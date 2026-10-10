@@ -555,7 +555,7 @@ From the booking onwards both policies follow the same steps.
 | Commission | TIS Finance & General Accounting | [Commission to agents and referrers (19.5)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
 | Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (17.12)](#policies) | Policy changed; additional premium billed |
 | Claim | the Operations roles or TIS General Manager | [The claims list (17.15)](#the-claims-list) | Claim **Pending** to **Closed** |
-| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
+| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
 | Month-end and tax | TIS Finance & General Accounting | [Period end (18.29)](#period-end), [Tax: BIR forms and returns (18.21)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
 
 Work that waits for you appears in [My Work (2.3)](#my-work). Each approval in the chain is made by another user than the
@@ -921,7 +921,7 @@ recorded on [Claims settlements paid through the broker (18.5)](#claims-settleme
 ![Figure 3.12: Operations > Claims, with the open claims, the settlement to approve and the settled claims](../images/process/claims-list.png)
 ### Renewals {#process-renewals}
 Renewals are prepared by the Sales roles, the Operations roles or TIS General Manager; renewal terms are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. See
-[Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies).
+[Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies).
 
 Policies come into the renewal pipeline 90 days before their expiry.
 
@@ -1035,10 +1035,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -1058,10 +1058,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Product Configurator | Dashboard | View |
@@ -1087,10 +1083,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
-| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1101,7 +1095,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1148,7 +1142,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Book the policies checked against the slip | Daily | [Placement Slips (17.5)](#placement-slips) |
 | Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes (17.23)](#cover-notes-binders), [CTPL Authentication (17.22)](#ctpl-authentication) |
 | Raise the endorsements and cancellations your clients ask for | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
-| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies), [Negotiations (17.20)](#negotiations) |
+| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies), [Negotiations (17.20)](#negotiations) |
 | Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Check your pipeline and your incentive progress | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Incentive (18.32)](#incentives) |
 
@@ -1168,7 +1162,7 @@ appears in My Work and you receive a notification. When no rule matches a prospe
 created it. A walk-in client or a referral you record yourself is yours.
 
 1. Choose Operations > Sales & Marketing > Prospects. To record a new prospect, select **Create Prospect** and follow
-   [Create a prospect (17.1.2)](#create-a-prospect).
+   [Create a prospect (17.1.1)](#create-a-prospect).
 2. Contact the prospect. Choose Operations > Sales & Marketing > Sales Activities and log the call, meeting, e-mail or visit with its
    outcome and, where there is one, the next step and its follow-up date. Logging the first activity marks a
    **New** prospect **Contacted**.
@@ -1282,10 +1276,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -1305,10 +1299,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Product Configurator | Dashboard | View |
@@ -1321,7 +1311,6 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
-| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -1339,11 +1328,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
-| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
+| Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1354,7 +1342,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1404,7 +1392,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Review the team's activities and open follow-ups | Weekly | [Sales Activities (17.10)](#sales-activities) |
 | Keep the assignment rules in line with the team and the TFS offices | When the team or the channels change | [Lead Assignment (17.6)](#lead-assignment) |
 | Prepare, schedule and send campaigns; check their results | As planned | [Campaigns (17.9)](#campaigns) |
-| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) |
+| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) |
 
 The sales work on your own accounts (prospects, quotations, placement, booking, endorsements, renewals) follows the
 procedures of the [TIS Sales Associate (4.7)](#tis-sales-associate-procedures).
@@ -1541,10 +1529,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -1573,10 +1561,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Product Configurator | Dashboard | View |
@@ -1589,7 +1573,6 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
-| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -1607,11 +1590,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
-| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
+| Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1627,7 +1609,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | Create and edit | Calculate, submit and pay incentives |  |
 | Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1674,7 +1656,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.20)](#negotiations) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.19)](#renewal-queue-and-at-risk-policies) |
+| Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.18)](#renewal-queue-and-at-risk-policies) |
 | Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (18.6)](#accounts-payable) |
 | Review the unit's pipeline, conversion and premium | Weekly | [Sales Dashboard (19.4)](#sales-dashboard) |
 | Review the team assignment and the reassignment queue | Weekly | [Lead Assignment (17.6)](#lead-assignment) |
@@ -1791,10 +1773,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -1814,10 +1796,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
@@ -1841,10 +1819,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1855,7 +1833,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1906,7 +1884,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Record repair estimates, adjuster decisions, letters of authority and vehicle releases | Daily | [Motor Claim Repairs (17.26)](#motor-claim-repairs-and-letters-of-authority) |
 | Raise endorsements and cancellations requested by clients | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
 | Check the payment status of policies before an endorsement or a claim | As needed | [Payments (17.21)](#payments) |
-| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies), [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
+| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies), [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Follow up lapsed policies and the policies in their grace period | Weekly | [Lapse Management (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Maintain fleet schedules and marine open covers of corporate clients | As requested | [Fleet Schedules (17.13)](#fleet-schedules), [Marine Open Covers (17.14)](#marine-open-covers) |
 | Run the claims and renewal reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
@@ -2092,10 +2070,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -2121,10 +2099,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
@@ -2148,10 +2122,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -2164,7 +2138,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -2209,7 +2183,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes (17.23)](#cover-notes-binders), [CTPL Authentication (17.22)](#ctpl-authentication) |
 | Register claims, collect their documents, follow motor repairs | Daily | [Claims (17.15)](#the-claims-list), [Claims Awaiting Documents (17.25)](#claims-awaiting-documents), [Motor Claim Repairs (17.26)](#motor-claim-repairs-and-letters-of-authority) |
 | Raise endorsements and cancellations | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
-| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) |
+| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) |
 | Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (18.14)](#journal-vouchers) |
 | Look up an office asset (cost, location, book value) | As needed | [Fixed Assets (18.8)](#fixed-assets-and-depreciation) |
 | Follow the work in flight and the claims position | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
@@ -2296,10 +2270,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -2331,10 +2305,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
@@ -2360,11 +2330,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
@@ -2381,7 +2352,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -2403,7 +2374,7 @@ Approval limits of this role on the Authority Matrix:
 
 | Transaction | Approval step | Limit of the role |
 |---|---|---|
-| Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
+| Claim settlement approval | Operations > Claims > Settlement approval | PHP 500,000.00 |
 | Underwriting referral approval | Operations > Sales & Marketing > Quotations > Underwriting referral | Not set: no amount limit applies |
 
 Who approves the work of this role:
@@ -2443,7 +2414,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Approve or return renewal terms | Daily | [Negotiations (17.20)](#negotiations) |
 | Approve quotations and decide underwriting referrals | As referred | [Quotations (17.4)](#quotations) |
 | Approve supplier invoices | As submitted | [Payables (18.6)](#accounts-payable) |
-| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.19)](#renewal-queue-and-at-risk-policies) |
+| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.18)](#renewal-queue-and-at-risk-policies) |
 | Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
 | Review the claims, renewal and production reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
@@ -2898,6 +2869,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
+| Operations | Claims | Special | Record claim settlement funds received from an insurer | No screen of its own |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
@@ -3105,6 +3077,8 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
+| Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error | No screen of its own |
+| Operations | Claims | Special | Record claim settlement funds received from an insurer |  |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
@@ -3341,7 +3315,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
-| Operations > Sales & Marketing | Prospects | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
@@ -3419,10 +3392,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -3459,7 +3428,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |
@@ -3467,6 +3436,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
 | Operations | Renewals | View | See renewals | No screen of its own |
 | Operations | Claims | View | See claims | No screen of its own |
+| Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
 | Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |
@@ -3491,7 +3461,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
 | Commission | Commission | Create and edit | Process commission and insurer overrides |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers and Report Builder |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Payment Gateways, Taxation, Close Checklist, Asset Classes, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
@@ -3787,6 +3757,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Quotations | View |
 | Operations > Sales & Marketing | Placement Slips | View |
+| Operations > Sales & Marketing | Lead Assignment | View |
 | Operations > Sales & Marketing | Dealer Programmes | Create and edit |
 | Operations > Sales & Marketing | Comparison Reports | View |
 | Operations | Clients | View |
@@ -3797,6 +3768,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Queue | View |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | View |
+| Operations > Renewals | Lock-in Accounts | View |
 | Operations > Renewals | Negotiations | View |
 | Operations > Renewals | Lapse Management | View |
 | Operations > Renewals | Performance | View |
@@ -3833,10 +3805,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -3921,7 +3889,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
@@ -3932,7 +3900,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping and Product Analytics |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
 | Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Package Bundles, Insurer Rate Tables, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
@@ -4185,10 +4153,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -4277,10 +4245,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -4312,7 +4276,6 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
-| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -4330,11 +4293,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
-| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
+| Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
@@ -4355,7 +4317,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents, Period Management, Month-End Close, Year-End Close, Recurring Journals and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -4381,7 +4343,7 @@ Approval limits of this role on the Authority Matrix:
 
 | Transaction | Approval step | Limit of the role |
 |---|---|---|
-| Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
+| Claim settlement approval | Operations > Claims > Settlement approval | No limit |
 | Remittance approval | Accounts > Remittance > Approvals | No limit |
 | Remittance settlement, adjustment and transfer | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | No limit |
 
@@ -4527,7 +4489,6 @@ A prospect is a person or company that TISPH quotes before it becomes a client: 
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
-| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -4545,12 +4506,6 @@ The list shows **Prospect ID** (LD-YYYY-NNNNN), **Name**, **Category**, **Produc
 
 The buttons above the list are **Bulk Upload** (prospects from an Excel file, validated before they are created), **Generate Report** (the list as an Excel file) and **Create Prospect**.
 
-#### Upload prospects and TFS accounts {#upload-prospects-and-tfs-accounts}
-**Bulk Upload** loads a file into **Prospects** or **TFS accounts**; **Download template** gives the columns of each. Every upload is stamped with a batch number (LIB-YYYY-NNNNN) shown on the prospects it created, and the result lists the rows created, updated and failed, with the row number and reason of each failed row. A failed row does not stop the others.
-
-- **Prospects**: the prospects of calls, e-mail, walk-ins, referrals and the other channels of the Lead Source list, in batches of a few hundred rows. A row with the **Lead Number** of a prospect already loaded (or its **Loan ID**) updates its **Status** and **Disposition** instead of creating a second prospect: the call results of a list are loaded by uploading the same file again with the new status.
-- **TFS accounts**: the account file of Toyota Financial Services. Each account becomes a prospect with **Source** TFS and **Customer Type** TFS, and keeps the TFS details: **Reference No.**, **Loan ID**, the vehicle, the **Insurance Provider**, the **Policy Expiry Date**, the loan start, booking and maturity dates, the **Product Group** and the **SRP**. There is one prospect per loan: a fleet customer with several loans has several prospects, and a Loan ID already loaded updates its prospect. An account without a policy expiry date gives no prospect, and an insurance provider that is not an insurer of the Insurance Company list is refused.
-
 ![Figure 17.1: Operations > Sales & Marketing > Prospects, with the prospects by product line and status](../images/screens-operations/prospects-list.png)
 #### Create a prospect {#create-a-prospect}
 1. Choose Operations > Sales & Marketing > Prospects and select **Create Prospect**.
@@ -4566,21 +4521,17 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
-| **Customer Type** | No | **TFS**, **Non-TFS** or **Direct Customer** | |
-| **Loan ID** | No | The TFS loan the prospect is for | One prospect per loan |
-| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **E-mail**, **Customer Service**, **Dealer** | From [Lead sources and reason codes (20.6)](#lead-sources-and-reason-codes) |
+| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes (20.6)](#lead-sources-and-reason-codes) |
 | **Product** | No | The product chosen in step 3 | **Product not yet tagged** when skipped |
 
-Before the prospect is saved, the system looks for a client or an open prospect with the same first name, last name, mobile number and date of birth, or the same Loan ID, and shows it; you may still save. The category, customer type, status and disposition only take the values of their lists. The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give it an account executive.
+The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give it an account executive.
 
 ![Figure 17.2: Create prospect: the choice between a new customer and an existing client](../images/screens-operations/prospect-create.png)
 ![Figure 17.3: The prospect form](../images/screens-operations/prospect-form.png)
 #### View, edit or delete a prospect {#view-edit-or-delete-a-prospect}
 Select a row (or the eye in **Actions**) to open the prospect. The prospect page shows the prospect's quotations with the same counters as the quotations list, **Add Quote** to quote the prospect, and **Convert** on an approved quotation. The pencil opens the prospect form for a change.
 
-The **Account** section shows the customer type, the source, the disposition of the last call and, for a TFS account, the TFS reference, Loan ID, insurance provider, policy expiry, vehicle, product group, SRP, loan dates and the upload batch.
-
-Only the roles allowed to delete prospects see **Delete**, and a prospect with a policy is never deleted: set it to **Lost** instead. A **Converted** prospect keeps its status. A prospect not converted and not changed for 90 days is closed as **Lost** by the daily job. Every change is kept in the history of the prospect.
+A prospect is not deleted once it has a quotation or a sales activity: set it to **Lost** instead. Every change is kept in the history of the prospect.
 
 ### Quick Quote {#quick-quote}
 Quick Quote prices a package product on the spot from the product's rates, without the steps of a full quotation: for example Compulsory Credit Life, Personal Accident or Parcel / Courier Insurance.
@@ -4758,15 +4709,14 @@ Lead Assignment decides who works each prospect.
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
 The screen has three tabs:
 
 - **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
 - **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
-- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. The conditions include the **Insurance provider** and the **Customer type** of the prospect, so the TFS accounts of each insurer go to that insurer's group of account executives. **Method** is **Round robin** between the rule's **Account executives**, **Load** (the one with the fewest open prospects) or a fixed account executive. **Bandwidth** caps the open prospects one account executive may hold under the rule; when all are full the prospect waits in the queue. **Add rule** creates a rule; the switch in **Active** turns it off.
-
-A prospect with an insurance provider is reassigned only to an account executive of that insurer's rules. A prospect still **New** three working days (72 hours, weekends and holidays not counted) after it was assigned goes to the **Reassignment Queue** and the lead assignment team is told.
+- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. **Method** is **Round robin** between the rule's **Account executives**, or a fixed account executive. **Add rule** creates a rule; the switch in **Active** turns it off.
 
 At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
 
@@ -5022,8 +4972,10 @@ The cards count **Open claims**, **Settlement to approve**, **Approved, to be pa
 | **Processing** | Advised to the insurer, under review or with the adjuster |
 | **Pending Approval** | The settlement waits for the checker |
 | **Approved** | The settlement is approved and not yet released (only when the release on approval is switched off) |
+| **Partially Settled** | A partial settlement is approved; the claim stays open for the final settlement |
 | **Settled** | The settlement is approved and released |
 | **Rejected** | Declined by the insurer, with a reason |
+| **Cancelled** | Registered in error or a duplicate notification, with a reason |
 
 A claim follows nine steps, shown at the top of the claim: **Notification**, **Insurer advice**, **Documents**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval** and **Payment**. The **Next step** bar at the bottom names what is to be done and leads to it.
 
@@ -5031,12 +4983,13 @@ A claim follows nine steps, shown at the top of the claim: **Notification**, **I
 #### Register a claim {#register-a-claim}
 1. Choose Operations > Policy, select **More actions** in the row of the policy, then **Claim**. (Or select **Register claim** in [My Work (2.3)](#my-work).)
 2. On **Claim notification**, check the policy and insured, and the insured's address.
-3. Enter the incident: **Date of loss** (required), **Time of loss**, **Cause of loss** (required), **Place of loss** (required, with city and province), **Estimated Claim Amount** and, if known, the **Insurance Company Claim Number**.
+3. Enter the incident: **Date of loss** (required), **Time of loss**, **Cause of loss** (required), **Place of loss** (required, with city and province), **Estimated Claim Amount**, **Reported through** (TFS, call centre, insurer, dealer, walk-in or e-mail), for a motor claim the **Loss extent** (**Partial loss** or **Total loss**) and, if known, the **Insurance Company Claim Number**.
 4. Enter the **Driver at the time of loss** (**Same as Policy Holder**, or the **Driver's name** and address) and the **Third party** if any (name, contact number, plate number, unit, shop, insurer).
-5. Select **Next**. The claim is created (CLM-YYYY-NNNNN) as **Pending**.
-6. On **Insurer advice**, send the Preliminary Loss Advice to the insurer by e-mail and record the insurer's claim number.
+5. Select **Next**, then on **Insurer advice** select **Register claim and send**.
+6. When the policy has premium outstanding, the claim is reported late or a claim of the same date of loss is already registered on the policy, **Check before registering** shows the **Outstanding premium**, the **Claims ratio of the client**, the days between the loss and the report and the claims of the same date. Select **Register claim and send** to register the claim anyway, or **Cancel**.
+7. The claim is created (CLM-YYYY-NNNNN) as **Pending**, assigned to the claims handler with the fewest open claims, and the Preliminary Loss Advice is e-mailed to the insurer.
 
-The date of loss must fall within the period of cover of the policy.
+The date of loss must fall within the period of cover of the policy and cannot be in the future. A claim reported more than the late intimation days after the loss (30 as delivered) is marked **Late** and the claims handlers are alerted. The follow-up date of the claim depends on the line and the loss extent (for example 30 days for a partial motor loss, 60 for a total loss, 90 for fire, marine and engineering). For Credit Life the claim is a death benefit claim on the TFS loan.
 
 ![Figure 17.24: New claim, step 1: Claim notification](../images/screens-operations/claim-new.png)
 On **Documents**, the claim lists the documents its cause of loss needs (from [Claim documents (20.5)](#claim-documents)) with their status **Missing**, **Received** or **Waived**. Upload each document as it arrives, or waive it. **Remind the claimant** e-mails the list of missing documents; **Continue to review** moves on once the documents are in.
@@ -5046,21 +4999,40 @@ On **Documents**, the claim lists the documents its cause of loss needs (from [C
 On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), the **Adjuster status** (assigned, report received) and upload the adjuster's report with the amount the adjuster recommends. For a motor repair, the estimates and the letter of authority are kept on [Motor claim repairs (17.26)](#motor-claim-repairs-and-letters-of-authority).
 
 #### Assessment and settlement (maker) {#assessment-and-settlement-maker}
+The claim is moved to review and its settlement submitted by the Operations roles. Rejection, cancellation and closing are decisions of TIS Operations Unit Head or TIS General Manager.
+
 On **Assessment**, check the key facts of the claim and the **Assessment basis** (date reported, adjuster and adjuster status) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
 
-On **Settlement**, enter the **Settlement type** (for example **Repair Shop**, or payment to the insured), the **Settlement amount** the insurer agreed, the deductible or participation and the payee, and select **Submit settlement**. The claim becomes **Pending Approval**: a second claims user must approve it before the claim is settled.
+On **Settlement**, choose **Final** or **Partial**, enter the **Settlement type** (for example **Repair Shop**, or payment to the insured), the **Settlement amount** the insurer agreed, the deductible or participation and the payee, and select **Submit settlement**. The claim becomes **Pending Approval**: a second claims user must approve it before the claim is settled. A partly settled claim shows **Settled so far** and is settled further, or finally, from the same step.
 
 #### Approve a settlement (checker) {#approve-a-settlement-checker}
 The settlement is approved by TIS Operations Unit Head or TIS General Manager, never by the user who submitted it.
 
 1. Open the claim from [My Work (2.3)](#my-work) or from the list (**Settlement to approve**).
-2. On **Approval**, check the settlement against the adjuster's report and the documents.
-3. Approve it, or return it with a reason.
+2. On **Approval**, check the settlement against the adjuster's report and the documents: the **Settlement** (partial or final), **Requested by** and what was **Settled before**.
+3. Enter the **Approved amount** (the amount requested, or less), then approve it, or return it with a reason.
+
+The approved amount must be within the approver's claim settlement limit on the [Authority Matrix (20.10)](#authority-matrix) when the limit is enforced. **Requested by** and **Approved by** show the users' names.
 
 As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between. When the insurer pays through TISPH, the settlement is received from the insurer and paid out to the claimant on [Claims settlements paid through the broker (18.5)](#claims-settlements-paid-through-the-broker), and the **Payment** step shows that payment.
 
 #### Claim details, documents and audit trail {#claim-details-documents-and-audit-trail}
-Open a claim from the list (the eye in **Actions**). The claim page shows the key facts (**Policy number**, **Insured**, **Insurer**, **Insurer claim number**, **Date of loss**, **Cause of loss**, **Estimated amount**, **Settlement amount**) and the panels **Claim details** (loss, policy and insured, driver, third party), **Adjuster report**, **Settlement details** and **Documents**. **History** shows every change: who made it, when and what changed. **Close** returns to the list.
+Open a claim from the list (the eye in **Actions**). The claim page shows the key facts (**Policy number**, **Insured**, **Insurer**, **Insurer claim number**, **Date of loss**, **Cause of loss**, **Estimated amount**, **Settlement amount**, **Reported through**, **Loss extent**, **Follow-up due**) and the panels **Claim details** (loss, policy and insured, driver, third party), **Adjuster report**, **Settlement details** and **Documents**. **History** shows every change: who made it, when and what changed. **Close** returns to the list.
+
+#### Insurer advice and communications {#insurer-advice-and-communications}
+The **Insurer** panel shows the insurer claim number, the **Insurer claims handler**, the **Insurer advice** (**Under evaluation**, **Incomplete requirements**, **LOA issued**, **Cheque available**, **Approved by the insurer**, **Denied by the insurer**), the **Authorisation code** and the **Amount offered**. **Record insurer advice** updates them.
+
+The **Communications** panel logs each exchange with the insurer, the client, the adjuster or the repair shop: date, party, sent or received, method, message, **Follow-up date** and who logged it. An overdue follow-up shows **Overdue** until **Mark follow-up done**. **Log communication** records one; **Follow up insurer** e-mails the insurer and logs it. The claims handlers are alerted of overdue follow-ups and of claims past their follow-up date.
+
+The **Settlements** panel lists each settlement of the claim, partial and final, with the amount requested and approved, its status, **Requested by** and **Decided by**.
+
+#### Cancel a claim or verify a death {#cancel-a-claim-or-verify-a-death}
+**Cancel claim** cancels a claim registered in error or notified twice: choose the reason (**Registered in error**, **Duplicate notification of the same loss**) and add a note. A settlement waiting for approval is returned.
+
+On a death benefit claim (Credit Life), **Verify death** records the date the death was verified; the follow-up date counts from it.
+
+#### Reverse a settlement movement {#reverse-a-settlement-movement}
+Funds received from the insurer and payments to the claimant are recorded on [Claims settlements paid through the broker (18.5)](#claims-settlements-paid-through-the-broker) by CCD-BP / QRPh (Receipting) or CCD-Recon (Reconciliation and Reversals). A movement recorded in error is reversed with **Reverse movement**, a reason and a note, by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, never by the user who recorded it. The journal is reversed and the movement shows **Reversed**.
 
 ### Renewal Policy {#renewal-policy}
 Renewal Policy lists the policies coming up for renewal and those already in progress.
@@ -5144,8 +5116,6 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 **Renewal Batch** prepares the renewal quotations of many policies at once. Select **Create Batch**, choose the **Selection Criteria** (**Expiry Date From**, **Expiry Date To**, **Insurance Company**, **Product Type**, **Min premium**, **Max premium**, **Client Name**, **Payment Status**) and select **Generate policy list**. Check the list and process the batch. The list of batches shows **Batch ID** (RB-YYYY-NNNNN), **Status** (**Draft**, **Partially completed**, **Completed**), **Total policies**, **Processed** and **Created on**.
 
 ![Figure 17.26: Create Batch Renewal: the selection criteria](../images/screens-operations/renewal-batch-create.png)
-With the Talkbot call lists in use, **Create Batch Renewal** also has the criteria **Talkbot outcome** and **Talkbot call list**; for a Motor product the Talkbot outcome starts at **Willing to renew**. The policy list shows each policy's **Talkbot outcome** and **Confirmed on**. In a batch, **Generate Renewal Quotes** prepares the renewal quotes of the selected policies: a Motor policy that Talkbot has not confirmed, or whose confirmation is older than the validity period, is **Skipped** with the reason, and the others are quoted. The **Quote status** of each policy (**Not quoted**, **Queued**, **Quoted**, **Skipped**, **Failed**) is shown in the batch and in its report. A single renewal from Renewal Policy is not affected.
-
 **Lapse Management** shows the policies **Lapsed**, **In grace period** and that **Can be reinstated**, with the **Premium lost or at risk**. The tab **Lapsed and grace period** lists each policy with its days lapsed or left in the grace period, the **Lapse reason** and the win-back offers made. The tab **Win-back campaigns** holds the campaigns offering lapsed clients a discount to come back, with the clients contacted and converted and the premium recovered; **New campaign** creates one.
 
 ![Figure 17.27: Operations > Renewals > Lapse Management](../images/screens-operations/lapse-management.png)
@@ -5154,42 +5124,6 @@ With the Talkbot call lists in use, **Create Batch Renewal** also has the criter
 **Performance** compares the renewal results with the targets: the **KPI scorecard** shows each KPI (renewal rate, premium retention, average cycle time) with **Target**, **Achieved**, **Variance** and the status **Met** or **Below target**, also **By account executive**, **By line of business** and as a **Monthly trend**. **Export** downloads each view.
 
 ![Figure 17.28: Operations > Renewals > Performance, the KPI scorecard](../images/screens-operations/renewal-performance.png)
-### Talkbot Calls {#talkbot-calls}
-Talkbot calls Motor clients a few days before their policy expires and asks whether they will renew. The call list is prepared here, loaded on the Talkbot platform, and the call results come back as a file.
-
-**Menu:** Operations > Renewals > Talkbot Calls
-
-| Role | Access |
-|---|---|
-| TIS Sales Associate | Create and edit |
-| TIS Sales Officer | Create and edit |
-| TIS Sales Unit Head | Create and edit |
-| TIS Operations Associate | View |
-| TIS Operations Officer | View |
-| TIS Operations Unit Head | View |
-| TIS General Manager | Create and edit |
-
-The list shows each **Call list** (TCL-YYYY-NNNNN), its **Talkbot task name**, the **Expiry date** of its accounts, the **Accounts**, those **Willing to renew** and those **Not called**, the **Renewal batch** made from it and the **Status**: **Draft**, **Sent to Talkbot**, **Results loaded**, **Closed** or **Cancelled**.
-
-#### Prepare and send a call list {#prepare-and-send-a-call-list}
-1. Choose Operations > Renewals > Talkbot Calls and select **New call list**.
-2. The expiry dates are proposed for the list of the day; on the last working day before a weekend or a holiday they cover the days nobody works. Choose the **Insurance Company**, **Sales person** or **Source of business** if needed, tick **Include expired policies still renewable**, or pick a list in **Re-call accounts not reached on** to call its missed and uncontacted accounts again. The dialog shows the accounts to call and those left out, with the reason (for example no mobile number, lock-in, client asked not to be called, already on another call list).
-3. Select **Create call list**. The list opens in **Draft**. **Remove** takes an account off the list with a reason; **Put back** restores it.
-4. Select **Download call list**: the Contact Import file for the Talkbot platform. Accounts no longer eligible (renewed, cancelled, already quoted) are left out of the file and shown as **Removed**.
-5. Load the file on the Talkbot platform, then select **Mark as sent** and enter the Talkbot task name.
-
-A list that will not be called is ended with **Cancel list** and a reason.
-
-#### Load the results and create the renewal batch {#load-the-talkbot-results}
-1. Export the Call Records of the campaign from the Talkbot platform.
-2. On the call list, select **Upload results** and choose the file. A file of another Talkbot task is loaded only after you confirm. The result line gives the rows loaded and failed, with the row number and reason of each failed row.
-3. Each account gets one **Talkbot outcome** from all its calls: **Willing to renew**, **Not willing to renew**, **Already renewed**, **Call back**, **Wrong contact**, **Uncontacted**, **Missed call** or **Not called**. **Calls** shows the calls of an account. The outcome is written on the renewal timeline; a call back date becomes the follow-up date on Negotiations.
-4. **Record outcome** sets the outcome of an account by hand, with the date and a remark (for example when the client called the hotline).
-5. **Create renewal batch** puts the accounts confirmed **Willing to renew** into a renewal batch in **Draft**; open it on [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) and select **Generate Renewal Quotes**.
-6. **Close list** ends a list whose results are worked; a list is also closed 30 days after its last upload.
-
-Mobile numbers are shown masked; the full number is only in the downloaded file. The Operations team can open the call lists and create the renewal batch; Sales prepares, sends and loads them.
-
 ### Renewal Queue and At-Risk Policies {#renewal-queue-and-at-risk-policies}
 **Menu:** Operations > Renewals > Renewal Queue
 
@@ -5217,9 +5151,36 @@ Mobile numbers are shown masked; the full number is only in the downloaded file.
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
-The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, Talkbot outcome, risk level and account executive. The **Talkbot** column shows the latest Talkbot outcome of the policy with its call list and date, the call back date or the number of calls. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
+The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, risk level and account executive. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
 
-The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed** or lapsed. The renewal notices are e-mailed to the client on the schedule of the renewals.
+The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed**, lapsed or **Not for renewal**. The renewal notices are e-mailed to the client 90, 60 and 30 days before expiry (30 and 15 days for Credit Life), on working days; a notice missed on a holiday goes out on the next working day.
+
+The notices of a policy in a lock-in or under Scheme 2 are not sent, and those of a policy whose TFS loan is past due, terminated, in legal dispute or under fraud review are held: the stage shows **Lock-in: not sent** or **Held**, and **Notices withheld** replaces the send action.
+
+Under **More actions**, TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager can:
+
+- **Reassign**: move the renewal to another owner, with a reason.
+- **Not for renewal**: close the renewal with a reason; no more notices are sent and the policy shows **Not for renewal** on Lapse Management, where it can still be reinstated within the reinstatement period.
+
+A renewal opened from [My Work (2.3)](#my-work) or a notification opens on the selected renewal.
+
+### Lock-in Accounts {#lock-in-accounts}
+**Menu:** Operations > Renewals > Lock-in Accounts
+
+| Role | Access |
+|---|---|
+| TIS Sales Associate | Create and edit |
+| TIS Sales Officer | Create and edit |
+| TIS Sales Unit Head | Create and edit |
+| TIS Operations Associate | Create and edit |
+| TIS Operations Officer | Create and edit |
+| TIS Operations Unit Head | Create and edit |
+| TIS IT AppSupport / Admin | View |
+| TIS General Manager | Create and edit |
+
+Lock-in Accounts lists the lock-in (promotion, Scheme 1 ARA) and Scheme 2 accounts expiring within the review window (60 days as delivered) or the days chosen. The cards count the **Accounts**, those whose **Review due** date is reached, **Notices suppressed** and **Notices held**. Each row shows the policy and insured, the lock-in and its year, **Expiry**, **Review date**, **TFS loan status** with the loan account, the notice treatment and the owner. Filter by lock-in, loan status and notice treatment, or search by policy, client or loan account.
+
+**Download Excel** downloads the list. **Open renewal** opens the renewal of the account. **Set loan status** records the TFS loan status (**Current**, **Past due**, **Fraud**, **Terminated**, **Legal dispute**, **Closed**); a status that holds the notices needs a note, and the notices already queued for the policy are skipped. A review task is created in [My Work (2.3)](#my-work) for the owner when the review date is reached.
 
 **At-Risk Policies** is the risk register: open renewals with a **Medium** or higher retention risk. The cards count the **Policies at risk**, **High**, **Medium**, the **Premium at risk** and those **Without a next action**. Each row shows the risk score and its **Main drivers** (for example claims in the current term, first renewal with the broker, premium up on the renewal quote, expiry close), and the **Next action** with its due date. Open the policy to plan the next action.
 
@@ -5244,6 +5205,8 @@ Select a renewal to see its **Renewal terms** (RN-YYYY-NNNNN), and the **Timelin
 - **Add update**: a change of terms or stage.
 - **Log communication**: a call, e-mail or meeting with the client, its outcome and the next step.
 - **Submit for approval**: the renewal terms go to TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who submitted them.
+
+While the terms wait for approval they cannot be changed. The approved premium is the premium booked on the renewed policy, and an expired renewal quote cannot be submitted or completed. When the renewal terms limit is enforced, the premium must be within the approver's limit on the [Authority Matrix (20.10)](#authority-matrix). The new term starts the day after the expiring term ends.
 
 ### Payments {#payments}
 Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivables** and **Earned Commission**, and the bills in the tabs **Paid**, **Pending** and **Reviewing**. The **Type** column says whether the bill is for a **Policy**, a **Renewal Policy** or an **Endorsement**. Receipts are posted by Accounting; this screen shows the result.
@@ -7570,7 +7533,7 @@ Reports > All Reports shows the reports your role may run, as cards grouped unde
 ![Figure 22.1: Reports > All Reports, as TIS Operations Officer sees it](../images/reports/all-reports.png)
 #### Run a report {#reports-run}
 1. Choose Reports > All Reports and select the report (or choose it from the report menu).
-2. In **Report Criteria**, choose how the report is grouped or which part it shows, for example **Overall**, by **Agent**, **Branch** or **Principal Insurer**; **Summary** or **Detailed**; **Open**, **Settled** or **Aging** for the claims reports.
+2. In **Report Criteria**, choose how the report is grouped or which part it shows, for example **Overall**, by **Agent**, **Branch** or **Principal Insurer**; **Summary** or **Detailed**; **Open**, **Partial**, **Settled**, **Rejected**, **Cancelled**, **Aging** or by **Claim Type** for the claims reports.
 3. Enter **From Date** and **To Date** (required). Most reports take the records of the period; the ageing and balance reports are computed as of the **To Date**.
 4. Narrow the report with the other filters if needed: **Agent**, **Branch**, **Client**, **Status**, **Company (principal insurer)**, **Product**, **Bank Account**, **GL Account**. A filter marked "Used with criteria" applies only with the criteria of that name.
 5. Choose the **File format**: **CSV**, **Excel (XLSX)** or **PDF**.
@@ -7603,16 +7566,13 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Premium by Product / Month / Insurer** | Policy count, sum insured, premium and commission by month, product or insurer |
 | **SOA / Premium Receivable**, **Receivables Ageing** | The premium bills with their balance and ageing |
 | **Incentive Results** | The incentive programme results: target, achieved, achievement and payout per agent |
-| **APR Operation Report** | Policies written month to date or year to date per business category: Existing UIO, New Car, ROPA, OEM, Cancelled and Unclassified; see [Sales reports (22.1.4)](#reports-sales) |
-| **Production per Line** | Policy count, sum insured, premium and commission per product line, by month, product or business type |
-| **Agent Policy Conversion** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout |
-| **Renewal Notice Listing** | Policies expiring within 90 days of the as-of date, in 30, 60 and 90 day buckets, with the renewal calling details |
 
 **Operations** (TIS Operations Associate, TIS Operations Officer, TIS Operations Unit Head): the operational reports above, and
 
 | Report | Contents |
 |---|---|
-| **Claims Position** | Claims reported in the period with estimate, approved and settled amounts, age and ageing bucket |
+| **Claims Position** | Claims reported in the period with claim type, line, estimate, insurer offer, approved and settled amounts, requirements received, follow-up date, settlement date, age and ageing bucket; filter by insurer, product, agent, branch or client |
+| **Settled Claims** | Claims settled in the period by settlement date, overall, by principal insurer or by claim type, with the estimate, insurer offer, approved and settled amounts (Reports > All Reports) |
 | **Claims Ageing** | Open claims by ageing bucket (optionally per insurer or agent) with estimate and approved amounts |
 | **Co-insurance Register** | Co-insured policies incepted in the period: each participating insurer with its role, share, premium, commission, premium taxes and premium due |
 | **Remittance Summary**, **Broker Commission Statement** | The remittances and the commission of the period, for information |
@@ -7628,7 +7588,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (18.19)](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |
 
-**Finance and Accounting** (TIS Finance & General Accounting): the four [sales reports (22.1.4)](#reports-sales), and
+**Finance and Accounting** (TIS Finance & General Accounting):
 
 | Report | Contents |
 |---|---|
@@ -7645,35 +7605,6 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 **Management** (TIS General Manager): every report of the departments above.
 
 The roles that open each report menu, with their access, are listed at the top of this section and in each role chapter.
-
-#### Sales reports {#reports-sales}
-The four sales reports are under Reports > Operational Reports. The Sales and Operations roles, Finance & General Accounting, the General Manager and IT AppSupport can run them.
-
-**APR Operation Report**. Choose the **To Date** (the as-of date) and the **Report Criteria**:
-
-| Report Criteria | Rows |
-|---|---|
-| Month to Date | One row per business category, for the policies incepted from the first day of the month of the To Date |
-| Year to Date | The same from 1 January of the year of the To Date |
-| Month to Date by Product Line, Year to Date by Product Line | One row per business category and product line |
-| Period by Month | One row per month and business category, from the From Date to the To Date |
-
-The business category of a policy is:
-
-| Category | When |
-|---|---|
-| Cancelled | The policy is cancelled |
-| The category written on the policy | For example ROPA for a repossessed unit |
-| OEM | The vehicle brand is not Toyota or Lexus |
-| Existing UIO | A renewal, or a vehicle that is not brand new |
-| New Car | A brand-new Toyota or Lexus vehicle |
-| Unclassified | No category and no vehicle brand, for example a Personal Accident policy |
-
-**Production per Line**. Choose the From Date, the To Date and the Report Criteria: Product Line, Product Line by Month, Product or Business Type. Cancelled policies are left out.
-
-**Agent Policy Conversion**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
-
-**Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Lock-in. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. A lock-in policy shows **Suppressed: Lock-in**.
 
 ### Report Builder {#report-builder}
 **Menu:** Reports > Report Builder

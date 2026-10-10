@@ -83,11 +83,11 @@ export const taskNameOf = (pattern, iso) => String(pattern).replace('YYYY', iso.
  * before days off, to the expiry dates the next working day's list would start with, so no account is missed
  * (Wednesday 07/10: 10/10 to 10/10; Friday 09/10: 12/10 to 14/10).
  */
-export async function defaultWindow(day = null, db) {
+export async function defaultWindow(day = null) {
   const d = day || await today();
   const { daysBefore } = await talkbotSettings();
   const from = addDays(d, daysBefore);
-  const to = addDays(await nextWorkingDay(d, db), daysBefore - 1);
+  const to = addDays(await nextWorkingDay(addDays(d, 1)), daysBefore - 1);
   return { expiryFrom: from, expiryTo: to < from ? from : to };
 }
 

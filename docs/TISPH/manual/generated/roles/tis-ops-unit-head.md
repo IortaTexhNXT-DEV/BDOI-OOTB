@@ -24,10 +24,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
-| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -59,10 +59,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
-| Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
-| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
@@ -89,11 +85,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
-| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
@@ -110,7 +107,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -133,7 +130,7 @@ Approval limits of this role on the Authority Matrix:
 
 | Transaction | Approval step | Limit of the role |
 |---|---|---|
-| Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
+| Claim settlement approval | Operations > Claims > Settlement approval | PHP 500,000.00 |
 | Underwriting referral approval | Operations > Sales & Marketing > Quotations > Underwriting referral | Not set: no amount limit applies |
 
 Who approves the work of this role:

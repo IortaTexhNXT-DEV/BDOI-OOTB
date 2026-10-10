@@ -136,7 +136,7 @@ describe('role figures (GET /my-work/figures)', () => {
       VALUES ('clm_home1', 'CLM-HOME-0001', 'pol_home1', 'cl_home1', 'in-review', $1::date - 12, $1::date - 10, 30000, $2)`, [now, ids['mw.claims']]);
     // the whole book (the sample seed adds claims): compare with the database
     const claims = Object.fromEntries((await figures('mw.claims')).figures.map((x) => [x.key, x.value]));
-    const open = await one("SELECT count(*)::int AS n, round(avg($1::date - reported_date)) AS days FROM claims WHERE status IN ('registered', 'in-review', 'approved', 'pending-approval')", [now]);
+    const open = await one("SELECT count(*)::int AS n, round(avg($1::date - reported_date)) AS days FROM claims WHERE status IN ('registered', 'in-review', 'approved', 'pending-approval', 'partially-settled')", [now]);
     expect(open.n).toBeGreaterThanOrEqual(1);
     expect(claims).toMatchObject({ claimsOpen: open.n, daysOpen: Number(open.days) });
     expect(claims.claimsMonth).toBeGreaterThanOrEqual(1);

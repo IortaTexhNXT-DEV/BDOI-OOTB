@@ -5,6 +5,8 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { numberLocale } from "../../../utility/currencyConverter";
 import CustomToast from "../../../components/Toast";
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
@@ -17,7 +19,8 @@ import { hasPermission } from "../../../utils/canOpen";
 /**
  * Assessment: the claim as reported and adjusted, then the decision to go on to the settlement or to reject the claim
  * (repudiation: a reason code of Master > Insurance Management > Reason Codes and its note, or the reason as text).
- * A settlement waiting for the checker (maker-checker) is approved or returned here. Decisions need approve:claims.
+ * A settlement waiting for the checker (maker-checker) is approved, for no more than the amount requested, or returned
+ * here. Decisions need approve:claims; the approval is within the checker's claim settlement limit (server).
  */
 const SettlementApproval = () => {
   const { t } = useTranslation();
@@ -33,28 +36,38 @@ const SettlementApproval = () => {
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [reasonCode, setReasonCode] = useState(null);
+  const [approvedAmount, setApprovedAmount] = useState(null);
   const repudiationReasons = useMasterOptions("reason-code", { filter: (r) => r.context === "repudiation" });
   const mayDecide = hasPermission("approve:claims");
 
   useEffect(() => {
     if (!claimId) return;
     claimsService.getClaimDetails(claimId).then((result) => {
-      if (result.success) setClaim(result.data?.data || result.data);
-      else setLoadError(result.error);
+      if (result.success) {
+        const loaded = result.data?.data || result.data;
+        setClaim(loaded);
+        setApprovedAmount(Number(loaded?.settlementAmount) || null);
+      } else setLoadError(result.error);
     });
   }, [claimId]);
 
   const status = claim?.lifecycleStatus;
   const isPendingApproval = status === "pending-approval";
   const canDecide = mayDecide && ["registered", "in-review"].includes(status);
+  const canSettleMore = mayDecide && status === "partially-settled";
   const detailView = () => navigate(`/agent/claimdetailedview/${claimId}`, { replace: true });
 
+  const requested = Number(claim?.settlementAmount) || 0;
   const decideSettlement = async (decision) => {
+    if (decision === "approve" && !(approvedAmount > 0 && approvedAmount <= requested)) {
+      setActionError(t("claimSettlements.approvedRange", { amount: formatCurrency(requested) }));
+      return;
+    }
     setBusy(true);
     setActionError("");
     const result = await claimsService.approveSettlement(claimId, {
       decision,
-      ...(decision === "approve" && claim?.settlementAmount ? { approvedAmount: claim.settlementAmount } : {}),
+      ...(decision === "approve" ? { approvedAmount } : {}),
     });
     setBusy(false);
     if (!result.success) {
@@ -97,7 +110,9 @@ const SettlementApproval = () => {
         [t("claimJourney.adjusterName"), claim.adjusterName],
         [t("claimFlow.adjusterStatus"), claim.adjusterStatus],
         ...(isPendingApproval
-          ? [[t("claimJourney.settlementType"), claim.settlementType], [t("claimJourney.settlementAmount"), formatCurrency(claim.settlementAmount)]]
+          ? [[t("claimSettlements.kind"), t(`claimSettlements.kinds.${claim.settlement?.kind || "final"}`)], [t("claimJourney.settlementType"), claim.settlementType],
+            [t("claimJourney.settlementAmount"), formatCurrency(claim.settlementAmount)], [t("claimFlow.submittedBy"), claim.settlementRequestedBy],
+            ...(Number(claim.settledAmount) > 0 ? [[t("claimSettlements.settledBefore"), formatCurrency(claim.settledAmount)]] : [])]
           : []),
       ]
     : [];
@@ -125,6 +140,15 @@ const SettlementApproval = () => {
               </div>
             ))}
           </dl>
+          {isPendingApproval && mayDecide ? (
+            <div className="grid mt-2">
+              <div className="col-12 md:col-6">
+                <label htmlFor="approved-amount" className="block mb-2">{t("claimSettlements.approvedAmount")}</label>
+                <InputNumber inputId="approved-amount" value={approvedAmount} onValueChange={(e) => setApprovedAmount(e.value)} mode="decimal" locale={numberLocale()}
+                  minFractionDigits={2} maxFractionDigits={2} min={0} max={requested} className="w-full" inputClassName="text-right" />
+              </div>
+            </div>
+          ) : null}
         </ClaimSection>
       )}
       <FormErrorSummary serverError={actionError} />
@@ -152,6 +176,10 @@ const SettlementApproval = () => {
               disabled={busy}
             />
           </>
+        )}
+        {canSettleMore && (
+          <Button type="button" label={t("claimSettlements.settleMore")}
+            onClick={() => navigate(`/agent/claimrequest/settlementdetails/${claimId}`, { state: { claimId } })} disabled={busy} />
         )}
         {claim && !isPendingApproval && !canDecide && <Button type="button" label={t("claimJourney.openClaim")} onClick={detailView} />}
       </ClaimActions>

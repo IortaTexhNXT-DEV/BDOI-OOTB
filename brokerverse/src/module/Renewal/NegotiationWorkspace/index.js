@@ -18,7 +18,7 @@ import FieldError from "../../../components/FieldError";
 import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel } from "../../../components/RecordPage";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
-import { ExpiryCell, PolicyCell, RenewalHeader, StageChip } from "../shared";
+import { ExpiryCell, PolicyCell, RenewalHeader, StageChip, useRenewalParam } from "../shared";
 import "./index.scss";
 
 const UPDATE_TYPES = ["Update", "Meeting", "Counter Offer", "Competitor Quote", "Revised Offer"];
@@ -69,6 +69,8 @@ const NegotiationWorkspace = () => {
   useEffect(() => { load(); }, [load]);
 
   const selected = rows.find((r) => r.id === panelId) || null;
+  const openRow = useCallback((row) => setPanelId(row.id), []);
+  useRenewalParam(rows, openRow);
   const agents = useMemo(() => [...new Set(rows.map((r) => r.salesPerson).filter(Boolean))].sort(), [rows]);
   const stages = useMemo(() => [...new Map(rows.map((r) => [r.statusCode, r.currentStage])).entries()], [rows]);
   const filtered = useMemo(() => {

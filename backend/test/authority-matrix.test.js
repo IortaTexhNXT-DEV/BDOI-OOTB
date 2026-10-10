@@ -259,7 +259,7 @@ describe('upload', () => {
     const rows = [
       ['', '', '1,000,000.00', 'No', '', 'BR-2026-020', '2026-10-01', 'journal_voucher', 'tis-finance'],
       ['Remittance approval', 'CCD-Recon (Reconciliation)', '750000', '', '', 'BR-2026-020', '2026-10-01', '', ''],
-      ['', '', '', 'Yes', '', 'BR-2026-020', '2026-10-01', 'claim_settlement', 'tis-general-manager'],
+      ['', '', '5,000,000.00', 'No', '', 'BR-2026-020', '2026-10-01', 'claim_settlement', 'tis-general-manager'],
       ['', '', '400000', '', '', 'BR-2026-020', '2026-10-01', 'claim_settlement', 'tis-ops-unit-head'],
       ['', '', '', '', '', '', '', 'payment_voucher', 'tis-finance'],
     ];
@@ -269,7 +269,7 @@ describe('upload', () => {
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.message).toBe('Checked 5 rows: 3 changes ready to review, 2 unchanged.');
     expect(r.body.data.changes.map((c) => [c.row, c.transactionType, c.roleCode, c.maxAmount, c.unlimited])).toEqual([
-      [3, 'remittance', 'tis-ccd-recon', 750000, false], [4, 'claim_settlement', 'tis-general-manager', null, true], [5, 'claim_settlement', 'tis-ops-unit-head', 400000, false]]);
+      [3, 'remittance', 'tis-ccd-recon', 750000, false], [4, 'claim_settlement', 'tis-general-manager', 5000000, false], [5, 'claim_settlement', 'tis-ops-unit-head', 400000, false]]);
     const file = r.body.data.file;
     expect(file.key).toMatch(/^authority-matrix\//);
     expect((await as['am.it2']('post', '/access-control/authority-changes').send({ lines: r.body.data.changes, file })).status).toBe(400);
@@ -288,7 +288,7 @@ describe('upload', () => {
     const m = await matrix();
     const at = (type, role) => m.rows.find((x) => x.code === type).cells[role];
     expect(at('remittance', 'tis-ccd-recon')).toMatchObject({ set: true, maxAmount: 750000, referenceNo: 'BR-2026-020', changeId: c.id });
-    expect(at('claim_settlement', 'tis-general-manager')).toMatchObject({ set: true, unlimited: true });
+    expect(at('claim_settlement', 'tis-general-manager')).toMatchObject({ set: true, maxAmount: 5000000 });
     expect(at('claim_settlement', 'tis-ops-unit-head')).toMatchObject({ set: true, maxAmount: 400000 });
   });
 });

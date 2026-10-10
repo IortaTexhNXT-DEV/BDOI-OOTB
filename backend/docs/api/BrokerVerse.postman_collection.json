@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1335 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1328 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -18674,7 +18674,7 @@
                 }
               ]
             },
-            "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns, read:leads, read:clients"
+            "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns"
           },
           "response": [
             {
@@ -18702,7 +18702,7 @@
                     }
                   ]
                 },
-                "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns, read:leads, read:clients"
+                "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns"
               },
               "status": "OK",
               "code": 200,
@@ -18738,7 +18738,7 @@
                 "consents"
               ]
             },
-            "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns, write:leads, write:clients",
+            "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed application form\"\n}",
@@ -18770,7 +18770,7 @@
                     "consents"
                   ]
                 },
-                "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns, write:leads, write:clients",
+                "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed application form\"\n}",
@@ -20318,7 +20318,7 @@
           ]
         },
         {
-          "name": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)",
+          "name": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)",
           "request": {
             "method": "POST",
             "header": [
@@ -20346,7 +20346,7 @@
                 }
               ]
             },
-            "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
+            "description": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",
@@ -20387,7 +20387,7 @@
                     }
                   ]
                 },
-                "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
+                "description": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",
@@ -20730,6 +20730,429 @@
           ]
         },
         {
+          "name": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"party\": \"insurer\",\n      \"partyLabel\": \"Insurer\",\n      \"direction\": \"out\",\n      \"method\": \"Email\",\n      \"subject\": \"Follow-up\",\n      \"message\": \"Status of the LOA?\",\n      \"followUpDate\": \"2026-10-08\",\n      \"overdue\": false,\n      \"by\": \"Paolo Reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"party\": \"insurer\",\n  \"direction\": \"in\",\n  \"method\": \"Phone\",\n  \"message\": \"Adjuster visit set for 07/10/2026\",\n  \"followUpDate\": \"2026-10-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"party\": \"insurer\",\n  \"direction\": \"in\",\n  \"method\": \"Phone\",\n  \"message\": \"Adjuster visit set for 07/10/2026\",\n  \"followUpDate\": \"2026-10-08\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"party\": \"insurer\",\n    \"partyLabel\": \"Insurer\",\n    \"direction\": \"out\",\n    \"method\": \"Email\",\n    \"subject\": \"Follow-up\",\n    \"message\": \"Status of the LOA?\",\n    \"followUpDate\": \"2026-10-08\",\n    \"overdue\": false,\n    \"by\": \"Paolo Reyes\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark the follow-up of a communication done",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications/:commId/done",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications",
+                ":commId",
+                "done"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "commId",
+                  "value": "",
+                  "description": "commId (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark the follow-up of a communication done\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications/:commId/done",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications",
+                    ":commId",
+                    "done"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "commId",
+                      "value": "",
+                      "description": "commId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark the follow-up of a communication done\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"party\": \"insurer\",\n    \"partyLabel\": \"Insurer\",\n    \"direction\": \"out\",\n    \"method\": \"Email\",\n    \"subject\": \"Follow-up\",\n    \"message\": \"Status of the LOA?\",\n    \"followUpDate\": \"2026-10-08\",\n    \"overdue\": false,\n    \"by\": \"Paolo Reyes\",\n    \"followUpDone\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/insurer-advice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "insurer-advice"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount\n\nFront-end touchpoint: Operations > Claims > Claim detail > Insurer advice\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insurerClaimNumber\": \"MAPFRE-CL-7781\",\n  \"insurerHandler\": \"Rosa Lim\",\n  \"adviceStatus\": \"loa-issued\",\n  \"authorisationCode\": \"AUTH-55102\",\n  \"offerAmount\": 72000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/insurer-advice",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "insurer-advice"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount\n\nFront-end touchpoint: Operations > Claims > Claim detail > Insurer advice\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insurerClaimNumber\": \"MAPFRE-CL-7781\",\n  \"insurerHandler\": \"Rosa Lim\",\n  \"adviceStatus\": \"loa-issued\",\n  \"authorisationCode\": \"AUTH-55102\",\n  \"offerAmount\": 72000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Insurer advice recorded\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Pending\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    },\n    \"insurerAdvice\": \"loa-issued\",\n    \"insurerAdviceLabel\": \"LOA issued\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/insurer-follow-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "insurer-follow-up"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date\n\nFront-end touchpoint: Operations > Claims > Claim detail > Follow up insurer\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"May we have the status of the LOA?\",\n  \"followUpDate\": \"2026-10-09\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/insurer-follow-up",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "insurer-follow-up"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date\n\nFront-end touchpoint: Operations > Claims > Claim detail > Follow up insurer\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"May we have the status of the LOA?\",\n  \"followUpDate\": \"2026-10-09\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"to\": \"claims@insurer.ph\",\n    \"communication\": {\n      \"id\": 1,\n      \"party\": \"insurer\",\n      \"partyLabel\": \"Insurer\",\n      \"direction\": \"out\",\n      \"method\": \"Email\",\n      \"subject\": \"Follow-up\",\n      \"message\": \"Status of the LOA?\",\n      \"followUpDate\": \"2026-10-08\",\n      \"overdue\": false,\n      \"by\": \"Paolo Reyes\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts",
           "request": {
             "method": "GET",
@@ -20823,7 +21246,7 @@
                 }
               ]
             },
-            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:claim-funds",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
@@ -20864,7 +21287,7 @@
                     }
                   ]
                 },
-                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:claim-funds",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
@@ -20985,7 +21408,100 @@
           ]
         },
         {
-          "name": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester",
+          "name": "Record the verification of the death on a death benefit claim; the follow-up date counts from it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/verify-death",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "verify-death"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the verification of the death on a death benefit claim; the follow-up date counts from it\n\nFront-end touchpoint: Operations > Claims > Claim detail > Verify death\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verifiedOn\": \"2026-10-05\",\n  \"note\": \"PSA death certificate seen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/verify-death",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "verify-death"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the verification of the death on a death benefit claim; the follow-up date counts from it\n\nFront-end touchpoint: Operations > Claims > Claim detail > Verify death\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"verifiedOn\": \"2026-10-05\",\n  \"note\": \"PSA death certificate seen\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Death verified\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Pending\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    },\n    \"deathVerifiedOn\": \"2026-10-05\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix",
           "request": {
             "method": "PUT",
             "header": [
@@ -21012,7 +21528,7 @@
                 }
               ]
             },
-            "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+            "description": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -21052,7 +21568,7 @@
                     }
                   ]
                 },
-                "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+                "description": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -21151,6 +21667,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"timestamp\": \"2026-09-21T02:00:00Z\",\n      \"action\": \"Status Changed\",\n      \"fieldName\": \"claimStatus\",\n      \"oldValue\": \"registered\",\n      \"newValue\": \"in-review\",\n      \"user\": \"j.claims\"\n    }\n  ],\n  \"total\": 1,\n  \"sort\": \"desc\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/cancel/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                "cancel",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note\n\nFront-end touchpoint: Operations > Claims > Claim detail > Cancel claim\n\nAccess: write:claims, approve:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"CCN-DUPLICATE\",\n  \"note\": \"Same loss as CLM-2026-00014\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/cancel/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    "cancel",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note\n\nFront-end touchpoint: Operations > Claims > Claim detail > Cancel claim\n\nAccess: write:claims, approve:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"CCN-DUPLICATE\",\n  \"note\": \"Same loss as CLM-2026-00014\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Claim cancelled\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Cancelled\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    }\n  }\n}"
             }
           ]
         },
@@ -21374,7 +21983,84 @@
           ]
         },
         {
-          "name": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",
+          "name": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/registration-check?policyId=pol_1&lossDate=2026-09-20&reportedDate=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                "registration-check"
+              ],
+              "query": [
+                {
+                  "key": "policyId",
+                  "value": "pol_1"
+                },
+                {
+                  "key": "lossDate",
+                  "value": "2026-09-20"
+                },
+                {
+                  "key": "reportedDate",
+                  "value": "2026-10-02"
+                }
+              ]
+            },
+            "description": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss\n\nFront-end touchpoint: Operations > Claims > Claim details\n\nAccess: write:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/registration-check?policyId=pol_1&lossDate=2026-09-20&reportedDate=2026-10-02",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    "registration-check"
+                  ],
+                  "query": [
+                    {
+                      "key": "policyId",
+                      "value": "pol_1"
+                    },
+                    {
+                      "key": "lossDate",
+                      "value": "2026-09-20"
+                    },
+                    {
+                      "key": "reportedDate",
+                      "value": "2026-10-02"
+                    }
+                  ]
+                },
+                "description": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss\n\nFront-end touchpoint: Operations > Claims > Claim details\n\nAccess: write:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyNumber\": \"POL-2026-00001\",\n    \"outstandingPremium\": 0,\n    \"claimsRatio\": {\n      \"claims\": 1,\n      \"claimsAmount\": 20000,\n      \"premium\": 45000,\n      \"ratio\": 44.44\n    },\n    \"intimation\": {\n      \"days\": 12,\n      \"limit\": 30,\n      \"late\": false\n    },\n    \"duplicates\": [],\n    \"problems\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason",
           "request": {
             "method": "PUT",
             "header": [
@@ -21401,7 +22087,7 @@
                 }
               ]
             },
-            "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+            "description": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
@@ -21441,7 +22127,7 @@
                     }
                   ]
                 },
-                "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+                "description": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
@@ -21499,7 +22185,7 @@
                 }
               ]
             },
-            "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims, read:reports"
+            "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -21535,7 +22221,7 @@
                     }
                   ]
                 },
-                "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims, read:reports"
+                "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -21552,12 +22238,12 @@
           ]
         },
         {
-          "name": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)",
+          "name": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Open&reportType=excel",
+              "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Settled&dateBasis=settlement&claimType=Motor&insurerId=2&reportType=excel",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -21577,7 +22263,19 @@
                 },
                 {
                   "key": "criteria",
-                  "value": "Open"
+                  "value": "Settled"
+                },
+                {
+                  "key": "dateBasis",
+                  "value": "settlement"
+                },
+                {
+                  "key": "claimType",
+                  "value": "Motor"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "2"
                 },
                 {
                   "key": "reportType",
@@ -21585,7 +22283,7 @@
                 }
               ]
             },
-            "description": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims, read:reports"
+            "description": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -21594,7 +22292,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Open&reportType=excel",
+                  "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Settled&dateBasis=settlement&claimType=Motor&insurerId=2&reportType=excel",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -21614,7 +22312,19 @@
                     },
                     {
                       "key": "criteria",
-                      "value": "Open"
+                      "value": "Settled"
+                    },
+                    {
+                      "key": "dateBasis",
+                      "value": "settlement"
+                    },
+                    {
+                      "key": "claimType",
+                      "value": "Motor"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "2"
                     },
                     {
                       "key": "reportType",
@@ -21622,7 +22332,7 @@
                     }
                   ]
                 },
-                "description": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims, read:reports"
+                "description": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -21639,7 +22349,7 @@
           ]
         },
         {
-          "name": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled",
+          "name": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)",
           "request": {
             "method": "PUT",
             "header": [
@@ -21666,7 +22376,7 @@
                 }
               ]
             },
-            "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+            "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, process:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -21706,7 +22416,7 @@
                     }
                   ]
                 },
-                "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+                "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, process:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -21732,7 +22442,7 @@
           ]
         },
         {
-          "name": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",
+          "name": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing",
           "request": {
             "method": "PUT",
             "header": [
@@ -21759,7 +22469,7 @@
                 }
               ]
             },
-            "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
+            "description": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, process:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",
@@ -21799,7 +22509,7 @@
                     }
                   ]
                 },
-                "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
+                "description": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, process:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",
@@ -21982,7 +22692,7 @@
                 }
               ]
             },
-            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:receipts",
+            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:claim-funds",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-10-04\",\n  \"reference\": \"RA-8812\"\n}",
@@ -22023,7 +22733,7 @@
                     }
                   ]
                 },
-                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:receipts",
+                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:claim-funds",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-10-04\",\n  \"reference\": \"RA-8812\"\n}",
@@ -22045,6 +22755,115 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"journalNumber\": \"JV-2026-00140\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claim-payments/claims/:id/movements/:movementId/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claim-payments",
+                "claims",
+                ":id",
+                "movements",
+                ":movementId",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "movementId",
+                  "value": "",
+                  "description": "movementId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed\n\nFront-end touchpoint: Accounts > Claims Settlements > Reverse\n\nAccess: reverse:claim-cash",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"CRV-AMOUNT\",\n  \"note\": \"Recorded 75,000 instead of 57,000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claim-payments/claims/:id/movements/:movementId/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claim-payments",
+                    "claims",
+                    ":id",
+                    "movements",
+                    ":movementId",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "movementId",
+                      "value": "",
+                      "description": "movementId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed\n\nFront-end touchpoint: Accounts > Claims Settlements > Reverse\n\nAccess: reverse:claim-cash",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"CRV-AMOUNT\",\n  \"note\": \"Recorded 75,000 instead of 57,000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"movementId\": 7,\n    \"kind\": \"funds-received\",\n    \"amount\": 75000,\n    \"journalNumber\": \"JV-2026-00152\"\n  }\n}"
             }
           ]
         },
@@ -46008,7 +46827,7 @@
           ]
         },
         {
-          "name": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city, insurance provider, customer type; round robin, load or fixed; maxOpen: open prospects an account executive may hold under the rule)",
+          "name": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city; round robin, load or fixed)",
           "request": {
             "method": "POST",
             "header": [
@@ -46027,7 +46846,7 @@
                 "rules"
               ]
             },
-            "description": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city, insurance provider, customer type; round robin, load or fixed; maxOpen: open prospects an account executive may hold under the rule)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Add\n\nAccess: write:lead-assignment",
+            "description": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city; round robin, load or fixed)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Add\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Metro Manila motor\",\n  \"priority\": 10,\n  \"method\": \"round_robin\",\n  \"conditions\": {\n    \"lob\": \"MOTOR\",\n    \"province\": \"Metro Manila\"\n  },\n  \"assignees\": [\n    \"usr_1\",\n    \"usr_2\"\n  ]\n}",
@@ -46059,7 +46878,7 @@
                     "rules"
                   ]
                 },
-                "description": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city, insurance provider, customer type; round robin, load or fixed; maxOpen: open prospects an account executive may hold under the rule)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Add\n\nAccess: write:lead-assignment",
+                "description": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city; round robin, load or fixed)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Add\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Metro Manila motor\",\n  \"priority\": 10,\n  \"method\": \"round_robin\",\n  \"conditions\": {\n    \"lob\": \"MOTOR\",\n    \"province\": \"Metro Manila\"\n  },\n  \"assignees\": [\n    \"usr_1\",\n    \"usr_2\"\n  ]\n}",
@@ -46913,7 +47732,7 @@
           ]
         },
         {
-          "name": "Delete a lead (soft delete; blocked once a policy exists; delete:leads)",
+          "name": "Delete a lead (soft delete; blocked once a policy exists)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -46934,7 +47753,7 @@
                 }
               ]
             },
-            "description": "Delete a lead (soft delete; blocked once a policy exists; delete:leads)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: delete:leads"
+            "description": "Delete a lead (soft delete; blocked once a policy exists)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: write:leads"
           },
           "response": [
             {
@@ -46959,7 +47778,7 @@
                     }
                   ]
                 },
-                "description": "Delete a lead (soft delete; blocked once a policy exists; delete:leads)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: delete:leads"
+                "description": "Delete a lead (soft delete; blocked once a policy exists)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: write:leads"
               },
               "status": "OK",
               "code": 200,
@@ -47197,7 +48016,7 @@
           ]
         },
         {
-          "name": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth; with leads.duplicate_rule four-key the same first name, last name, mobile and date of birth together, or the same Loan ID (clientId: the open prospects of that client); off with leads.duplicate_check",
+          "name": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check",
           "request": {
             "method": "GET",
             "header": [],
@@ -47233,7 +48052,7 @@
                 }
               ]
             },
-            "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth; with leads.duplicate_rule four-key the same first name, last name, mobile and date of birth together, or the same Loan ID (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+            "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
           },
           "response": [
             {
@@ -47273,7 +48092,7 @@
                     }
                   ]
                 },
-                "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth; with leads.duplicate_rule four-key the same first name, last name, mobile and date of birth together, or the same Loan ID (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+                "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
               },
               "status": "OK",
               "code": 200,
@@ -47286,55 +48105,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"kind\": \"client\",\n      \"id\": \"cli_1\",\n      \"number\": \"CL-2026-00004\",\n      \"name\": \"Juan Dela Cruz\",\n      \"ownerName\": \"Ana Garcia\",\n      \"matchedOn\": [\n        \"email\",\n        \"name\",\n        \"birthDate\"\n      ]\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers (insurance provider)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/leads/options",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "leads",
-                "options"
-              ]
-            },
-            "description": "Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers (insurance provider)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create / Edit\n\nAccess: read:leads"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/leads/options",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "leads",
-                    "options"
-                  ]
-                },
-                "description": "Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers (insurance provider)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create / Edit\n\nAccess: read:leads"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"categories\": [\n      \"Retail\",\n      \"Corporate\"\n    ],\n    \"customerTypes\": [\n      \"TFS\",\n      \"Non-TFS\",\n      \"Direct Customer\"\n    ],\n    \"dispositions\": [\n      \"Interested\"\n    ],\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"name\": \"Malayan Insurance Co., Inc.\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -47526,134 +48296,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"totalLeads\": 16,\n  \"recentLeads\": 3,\n  \"last30DaysLeads\": 9,\n  \"convertedLeads\": 8,\n  \"leadsWithQuotations\": 12,\n  \"conversionRate\": 50,\n  \"quotationRate\": 75,\n  \"growthRate\": 12.5,\n  \"leadsByStatus\": [\n    {\n      \"status\": \"New\",\n      \"count\": 4\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Load the TFS account file (multipart field \"file\", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/leads/tfs-import",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "leads",
-                "tfs-import"
-              ]
-            },
-            "description": "Load the TFS account file (multipart field \"file\", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts\n\nAccess: write:leads",
-            "body": {
-              "mode": "raw",
-              "raw": "\"multipart/form-data file\"",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/leads/tfs-import",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "leads",
-                    "tfs-import"
-                  ]
-                },
-                "description": "Load the TFS account file (multipart field \"file\", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts\n\nAccess: write:leads",
-                "body": {
-                  "mode": "raw",
-                  "raw": "\"multipart/form-data file\"",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 250 rows: 246 created, 2 updated, 2 failed (batch LIB-2026-00004)\",\n    \"total\": 250,\n    \"created\": 246,\n    \"updated\": 2,\n    \"failed\": 2,\n    \"errors\": [\n      {\n        \"row\": 17,\n        \"message\": \"Row 17: No policy expiry date: no prospect is created for this account\"\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "TFS account file template (XLSX: Data, Columns and Instructions sheets)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/leads/tfs-import/template",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "leads",
-                "tfs-import",
-                "template"
-              ]
-            },
-            "description": "TFS account file template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts > Download template\n\nAccess: read:leads"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/leads/tfs-import/template",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "leads",
-                    "tfs-import",
-                    "template"
-                  ]
-                },
-                "description": "TFS account file template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts > Download template\n\nAccess: read:leads"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(xlsx file)"
             }
           ]
         }
@@ -66497,7 +67139,7 @@
           ]
         },
         {
-          "name": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId); with talkbot.bulk_quote_filter a Motor policy not confirmed by Talkbot is Skipped with the reason",
+          "name": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)",
           "request": {
             "method": "POST",
             "header": [
@@ -66525,7 +67167,7 @@
                 }
               ]
             },
-            "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId); with talkbot.bulk_quote_filter a Motor policy not confirmed by Talkbot is Skipped with the reason\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
+            "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"selectedPolicyIds\": [\n    \"pol_1\",\n    \"pol_2\"\n  ]\n}",
@@ -66566,7 +67208,7 @@
                     }
                   ]
                 },
-                "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId); with talkbot.bulk_quote_filter a Motor policy not confirmed by Talkbot is Skipped with the reason\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
+                "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"selectedPolicyIds\": [\n    \"pol_1\",\n    \"pol_2\"\n  ]\n}",
@@ -66587,7 +67229,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Renewal quotes queued: 2 policies, 1 skipped as not confirmed by Talkbot\",\n  \"data\": {\n    \"jobId\": \"17\",\n    \"queued\": 2,\n    \"skipped\": 1,\n    \"batchId\": \"RB-2026-00001\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Renewal quotes queued\",\n  \"data\": {\n    \"jobId\": \"17\",\n    \"queued\": 2,\n    \"batchId\": \"RB-2026-00001\"\n  }\n}"
             }
           ]
         },
@@ -91009,6 +91651,99 @@
           ]
         },
         {
+          "name": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/not-for-renewal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "not-for-renewal"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Not for renewal\n\nAccess: write:renewals, assign:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"NFR-LOANCLOSED\",\n  \"note\": \"Loan fully paid; client insures elsewhere\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/not-for-renewal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "not-for-renewal"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Not for renewal\n\nAccess: write:renewals, assign:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"NFR-LOANCLOSED\",\n  \"note\": \"Loan fully paid; client insures elsewhere\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Not for renewal\",\n    \"statusCode\": \"not-renewed\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Send the next renewal notice (first, second, final in order); stage may be given explicitly",
           "request": {
             "method": "POST",
@@ -91167,7 +91902,100 @@
           ]
         },
         {
-          "name": "Reinstate a lapsed renewal within the reinstatement window",
+          "name": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "reassign"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"RRA-WORKLOAD\",\n  \"note\": \"Ana is on leave until 20/10/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/reassign",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "reassign"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"RRA-WORKLOAD\",\n  \"note\": \"Ana is on leave until 20/10/2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Carlo Mendoza\",\n    \"renewalAttempts\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window",
           "request": {
             "method": "POST",
             "header": [
@@ -91194,7 +92022,7 @@
                 }
               ]
             },
-            "description": "Reinstate a lapsed renewal within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+            "description": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"note\": \"Client accepted win-back offer\"\n}",
@@ -91234,7 +92062,7 @@
                     }
                   ]
                 },
-                "description": "Reinstate a lapsed renewal within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+                "description": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"note\": \"Client accepted win-back offer\"\n}",
@@ -91653,6 +92481,55 @@
           ]
         },
         {
+          "name": "Active users a renewal can be reassigned to (holders of write:renewals)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/assignees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "assignees"
+              ]
+            },
+            "description": "Active users a renewal can be reassigned to (holders of write:renewals)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/assignees",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "assignees"
+                  ]
+                },
+                "description": "Active users a renewal can be reassigned to (holders of write:renewals)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Ana Reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact",
           "request": {
             "method": "GET",
@@ -91942,6 +92819,186 @@
           ]
         },
         {
+          "name": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/lock-ins?asOf=2026-10-10&days=60&loanStatus=All&format=excel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "lock-ins"
+              ],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "2026-10-10"
+                },
+                {
+                  "key": "days",
+                  "value": "60"
+                },
+                {
+                  "key": "loanStatus",
+                  "value": "All"
+                },
+                {
+                  "key": "format",
+                  "value": "excel"
+                }
+              ]
+            },
+            "description": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts\n\nAccess: read:renewals"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/lock-ins?asOf=2026-10-10&days=60&loanStatus=All&format=excel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "lock-ins"
+                  ],
+                  "query": [
+                    {
+                      "key": "asOf",
+                      "value": "2026-10-10"
+                    },
+                    {
+                      "key": "days",
+                      "value": "60"
+                    },
+                    {
+                      "key": "loanStatus",
+                      "value": "All"
+                    },
+                    {
+                      "key": "format",
+                      "value": "excel"
+                    }
+                  ]
+                },
+                "description": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts\n\nAccess: read:renewals"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"days\": 60,\n    \"to\": \"2026-12-09\",\n    \"items\": [\n      {\n        \"policyNumber\": \"POL-2025-00412\",\n        \"clientName\": \"Maria Santos\",\n        \"sourceLabel\": \"Scheme 2\",\n        \"year\": 2,\n        \"reviewDate\": \"2026-10-21\",\n        \"tfsLoanAccount\": \"TFS-0012345\",\n        \"loanStatusLabel\": \"Current\",\n        \"noticeTreatment\": {\n          \"code\": \"scheme2\",\n          \"label\": \"Suppressed: Scheme 2\"\n        }\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/lock-ins/:policyId/loan-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "lock-ins",
+                ":policyId",
+                "loan-status"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts > Set loan status\n\nAccess: write:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanStatus\": \"legal-dispute\",\n  \"note\": \"Case filed by TFS on 02/10/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/lock-ins/:policyId/loan-status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "lock-ins",
+                    ":policyId",
+                    "loan-status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts > Set loan status\n\nAccess: write:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"loanStatus\": \"legal-dispute\",\n  \"note\": \"Case filed by TFS on 02/10/2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"before\": {\n      \"loanStatus\": \"current\"\n    },\n    \"after\": {\n      \"loanStatus\": \"legal-dispute\"\n    },\n    \"skippedNotices\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Renewals under negotiation with their contact timeline",
           "request": {
             "method": "GET",
@@ -92176,7 +93233,7 @@
           ]
         },
         {
-          "name": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize; talkbotOutcome and each renewal's Talkbot outcome with read:talkbot-calls)",
+          "name": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",
           "request": {
             "method": "GET",
             "header": [],
@@ -92220,7 +93277,7 @@
                 }
               ]
             },
-            "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize; talkbotOutcome and each renewal's Talkbot outcome with read:talkbot-calls)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
+            "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
           },
           "response": [
             {
@@ -92268,7 +93325,7 @@
                     }
                   ]
                 },
-                "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize; talkbotOutcome and each renewal's Talkbot outcome with read:talkbot-calls)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
+                "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
               },
               "status": "OK",
               "code": 200,
@@ -96384,1433 +97441,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Talkbot calls",
-      "item": [
-        {
-          "name": "Call lists, newest first (status, search by list number or task name, page, pageSize)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists?status=sent&page=1&pageSize=20",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "sent"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Call lists, newest first (status, search by list number or task name, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists?status=sent&page=1&pageSize=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists"
-                  ],
-                  "query": [
-                    {
-                      "key": "status",
-                      "value": "sent"
-                    },
-                    {
-                      "key": "page",
-                      "value": "1"
-                    },
-                    {
-                      "key": "pageSize",
-                      "value": "20"
-                    }
-                  ]
-                },
-                "description": "Call lists, newest first (status, search by list number or task name, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"tcl_1\",\n      \"listNumber\": \"TCL-2026-00014\",\n      \"status\": \"sent\",\n      \"statusLabel\": \"Sent to Talkbot\",\n      \"taskName\": \"TIS_MV - OCT 07, 2026\",\n      \"expiryFrom\": \"2026-10-10\",\n      \"expiryTo\": \"2026-10-10\",\n      \"accounts\": 500,\n      \"willing\": 37,\n      \"notCalled\": 0,\n      \"batchNumbers\": [\n        \"RB-2026-90014\"\n      ],\n      \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
-            }
-          ]
-        },
-        {
-          "name": "Create a call list in Draft from the Motor policies due for renewal of the criteria (eligibility rules applied; refused when no account or more than talkbot.max_accounts)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists"
-              ]
-            },
-            "description": "Create a call list in Draft from the Motor policies due for renewal of the criteria (eligibility rules applied; refused when no account or more than talkbot.max_accounts)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list > Create call list\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"expiryFrom\": \"2026-10-10\",\n  \"expiryTo\": \"2026-10-10\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists"
-                  ]
-                },
-                "description": "Create a call list in Draft from the Motor policies due for renewal of the criteria (eligibility rules applied; refused when no account or more than talkbot.max_accounts)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list > Create call list\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"expiryFrom\": \"2026-10-10\",\n  \"expiryTo\": \"2026-10-10\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Call list TCL-2026-00016 created with 41 accounts\",\n  \"data\": {\n    \"id\": \"tcl_1\",\n    \"listNumber\": \"TCL-2026-00014\",\n    \"status\": \"sent\",\n    \"statusLabel\": \"Sent to Talkbot\",\n    \"taskName\": \"TIS_MV - OCT 07, 2026\",\n    \"expiryFrom\": \"2026-10-10\",\n    \"expiryTo\": \"2026-10-10\",\n    \"accounts\": 500,\n    \"willing\": 37,\n    \"notCalled\": 0,\n    \"batchNumbers\": [\n      \"RB-2026-90014\"\n    ],\n    \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "One call list with its accounts (outcome, lineStatus active | removed, search); mobile numbers masked",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id?outcome=call-back",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id"
-              ],
-              "query": [
-                {
-                  "key": "outcome",
-                  "value": "call-back"
-                }
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "One call list with its accounts (outcome, lineStatus active | removed, search); mobile numbers masked\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id?outcome=call-back",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id"
-                  ],
-                  "query": [
-                    {
-                      "key": "outcome",
-                      "value": "call-back"
-                    }
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "One call list with its accounts (outcome, lineStatus active | removed, search); mobile numbers masked\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tcl_1\",\n    \"listNumber\": \"TCL-2026-00014\",\n    \"status\": \"sent\",\n    \"statusLabel\": \"Sent to Talkbot\",\n    \"taskName\": \"TIS_MV - OCT 07, 2026\",\n    \"expiryFrom\": \"2026-10-10\",\n    \"expiryTo\": \"2026-10-10\",\n    \"accounts\": 500,\n    \"willing\": 37,\n    \"notCalled\": 0,\n    \"batchNumbers\": [\n      \"RB-2026-90014\"\n    ],\n    \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\",\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"policyNumber\": \"POL-2025-41187\",\n        \"clientName\": \"ANDREA M. VILLANUEVA\",\n        \"mobile\": \"0917 *** 7105\",\n        \"vehicle\": \"2023 TOYOTA Raize 1.0 Turbo CVT\",\n        \"expiryDate\": \"2026-10-10\",\n        \"outcome\": \"willing\",\n        \"outcomeLabel\": \"Willing to renew\",\n        \"outcomeDetail\": \"Will Renew (Closing)\",\n        \"calls\": 3,\n        \"manual\": false,\n        \"batchNumber\": \"RB-2026-90014\",\n        \"quoteStatus\": \"Quoted\",\n        \"quoteNumber\": \"RQ-2026-90031\"\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Cancel a Draft or Sent call list with a reason code (context talkbot_list_cancel)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "cancel"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Cancel a Draft or Sent call list with a reason code (context talkbot_list_cancel)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Cancel list\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reasonCode\": \"TBC-NOT-RUN\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/cancel",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "cancel"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Cancel a Draft or Sent call list with a reason code (context talkbot_list_cancel)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Cancel list\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"reasonCode\": \"TBC-NOT-RUN\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tcl_1\",\n    \"listNumber\": \"TCL-2026-00014\",\n    \"status\": \"sent\",\n    \"statusLabel\": \"Sent to Talkbot\",\n    \"taskName\": \"TIS_MV - OCT 07, 2026\",\n    \"expiryFrom\": \"2026-10-10\",\n    \"expiryTo\": \"2026-10-10\",\n    \"accounts\": 500,\n    \"willing\": 37,\n    \"notCalled\": 0,\n    \"batchNumbers\": [\n      \"RB-2026-90014\"\n    ],\n    \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Close a call list whose results were loaded",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/close",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "close"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Close a call list whose results were loaded\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Close list\n\nAccess: write:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/close",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "close"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Close a call list whose results were loaded\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Close list\n\nAccess: write:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tcl_1\",\n    \"listNumber\": \"TCL-2026-00014\",\n    \"status\": \"sent\",\n    \"statusLabel\": \"Sent to Talkbot\",\n    \"taskName\": \"TIS_MV - OCT 07, 2026\",\n    \"expiryFrom\": \"2026-10-10\",\n    \"expiryTo\": \"2026-10-10\",\n    \"accounts\": 500,\n    \"willing\": 37,\n    \"notCalled\": 0,\n    \"batchNumbers\": [\n      \"RB-2026-90014\"\n    ],\n    \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Download call list: the Contact Import file (.xlsx, sheet Contact Import); accounts no longer eligible are taken off the list first",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/download",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "download"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Download call list: the Contact Import file (.xlsx, sheet Contact Import); accounts no longer eligible are taken off the list first\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Download call list\n\nAccess: write:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/download",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "download"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Download call list: the Contact Import file (.xlsx, sheet Contact Import); accounts no longer eligible are taken off the list first\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Download call list\n\nAccess: write:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(xlsx file)"
-            }
-          ]
-        },
-        {
-          "name": "The call attempts of an account with the Call ID and the upload they came from",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/attempts",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "lines",
-                ":lineId",
-                "attempts"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                },
-                {
-                  "key": "lineId",
-                  "value": "",
-                  "description": "lineId (path parameter)"
-                }
-              ]
-            },
-            "description": "The call attempts of an account with the Call ID and the upload they came from\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Calls\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/attempts",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "lines",
-                    ":lineId",
-                    "attempts"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    },
-                    {
-                      "key": "lineId",
-                      "value": "",
-                      "description": "lineId (path parameter)"
-                    }
-                  ]
-                },
-                "description": "The call attempts of an account with the Call ID and the upload they came from\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Calls\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"callId\": \"3422766876\",\n      \"result\": \"Connected(200)\",\n      \"callTime\": \"2026-10-07T06:52:10Z\",\n      \"callResult\": \"Will Renew\",\n      \"outcome\": \"willing\",\n      \"uploadNumber\": 1\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Record or correct the Talkbot outcome of an account by hand (remark required; any outcome but Not called)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/outcome",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "lines",
-                ":lineId",
-                "outcome"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                },
-                {
-                  "key": "lineId",
-                  "value": "",
-                  "description": "lineId (path parameter)"
-                }
-              ]
-            },
-            "description": "Record or correct the Talkbot outcome of an account by hand (remark required; any outcome but Not called)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Record outcome\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"outcome\": \"willing\",\n  \"date\": \"2026-10-08\",\n  \"remark\": \"Client called the hotline 08/10/2026\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/outcome",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "lines",
-                    ":lineId",
-                    "outcome"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    },
-                    {
-                      "key": "lineId",
-                      "value": "",
-                      "description": "lineId (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Record or correct the Talkbot outcome of an account by hand (remark required; any outcome but Not called)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Record outcome\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"outcome\": \"willing\",\n  \"date\": \"2026-10-08\",\n  \"remark\": \"Client called the hotline 08/10/2026\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Outcome recorded for policy POL-2025-41187\",\n  \"data\": {\n    \"policyNumber\": \"POL-2025-41187\",\n    \"after\": {\n      \"outcome\": \"willing\",\n      \"source\": \"manual\"\n    }\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Take an account off a Draft call list with a reason code (context talkbot_line_remove)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/remove",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "lines",
-                ":lineId",
-                "remove"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                },
-                {
-                  "key": "lineId",
-                  "value": "",
-                  "description": "lineId (path parameter)"
-                }
-              ]
-            },
-            "description": "Take an account off a Draft call list with a reason code (context talkbot_line_remove)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Remove\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reasonCode\": \"TBR-COMPLAINT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/remove",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "lines",
-                    ":lineId",
-                    "remove"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    },
-                    {
-                      "key": "lineId",
-                      "value": "",
-                      "description": "lineId (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Take an account off a Draft call list with a reason code (context talkbot_line_remove)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Remove\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"reasonCode\": \"TBR-COMPLAINT\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"policyNumber\": \"POL-2025-41187\",\n    \"clientName\": \"ANDREA M. VILLANUEVA\",\n    \"mobile\": \"0917 *** 7105\",\n    \"vehicle\": \"2023 TOYOTA Raize 1.0 Turbo CVT\",\n    \"expiryDate\": \"2026-10-10\",\n    \"outcome\": \"willing\",\n    \"outcomeLabel\": \"Willing to renew\",\n    \"outcomeDetail\": \"Will Renew (Closing)\",\n    \"calls\": 3,\n    \"manual\": false,\n    \"batchNumber\": \"RB-2026-90014\",\n    \"quoteStatus\": \"Quoted\",\n    \"quoteNumber\": \"RQ-2026-90031\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Put a removed account back on a Draft call list",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/restore",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "lines",
-                ":lineId",
-                "restore"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                },
-                {
-                  "key": "lineId",
-                  "value": "",
-                  "description": "lineId (path parameter)"
-                }
-              ]
-            },
-            "description": "Put a removed account back on a Draft call list\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Put back\n\nAccess: write:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/lines/:lineId/restore",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "lines",
-                    ":lineId",
-                    "restore"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    },
-                    {
-                      "key": "lineId",
-                      "value": "",
-                      "description": "lineId (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Put a removed account back on a Draft call list\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Put back\n\nAccess: write:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"policyNumber\": \"POL-2025-41187\",\n    \"clientName\": \"ANDREA M. VILLANUEVA\",\n    \"mobile\": \"0917 *** 7105\",\n    \"vehicle\": \"2023 TOYOTA Raize 1.0 Turbo CVT\",\n    \"expiryDate\": \"2026-10-10\",\n    \"outcome\": \"willing\",\n    \"outcomeLabel\": \"Willing to renew\",\n    \"outcomeDetail\": \"Will Renew (Closing)\",\n    \"calls\": 3,\n    \"manual\": false,\n    \"batchNumber\": \"RB-2026-90014\",\n    \"quoteStatus\": \"Quoted\",\n    \"quoteNumber\": \"RQ-2026-90031\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Create renewal batch: a Draft renewal batch (at most renewals.batch_max_policies policies each) with the Talkbot-confirmed accounts not yet in a batch",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/renewal-batches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "renewal-batches"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Create renewal batch: a Draft renewal batch (at most renewals.batch_max_policies policies each) with the Talkbot-confirmed accounts not yet in a batch\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Create renewal batch\n\nAccess: read:talkbot-calls, write:renewals"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/renewal-batches",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "renewal-batches"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Create renewal batch: a Draft renewal batch (at most renewals.batch_max_policies policies each) with the Talkbot-confirmed accounts not yet in a batch\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Create renewal batch\n\nAccess: read:talkbot-calls, write:renewals"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Renewal batch RB-2026-90014 created with 37 policies\",\n  \"data\": {\n    \"listNumber\": \"TCL-2026-00014\",\n    \"batches\": [\n      {\n        \"batchNumber\": \"RB-2026-90014\",\n        \"policies\": 37\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Upload the Talkbot Call Records file of a call list (multipart field \"file\", .xlsx; confirmTaskName=true loads a file of another Talkbot task)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/results",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "results"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Upload the Talkbot Call Records file of a call list (multipart field \"file\", .xlsx; confirmTaskName=true loads a file of another Talkbot task)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "\"multipart/form-data file, confirmTaskName\"",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/results",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "results"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Upload the Talkbot Call Records file of a call list (multipart field \"file\", .xlsx; confirmTaskName=true loads a file of another Talkbot task)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "\"multipart/form-data file, confirmTaskName\"",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Processed 1,529 rows: 1,529 loaded, 0 failed\",\n  \"data\": {\n    \"total\": 1529,\n    \"loaded\": 1529,\n    \"failed\": 0,\n    \"errors\": [],\n    \"outcomeCounts\": {\n      \"willing\": 37,\n      \"missed-call\": 261\n    }\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Mark a downloaded Draft list as sent to Talkbot with the Talkbot task name",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/send",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "send"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Mark a downloaded Draft list as sent to Talkbot with the Talkbot task name\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Mark as sent\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"taskName\": \"TIS_MV - OCT 07, 2026\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/send",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "send"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Mark a downloaded Draft list as sent to Talkbot with the Talkbot task name\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Mark as sent\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"taskName\": \"TIS_MV - OCT 07, 2026\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tcl_1\",\n    \"listNumber\": \"TCL-2026-00014\",\n    \"status\": \"sent\",\n    \"statusLabel\": \"Sent to Talkbot\",\n    \"taskName\": \"TIS_MV - OCT 07, 2026\",\n    \"expiryFrom\": \"2026-10-10\",\n    \"expiryTo\": \"2026-10-10\",\n    \"accounts\": 500,\n    \"willing\": 37,\n    \"notCalled\": 0,\n    \"batchNumbers\": [\n      \"RB-2026-90014\"\n    ],\n    \"leftOut\": \"11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Uploads of a call list with their counts and failed rows",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/uploads",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "uploads"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Uploads of a call list with their counts and failed rows\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/uploads",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "uploads"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Uploads of a call list with their counts and failed rows\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"uploadNumber\": 1,\n      \"fileName\": \"CallRecords_07-10-2026.xlsx\",\n      \"total\": 1529,\n      \"loaded\": 1529,\n      \"failed\": 0,\n      \"fileAvailable\": true\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "The call records file of an upload as it was uploaded (kept talkbot.file_retention_days)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/lists/:id/uploads/:uploadId/file",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "lists",
-                ":id",
-                "uploads",
-                ":uploadId",
-                "file"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                },
-                {
-                  "key": "uploadId",
-                  "value": "",
-                  "description": "uploadId (path parameter)"
-                }
-              ]
-            },
-            "description": "The call records file of an upload as it was uploaded (kept talkbot.file_retention_days)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: write:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/lists/:id/uploads/:uploadId/file",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "lists",
-                    ":id",
-                    "uploads",
-                    ":uploadId",
-                    "file"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    },
-                    {
-                      "key": "uploadId",
-                      "value": "",
-                      "description": "uploadId (path parameter)"
-                    }
-                  ]
-                },
-                "description": "The call records file of an upload as it was uploaded (kept talkbot.file_retention_days)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: write:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(xlsx file)"
-            }
-          ]
-        },
-        {
-          "name": "New call list defaults: expiry dates (today + talkbot.days_before_expiry, extended over the coming non-working days), proposed task name, insurers, sales persons, lists to call again, outcomes",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/options",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "options"
-              ]
-            },
-            "description": "New call list defaults: expiry dates (today + talkbot.days_before_expiry, extended over the coming non-working days), proposed task name, insurers, sales persons, lists to call again, outcomes\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/options",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "options"
-                  ]
-                },
-                "description": "New call list defaults: expiry dates (today + talkbot.days_before_expiry, extended over the coming non-working days), proposed task name, insurers, sales persons, lists to call again, outcomes\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"expiryFrom\": \"2026-10-12\",\n    \"expiryTo\": \"2026-10-14\",\n    \"taskName\": \"TIS_MV - OCT 09, 2026\",\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"name\": \"Malayan Insurance Co., Inc.\"\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Accounts the criteria give: how many can be called and how many are left out, by reason (nothing is saved)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/preview",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "preview"
-              ]
-            },
-            "description": "Accounts the criteria give: how many can be called and how many are left out, by reason (nothing is saved)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: write:talkbot-calls",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"expiryFrom\": \"2026-10-10\",\n  \"expiryTo\": \"2026-10-10\",\n  \"includeExpired\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/preview",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "preview"
-                  ]
-                },
-                "description": "Accounts the criteria give: how many can be called and how many are left out, by reason (nothing is saved)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: write:talkbot-calls",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"expiryFrom\": \"2026-10-10\",\n  \"expiryTo\": \"2026-10-10\",\n  \"includeExpired\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"eligible\": 500,\n    \"maxAccounts\": 2000,\n    \"excluded\": {\n      \"No mobile number\": 6\n    },\n    \"leftOut\": \"6 accounts left out: 6 No mobile number\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Talkbot call results template (Data, Columns and Instructions sheets with the 13 columns BrokerVerse reads)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/talkbot/results/template",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "talkbot",
-                "results",
-                "template"
-              ]
-            },
-            "description": "Talkbot call results template (Data, Columns and Instructions sheets with the 13 columns BrokerVerse reads)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results > Download template\n\nAccess: read:talkbot-calls"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/talkbot/results/template",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "talkbot",
-                    "results",
-                    "template"
-                  ]
-                },
-                "description": "Talkbot call results template (Data, Columns and Instructions sheets with the 13 columns BrokerVerse reads)\n\nFront-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results > Download template\n\nAccess: read:talkbot-calls"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(xlsx file)"
             }
           ]
         }

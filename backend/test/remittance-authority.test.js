@@ -160,7 +160,7 @@ describe('approve:remittance and the approval limit', () => {
       'access.authority_without_limit')`)).map((r) => [r.key, r.value]));
     // the TISPH values of seed 90; the global rule for a user without a limit is left as it was (D10)
     expect(settings).toEqual({ 'remittance.require_authority_limit': true, 'remittance.item_delegation_enabled': false, 'access.authority_without_limit': 'allow' });
-    expect(await q(`SELECT transaction_type, role_code, max_amount FROM authority_limits WHERE role_code LIKE 'tis-%' AND status = 'active' ORDER BY 1, 2`)).toEqual([
+    expect(await q(`SELECT transaction_type, role_code, max_amount FROM authority_limits WHERE role_code LIKE 'tis-%' AND transaction_type LIKE 'remittance%' AND status = 'active' ORDER BY 1, 2`)).toEqual([
       { transaction_type: 'remittance', role_code: 'tis-finance', max_amount: 1000000 }, { transaction_type: 'remittance', role_code: 'tis-general-manager', max_amount: null },
       { transaction_type: 'remittance_settlement', role_code: 'tis-finance', max_amount: 1000000 }, { transaction_type: 'remittance_settlement', role_code: 'tis-general-manager', max_amount: null }]);
   });

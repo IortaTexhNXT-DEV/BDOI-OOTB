@@ -28,6 +28,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
+| Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations > Renewals | Performance | View |
@@ -77,7 +78,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |

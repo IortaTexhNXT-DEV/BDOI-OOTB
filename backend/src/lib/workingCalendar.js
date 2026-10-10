@@ -1,65 +1,95 @@
 /**
- * Working calendar: Monday to Friday, less the national Regular Holidays and Special Non-working Days of the Holiday
- * master (Master > General > Holiday, seed 69_ph_practice_masters.sql); a Special Working Day of the master is worked
- * even on a weekend. Dates are business dates (YYYY-MM-DD in general.timezone).
+ * Working calendar of the business: the working days of the week (calendar.working_weekdays, 1 = Monday ... 7 = Sunday;
+ * Monday to Friday by default) less the national public holidays of the Holiday master (Master > Configuration, type
+ * holiday: Regular Holidays and Special Non-working Days; a Special Working Day stays a working day). Dates are ISO
+ * yyyy-mm-dd business dates (lib/dates.js). Used by the renewal notice schedule, the renewal and claim service levels,
+ * the Talkbot call list of the day and the prospect assignment SLA (working hours).
  */
-import { query } from '../db/pool.js';
+import { many } from '../db/pool.js';
+import { getSetting } from './settings.js';
 import { addDays, businessTimeZone, isoInZone } from './dates.js';
 
 const NON_WORKING = ['Regular Holiday', 'Special Non-working Day'];
-const WORKING = 'Special Working Day';
+/** Longest run of non-working days searched for the next working day (a guard against an empty working week). */
+const MAX_SPAN = 60;
 
-/** The holiday dates between two business dates: { off: Set of non-working dates, on: Set of special working dates }. */
-export async function holidays(from, to, db = { query }) {
-  const rows = (await db.query(`SELECT data->>'date' AS date, data->>'holidayType' AS kind FROM master_records
-    WHERE type_code = 'holiday' AND status = 'active' AND COALESCE(NULLIF(data->>'scope', ''), 'National') = 'National'
-      AND data->>'date' BETWEEN $1 AND $2`, [from, to])).rows;
+const weekday = (iso) => {
+  const d = new Date(`${iso}T00:00:00Z`).getUTCDay();
+  return d === 0 ? 7 : d;
+};
+
+/** National holidays (non-working) between two dates, inclusive, as a Set of ISO dates. */
+export async function holidaysBetween(from, to) {
+  const rows = await many(`SELECT data->>'date' AS d FROM master_records WHERE type_code = 'holiday' AND status = 'active'
+    AND data->>'holidayType' = ANY($1) AND COALESCE(NULLIF(data->>'scope', ''), 'National') = 'National'
+    AND data->>'date' BETWEEN $2 AND $3`, [NON_WORKING, from, to]);
+  return new Set(rows.map((r) => r.d));
+}
+
+/** A calendar of the dates around `from` .. `to`: { isWorking(iso) } from one read of the holidays and the setting. */
+export async function workingCalendar(from, to) {
+  const days = (await getSetting('calendar.working_weekdays', [1, 2, 3, 4, 5])) || [1, 2, 3, 4, 5];
+  const working = new Set((Array.isArray(days) ? days : [1, 2, 3, 4, 5]).map(Number));
+  const holidays = await holidaysBetween(addDays(from, -MAX_SPAN), addDays(to, MAX_SPAN));
+  const isWorking = (iso) => working.size > 0 && working.has(weekday(iso)) && !holidays.has(iso);
   return {
-    off: new Set(rows.filter((r) => NON_WORKING.includes(r.kind)).map((r) => r.date)),
-    on: new Set(rows.filter((r) => r.kind === WORKING).map((r) => r.date)),
+    isWorking,
+    holidays,
+    /** The date itself when it is a working day, else the next working day. */
+    onOrAfter(iso) {
+      let d = iso;
+      for (let i = 0; i < MAX_SPAN && !isWorking(d); i += 1) d = addDays(d, 1);
+      return d;
+    },
+    /** n working days after a date (n >= 0; the date itself does not count). */
+    add(iso, n) {
+      let d = iso;
+      let left = Number(n) || 0;
+      for (let i = 0; left > 0 && i < MAX_SPAN * (Number(n) + 1); i += 1) {
+        d = addDays(d, 1);
+        if (isWorking(d)) left -= 1;
+      }
+      return d;
+    },
+    /** Working days from a (exclusive) to b (inclusive); 0 when b is not after a. */
+    between(a, b) {
+      let n = 0;
+      for (let d = addDays(a, 1); d <= b; d = addDays(d, 1)) if (isWorking(d)) n += 1;
+      return n;
+    },
   };
 }
 
-const weekday = (iso) => new Date(`${iso}T00:00:00Z`).getUTCDay();
-
-/** Whether a business date is worked, with the holidays of holidays(). */
-export function isWorkingDate(iso, cal) {
-  if (cal.on.has(iso)) return true;
-  if (cal.off.has(iso)) return false;
-  const d = weekday(iso);
-  return d !== 0 && d !== 6;
+export async function isWorkingDay(iso) {
+  return (await workingCalendar(iso, iso)).isWorking(iso);
 }
 
-/** Whether a business date is worked (reads the Holiday master). */
-export async function isWorkingDay(iso, db) {
-  return isWorkingDate(iso, await holidays(iso, iso, db));
+export async function nextWorkingDay(iso) {
+  return (await workingCalendar(iso, iso)).onOrAfter(iso);
 }
 
-/** The first working day after a business date (at most 30 days ahead). */
-export async function nextWorkingDay(iso, db) {
-  const cal = await holidays(addDays(iso, 1), addDays(iso, 31), db);
-  for (let i = 1; i <= 31; i += 1) {
-    const d = addDays(iso, i);
-    if (isWorkingDate(d, cal)) return d;
-  }
-  return addDays(iso, 1);
+export async function addWorkingDays(iso, n) {
+  return (await workingCalendar(iso, addDays(iso, Math.ceil(Number(n) * 1.6) + 7))).add(iso, n);
+}
+
+export async function workingDaysBetween(a, b) {
+  return (await workingCalendar(a, b)).between(a, b);
 }
 
 /**
  * Hours of working days between two instants: every hour that falls on a working day of the business time zone counts,
- * the hours of weekends and holidays do not (a prospect assigned on Friday morning reaches 72 hours on Wednesday morning).
+ * the hours of days off do not (a prospect assigned on Friday morning reaches 72 hours on Wednesday morning).
  */
-export async function workingHoursBetween(start, end, db) {
+export async function workingHoursBetween(start, end) {
   const from = new Date(start);
   const to = new Date(end);
   if (!(to > from)) return 0;
   const tz = await businessTimeZone();
-  const cal = await holidays(isoInZone(from, tz), isoInZone(to, tz), db);
+  const cal = await workingCalendar(isoInZone(from, tz), isoInZone(to, tz));
   let hours = 0;
-  // step hour by hour in blocks: a working day adds the hours of the block, a day off adds none
   for (let t = from.getTime(); t < to.getTime(); t += 3600000) {
     const step = Math.min(3600000, to.getTime() - t);
-    if (isWorkingDate(isoInZone(new Date(t), tz), cal)) hours += step / 3600000;
+    if (cal.isWorking(isoInZone(new Date(t), tz))) hours += step / 3600000;
   }
   return hours;
 }
