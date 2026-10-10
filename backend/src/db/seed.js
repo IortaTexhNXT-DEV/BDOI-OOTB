@@ -135,6 +135,8 @@ Object.assign(ROLE_PERMS, {
   'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read', 'remittance:approve', 'features:read'],
+  // the iorta TechNXT platform administrator: the catalogue and its changes, nothing of the business (lib/platform.js)
+  'iorta-platform-admin': ['profile:read', 'features:read', 'feature-entitlements:manage'],
 });
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };

@@ -8,8 +8,9 @@
 -- maker-checker), immediately or on a scheduled date. Each environment keeps its own state; a promotion from another
 -- environment is a change request like any other.
 --
--- Role iorta-platform-admin with manage:feature-entitlements, held by no tenant role. read:features (the read-only
--- Features & Releases of Master > System Configuration) for TIS IT AppSupport / Admin and the General Manager.
+-- Permission manage:feature-entitlements, held only by the role iorta-platform-admin (created with its grants by the seed,
+-- after the base roles; db/seed.js) and by no tenant role. read:features (the read-only Features & Releases of Master >
+-- System Configuration) for TIS IT AppSupport / Admin and the General Manager.
 -- Setting features.notify_roles: who is told by e-mail and on the bell when a feature is enabled or disabled.
 -- Idempotent.
 
@@ -47,10 +48,6 @@ CREATE TABLE IF NOT EXISTS feature_changes (
   applied_at timestamptz
 );
 CREATE INDEX IF NOT EXISTS feature_changes_status_idx ON feature_changes(status, effective_at);
-
-INSERT INTO roles(code, name, description, is_system) VALUES
- ('iorta-platform-admin', 'iorta TechNXT Platform Administrator', 'Vendor role: enables and disables the releases of the platform (Phase 2, future releases); no business access', true)
-ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO permissions(code, module, description) VALUES
  ('manage:feature-entitlements', 'features', 'Request and approve the enabling and disabling of platform features (iorta TechNXT platform administrator only)'),
