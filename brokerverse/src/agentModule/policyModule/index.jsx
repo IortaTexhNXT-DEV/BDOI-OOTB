@@ -126,6 +126,7 @@ const ClientListingCard = () => {
                 }}
                 placeholder={t("policies.createPolicy")}
                 dropdownIcon={<SvgAdd />}
+                className="policies-create-dropdown"
               />
             )}
           </div>

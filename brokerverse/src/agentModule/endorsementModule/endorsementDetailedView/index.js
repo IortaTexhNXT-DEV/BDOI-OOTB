@@ -15,6 +15,7 @@ import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
+import { statusLabel } from "../../../utils/statusSeverity";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -41,6 +42,14 @@ const EndorsementDetailedView = ({ action }) => {
   // a non-cancellation endorsement) is refunded by finance through a client refund payment voucher, not collected here.
   const premiumDelta = Number(endorsementData?.premiumDelta ?? endorsementData?.summary?.premiumDelta ?? 0) || 0;
   const paymentDue = !isCancelled && premiumDelta > 0;
+  // a return premium is refunded once the cancellation is done, not while it is a draft or with the insurer
+  const refundable = isCancelled && ["Completed", "Approved", "Issued", "Cancelled"].includes(endorsementStatus);
+  const hasDocument = Boolean(endorsementData?.documentKey || endorsementData?.documentUrl);
+  const completion = endorsementData?.completionDetails || {};
+  const typeCode = endorsementData?.endorsementType;
+  const typeLabel = typeCode ? t(`endorsement.types.${typeCode}`, { defaultValue: statusLabel(typeCode) }) : null;
+  // the reason as named in the Cancellation Reasons master, not its code
+  const reasonName = endorsementData?.returnCalculation?.reason?.name || endorsementData?.cancellationReasonName || endorsementData?.cancellationReason;
 
   // Fetch endorsement data if not in state
   useEffect(() => {
@@ -177,28 +186,26 @@ const EndorsementDetailedView = ({ action }) => {
             ]}
             actions={<Button className="p-button-outlined" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")} onClick={printEndorsement} />}
           />
-          {action === "completed" && (
-            <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
-              {t("endorsement.personalDetailsChange")}
-            </div>
-          )}
-
           <DetailSection title={t("endorsement.details")}>
             <KeyValueGrid columns={3} items={[
               { label: t("endorsement.policyNumber"), value: endorsementData?.policyNumber },
               { label: t("endorsement.endorsementNumber"), value: endorsementData?.endorsementNumber },
-              { label: t("endorsement.endorsementTypeLabel"), value: endorsementData?.endorsementType },
-              { label: t("endorsement.production"), value: endorsementData?.completionDetails?.productionDate, type: "date" },
-              { label: t("endorsement.inception"), value: endorsementData?.completionDetails?.inceptionDate, type: "date" },
-              { label: t("endorsement.issuedDate"), value: endorsementData?.completionDetails?.issuedDate, type: "date" },
-              { label: t("endorsement.expiry"), value: endorsementData?.completionDetails?.expiryDate, type: "date" },
+              { label: t("endorsement.endorsementTypeLabel"), value: typeLabel },
+              { label: t("endorsement.effectiveDate"), value: endorsementData?.effectiveDate, type: "date" },
+              { label: t("endorsement.production"), value: completion.productionDate, type: "date", hidden: !completion.productionDate },
+              { label: t("endorsement.inception"), value: completion.inceptionDate || endorsementData?.policyInception, type: "date", hidden: !(completion.inceptionDate || endorsementData?.policyInception) },
+              { label: t("endorsement.issuedDate"), value: completion.issuedDate, type: "date", hidden: !completion.issuedDate },
+              { label: t("endorsement.expiry"), value: completion.expiryDate || endorsementData?.policyExpiry, type: "date", hidden: !(completion.expiryDate || endorsementData?.policyExpiry) },
               { label: t("endorsement.premiumChange"), value: premiumDelta, type: "amount", hidden: isCancelled },
               { label: t("endorsement.premiumEffectLabel"), value: <span data-testid="endorsement-premium-note">{premiumEffect}</span>, hidden: isCancelled },
-              { label: t("endorsement.cancellationReasonLabel"), value: endorsementData?.cancellationReason, hidden: !isCancelled },
+              { label: t("endorsement.cancellationReasonLabel"), value: reasonName, hidden: !isCancelled },
+              { label: t("endorsement.returnPremium"), value: Math.abs(premiumDelta), type: "amount", hidden: !isCancelled || !premiumDelta },
               { label: t("endorsement.remarksLabel"), value: endorsementData?.remarks, span: "full", hidden: !endorsementData?.remarks },
             ]} />
           </DetailSection>
 
+          {hasDocument && (
+          <>
           <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
             {t("endorsement.document")}
           </div>
@@ -225,6 +232,8 @@ const EndorsementDetailedView = ({ action }) => {
               </div>
             </div>
           </div>
+          </>
+          )}
           <DetailSection title={t("endorsement.history")} className="mt-3">
             <RecordActivityLog entity="endorsement" recordId={endorsementData?.endorsementId || endorsementId} />
           </DetailSection>
@@ -232,7 +241,7 @@ const EndorsementDetailedView = ({ action }) => {
           <div className="grid m-0 mt-3">
             <div className="col-12 md:col-12 lg:col-12 p-0 back__complete__btn__container ">
               <div className="complete__btn__container">
-                {isCancelled ? (
+                {refundable ? (
                   <Button
                     className="complete__btn"
                     onClick={() => {

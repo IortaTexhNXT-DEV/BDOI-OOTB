@@ -84,7 +84,12 @@ export async function policyWithParticipants(row, db = null) {
     if (derived) p = { ...p, ...derived, premiumTaxesDerived: true };
   }
   const participants = await participantsOf('policy', row.id, db);
-  return { ...p, participants, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null };
+  // the endorsements of the policy, newest first, for its detail screen
+  const endorsements = (await (db || { query }).query(`SELECT id AS "endorsementId", endorsement_number AS "endorsementNumber", endorsement_type AS "endorsementType",
+      endorsement_type_ids AS "endorsementTypeIds", status, effective_date::text AS "effectiveDate", premium_delta::float AS "premiumDelta", is_cancel AS "isCancelPolicy",
+      document_key AS "documentKey", created_at AS "createdAt"
+    FROM endorsements WHERE policy_id = $1 ORDER BY created_at DESC`, [row.id])).rows;
+  return { ...p, participants, endorsements, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null };
 }
 
 export async function getPolicyRow(id, db = null) {

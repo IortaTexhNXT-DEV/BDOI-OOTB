@@ -5045,6 +5045,9 @@
       "InitiateCancel": "Cancellation initiated",
       "Completed": "Completed",
       "Cancelled": "Cancelled"
+    },
+    "types": {
+      "cancellation": "Cancellation"
     }
   },
   "endorsementSummary": {
@@ -5105,7 +5108,8 @@
     "endorsementNo": "Endorsement no.",
     "policyNo": "Policy no.",
     "endorsementType": "Endorsement type",
-    "sendToInsurer": "Send to insurer"
+    "sendToInsurer": "Send to insurer",
+    "policyExtension": "Policy extension"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -5440,9 +5444,9 @@
     "netPremium": "NET Premium",
     "others": "Others",
     "discount": "Discount",
-    "dst": "DST",
+    "dst": "Documentary stamp tax",
     "vat": "VAT",
-    "lgt": "LGT",
+    "lgt": "Local government tax",
     "auditTrail": "Audit Trail",
     "share": "Share",
     "proceedToPolicy": "Proceed to Policy",
@@ -5453,7 +5457,12 @@
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
     "errorSendingQuoteForApproval": "Error sending quote for approval",
     "notIncluded": "Not included",
-    "pageTitle": "Quotation Slip"
+    "pageTitle": "Quotation Slip",
+    "scheduleOfCover": "Schedule of cover",
+    "scheduleSection": "Section / item / perils",
+    "scheduleSumInsured": "Sum insured",
+    "schedulePremium": "Premium",
+    "fst": "Fire service tax"
   },
   "policyList": {
     "title": "Policies",
@@ -6185,7 +6194,9 @@
     "cancel": "Cancel",
     "insured": "Insured",
     "startEndorsement": "Start endorsement",
-    "endorsementTypes": "Endorsement types"
+    "endorsementTypes": "Endorsement types",
+    "claimAfterPayment": "Claim (after the premium is paid)",
+    "endorsementAfterPayment": "Endorsement (after the premium is paid)"
   },
   "collectionsList": {
     "view": "View",

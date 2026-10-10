@@ -202,6 +202,21 @@ const EndorsementSummary = ({ action }) => {
   }, [state?.endorsementData]);
 
   const quotationData = policyData?.quotation;
+  // facts of the policy itself where the policy came without a quotation (migrated, placed or booked directly)
+  const firstParticipant = quotationData?.participantDetails?.[0];
+  const insurerName = firstParticipant?.insuranceCompanyName || firstParticipant?.participantName || policyData?.insuranceCompanyName || state?.endorsementData?.insurerName || null;
+  const personal = state?.endorsementData?.summary?.personalDetails || {};
+  const assuredName = [personal.FirstName, personal.LastName].filter(Boolean).join(" ") || policyData?.insuredName || state?.endorsementData?.clientName || null;
+  const assuredEmail = personal.EmailID || policyData?.client?.email || policyData?.clientEmail || null;
+  const assuredPhone = personal.ContactNumber || policyData?.client?.mobile || policyData?.client?.phone || null;
+  const isCancellationSummary = state?.endorsementData?.isCancelPolicy === true || state?.endorsementData?.status === "InitiateCancel";
+  // the premium lines of the change: the coverage change of the endorsement, else the computed delta (cancellations)
+  const delta = state?.endorsementData?.premiumChange?.delta || state?.endorsementData?.summary?.premiumChange?.delta || {};
+  const lineOf = (fromCoverage, fromDelta) => {
+    const v = fromCoverage ?? fromDelta;
+    return v === undefined || v === null || v === "NaN" ? 0 : Math.abs(Number(v) || 0);
+  };
+  const hasExtension = Boolean(state?.endorsementData?.summary?.policyExtension?.FromDate || state?.endorsementData?.summary?.policyExtension?.ToDate);
 
   const endorsementTypeIds = useMemo(
     () =>
@@ -291,8 +306,8 @@ const EndorsementSummary = ({ action }) => {
       facts: [
         { label: t("endorsementSummary.endorsementNo"), value: state?.endorsementData?.endorsementNumber || state?.endorsementId },
         { label: t("endorsementSummary.policyNo"), value: state?.endorsementData?.policyNumber },
-        { label: t("endorsementSummary.insuranceCompany"), value: quotationData?.participantDetails?.[0]?.insuranceCompanyName || quotationData?.participantDetails?.[0]?.participantName },
-        { label: t("endorsementSummary.endorsementType"), value: typeNames.join(", ") },
+        { label: t("endorsementSummary.insuranceCompany"), value: insurerName },
+        { label: t("endorsementSummary.endorsementType"), value: (isCancellation && !typeNames.length ? [t("endorsement.types.cancellation")] : typeNames).join(", ") },
         {
           label: premiumDelta > 0 ? t("endorsementSummary.additionalPremium") : premiumDelta < 0 ? t("endorsementSummary.returnPremium") : t("endorsementSummary.premiumChange"),
           value: premiumDelta === null ? null : Math.abs(premiumDelta),
@@ -392,19 +407,14 @@ const EndorsementSummary = ({ action }) => {
             : t("endorsementSummary.endorsementDetails")}
         </div>
         <div className="quote_details">
-          <label>{t("endorsementSummary.checkEndorsementDetails")}</label>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementData?.endorsementNumber || state?.endorsementId || t("policyDetail.nA")}</label>
-          </div>
+          <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementData?.endorsementNumber || state?.endorsementId || t("policyDetail.nA")}</label>
         </div>
         <div className="sub_title">
           <label className="policy_text">{t("endorsementSummary.policyDetails")}</label>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.insuranceCompany")}</label>
             <label className="alpha_text">
-              {quotationData?.participantDetails?.[0]?.insuranceCompanyName ||
-                quotationData?.participantDetails?.[0]?.participantName ||
-                "N/A"}
+              {insurerName || "—"}
             </label>
           </div>
           <div className="quote_details">
@@ -416,13 +426,13 @@ const EndorsementSummary = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.insurancePolicyType")}</label>
             <label className="alpha_text">
-              {quotationData?.insurancePolicyType || "N/A"}
+              {quotationData?.insurancePolicyType || policyData?.productType || policyData?.product || "—"}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.accountCode")}</label>
             <label className="alpha_text">
-              {quotationData?.accountCode || "N/A"}
+              {quotationData?.accountCode || policyData?.clientCode || state?.endorsementData?.clientCode || "—"}
             </label>
           </div>
         </div>
@@ -503,24 +513,19 @@ const EndorsementSummary = ({ action }) => {
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.name")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.summary?.personalDetails?.FirstName &&
-              state?.endorsementData?.summary?.personalDetails?.LastName
-                ? `${state?.endorsementData?.summary?.personalDetails?.FirstName} ${state?.endorsementData?.summary?.personalDetails?.LastName}`
-                : "N/A"}
+              {assuredName || "—"}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.emailId")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.summary?.personalDetails?.EmailID ||
-                "N/A"}
+              {assuredEmail || "—"}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.contactNumber")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.summary?.personalDetails
-                ?.ContactNumber || "N/A"}
+              {assuredPhone || "—"}
             </label>
           </div>
         </div>
@@ -686,9 +691,9 @@ const EndorsementSummary = ({ action }) => {
             </div>
           </div>
         )}
-        {!isFireLOB && (
+        {!isFireLOB && hasExtension && !isCancellationSummary && (
           <div className="sub_title">
-            <label className="policy_text">Policy Extension Details</label>
+            <label className="policy_text">{t("endorsementSummary.policyExtension")}</label>
           <div className="quote_details">
             <label className="insurance_text">From Date</label>
             <label className="alpha_text">
@@ -721,15 +726,14 @@ const EndorsementSummary = ({ action }) => {
         )}
         <div className="sub_title">
           <label className="policy_text">
-            {state?.endorsementData?.status === "InitiateCancel"
+            {isCancellationSummary
               ? t("endorsementSummary.refundDetails")
               : t("endorsementSummary.paymentDetails")}
           </label>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.netPremium")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.NETpremium ?? firePremiumDetails?.totalCoverPremium ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.NETpremium ?? firePremiumDetails?.totalCoverPremium, delta.netPremium))}
             </label>
           </div>
           <div className="quote_details">
@@ -737,8 +741,7 @@ const EndorsementSummary = ({ action }) => {
               {t("endorsementSummary.dst")} ({percentOf(taxRates.documentaryStampTax)}%)
             </label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.DocumentaryStampTax ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.DocumentaryStampTax, delta.documentaryStampTax))}
             </label>
           </div>
           <div className="quote_details">
@@ -746,8 +749,7 @@ const EndorsementSummary = ({ action }) => {
               {t("endorsementSummary.vat")} ({percentOf(taxRates.valueAddedTax)}%)
             </label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.ValueAddedTax ?? firePremiumDetails?.valueAddedTax ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.ValueAddedTax ?? firePremiumDetails?.valueAddedTax, delta.valueAddedTax))}
             </label>
           </div>
           <div className="quote_details">
@@ -755,29 +757,25 @@ const EndorsementSummary = ({ action }) => {
               {t("endorsementSummary.lgt", "LGT")} ({percentOf(taxRates.localGovernmentTax)}%)
             </label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.LocalGovtTax ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.LocalGovtTax, delta.localGovernmentTax))}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.others")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.OthersPremium ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.OthersPremium, delta.otherCharges))}
             </label>
           </div>
           <div className="quote_details">
             <label className="insurance_text">{t("endorsementSummary.discount")}</label>
             <label className="alpha_text">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.Discount === "NaN" ? 0 : coverageChanges?.Discount ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.Discount, delta.discount))}
             </label>
           </div>
           <div className="quote_details">
             <label className="gross_text">{t("endorsementSummary.grossPremium")}</label>
             <label className="gross_count">
-              {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
-              {formatCurrency(coverageChanges?.Grosspremium ?? coverageChanges?.totalPremium ?? firePremiumDetails?.totalPremium ?? 0)}
+              {formatCurrency(lineOf(coverageChanges?.Grosspremium ?? coverageChanges?.totalPremium ?? firePremiumDetails?.totalPremium, delta.grossPremium))}
             </label>
           </div>
           {premiumDelta !== null && (
@@ -790,7 +788,6 @@ const EndorsementSummary = ({ action }) => {
                   : t("endorsementSummary.premiumChange", "Premium change")}
               </label>
               <label className="gross_count">
-                {premiumDelta < 0 ? "-" : ""}
                 {formatCurrency(Math.abs(premiumDelta))}
               </label>
             </div>
