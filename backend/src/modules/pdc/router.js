@@ -12,6 +12,8 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { sendTable } from '../documents/tabular.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { pdcAcknowledgementDoc } from '../documents/templates.js';
 import * as svc from './service.js';
 import * as life from './lifecycle.js';
 
@@ -82,6 +84,14 @@ define({
   method: 'GET', path: '/sets/:id', summary: 'A PDC set with its cheques per instalment (the cheque paying it now and the ones it replaced), count, total and end of term', screen: `${S} > Set`,
   middleware: read, response: { success: true, data: { setNumber: 'PCS-2026-00031', status: 'open', chequeCount: 4, total: 51150, lastChequeDate: '2027-01-15', instalments: [{ seq: 1, current: example, earlier: [] }] } },
   handler: async (req, res) => ok(res, await life.getSet(pool, req.params.id)),
+});
+define({
+  method: 'GET', path: '/sets/:id/acknowledgement', summary: 'Acknowledgement receipt (PDF) of the post-dated cheques of a set, given to the client on receipt; no journal is posted',
+  screen: `${S} > Set > Print acknowledgement`, middleware: read, response: 'application/pdf',
+  handler: async (req, res) => {
+    const set = await life.getSet(pool, req.params.id);
+    sendPdf(res, buildPdf(await pdcAcknowledgementDoc(set)), `pdc-acknowledgement-${set.setNumber}.pdf`);
+  },
 });
 define({
   method: 'POST', path: '/sets', summary: 'Encode PDCs: one set (PCS-) and one cheque per row against the unpaid instalments of a bill, Received at TIS; nothing is posted',

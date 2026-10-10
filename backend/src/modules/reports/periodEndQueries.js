@@ -9,11 +9,11 @@
  * still shows its result.
  */
 const setting = (key, fallback, type) => ({ key, fallback, type });
-const POSTED = "j.status IN ('posted', 'reversed')";
+export const POSTED = "j.status IN ('posted', 'reversed')";
 const FS_ORDER = "ARRAY['Current Assets','Non-current Assets','Current Liabilities','Non-current Liabilities','Equity','Revenue','Other Income','Cost of Services','Operating Expenses','Other Expenses','Income Tax']";
 const TYPE_ORDER = "ARRAY['asset','liability','equity','income','expense']";
 const FS_GROUP = "COALESCE(a.fs_group, CASE a.account_type WHEN 'asset' THEN 'Current Assets' WHEN 'liability' THEN 'Current Liabilities' WHEN 'equity' THEN 'Equity' WHEN 'income' THEN 'Revenue' ELSE 'Operating Expenses' END)";
-const FY_START = (d) => `COALESCE((SELECT start_date FROM fiscal_years WHERE ${d}::date BETWEEN start_date AND end_date), date_trunc('year', ${d}::date)::date)`;
+export const FY_START = (d) => `COALESCE((SELECT start_date FROM fiscal_years WHERE ${d}::date BETWEEN start_date AND end_date), date_trunc('year', ${d}::date)::date)`;
 const statementOrder = (dims) => dims.map((d) => {
   if (d === 'accountType') return `COALESCE(array_position(${TYPE_ORDER}, f."accountType"), 99)`;
   if (d === 'fsGroup') return `COALESCE(array_position(${FS_ORDER}, f."fsGroup"), 99)`;

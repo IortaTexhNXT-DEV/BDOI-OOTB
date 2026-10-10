@@ -355,6 +355,31 @@ export async function acknowledgementReceiptDoc(c) {
 }
 
 /**
+ * Acknowledgement receipt of the post-dated cheques of a set (TIS-BRD-RPT-CCD-07): the cheques received from the client
+ * for the instalments of a policy, payable to the Insurance Partner or to the broker. No journal is posted on receipt;
+ * each cheque is accounted for when it is collected. `set` is pdc/lifecycle.js#getSet.
+ */
+export async function pdcAcknowledgementDoc(set) {
+  const h = await header('Acknowledgment Receipt - Post-Dated Cheques', set.setNumber);
+  const f = formatters(h);
+  const currency = h.format?.currency || 'PHP';
+  const cheques = set.cheques.filter((c) => !['cancelled', 'replaced', 'returned'].includes(c.status));
+  const note = (await getSetting('documents.pdc_acknowledgement_note', 'Received the post-dated cheques below, subject to clearing. This is not an official receipt; a receipt is issued for each cheque once it is paid.')) || '';
+  const sig = await signatures(h, 'pdc-acknowledgement', { status: 'issued', date: set.receivedDate, names: { 'issuing-user': set.receivedBy } },
+    { blocks: [{ slot: 'received-by', label: 'Received by', name: set.receivedBy || null }, { label: 'Received from (client)' }], perRow: 2 });
+  return { ...h, footerNote: note,
+    meta: kv([['Date received', f.date(set.receivedDate)], ['Received from', set.clientName], ['Policy', set.policyNumber], ['Bill', set.billNumber],
+      ['Payable to', set.payee === 'insurance-partner' ? set.insurerName : brokerName(h)], ['Cheques', String(cheques.length)], ['Total', f.ccy(set.total, currency), { bold: true }]]),
+    sections: [
+      { heading: 'Amount in words', text: amountInWords(set.total, currency), bold: true },
+      { heading: `Cheques received (${currency})`, table: { columns: ['Instalment', 'Bank', 'Cheque no.', 'Cheque date', { label: 'Amount', type: 'money' }],
+        rows: [...cheques.map((c) => [c.instalmentSeq ? `${c.instalmentSeq} of ${c.instalmentCount || cheques.length}` : '', val(c.bankName), val(c.chequeNumber), f.date(c.chequeDate),
+          money(c.amount)]), ['Total', '', '', '', money(set.total)]], totalRow: true } },
+      sig.section,
+    ] };
+}
+
+/**
  * Commission debit note to an insurer (direct bill), or commission billing statement (gross remittance, basis gross):
  * one line per policy / endorsement, commission, VAT, total due, the expanded withholding tax the insurer deducts and
  * the net amount payable. `dn` and `lines` are the API shapes (remittance/directbill.js#debitNoteOut).

@@ -11,6 +11,8 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import LoadState from "../../../components/LoadState";
 import StatusChip from "../../../components/StatusChip";
 import { RecordActivityLog } from "../../../components/ActivityLog";
+import { printPdf } from "../../../components/Print";
+import { showErrorMessage } from "../../../utility/toastUtils";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import service from "../../../services/opsAccountingService";
 import { date, money, numericColumn } from "../common";
@@ -105,7 +107,9 @@ const ChequeDetail = ({ chequeId, refreshKey, onHide, onAction }) => {
             <DetailSection title={t("opsAcc.pdc.chequeSection")}><KeyValueGrid columns={3} items={chequeFacts(t, c)} /></DetailSection>
             {c.cancellation ? <DetailSection title={t("opsAcc.pdc.cancellationSection")}><KeyValueGrid columns={3} items={cancellationFacts(t, c.cancellation)} /></DetailSection> : null}
             {data.set ? (
-              <DetailSection title={t("opsAcc.pdc.setSection", { set: data.set.setNumber })} flush>
+              <DetailSection title={t("opsAcc.pdc.setSection", { set: data.set.setNumber })} flush
+                actions={<Button label={t("opsAcc.pdc.printAcknowledgement")} icon="pi pi-print" text size="small"
+                  onClick={() => printPdf(service.pdcAcknowledgementPath(data.set.id), { fileName: `pdc-acknowledgement-${data.set.setNumber}.pdf` }).catch((e) => showErrorMessage(e.message))} />}>
                 <KeyValueGrid columns={4} className="px-3 pt-2" items={[
                   { label: t("opsAcc.pdc.payee"), value: data.set.payeeText },
                   { label: t("opsAcc.pdc.cheques"), value: data.set.chequeCount, type: "number" },

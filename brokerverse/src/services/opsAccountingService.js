@@ -81,6 +81,8 @@ const opsAccountingService = {
   updatePdc: (pdcId, payload) => put(`/pdc/${id(pdcId)}`, payload),
   pdcEncode: (policy, bill) => request(`/pdc/encode${qs({ policy, bill })}`),
   encodePdcSet: (payload) => post("/pdc/sets", payload),
+  // acknowledgement receipt (PDF) of the cheques of a set, for printPdf
+  pdcAcknowledgementPath: (setId) => `/pdc/sets/${id(setId)}/acknowledgement`,
   pdcSet: (setId) => request(`/pdc/sets/${id(setId)}`),
   pdcFollowUp: () => request("/pdc/follow-up"),
   pdcTransmittals: (params) => request(`/pdc/transmittals${qs(params)}`),

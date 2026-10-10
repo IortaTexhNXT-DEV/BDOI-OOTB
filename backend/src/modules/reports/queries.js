@@ -11,6 +11,7 @@
 import { PERIOD_END_QUERIES } from './periodEndQueries.js';
 import { BANK_REC_QUERIES } from './bankRecQueries.js';
 import { CHANNEL_QUERIES } from './channelQueries.js';
+import { TISPH_QUERIES } from './tisphQueries.js';
 
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
@@ -219,6 +220,7 @@ export const QUERIES = {
   },
   ...BANK_REC_QUERIES,
   ...CHANNEL_QUERIES,
+  ...TISPH_QUERIES,
   production: {
     sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Source: { groupBy: 'source' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
