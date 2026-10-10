@@ -111,9 +111,9 @@ WHERE EXISTS (SELECT 1 FROM claims WHERE id = v.id)
 
 -- The communication log: the insurer chased on a third-party claim (follow-up overdue), the client told of missing
 -- requirements and the repair shop's estimate on the flood claim.
-INSERT INTO claim_communications(claim_id, party, direction, method, subject, message, follow_up_date, follow_up_done_at, created_by, created_at)
+INSERT INTO claim_communications(claim_id, party, direction, method, subject, message, follow_up_date, follow_up_done_at, follow_up_done_by, created_by, created_at)
 SELECT v.id, v.party, v.dir, v.method, v.subject, v.message, CASE WHEN v.fu IS NOT NULL THEN current_date + v.fu END,
-       CASE WHEN v.done THEN now() - interval '1 day' END, (SELECT id FROM users WHERE username = 'ops.cmendoza'), now() - (v.ago || ' days')::interval
+       CASE WHEN v.done THEN now() - interval '1 day' END, CASE WHEN v.done THEN 'ops.cmendoza' END, 'ops.cmendoza', now() - (v.ago || ' days')::interval
 FROM (VALUES
  ('clm_crs_04', 'insurer', 'out', 'Email', 'Claim CLM-2026-90004: documents submitted', 'Sent the police report, the third party''s repair estimate and the driver''s licence.', -3, false, 9),
  ('clm_crs_04', 'client', 'out', 'Phone', NULL, 'Told Ms. Villanueva the insurer is evaluating the third party''s claim.', NULL, false, 5),

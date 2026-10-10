@@ -44,7 +44,7 @@ const LockInAccounts = () => {
   const navigate = useNavigate();
   const toast = useRef(null);
   const [asOf, setAsOf] = useState(toIsoDate(new Date()));
-  const [days, setDays] = useState(null);
+  const [days, setDays] = useState("");
   const [source, setSource] = useState("");
   const [loanStatus, setLoanStatus] = useState("");
   const [treatment, setTreatment] = useState("");
@@ -53,7 +53,7 @@ const LockInAccounts = () => {
   const [note, setNote] = useState("");
   const canWrite = hasPermission("write:renewals");
 
-  const params = useMemo(() => ({ asOf, days: days ?? undefined, source, loanStatus, treatment }), [asOf, days, source, loanStatus, treatment]);
+  const params = useMemo(() => ({ asOf, days: days || undefined, source, loanStatus, treatment }), [asOf, days, source, loanStatus, treatment]);
   const loader = useCallback(() => renewalsWorkspaceService.getLockIns(params), [params]);
   const { data, loading, refreshing, reload } = useStableLoad(loader, { initialData: { items: [], sources: {}, loanStatuses: {}, treatments: {} } });
   const items = useMemo(() => data?.items || [], [data]);
@@ -100,14 +100,16 @@ const LockInAccounts = () => {
       <StatCards items={figures} />
       <SectionCard>
         <FilterBar active={!!(source || loanStatus || treatment || search || days)}
-          onClear={() => { setSource(""); setLoanStatus(""); setTreatment(""); setSearch(""); setDays(null); }}>
+          onClear={() => { setSource(""); setLoanStatus(""); setTreatment(""); setSearch(""); setDays(""); }}>
           <span className="p-input-icon-left bv-filter-bar__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("lockIn.searchHint")} aria-label={t("lockIn.searchHint")} />
           </span>
-          <DateField id="lk-asof" value={asOf} onChange={(e) => setAsOf(e.target.value || toIsoDate(new Date()))} aria-label={t("lockIn.asOf")} />
-          <Dropdown value={days} onChange={(e) => setDays(e.value ?? null)} aria-label={t("lockIn.window")}
-            options={[{ label: t("lockIn.reviewWindow"), value: null }, ...WINDOWS.map((d) => ({ label: t("lockIn.withinDays", { count: d }), value: d }))]} />
+          <div className="w-12rem">
+            <DateField id="lk-asof" value={asOf} onChange={(e) => setAsOf(e.target.value || toIsoDate(new Date()))} aria-label={t("lockIn.asOf")} />
+          </div>
+          <Dropdown value={days} onChange={(e) => setDays(e.value || "")} aria-label={t("lockIn.window")}
+            options={[{ label: t("lockIn.reviewWindow"), value: "" }, ...WINDOWS.map((d) => ({ label: t("lockIn.withinDays", { count: d }), value: d }))]} />
           <Dropdown value={source} onChange={(e) => setSource(e.value || "")} aria-label={t("lockIn.col.lockIn")}
             options={[{ label: t("lockIn.allSources"), value: "" }, ...options(data?.sources)]} />
           <Dropdown value={loanStatus} onChange={(e) => setLoanStatus(e.value || "")} aria-label={t("lockIn.col.loan")}
