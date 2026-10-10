@@ -53,7 +53,8 @@
     "theme:palette": "node scripts/apply-bdoi-palette.js",
     "check:api": "node scripts/check-api-calls.js",
     "check:i18n": "node scripts/check-translations.js",
-    "help:build": "node scripts/build-help.js"
+    "help:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-help.js",
+    "help:word": "node scripts/help/word.js"
   },
   "eslintConfig": {
     "extends": [
