@@ -7,8 +7,8 @@ to the latest runs; the detail is in the linked files.
 
 | Check | Result | Detail |
 |---|---|---|
-| Role walk | 7 roles, 429 screens opened, no screen problems, 2,823 API calls all successful | [ROLE_WALK.md](ROLE_WALK.md) |
-| Document and report sweep | 291 of 291 passed | [DOCUMENT_REPORT_SWEEP.md](DOCUMENT_REPORT_SWEEP.md) |
+| Role walk | 7 roles, 429 screens opened, no screen problems, 2,823 API calls all successful | [ROLE_WALK.md](../../../e2e/ROLE_WALK.md) |
+| Document and report sweep | 291 of 291 passed | [DOCUMENT_REPORT_SWEEP.md](../../../e2e/DOCUMENT_REPORT_SWEEP.md) |
 | Backend tests | 518 tests pass (vitest against PostgreSQL 16, `backend/test`, 50 files) | `cd backend && npx vitest run` |
 | Front-end tests | 30 tests pass | `cd brokerverse && npx craco test --watchAll=false` |
 | GitHub CI | Backend lint and tests, front-end tests and production build, backend image build on every push and pull request | `.github/workflows/ci.yml` |
@@ -30,7 +30,7 @@ menu offered; an API call fails when the backend log shows an answer of 400 or m
 | Accounting | 81 | 0 |
 | Accounting Manager | 81 | 0 |
 
-Script: [role_walk.py](role_walk.py).
+Script: [role_walk.py](../../../e2e/role_walk.py).
 
 ## Document and report sweep
 
@@ -57,7 +57,7 @@ deployment workflow runs the front-end tests before it publishes.
 Before the broker roles and the placement journey were added, the full broking cycle was run screen by screen:
 lead, quotation, client approval, policy, receipts, commission payout, remittance to the insurer, endorsements,
 claim settlement, journal voucher, scheduled jobs, renewal, direct bill and the chart of accounts. Screenshots
-are in [evidence/](evidence/). The money trail of that run shows how one policy moves through the ledger:
+are in [evidence/](../../../e2e/evidence/). The money trail of that run shows how one policy moves through the ledger:
 
 | Event | Document | Debit | Credit | Amount |
 |---|---|---|---|---|

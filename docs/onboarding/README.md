@@ -3,6 +3,14 @@
 Everything to hand to the customer's users and administrators at go-live, and where it is. Version 1.1, 04 October 2026,
 iorta TechNXT.
 
+**TISPH.** The TISPH documents (functional specifications, the document pack and the test pack) are indexed in
+[`docs/TISPH/README.md`](../TISPH/README.md); the Document Register (`docs/TISPH/pack/TISPH_Document_Register.docx`)
+says where each required document is held. Support model and runbooks: `docs/TISPH/pack/TISPH_Operations_and_Support.docx`;
+environments and release: `docs/TISPH/pack/TISPH_Environments_and_Release.docx`; data migration and cutover:
+`docs/TISPH/pack/TISPH_Data_Migration_and_Cutover.docx`. The guides below were written for the generic product and
+are being corrected for TISPH (getting started and role decks under work packages MAN-A and MAN-B, UAT scripts with the
+TISPH UAT test cases, support and escalation under operations planned item P29).
+
 | Item | For | Where |
 |---|---|---|
 | Getting started guide | Every user | [GETTING_STARTED.md](GETTING_STARTED.md): first sign-in, password rules, two-step verification, the side menu and menu search, menus per role (including the Compliance Officer), My Work, masked personal identifiers, the Help panel (F1) and how to get help |

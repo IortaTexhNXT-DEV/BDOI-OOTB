@@ -7,6 +7,11 @@ How users report a problem with BrokerVerse, how it is graded, the response targ
 checks first. Contacts, hours and targets marked "to be agreed with the customer" are settled in the support agreement
 before go-live; fill them in here once agreed.
 
+For TISPH, the support model, incident, problem and change management and the runbooks are in
+`docs/TISPH/pack/TISPH_Operations_and_Support.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md)). This guide
+still describes support steps for compliance, AML, complaints and breach-deadline jobs removed from the TISPH build, and
+the generic release route; its rewrite for TISPH is operations planned item P29.
+
 ## 1. Who to contact
 
 | Level | Who | How |

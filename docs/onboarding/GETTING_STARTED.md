@@ -7,6 +7,10 @@ This guide is for everyone who uses BrokerVerse day to day. It explains how to s
 after signing in, which menus your role opens and how to ask for help. The user manual
 (`docs/package/05_Delivery/BrokerVerse_User_Manual.pdf`) describes every screen in detail.
 
+For TISPH: the menus per role below are those of the generic roles (including the Compliance Officer). The TISPH
+personas are listed in `docs/TISPH/pack/TISPH_Delivery_Governance.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md));
+the TISPH edition of this guide and of the manual follows with work packages MAN-A and MAN-B.
+
 ## 1. Signing in the first time
 
 Your System Administrator creates your user and gives you three things privately: the BrokerVerse web address, your

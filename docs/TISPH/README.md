@@ -10,7 +10,7 @@ where it is held, its owner, its approver and its status.
 | Folder | Contents |
 |---|---|
 | [`frs/`](frs/) | Functional Requirement Specifications, one per BRD build item (the TISPH SRS): personas, functional requirements with acceptance criteria, traceability to test cases |
-| [`pack/`](pack/) | Non-functional, technical, operational and governance documents (list below) |
+| `pack/` | Non-functional, technical, operational and governance documents (list below) |
 | [`testing/`](testing/) | Test strategy and test pack |
 
 ## `frs/`: Functional Requirement Specifications

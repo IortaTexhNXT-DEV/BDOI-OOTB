@@ -9,7 +9,7 @@ are.
 ## Current result
 
 The role walk of 29 September 2026 signed in one user per broker role and opened every screen its menu offers:
-7 roles, 429 screens, no screen problems, 2,823 API calls all successful. See [ROLE_WALK.md](ROLE_WALK.md) and the
+7 roles, 429 screens, no screen problems, 2,823 API calls all successful. See [ROLE_WALK.md](../../../e2e/ROLE_WALK.md) and the
 summary in [E2E_REPORT.md](E2E_REPORT.md).
 
 ## What the persona walks found
