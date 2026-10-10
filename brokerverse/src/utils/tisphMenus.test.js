@@ -39,6 +39,14 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(isPathAllowed("/operations/claim-documents", menuList, ["tis-sales-officer"])).toBe(false);
   });
 
+  it("Sales associates and officers open their own incentive programs and statement, not the calculations", () => {
+    for (const role of ["tis-sales-associate", "tis-sales-officer"]) {
+      expect(isPathAllowed("/incentive/my-programs", menuList, [role])).toBe(true);
+      expect(isPathAllowed("/incentive/statement", menuList, [role])).toBe(true);
+      expect(["/incentive/calculations", "/incentive/approvals", "/incentive/reports"].filter((p) => isPathAllowed(p, menuList, [role]))).toEqual([]);
+    }
+  });
+
   it("Cash Control sees its cash screens only; Finance the accounting menus with the audit trail", () => {
     expect(isPathAllowed("/accounts/post-dated-cheques", menuList, ["tis-ccd-pdu"])).toBe(true);
     expect(isPathAllowed("/accounts/journalvoucher", menuList, ["tis-ccd-pdu"])).toBe(false);
