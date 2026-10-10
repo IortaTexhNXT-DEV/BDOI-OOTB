@@ -9,7 +9,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "284d8e66a452260261e5c0f406df6f3f2e14dfa24f362fddcdde0f8b67f2793a",
+ "sourceHash": "6f1afeaacf6392b42fdda7d742bef9d952259381aa9caeb9039d4559751b06bd",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -195,6 +195,27 @@
    "number": "2.7",
    "title": "Working with forms",
    "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "confirmations",
+   "number": "2.7.1",
+   "title": "Confirmations",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "record-details",
+   "number": "2.7.2",
+   "title": "Record details",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "printing",
+   "number": "2.7.3",
+   "title": "Printing",
+   "level": 3,
    "chapter": "Getting started"
   },
   {
@@ -1425,7 +1446,7 @@
   {
    "id": "ccd-recon-reconciliation-and-reversals-remittance-approve",
    "number": "13.7.11",
-   "title": "Approve a remittance",
+   "title": "Follow a remittance you submitted",
    "level": 3,
    "chapter": "CCD-Recon (Reconciliation and Reversals)"
   },
@@ -2176,6 +2197,62 @@
    "number": "18.12",
    "title": "Remittance to insurers",
    "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittances-worklist",
+   "number": "18.12.1",
+   "title": "Remittances",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-import-policy-list",
+   "number": "18.12.2",
+   "title": "Import policy list",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-record",
+   "number": "18.12.3",
+   "title": "The remittance page",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-approvals",
+   "number": "18.12.4",
+   "title": "Approvals",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "insurer-payments",
+   "number": "18.12.5",
+   "title": "Insurer payments",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-exceptions",
+   "number": "18.12.6",
+   "title": "Exceptions",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-schedules",
+   "number": "18.12.7",
+   "title": "Setup: remittance schedules",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-settlement",
+   "number": "18.12.8",
+   "title": "Settlement",
+   "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {

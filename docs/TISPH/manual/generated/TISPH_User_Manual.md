@@ -322,8 +322,9 @@ Most screens open on a list. The lists work the same way everywhere.
 - **Paging**: the list shows 20 rows per page; change the number at the bottom right. The arrows go to the first,
   previous, next and last page, and the text next to them shows the rows on screen and the total (for example 1 - 16
   of 16). Search and filters apply to the whole list, not only to the page on screen.
-- **Row actions**: at the end of the row. The eye or the arrow opens the record, the pencil edits it, the bin deletes
-  it. An action your role may not use is not shown, or is greyed out.
+- **Row actions**: at the end of the row. **View** (the eye) opens the record and **Edit** (the pencil) changes it;
+  on lists with more actions, the three dots open the row menu, with **View** first. An action your role may not use
+  is not shown; an action that cannot be taken now is greyed out in the menu with the reason.
 - **Export**: lists that can be exported have **Generate Report**, **Export** or **Excel** and **CSV**. The file
   downloads to your computer and contains the rows of the search and filters.
 
@@ -344,16 +345,39 @@ overdue or lost.
 - **Save**, or the action named on the button (for example **Create Placement Slip**), stores the record. **Cancel**
   or the X closes the form without saving. Nothing is stored until you save.
 - After a save the system shows a confirmation at the top right and, for most records, the number it issued.
-- Deleting a record or a task asks for confirmation first: the question names the action, and the button repeats
-  the verb, for example **Delete task**. A decline, return or reversal asks for the reason, chosen from a list.
-- Other decisions take effect as soon as you select them, without a question: for example **Approve** on a renewal of
-  Negotiations or **Approve settlement** on a claim. Check the record before you select the decision.
+- An action that changes or removes a record asks for confirmation first (see [Confirmations (2.7.1)](#confirmations)).
+
+#### Confirmations {#confirmations}
+A confirmation says in one sentence what is about to happen, lists the facts of the record it applies to (amounts in
+pesos on the right, dates as DD/MM/YYYY) and says what follows. The button names the action, for example
+**Submit 3 remittances**, **Register cheque** or **Escalate**; **Cancel** or the X closes the confirmation and
+changes nothing.
+
+- A rejection, return, reversal, cancellation or escalation asks for the **Reason**, chosen from the list of reasons
+  that TIS IT AppSupport / Admin keeps on [Reason Codes (20.6)](#lead-sources-and-reason-codes). The reason **Other** also needs a **Note**.
+- The button shows that the action is running. The confirmation closes when the action is done; if the system refuses
+  it, the confirmation stays open with the message, and nothing is changed.
+
+![Figure 2.9: Escalate a remittance exception: the facts of the exception and the reason chosen from the list](../images/getting-started/confirm-dialog.png)
+#### Record details {#record-details}
+**View** in a list opens the details of the record, in a window or on a page of its own. The details show the number,
+the status and the main facts at the top, then the facts in groups (label above, value below), and the record's
+activity. **Close** closes the window; **Edit** is shown to the roles that may change the record. Personal data is
+masked as in [Personal data masking (2.11)](#personal-data-masking).
+
+![Figure 2.10: Bank details opened from the bank list: the facts in groups, Close and Edit](../images/getting-started/detail-view.png)
+#### Printing {#printing}
+**Print** prints the document of the record (receipt, voucher, debit note, schedule), on the letterhead of Toyota
+Insurance Services Philippines, and never the screen: the browser's print window opens with the document only. Where
+the browser cannot print from the page, the document opens in a new tab to print from there. While a print is being
+prepared its button shows that it is working. Documents such as the remittance schedule and advice are downloaded as
+PDF or XLSX files instead. A print is recorded in the activity of the record; repeated prints show as one entry.
 
 ### Uploads and templates {#uploads-and-templates}
 Some screens load many records at once from a spreadsheet, for example **Bulk Upload** on Prospects or **Import open
 items** on Collections. The upload works the same way on every screen.
 
-![Figure 2.9: Bulk upload prospects: Download template and Choose file](../images/getting-started/bulk-upload.png)
+![Figure 2.11: Bulk upload prospects: Download template and Choose file](../images/getting-started/bulk-upload.png)
 1. Select the upload button of the screen (**Bulk Upload**, **Import**, **Upload**). The upload dialog opens.
 2. Select **Download template** and fill in the template. Keep its columns and headings as they are: the template has
    the exact columns the system reads.
@@ -387,7 +411,7 @@ approves and who approves your work.
 | Claim decisions and settlement | TIS Operations Unit Head or TIS General Manager |
 | Supplier invoice | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Journal voucher, payment voucher and cheque | Another TIS Finance & General Accounting user |
-| Remittance to an insurer, and its settlement, adjustment or electronic transfer | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, another user than the one who prepared it |
+| Remittance to an insurer, and its settlement or adjustment | TIS Finance & General Accounting or TIS General Manager, within the approval limit, never the user who prepared or submitted it |
 | Bank reconciliation | TIS Finance & General Accounting |
 | Insurer statement reconciliation | CCD-Recon (Reconciliation and Reversals) |
 | Credit control decisions | TIS Finance & General Accounting |
@@ -397,12 +421,13 @@ approves and who approves your work.
 | Role access changes and authority limits | TIS IT AppSupport / Admin |
 
 **Approval limits.** The [Authority Matrix (20.10)](#authority-matrix) sets the largest amount each role may approve per
-transaction. As delivered it holds no limit, which the role chapters show as "Not set":
+transaction. As delivered:
 
-- a claim settlement is approved by the approver whatever its amount;
-- a remittance to an insurer follows the remittance approval levels instead: one approval up to PHP 100,000.00, two
-  approvals up to PHP 1,000,000.00 and three approvals above that, each by a different user. As soon as TISPH enters
-  remittance limits on the Authority Matrix, one approval by a user whose limit covers the amount is enough.
+- a remittance, and its settlement or adjustment, is approved by TIS Finance & General Accounting up to
+  PHP 1,000,000.00 and by the TIS General Manager without limit. A user without a remittance limit cannot approve
+  or reject a remittance;
+- the other transactions hold no limit, which the role chapters show as "Not set": a claim settlement, for example,
+  is approved by the approver whatever its amount.
 
 To approve:
 
@@ -410,9 +435,14 @@ To approve:
    or reject**.
 2. Select the arrow at the end of the row. The record opens with its approval actions.
 3. Check the record, then choose **Approve**, or the decline action of the screen (**Reject** or **Return**) with
-   the reason. The decision is recorded in the audit trail of the record.
+   the reason. The decision is recorded in the activity of the record.
 
-![Figure 2.10: Approvals in My Work of the TIS Operations Unit Head: a renewal premium and a claim settlement](../images/getting-started/my-work-approvals.png)
+When you may not decide a record (you entered or submitted it, or its amount is above your limit), the decision
+buttons are greyed out or not shown, and a line next to them says why and, where the system knows them, who can
+decide. The system applies the same rule when the decision is sent.
+
+![Figure 2.12: A remittance submitted by the user: the line under the steps says that another user decides, and who can](../images/getting-started/maker-checker-note.png)
+![Figure 2.13: Approvals in My Work of the TIS Operations Unit Head: a renewal premium and a claim settlement](../images/getting-started/my-work-approvals.png)
 On top of maker-checker:
 
 - once a limit is set on the [Authority Matrix (20.10)](#authority-matrix), an approval above the approver's limit is
@@ -441,12 +471,14 @@ To search the audit trail:
    and after.
 4. Select **Export** to download the rows of the search.
 
-![Figure 2.11: Master > System > Audit Trail with the sign-ins of the day](../images/getting-started/audit-trail.png)
-On a record, the activity log lists the events newest first, grouped by day. Each event shows the user and role, the
-action (Created, Updated, Submitted, Approved, Rejected, Posted, Reversed and others), the remarks and **What
-changed** (**Field**, **Before**, **After**). Search the events, filter by **User** and **Kind of event**, and select
-**Export** for an Excel or CSV file.
+![Figure 2.14: Master > System > Audit Trail with the sign-ins of the day](../images/getting-started/audit-trail.png)
+On a record, the activity log (the **Activity**, **History** or **Audit Trail** tab) lists the events newest first,
+grouped by day. Each event shows what was done, the date and time, the user's name and role, the status before and
+after, the remarks or reason given and, under **What changed**, each field changed with its value **Before** and
+**After**. Masked personal data stays masked. Where the record offers them, search the events, filter by **User** and
+**Kind of event**, or export them (**Export**, **Download log (XLSX)**).
 
+![Figure 2.15: Activity of a remittance: submitted by the CCD-Recon user, with What changed open](../images/getting-started/activity-log.png)
 ### Personal data masking {#personal-data-masking}
 Personal identifiers of clients and prospects are protected under Republic Act No. 10173. On every screen, export and
 report, the system shows them in full only to a user of one of the roles that need them: the Sales roles, the Operations roles, TIS Finance & General Accounting or TIS General Manager.
@@ -517,7 +549,7 @@ From the booking onwards both policies follow the same steps.
 | Check of the e-policy | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | **Checked against slip** |
 | Booking | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | Policy, bill, journal and commission; **Insurer issued (Booked)** |
 | Collection | the Cash Control roles | [Receipts (18.1)](#verify-payments-and-post-official-receipts), [Post-Dated Cheques (18.4)](#post-dated-cheques) | Official receipt; policy payment **Completed** |
-| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (18.12)](#remittance-to-insurers) | Remittance approved and paid to the insurer |
+| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (18.12)](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
 | Commission | TIS Finance & General Accounting | [Commission to agents and referrers (19.5)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
 | Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (17.12)](#policies) | Policy changed; additional premium billed |
 | Claim | the Operations roles or TIS General Manager | [The claims list (17.15)](#the-claims-list) | Claim **Pending** to **Closed** |
@@ -791,29 +823,33 @@ Premium warranty extensions, instalment plans and client credit limits are handl
 [Credit control (18.3)](#credit-control) and approved by TIS Finance & General Accounting.
 
 ### Remittance to the insurers {#process-remittance}
-Remittances to the insurers are prepared by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, and approved by another user of these roles.
-See [Remittance to insurers (18.12)](#remittance-to-insurers).
+Remittances to the insurers are prepared and submitted by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, and approved by
+TIS Finance & General Accounting or TIS General Manager within their approval limit, never by the user who prepared or submitted them. See
+[Remittance to insurers (18.12)](#remittance-to-insurers).
 
 TISPH collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
 the premium collected, less the commission and the output VAT on it, plus the withholding tax the insurer deducts
 from the commission. For an insurer and product remitted gross, the whole premium is remitted and the commission is
-billed to the insurer separately on Direct Bill Processing.
+billed to the insurer separately on [Insurer billing (18.13)](#direct-bill-commission-debit-notes).
 
-1. Remittances are prepared from the policies with collected premium, per insurer: by the remittance schedules on
-   Accounts > Remittance > Automated Processing (insurer, cut-off and run date per schedule), or from an uploaded
-   list on Accounts > Remittance > Bulk Processing.
-2. Choose Accounts > Remittance > Tracking, open the remittance (**Draft**) and check its policies and
-   amounts.
-3. Select **Process**. The remittance is submitted for approval.
-4. The approver decides on Accounts > Remittance > Approval Workflow; the approver must be another user than the maker.
-   A remittance needs one, two or three approvals according to its amount (see
-   [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)).
-5. The approved remittance raises the insurer payment voucher on
-   [Disbursement (18.10)](#disbursement-payment-vouchers-and-cheques). The cheque approval posts the payment journal; a
-   transfer is sent through [Bank payment files (18.11)](#bank-payment-files).
-6. The remittance advice is printed from Tracking (print icon) on the TISPH letterhead and sent to the insurer.
+1. Every Monday at 06:15 the weekly run creates the draft remittances of the policies paid in the Monday to Friday
+   before, one per insurer and product line ([Setup: remittance schedules (18.12.7)](#remittance-schedules)). An off-cycle
+   remittance is created from a list of policies with
+   [Import policy list (18.12.2)](#remittance-import-policy-list).
+2. Choose Accounts > Remittance > Remittances. On **My work**, check each draft (policies and amounts), tick it and
+   select **Submit for approval (n)**.
+3. The approver decides on Accounts > Remittance > Approvals: **Approve**, or **Reject** with a reason, which
+   returns the remittance to its maker as **Returned**.
+4. The approved remittance is settled on Accounts > Remittance > Settlement. The approved settlement
+   raises the insurer's payment voucher on [Disbursement (18.10)](#disbursement-payment-vouchers-and-cheques) and the
+   remittance shows **Settled (voucher raised)**.
+5. The voucher is paid from [Insurer payments (18.12.5)](#insurer-payments): by a bank payment batch on
+   [Bank payment files (18.11)](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
+   remittance reaches the step **Paid**.
+6. The remittance schedule (XLSX and PDF) and, once the voucher is raised, the remittance advice are downloaded from
+   the remittance and sent to the insurer.
 
-![Figure 3.10: Accounts > Remittance > Tracking, with the remittances per insurer](../images/process/remittance-tracking.png)
+![Figure 3.10: Accounts > Remittance > Remittances of TIS Finance & General Accounting: the drafts to submit, the next run and Automation Off](../images/process/remittances.png)
 Each month the insurers' statements are matched with TISPH's records on
 [Insurer statement reconciliation (18.20)](#insurer-statement-reconciliation); the reconciliation and its adjustments are
 approved by CCD-Recon (Reconciliation and Reversals).
@@ -1075,6 +1111,8 @@ Who approves the work of this role:
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -1322,6 +1360,8 @@ Who approves the work of this role:
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -1588,6 +1628,8 @@ Who approves the work of this role:
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -1738,6 +1780,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts > Remittance | Remittances | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -1778,7 +1821,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
@@ -1802,6 +1845,8 @@ Who approves the work of this role:
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Operations > Claims > Settlement approval | Claim settlement approval within the approver's limit | TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -2033,6 +2078,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Fixed Assets | Asset Register | View |
 | Accounts > Fixed Assets | Depreciation Run | View |
 | Accounts > Fixed Assets | Disposals | View |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
@@ -2076,7 +2124,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
@@ -2100,6 +2148,8 @@ Who approves the work of this role:
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Operations > Claims > Settlement approval | Claim settlement approval within the approver's limit | TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -2232,6 +2282,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Fixed Assets | Depreciation Run | View |
 | Accounts > Fixed Assets | Disposals | View |
 | Accounts | Disbursement | View |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
@@ -2282,7 +2335,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
@@ -2319,6 +2372,8 @@ Who approves the work of this role:
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Operations > Claims > Settlement approval | Claim settlement approval within the approver's limit | TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -2502,6 +2557,13 @@ Where: the screens of your menus that show the module. A module without a screen
 ### Approvals {#ccd-pdu-post-dated-cheques-approvals}
 This role approves nothing.
 
+Who approves the work of this role:
+
+| Work | Approval | Approved by |
+|---|---|---|
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+
 The user who enters a record never approves it: the approval is always another user's.
 
 ### Segregation of duties {#ccd-pdu-post-dated-cheques-sod}
@@ -2529,7 +2591,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 #### Find a cheque in the register {#ccd-pdu-post-dated-cheques-register}
 1. Choose Accounts > Post-Dated Cheques. The cards show the cheques **On hand**, the cheques **Due for
    deposit** and the number **Bounced**.
-2. On the **Cheque register** tab (the list of cheques, not the **Register cheque** button), select the status in
+2. On the **Cheques** tab, select the status in
    the first list (**On hand** is shown first; **All** shows every cheque) and type a PDC number, cheque number,
    client, policy or bill in the search box.
 3. Select **Export to Excel** to download the register with the status selected.
@@ -2544,10 +2606,10 @@ the system sends a notification of these cheques to the Cash Control users.
 3. In **Reference**, type the bill number (for example INV-2026-95007) or the policy number.
 4. In **Drawee bank**, select the client's bank. If the bank is not in the list, type it in **Drawee bank (if not in
    the list)**.
-5. Type the **Cheque no.** and the **Amount**. Pick the **Cheque date** from the calendar of the field: a date typed
-   in the field is not taken.
+5. Type the **Cheque no.**, the **Cheque date** (DD/MM/YYYY, or pick it from the calendar of the field) and the
+   **Amount**.
 6. In **Kept in**, type where the cheque is filed, for example "Finance vault, drawer 2". Add **Remarks** if needed.
-7. Select **Save**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
+7. Select **Register cheque**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
 
 | Field | Required | What to enter | Rule |
 |---|---|---|---|
@@ -2555,7 +2617,7 @@ the system sends a notification of these cheques to the Cash Control users.
 | **Reference** | Yes | The bill or policy number | The bill must have an open balance |
 | **Drawee bank** | Yes, one of the two | The client's bank | Type it in **Drawee bank (if not in the list)** when it is not listed |
 | **Cheque no.** | Yes | The number printed on the cheque | |
-| **Cheque date** | Yes | The date on the cheque, picked from the calendar | The cheque cannot be deposited before this date |
+| **Cheque date** | Yes | The date on the cheque | The cheque cannot be deposited before this date |
 | **Amount** | Yes | The amount of the cheque | Not more than the bill balance left after the cheques already on hand for it |
 | **Kept in** | No | Vault, drawer or folder | Printed on the register and the export |
 
@@ -2593,7 +2655,7 @@ e-mail address is on file, receives an e-mail about the returned cheque.
 ![Figure 10.4: Bounced cheque dialog, with the reason given by the bank and the bank charge](../images/role-tis-ccd-pdu/bounced-cheque.png)
 #### Replace, return or cancel a cheque {#ccd-pdu-post-dated-cheques-replace}
 - **Replace** (on a cheque **On Hand** or **Bounced**): enter the new cheque as in
-  [Register a post-dated cheque (10.7.2)](#ccd-pdu-post-dated-cheques-encode) and select **Save**. The old cheque becomes
+  [Register a post-dated cheque (10.7.2)](#ccd-pdu-post-dated-cheques-encode) and select **Register replacement**. The old cheque becomes
   **Replaced** and the new one is linked to it, against the same bill (or the policy when the bill is closed).
 - **Return** (on a cheque **On Hand**): type why the cheque goes back to the client and select **Return cheque**. The
   cheque becomes **Returned**; the bill stays open.
@@ -2629,6 +2691,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Receipts | Create and edit |
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | Create and edit |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Reconciliation | View |
+| Accounts > Remittance | Exceptions | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -2636,7 +2701,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
-| Accounts > Insurer Reconciliation | Insurer Statements | View |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -2649,7 +2713,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Statements |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -2657,6 +2721,13 @@ Where: the screens of your menus that show the module. A module without a screen
 
 ### Approvals {#ccd-pdc-ccd-ada-approvals}
 This role approves nothing.
+
+Who approves the work of this role:
+
+| Work | Approval | Approved by |
+|---|---|---|
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
@@ -2765,6 +2836,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | Create and edit |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Accounts | Claims Settlements | Create and edit |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Reconciliation | View |
+| Accounts > Remittance | Exceptions | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -2772,7 +2846,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
-| Accounts > Insurer Reconciliation | Insurer Statements | View |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -2786,7 +2859,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Statements |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -2800,6 +2873,8 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
@@ -2945,7 +3020,7 @@ bank. You import the bank statements, match them with the receipts and payments 
 yet booked, reverse the receipts of cheques returned by the bank and prepare the monthly bank reconciliation. You also
 reconcile the insurers' statements of account with the remittances and approve the insurer statement reconciliations
 prepared by another user. With TIS Finance & General Accounting you prepare the remittances to the insurers and
-approve those prepared by the other user.
+submit them for approval; TIS Finance & General Accounting and the TIS General Manager approve them.
 
 You work with CCD-BP / QRPh (Receipting), CCD-PDU (Post-Dated Cheques) and CCD-PDC / CCD-ADA, whose receipts you
 match and reverse; the receipting roles do not reverse their own receipts. TIS Finance & General Accounting approves
@@ -2963,22 +3038,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Post-Dated Cheques | Create and edit |
 | Accounts | Claims Settlements | Create and edit |
 | Accounts | Disbursement | View |
-| Accounts > Remittance | Automated Processing | Create and edit |
-| Accounts > Remittance | Tracking | Create and edit |
-| Accounts > Remittance | Statements | Create and edit |
-| Accounts > Remittance | Settlement | Create and edit |
+| Accounts > Remittance | Remittances | Create and edit |
+| Accounts > Remittance | Approvals | Approve |
+| Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
-| Accounts > Remittance | Bulk Processing | Create and edit |
-| Accounts > Remittance | Scheduling | Create and edit |
-| Accounts > Remittance | Electronic Transfer | Create and edit |
-| Accounts > Remittance | Approval Workflow | Approve |
-| Accounts > Remittance | Exception Management | Create and edit |
-| Accounts > Remittance | Agency Bill Processing | Create and edit |
-| Accounts > Remittance | Direct Bill Processing | Create and edit |
-| Accounts > Remittance | Adjustments | Create and edit |
-| Accounts > Remittance | Notifications | Create and edit |
-| Accounts > Remittance | History | View |
-| Accounts > Remittance | Analytics | View |
+| Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Insurer billing | Create and edit |
 | Accounts | Open Entry Matching | View |
 | Accounts | Open Entry Unmatching | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | Create and edit |
@@ -2988,7 +3053,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
-| Accounts > Insurer Reconciliation | Insurer Statements | Approve |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -3002,8 +3066,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History, Analytics and Insurer Statements |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions and Insurer billing |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve insurer statement reconciliations and post their adjustments (not the preparer) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
@@ -3017,13 +3081,6 @@ This role approves the work of other users:
 
 - Approve insurer statement reconciliations and post their adjustments (not the preparer)
 
-Approval limits of this role on the Authority Matrix:
-
-| Transaction | Approval step | Limit of the role |
-|---|---|---|
-| Remittance approval | Accounts > Remittance > Approval Workflow | Not set: the remittance approval levels apply |
-| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Not set: the remittance approval levels apply |
-
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
@@ -3031,8 +3088,9 @@ Who approves the work of this role:
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
-| Accounts > Remittance > Approval Workflow | Remittance approval within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
-| Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
+| Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
@@ -3060,7 +3118,9 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation (18.19)](#bank-reconciliation) |
 | Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements (18.20)](#insurer-statement-reconciliation) |
 | Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements (18.20)](#insurer-statement-reconciliation) |
-| Prepare the remittances to the insurers, and approve those prepared by another user | As scheduled per insurer | [Remittance (18.12)](#remittance-to-insurers) |
+| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances (18.12.1)](#remittances-worklist) |
+| Follow the remittances you submitted until they are approved | Daily | [Approvals (18.12.4)](#remittance-approvals) |
+| Follow up the remittance exceptions assigned to you | Daily | [Exceptions (18.12.6)](#remittance-exceptions) |
 | Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation (18.19)](#bank-reconciliation), [All Reports (22.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-recon-reconciliation-and-reversals-procedures}
@@ -3071,10 +3131,8 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
    "Confirm the payment promised". Work them as in
    [Follow up an overdue premium (12.7.4)](#ccd-bp-qrph-receipting-follow-up).
 3. Under **Approvals**, select the arrow of an insurer statement reconciliation to open it and decide it.
-4. **Approvals** also lists the remittances to insurers, their electronic transfers and their adjustments waiting for
-   approval (**Approve or reject**). The arrow opens Accounts > Remittance > Approval Workflow: follow
-   [Approve a remittance (13.7.11)](#ccd-recon-reconciliation-and-reversals-remittance-approve). A remittance you prepared
-   yourself is approved by another user.
+4. The remittances you submitted are followed on Accounts > Remittance > Approvals, under **Submitted by me**:
+   see [Follow a remittance you submitted (13.7.11)](#ccd-recon-reconciliation-and-reversals-remittance-approve).
 
 ![Figure 13.1: My Work of CCD-Recon (Reconciliation and Reversals): collection follow-ups and approvals](../images/role-tis-ccd-recon/my-work.png)
 #### Import a bank statement {#ccd-recon-reconciliation-and-reversals-import}
@@ -3159,7 +3217,7 @@ All reconciliations are listed on Accounts > Bank Reconciliation > Reconciliatio
 approver.
 
 #### Reconcile an insurer's statement of account {#ccd-recon-reconciliation-and-reversals-insurer}
-1. Choose Accounts > Insurer Reconciliation > Insurer Statements and select **Import statement**.
+1. Choose Accounts > Remittance > Reconciliation and select **Import statement**.
 2. Select the **Insurer** and the **Statement type**: **Premium remittance confirmation** (the premium the insurer
    received from the broker) or **Commission statement** (the commission the insurer recognises on direct-bill
    business).
@@ -3176,7 +3234,7 @@ approver.
 
 ![Figure 13.4: Insurer Statements > Import statement, with the insurer, statement type, period and file](../images/role-tis-ccd-recon/insurer-statement-import.png)
 #### Approve an insurer statement reconciliation {#ccd-recon-reconciliation-and-reversals-insurer-approve}
-1. Open the statement **Pending approval** from **Approvals** in My Work or from Insurer Statements.
+1. Open the statement **Pending approval** from **Approvals** in My Work or from Remittance > Reconciliation.
 2. Check the matched lines, the differences and their resolutions.
 3. Select **Approve** (with optional remarks) and confirm with **Approve reconciliation**: the adjustment journals
    are posted and the reconciliation is locked. Or select **Reject**, type the reason and confirm with **Reject
@@ -3186,24 +3244,26 @@ You cannot approve a reconciliation you submitted yourself: another CCD-Recon (R
 approves it. See [Insurer statement reconciliation (18.20)](#insurer-statement-reconciliation).
 
 #### Prepare a remittance to an insurer {#ccd-recon-reconciliation-and-reversals-remittance}
-1. Choose Accounts > Remittance > Tracking and open the remittance of the insurer (**Draft**), prepared
-   by the remittance schedule or from an uploaded list (see [Remittance to the insurers (3.8)](#process-remittance)).
-2. Check its policies, the gross premium, the commission and the net amount against the collections.
-3. Select **Process**. The remittance is submitted for approval and the other approvers are notified.
+1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit: those of the weekly run
+   and those created from a list of policies with
+   [Import policy list (18.12.2)](#remittance-import-policy-list).
+2. Select the remittance number to open it. On **Lines**, check its policies, the total premium, the commission, the
+   tax and the amount due to the insurer against the collections.
+3. Select **Submit for approval** and confirm. To submit several drafts at once, tick them on **My work** and select
+   **Submit for approval (n)**.
 
-You cannot approve a remittance you prepared: another CCD-Recon (Reconciliation and Reversals) or TIS Finance &
-General Accounting user approves it.
+The remittance is **Pending approval**. The users who can approve its amount are notified; you cannot approve a
+remittance yourself.
 
-#### Approve a remittance {#ccd-recon-reconciliation-and-reversals-remittance-approve}
-1. Choose Accounts > Remittance > Approval Workflow, or select the arrow of the remittance under **Approvals** in My
-   Work. **Pending approvals** lists the remittances, electronic transfers and adjustments waiting, with the amount,
-   the user who initiated them, the **SLA** and the approval **Level**.
-2. Select **View** in the row to check the record.
-3. Select **Approve**, or **Reject** with the reason. A remittance that needs more than one approval (see
-   [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)) goes to the next level, decided by another
-   user.
+#### Follow a remittance you submitted {#ccd-recon-reconciliation-and-reversals-remittance-approve}
+1. Choose Accounts > Remittance > Approvals. The chip **View only** shows that you do not decide remittances.
+   **Submitted by me** lists what you submitted, with the approvers each one waits on and its **SLA**.
+2. If an approval is late, select **Remind approver** in the row menu (or on the remittance page). A reminder can be
+   sent again after a few hours; the menu shows when.
+3. A rejected remittance returns to **My work** as **Returned**. Read the reason on its **Activity** tab before you
+   submit it again.
 
-![Figure 13.5: Accounts > Remittance > Approval Workflow of CCD-Recon (Reconciliation and Reversals): a transfer, a remittance and an adjustment waiting](../images/role-tis-ccd-recon/remittance-approval.png)
+![Figure 13.5: Accounts > Remittance > Approvals of CCD-Recon (Reconciliation and Reversals): a remittance submitted, waiting for its approvers](../images/role-tis-ccd-recon/remittance-approvals.png)
 #### Collections, receipts and claim settlement funds {#ccd-recon-reconciliation-and-reversals-other}
 You also hold the receipting work of Cash Control when needed:
 
@@ -3257,22 +3317,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Fixed Assets | Disposals | Create and edit |
 | Accounts | Disbursement | Create and edit |
 | Accounts | Bank Payment Files | Create and edit |
-| Accounts > Remittance | Automated Processing | Create and edit |
-| Accounts > Remittance | Tracking | Create and edit |
-| Accounts > Remittance | Statements | Create and edit |
-| Accounts > Remittance | Settlement | Create and edit |
+| Accounts > Remittance | Remittances | Create and edit |
+| Accounts > Remittance | Approvals | Approve |
+| Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
-| Accounts > Remittance | Bulk Processing | Create and edit |
-| Accounts > Remittance | Scheduling | Create and edit |
-| Accounts > Remittance | Electronic Transfer | Create and edit |
-| Accounts > Remittance | Approval Workflow | Create and edit |
-| Accounts > Remittance | Exception Management | Create and edit |
-| Accounts > Remittance | Agency Bill Processing | Create and edit |
-| Accounts > Remittance | Direct Bill Processing | Create and edit |
-| Accounts > Remittance | Adjustments | Create and edit |
-| Accounts > Remittance | Notifications | Create and edit |
-| Accounts > Remittance | History | View |
-| Accounts > Remittance | Analytics | View |
+| Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Insurer billing | Create and edit |
+| Accounts > Remittance | Setup | Create and edit |
+| Accounts > Remittance | Settlement | Create and edit |
 | Accounts | Journal Voucher | Create and edit |
 | Accounts | SAP GL Export | Create and edit |
 | Accounts | Correction JV | Create and edit |
@@ -3293,7 +3345,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
-| Accounts > Insurer Reconciliation | Insurer Statements | Create and edit |
 | Accounts > Tax | BIR Form 2307 | Create and edit |
 | Accounts > Tax | VAT Summary | Create and edit |
 | Accounts > Tax | SAWT | Create and edit |
@@ -3371,7 +3422,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
 | Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Initiate, Request and Replenish |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Insurer payments, Initiate, Request and Replenish |
 | Accounts | Disbursements and petty cash | Create and edit | Prepare payment vouchers, petty cash and bank payment files |  |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
 | Accounts | Payables | Create and edit | Enter supplier invoices and payments; maintain suppliers |  |
@@ -3380,8 +3431,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |  |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
 | Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History, Analytics and Insurer Statements |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Bank reconciliation | Create and edit | Prepare bank reconciliations |  |
 | Accounts | Bank reconciliation | Approve | Approve and reopen bank reconciliations (not the preparer) |  |
@@ -3411,6 +3463,7 @@ This role approves the work of other users:
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
 - Approve changes to posting rules and account determination (not the requester)
+- Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 
 Approval limits of this role on the Authority Matrix:
 
@@ -3418,8 +3471,8 @@ Approval limits of this role on the Authority Matrix:
 |---|---|---|
 | Payment voucher and cheque release | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Not set: no amount limit applies |
 | Journal voucher approval | Accounts > Journal Vouchers > Approve | Not set: no amount limit applies |
-| Remittance approval | Accounts > Remittance > Approval Workflow | Not set: the remittance approval levels apply |
-| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Not set: the remittance approval levels apply |
+| Remittance approval | Accounts > Remittance > Approvals | PHP 1,000,000.00 |
+| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | PHP 1,000,000.00 |
 
 Who approves the work of this role:
 
@@ -3430,10 +3483,11 @@ Who approves the work of this role:
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
+| Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
-| Accounts > Remittance > Approval Workflow | Remittance approval within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
-| Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
@@ -3454,7 +3508,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement (18.10)](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files (18.11)](#bank-payment-files) |
 | Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables (18.6)](#accounts-payable), [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers) |
 | Enter, correct or reverse journal vouchers | As needed | [Journal Voucher (18.14)](#journal-vouchers) |
-| Prepare the remittances to the insurers and decide those of another user | On each remittance schedule | [Remittance (18.12)](#remittance-to-insurers) |
+| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance (18.12)](#remittance-to-insurers) |
 | Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts (19.5)](#commission-to-agents-and-referrers) |
 | Keep the petty cash funds and replenish them | Daily; when a fund runs low | [Petty Cash (18.18)](#petty-cash) |
 | Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation (18.19)](#bank-reconciliation) |
@@ -3469,9 +3523,9 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 ### Procedures {#tis-finance-and-general-accounting-procedures}
 #### Start the day from My Work {#tis-finance-and-general-accounting-my-work}
 1. Choose **My Work**. The tiles show what is overdue, due today and due in the next seven days.
-2. Select **Approvals** in the list on the left. The list shows each item waiting for your decision: electronic
-   transfers, insurer remittances, remittance adjustments, cheque releases, journal vouchers and petty cash requests,
-   with the amount and the due date.
+2. Select **Approvals** in the list on the left. The list shows each item waiting for your decision: insurer
+   remittances, remittance adjustments, cheque releases, journal vouchers and petty cash requests, with the amount and
+   the due date.
 3. Select the arrow in **Actions** to open the item on its own screen, check it and approve or reject it there.
 
 Items you entered yourself are not listed for your approval: they wait for another user of your role.
@@ -3534,7 +3588,7 @@ A journal approved after the cut-off is in the next day's file. See [SAP GL expo
 6. When the cheque is printed, select it and select **Print**, then **Print cheque**. The cheque is **Printed** and the
    voucher **Paid**. This cannot be undone.
 
-Payment vouchers are also raised by the system: an approved remittance raises the insurer's voucher, and a commission
+Payment vouchers are also raised by the system: an approved remittance settlement raises the insurer's voucher, and a commission
 payout raises the referrer's voucher. A voucher paid by bank transfer goes into a batch of
 Accounts > Bank Payment Files (**New batch**): the batch is approved, its file is uploaded to the bank portal
 and the bank's results post each payment. See
@@ -3556,17 +3610,19 @@ Follow the open invoices on Accounts > Payables > AP Ageing. See [Accounts payab
 [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers).
 
 #### Prepare and approve a remittance to an insurer {#tis-finance-and-general-accounting-remittance}
-1. Choose Accounts > Remittance > Tracking. The list shows each remittance with its insurer, number of
-   policies, gross amount, commission, net amount and status.
-2. Open a **Draft** remittance, check its policies and amounts and select **Process**. The remittance is
-   **Pending Approval**.
-3. The approver chooses Accounts > Remittance > Approval Workflow, selects the remittance in **Pending approvals**, chooses
-   **Approve** or **Reject** in **Approval details** and selects **Submit**.
+1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit, from the weekly run or
+   from [Import policy list (18.12.2)](#remittance-import-policy-list).
+2. Open a draft, check its policies and amounts, and select **Submit for approval**. The remittance is **Pending
+   approval**.
+3. To decide the remittances of another user, choose Accounts > Remittance > Approvals. **Awaiting my decision**
+   lists what you may decide within your limit (PHP 1,000,000.00 as delivered). Select the reference, check the review
+   panel and select **Approve**, or **Reject** with a reason from the list.
+4. Settle the approved remittances on Accounts > Remittance > Settlement and submit the settlement for
+   approval. The approved settlement raises the insurer's payment voucher on Disbursement.
+5. Pay the voucher from Accounts > Remittance > Insurer payments: in a bank payment batch, or by cheque on Disbursement.
 
-The approver is another user of TIS Finance & General Accounting or of CCD-Recon (Reconciliation and Reversals),
-within the remittance limit of the [Authority Matrix (20.10)](#authority-matrix). The approved remittance raises the insurer's
-payment voucher on Disbursement. Electronic transfers and remittance adjustments are approved on the same screen. See
-[Remittance to insurers (18.12)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
+You cannot approve a remittance you prepared or submitted. A remittance above your limit waits for the TIS General
+Manager. See [Remittance to insurers (18.12)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
 
 #### Pay the commission of agents and referrers {#tis-finance-and-general-accounting-commission}
 1. Choose Commission > Agents/Referrer Accounts and open the agent or referrer.
@@ -3713,22 +3769,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Fixed Assets | Depreciation Run | View |
 | Accounts > Fixed Assets | Disposals | View |
 | Accounts | Disbursement | View |
-| Accounts > Remittance | Automated Processing | View |
-| Accounts > Remittance | Tracking | View |
-| Accounts > Remittance | Statements | View |
-| Accounts > Remittance | Settlement | View |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Approvals | View |
+| Accounts > Remittance | Insurer payments | View |
 | Accounts > Remittance | Reconciliation | View |
-| Accounts > Remittance | Bulk Processing | View |
-| Accounts > Remittance | Scheduling | View |
-| Accounts > Remittance | Electronic Transfer | View |
-| Accounts > Remittance | Approval Workflow | View |
-| Accounts > Remittance | Exception Management | View |
-| Accounts > Remittance | Agency Bill Processing | View |
-| Accounts > Remittance | Direct Bill Processing | View |
-| Accounts > Remittance | Adjustments | View |
-| Accounts > Remittance | Notifications | Create and edit |
-| Accounts > Remittance | History | View |
-| Accounts > Remittance | Analytics | View |
+| Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Insurer billing | View |
+| Accounts > Remittance | Setup | View |
+| Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
 | Commission | Commission Dashboard | View |
 | Reports | All Reports | View |
@@ -3826,11 +3874,11 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History and Analytics |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
@@ -3866,6 +3914,8 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Access control | Approve role access changes and authority limits of another administrator | TIS IT AppSupport / Admin |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
@@ -4048,10 +4098,12 @@ See [Integrations (20.28)](#integrations), [E-mail Outbox (20.27)](#e-mail-outbo
 
 The TIS General Manager oversees the business of Toyota Insurance Services Philippines. You hold every approval of
 the front office: the check of the insurers' e-policies against the placement slips, the renewal terms, the return
-premiums and cancellations, and the claim decisions and settlement approvals. You approve supplier invoices, follow
-the business on the dashboards and reports, and review who has access to what.
+premiums and cancellations, and the claim decisions and settlement approvals. You approve supplier invoices and the
+remittances to the insurers above the limit of TIS Finance & General Accounting, follow the business on the dashboards
+and reports, and review who has access to what.
 
-You read the accounting (receipts, remittances, journals, period end, tax) without changing it, and you read users,
+Apart from the remittance approvals, you read the accounting (receipts, remittances, journals, period end, tax)
+without changing it, and you read users,
 roles, access, the Authority Matrix, segregation of duties and the audit trail without changing them: those are kept
 by TIS Finance & General Accounting and TIS IT AppSupport / Admin. You never decide a record you entered yourself.
 
@@ -4112,22 +4164,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Fixed Assets | Disposals | View |
 | Accounts | Disbursement | View |
 | Accounts | Bank Payment Files | View |
-| Accounts > Remittance | Automated Processing | View |
-| Accounts > Remittance | Tracking | View |
-| Accounts > Remittance | Statements | View |
-| Accounts > Remittance | Settlement | View |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Approvals | Approve |
+| Accounts > Remittance | Insurer payments | View |
 | Accounts > Remittance | Reconciliation | View |
-| Accounts > Remittance | Bulk Processing | View |
-| Accounts > Remittance | Scheduling | View |
-| Accounts > Remittance | Electronic Transfer | View |
-| Accounts > Remittance | Approval Workflow | View |
-| Accounts > Remittance | Exception Management | View |
-| Accounts > Remittance | Agency Bill Processing | View |
-| Accounts > Remittance | Direct Bill Processing | View |
-| Accounts > Remittance | Adjustments | View |
-| Accounts > Remittance | Notifications | Create and edit |
-| Accounts > Remittance | History | View |
-| Accounts > Remittance | Analytics | View |
+| Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Insurer billing | View |
+| Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
 | Accounts | SAP GL Export | View |
 | Accounts | Correction JV | View |
@@ -4148,7 +4191,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
-| Accounts > Insurer Reconciliation | Insurer Statements | View |
 | Accounts > Tax | BIR Form 2307 | View |
 | Accounts > Tax | VAT Summary | View |
 | Accounts > Tax | SAWT | View |
@@ -4243,12 +4285,13 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Initiate, Request and Replenish |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Insurer payments, Initiate, Request and Replenish |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History, Analytics and Insurer Statements |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing and Settlement |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents, Period Management, Month-End Close, Year-End Close, Recurring Journals and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
@@ -4272,6 +4315,7 @@ This role approves the work of other users:
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
+- Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 - Approve or return renewal terms of another user
 
 Approval limits of this role on the Authority Matrix:
@@ -4279,6 +4323,8 @@ Approval limits of this role on the Authority Matrix:
 | Transaction | Approval step | Limit of the role |
 |---|---|---|
 | Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
+| Remittance approval | Accounts > Remittance > Approvals | No limit |
+| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | No limit |
 
 Who approves the work of this role:
 
@@ -4289,6 +4335,8 @@ Who approves the work of this role:
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Operations > Claims > Settlement approval | Claim settlement approval within the approver's limit | TIS Operations Unit Head or TIS General Manager |
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
 
 The user who enters a record never approves it: the approval is always another user's.
@@ -4312,6 +4360,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips (17.5)](#placement-slips) |
 | Approve or return renewal terms and complete return premiums | As needed | [Negotiations (17.19)](#negotiations), [Policy (17.12)](#policies) |
 | Approve or reject supplier invoices | As notified | [Payables (18.6)](#accounts-payable) |
+| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (18.12.4)](#remittance-approvals) |
 | Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard (19.1)](#dashboard), [Claims Dashboard (19.2)](#claims-dashboard), [Processing Dashboard (19.3)](#processing-dashboard), [Sales Dashboard (19.4)](#sales-dashboard) |
 | Review the month's financial reports after the month-end close | Monthly | [All Reports (22.1)](#reports-catalogue) |
 | Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20.12)](#segregation-of-duties) |
@@ -5367,7 +5416,7 @@ Accounts > Post-Dated Cheques is the register of cheques received from clients b
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheque register** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
+The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheques** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
 
 To register a cheque, select **Register cheque**:
 
@@ -5391,7 +5440,7 @@ The cheque is **On Hand**. Nothing is posted until it is deposited. The actions 
 
 A cheque that bounces is recorded as bounced with the reason: its receipt is cancelled, the journal reversed and the bill is open again.
 
-![Figure 18.5: Register cheque](../images/screens-accounts/register-cheque.png)
+![Figure 18.5: Register cheque with the bill, drawee bank, cheque number, date, amount and vault entered](../images/role-tis-ccd-pdu/register-cheque.png)
 ![Figure 18.6: Deposit a post-dated cheque: the official receipt is posted to the bank account chosen](../images/screens-accounts/deposit-cheque.png)
 ### Claims settlements paid through the broker {#claims-settlements-paid-through-the-broker}
 **Menu:** Accounts > Claims Settlements
@@ -5585,91 +5634,138 @@ Bank Payment Files pays approved payment vouchers through the bank's upload file
 
 The batch is approved by another user, the file is downloaded for the bank portal, and the bank's result file is loaded back: each payment it confirms is posted and its voucher becomes **Paid**; a rejected payment returns to the vouchers waiting for payment.
 
+**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments (18.12.5)](#insurer-payments) with the same batch dialog.
+
 ### Remittance to insurers {#remittance-to-insurers}
-For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its share. The remittances are prepared and approved by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting.
+For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its
+share. Remittances are prepared and submitted by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting; they are approved by
+TIS Finance & General Accounting or TIS General Manager, never by the user who prepared or submitted them.
 
-**Menu:** Accounts > Remittance > Automated Processing
+The Remittance menu has eight entries. Each role sees the entries of its work; a role that only reads an entry sees
+**View only** at the top of the page and no tick boxes or action buttons.
+
+| Entry | What it is for |
+|---|---|
+| [Remittances (18.12.1)](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
+| [Approvals (18.12.4)](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
+| [Insurer payments (18.12.5)](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
+| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation (18.20)](#insurer-statement-reconciliation) |
+| [Exceptions (18.12.6)](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
+| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes (18.13)](#direct-bill-commission-debit-notes) |
+| [Setup (18.12.7)](#remittance-schedules) | The schedules of the weekly remittance runs |
+| [Settlement (18.12.8)](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
+
+A remittance (REM-YYYY-NNNNN) covers one insurer and product line for a coverage week. Its status is **Draft** until
+submitted, **Pending approval** until an approver decides, then **Approved**, or **Returned** to its maker when
+rejected. **Settled (voucher raised)** means the insurer's payment voucher exists; the step **Paid** of the remittance
+shows when the voucher is paid.
+
+#### Remittances {#remittances-worklist}
+**Menu:** Accounts > Remittance > Remittances
 
 | Role | Access |
 |---|---|
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
+| CCD-PDC / CCD-ADA | View |
+| CCD-BP / QRPh (Receipting) | View |
 | CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Create and edit |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-**Menu:** Accounts > Remittance > Tracking
+The chips at the top show the next weekly run and whether **Automation** (the daily remittance job) is **On** or
+**Off**. The cards **To submit**, **Awaiting approval**, **Approved, not paid** and **Overdue to insurer** count the
+remittances of the list as filtered; select a card to list them. The tabs are **My work** (the drafts and returned
+remittances to submit), **Drafts**, **In approval**, **In payment** and **All**. Filter by coverage week, insurer,
+product line and source (**Weekly run**, **Run now**, **Import**), or search a REM, policy or OR number.
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+Each row shows **Remittance no** with the coverage week, **Insurer** and product line, **Policies**, **Due to insurer**
+with the due date (red with **Overdue** when past), **Status** and **Next step**: for a remittance pending approval,
+the approvers it waits on. **Columns** adds Source, Voucher no, Paid on, Bank ref, Submitted by and Created on. The
+total of the list is under **Due to insurer**.
 
-**Menu:** Accounts > Remittance > Statements
+To submit remittances for approval:
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+1. Choose Accounts > Remittance > Remittances. Open **My work** or **Drafts**.
+2. Tick the drafts and select **Submit for approval (n)**, or choose **Submit for approval** in the row menu.
+3. Check the total in the confirmation and select **Submit n remittances**. Each row then says **Submitted**, or why
+   it was not submitted (for example, another user submitted it a moment before).
 
-**Menu:** Accounts > Remittance > Settlement
+The row menu also offers **View**, the remittance schedule (XLSX and PDF), the remittance advice once the voucher is
+raised, and **Open voucher**. The menu at the top right holds **Run now**, **Run history**, **Import history** and
+**Export XLSX**.
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+#### Import policy list {#remittance-import-policy-list}
+An off-cycle remittance (opening remittances at go-live, a catch-up, an insurer's list, a correction) is created from
+a list of policies. The file names the policies and the insurer; the system computes every amount from the
+collections. **Import policy list** replaces the bulk upload of remittances with typed amounts.
 
-**Menu:** Accounts > Remittance > Reconciliation
+1. On Accounts > Remittance > Remittances, select **Import policy list**.
+2. Select **Download template** and fill in the **Data** sheet: **Policy No** and **Insurer Code** are required;
+   **Product Line**, **Expected Due to Insurer**, **Insurer Reference** and **Remark** are optional.
+3. Choose the **Purpose** from the list, type a **Note** if needed, and choose the file (.xlsx or .csv, at most
+   10 MB and 5,000 rows).
+4. Select **Validate**. Nothing is created yet. The preview shows each row with its result (**Ready**, **Ready ·
+   Variance**, **Already on REM**, **Not found**, **Not issued**, **Insurer differs**, **Product line differs**,
+   **Direct bill**, **Duplicate in file**) and the remittances to create per insurer and product line.
+   **Download error report** lists every row with its result and message.
+5. Select **Create n draft remittances** and confirm. One draft is created per insurer and product line from the
+   ready rows, marked **Off-cycle** with the purpose. Submit the drafts for approval as above.
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+**Expected Due to Insurer** is only compared with the amount computed: a difference above PHP 1.00 is shown as a
+variance. The same file cannot be imported twice, and a validated file not created within 7 days is discarded.
+**Import history** (menu at the top right) lists the imports with their results.
 
-**Menu:** Accounts > Remittance > Bulk Processing
+![Figure 18.11: Import policy list with Download template, Purpose, Note and File](../images/screens-accounts/import-policy-list.png)
+#### The remittance page {#remittance-record}
+Select a remittance number to open its page. The header shows the number, status, insurer, product line, basis,
+coverage week, due date and source, and the steps **Created**, **Submitted**, **Approved** (or **Returned**),
+**Voucher raised** and **Paid**, each with its date and user. Under the header one line says what comes next, or why
+you cannot act and who can.
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+The buttons follow the status and your role: **Submit for approval** for a draft or returned remittance, **Approve**
+and **Reject** for an approver who may decide it, **Remind approver** for the user who submitted it. The tabs are
+**Lines** (the policies with their totals), **Payment** (the voucher, its payment and value date), **Documents** (the
+remittance schedule in XLSX and PDF and, once the voucher is raised, the remittance advice) and **Activity** (the
+decisions and the activity log, with **Download log (XLSX)**).
 
-**Menu:** Accounts > Remittance > Scheduling
-
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
-
-**Menu:** Accounts > Remittance > Electronic Transfer
-
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
-
-**Menu:** Accounts > Remittance > Approval Workflow
+![Figure 18.12: A remittance pending approval, seen by the user who submitted it: the steps, Remind approver and the users who can decide](../images/screens-accounts/remittance-record.png)
+#### Approvals {#remittance-approvals}
+**Menu:** Accounts > Remittance > Approvals
 
 | Role | Access |
 |---|---|
 | CCD-Recon (Reconciliation and Reversals) | Approve |
-| TIS Finance & General Accounting | Create and edit |
+| TIS Finance & General Accounting | Approve |
 | TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+| TIS General Manager | Approve |
 
-**Menu:** Accounts > Remittance > Exception Management
+The chips at the top say what you may decide, for example **Remittance up to PHP 1,000,000.00**, or **View only**.
+As delivered, TIS Finance & General Accounting approves remittances up to PHP 1,000,000.00 and the TIS General
+Manager without limit (see the [Authority Matrix (20.10)](#authority-matrix)). A user without a remittance limit cannot
+approve or reject. An absent approver is covered by a [Delegation (20.11)](#delegations).
+
+The cards count **Awaiting my decision**, **Past SLA**, **Submitted by me** and **Decided by me today**. The tabs are
+**Awaiting my decision**, **Submitted by me** (with the approvers each item waits on, and **Remind approver** in the row
+menu), **All pending** (with **Can I decide?**) and **Decided** (the last 30 days).
+
+To decide a remittance:
+
+1. Choose Accounts > Remittance > Approvals, or open the approval from **My Work** or its notification.
+2. Select the reference. The review panel shows the remittance and its totals, the previous remittance of the insurer
+   with the change in per cent, the checks at submission, the lines, the open exceptions and the activity.
+3. Select **Approve** and confirm, or **Reject**, choose the reason from the list and confirm. A rejected remittance
+   returns to its maker as **Returned**.
+
+Several items can be approved together: tick them and select **Approve selected (n)**; each is decided on its own and
+its result is listed. There is no rejection of several items at once. When you may not decide an item, the panel
+says why (you submitted it, it is above your limit, or another user decided it) and shows no buttons.
+
+![Figure 18.13: Review approval of a remittance with the approver's limit, Reject and Approve](../images/screens-accounts/remittance-approval-review.png)
+#### Insurer payments {#insurer-payments}
+**Menu:** Accounts > Remittance > Insurer payments
 
 | Role | Access |
 |---|---|
@@ -5678,79 +5774,94 @@ For broker-billed policies TISPH remits the collected premium, net of the broker
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-**Menu:** Accounts > Remittance > Agency Bill Processing
+**Insurer payments** lists the payment vouchers of the approved remittances with their bank payment batch or cheque
+and the bank's result. It posts nothing itself: batches are approved and released on
+[Bank payment files (18.11)](#bank-payment-files), cheques on [Disbursement (18.10)](#disbursement-payment-vouchers-and-cheques).
+
+The cards and tabs are **To pay**, **In payment**, **Paid** (this week on the card), **Failed** and **All**. Each row
+shows the voucher, the insurer with its bank account masked, the amount, method, batch, paid on and the **Next step**
+(for example **Submit voucher (Disbursement)**). The row menu starts with **View payment**, then **Open remittance**,
+**Open batch**, **Pay by cheque**, **Re-batch** (a failed payment) and **Download advice (PDF)** (a paid one).
+
+To pay insurers by bank file, tick the vouchers to pay (an approved voucher with the insurer's bank account on file)
+and select **Create Metrobank batch (n)**. The batch dialog of Bank Payment Files opens with those vouchers and the
+Metrobank layout; check the value date and select **Create batch with n payments**, then submit the batch on
+[Bank payment files (18.11)](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
+step and cannot be ticked.
+
+![Figure 18.14: Accounts > Remittance > Insurer payments with the vouchers to pay](../images/screens-accounts/insurer-payments.png)
+#### Exceptions {#remittance-exceptions}
+**Menu:** Accounts > Remittance > Exceptions
 
 | Role | Access |
 |---|---|
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
+| CCD-PDC / CCD-ADA | View |
+| CCD-BP / QRPh (Receipting) | View |
 | CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Create and edit |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-**Menu:** Accounts > Remittance > Adjustments
+**Exceptions** lists the differences found on remittances (for example **Amount Mismatch**, **Duplicate Entry**,
+**Missing Document**, **Date Discrepancy**) with their severity, amount, age, the user assigned and the status. The
+cards **Unresolved**, **In progress**, **Escalated** and **Resolved today** filter the list. The row menu offers
+**View**, **Start** (you take it on), **Escalate** (with a reason from the list) and **Resolve** (with the resolution,
+the amount if any and a note).
+
+#### Setup: remittance schedules {#remittance-schedules}
+**Menu:** Accounts > Remittance > Setup
 
 | Role | Access |
 |---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
+| TIS Finance & General Accounting | Create and edit |
+| TIS IT AppSupport / Admin | View |
+
+The weekly schedule **TIS-WEEKLY** runs every Monday at 06:15 for every active insurer and creates one draft per
+insurer and product line for the policies of the Monday to Friday before. The **Automation** chip shows whether the
+daily remittance job is on; it is **Off** until TISPH switches it on.
+
+The row menu offers **View** (the schedule, its latest runs and its activity log) and, to TIS Finance & General
+Accounting: **Edit**, **Preview run** (what a run would create, without creating anything),
+**Run now** and **Pause** or **Resume**. **Run now** asks for the off-cycle reason and shows per insurer what will be
+created; nothing is created until you select **Create n draft remittances**. A week that has been run cannot be run
+again: a later catch-up goes through [Import policy list (18.12.2)](#remittance-import-policy-list).
+
+![Figure 18.15: Accounts > Remittance > Setup with the weekly schedule and Automation Off](../images/screens-accounts/remittance-schedules.png)
+#### Settlement {#remittance-settlement}
+**Menu:** Accounts > Remittance > Settlement
+
+| Role | Access |
+|---|---|
 | TIS Finance & General Accounting | Create and edit |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-**Menu:** Accounts > Remittance > Notifications
+An approved remittance is settled with the insurer, and the approved settlement raises the insurer's payment voucher.
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
-| TIS Finance & General Accounting | Create and edit |
-| TIS IT AppSupport / Admin | Create and edit |
-| TIS General Manager | Create and edit |
+1. Choose Accounts > Remittance > Settlement.
+2. Choose the **Insurer code** and the period, then select **Add policies** (or **Import**).
+3. Select **Calculate**: total premium less commission and tax, plus or minus adjustments, gives the
+   **Net Settlement**.
+4. Select **Submit for approval**, or **Save draft**.
 
-**Menu:** Accounts > Remittance > History
+Another user approves the settlement on [Approvals (18.12.4)](#remittance-approvals). The system then raises the payment voucher
+for the net amount on [Disbursement (18.10)](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
+(voucher raised)**. The voucher is paid through [Insurer payments (18.12.5)](#insurer-payments).
 
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | View |
-| TIS Finance & General Accounting | View |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium
+already remitted) is netted against its next remittance.
 
-**Menu:** Accounts > Remittance > Analytics
-
-| Role | Access |
-|---|---|
-| CCD-Recon (Reconciliation and Reversals) | View |
-| TIS Finance & General Accounting | View |
-| TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
-
-A remittance (REM-YYYY-NNNNN) groups the collected premiums of one insurer; it is **Draft** until submitted, **Pending Approval** until the approvals it needs are given by users other than the preparer (see [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)), then **Approved**, and **Completed** once paid.
-
-| Screen | What it is for |
-|---|---|
-| **Automated Processing** | The scheduled remittances of each insurer for the current date, with the policies and estimated amount. Select the remittances, choose the **Processing Date** and options, **Validate** and **Process Selected**, or **Schedule for Later**. |
-| **Tracking** | Every remittance with **Remittance No**, **Date**, **Insurer Code**, **Insurer Name**, **Policies**, **Gross Amount**, **Commission**, **Net Amount** and **Status**, filtered by number, insurer, date and status. The row actions open, submit and print the remittance and its advice to the insurer. |
-| **Statements** | The remittance statement for one or more insurers and a period, in three steps: **Selection**, **Preview**, **Generate**. |
-| **Settlement** | An insurer settlement: choose the insurer and period, **Add policies** (or **Import**) and **Calculate** the premium, commission, tax and net settlement; **Save draft** or **Submit for approval**. |
-| **Reconciliation** | Matching of the bank transactions of the remittances with the remittances recorded: **Auto Match**, **Match Selected** or **Force Match**, with the **Exceptions** and **History**. |
-| **Bulk Processing** | Remittances from a file in four steps: **Upload File**, **Validate**, **Process**, **Complete** (**Download template** first). |
-| **Scheduling** | The remittance schedules: the insurers to remit, the cut-off, the frequency and the next run. **New schedule** and **Run now**. |
-| **Electronic Transfer** | The transfers to insurers by PESONet, InstaPay, RTGS or wire, with their approval and status. |
-| **Approval Workflow** | The remittances, transfers and adjustments waiting for approval, with the SLA. Approve or reject each one; the limits come from the [Authority Matrix (20.10)](#authority-matrix) and cover for an absent approver from [Delegations (20.11)](#delegations). |
-| **Exception Management** | The exceptions found (amount mismatch, duplicate entry, missing document, date discrepancy), assigned to a user and resolved. |
-| **Agency Bill Processing** | The bills of the agencies for a period: **Load agencies**, check the totals, **Validate** and **Process bills**. |
-| **Adjustments** | Premium or commission adjustments of a remittance (**New Adjustment**), approved by another user. |
-| **Notifications** | The messages sent to insurers about remittances, and their templates. |
-| **History** | Every remittance transaction with its versions and audit trail; **Export History**. |
-| **Analytics** | Settlement efficiency, payment success rate, average processing time and exception rate against their targets, with the trends. |
-
-![Figure 18.11: Accounts > Remittance > Tracking](../images/screens-accounts/remittance-tracking.png)
 See [Remittance to the insurers (3.8)](#process-remittance) for the order of the steps at TISPH.
 
 ### Direct bill: commission debit notes {#direct-bill-commission-debit-notes}
-**Menu:** Accounts > Remittance > Direct Bill Processing
+**Menu:** Accounts > Remittance > Insurer billing
 
 | Role | Access |
 |---|---|
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
 | CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Create and edit |
 | TIS IT AppSupport / Admin | View |
@@ -5758,11 +5869,14 @@ See [Remittance to the insurers (3.8)](#process-remittance) for the order of the
 
 For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
 
-1. **Raise Debit Note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
-2. **Debit Notes**: the debit notes issued, with their balance; record the insurer's payment against them.
-3. **Billing Mode**: whether each insurer's policies are broker-billed or direct-billed.
+1. **Raise debit note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
+2. **Debit notes**: the debit notes issued, with their balance; record the insurer's payment against them.
+3. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
 
-![Figure 18.12: Accounts > Remittance > Direct Bill Processing](../images/screens-accounts/direct-bill.png)
+A debit note is approved by another user than the one who raised or submitted it; that user reads why instead of
+**Approve** and **Reject**. **Reject** and **Cancel debit note** ask for the reason from the list.
+
+![Figure 18.16: Accounts > Remittance > Insurer billing on the tab Raise debit note](../images/screens-accounts/insurer-billing.png)
 ### Journal vouchers {#journal-vouchers}
 **Menu:** Accounts > Journal Voucher
 
@@ -5799,7 +5913,7 @@ To enter a journal, select **Voucher**:
 
 The journal is approved by TIS Finance & General Accounting other than the user who submitted it, and is posted on approval. A journal cannot be posted into a closed period.
 
-![Figure 18.13: Add Journal Voucher](../images/screens-accounts/add-journal-voucher.png)
+![Figure 18.17: Add Journal Voucher](../images/screens-accounts/add-journal-voucher.png)
 **Correction JV** corrects a posted transaction: choose the **Transaction Code** and **Transaction Number** of the original, the **Corrections JV Transaction Code** and the **Correction Description**, select **Next** and enter the corrected lines. **Reversal JV** reverses a posted transaction in full the same way, with the **Reversal JV Transaction Code** and **Reversal Description**. Both are approved like any journal voucher.
 
 ### SAP GL export {#sap-gl-export}
@@ -5904,7 +6018,7 @@ A fund is opened on Initiate, which issues its code (PCF-) when left empty and h
 | **Receipts** | Cash returned to the fund, for example the unused part of a cash advance. |
 | **Replenish** | Restores the fund to its size from the bank: the amount spent since the last replenishment, with the bank account. |
 
-![Figure 18.14: Accounts > Petty Cash > Initiate, the funds and their limits](../images/screens-accounts/petty-cash-initiate.png)
+![Figure 18.18: Accounts > Petty Cash > Initiate, the funds and their limits](../images/screens-accounts/petty-cash-initiate.png)
 ### Bank reconciliation {#bank-reconciliation}
 **Menu:** Accounts > Bank Reconciliation > Reconciliation Workspace
 
@@ -5987,20 +6101,21 @@ The **Reconciliation Workspace** reconciles one bank account for one period:
 
 The cards show the **Balance per bank**, **Balance per books**, **Unmatched bank lines**, **Unmatched book entries**, **Difference** and the status of the **Reconciliation**. The reconciliation is prepared by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting and approved by TIS Finance & General Accounting, a user other than the preparer.
 
-![Figure 18.15: Accounts > Bank Reconciliation > Reconciliation Workspace](../images/screens-accounts/reconciliation-workspace.png)
+![Figure 18.19: Accounts > Bank Reconciliation > Reconciliation Workspace](../images/screens-accounts/reconciliation-workspace.png)
 **Reconciliations** lists the reconciliations with **Reconciliation No.**, **Bank account**, **Period**, **Status**, the adjusted bank and book balances, **Difference**, **Prepared by** and **Approved by**. **New reconciliation** starts one.
 
 The five reports (**Reconciliation Statement Report**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book**) are run like any report: choose the criteria (**Overall** or by bank account), **From Date** and **To Date**, the **Bank Account** and the **File format** (**CSV**, **Excel (XLSX)** or **PDF**), then **Preview** or **Generate**. See [Reports (chapter 22)](#reports).
 
 ### Insurer statement reconciliation {#insurer-statement-reconciliation}
-**Menu:** Accounts > Insurer Reconciliation > Insurer Statements
+**Menu:** Accounts > Remittance > Reconciliation
 
 | Role | Access |
 |---|---|
 | CCD-PDC / CCD-ADA | View |
 | CCD-BP / QRPh (Receipting) | View |
-| CCD-Recon (Reconciliation and Reversals) | Approve |
+| CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Create and edit |
+| TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
 An insurer's statement (for example a premium remittance confirmation) is matched with what TISPH recorded. The list shows **Number**, **Insurer**, **Statement type**, **Insurer reference**, **Period**, **Lines**, **Matched**, **Gross premium**, **Commission** and **Status**.
@@ -6012,7 +6127,7 @@ An insurer's statement (for example a premium remittance confirmation) is matche
 
 Each statement line is matched with the policy, premium and commission recorded; differences within the tolerance match. Open the statement to resolve the lines that differ. The statement is approved by CCD-Recon (Reconciliation and Reversals).
 
-![Figure 18.16: Import an insurer statement](../images/screens-accounts/insurer-statement-import.png)
+![Figure 18.20: Import an insurer statement](../images/screens-accounts/insurer-statement-import.png)
 ### Tax: BIR forms and returns {#tax-bir-forms-and-returns}
 **Menu:** Accounts > Tax > BIR Form 2307
 
@@ -6083,7 +6198,7 @@ The screen lists the withholding returns of the year: BIR Form 0619-E for the fi
 3. File and pay the return with the BIR (eFPS or eBIRForms).
 4. Select **Record filing** and enter the date filed, the filing reference and the amount paid. The return becomes **Filed**.
 
-![Figure 18.17: Accounts > Tax > Withholding Returns](../images/screens-accounts/withholding-returns.png)
+![Figure 18.21: Accounts > Tax > Withholding Returns](../images/screens-accounts/withholding-returns.png)
 ### Annual information return 1604-E and alphalist of payees {#annual-information-return-1604-e-and-alphalist-of-payees}
 **Menu:** Accounts > Tax > Annual Alphalist 1604-E
 
@@ -6134,7 +6249,7 @@ The list shows **Invoice no.**, **Invoice date**, **Buyer**, **Invoice for**, **
 
 Invoices are numbered in sequence; an invoice is cancelled with a reason and keeps its number, it is never deleted.
 
-![Figure 18.18: New invoice](../images/screens-accounts/sales-invoice-new.png)
+![Figure 18.22: New invoice](../images/screens-accounts/sales-invoice-new.png)
 ### E-invoicing (EIS) {#e-invoicing-eis}
 **Menu:** Accounts > Tax > E-Invoicing (EIS)
 
@@ -6159,7 +6274,7 @@ The screen holds the registration pack of the computerized accounting system (CA
 
 **Documents** holds the system description and controls and the backup and restore procedure, with their approved version; **Open** and **Print**. The books (general journal, general ledger, cash receipts and disbursements books, sales and purchase books) print per month with page numbers that run on through the year.
 
-![Figure 18.19: Accounts > Tax > CAS Books and Documents](../images/screens-accounts/cas-readiness.png)
+![Figure 18.23: Accounts > Tax > CAS Books and Documents](../images/screens-accounts/cas-readiness.png)
 ### Period end {#period-end}
 A fiscal year (FY2026) has twelve monthly periods and an adjustment period 13 used by the year-end close. The cards count the periods Open, Soft-closed, Closed and Locked.
 
@@ -6202,10 +6317,10 @@ The fiscal year of TISPH runs from April to March. **Period Management** lists t
 3. Submit the run to soft-close or close the period.
 4. The run is approved by TIS Finance & General Accounting, a user other than the preparer. The period takes the new status.
 
-![Figure 18.20: New close run](../images/screens-accounts/month-end-close-new.png)
+![Figure 18.24: New close run](../images/screens-accounts/month-end-close-new.png)
 **Financial Statements** shows the **Income Statement**, **Balance Sheet** and **Trial Balance** from the posted journals, for a fiscal period or a date range, with the period, year to date and the same columns of the previous year. Select an account to see its postings. **Export** (Excel) and **Print** (PDF).
 
-![Figure 18.21: Accounts > Period End > Financial Statements](../images/screens-accounts/financial-statements.png)
+![Figure 18.25: Accounts > Period End > Financial Statements](../images/screens-accounts/financial-statements.png)
 ### Year-end close (preparer) {#year-end-close-preparer}
 Accounts > Period End > Year-End Close leads through five steps, one card per step; the stepper above the card shows the status of each step. Choose the fiscal year and select **Start year-end close**: the prerequisites are checked at once.
 
@@ -6629,7 +6744,7 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 **Lead Sources** lists where prospects come from (for example Walk-In, Referral, Agent, Bundling, Promo, Used-Cars - SCR, Used-Cars - UCFP), with the **Channel Type**, the **Linked Office (branch code)** and the **Sort Order**. The source is chosen on the prospect.
 
-**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals and the accounting reversals. **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
+**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
 
 ![Figure 20.3: Master > Insurance > Reason Codes](../images/screens-master/reason-codes.png)
 ### Users {#users}
