@@ -8,7 +8,7 @@ the approval of a second user (Configuration Approvals).
 
 ## What the page shows
 
-- **Status row**: the date of the rules in force and the edition code of the configuration (printed on the exports),
+- **Status row**: the date of the rules in force,
   the Account mapping status (Ready or Incomplete, with the accounts still to be mapped and, for users who may change
   them, a Configure link to Account Determination) and the changes waiting for approval (a link to Configuration
   Approvals for approvers).

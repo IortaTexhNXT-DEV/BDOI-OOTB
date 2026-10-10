@@ -128,7 +128,7 @@ const AccountingFlow = () => {
         { label: t("accountingFlow.export.excel"), icon: "pi pi-file-excel", command: () => download("xlsx") },
         { label: t("accountingFlow.export.pdf"), icon: "pi pi-file-pdf", command: () => download("pdf") },
       ]} />
-      <Button type="button" label={t("accountingFlow.print")} icon="pi pi-print" text disabled={!data} onClick={() => window.print()} />
+      <Button type="button" label={t("accountingFlow.print")} icon="pi pi-print" outlined disabled={!data} onClick={() => window.print()} />
     </>
   );
 
@@ -137,9 +137,7 @@ const AccountingFlow = () => {
   const pendingChip = <TipChip label={t("accountingFlow.status.pendingChanges", { count: pendingChanges.length })} severity="warning" tip={pendingTip} />;
   const status = data ? (
     <div className="af-status" role="group" aria-label={t("accountingFlow.status.label")}>
-      <span className="af-status__edition af-tip" tabIndex={0} data-pr-tooltip={t("accountingFlow.status.editionTip")}>
-        {t("accountingFlow.status.asOf", { date: formatDate(data.asOf), edition: data.edition })}
-      </span>
+      <span className="af-status__edition">{t("accountingFlow.status.inForce", { date: formatDate(data.asOf) })}</span>
       <ConfigStatus feature={t("accountingFlow.status.mapping")} state={data.mapping.state === "ready" ? "ready" : "incomplete"} to={DETERMINATION} permission="write:posting-rules"
         missing={data.mapping.pending.map((p) => t(`accountingFlow.status.item.${p.reason}`, { item: p.item, account: p.glCode || "-" }))} />
       {pendingChanges.length ? (mayApprove ? <Link to={APPROVALS} className="af-chip-link">{pendingChip}</Link> : pendingChip) : null}

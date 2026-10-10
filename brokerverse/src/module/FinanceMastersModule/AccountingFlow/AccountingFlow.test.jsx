@@ -160,7 +160,7 @@ describe("Accounting Flow", () => {
   it("shows the account mapping status, the pending change and the accounts of a map", async () => {
     signInAs(["tis-finance"], ["read:masters", "write:posting-rules", "approve:posting-rules"]);
     renderAt();
-    expect(await screen.findByText("Rules in force on 09/10/2026 · Edition 3F9A21C7")).toBeInTheDocument();
+    expect(await screen.findByText("Rules in force on 09/10/2026")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Account mapping: Incomplete" }));
     expect(await screen.findByText("Premium payable to insurers: provisional account 210245")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^1 change pending approval/ })).toHaveAttribute("href", "/master/finance/configuration-approvals");

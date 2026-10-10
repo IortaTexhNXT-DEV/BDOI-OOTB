@@ -2,6 +2,9 @@
 @import "../../../theme/bdoi/tokens";
 
 .af-page {
+  // the page frame of the other Master screens (Administration .admin__page)
+  padding: 16px 24px 32px;
+
   .af-status {
     display: flex;
     flex-wrap: wrap;
@@ -239,10 +242,12 @@
   gap: 8px 24px;
   margin: 12px 0;
 
+  // label above its value, both in the size of the card text
   .af-fact {
-    display: grid;
-    grid-template-columns: 11rem minmax(0, 1fr);
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 
   dt {
@@ -252,6 +257,8 @@
 
   dd {
     margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
   }
 }
 
@@ -440,10 +447,12 @@
 
   .af-facts {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
 
-    .af-fact {
-      grid-template-columns: 9rem minmax(0, 1fr);
-    }
+@media (max-width: 640px) {
+  .af-page {
+    padding: 12px 16px 24px;
   }
 }
 
