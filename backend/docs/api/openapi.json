@@ -35078,7 +35078,7 @@
     "/claim-documents/claims/{id}/submit-to-insurer": {
       "post": {
         "operationId": "postClaimDocumentsClaimsIdSubmitToInsurer",
-        "summary": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)",
+        "summary": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)",
         "tags": [
           "Claim Documents"
         ],
@@ -35915,6 +35915,653 @@
         }
       }
     },
+    "/claims/{id}/communications": {
+      "get": {
+        "operationId": "getClaimsIdCommunications",
+        "summary": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: read:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "party": {
+                            "type": "string"
+                          },
+                          "partyLabel": {
+                            "type": "string"
+                          },
+                          "direction": {
+                            "type": "string"
+                          },
+                          "method": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "followUpDate": {
+                            "type": "string"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          },
+                          "by": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "party": "insurer",
+                      "partyLabel": "Insurer",
+                      "direction": "out",
+                      "method": "Email",
+                      "subject": "Follow-up",
+                      "message": "Status of the LOA?",
+                      "followUpDate": "2026-10-08",
+                      "overdue": false,
+                      "by": "Paolo Reyes"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Communications",
+        "x-permissions": [
+          "read:claims"
+        ]
+      },
+      "post": {
+        "operationId": "postClaimsIdCommunications",
+        "summary": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "party": {
+                          "type": "string"
+                        },
+                        "partyLabel": {
+                          "type": "string"
+                        },
+                        "direction": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "followUpDate": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "by": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "party": "insurer",
+                    "partyLabel": "Insurer",
+                    "direction": "out",
+                    "method": "Email",
+                    "subject": "Follow-up",
+                    "message": "Status of the LOA?",
+                    "followUpDate": "2026-10-08",
+                    "overdue": false,
+                    "by": "Paolo Reyes"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Communications",
+        "x-permissions": [
+          "write:claims"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "party": {
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "followUpDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "party": "insurer",
+                "direction": "in",
+                "method": "Phone",
+                "message": "Adjuster visit set for 07/10/2026",
+                "followUpDate": "2026-10-08"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/claims/{id}/communications/{commId}/done": {
+      "post": {
+        "operationId": "postClaimsIdCommunicationsCommIdDone",
+        "summary": "Mark the follow-up of a communication done",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "party": {
+                          "type": "string"
+                        },
+                        "partyLabel": {
+                          "type": "string"
+                        },
+                        "direction": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "followUpDate": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "by": {
+                          "type": "string"
+                        },
+                        "followUpDone": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "party": "insurer",
+                    "partyLabel": "Insurer",
+                    "direction": "out",
+                    "method": "Email",
+                    "subject": "Follow-up",
+                    "message": "Status of the LOA?",
+                    "followUpDate": "2026-10-08",
+                    "overdue": false,
+                    "by": "Paolo Reyes",
+                    "followUpDone": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Communications",
+        "x-permissions": [
+          "write:claims"
+        ]
+      }
+    },
+    "/claims/{id}/insurer-advice": {
+      "put": {
+        "operationId": "putClaimsIdInsurerAdvice",
+        "summary": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Insurer advice\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "claimNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "claimStatus": {
+                          "type": "string"
+                        },
+                        "lifecycleStatus": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "policyHolderName": {
+                          "type": "string"
+                        },
+                        "lob": {
+                          "type": "string"
+                        },
+                        "dateOfIncident": {
+                          "type": "string"
+                        },
+                        "reportedDate": {
+                          "type": "string"
+                        },
+                        "estimatedClaimAmount": {
+                          "type": "integer"
+                        },
+                        "policy": {
+                          "type": "object",
+                          "properties": {
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "clientId": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "insurerAdvice": {
+                          "type": "string"
+                        },
+                        "insurerAdviceLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Insurer advice recorded",
+                  "data": {
+                    "id": "clm_1a2b",
+                    "claimNumber": "CLM-2026-00001",
+                    "status": "Pending",
+                    "claimStatus": "Pending",
+                    "lifecycleStatus": "registered",
+                    "policyNumber": "POL-2026-00001",
+                    "policyHolderName": "Maria Santos",
+                    "lob": "MOTOR",
+                    "dateOfIncident": "2026-09-20",
+                    "reportedDate": "2026-09-21",
+                    "estimatedClaimAmount": 85000,
+                    "policy": {
+                      "policyNumber": "POL-2026-00001",
+                      "clientId": "cl_1"
+                    },
+                    "insurerAdvice": "loa-issued",
+                    "insurerAdviceLabel": "LOA issued"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Insurer advice",
+        "x-permissions": [
+          "write:claims"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "insurerClaimNumber": {
+                    "type": "string"
+                  },
+                  "insurerHandler": {
+                    "type": "string"
+                  },
+                  "adviceStatus": {
+                    "type": "string"
+                  },
+                  "authorisationCode": {
+                    "type": "string"
+                  },
+                  "offerAmount": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "insurerClaimNumber": "MAPFRE-CL-7781",
+                "insurerHandler": "Rosa Lim",
+                "adviceStatus": "loa-issued",
+                "authorisationCode": "AUTH-55102",
+                "offerAmount": 72000
+              }
+            }
+          }
+        }
+      }
+    },
+    "/claims/{id}/insurer-follow-up": {
+      "post": {
+        "operationId": "postClaimsIdInsurerFollowUp",
+        "summary": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Follow up insurer\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "to": {
+                          "type": "string"
+                        },
+                        "communication": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "party": {
+                              "type": "string"
+                            },
+                            "partyLabel": {
+                              "type": "string"
+                            },
+                            "direction": {
+                              "type": "string"
+                            },
+                            "method": {
+                              "type": "string"
+                            },
+                            "subject": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "followUpDate": {
+                              "type": "string"
+                            },
+                            "overdue": {
+                              "type": "boolean"
+                            },
+                            "by": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "to": "claims@insurer.ph",
+                    "communication": {
+                      "id": 1,
+                      "party": "insurer",
+                      "partyLabel": "Insurer",
+                      "direction": "out",
+                      "method": "Email",
+                      "subject": "Follow-up",
+                      "message": "Status of the LOA?",
+                      "followUpDate": "2026-10-08",
+                      "overdue": false,
+                      "by": "Paolo Reyes"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Follow up insurer",
+        "x-permissions": [
+          "write:claims"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "followUpDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "message": "May we have the status of the LOA?",
+                "followUpDate": "2026-10-09"
+              }
+            }
+          }
+        }
+      }
+    },
     "/claims/{id}/settlement-cash": {
       "get": {
         "operationId": "getClaimsIdSettlementCash",
@@ -36122,7 +36769,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+        "description": "Front-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:claim-funds",
         "parameters": [
           {
             "name": "id",
@@ -36322,7 +36969,7 @@
         },
         "x-screen": "Operations > Claims > Claim settlement > Funds received",
         "x-permissions": [
-          "write:receipts"
+          "write:claim-funds"
         ],
         "requestBody": {
           "required": true,
@@ -36605,10 +37252,159 @@
         }
       }
     },
+    "/claims/{id}/verify-death": {
+      "post": {
+        "operationId": "postClaimsIdVerifyDeath",
+        "summary": "Record the verification of the death on a death benefit claim; the follow-up date counts from it",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Verify death\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "claimNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "claimStatus": {
+                          "type": "string"
+                        },
+                        "lifecycleStatus": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "policyHolderName": {
+                          "type": "string"
+                        },
+                        "lob": {
+                          "type": "string"
+                        },
+                        "dateOfIncident": {
+                          "type": "string"
+                        },
+                        "reportedDate": {
+                          "type": "string"
+                        },
+                        "estimatedClaimAmount": {
+                          "type": "integer"
+                        },
+                        "policy": {
+                          "type": "object",
+                          "properties": {
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "clientId": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "deathVerifiedOn": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Death verified",
+                  "data": {
+                    "id": "clm_1a2b",
+                    "claimNumber": "CLM-2026-00001",
+                    "status": "Pending",
+                    "claimStatus": "Pending",
+                    "lifecycleStatus": "registered",
+                    "policyNumber": "POL-2026-00001",
+                    "policyHolderName": "Maria Santos",
+                    "lob": "MOTOR",
+                    "dateOfIncident": "2026-09-20",
+                    "reportedDate": "2026-09-21",
+                    "estimatedClaimAmount": 85000,
+                    "policy": {
+                      "policyNumber": "POL-2026-00001",
+                      "clientId": "cl_1"
+                    },
+                    "deathVerifiedOn": "2026-10-05"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Verify death",
+        "x-permissions": [
+          "write:claims"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "verifiedOn": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "verifiedOn": "2026-10-05",
+                "note": "PSA death certificate seen"
+              }
+            }
+          }
+        }
+      }
+    },
     "/claims/approve-settlement/{id}": {
       "put": {
         "operationId": "putClaimsApproveSettlementId",
-        "summary": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester",
+        "summary": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix",
         "tags": [
           "Claims"
         ],
@@ -36863,6 +37659,152 @@
         "x-permissions": [
           "read:claims"
         ]
+      }
+    },
+    "/claims/cancel/{id}": {
+      "put": {
+        "operationId": "putClaimsCancelId",
+        "summary": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim detail > Cancel claim\n\nAccess: write:claims, approve:claims",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "claimNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "claimStatus": {
+                          "type": "string"
+                        },
+                        "lifecycleStatus": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "policyHolderName": {
+                          "type": "string"
+                        },
+                        "lob": {
+                          "type": "string"
+                        },
+                        "dateOfIncident": {
+                          "type": "string"
+                        },
+                        "reportedDate": {
+                          "type": "string"
+                        },
+                        "estimatedClaimAmount": {
+                          "type": "integer"
+                        },
+                        "policy": {
+                          "type": "object",
+                          "properties": {
+                            "policyNumber": {
+                              "type": "string"
+                            },
+                            "clientId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Claim cancelled",
+                  "data": {
+                    "id": "clm_1a2b",
+                    "claimNumber": "CLM-2026-00001",
+                    "status": "Cancelled",
+                    "claimStatus": "Pending",
+                    "lifecycleStatus": "registered",
+                    "policyNumber": "POL-2026-00001",
+                    "policyHolderName": "Maria Santos",
+                    "lob": "MOTOR",
+                    "dateOfIncident": "2026-09-20",
+                    "reportedDate": "2026-09-21",
+                    "estimatedClaimAmount": 85000,
+                    "policy": {
+                      "policyNumber": "POL-2026-00001",
+                      "clientId": "cl_1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim detail > Cancel claim",
+        "x-permissions": [
+          "write:claims",
+          "approve:claims"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "CCN-DUPLICATE",
+                "note": "Same loss as CLM-2026-00014"
+              }
+            }
+          }
+        }
       }
     },
     "/claims/close/{id}": {
@@ -37202,10 +38144,149 @@
         ]
       }
     },
+    "/claims/registration-check": {
+      "get": {
+        "operationId": "getClaimsRegistrationCheck",
+        "summary": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims > Claim details\n\nAccess: write:claims",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pol_1"
+          },
+          {
+            "name": "lossDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-20"
+          },
+          {
+            "name": "reportedDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-02"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "outstandingPremium": {
+                          "type": "integer"
+                        },
+                        "claimsRatio": {
+                          "type": "object",
+                          "properties": {
+                            "claims": {
+                              "type": "integer"
+                            },
+                            "claimsAmount": {
+                              "type": "integer"
+                            },
+                            "premium": {
+                              "type": "integer"
+                            },
+                            "ratio": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "intimation": {
+                          "type": "object",
+                          "properties": {
+                            "days": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "late": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "duplicates": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "problems": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyNumber": "POL-2026-00001",
+                    "outstandingPremium": 0,
+                    "claimsRatio": {
+                      "claims": 1,
+                      "claimsAmount": 20000,
+                      "premium": 45000,
+                      "ratio": 44.44
+                    },
+                    "intimation": {
+                      "days": 12,
+                      "limit": 30,
+                      "late": false
+                    },
+                    "duplicates": [],
+                    "problems": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims > Claim details",
+        "x-permissions": [
+          "write:claims"
+        ]
+      }
+    },
     "/claims/rejectclaim/{id}": {
       "put": {
         "operationId": "putClaimsRejectclaimId",
-        "summary": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",
+        "summary": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason",
         "tags": [
           "Claims"
         ],
@@ -37355,7 +38436,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims, read:reports",
+        "description": "Front-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims",
         "parameters": [
           {
             "name": "startDate",
@@ -37585,19 +38666,18 @@
         },
         "x-screen": "Claims > Claims Dashboard",
         "x-permissions": [
-          "read:claims",
-          "read:reports"
+          "read:claims"
         ]
       }
     },
     "/claims/reports/criteria": {
       "get": {
         "operationId": "getClaimsReportsCriteria",
-        "summary": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)",
+        "summary": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)",
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims, read:reports",
+        "description": "Front-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims",
         "parameters": [
           {
             "name": "startDate",
@@ -37624,7 +38704,34 @@
             "schema": {
               "type": "string"
             },
-            "example": "Open"
+            "example": "Settled"
+          },
+          {
+            "name": "dateBasis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "settlement"
+          },
+          {
+            "name": "claimType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Motor"
+          },
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2
           },
           {
             "name": "reportType",
@@ -37660,15 +38767,14 @@
         },
         "x-screen": "Reports > Operational Reports > Claims",
         "x-permissions": [
-          "read:claims",
-          "read:reports"
+          "read:claims"
         ]
       }
     },
     "/claims/settle/{id}": {
       "put": {
         "operationId": "putClaimsSettleId",
-        "summary": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled",
+        "summary": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)",
         "tags": [
           "Claims"
         ],
@@ -38194,7 +39300,7 @@
         "tags": [
           "Claims Settlements"
         ],
-        "description": "Front-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:receipts",
+        "description": "Front-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:claim-funds",
         "parameters": [
           {
             "name": "id",
@@ -38247,7 +39353,7 @@
         },
         "x-screen": "Accounts > Claims Settlements > Funds received",
         "x-permissions": [
-          "write:receipts"
+          "write:claim-funds"
         ],
         "requestBody": {
           "required": true,
@@ -38279,6 +39385,112 @@
                 "bankAccount": "ACC-OPS-001",
                 "date": "2026-10-04",
                 "reference": "RA-8812"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/claim-payments/claims/{id}/movements/{movementId}/reverse": {
+      "post": {
+        "operationId": "postClaimPaymentsClaimsIdMovementsMovementIdReverse",
+        "summary": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed",
+        "tags": [
+          "Claims Settlements"
+        ],
+        "description": "Front-end touchpoint: Accounts > Claims Settlements > Reverse\n\nAccess: reverse:claim-cash",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "movementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "movementId": {
+                          "type": "integer"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "integer"
+                        },
+                        "journalNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "movementId": 7,
+                    "kind": "funds-received",
+                    "amount": 75000,
+                    "journalNumber": "JV-2026-00152"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Claims Settlements > Reverse",
+        "x-permissions": [
+          "reverse:claim-cash"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "CRV-AMOUNT",
+                "note": "Recorded 75,000 instead of 57,000"
               }
             }
           }
@@ -153181,6 +154393,180 @@
         }
       }
     },
+    "/renewals/{id}/not-for-renewal": {
+      "post": {
+        "operationId": "postRenewalsIdNotForRenewal",
+        "summary": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Queue > Not for renewal\n\nAccess: write:renewals, assign:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "renewalNumber": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "insuredName": {
+                          "type": "string"
+                        },
+                        "product": {
+                          "type": "string"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "currentPremium": {
+                          "type": "integer"
+                        },
+                        "renewalPremium": {
+                          "type": "number"
+                        },
+                        "premiumVariancePct": {
+                          "type": "number"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusCode": {
+                          "type": "string"
+                        },
+                        "retentionRisk": {
+                          "type": "string"
+                        },
+                        "riskScore": {
+                          "type": "integer"
+                        },
+                        "noticeStage": {
+                          "type": "integer"
+                        },
+                        "nextNotice": {
+                          "type": "object",
+                          "properties": {
+                            "stage": {
+                              "type": "integer"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "assignedAgent": {
+                          "type": "string"
+                        },
+                        "renewalAttempts": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rnw_1",
+                    "renewalNumber": "RN-2026-00001",
+                    "policyNumber": "POL-2025-00012",
+                    "insuredName": "Maria Santos",
+                    "product": "Motor Vehicle Insurance",
+                    "insurer": "MAPFRE Insurance Corporation",
+                    "expiryDate": "2026-10-30",
+                    "daysToExpiry": 32,
+                    "currentPremium": 18500,
+                    "renewalPremium": 21450.5,
+                    "premiumVariancePct": 15.95,
+                    "status": "Not for renewal",
+                    "statusCode": "not-renewed",
+                    "retentionRisk": "Medium",
+                    "riskScore": 35,
+                    "noticeStage": 1,
+                    "nextNotice": {
+                      "stage": 2,
+                      "code": "second",
+                      "label": "Second Notice"
+                    },
+                    "assignedAgent": "Ana Reyes",
+                    "renewalAttempts": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Queue > Not for renewal",
+        "x-permissions": [
+          "write:renewals",
+          "assign:renewals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "NFR-LOANCLOSED",
+                "note": "Loan fully paid; client insures elsewhere"
+              }
+            }
+          }
+        }
+      }
+    },
     "/renewals/{id}/notices": {
       "post": {
         "operationId": "postRenewalsIdNotices",
@@ -153484,10 +154870,188 @@
         ]
       }
     },
+    "/renewals/{id}/reassign": {
+      "post": {
+        "operationId": "postRenewalsIdReassign",
+        "summary": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "renewalNumber": {
+                          "type": "string"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "insuredName": {
+                          "type": "string"
+                        },
+                        "product": {
+                          "type": "string"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "currentPremium": {
+                          "type": "integer"
+                        },
+                        "renewalPremium": {
+                          "type": "number"
+                        },
+                        "premiumVariancePct": {
+                          "type": "number"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusCode": {
+                          "type": "string"
+                        },
+                        "retentionRisk": {
+                          "type": "string"
+                        },
+                        "riskScore": {
+                          "type": "integer"
+                        },
+                        "noticeStage": {
+                          "type": "integer"
+                        },
+                        "nextNotice": {
+                          "type": "object",
+                          "properties": {
+                            "stage": {
+                              "type": "integer"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "assignedAgent": {
+                          "type": "string"
+                        },
+                        "renewalAttempts": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rnw_1",
+                    "renewalNumber": "RN-2026-00001",
+                    "policyNumber": "POL-2025-00012",
+                    "insuredName": "Maria Santos",
+                    "product": "Motor Vehicle Insurance",
+                    "insurer": "MAPFRE Insurance Corporation",
+                    "expiryDate": "2026-10-30",
+                    "daysToExpiry": 32,
+                    "currentPremium": 18500,
+                    "renewalPremium": 21450.5,
+                    "premiumVariancePct": 15.95,
+                    "status": "Quote Sent",
+                    "statusCode": "quoted",
+                    "retentionRisk": "Medium",
+                    "riskScore": 35,
+                    "noticeStage": 1,
+                    "nextNotice": {
+                      "stage": 2,
+                      "code": "second",
+                      "label": "Second Notice"
+                    },
+                    "assignedAgent": "Carlo Mendoza",
+                    "renewalAttempts": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Queue > Reassign",
+        "x-permissions": [
+          "write:renewals",
+          "assign:renewals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "toUserId": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "toUserId": "usr_2",
+                "reasonCode": "RRA-WORKLOAD",
+                "note": "Ana is on leave until 20/10/2026"
+              }
+            }
+          }
+        }
+      }
+    },
     "/renewals/{id}/reinstate": {
       "post": {
         "operationId": "postRenewalsIdReinstate",
-        "summary": "Reinstate a lapsed renewal within the reinstatement window",
+        "summary": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window",
         "tags": [
           "Renewals workspace"
         ],
@@ -154278,6 +155842,68 @@
         ]
       }
     },
+    "/renewals/assignees": {
+      "get": {
+        "operationId": "getRenewalsAssignees",
+        "summary": "Active users a renewal can be reassigned to (holders of write:renewals)",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "usr_1",
+                      "name": "Ana Reyes"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Queue > Reassign",
+        "x-permissions": [
+          "write:renewals",
+          "assign:renewals"
+        ]
+      }
+    },
     "/renewals/at-risk": {
       "get": {
         "operationId": "getRenewalsAtRisk",
@@ -154816,6 +156442,269 @@
         "x-permissions": [
           "read:renewals"
         ]
+      }
+    },
+    "/renewals/lock-ins": {
+      "get": {
+        "operationId": "getRenewalsLockIns",
+        "summary": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Lock-in Accounts\n\nAccess: read:renewals",
+        "parameters": [
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-10"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 60
+          },
+          {
+            "name": "loanStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "All"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "excel"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "days": {
+                          "type": "integer"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "clientName": {
+                                "type": "string"
+                              },
+                              "sourceLabel": {
+                                "type": "string"
+                              },
+                              "year": {
+                                "type": "integer"
+                              },
+                              "reviewDate": {
+                                "type": "string"
+                              },
+                              "tfsLoanAccount": {
+                                "type": "string"
+                              },
+                              "loanStatusLabel": {
+                                "type": "string"
+                              },
+                              "noticeTreatment": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-10",
+                    "days": 60,
+                    "to": "2026-12-09",
+                    "items": [
+                      {
+                        "policyNumber": "POL-2025-00412",
+                        "clientName": "Maria Santos",
+                        "sourceLabel": "Scheme 2",
+                        "year": 2,
+                        "reviewDate": "2026-10-21",
+                        "tfsLoanAccount": "TFS-0012345",
+                        "loanStatusLabel": "Current",
+                        "noticeTreatment": {
+                          "code": "scheme2",
+                          "label": "Suppressed: Scheme 2"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Lock-in Accounts",
+        "x-permissions": [
+          "read:renewals"
+        ]
+      }
+    },
+    "/renewals/lock-ins/{policyId}/loan-status": {
+      "put": {
+        "operationId": "putRenewalsLockInsPolicyIdLoanStatus",
+        "summary": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Lock-in Accounts > Set loan status\n\nAccess: write:renewals",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "before": {
+                          "type": "object",
+                          "properties": {
+                            "loanStatus": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "after": {
+                          "type": "object",
+                          "properties": {
+                            "loanStatus": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "skippedNotices": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "before": {
+                      "loanStatus": "current"
+                    },
+                    "after": {
+                      "loanStatus": "legal-dispute"
+                    },
+                    "skippedNotices": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Lock-in Accounts > Set loan status",
+        "x-permissions": [
+          "write:renewals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "loanStatus": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "loanStatus": "legal-dispute",
+                "note": "Case filed by TFS on 02/10/2026"
+              }
+            }
+          }
+        }
       }
     },
     "/renewals/negotiations": {

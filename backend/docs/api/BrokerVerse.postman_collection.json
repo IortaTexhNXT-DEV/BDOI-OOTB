@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1314 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1328 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20318,7 +20318,7 @@
           ]
         },
         {
-          "name": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)",
+          "name": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)",
           "request": {
             "method": "POST",
             "header": [
@@ -20346,7 +20346,7 @@
                 }
               ]
             },
-            "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
+            "description": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",
@@ -20387,7 +20387,7 @@
                     }
                   ]
                 },
-                "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
+                "description": "Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",
@@ -20730,6 +20730,429 @@
           ]
         },
         {
+          "name": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Communication log of a claim (insurer, client, adjuster, repair shop) with follow-up dates and overdue flags, newest first\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"party\": \"insurer\",\n      \"partyLabel\": \"Insurer\",\n      \"direction\": \"out\",\n      \"method\": \"Email\",\n      \"subject\": \"Follow-up\",\n      \"message\": \"Status of the LOA?\",\n      \"followUpDate\": \"2026-10-08\",\n      \"overdue\": false,\n      \"by\": \"Paolo Reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"party\": \"insurer\",\n  \"direction\": \"in\",\n  \"method\": \"Phone\",\n  \"message\": \"Adjuster visit set for 07/10/2026\",\n  \"followUpDate\": \"2026-10-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Log an exchange on the claim (party, direction, method, subject, message, follow-up date)\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"party\": \"insurer\",\n  \"direction\": \"in\",\n  \"method\": \"Phone\",\n  \"message\": \"Adjuster visit set for 07/10/2026\",\n  \"followUpDate\": \"2026-10-08\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"party\": \"insurer\",\n    \"partyLabel\": \"Insurer\",\n    \"direction\": \"out\",\n    \"method\": \"Email\",\n    \"subject\": \"Follow-up\",\n    \"message\": \"Status of the LOA?\",\n    \"followUpDate\": \"2026-10-08\",\n    \"overdue\": false,\n    \"by\": \"Paolo Reyes\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark the follow-up of a communication done",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/communications/:commId/done",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "communications",
+                ":commId",
+                "done"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "commId",
+                  "value": "",
+                  "description": "commId (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark the follow-up of a communication done\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/communications/:commId/done",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "communications",
+                    ":commId",
+                    "done"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "commId",
+                      "value": "",
+                      "description": "commId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark the follow-up of a communication done\n\nFront-end touchpoint: Operations > Claims > Claim detail > Communications\n\nAccess: write:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"party\": \"insurer\",\n    \"partyLabel\": \"Insurer\",\n    \"direction\": \"out\",\n    \"method\": \"Email\",\n    \"subject\": \"Follow-up\",\n    \"message\": \"Status of the LOA?\",\n    \"followUpDate\": \"2026-10-08\",\n    \"overdue\": false,\n    \"by\": \"Paolo Reyes\",\n    \"followUpDone\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/insurer-advice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "insurer-advice"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount\n\nFront-end touchpoint: Operations > Claims > Claim detail > Insurer advice\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insurerClaimNumber\": \"MAPFRE-CL-7781\",\n  \"insurerHandler\": \"Rosa Lim\",\n  \"adviceStatus\": \"loa-issued\",\n  \"authorisationCode\": \"AUTH-55102\",\n  \"offerAmount\": 72000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/insurer-advice",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "insurer-advice"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the insurer's advice: insurer claim number, claim handler, advice status (claims.insurer_advice_statuses), authorisation code, offered amount\n\nFront-end touchpoint: Operations > Claims > Claim detail > Insurer advice\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insurerClaimNumber\": \"MAPFRE-CL-7781\",\n  \"insurerHandler\": \"Rosa Lim\",\n  \"adviceStatus\": \"loa-issued\",\n  \"authorisationCode\": \"AUTH-55102\",\n  \"offerAmount\": 72000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Insurer advice recorded\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Pending\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    },\n    \"insurerAdvice\": \"loa-issued\",\n    \"insurerAdviceLabel\": \"LOA issued\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/insurer-follow-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "insurer-follow-up"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date\n\nFront-end touchpoint: Operations > Claims > Claim detail > Follow up insurer\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"May we have the status of the LOA?\",\n  \"followUpDate\": \"2026-10-09\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/insurer-follow-up",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "insurer-follow-up"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "E-mail a follow-up to the insurer (template claim_insurer_followup; to defaults to the insurer's address) and log it with its follow-up date\n\nFront-end touchpoint: Operations > Claims > Claim detail > Follow up insurer\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"message\": \"May we have the status of the LOA?\",\n  \"followUpDate\": \"2026-10-09\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"to\": \"claims@insurer.ph\",\n    \"communication\": {\n      \"id\": 1,\n      \"party\": \"insurer\",\n      \"partyLabel\": \"Insurer\",\n      \"direction\": \"out\",\n      \"method\": \"Email\",\n      \"subject\": \"Follow-up\",\n      \"message\": \"Status of the LOA?\",\n      \"followUpDate\": \"2026-10-08\",\n      \"overdue\": false,\n      \"by\": \"Paolo Reyes\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Cash position of a settlement paid through the broker: recoverable from / received from each insurer, payable to / paid to the claimant, movements, bank accounts",
           "request": {
             "method": "GET",
@@ -20823,7 +21246,7 @@
                 }
               ]
             },
-            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:claim-funds",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
@@ -20864,7 +21287,7 @@
                     }
                   ]
                 },
-                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:receipts",
+                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received; not more than the insurer's outstanding share)\n\nFront-end touchpoint: Operations > Claims > Claim settlement > Funds received\n\nAccess: write:claim-funds",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-09-29\",\n  \"reference\": \"RA-8812\"\n}",
@@ -20985,7 +21408,100 @@
           ]
         },
         {
-          "name": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester",
+          "name": "Record the verification of the death on a death benefit claim; the follow-up date counts from it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/:id/verify-death",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                ":id",
+                "verify-death"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the verification of the death on a death benefit claim; the follow-up date counts from it\n\nFront-end touchpoint: Operations > Claims > Claim detail > Verify death\n\nAccess: write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verifiedOn\": \"2026-10-05\",\n  \"note\": \"PSA death certificate seen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/:id/verify-death",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    ":id",
+                    "verify-death"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the verification of the death on a death benefit claim; the follow-up date counts from it\n\nFront-end touchpoint: Operations > Claims > Claim detail > Verify death\n\nAccess: write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"verifiedOn\": \"2026-10-05\",\n  \"note\": \"PSA death certificate seen\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Death verified\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Pending\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    },\n    \"deathVerifiedOn\": \"2026-10-05\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix",
           "request": {
             "method": "PUT",
             "header": [
@@ -21012,7 +21528,7 @@
                 }
               ]
             },
-            "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+            "description": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -21052,7 +21568,7 @@
                     }
                   ]
                 },
-                "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+                "description": "Checker decision on a pending settlement (decision approve | return): the approver differs from the requester, approves no more than requested and within the claim settlement limit of the Authority Matrix\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -21151,6 +21667,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"timestamp\": \"2026-09-21T02:00:00Z\",\n      \"action\": \"Status Changed\",\n      \"fieldName\": \"claimStatus\",\n      \"oldValue\": \"registered\",\n      \"newValue\": \"in-review\",\n      \"user\": \"j.claims\"\n    }\n  ],\n  \"total\": 1,\n  \"sort\": \"desc\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claims/cancel/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                "cancel",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note\n\nFront-end touchpoint: Operations > Claims > Claim detail > Cancel claim\n\nAccess: write:claims, approve:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"CCN-DUPLICATE\",\n  \"note\": \"Same loss as CLM-2026-00014\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/cancel/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    "cancel",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a claim registered in error (pending or processing): reasonCode of the Reason Codes master (claim_cancel) and a note\n\nFront-end touchpoint: Operations > Claims > Claim detail > Cancel claim\n\nAccess: write:claims, approve:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"CCN-DUPLICATE\",\n  \"note\": \"Same loss as CLM-2026-00014\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Claim cancelled\",\n  \"data\": {\n    \"id\": \"clm_1a2b\",\n    \"claimNumber\": \"CLM-2026-00001\",\n    \"status\": \"Cancelled\",\n    \"claimStatus\": \"Pending\",\n    \"lifecycleStatus\": \"registered\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"policyHolderName\": \"Maria Santos\",\n    \"lob\": \"MOTOR\",\n    \"dateOfIncident\": \"2026-09-20\",\n    \"reportedDate\": \"2026-09-21\",\n    \"estimatedClaimAmount\": 85000,\n    \"policy\": {\n      \"policyNumber\": \"POL-2026-00001\",\n      \"clientId\": \"cl_1\"\n    }\n  }\n}"
             }
           ]
         },
@@ -21374,7 +21983,84 @@
           ]
         },
         {
-          "name": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",
+          "name": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/registration-check?policyId=pol_1&lossDate=2026-09-20&reportedDate=2026-10-02",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                "registration-check"
+              ],
+              "query": [
+                {
+                  "key": "policyId",
+                  "value": "pol_1"
+                },
+                {
+                  "key": "lossDate",
+                  "value": "2026-09-20"
+                },
+                {
+                  "key": "reportedDate",
+                  "value": "2026-10-02"
+                }
+              ]
+            },
+            "description": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss\n\nFront-end touchpoint: Operations > Claims > Claim details\n\nAccess: write:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/registration-check?policyId=pol_1&lossDate=2026-09-20&reportedDate=2026-10-02",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    "registration-check"
+                  ],
+                  "query": [
+                    {
+                      "key": "policyId",
+                      "value": "pol_1"
+                    },
+                    {
+                      "key": "lossDate",
+                      "value": "2026-09-20"
+                    },
+                    {
+                      "key": "reportedDate",
+                      "value": "2026-10-02"
+                    }
+                  ]
+                },
+                "description": "Before registering a claim on a policy: acceptance problems, outstanding premium, claims ratio of the customer, late intimation and claims already registered for the same date of loss\n\nFront-end touchpoint: Operations > Claims > Claim details\n\nAccess: write:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyNumber\": \"POL-2026-00001\",\n    \"outstandingPremium\": 0,\n    \"claimsRatio\": {\n      \"claims\": 1,\n      \"claimsAmount\": 20000,\n      \"premium\": 45000,\n      \"ratio\": 44.44\n    },\n    \"intimation\": {\n      \"days\": 12,\n      \"limit\": 30,\n      \"late\": false\n    },\n    \"duplicates\": [],\n    \"problems\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason",
           "request": {
             "method": "PUT",
             "header": [
@@ -21401,7 +22087,7 @@
                 }
               ]
             },
-            "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+            "description": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
@@ -21441,7 +22127,7 @@
                     }
                   ]
                 },
-                "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
+                "description": "Reject (repudiate) a claim: reasonCode of the Reason Codes master (repudiation) with the reason as its note, or the reason as text (one is required); the client is e-mailed the reason\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
@@ -21499,7 +22185,7 @@
                 }
               ]
             },
-            "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims, read:reports"
+            "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -21535,7 +22221,7 @@
                     }
                   ]
                 },
-                "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims, read:reports"
+                "description": "Claims dashboard data (summary, breakdowns, ageing, detailed rows); format=excel downloads an .xlsx\n\nFront-end touchpoint: Claims > Claims Dashboard\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -21552,12 +22238,12 @@
           ]
         },
         {
-          "name": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)",
+          "name": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Open&reportType=excel",
+              "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Settled&dateBasis=settlement&claimType=Motor&insurerId=2&reportType=excel",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -21577,7 +22263,19 @@
                 },
                 {
                   "key": "criteria",
-                  "value": "Open"
+                  "value": "Settled"
+                },
+                {
+                  "key": "dateBasis",
+                  "value": "settlement"
+                },
+                {
+                  "key": "claimType",
+                  "value": "Motor"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "2"
                 },
                 {
                   "key": "reportType",
@@ -21585,7 +22283,7 @@
                 }
               ]
             },
-            "description": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims, read:reports"
+            "description": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -21594,7 +22292,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Open&reportType=excel",
+                  "raw": "{{baseUrl}}/claims/reports/criteria?startDate=2026-01-01&endDate=2026-09-28&criteria=Settled&dateBasis=settlement&claimType=Motor&insurerId=2&reportType=excel",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -21614,7 +22312,19 @@
                     },
                     {
                       "key": "criteria",
-                      "value": "Open"
+                      "value": "Settled"
+                    },
+                    {
+                      "key": "dateBasis",
+                      "value": "settlement"
+                    },
+                    {
+                      "key": "claimType",
+                      "value": "Motor"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "2"
                     },
                     {
                       "key": "reportType",
@@ -21622,7 +22332,7 @@
                     }
                   ]
                 },
-                "description": "Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims, read:reports"
+                "description": "Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)\n\nFront-end touchpoint: Reports > Operational Reports > Claims\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -21639,7 +22349,7 @@
           ]
         },
         {
-          "name": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled",
+          "name": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)",
           "request": {
             "method": "PUT",
             "header": [
@@ -21666,7 +22376,7 @@
                 }
               ]
             },
-            "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+            "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -21706,7 +22416,7 @@
                     }
                   ]
                 },
-                "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+                "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -21982,7 +22692,7 @@
                 }
               ]
             },
-            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:receipts",
+            "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:claim-funds",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-10-04\",\n  \"reference\": \"RA-8812\"\n}",
@@ -22023,7 +22733,7 @@
                     }
                   ]
                 },
-                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:receipts",
+                "description": "Record settlement funds received from an insurer into a bank account (posting rule claim.funds_received)\n\nFront-end touchpoint: Accounts > Claims Settlements > Funds received\n\nAccess: write:claim-funds",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insurerId\": 1,\n  \"amount\": 75000,\n  \"bankAccount\": \"ACC-OPS-001\",\n  \"date\": \"2026-10-04\",\n  \"reference\": \"RA-8812\"\n}",
@@ -22045,6 +22755,115 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"journalNumber\": \"JV-2026-00140\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/claim-payments/claims/:id/movements/:movementId/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claim-payments",
+                "claims",
+                ":id",
+                "movements",
+                ":movementId",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "movementId",
+                  "value": "",
+                  "description": "movementId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed\n\nFront-end touchpoint: Accounts > Claims Settlements > Reverse\n\nAccess: reverse:claim-cash",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"CRV-AMOUNT\",\n  \"note\": \"Recorded 75,000 instead of 57,000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/claim-payments/claims/:id/movements/:movementId/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claim-payments",
+                    "claims",
+                    ":id",
+                    "movements",
+                    ":movementId",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "movementId",
+                      "value": "",
+                      "description": "movementId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse funds received or a payment to the claimant recorded in error (reason code of context claim_cash_reversal and a remark; not by the user who recorded it); the journal is reversed\n\nFront-end touchpoint: Accounts > Claims Settlements > Reverse\n\nAccess: reverse:claim-cash",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"CRV-AMOUNT\",\n  \"note\": \"Recorded 75,000 instead of 57,000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"movementId\": 7,\n    \"kind\": \"funds-received\",\n    \"amount\": 75000,\n    \"journalNumber\": \"JV-2026-00152\"\n  }\n}"
             }
           ]
         },
@@ -90832,6 +91651,99 @@
           ]
         },
         {
+          "name": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/not-for-renewal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "not-for-renewal"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Not for renewal\n\nAccess: write:renewals, assign:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"NFR-LOANCLOSED\",\n  \"note\": \"Loan fully paid; client insures elsewhere\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/not-for-renewal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "not-for-renewal"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Not for renewal\n\nAccess: write:renewals, assign:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"NFR-LOANCLOSED\",\n  \"note\": \"Loan fully paid; client insures elsewhere\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Not for renewal\",\n    \"statusCode\": \"not-renewed\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Send the next renewal notice (first, second, final in order); stage may be given explicitly",
           "request": {
             "method": "POST",
@@ -90990,7 +91902,100 @@
           ]
         },
         {
-          "name": "Reinstate a lapsed renewal within the reinstatement window",
+          "name": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "reassign"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"RRA-WORKLOAD\",\n  \"note\": \"Ana is on leave until 20/10/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/reassign",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "reassign"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"RRA-WORKLOAD\",\n  \"note\": \"Ana is on leave until 20/10/2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Carlo Mendoza\",\n    \"renewalAttempts\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window",
           "request": {
             "method": "POST",
             "header": [
@@ -91017,7 +92022,7 @@
                 }
               ]
             },
-            "description": "Reinstate a lapsed renewal within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+            "description": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"note\": \"Client accepted win-back offer\"\n}",
@@ -91057,7 +92062,7 @@
                     }
                   ]
                 },
-                "description": "Reinstate a lapsed renewal within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+                "description": "Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"note\": \"Client accepted win-back offer\"\n}",
@@ -91476,6 +92481,55 @@
           ]
         },
         {
+          "name": "Active users a renewal can be reassigned to (holders of write:renewals)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/assignees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "assignees"
+              ]
+            },
+            "description": "Active users a renewal can be reassigned to (holders of write:renewals)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/assignees",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "assignees"
+                  ]
+                },
+                "description": "Active users a renewal can be reassigned to (holders of write:renewals)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue > Reassign\n\nAccess: write:renewals, assign:renewals"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Ana Reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact",
           "request": {
             "method": "GET",
@@ -91761,6 +92815,186 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyNumber\": \"POL-2025-00007\",\n      \"insuredName\": \"Tech Solutions Ltd\",\n      \"lapseDate\": \"2026-09-01\",\n      \"daysLapsed\": 27,\n      \"premiumLost\": 85000,\n      \"lapseReason\": \"Customer No Longer Needs Coverage: sold the vehicle\",\n      \"lapseReasonCode\": \"LAP-COV\",\n      \"reinstatementEligible\": true,\n      \"winBackAttempts\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/lock-ins?asOf=2026-10-10&days=60&loanStatus=All&format=excel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "lock-ins"
+              ],
+              "query": [
+                {
+                  "key": "asOf",
+                  "value": "2026-10-10"
+                },
+                {
+                  "key": "days",
+                  "value": "60"
+                },
+                {
+                  "key": "loanStatus",
+                  "value": "All"
+                },
+                {
+                  "key": "format",
+                  "value": "excel"
+                }
+              ]
+            },
+            "description": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts\n\nAccess: read:renewals"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/lock-ins?asOf=2026-10-10&days=60&loanStatus=All&format=excel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "lock-ins"
+                  ],
+                  "query": [
+                    {
+                      "key": "asOf",
+                      "value": "2026-10-10"
+                    },
+                    {
+                      "key": "days",
+                      "value": "60"
+                    },
+                    {
+                      "key": "loanStatus",
+                      "value": "All"
+                    },
+                    {
+                      "key": "format",
+                      "value": "excel"
+                    }
+                  ]
+                },
+                "description": "Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts\n\nAccess: read:renewals"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"days\": 60,\n    \"to\": \"2026-12-09\",\n    \"items\": [\n      {\n        \"policyNumber\": \"POL-2025-00412\",\n        \"clientName\": \"Maria Santos\",\n        \"sourceLabel\": \"Scheme 2\",\n        \"year\": 2,\n        \"reviewDate\": \"2026-10-21\",\n        \"tfsLoanAccount\": \"TFS-0012345\",\n        \"loanStatusLabel\": \"Current\",\n        \"noticeTreatment\": {\n          \"code\": \"scheme2\",\n          \"label\": \"Suppressed: Scheme 2\"\n        }\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/lock-ins/:policyId/loan-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                "lock-ins",
+                ":policyId",
+                "loan-status"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts > Set loan status\n\nAccess: write:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanStatus\": \"legal-dispute\",\n  \"note\": \"Case filed by TFS on 02/10/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/lock-ins/:policyId/loan-status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    "lock-ins",
+                    ":policyId",
+                    "loan-status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy\n\nFront-end touchpoint: Operations > Renewals > Lock-in Accounts > Set loan status\n\nAccess: write:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"loanStatus\": \"legal-dispute\",\n  \"note\": \"Case filed by TFS on 02/10/2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"before\": {\n      \"loanStatus\": \"current\"\n    },\n    \"after\": {\n      \"loanStatus\": \"legal-dispute\"\n    },\n    \"skippedNotices\": 1\n  }\n}"
             }
           ]
         },

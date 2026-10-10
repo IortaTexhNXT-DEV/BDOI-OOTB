@@ -21,6 +21,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Queue | View |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | View |
+| Operations > Renewals | Lock-in Accounts | View |
 | Operations > Renewals | Negotiations | View |
 | Operations > Renewals | Lapse Management | View |
 | Operations > Renewals | Performance | View |
@@ -142,7 +143,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Lock-in Accounts, Negotiations, Lapse Management and Performance |
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |

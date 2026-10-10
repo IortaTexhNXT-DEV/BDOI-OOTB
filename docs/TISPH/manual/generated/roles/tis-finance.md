@@ -128,6 +128,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
 | Operations | Renewals | View | See renewals | No screen of its own |
 | Operations | Claims | View | See claims | No screen of its own |
+| Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
 | Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |

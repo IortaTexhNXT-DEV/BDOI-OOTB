@@ -383,8 +383,10 @@ The cards count **Open claims**, **Settlement to approve**, **Approved, to be pa
 | **Processing** | Advised to the insurer, under review or with the adjuster |
 | **Pending Approval** | The settlement waits for the checker |
 | **Approved** | The settlement is approved and not yet released (only when the release on approval is switched off) |
+| **Partially Settled** | A partial settlement is approved; the claim stays open for the final settlement |
 | **Settled** | The settlement is approved and released |
 | **Rejected** | Declined by the insurer, with a reason |
+| **Cancelled** | Registered in error or a duplicate notification, with a reason |
 
 A claim follows nine steps, shown at the top of the claim: **Notification**, **Insurer advice**, **Documents**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval** and **Payment**. The **Next step** bar at the bottom names what is to be done and leads to it.
 
@@ -394,12 +396,13 @@ A claim follows nine steps, shown at the top of the claim: **Notification**, **I
 
 1. Choose {{menu:/agent/policy}}, select **More actions** in the row of the policy, then **Claim**. (Or select **Register claim** in [My Work](#my-work).)
 2. On **Claim notification**, check the policy and insured, and the insured's address.
-3. Enter the incident: **Date of loss** (required), **Time of loss**, **Cause of loss** (required), **Place of loss** (required, with city and province), **Estimated Claim Amount** and, if known, the **Insurance Company Claim Number**.
+3. Enter the incident: **Date of loss** (required), **Time of loss**, **Cause of loss** (required), **Place of loss** (required, with city and province), **Estimated Claim Amount**, **Reported through** (TFS, call centre, insurer, dealer, walk-in or e-mail), for a motor claim the **Loss extent** (**Partial loss** or **Total loss**) and, if known, the **Insurance Company Claim Number**.
 4. Enter the **Driver at the time of loss** (**Same as Policy Holder**, or the **Driver's name** and address) and the **Third party** if any (name, contact number, plate number, unit, shop, insurer).
-5. Select **Next**. The claim is created (CLM-YYYY-NNNNN) as **Pending**.
-6. On **Insurer advice**, send the Preliminary Loss Advice to the insurer by e-mail and record the insurer's claim number.
+5. Select **Next**, then on **Insurer advice** select **Register and send**.
+6. When the policy has premium outstanding, the claim is reported late or a claim of the same date of loss is already registered on the policy, **Check before registering** shows the **Outstanding premium**, the **Claims ratio of the client**, the days between the loss and the report and the claims of the same date. Select **Register and send** to register the claim anyway, or **Cancel**.
+7. The claim is created (CLM-YYYY-NNNNN) as **Pending**, assigned to the claims handler with the fewest open claims, and the Preliminary Loss Advice is e-mailed to the insurer.
 
-The date of loss must fall within the period of cover of the policy.
+The date of loss must fall within the period of cover of the policy and cannot be in the future. A claim reported more than the late intimation days after the loss (30 as delivered) is marked **Late** and the claims handlers are alerted. The follow-up date of the claim depends on the line and the loss extent (for example 30 days for a partial motor loss, 60 for a total loss, 90 for fire, marine and engineering). For Credit Life the claim is a death benefit claim on the TFS loan.
 
 ![New claim, step 1: Claim notification](images/screens-operations/claim-new.png)
 
@@ -415,21 +418,41 @@ On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), 
 
 On **Assessment**, check the key facts of the claim and the **Assessment basis** (date reported, adjuster and adjuster status) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
 
-On **Settlement**, enter the **Settlement type** (for example **Repair Shop**, or payment to the insured), the **Settlement amount** the insurer agreed, the deductible or participation and the payee, and select **Submit settlement**. The claim becomes **Pending Approval**: a second claims user must approve it before the claim is settled.
+On **Settlement**, choose **Final** or **Partial**, enter the **Settlement type** (for example **Repair Shop**, or payment to the insured), the **Settlement amount** the insurer agreed, the deductible or participation and the payee, and select **Submit settlement**. The claim becomes **Pending Approval**: a second claims user must approve it before the claim is settled. A partly settled claim shows **Settled so far** and is settled further, or finally, from the same step.
 
 ### Approve a settlement (checker) {#approve-a-settlement-checker}
 
 The settlement is approved by {{roles:approve:claims}}, never by the user who submitted it.
 
 1. Open the claim from [My Work](#my-work) or from the list (**Settlement to approve**).
-2. On **Approval**, check the settlement against the adjuster's report and the documents.
-3. Approve it, or return it with a reason.
+2. On **Approval**, check the settlement against the adjuster's report and the documents: the **Settlement** (partial or final), **Requested by** and what was **Settled before**.
+3. Enter the **Approved amount** (the amount requested, or less), then approve it, or return it with a reason.
+
+The approved amount must be within the approver's claim settlement limit on the [Authority Matrix](#authority-matrix) when the limit is enforced. **Requested by** and **Approved by** show the users' names.
 
 As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between. When the insurer pays through TISPH, the settlement is received from the insurer and paid out to the claimant on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker), and the **Payment** step shows that payment.
 
 ### Claim details, documents and audit trail {#claim-details-documents-and-audit-trail}
 
-Open a claim from the list (the eye in **Actions**). The claim page shows the key facts (**Policy number**, **Insured**, **Insurer**, **Insurer claim number**, **Date of loss**, **Cause of loss**, **Estimated amount**, **Settlement amount**) and the panels **Claim details** (loss, policy and insured, driver, third party), **Adjuster report**, **Settlement details** and **Documents**. **History** shows every change: who made it, when and what changed. **Close** returns to the list.
+Open a claim from the list (the eye in **Actions**). The claim page shows the key facts (**Policy number**, **Insured**, **Insurer**, **Insurer claim number**, **Date of loss**, **Cause of loss**, **Estimated amount**, **Settlement amount**, **Reported through**, **Loss extent**, **Follow-up due**) and the panels **Claim details** (loss, policy and insured, driver, third party), **Adjuster report**, **Settlement details** and **Documents**. **History** shows every change: who made it, when and what changed. **Close** returns to the list.
+
+### Insurer advice and communications {#insurer-advice-and-communications}
+
+The **Insurer** panel shows the insurer claim number, the **Insurer claims handler**, the **Insurer advice** (**Under evaluation**, **Incomplete requirements**, **LOA issued**, **Cheque available**, **Approved by the insurer**, **Denied by the insurer**), the **Authorisation code** and the **Amount offered**. **Record insurer advice** updates them.
+
+The **Communications** panel logs each exchange with the insurer, the client, the adjuster or the repair shop: date, party, sent or received, method, message, **Follow-up date** and who logged it. An overdue follow-up shows **Overdue** until **Mark follow-up done**. **Log communication** records one; **Follow up insurer** e-mails the insurer and logs it. The claims handlers are alerted of overdue follow-ups and of claims past their follow-up date.
+
+The **Settlements** panel lists each settlement of the claim, partial and final, with the amount requested and approved, its status, **Requested by** and **Decided by**.
+
+### Cancel a claim or verify a death {#cancel-a-claim-or-verify-a-death}
+
+**Cancel claim** cancels a claim registered in error or notified twice: choose the reason (**Registered in error**, **Duplicate notification of the same loss**) and add a note. A settlement waiting for approval is returned.
+
+On a death benefit claim (Credit Life), **Verify death** records the date the death was verified; the follow-up date counts from it.
+
+### Reverse a settlement movement {#reverse-a-settlement-movement}
+
+Funds received from the insurer and payments to the claimant are recorded on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker) by {{roles:write:claim-funds}}. A movement recorded in error is reversed with **Reverse movement**, a reason and a note, by {{roles:reverse:claim-cash}}, never by the user who recorded it. The journal is reversed and the movement shows **Reversed**.
 
 ## Renewal Policy {#renewal-policy}
 
@@ -480,7 +503,24 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, risk level and account executive. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
 
-The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed** or lapsed. The renewal notices are e-mailed to the client on the schedule of the renewals.
+The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed**, lapsed or **Not for renewal**. The renewal notices are e-mailed to the client 90, 60 and 30 days before expiry (30 and 15 days for Credit Life), on working days; a notice missed on a holiday goes out on the next working day.
+
+The notices of a policy in a lock-in or under Scheme 2 are not sent, and those of a policy whose TFS loan is past due, terminated, in legal dispute or under fraud review are held: the stage shows **Lock-in: not sent** or **Held**, and **Notices withheld** replaces the send action.
+
+Under **More actions**, {{roles:assign:renewals}} can:
+
+- **Reassign**: move the renewal to another owner, with a reason.
+- **Not for renewal**: close the renewal with a reason; no more notices are sent and the policy shows **Not for renewal** on Lapse Management, where it can still be reinstated within the reinstatement period.
+
+A renewal opened from [My Work](#my-work) or a notification opens on the selected renewal.
+
+## Lock-in Accounts {#lock-in-accounts}
+
+{{screen:/renewal/lock-in-accounts}}
+
+Lock-in Accounts lists the lock-in (promotion, Scheme 1 ARA) and Scheme 2 accounts expiring within the review window (60 days as delivered) or the days chosen. The cards count the **Accounts**, those whose **Review due** date is reached, **Notices suppressed** and **Notices held**. Each row shows the policy and insured, the lock-in and its year, **Expiry**, **Review date**, **TFS loan status** with the loan account, the notice treatment and the owner. Filter by lock-in, loan status and notice treatment, or search by policy, client or loan account.
+
+**Download Excel** downloads the list. **Open renewal** opens the renewal of the account. **Set loan status** records the TFS loan status (**Current**, **Past due**, **Fraud**, **Terminated**, **Legal dispute**, **Closed**); a status that holds the notices needs a note, and the notices already queued for the policy are skipped. A review task is created in [My Work](#my-work) for the owner when the review date is reached.
 
 **At-Risk Policies** is the risk register: open renewals with a **Medium** or higher retention risk. The cards count the **Policies at risk**, **High**, **Medium**, the **Premium at risk** and those **Without a next action**. Each row shows the risk score and its **Main drivers** (for example claims in the current term, first renewal with the broker, premium up on the renewal quote, expiry close), and the **Next action** with its due date. Open the policy to plan the next action.
 
@@ -495,6 +535,8 @@ Select a renewal to see its **Renewal terms** (RN-YYYY-NNNNN), and the **Timelin
 - **Add update**: a change of terms or stage.
 - **Log communication**: a call, e-mail or meeting with the client, its outcome and the next step.
 - **Submit for approval**: the renewal terms go to {{roles:approve:renewals}}, a user other than the one who submitted them.
+
+While the terms wait for approval they cannot be changed. The approved premium is the premium booked on the renewed policy, and an expired renewal quote cannot be submitted or completed. When the renewal terms limit is enforced, the premium must be within the approver's limit on the [Authority Matrix](#authority-matrix). The new term starts the day after the expiring term ends.
 
 ## Payments {#payments}
 

@@ -53,7 +53,7 @@ Reports > All Reports shows the reports your role may run, as cards grouped unde
 ### Run a report {#reports-run}
 
 1. Choose {{menu:/reports/catalogue}} and select the report (or choose it from the report menu).
-2. In **Report Criteria**, choose how the report is grouped or which part it shows, for example **Overall**, by **Agent**, **Branch** or **Principal Insurer**; **Summary** or **Detailed**; **Open**, **Settled** or **Aging** for the claims reports.
+2. In **Report Criteria**, choose how the report is grouped or which part it shows, for example **Overall**, by **Agent**, **Branch** or **Principal Insurer**; **Summary** or **Detailed**; **Open**, **Partial**, **Settled**, **Rejected**, **Cancelled**, **Aging** or by **Claim Type** for the claims reports.
 3. Enter **From Date** and **To Date** (required). Most reports take the records of the period; the ageing and balance reports are computed as of the **To Date**.
 4. Narrow the report with the other filters if needed: **Agent**, **Branch**, **Client**, **Status**, **Company (principal insurer)**, **Product**, **Bank Account**, **GL Account**. A filter marked "Used with criteria" applies only with the criteria of that name.
 5. Choose the **File format**: **CSV**, **Excel (XLSX)** or **PDF**.
@@ -94,7 +94,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 
 | Report | Contents |
 |---|---|
-| **Claims Position** | Claims reported in the period with estimate, approved and settled amounts, age and ageing bucket |
+| **Claims Position** | Claims reported in the period with claim type, line, estimate, approved and settled amounts, settlement date, age and ageing bucket; filter by insurer, product, agent, branch or client |
 | **Claims Ageing** | Open claims by ageing bucket (optionally per insurer or agent) with estimate and approved amounts |
 | **Co-insurance Register** | Co-insured policies incepted in the period: each participating insurer with its role, share, premium, commission, premium taxes and premium due |
 | **Remittance Summary**, **Broker Commission Statement** | The remittances and the commission of the period, for information |
