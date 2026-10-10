@@ -18,6 +18,7 @@ import { coverNoteExpiry } from '../src/modules/cover-notes/jobs.js';
 import { pdcDepositDue } from '../src/modules/pdc/jobs.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { claimDocumentReminders } from '../src/modules/claim-documents/jobs.js';
+import { enableFeatures } from './helpers.js';
 
 let ctx; let admin; let manager; let asOf;
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -28,6 +29,8 @@ const bill = async (m, amount = m.gross) => withTransaction(async (db) => create
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['claims-settlements', 'payables', 'fixed-assets']);
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
   await ctx.api('post', '/users').send({ username: 'ops.manager', password: 'Welcome@123', displayName: 'AP manager', roles: ['accounting-manager'], email: 'ops.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'ops.manager', password: 'Welcome@123' })).body.accessToken;

@@ -13,6 +13,7 @@ defects in production.
 |---|---|
 | [backend.md](backend.md) | The API and scheduled jobs (`backend/`): layout, running and testing, configuration, tracing a defect, logs, common production issues, how to add routes, settings, migrations, masters, posting rules, number series, reports and jobs. |
 | [frontend.md](frontend.md) | The React application (`brokerverse/`), written by the front-end team. |
+| [features.md](features.md) | Release tiers (Phase 1, Phase 2, future releases, platform), the feature catalogue, how a new screen registers its feature, parts of screens, the manual of the edition and tests of a feature that is off. |
 | [dashboards.md](dashboards.md) | The dashboard and chart standard: data colour tokens, chart forms, KPI cards, periods, drill-down and accessibility. |
 | [`backend/docs/MODULE_GUIDE.md`](../../backend/docs/MODULE_GUIDE.md) and the module READMEs (`backend/src/modules/*/README.md`) | Modules of the API: purpose, routes, tables, jobs and settings. The TISPH architecture is described in `docs/TISPH/pack/TISPH_Solution_Architecture.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md)). |
 

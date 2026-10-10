@@ -432,7 +432,11 @@ The settlement is approved by {{roles:approve:claims}}, never by the user who su
 
 The approved amount must be within the approver's claim settlement limit on the [Authority Matrix](#authority-matrix) when the limit is enforced. **Requested by** and **Approved by** show the users' names.
 
-As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between. When the insurer pays through TISPH, the settlement is received from the insurer and paid out to the claimant on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker), and the **Payment** step shows that payment.
+As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between.
+
+::: feature claims-settlements
+When the insurer pays through TISPH, the settlement is received from the insurer and paid out to the claimant on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker), and the **Payment** step shows that payment.
+:::
 
 ### Claim details, documents and audit trail {#claim-details-documents-and-audit-trail}
 

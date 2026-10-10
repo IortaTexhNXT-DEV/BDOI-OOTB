@@ -9,6 +9,7 @@ export const REASON_CONTEXTS = [
   "remittance_reject", "remittance_withdraw", "remittance_cancel", "remittance_revoke", "remittance_off_cycle", "remittance_line_exclude",
   "exception_escalate", "exception_resolve", "exception_reopen", "reconciliation_difference", "reconciliation_unmatch", "confirmation_difference",
   "payment_duplicate_override", "billing_reject", "billing_cancel", "pdc_cancel", "pdc_bounce", "receipt_reversal", "receipt_reversal_reject", "unapplied_refund",
+  "feature_change", "feature_reject",
 ];
 
 const words = (code) => {

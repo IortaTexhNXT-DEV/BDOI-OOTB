@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool, query, one, many } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { today, addDays } from '../src/lib/dates.js';
@@ -49,6 +49,8 @@ const settle = (who, id, f) => {
 
 beforeAll(async () => {
   ctx = await setup();
+  // claims paid through the broker is a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['claims-settlements']);
   todayStr = await today();
   await setSetting('calendar.working_weekdays', [1, 2, 3, 4, 5, 6, 7]);
   await makeUser('cc.sales', ['tis-sales-associate'], 'Sofia Sales');

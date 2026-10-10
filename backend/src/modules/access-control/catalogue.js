@@ -6,7 +6,8 @@
  * out of the business view); `baseline` is Basic access, held by every role and never removed.
  *
  * A permission added by a later migration needs its entry here; until then it is shown under "Other" with the
- * description of the database (describe), and test/role-permissions.test.js fails.
+ * description of the database (describe), and test/role-permissions.test.js fails. The platform permissions
+ * (lib/platform.js) are not part of the tenant's catalogue: they are never offered or granted on Role Permissions.
  */
 
 export const LEVELS = ['view', 'edit', 'approve', 'special'];
@@ -63,6 +64,7 @@ const MODULE_LIST = [
   ['integrations', 'masters', 'Integrations', ['Integrations', 'Message Templates', 'Insurer Integration']],
   ['audit', 'masters', 'Audit trail', ['Audit Trail']],
   ['data-load', 'masters', 'Go-live data load', ['Go-Live Data Load']],
+  ['features', 'masters', 'Features and releases', ['Features & Releases']],
   ['users', 'access', 'Users', ['User', 'User Access Matrix']],
   ['roles', 'access', 'Roles', ['Role', 'Role Permissions']],
   ['access-control', 'access', 'Access control', ['Authority Matrix', 'Delegations', 'Segregation of Duties', 'Access Reviews']],
@@ -164,6 +166,7 @@ const PERMISSION_LIST = {
   'write:audit': ['audit', 'edit', 'Not used by any screen', { checked: false }],
   'read:data-load': ['data-load', 'view', 'Download go-live workbooks, read the load history, compare environments'],
   'write:data-load': ['data-load', 'edit', 'Upload, validate and load the go-live workbooks'],
+  'read:features': ['features', 'view', 'See the catalogue of features and releases with their status (read only)'],
   'read:users': ['users', 'view', 'See users and their sign-in history'],
   'write:users': ['users', 'edit', 'Create users, change their roles, reset passwords, lock and unlock'],
   'read:roles': ['roles', 'view', 'Not used by any screen (every signed-in user sees the list of roles)', { checked: false }],

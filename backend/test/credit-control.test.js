@@ -11,12 +11,15 @@ import { addDays, today } from '../src/lib/dates.js';
 import { createReceivable, findPolicy } from '../src/modules/receipts/receivables.js';
 import { issuePolicy } from '../src/modules/policies/service.js';
 import { addMonths, allocatePaid, generateSchedule } from '../src/modules/credit-control/instalments.js';
+import { enableFeatures } from './helpers.js';
 
 let ctx;
 let manager;
 let asOf;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['client-credit-limits']);
   await ctx.api('post', '/users').send({ username: 'cc.manager', password: 'Welcome@123', displayName: 'Credit manager', roles: ['accounting-manager'], email: 'cc.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'cc.manager', password: 'Welcome@123' })).body.accessToken;
   manager = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);

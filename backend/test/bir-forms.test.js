@@ -15,6 +15,7 @@ import { alphalist1604EDat, qapDat, sawtDat, slspPurchasesDat, slspSalesDat, spl
 import { invoicingSetup } from '../src/modules/bir/invoices.js';
 import { buildPayload, canonical, signPayload } from '../src/modules/bir/eis.js';
 import { splitTin } from '../src/modules/bir/common.js';
+import { enableFeatures } from './helpers.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (name) => fs.readFileSync(path.join(here, 'fixtures', 'bir', name), 'latin1');
@@ -23,6 +24,8 @@ let ctx;
 let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['bir-returns', 'bir-2551q', 'bir-eis', 'bir-reports']);
   maker = ctx.as('maker');
 });
 afterAll(async () => { await pool.end(); });

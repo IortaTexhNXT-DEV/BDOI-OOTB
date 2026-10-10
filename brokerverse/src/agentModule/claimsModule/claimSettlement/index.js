@@ -13,6 +13,7 @@ import { formatDate } from "../../../utility/dateFormat";
 import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
 import FormErrorSummary from "../shared/FormErrorSummary";
 import { stepForStatus } from "../shared/claimJourney";
+import Feature from "../../../features/Feature";
 import SettlementCash from "./SettlementCash";
 
 /** Claim documents printed from the claim (claimsService.getClaimDocuments), with their translation key. */
@@ -123,7 +124,9 @@ const ClaimSettlement = () => {
               )} />
             </DataTable>
           </ClaimSection>
-          <SettlementCash claimId={claim.id || claimId} onPosition={setCash} />
+          <Feature name="claims-settlements">
+            <SettlementCash claimId={claim.id || claimId} onPosition={setCash} />
+          </Feature>
         </>
       )}
       <ClaimActions next={next} tone={next && !outstanding && !(cash?.payableToClaimant > 0) && ["settled", "closed"].includes(status) ? "success" : "info"}>

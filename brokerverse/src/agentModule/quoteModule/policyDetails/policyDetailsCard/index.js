@@ -28,6 +28,8 @@ import { openConfirm } from "../../../../components/ConfirmDialog";
 import useQuoteSetup, { missingRiskFields, riskFieldsToAsk } from "../../utils/useQuoteSetup";
 import RiskFactsFields from "./RiskFactsFields";
 import QuoteSteps from "../../quoteSteps";
+import { isFeatureOn } from "../../../../features/entitlements";
+import Feature from "../../../../features/Feature";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -206,10 +208,12 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         quotationData: policyDetailsData,
         leadId: lead?.generatedLeadId || state?.lead?.generatedLeadId,
       };
-      navigate("/agent/createquote/product-recommendation", {
-        state: { ...propsState },
-      });
-      //implement a navigate to page for product recommendation
+      // the product recommendation step is a future-release feature: without it the wizard goes on to the coverage
+      if (isFeatureOn("product-recommendation")) {
+        navigate("/agent/createquote/product-recommendation", { state: { ...propsState } });
+      } else {
+        navigate(propsState.path, payloadState);
+      }
     }
   };
 
@@ -232,8 +236,9 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
   });
 
   // Initialize checkboxes based on existing data
+  // co-insurance is a future-release feature: without it the quotation has one insurer
   const [checked, setChecked] = useState(
-    existingPolicyDetails?.isCoInsurance || false
+    (existingPolicyDetails?.isCoInsurance && isFeatureOn("coinsurance")) || false
   );
   const [paychecked, setPayChecked] = useState(
     existingPolicyDetails?.installmentType ? true : false
@@ -332,16 +337,18 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
           <div className="policy__details__card__container__sub__title mt-2 mb-2">
             {t("agent.policyDetailsLabel")}
           </div>
-          <div className="flex align-items-center">
-            <Checkbox
-              id="co-insurance"
-              onChange={(e) => setChecked(e.checked)}
-              checked={checked}
-            />
-            <label htmlFor="co-insurance" className="ml-2">
-              {t("agent.coInsurance")}
-            </label>
-          </div>
+          <Feature name="coinsurance">
+            <div className="flex align-items-center">
+              <Checkbox
+                id="co-insurance"
+                onChange={(e) => setChecked(e.checked)}
+                checked={checked}
+              />
+              <label htmlFor="co-insurance" className="ml-2">
+                {t("agent.coInsurance")}
+              </label>
+            </div>
+          </Feature>
         </div>
         <div className="grid mt-2">
           <div className="col-12 md:col-12 lg:col-12">

@@ -106,9 +106,12 @@ decision right: the TIS General Manager, or another TIS Operations Unit Head use
    effect at once, without a confirmation.
 
 On approval the claim is settled at once and the user who submitted it is notified. You cannot approve a settlement
-you submitted. When the Authority Matrix sets you a limit for claim settlements, the amount must be within it. When the
-settlement is paid through TISPH, the funds from the insurer and the payment to the claimant are recorded by Cash
-Control and Finance on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker).
+you submitted. When the Authority Matrix sets you a limit for claim settlements, the amount must be within it.
+
+::: feature claims-settlements
+When the settlement is paid through TISPH, the funds from the insurer and the payment to the claimant are recorded by
+Cash Control and Finance on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker).
+:::
 
 ![Settlement approval of a motor claim with Return for correction and Approve settlement](images/role-tis-ops-unit-head/settlement-approval.png)
 
@@ -135,8 +138,10 @@ for return premiums, the amount must be within it. See
 3. Select **Approve**, or **Reject** with a note. The decision takes effect at once, without a confirmation.
 
 An approved renewal is completed by the team on the Renewal Queue. You cannot approve terms you submitted yourself.
+::: feature renewal-at-risk
 A renewal escalated from {{menu:/renewal/at-risk}} is notified to the manager of the renewal's owner or, when the
 owner reports to no one, to the unit heads.
+:::
 
 ### Approve a quotation or an underwriting referral {#tis-operations-unit-head-quotations}
 

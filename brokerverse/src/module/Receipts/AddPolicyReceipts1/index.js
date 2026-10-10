@@ -30,6 +30,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currencyConverter";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
+import { useFeature } from "../../../features/Feature";
 
 /** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
 const RECEIPT_MODES = [
@@ -89,7 +90,10 @@ function BranchAdding() {
   const receiptModeOptions = RECEIPT_MODES.map((m) => ({ name: t(`accounts.addReceipts.${m.key}`), code: m.code }));
   const defaultCurrency = getDisplayCurrencyConfig().currency;
   // Currency codes from the Currency master (Master > Finance > Currency)
-  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const allCurrencies = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  // a receipt in another currency than the base one is a future-release feature (features/entitlements.js)
+  const multiCurrency = useFeature("multi-currency").on;
+  const currencyOptions = multiCurrency ? allCurrencies : allCurrencies.filter((o) => o.code === defaultCurrency);
 
   const loadOpenReceivables = useCallback(async () => {
     setReceivablesLoading(true);

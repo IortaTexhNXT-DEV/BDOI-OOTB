@@ -8,8 +8,11 @@
  * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as My Work).
  *
  * The server enforces the same personas through permissions on every endpoint; this file only
- * decides what the user sees and which screens the router lets them open.
+ * decides what the user sees and which screens the router lets them open. Entries of features this environment does
+ * not run (features/entitlements.js) are left out for every role, and entries marked `platform: true` are shown to the
+ * iorta TechNXT platform administrator only.
  */
+import { withoutFeatures } from "../features/entitlements.js";
 
 const OPERATIONS_ALL = [
   "Sales & Marketing",
@@ -46,6 +49,8 @@ const OPERATIONS_PROCESSING = [
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
 export const ADMIN_ROLE = "system-admin";
 export const ADMIN_ROLES = [ADMIN_ROLE];
+/** The iorta TechNXT platform administrator (vendor): Features & Releases only, never a menu of the tenant. */
+export const PLATFORM_ROLE = "iorta-platform-admin";
 
 export const roleMenuPermissions = {
   // The administrator sees every menu.
@@ -232,6 +237,7 @@ Object.assign(roleMenuPermissions, {
     "product configurator": roleMenuPermissions.processing["product configurator"],
   },
   // TIS General Manager: the front office with its approvals; accounting, commission and administration read only
+  [PLATFORM_ROLE]: { master: ["Platform > Features & Releases"] },
   "tis-general-manager": {
     dashboard: ["Executive Dashboard", "Sales Dashboard", "Processing Dashboard", "Claims Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
@@ -243,7 +249,8 @@ Object.assign(roleMenuPermissions, {
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
-      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels"],
+      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
+      "Insurance Management > Distribution Channels"],
   },
 });
 
@@ -301,9 +308,17 @@ export const hasMenuAccess = (role, menuName, submenuName = null) => {
 };
 
 /** The menu tree reduced to what any of the given roles may see. */
-export const filterMenuForRoles = (menuList, roles) => {
+const withoutPlatformEntries = (items) =>
+  (items || [])
+    .filter((item) => !item.platform)
+    .map((item) => (item.submenu ? { ...item, submenu: withoutPlatformEntries(item.submenu) } : item))
+    .filter((item) => !item.submenu || item.submenu.length);
+
+export const filterMenuForRoles = (fullMenu, roles) => {
   const list = (roles || []).map(norm).filter(Boolean);
   if (!list.length) return [];
+  const edition = withoutFeatures(fullMenu);
+  const menuList = list.includes(PLATFORM_ROLE) ? edition : withoutPlatformEntries(edition);
   if (list.some((r) => roleMenuPermissions[r]?.all)) return menuList;
   return menuList
     .map((menu) => {

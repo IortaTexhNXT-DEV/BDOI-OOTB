@@ -43,7 +43,7 @@ describe('masters', () => {
       'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review',
       'renewal_reassign', 'non_renewal', 'claim_cancel', 'claim_cash_reversal', 'pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject',
       'unapplied_refund')
-      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing)_' GROUP BY 1 ORDER BY 1`);
+      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|feature)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
       { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);
     const type = (await q("SELECT fields FROM master_types WHERE code = 'reason-code'"))[0];

@@ -27,12 +27,14 @@ import { isoDate, fromIso } from "./dates";
 import canOpen from "../../utils/canOpen";
 import "./index.scss";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import { useFeature } from "../../features/Feature";
 
 const OPEN = ["draft", "submitted", "responses-in"];
 
 /** Broker Slip detail: market responses, comparison of the offers and the next journey step from the selected offer(s). */
 const BrokerSlipDetail = () => {
   const { t } = useTranslation();
+  const multiInsurer = useFeature("rfq-multi-insurer").on;
   const { id } = useParams();
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
@@ -181,7 +183,7 @@ const BrokerSlipDetail = () => {
           <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"
             onClick={() => navigate(`/sales/comparison-reports?brokerSlipId=${encodeURIComponent(slip.id)}&slipNumber=${encodeURIComponent(slip.slipNumber)}`)} />
         )}
-        {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
+        {multiInsurer && OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
         {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => withQueuedNotice(t("placement.messages.submitted", { count: r.sent?.length || 0 }), emailSending))} loading={busy} className="ml-2" />}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.closeSlip")} icon="pi pi-check-square" severity="secondary" outlined onClick={() => endSlip("closed")} className="ml-2" />}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" severity="danger" outlined onClick={() => endSlip("cancelled")} className="ml-2" />}

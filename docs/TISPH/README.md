@@ -60,6 +60,7 @@ where it is held, its owner, its approver and its status.
 | `TISPH_Remittance_Redesign_Specification.docx` | Remittance redesign: menu, status model, controls, screens, flows and phased build plan |
 | `TISPH_Agents_Referrer_Commission_and_Reports.docx` | Agents and referrer commission process, Reports screen and overriding commission panel |
 | `TISPH_Platform_Features_Proposal.docx` | Environment promotion, copy of transactions, master uploads, TISPH manual, risk details and personal data |
+| `TISPH_Feature_Catalogue_and_Release_Tiers.docx` | Every function of the platform with its release tier (Phase 1, platform, Phase 2, future release), requirement IDs, dependencies and the decisions open for TISPH |
 
 All documents use the iorta TechNXT document template and are issued as Word files.
 

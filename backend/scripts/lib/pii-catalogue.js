@@ -429,6 +429,8 @@ export const ALLOW_LIST = {
   'access_review_items.last_login_at': 'date and time only; the user is identified by the kept username',
   'access_review_items.apply_note': 'written by the system: account already inactive, or role codes no longer held',
   'users.last_login_at': 'date and time only',
+  'feature_entitlements.signature': 'HMAC signature of a feature entitlement (modules/features); no personal data, and the entitlement is void without it',
+  'feature_changes.remarks': 'decision remarks of the platform administrators on a feature change; about releases, never about clients',
   'login_history.*': 'table emptied (TABLE_ACTIONS)',
   'refresh_tokens.*': 'table emptied (TABLE_ACTIONS)',
   'password_resets.*': 'table emptied (TABLE_ACTIONS)',

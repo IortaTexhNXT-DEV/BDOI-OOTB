@@ -123,6 +123,9 @@
       "name": "Endorsements"
     },
     {
+      "name": "Features and Releases"
+    },
+    {
       "name": "Files (S3 API)"
     },
     {
@@ -205,6 +208,9 @@
     },
     {
       "name": "Placement Slips"
+    },
+    {
+      "name": "Platform Administration"
     },
     {
       "name": "Policies"
@@ -62262,6 +62268,221 @@
         }
       }
     },
+    "/features/catalogue": {
+      "get": {
+        "operationId": "getFeaturesCatalogue",
+        "summary": "Catalogue of features and releases with tier, status, requirement ids, enabled date, enabled by and release reference (read-only)",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "tier": {
+                            "type": "string"
+                          },
+                          "tierName": {
+                            "type": "string"
+                          },
+                          "requirements": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "dependsOn": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusName": {
+                            "type": "string"
+                          },
+                          "decisionPending": {
+                            "type": "boolean"
+                          },
+                          "enabledAt": {},
+                          "enabledBy": {},
+                          "releaseRef": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "payables",
+                      "name": "Accounts payable",
+                      "module": "Accounts",
+                      "tier": "PHASE_2",
+                      "tierName": "Phase 2",
+                      "requirements": [
+                        "TIS-BRD-NIA-03"
+                      ],
+                      "dependsOn": [
+                        "suppliers"
+                      ],
+                      "status": "off",
+                      "statusName": "Not enabled",
+                      "decisionPending": false,
+                      "enabledAt": null,
+                      "enabledBy": null,
+                      "releaseRef": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases",
+        "x-permissions": [
+          "read:features"
+        ]
+      }
+    },
+    "/features/catalogue/export": {
+      "get": {
+        "operationId": "getFeaturesCatalogueExport",
+        "summary": "Catalogue of features and releases as Excel: the features with their status and the future releases with their description",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Export\n\nAccess: read:features",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Export",
+        "x-permissions": [
+          "read:features"
+        ]
+      }
+    },
+    "/features/state": {
+      "get": {
+        "operationId": "getFeaturesState",
+        "summary": "Features of this environment that are not plainly on (off or read-only) with the menu entries and addresses they hide; every signed-in user (menus, route guard, sections)",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Side menu; route guard\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "menus": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "routes": {
+                            "type": "array",
+                            "items": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "payables",
+                      "status": "off",
+                      "menus": [
+                        "Accounts > Payables > Supplier Invoices"
+                      ],
+                      "routes": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Side menu; route guard"
+      }
+    },
     "/s3/file/*": {
       "delete": {
         "operationId": "deleteS3File*",
@@ -110158,6 +110379,838 @@
           "read:quotations",
           "read:leads"
         ]
+      }
+    },
+    "/platform/admins": {
+      "get": {
+        "operationId": "getPlatformAdmins",
+        "summary": "Platform administrator accounts",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Platform administrators\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "twoFactorEnabled": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "usr_1",
+                      "username": "platform.admin@iorta.example",
+                      "displayName": "Platform Administrator",
+                      "twoFactorEnabled": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Platform administrators",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ]
+      },
+      "post": {
+        "operationId": "postPlatformAdmins",
+        "summary": "Add a platform administrator (the second approver): a temporary password is returned once; the password is changed and two-factor authentication set up at the first sign-in",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Platform administrators > Add\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "temporaryPassword": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "usr_2",
+                    "username": "second.admin@iorta.example",
+                    "temporaryPassword": "<shown once>"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Platform administrators > Add",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "displayName": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "username": "second.admin@iorta.example",
+                "displayName": "Second Administrator",
+                "email": "second.admin@iorta.example"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/platform/features": {
+      "get": {
+        "operationId": "getPlatformFeatures",
+        "summary": "Every feature with its state and what it controls (menus, API, jobs, connectors, settings, sections, documents)",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "tier": {
+                            "type": "string"
+                          },
+                          "tierName": {
+                            "type": "string"
+                          },
+                          "requirements": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "dependsOn": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusName": {
+                            "type": "string"
+                          },
+                          "decisionPending": {
+                            "type": "boolean"
+                          },
+                          "enabledAt": {},
+                          "enabledBy": {},
+                          "releaseRef": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "payables",
+                      "name": "Accounts payable",
+                      "module": "Accounts",
+                      "tier": "PHASE_2",
+                      "tierName": "Phase 2",
+                      "requirements": [
+                        "TIS-BRD-NIA-03"
+                      ],
+                      "dependsOn": [
+                        "suppliers"
+                      ],
+                      "status": "off",
+                      "statusName": "Not enabled",
+                      "decisionPending": false,
+                      "enabledAt": null,
+                      "enabledBy": null,
+                      "releaseRef": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ]
+      }
+    },
+    "/platform/features/changes": {
+      "get": {
+        "operationId": "getPlatformFeaturesChanges",
+        "summary": "Feature change requests (status pending, scheduled, applied, rejected, withdrawn), newest first",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Changes\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Changes",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ]
+      },
+      "post": {
+        "operationId": "postPlatformFeaturesChanges",
+        "summary": "Request a change (maker): enable or disable features or a tier bundle, with reason, contract or change request reference and effective date (immediate or scheduled)",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 1,
+                      "ref": "FCR-00001",
+                      "status": "pending"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Enable / Disable",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "tier": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "releaseRef": {
+                    "type": "string"
+                  },
+                  "effective": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "action": "enable",
+                "tier": "PHASE_2",
+                "reasonCode": "FTR-CONTRACT",
+                "releaseRef": "CR-2027-004",
+                "effective": "immediate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/platform/features/changes/{id}/decision": {
+      "post": {
+        "operationId": "postPlatformFeaturesChangesIdDecision",
+        "summary": "Approve or reject a change (checker, never the requester); an immediate change applies at once, a scheduled one on its date",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Changes > Approve / Reject\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "applied": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 1,
+                      "status": "applied"
+                    },
+                    "applied": [
+                      {
+                        "key": "payables",
+                        "from": "off",
+                        "to": "on"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Changes > Approve / Reject",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve",
+                "remarks": "Checked against CR-2027-004"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/platform/features/changes/{id}/withdraw": {
+      "post": {
+        "operationId": "postPlatformFeaturesChangesIdWithdraw",
+        "summary": "Withdraw a change waiting for approval (requester) or cancel a scheduled change",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Changes > Withdraw\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "withdrawn"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Changes > Withdraw",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ]
+      }
+    },
+    "/platform/features/export": {
+      "get": {
+        "operationId": "getPlatformFeaturesExport",
+        "summary": "Entitlements of this environment (JSON) for promotion to another environment",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Export for promotion\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(json file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Export for promotion",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ]
+      }
+    },
+    "/platform/features/preview": {
+      "post": {
+        "operationId": "postPlatformFeaturesPreview",
+        "summary": "Impact of enabling or disabling features or a tier bundle: features with dependencies, menus, roles that gain access, jobs, connectors, settings to configure, read-only features",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "string"
+                        },
+                        "features": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "menus": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "action": "enable",
+                    "features": [
+                      {
+                        "key": "payables",
+                        "from": "off",
+                        "to": "on"
+                      }
+                    ],
+                    "menus": [],
+                    "roles": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Enable / Disable",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "tier": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "action": "enable",
+                "tier": "PHASE_2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/platform/features/promote": {
+      "post": {
+        "operationId": "postPlatformFeaturesPromote",
+        "summary": "Promote the entitlements exported from another environment: raises the change requests (enable, disable) that bring this environment to that state, each waiting for approval",
+        "tags": [
+          "Platform Administration"
+        ],
+        "description": "Front-end touchpoint: Master > Platform > Features & Releases > Promote from another environment\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Platform > Features & Releases > Promote from another environment",
+        "x-permissions": [
+          "manage:feature-entitlements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "object",
+                    "properties": {
+                      "environment": {
+                        "type": "string"
+                      },
+                      "features": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "releaseRef": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "file": {
+                  "environment": "uat",
+                  "features": [
+                    {
+                      "key": "payables",
+                      "status": "on"
+                    }
+                  ]
+                },
+                "reason": "Promotion of the UAT sign-off",
+                "releaseRef": "CR-2027-004"
+              }
+            }
+          }
+        }
       }
     },
     "/policies": {

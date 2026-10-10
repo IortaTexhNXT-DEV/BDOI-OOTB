@@ -7,6 +7,7 @@ import { Toast } from "primereact/toast";
 import birTaxService from "../../services/birTaxService";
 import ReturnView from "./ReturnView";
 import { BirTag, Kpis, PageHeader, YearPicker, date, money, showError } from "./common";
+import { useFeature } from "../../features/Feature";
 
 /**
  * Accounts > Tax > Withholding Returns: the filing calendar of a year (0619-E for the first and second month of each
@@ -15,6 +16,7 @@ import { BirTag, Kpis, PageHeader, YearPicker, date, money, showError } from "./
  */
 const WithholdingReturns = () => {
   const { t } = useTranslation();
+  const percentageTax = useFeature("bir-2551q").on;
   const toast = useRef(null);
   const [year, setYear] = useState(new Date().getFullYear());
   const [rows, setRows] = useState([]);
@@ -25,13 +27,14 @@ const WithholdingReturns = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setRows(await birTaxService.calendar(year));
+      // the percentage tax return 2551Q is a feature of its own (features/entitlements.js)
+      setRows((await birTaxService.calendar(year)).filter((r) => r.form !== "2551Q" || percentageTax));
     } catch (e) {
       showError(toast, e);
     } finally {
       setLoading(false);
     }
-  }, [year]);
+  }, [year, percentageTax]);
   useEffect(() => { load(); setRet(null); setSelected(null); }, [load]);
 
   const open = useCallback(async (row) => {

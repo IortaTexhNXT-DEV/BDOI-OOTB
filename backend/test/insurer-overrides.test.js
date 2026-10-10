@@ -7,12 +7,15 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
 import { checkTiers, commissionFor, periodsOf, tierFor } from '../src/modules/insurer-overrides/service.js';
+import { enableFeatures } from './helpers.js';
 
 let ctx;
 let maker;
 let checker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['insurer-overrides']);
   maker = ctx.as('maker');
   checker = ctx.as('checker');
 });

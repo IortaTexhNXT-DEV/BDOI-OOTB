@@ -139,6 +139,8 @@ export const MASTER_CONFIG_TABLES = [
   'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
   // CAS registration documents (system description, backup procedure): approved versions kept as the system's documentation
   'cas_documents',
+  // the releases the environment runs and their approved changes (modules/features)
+  'feature_entitlements', 'feature_changes',
 ];
 
 /**

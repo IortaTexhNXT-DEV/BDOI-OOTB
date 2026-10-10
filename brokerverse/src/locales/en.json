@@ -268,7 +268,9 @@
     "Integrations": "Integrations",
     "Message Templates": "Message Templates",
     "Insurer Integration": "Insurer Integration",
-    "Claim Documents": "Claims Awaiting Documents"
+    "Claim Documents": "Claims Awaiting Documents",
+    "Features & Releases": "Features & Releases",
+    "Platform": "Platform"
   },
   "sidebarFull": {
     "Request for Quotation": "Requests for Quotation (Broker Slips)",
@@ -15321,7 +15323,9 @@
       "pdc_bounce": "Bounced post-dated cheque",
       "receipt_reversal": "Reversal of a receipt",
       "receipt_reversal_reject": "Return of a receipt reversal",
-      "unapplied_refund": "Refund of an unapplied collection"
+      "unapplied_refund": "Refund of an unapplied collection",
+      "feature_change": "Feature change (platform)",
+      "feature_reject": "Feature change rejected (platform)"
     }
   },
   "financialStatements": {
@@ -16185,6 +16189,148 @@
     "problems": {
       "aboveBill": "An amount is above what the bill has left to pay",
       "aboveBalance": "The amounts are above what is left to allocate"
+    }
+  },
+  "features": {
+    "title": "Features & Releases",
+    "help": "Functions of the platform with their release tier and status in this environment. Phase 1 and platform functions are always on; Phase 2 and future releases are enabled by iorta TechNXT.",
+    "platformHelp": "Enable or disable Phase 2 and future-release features of this environment. Every change is approved by a second platform administrator.",
+    "export": "Export to Excel",
+    "search": "Search feature, module or requirement",
+    "allTiers": "All tiers",
+    "empty": "No features",
+    "decisionPending": "Decision pending",
+    "tampered": "Not trusted",
+    "enablePhase2": "Enable Phase 2",
+    "enableSelected": "Enable selected ({{count}})",
+    "disableSelected": "Disable selected ({{count}})",
+    "tabs": {
+      "catalogue": "Features",
+      "future": "Future releases ({{count}})",
+      "changes": "Changes ({{count}})",
+      "admins": "Platform administrators"
+    },
+    "tiers": {
+      "PHASE_1": "Phase 1",
+      "PLATFORM": "Platform",
+      "PHASE_2": "Phase 2",
+      "FUTURE": "Future release"
+    },
+    "status": {
+      "on": "Enabled",
+      "read-only": "Read-only",
+      "off": "Not enabled"
+    },
+    "columns": {
+      "feature": "Feature",
+      "module": "Module",
+      "tier": "Tier",
+      "status": "Status",
+      "requirements": "Requirement IDs",
+      "enabledOn": "Enabled On",
+      "enabledBy": "Enabled By",
+      "releaseRef": "Release Reference",
+      "description": "Description",
+      "dependsOn": "Depends On"
+    },
+    "detail": {
+      "general": "Feature",
+      "decision": "Decision for TISPH",
+      "question": "Question",
+      "options": "Options"
+    },
+    "notInEdition": {
+      "title": "Not available in this edition",
+      "text": "This function is not enabled in this environment.",
+      "home": "Go to My Work"
+    },
+    "common": {
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "change": {
+      "enableTitle": "Enable features",
+      "disableTitle": "Disable features",
+      "enableTier": "Enable {{tier}}",
+      "disableTier": "Disable {{tier}}",
+      "submit": "Submit for approval",
+      "from": "Now",
+      "to": "After the change",
+      "records": "Records",
+      "dependency": "Required by {{name}}",
+      "dependent": "Depends on {{name}}",
+      "menus": "Menus",
+      "roles": "Roles that gain access",
+      "jobs": "Scheduled jobs",
+      "connectors": "Connectors",
+      "settings": "Settings to configure",
+      "sections": "Screen sections",
+      "readOnly": "Kept read-only (records exist)",
+      "readOnlyItem": "{{name}}: {{count}} records",
+      "none": "None",
+      "releaseRef": "Contract or change request reference",
+      "releaseRefRequired": "Enter the contract or change request reference",
+      "effective": "Effective",
+      "immediate": "Immediately on approval",
+      "scheduled": "On a date",
+      "effectiveRequired": "Choose the effective date"
+    },
+    "changes": {
+      "ref": "Change",
+      "action": "Action",
+      "features": "Features",
+      "reason": "Reason",
+      "effective": "Effective",
+      "requestedBy": "Requested By",
+      "decidedBy": "Decided By",
+      "empty": "No change requests",
+      "approve": "Approve",
+      "reject": "Reject",
+      "withdraw": "Withdraw",
+      "ownRequest": "Requested by you: another platform administrator approves",
+      "approveTitle": "Approve change {{ref}}",
+      "rejectTitle": "Reject change {{ref}}",
+      "withdrawTitle": "Withdraw change {{ref}}",
+      "actionsFor": "Actions for {{ref}}",
+      "actions": {
+        "enable": "Enable",
+        "disable": "Disable"
+      },
+      "status": {
+        "pending": "Pending approval",
+        "scheduled": "Scheduled",
+        "applied": "Applied",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn"
+      }
+    },
+    "promote": {
+      "export": "Export for promotion",
+      "button": "Promote from file",
+      "title": "Promote from another environment",
+      "confirm": "Submit for approval",
+      "source": "Source environment",
+      "exportedAt": "Exported",
+      "on": "Enabled in the source",
+      "invalid": "The file is not an export of the features of an environment"
+    },
+    "admins": {
+      "add": "Add platform administrator",
+      "addConfirm": "Add",
+      "added": "Platform administrator added",
+      "name": "Name",
+      "username": "User Name",
+      "email": "E-mail",
+      "twoFactor": "Two-factor",
+      "enrolled": "Set up",
+      "pending": "At first sign-in",
+      "lastLogin": "Last Sign-in",
+      "temporaryPassword": "Temporary password (shown once)",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "locked": "Locked"
+      }
     }
   },
   "renewalDisposition": {

@@ -20,6 +20,7 @@ import { KYC_ITEMS, KYC_DEFAULT_REQUIRED } from '../policies/kyc.js';
 import { effectiveAuthority } from '../access-control/service.js';
 import { CHANGE_LABELS } from '../posting-rules/service.js';
 import { APPROVER as ACCESS_APPROVER } from '../access-control/changes.js';
+import { isFeatureOn } from '../features/service.js';
 
 /** Categories in screen order: code, label, icon, permission needed to see it. */
 export const CATEGORIES = [
@@ -264,7 +265,8 @@ async function approvals(ctx) {
       amount: 'k.totale_amount', created_at: 'k.created_at' })}
       FROM checkbooks k LEFT JOIN disbursements d ON d.id = k.disbursement_id WHERE k.status = 'Pending' AND ${notMine(ctx, 'k.created_by')}
         AND ${await withinAuthority(ctx, 'payment_voucher', 'k.totale_amount')}`);
-    if (await has('petty_cash_requests')) {
+    // petty cash is a future-release feature (modules/features): no approval of it while it is not enabled
+    if (await has('petty_cash_requests') && await isFeatureOn('petty-cash')) {
       out.push(`SELECT ${select({ ...base, kind: "'Petty cash request'", id: 'pc.id', ref: 'pc.request_number', title: "COALESCE(pc.purpose, pc.requester_name, 'Petty cash')", due_date: due('pc.created_at'),
         status: 'pc.status', link: "'/accounts/pettycash/editrequestform/view/' || pc.id", amount: 'pc.total_amount', created_at: 'pc.created_at' })}
         FROM petty_cash_requests pc WHERE pc.status = 'submitted' AND ${notMine(ctx, 'pc.created_by')}`);

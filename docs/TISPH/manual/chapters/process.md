@@ -242,8 +242,11 @@ to the client. The placement becomes **Insurer issued (Booked)** and the quotati
 TFS-financed car, the policy shows TFS in **Mortgage**.
 
 When the client needs proof of cover before the e-policy arrives, issue a cover note on
-[Cover Notes](#cover-notes-binders); a CTPL certificate is authenticated on
-[CTPL Authentication](#ctpl-authentication).
+[Cover Notes](#cover-notes-binders).
+
+::: feature ctpl-authentication
+A CTPL certificate is authenticated on [CTPL Authentication](#ctpl-authentication).
+:::
 
 ### Billing statement {#process-billing}
 
@@ -378,8 +381,12 @@ approves it. See [Commission to agents and referrers](#commission-to-agents-and-
 [Incentives](#incentives).
 
 TISPH earns its brokerage commission from the insurer: it is kept when the premium is remitted net, or billed to the
-insurer for gross and direct-bill business. Overriding, profit and contingent commission agreed with an insurer is
-computed on [Overriding, profit and contingent commission from insurers](#overriding-profit-and-contingent-commission-from-insurers).
+insurer for gross and direct-bill business.
+
+::: feature insurer-overrides
+Overriding, profit and contingent commission agreed with an insurer is computed on
+[Overriding, profit and contingent commission from insurers](#overriding-profit-and-contingent-commission-from-insurers).
+:::
 
 TISPH shares part of the commission with the agents, sub-agents and dealers who referred the business: the referrer
 commission (shown as **Comsub** on the screens). The referrer commission lines of each policy move through four
@@ -432,8 +439,10 @@ and pays.
 9. Close the claim when the claimant has been paid. A claim the insurer repudiates is **Rejected**, with a reason, and
    then closed.
 
+::: feature claims-settlements
 When the settlement is paid through TISPH, the funds received from the insurer and the payment to the claimant are
 recorded on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker).
+:::
 
 ![Operations > Claims, with the open claims, the settlement to approve and the settled claims](images/process/claims-list.png)
 
@@ -505,6 +514,7 @@ The BIR forms and returns are prepared on Accounts > Tax from the payment vouche
 | VAT Summary, SAWT, SLSP Sales and Purchases | Each quarter | [Tax: BIR forms and returns](#tax-bir-forms-and-returns) |
 | BIR Form 1604-E and the alphalist of payees | Each year | [Annual information return 1604-E](#annual-information-return-1604-e-and-alphalist-of-payees) |
 
+::: feature bir-returns
 1. Choose {{menu:/accounts/tax/withholding-returns}} and select the year. Each return shows its form, period, due date
    and status.
 2. Open the return, check the amounts and print or export the form and its validation file
@@ -513,6 +523,7 @@ The BIR forms and returns are prepared on Accounts > Tax from the payment vouche
    **Filed**.
 
 ![Accounts > Tax > Withholding Returns, the 0619-E and 1601-EQ returns of the year with their due dates](images/process/withholding-returns.png)
+:::
 
 ### Year-end {#process-year-end}
 

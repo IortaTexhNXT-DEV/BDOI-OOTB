@@ -8,6 +8,7 @@ import { Dropdown } from "primereact/dropdown";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { useFeature } from "../../../features/Feature";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import StatCards from "../../../components/StatCards";
 import { EmptyState, FilterBar, SectionCard, StatusChip } from "../../../components/RecordPage";
@@ -61,13 +62,15 @@ const PerformanceTracking = () => {
   useEffect(() => { load(); }, [load]);
 
   const overall = useMemo(() => data.overall || {}, [data]);
+  const satisfaction = useFeature("executive-satisfaction");
   const kpis = useMemo(() => [
     { key: "renewalRate", target: Number(targets["renewals.target_renewal_rate"] ?? 0), achieved: overall.renewalRate ?? 0, unit: "%" },
     { key: "premiumRetention", target: Number(targets["renewals.target_premium_retention"] ?? 0), achieved: overall.premiumRetention ?? 0, unit: "%" },
     { key: "cycleTime", target: Number(targets["renewals.target_cycle_days"] ?? 0), achieved: overall.avgCycleTime ?? 0, unit: t("perf.days"), lowerIsBetter: true },
     // shown only once satisfaction surveys are captured
     { key: "customerSatisfaction", target: Number(targets["renewals.target_satisfaction"] ?? 0), achieved: overall.customerSatisfaction, unit: "/5" },
-  ].filter((k) => k.achieved !== undefined && k.achieved !== null).map((k) => ({ ...k, label: t(`perf.kpi.${k.key}`), variance: Math.round((k.achieved - k.target) * 100) / 100, met: isMet(k) })), [targets, overall, t]);
+  ].filter((k) => k.achieved !== undefined && k.achieved !== null && (k.key !== "customerSatisfaction" || satisfaction.on))
+    .map((k) => ({ ...k, label: t(`perf.kpi.${k.key}`), variance: Math.round((k.achieved - k.target) * 100) / 100, met: isMet(k) })), [targets, overall, t, satisfaction.on]);
 
   const products = Object.entries(data.byProduct || {}).filter(([key]) => !line || key === line)
     .map(([key, p]) => ({ key, name: productLabel(key), ...p }));

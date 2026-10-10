@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withPackagedProducts } from './helpers.js';
+import { setup, loginAs, withPackagedProducts, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { PROVIDERS, dragonpayPostbackDigest, dragonpayRequestDigest } from '../src/modules/payment-gateway/providers.js';
 import { createLink } from '../src/modules/payment-gateway/service.js';
@@ -82,6 +82,8 @@ describe('payment links end to end', () => {
   let salesUser;
   beforeAll(async () => {
     ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['payment-gateways', 'package-bundles']);
     await withPackagedProducts();
     admin = ctx.api;
     sales = await persona('pay.sales', ['sales']);
