@@ -237,6 +237,11 @@
   }
 }
 
+.rm-payment.p-sidebar {
+  width: 640px;
+  min-width: 0;
+}
+
 .rm-review__title {
   font-weight: 600;
   color: var(--color-heading);
@@ -347,6 +352,46 @@
   justify-content: space-between;
   gap: 8px;
   border-left: 3px solid var(--color-danger);
+}
+
+.rm-banner--done {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border-left: 3px solid var(--color-success, var(--color-border));
+}
+
+.rm-payee,
+.rm-payment__account,
+.rm-payment__check {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.rm-payment__links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.rm-payment__limit {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.rm-payment__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rm-filters__date {
+  max-width: 11rem;
 }
 
 .rm-state {

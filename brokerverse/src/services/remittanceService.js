@@ -205,6 +205,7 @@ export const remittanceService = {
   rejectApproval: (approvalId, reason, version) => post(`${R}/approvals/${id(approvalId)}/reject`, { ...reason, version }),
   remindApprovers: (approvalId) => apiRequest("POST", `${R}/approvals/${id(approvalId)}/remind`, { body: {} }),
   listPayments: (params) => apiRequest("GET", `${R}/payments`, { params }),
+  exportPaymentsPath: (params = {}) => `${R}/payments/export.xlsx${toQuery(params)}`,
   getPayment: (voucherId) => get(`${R}/payments/${id(voucherId)}`),
   revealPaymentAccount: (voucherId) => get(`${R}/payments/${id(voucherId)}/account`),
   legacyTransfers: (params) => apiRequest("GET", `${R}/transfers`, { params: { legacy: 1, ...params } }),

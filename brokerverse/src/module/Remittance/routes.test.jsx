@@ -6,7 +6,7 @@ import { REDIRECTS, redirectTarget, remittanceRoutes } from "./routes";
 jest.mock("../InsurerReconciliation/Statements", () => () => <div>Insurer statements</div>);
 jest.mock("../InsurerReconciliation/Workspace", () => () => <div>Statement workspace</div>);
 jest.mock("./DirectBillProcessing", () => () => <div>Direct bill</div>);
-jest.mock("./ElectronicTransfer", () => () => <div>Transfers</div>);
+jest.mock("./Payments", () => () => <div>Insurer payments</div>);
 jest.mock("./Approvals", () => () => <div>Approvals</div>);
 jest.mock("./Record", () => () => <div>Remittance record</div>);
 jest.mock("./RemittanceExceptions", () => () => <div>Exceptions</div>);
@@ -41,7 +41,7 @@ describe("Accounts > Remittance routes", () => {
     ["/finance/remittance/reconciliation", "/finance/remittance/reconciliation/insurer-statements", "Insurer statements"],
     ["/finance/remittance/bulkprocessing", "/finance/remittance/remittances?import=new", "Remittances"],
     ["/finance/remittance/scheduling", "/finance/remittance/setup/schedules", "Setup"],
-    ["/finance/remittance/electronictransfer", "/finance/remittance/payments?segment=legacy", "Transfers"],
+    ["/finance/remittance/electronictransfer", "/finance/remittance/payments?segment=legacy", "Insurer payments"],
     ["/finance/remittance/approval?approval=21", "/finance/remittance/approvals?approval=21", "Approvals"],
     ["/finance/remittance/directbill", "/finance/remittance/billing", "Direct bill"],
     ["/finance/remittance/agencybill", "/finance/remittance/remittances", "Remittances"],

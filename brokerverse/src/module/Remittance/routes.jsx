@@ -1,8 +1,7 @@
 /**
  * The routes of Accounts > Remittance (R1), mounted by routes/MainRoute.js: the landing, the seven entries of the menu
  * plus Settlement (until R2), the record routes and the addresses of the retired screens, which open their new page
- * (§1.2), keeping their query (?approval=, ?import=new). Until the Insurer payments page is built (RM-08) its route
- * shows the screen of earlier releases.
+ * (§1.2), keeping their query (?approval=, ?import=new, ?segment=legacy).
  */
 import React from "react";
 import PropTypes from "prop-types";
@@ -10,10 +9,10 @@ import { Navigate, Route, useLocation, useParams } from "react-router-dom";
 import InsurerStatements from "../InsurerReconciliation/Statements";
 import InsurerStatementWorkspace from "../InsurerReconciliation/Workspace";
 import DirectBillProcessing from "./DirectBillProcessing";
-import ElectronicTransfer from "./ElectronicTransfer";
 import RemittanceExceptions from "./RemittanceExceptions";
 import SettlementProcessing from "./Settlement";
 import Approvals from "./Approvals";
+import Payments from "./Payments";
 import Remittances from "./Remittances";
 import Landing from "./Landing";
 import RemittanceRecord from "./Record";
@@ -68,7 +67,7 @@ export const remittanceRoutes = () => [
   <Route key="remittances" path={`${OLD}/remittances`} element={<Remittances />} />,
   <Route key="record" path={`${OLD}/remittances/:id`} element={<RemittanceRecord />} />,
   <Route key="approvals" path={`${OLD}/approvals`} element={<Approvals />} />,
-  <Route key="payments" path={`${OLD}/payments`} element={<ElectronicTransfer />} />,
+  <Route key="payments" path={`${OLD}/payments`} element={<Payments />} />,
   <Route key="reconciliation" path={`${OLD}/reconciliation/insurer-statements`} element={<InsurerStatements />} />,
   <Route key="statement" path={`${OLD}/reconciliation/statements/:id`} element={<InsurerStatementWorkspace />} />,
   <Route key="exceptions" path={`${OLD}/exceptions`} element={<RemittanceExceptions />} />,
