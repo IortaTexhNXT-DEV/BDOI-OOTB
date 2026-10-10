@@ -6926,7 +6926,12 @@
         "CallbackRequested": "Callback requested"
       },
       "emailSubject": "Premium due: policy {{policy}}",
-      "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you."
+      "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you.",
+      "actions": {
+        "Call": "Log call",
+        "Note": "Add note",
+        "Commitment": "Set date"
+      }
     },
     "collections": "Collections",
     "back": "Back",
@@ -10041,7 +10046,6 @@
     },
     "cancel": "Cancel",
     "send": "Send",
-    "save": "Save",
     "creditLimits": "Client Credit Limits",
     "creditLimitsHelp": "Credit limit of each client against its open broker-billed premium. A policy that takes a client over its limit is still issued; Accounting is warned and acknowledges it here. Limits are set by the Accounting Manager.",
     "clients": "Clients",
@@ -10103,8 +10107,8 @@
     "lastChanged": "Last changed",
     "newLimit": "New credit limit",
     "limitHistory": "Limit changes",
-    "noLimitChanges": "The limit has not been changed yet.",
-    "billDueAfterCancel": "Bill due on"
+    "billDueAfterCancel": "Bill due on",
+    "setLimitAction": "Set limit"
   },
   "packagedProducts": {
     "active": "Active",
@@ -13229,7 +13233,8 @@
       "allCheques": "Cheques",
       "chequesCount": "{{count}} cheques",
       "chequesCount_one": "{{count}} cheque",
-      "chequesCount_other": "{{count}} cheques"
+      "chequesCount_other": "{{count}} cheques",
+      "registerReplacement": "Register replacement"
     },
     "claimPay": {
       "title": "Claims Settlements",

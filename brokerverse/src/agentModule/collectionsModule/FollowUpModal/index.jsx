@@ -129,7 +129,7 @@ const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectio
         <Button label={t("emailDocument.sendEmail")} icon="pi pi-send" disabled={!formData.to || !formData.notes}
           onClick={() => handleSendEmail({ notes: formData.notes, to: formData.to, subject: formData.subject })} loading={loadingFollowUp} />
       ) : (
-        <Button label={t("common.save")} icon="pi pi-check" onClick={handleSave} loading={saving}
+        <Button label={k(`actions.${actionType}`, { defaultValue: t("common.save") })} icon="pi pi-check" onClick={handleSave} loading={saving}
           disabled={(actionType === "Commitment" && !formData.commitmentDate) || (actionType === "Call" && !formData.callOutcome) || (actionType === "Note" && !formData.notes.trim())} />
       )}
     </div>

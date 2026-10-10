@@ -179,7 +179,7 @@ const PostDatedCheques = () => {
 
       <Dialog className="pe-dialog" header={form?.mode === "replace" ? t("opsAcc.pdc.replaceTitle", { number: form.pdc.pdcNumber }) : t("opsAcc.pdc.register")} visible={!!form}
         style={{ width: "min(720px, 96vw)" }} onHide={() => openForm(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={saveCheque} /></div>}>
+        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={form?.mode === "replace" ? t("opsAcc.pdc.registerReplacement") : t("opsAcc.pdc.register")} icon="pi pi-check" onClick={saveCheque} /></div>}>
         {form && (
           <div className="grid">
             {form.mode === "register" && (

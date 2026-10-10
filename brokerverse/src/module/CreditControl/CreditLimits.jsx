@@ -22,10 +22,17 @@ import { ActivityLog, useRecordActivity } from "../../components/ActivityLog";
  * Manager (approve:credit-control).
  */
 /** The credit limit changes of a client, from its audit trail (who set which limit, when, from what). */
+// the changes of the client's limit, shown once there is one
 const LimitHistory = ({ clientId }) => {
   const { t } = useTranslation();
   const { entries, loading, error, reload } = useRecordActivity("client", clientId);
-  return <ActivityLog entries={entries.filter((e) => e.actionCode === "set-credit-limit")} loading={loading} error={error} onRetry={reload} emptyText={t("creditControl.noLimitChanges")} />;
+  const changes = entries.filter((e) => e.actionCode === "set-credit-limit");
+  if (!loading && !error && !changes.length) return null;
+  return (
+    <DetailSection title={t("creditControl.limitHistory")}>
+      <ActivityLog entries={changes} loading={loading} error={error} onRetry={reload} />
+    </DetailSection>
+  );
 };
 
 const CreditLimits = () => {
@@ -124,22 +131,22 @@ const CreditLimits = () => {
       </div>
 
       <Dialog className="pe-dialog bv-centered" header={edit ? `${t("creditControl.setLimit")} · ${edit.row.clientName}` : ""} visible={!!edit} style={{ width: "min(640px, 96vw)" }} onHide={() => setEdit(null)}
-        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setEdit(null)} /><Button label={t("creditControl.save")} icon="pi pi-save" onClick={saveLimit} /></div>}>
+        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setEdit(null)} /><Button label={t("creditControl.setLimitAction")} icon="pi pi-check" onClick={saveLimit} /></div>}>
         {edit && (
           <div className="flex flex-column gap-3">
             <KeyValueGrid columns={2} items={[
               { label: t("creditControl.currentLimit"), value: edit.row.creditLimit === null ? t("creditControl.noLimit") : edit.row.creditLimit, type: edit.row.creditLimit === null ? "text" : "amount" },
               { label: t("creditControl.exposure"), value: edit.row.exposure, type: "amount" },
-              { label: t("creditControl.available"), value: edit.row.available, type: "amount", hidden: edit.row.available === null },
+              edit.row.available === null
+                ? { label: t("creditControl.available"), value: t("creditControl.noLimit") }
+                : { label: t("creditControl.available"), value: edit.row.available, type: "amount" },
               { label: t("creditControl.lastChanged"), value: edit.row.updatedAt ? `${dateTime(edit.row.updatedAt)}${edit.row.updatedBy ? ` · ${edit.row.updatedBy}` : ""}` : null },
             ]} />
             <div>
               <label htmlFor="cc-limit">{t("creditControl.newLimit")}</label>
               <InputNumber inputId="cc-limit" value={edit.value} mode="decimal" minFractionDigits={2} min={0} placeholder={t("creditControl.noLimit")} onValueChange={(e) => setEdit({ ...edit, value: e.value })} className="w-full" />
             </div>
-            <DetailSection title={t("creditControl.limitHistory")}>
-              <LimitHistory clientId={edit.row.clientId} />
-            </DetailSection>
+            <LimitHistory clientId={edit.row.clientId} />
           </div>
         )}
       </Dialog>
