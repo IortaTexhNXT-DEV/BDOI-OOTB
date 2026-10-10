@@ -119,6 +119,7 @@ as nil.
 | `sample/96_ops_accounting.sql` | the Toyota dealers' service centres as accredited repair shops; suppliers |
 | `sample/97_distribution.sql` | dealer programmes (Toyota Makati free first year on TFS loans, Toyota Alabang half subsidy with an uploaded batch, Toyota Cebu commercial pick-ups), lead assignment rules for the TFS referrals, campaign segments, templates and campaigns, a shared Report Builder report |
 | `sample/98_integrations.sql` | demo CTPL COC series (Pioneer, Maagap, Stronghold), payee bank accounts of the panel insurers, an insurer API mapping for Pioneer |
+| `sample/99_tisph_sales.sql` | the TFS account details of the TFS-sourced prospects, a TFS import batch (LIB-2026-00001) with two accounts waiting for assignment, a direct customer, and the vehicles of five Motor policies (Toyota, a Hino unit as OEM, a repossessed unit as ROPA) for Talkbot and the APR Operation Report |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.
