@@ -23,3 +23,20 @@ FROM (VALUES ('remittance', 'tis-finance', 1000000::numeric), ('remittance', 'ti
 WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)
   AND EXISTS (SELECT 1 FROM authority_transaction_types t WHERE t.code = v.type)
   AND NOT EXISTS (SELECT 1 FROM authority_limits l WHERE l.transaction_type = v.type AND l.role_code = v.role);
+
+-- ---------------------------------------------------------------- remittances register and import
+-- Status names TISPH reads until the Phase 2 statuses arrive: a rejected remittance went back to its maker (Returned),
+-- and a settled one has its payment voucher raised, which is not yet a payment (Settled (voucher raised)). Only while
+-- the two labels are still the reference ones.
+UPDATE app_settings s
+   SET value = s.value || '{"rejected": "Returned", "settled": "Settled (voucher raised)"}'::jsonb, updated_at = now()
+ WHERE s.key = 'remittance.status_labels' AND s.updated_by IS NULL
+   AND s.value->>'rejected' = 'Rejected' AND s.value->>'settled' = 'Completed'
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
+-- Off-cycle remittances come from Import policy list only (migration 0402): the bulk upload of earlier releases, whose
+-- typed amounts replaced the booked ones, is closed.
+UPDATE app_settings s
+   SET value = 'false'::jsonb, updated_at = now()
+ WHERE s.key = 'remittance.bulk_upload_enabled' AND s.updated_by IS NULL AND s.value = 'true'::jsonb
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
