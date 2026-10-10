@@ -363,15 +363,19 @@ export async function yearEndOverview(db, fiscalYear, user) {
 
   const failed = (step) => checks.some((c) => c.step === step && c.status === 'failed');
   const pendingAdjustments = adjustments.filter((j) => OPEN_JV.includes(j.status)).length;
+  const blocked = failed('prerequisites') || failed('adjustments');
   const steps = closed
     ? [['prerequisites', 'passed'], ['adjustments', 'passed'], ['closing', 'posted'], ['approval', 'done'], ['opening', 'done']]
     : [['prerequisites', failed('prerequisites') ? 'failed' : 'passed'],
       ['adjustments', !failed('adjustments') ? 'passed' : pendingAdjustments && adjustmentPeriod?.status === 'open' ? 'pending' : 'failed'],
-      ['closing', 'pending'],
-      ['approval', failed('prerequisites') || failed('adjustments') ? 'blocked' : 'pending-approval'],
+      // the closing entries are previewed once a run is started and steps 1 and 2 pass; the close waits for them
+      ['closing', run && !blocked ? 'ready' : 'pending'],
+      ['approval', blocked ? 'blocked' : run ? 'pending-approval' : 'pending'],
       ['opening', 'pending']];
-  // the step to work on: the first of steps 1 and 2 still to resolve, else the close (steps 3 and 5 are previews)
-  const current = closed ? 'approval' : (steps.slice(0, 2).find(([, s]) => s !== 'passed') || ['approval'])[0];
+  const actions = await actionsFor(db, { fy, run, checks, adjustmentPeriod, user });
+  // the step to work on: the first of steps 1 and 2 still to resolve; then the close for the user who may approve it,
+  // and the closing entries for the preparer (steps 3 and 5 are previews)
+  const current = closed ? 'approval' : (steps.slice(0, 2).find(([, s]) => s !== 'passed') || [actions.close?.allowed ? 'approval' : 'closing'])[0];
   const { closing, opening } = run ? (closed ? await closingPosted(db, run) : await closingPreview(db, fy)) : { closing: null, opening: null };
 
   return {
@@ -388,7 +392,7 @@ export async function yearEndOverview(db, fiscalYear, user) {
     opening: opening && { ...opening, fiscalYear: run?.next_fiscal_year || (next ? next.code : `FY${Number(iso(fy.end_date).slice(0, 4)) + 1}`) },
     activity: history.map((h) => ({ id: Number(h.id), runNumber: h.run_number, action: h.action, fromStatus: h.from_status, toStatus: h.to_status, reasonCode: h.reason_code, remarks: h.remarks,
       by: h.changed_by, byName: users.get(h.changed_by) || null, roles: (h.changed_by_roles || []).map((c) => roleNames.get(c) || c), at: h.changed_at })),
-    actions: await actionsFor(db, { fy, run, checks, adjustmentPeriod, user }),
+    actions,
   };
 }
 
@@ -508,7 +512,7 @@ export async function cancelYearEnd(db, id, user = null) {
   return getYearEnd(db, r.id);
 }
 
-/** Year-end adjustment journal in adjustment period 13 (pending, approved and posted by a second user). */
+/** Year-end adjustment journal in adjustment period 13, awaiting approval: a second user approves and posts it on the journal voucher. */
 export async function createAdjustment(db, b, user, adjustmentEnabled) {
   if (!adjustmentEnabled) throw conflict('Adjustment journals are disabled (accounting.adjustment_period_enabled)');
   const fy = await getFiscalYear(db, b.fiscalYear);
@@ -516,5 +520,5 @@ export async function createAdjustment(db, b, user, adjustmentEnabled) {
   const p = (await db.query('SELECT status FROM accounting_periods WHERE period = $1', [adjCode(fy)])).rows[0];
   if (p?.status !== 'open') throw conflict(`Adjustment period ${adjCode(fy)} is ${p?.status || 'missing'}`);
   return createJournal(db, { date: iso(fy.end_date), period: adjCode(fy), description: b.description, source: 'adjustment', kind: 'standard', manual: true,
-    entryType: 'YEAR_END_ADJUSTMENT', referenceType: 'FiscalYear', referenceId: fy.code, status: 'pending', requiresApproval: true, lines: b.lines }, user);
+    entryType: 'YEAR_END_ADJUSTMENT', referenceType: 'FiscalYear', referenceId: fy.code, status: 'for-approval', requiresApproval: true, lines: b.lines }, user);
 }

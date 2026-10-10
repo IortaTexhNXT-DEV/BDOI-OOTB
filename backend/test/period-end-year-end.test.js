@@ -93,8 +93,11 @@ describe('pre-checks', () => {
     expect(check(o, 'unposted_journals').data.count).toBe(before);
     expect(check(o, 'adjustments_posted')).toMatchObject({ status: 'failed', data: { count: 1 } });
     expect(step(o, 'adjustments')).toBe('pending');
-    expect(o.adjustments).toEqual([expect.objectContaining({ journalId: adj.body.data.id, status: 'pending', amount: 1500, createdByName: 'maker user' })]);
-    expect((await checker('put', `/accounting/transactions/${adj.body.data.id}/post`)).status).toBe(200);
+    expect(o.adjustments).toEqual([expect.objectContaining({ journalId: adj.body.data.id, status: 'for-approval', amount: 1500, createdByName: 'maker user' })]);
+    // approved on the journal voucher by a second user (maker-checker of the journal vouchers)
+    expect((await maker('post', `/journal-vouchers/${adj.body.data.id}/approve`)).status).toBe(403);
+    const approved = await checker('post', `/journal-vouchers/${adj.body.data.id}/approve`);
+    expect(approved.status, JSON.stringify(approved.body)).toBe(200);
     o = await overview(maker);
     expect(check(o, 'adjustments_posted').status).toBe('passed');
     expect(o.adjustments[0]).toMatchObject({ status: 'posted', postedByName: 'checker user' });
@@ -127,9 +130,12 @@ describe('pre-checks', () => {
     await months('closed');
     const o = await overview(mgr2);
     expect(o.checks.filter((x) => x.status === 'failed')).toEqual([]);
+    expect(step(o, 'closing')).toBe('ready');
     expect(step(o, 'approval')).toBe('pending-approval');
     expect(o.currentStep).toBe('approval');
     expect(o.actions.close).toEqual({ allowed: true, reason: null });
+    // the preparer, who may not close, lands on the closing entries to review
+    expect((await overview(mgr1)).currentStep).toBe('closing');
   });
 });
 

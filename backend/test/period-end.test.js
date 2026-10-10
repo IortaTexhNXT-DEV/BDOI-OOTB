@@ -348,12 +348,12 @@ describe('year-end close', () => {
     // adjustment in period 13, approved by a second user, then close again
     const adj = await maker('post', '/period-end/adjustments').send({ fiscalYear: 'FY2025', description: 'Audit adjustment', lines: [{ accountCode: '4401003', debit: 1500, credit: 0 }, { accountCode: '2208001', debit: 0, credit: 1500 }] });
     expect(adj.status, JSON.stringify(adj.body)).toBe(201);
-    expect(adj.body.data).toMatchObject({ period: '2025-13', date: '2025-12-31', status: 'pending' });
+    expect(adj.body.data).toMatchObject({ period: '2025-13', date: '2025-12-31', status: 'for-approval' });
     const again = (await maker('post', '/period-end/year-end').send({ fiscalYear: 'FY2025' })).body.data;
     const blocked = await admin('post', `/period-end/year-end/${again.id}/close`).send({});
     expect(blocked.status).toBe(409);
     expect(blocked.body.message).toMatch(/adjustment journal/);
-    expect((await ctx.as('checker')('put', `/accounting/transactions/${adj.body.data.id}/post`)).status).toBe(200);
+    expect((await ctx.as('checker')('post', `/journal-vouchers/${adj.body.data.id}/approve`)).status).toBe(200);
     const closed = await admin('post', `/period-end/year-end/${again.id}/close`).send({});
     expect(closed.status, JSON.stringify(closed.body)).toBe(200);
     expect(closed.body.data.netIncome).toBeCloseTo(netIncome - 1500, 2);
