@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { DEFAULT_SECTION, HELP_ROUTES, helpSectionFor } from "./helpRoutes";
-import { supportContacts, ticketDetails } from "./index";
+import { manualFile, roleChapters, supportContacts, ticketDetails } from "./index";
 import { menuList } from "../SideBar/list";
 import { flattenLeaves } from "../SideBar/menuTree";
 
@@ -9,10 +9,15 @@ const manual = JSON.parse(fs.readFileSync(path.join(__dirname, "../../../public/
 const ids = new Set(manual.sections.map((s) => s.id));
 
 describe("help for this screen", () => {
-  it("links only to headings of the user manual (run npm run help:build after the manual changes)", () => {
-    const broken = HELP_ROUTES.filter(([, id]) => !ids.has(id)).map(([prefix, id]) => `${prefix} -> ${id}`);
+  it("links only to headings of the published manual (run npm run help:build after the manual changes)", () => {
+    const broken = HELP_ROUTES.filter(([, ...route]) => !route.some((id) => ids.has(id))).map(([prefix, ...route]) => `${prefix} -> ${route.join(" | ")}`);
     expect(broken).toEqual([]);
     expect(ids.has(DEFAULT_SECTION)).toBe(true);
+  });
+  it("takes the first section of a route that the published manual has", () => {
+    expect(helpSectionFor("/product-configurator/rating").id).toBe("rating-engine");
+    expect(helpSectionFor("/product-configurator/rating", new Set(["module-reference-product-configurator"])).id).toBe("module-reference-product-configurator");
+    expect(helpSectionFor("/master/incentive/programs/view", new Set(["incentives"])).id).toBe("incentives");
   });
   it("every menu screen has a section of its own", () => {
     const missing = flattenLeaves(menuList)
@@ -27,6 +32,19 @@ describe("help for this screen", () => {
     expect(helpSectionFor("/master/finance/posting-rules").id).toBe("posting-configuration-configuration-approvals-posting-rules-account-determination");
     expect(helpSectionFor("/").id).toBe("dashboard");
     expect(helpSectionFor("/no/such/screen")).toEqual({ id: DEFAULT_SECTION, matched: false });
+  });
+});
+
+describe("the manual of the edition", () => {
+  const manual = { files: { pdf: "TISPH_User_Manual.pdf", word: null }, roles: { "tis-finance": { id: "tis-finance-and-general-accounting", title: "TIS Finance & General Accounting" },
+    "tis-it-admin": { id: "tis-it-appsupport-admin", title: "TIS IT AppSupport / Admin" } } };
+  it("offers the chapters of the user's own roles only", () => {
+    expect(roleChapters(manual, ["TIS-FINANCE", "sales"])).toEqual([{ code: "tis-finance", id: "tis-finance-and-general-accounting", title: "TIS Finance & General Accounting" }]);
+    expect(roleChapters(null, ["tis-finance"])).toEqual([]);
+  });
+  it("downloads the files the edition names", () => {
+    expect(manualFile(manual, "pdf")).toBe("/help/TISPH_User_Manual.pdf");
+    expect(manualFile(manual, "word")).toBeNull();
   });
 });
 

@@ -1,0 +1,231 @@
+{
+ "id": "tisph",
+ "title": "Toyota Insurance Services Philippines – User Manual",
+ "version": "1.0",
+ "date": "10 October 2026",
+ "status": "Draft",
+ "classification": "Internal",
+ "prepared": "iorta TechNXT",
+ "owner": "Toyota Insurance Services Philippines",
+ "reviewed": "",
+ "approved": "",
+ "approvalRef": "",
+ "approvedHash": "",
+ "brandPack": "toyota-insurance-services",
+ "roleFacts": "generated/role-facts.json",
+ "wordSource": "generated/TISPH_User_Manual.md",
+ "files": {
+  "pdf": "TISPH_User_Manual.pdf",
+  "word": "TISPH_User_Manual.docx"
+ },
+ "changes": [
+  {
+   "version": "1.0",
+   "date": "10 October 2026",
+   "author": "iorta TechNXT",
+   "change": "First TISPH edition: TISPH roles, process and screens (Draft for TISPH review)"
+  }
+ ],
+ "signOff": [
+  {
+   "role": "TISPH Project Manager",
+   "name": "",
+   "date": ""
+  },
+  {
+   "role": "TISPH Head of IT",
+   "name": "",
+   "date": ""
+  }
+ ],
+ "chapters": [
+  "chapters/about.md",
+  "chapters/getting-started.md",
+  "chapters/process.md",
+  "chapters/role-tis-sales-associate.md",
+  "chapters/role-tis-sales-officer.md",
+  "chapters/role-tis-sales-unit-head.md",
+  "chapters/role-tis-ops-associate.md",
+  "chapters/role-tis-ops-officer.md",
+  "chapters/role-tis-ops-unit-head.md",
+  "chapters/role-tis-ccd-pdu.md",
+  "chapters/role-tis-ccd-pdc.md",
+  "chapters/role-tis-ccd-bp.md",
+  "chapters/role-tis-ccd-recon.md",
+  "chapters/role-tis-finance.md",
+  "chapters/role-tis-it-admin.md",
+  "chapters/role-tis-general-manager.md",
+  "chapters/screens-operations.md",
+  "chapters/screens-accounts.md",
+  "chapters/screens-dashboards-and-commission.md",
+  "chapters/screens-master.md",
+  "chapters/screens-product-configurator.md",
+  "chapters/reports.md",
+  "chapters/glossary.md"
+ ],
+ "forbidden": [
+  {
+   "term": "BrokerVerse OOTB",
+   "why": "product wording"
+  },
+  {
+   "term": "OOTB",
+   "why": "product wording"
+  },
+  {
+   "term": "out of the box",
+   "caseSensitive": false,
+   "why": "product wording"
+  },
+  {
+   "term": "iorta TechNXT",
+   "why": "vendor name (document control only)"
+  },
+  {
+   "term": "iNXT",
+   "why": "vendor name"
+  },
+  {
+   "term": "System Administrator",
+   "why": "generic role"
+  },
+  {
+   "term": "Sales & Marketing (Account Executive)",
+   "why": "generic role"
+  },
+  {
+   "term": "Account Executive",
+   "why": "generic role (write account executive in lower case for the person)"
+  },
+  {
+   "term": "Processing Team",
+   "why": "generic role"
+  },
+  {
+   "term": "Operations (Client Servicing)",
+   "caseSensitive": false,
+   "why": "generic role"
+  },
+  {
+   "term": "Accounting Manager",
+   "why": "generic role"
+  },
+  {
+   "term": "Claims role",
+   "caseSensitive": false,
+   "why": "generic role"
+  },
+  {
+   "term": "Accounting role",
+   "caseSensitive": false,
+   "why": "generic role"
+  },
+  {
+   "term": "Compliance Officer",
+   "why": "withdrawn role"
+  },
+  {
+   "term": "persona",
+   "caseSensitive": false,
+   "why": "generic role wording"
+  },
+  {
+   "term": "Go-Live Data Load",
+   "caseSensitive": false,
+   "why": "withdrawn screen"
+  },
+  {
+   "term": "go-live workbook",
+   "caseSensitive": false,
+   "why": "withdrawn screen"
+  },
+  {
+   "term": "Data Privacy",
+   "why": "withdrawn screen"
+  },
+  {
+   "term": "Theme and Branding",
+   "why": "withdrawn screen"
+  },
+  {
+   "term": "System Settings",
+   "why": "withdrawn screen"
+  },
+  {
+   "term": "Reinsurance",
+   "caseSensitive": false,
+   "why": "withdrawn module"
+  },
+  {
+   "term": "Incentive Programs",
+   "why": "screen no TISPH role opens"
+  },
+  {
+   "term": "SUPERID",
+   "why": "user acceptance testing role"
+  },
+  {
+   "term": "maria.rivera",
+   "why": "generic sample user"
+  },
+  {
+   "term": "beatriz.lacson",
+   "why": "generic sample user"
+  },
+  {
+   "pattern": "/home/",
+   "why": "machine path"
+  },
+  {
+   "pattern": "\\b(AI|GPT|LLM)\\b",
+   "why": "no AI wording"
+  },
+  {
+   "pattern": "\\b(C[l]aude|An[t]hropic|Open[A]I|Chat[G]PT|Co[p]ilot|Ge[m]ini)\\b",
+   "caseSensitive": false,
+   "why": "no AI wording"
+  },
+  {
+   "pattern": "artificial intelligence|language model|machine learning|\\bassistant\\b",
+   "caseSensitive": false,
+   "why": "no AI wording"
+  },
+  {
+   "term": "BrokerVerse",
+   "why": "product name (the TISPH edition names no product)"
+  },
+  {
+   "pattern": "\\bRBAC\\b",
+   "why": "internal project wording"
+  },
+  {
+   "pattern": "\\bv\\d+(?:\\.\\d+)*\\b",
+   "why": "internal version tag"
+  },
+  {
+   "pattern": "\\bseed(?:s|ed|ing)?\\b",
+   "caseSensitive": false,
+   "why": "technical wording (set-up or sample data)"
+  },
+  {
+   "term": "comsub",
+   "why": "internal term: write referrer commission (Comsub is only the screen label)"
+  },
+  {
+   "term": "GENERIC",
+   "why": "technical label"
+  },
+  {
+   "pattern": "\\b(?:UAT|SIT)\\b",
+   "why": "environment-specific content (cut-over plan)"
+  },
+  {
+   "pattern": "\\bManual (?:Sales|Operations|CCD|Finance|IT|General)\\b",
+   "why": "capture test account"
+  },
+  {
+   "pattern": "\\bmanual\\.[a-z]",
+   "why": "capture test account"
+  }
+ ]
+}

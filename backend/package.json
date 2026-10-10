@@ -15,6 +15,7 @@
     "seed": "node src/db/seed.js",
     "db:reset": "node src/db/migrate.js --reset && node src/db/seed.js",
     "export:api": "node src/tools/export-api.js",
+    "manual:role-facts": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/manual-role-facts.js",
     "purge:sample": "node scripts/purge-sample-data.js",
     "reset:transactions": "node scripts/reset-transactions.js",
     "rehearsal:golive": "node scripts/golive-rehearsal.js",

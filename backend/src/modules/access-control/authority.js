@@ -40,7 +40,7 @@ export const AUTHORITY_STEPS = {
   journal_voucher: { step: 'Accounts > Journal Vouchers > Approve', permissions: ['write:journal-vouchers'] },
   remittance: { step: 'Accounts > Remittance > Approvals', permissions: ['approve:remittance'] },
   remittance_settlement: { step: 'Accounts > Remittance > Approvals (settlement, adjustment, transfer)', permissions: ['approve:remittance'] },
-  underwriting_referral: { step: 'Quotation > Underwriting referral (the authority role of the acceptance rule)', permissions: ['write:quotations'], ruleRoles: true },
+  underwriting_referral: { step: 'Operations > Sales & Marketing > Quotations > Underwriting referral', permissions: ['write:quotations'], ruleRoles: true },
 };
 
 const money = (v) => (v === null || v === undefined || v === '' ? null : Math.round(Number(v) * 100) / 100);

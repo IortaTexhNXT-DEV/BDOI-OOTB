@@ -17,7 +17,6 @@ import "./index.scss";
 
 const HELP_BASE = `${process.env.PUBLIC_URL || ""}/help`;
 export const MANUAL_URL = `${HELP_BASE}/user-manual.html`;
-export const MANUAL_PDF_URL = `${HELP_BASE}/BrokerVerse_User_Manual.pdf`;
 const WEB_VERSION = process.env.REACT_APP_VERSION || "";
 const BUILD_DATE = process.env.REACT_APP_BUILD_DATE || "";
 
@@ -35,6 +34,20 @@ export const supportContacts = (rows) => {
     portalUrl: /^https?:\/\//i.test(portal) ? portal : "",
   };
 };
+
+/**
+ * The chapters of the user manual for the user's roles ([{ code, id, title }]), from the edition record of
+ * public/help/sections.json (roles: { code: { id, title } }), in the order of the manual.
+ */
+export const roleChapters = (manual, roles) => {
+  const held = new Set((roles || []).map((r) => String(r).toLowerCase()));
+  return Object.entries(manual?.roles || {})
+    .filter(([code]) => held.has(code))
+    .map(([code, chapter]) => ({ code, id: chapter.id, title: chapter.title }));
+};
+
+/** Address of a file of the published manual (the PDF or the Word file named in sections.json), or null. */
+export const manualFile = (manual, kind) => (manual?.files?.[kind] ? `${HELP_BASE}/${encodeURIComponent(manual.files[kind])}` : null);
 
 /** The details a support desk needs to look into a problem, as plain text. */
 export const ticketDetails = ({ screen, url, user, version, environment, at }) =>
@@ -69,8 +82,9 @@ const HelpSection = ({ icon, title, children }) => (
 
 /**
  * Help panel (avatar menu > Help, F1, or "?" outside a text field): the user manual section of the current screen,
- * the manual as PDF, the support desk (Master > Configuration, group support), a support ticket with the screen,
- * user, version and time filled in, the keyboard shortcuts, and About BrokerVerse.
+ * the chapter of the user's role, the manual as PDF and Word, the support desk (Master > Configuration, group
+ * support), a support ticket with the screen, user, version and time filled in, the keyboard shortcuts, and About.
+ * The manual is the edition published in public/help (sections.json names it, its files and its role chapters).
  */
 const HelpPanel = () => {
   const { t } = useTranslation();
@@ -78,11 +92,12 @@ const HelpPanel = () => {
   const navigate = useNavigate();
   const systemName = useSelector((s) => s.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName);
   const [visible, setVisible] = useState(false);
-  const [sections, setSections] = useState(null);
+  const [manual, setManual] = useState(null);
   const [support, setSupport] = useState(null);
   const [version, setVersion] = useState(null);
   const [copied, setCopied] = useState(false);
-  const isAdmin = useMemo(() => getUserRoles().some((r) => ADMIN_ROLES.includes(r)), []);
+  const userRoles = useMemo(() => getUserRoles(), []);
+  const isAdmin = userRoles.some((r) => ADMIN_ROLES.includes(r));
 
   const open = useCallback(() => setVisible(true), []);
 
@@ -106,11 +121,11 @@ const HelpPanel = () => {
   useEffect(() => {
     if (!visible) return;
     setCopied(false);
-    if (!sections) {
+    if (!manual) {
       fetch(`${HELP_BASE}/sections.json`)
         .then((r) => (r.ok ? r.json() : null))
-        .then((d) => setSections(d?.sections || []))
-        .catch(() => setSections([]));
+        .then((d) => setManual(d && Array.isArray(d.sections) ? d : { sections: [] }))
+        .catch(() => setManual({ sections: [] }));
     }
     if (!support) {
       adminService
@@ -124,7 +139,7 @@ const HelpPanel = () => {
         .then((v) => setVersion(v || {}))
         .catch(() => setVersion({}));
     }
-  }, [visible, sections, support, version]);
+  }, [visible, manual, support, version]);
 
   // the screen the user is on: its menu label, else the page title
   const screen = useMemo(() => {
@@ -135,9 +150,17 @@ const HelpPanel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, visible, t, systemName]);
 
-  const section = helpSectionFor(location.pathname);
+  const sections = manual?.sections || null;
+  const knownIds = useMemo(() => (manual ? new Set(manual.sections.map((s) => s.id)) : null), [manual]);
+  const section = helpSectionFor(location.pathname, knownIds);
   const sectionTitle = sections?.find((s) => s.id === section.id)?.title;
   const sectionUrl = `${MANUAL_URL}#${section.id}`;
+  const pdfUrl = manualFile(manual, "pdf");
+  const wordUrl = manualFile(manual, "word");
+  const chapters = roleChapters(manual, userRoles);
+  const manualVersion = [manual?.version && `${t("help.version")} ${manual.version}`, manual?.date, manual?.status && manual.status !== "Approved" ? manual.status : null]
+    .filter(Boolean)
+    .join(" · ");
 
   const versionText = [
     WEB_VERSION && `${t("help.webApp")} ${WEB_VERSION}`,
@@ -194,15 +217,38 @@ const HelpPanel = () => {
             <i className="pi pi-external-link" aria-hidden="true" />
             <span>{t("help.openSection")}</span>
           </a>
-          <a className="p-button p-component p-button-outlined bv-help__button" href={MANUAL_PDF_URL} download>
-            <i className="pi pi-download" aria-hidden="true" />
-            <span>{t("help.downloadPdf")}</span>
-          </a>
+          {pdfUrl && (
+            <a className="p-button p-component p-button-outlined bv-help__button" href={pdfUrl} download>
+              <i className="pi pi-download" aria-hidden="true" />
+              <span>{t("help.downloadPdf")}</span>
+            </a>
+          )}
+          {wordUrl && (
+            <a className="p-button p-component p-button-outlined bv-help__button" href={wordUrl} download>
+              <i className="pi pi-download" aria-hidden="true" />
+              <span>{t("help.downloadWord")}</span>
+            </a>
+          )}
         </div>
         <a className="bv-help__link" href={MANUAL_URL} target="_blank" rel="noopener noreferrer">
           {t("help.browseManual")}
         </a>
       </HelpSection>
+
+      {chapters.length > 0 && (
+        <HelpSection icon="pi-id-card" title={t("help.yourRole")}>
+          <ul className="bv-help__roles">
+            {chapters.map((c) => (
+              <li key={c.code}>
+                <span>{c.title}</span>
+                <a className="bv-help__link" href={`${MANUAL_URL}#${c.id}`} target="_blank" rel="noopener noreferrer">
+                  {t("help.openRoleChapter")}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </HelpSection>
+      )}
 
       <HelpSection icon="pi-phone" title={t("help.contactSupport")}>
         {support === null ? (
@@ -302,8 +348,14 @@ const HelpPanel = () => {
           <dd>{version === null ? <Skeleton width="6rem" height="0.9rem" /> : version.environment || "-"}</dd>
           <dt>{t("help.buildDate")}</dt>
           <dd>{formatBuildDate(BUILD_DATE) || "-"}</dd>
+          {manualVersion && (
+            <>
+              <dt>{t("help.manual")}</dt>
+              <dd>{manualVersion}</dd>
+            </>
+          )}
         </dl>
-        <p className="bv-help__muted bv-help__vendor">{t("help.vendor")}</p>
+        {manual && !manual.brandPack && <p className="bv-help__muted bv-help__vendor">{t("help.vendor")}</p>}
       </HelpSection>
     </Sidebar>
   );
