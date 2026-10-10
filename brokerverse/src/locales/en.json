@@ -323,7 +323,7 @@
     "phone": "Telephone",
     "hours": "Hours",
     "portal": "Support portal",
-    "noContacts": "The support contacts have not been set up yet. Ask your System Administrator.",
+    "noContacts": "Support contacts not set up. Contact TIS IT AppSupport / Admin.",
     "setContacts": "Set them on Master > Configuration",
     "raiseTicket": "Raise a support ticket",
     "ticketPortal": "Raise the ticket on the support portal. Copy the details below into it so that the support desk sees the screen, your user, the version and the time.",
@@ -1431,7 +1431,7 @@
     "filter": "Filter",
     "finalBillSummary": "Final bill summary",
     "finalize": "Finalize",
-    "finance": "Finance",
+    "finance": "Accounts",
     "frequency": "Frequency",
     "fromDate": "From date",
     "generate": "Generate",
@@ -4435,7 +4435,7 @@
     "allBranches": "All Branches"
   },
   "batchRenewal": {
-    "title": "Batch Renewal Management",
+    "title": "Renewal Batches",
     "noBatchRenewals": "No Batch Renewals Created",
     "selectionCriteria": "Selection Criteria",
     "expiryDateTo": "Expiry Date To",
@@ -5626,7 +5626,7 @@
     "firstSignIn": "This is your first sign-in",
     "notAssigned": "Not assigned",
     "twoStep": "Two-step verification",
-    "managedNote": "User ID, role, branch, designation, reporting line and e-mail address are maintained by your system administrator.",
+    "managedNote": "User ID, role, branch, designation, reporting line and e-mail address are maintained by TIS IT AppSupport / Admin.",
     "status": {
       "active": "Active",
       "inactive": "Inactive",
@@ -5649,7 +5649,7 @@
     "lastName": "Last name",
     "displayName": "Display name",
     "displayNameHint": "Shown in the top bar, on approvals and in the audit trail.",
-    "readOnlyHint": "Maintained by your system administrator.",
+    "readOnlyHint": "Maintained by TIS IT AppSupport / Admin.",
     "dateOfBirth": "Date of birth",
     "gender": "Gender",
     "select": "Select",
@@ -5660,7 +5660,7 @@
       "other": "Other",
       "undisclosed": "Prefer not to say"
     },
-    "emailManaged": "Ask your system administrator to change your e-mail address.",
+    "emailManaged": "Ask TIS IT AppSupport / Admin to change your e-mail address.",
     "contactNumber": "Contact number",
     "phoneHint": "Mobile 0917 123 4567 or +63 917 123 4567; landline with area code, e.g. (02) 8123 4567.",
     "houseNoStreet": "House No. / Unit No. / Street",
@@ -6037,7 +6037,7 @@
     "policy": "Policy"
   },
   "batchRenewalPage": {
-    "batchRenewal": "Batch Renewal",
+    "batchRenewal": "Renewal Batch",
     "home": "Home"
   },
   "reports": {
@@ -8230,7 +8230,7 @@
     "historyOf": "History: {{event}}"
   },
   "bankReconciliation": {
-    "downloadTemplate": "Download template (GENERIC format)",
+    "downloadTemplate": "Download template",
     "title": "Bank Reconciliation",
     "menu": "Bank Reconciliation",
     "accounts": "Accounts",
@@ -8766,7 +8766,7 @@
     }
   },
   "insurerRec": {
-    "downloadTemplate": "Download template (GENERIC format)",
+    "downloadTemplate": "Download template",
     "accounts": "Accounts",
     "master": "Master",
     "finance": "Finance",
@@ -8794,7 +8794,7 @@
     "tolerance": "Tolerance (PHP)",
     "toleranceDefault": "From the settings",
     "format": "Statement format",
-    "formatDefault": "Insurer's own, else generic",
+    "formatDefault": "Insurer's own, else standard",
     "file": "File (CSV or XLSX)",
     "preview": "Preview",
     "import": "Import and match",
@@ -12135,6 +12135,7 @@
       "title": "Post-Dated Cheques",
       "intro": "Cheques received against bills, kept on hand until their date. Depositing a cheque creates and posts the official receipt; a bounced cheque cancels it.",
       "register": "Register cheque",
+      "registerTab": "Cheque register",
       "registered": "Cheque registered as {{number}}",
       "onHand": "On hand",
       "dueNow": "Due for deposit",

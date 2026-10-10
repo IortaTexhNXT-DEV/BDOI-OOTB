@@ -163,7 +163,7 @@ const PostDatedCheques = () => {
       )}
       <div className="pe-card">
         <TabView>
-          <TabPanel header={t("opsAcc.pdc.register")}>
+          <TabPanel header={t("opsAcc.pdc.registerTab")}>
             <div className="flex gap-2 mb-2">
               <Dropdown value={status} options={STATUSES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }))} onChange={(e) => setStatus(e.value)} className="w-12rem" />
               <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.pdc.searchHint")} className="w-20rem" />

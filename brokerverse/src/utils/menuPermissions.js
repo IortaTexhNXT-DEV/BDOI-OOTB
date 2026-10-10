@@ -193,8 +193,9 @@ Object.assign(roleMenuPermissions, {
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", "Insurer Reconciliation"]),
   // the claim settlement funds an insurer remits are banked by Cash Control (write:receipts)
   "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation"]),
+  // CCD-Recon prepares and approves the remittances to insurers (write:remittance, the remittance steps of the Authority Matrix)
   "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation", "Open Entry Matching",
-    "Open Entry Unmatching", "Disbursement"]),
+    "Open Entry Unmatching", "Disbursement", "Remittance"]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,

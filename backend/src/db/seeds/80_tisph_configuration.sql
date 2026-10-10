@@ -99,6 +99,12 @@ INSERT INTO master_records(type_code, code, name, data, status, created_by)
 SELECT 'department', v.code, v.name, jsonb_build_object('DepartmentCode', v.code, 'DepartmentName', v.name, 'BranchCode', 'HO'), 'active', 'seed'
 FROM (VALUES ('10', 'TIS Sales'), ('20', 'TIS Operations'), ('30', 'Finance and General Accounting'), ('40', 'IT / Admin'), ('50', 'Cash Control')) AS v(code, name)
 WHERE NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'department' AND lower(m.code) = lower(v.code));
+-- the sample departments of the product (Underwriting, Reinsurance, Claims ...) are not TISPH's: inactive, so that no
+-- form offers them; the transaction codes of Finance name TISPH's Finance department. A row an administrator changed is kept.
+UPDATE master_records SET status = 'inactive', updated_at = now()
+ WHERE type_code = 'department' AND code IN ('SLS', 'UW', 'CLM', 'FIN', 'CS', 'IT', 'RI', 'CMP') AND status = 'active' AND updated_by IS NULL;
+UPDATE master_records SET data = data || '{"DepartmentCode": "30"}'::jsonb, updated_at = now()
+ WHERE type_code = 'transaction-code' AND data->>'DepartmentCode' = 'FIN' AND updated_by IS NULL;
 
 -- ---------------------------------------------------------------- M04 Insurer Panel
 -- Panel: AXA, Malayan, Standard, Stronghold, Pioneer and Maagap, all active. AXA under its registered name. Contacts are

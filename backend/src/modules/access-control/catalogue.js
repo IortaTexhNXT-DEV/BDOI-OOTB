@@ -90,7 +90,7 @@ const PERMISSION_LIST = {
   'write:clients': ['clients', 'edit', 'Create and edit clients'],
   'read:policies': ['policies', 'view', 'See policies, cover notes, payments and CTPL authentication'],
   'write:policies': ['policies', 'edit', 'Record and issue policies, cover notes and CTPL certificates'],
-  'approve:policies': ['policies', 'approve', 'Decide the check of a placement against the slip (not the user who recorded the policy)'],
+  'approve:policies': ['policies', 'approve', 'Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user'],
   'read:endorsements': ['endorsements', 'view', 'See endorsements and cancellations'],
   'write:endorsements': ['endorsements', 'edit', 'Request and process endorsements and cancellations'],
   'read:renewals': ['renewals', 'view', 'See renewals'],

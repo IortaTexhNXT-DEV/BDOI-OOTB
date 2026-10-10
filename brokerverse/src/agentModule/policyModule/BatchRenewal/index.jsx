@@ -6,7 +6,7 @@ import BatchTable from "./BatchTable";
 
 export default function BatchRenewalPage() {
   const { t } = useTranslation();
-  const items = [{ label: t("batchRenewalPage.batchRenewal"), url: "/agent/renewal-batch" }];
+  const items = [{ label: t("sidebar.Renewals") }, { label: t("batchRenewalPage.batchRenewal"), url: "/agent/renewal-batch" }];
   const Initiate = { label: t("sidebar.Operations") };
 
   return (
