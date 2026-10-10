@@ -6574,6 +6574,31 @@
       "issued": "Issued"
     }
   },
+  "importDialog": {
+    "about": "About this upload",
+    "uploadInto": "Upload into",
+    "template": "Template",
+    "downloadTemplate": "Download template",
+    "goLiveDate": "Go-live date",
+    "file": "File",
+    "chooseFile": "Choose file",
+    "fileTypes": "XLSX or CSV",
+    "removeFile": "Remove {{name}}",
+    "close": "Close",
+    "validate": "Validate",
+    "validating": "Validating...",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "validationResult": "Validation result",
+    "uploadResult": "Upload result",
+    "valid": "Valid",
+    "invalid": "Errors found",
+    "rows": "Rows",
+    "errors": "Errors",
+    "row": "Row",
+    "column": "Column",
+    "message": "Message"
+  },
   "pageHeader": {
     "help": "About this page",
     "back": "Back"

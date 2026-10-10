@@ -5370,6 +5370,31 @@
     "rejectNote": "หมายเหตุ",
     "rejectNoteRequired": "เหตุผลนี้ต้องมีหมายเหตุ: กรอกรายละเอียด"
   },
+  "importDialog": {
+    "about": "เกี่ยวกับการอัปโหลดนี้",
+    "uploadInto": "อัปโหลดไปยัง",
+    "template": "แม่แบบ",
+    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
+    "goLiveDate": "วันที่เริ่มใช้งานระบบ",
+    "file": "ไฟล์",
+    "chooseFile": "เลือกไฟล์",
+    "fileTypes": "XLSX หรือ CSV",
+    "removeFile": "นำ {{name}} ออก",
+    "close": "ปิด",
+    "validate": "ตรวจสอบ",
+    "validating": "กำลังตรวจสอบ...",
+    "upload": "อัปโหลด",
+    "uploading": "กำลังอัปโหลด...",
+    "validationResult": "ผลการตรวจสอบ",
+    "uploadResult": "ผลการอัปโหลด",
+    "valid": "ถูกต้อง",
+    "invalid": "พบข้อผิดพลาด",
+    "rows": "จำนวนแถว",
+    "errors": "ข้อผิดพลาด",
+    "row": "แถว",
+    "column": "คอลัมน์",
+    "message": "ข้อความ"
+  },
   "pageHeader": {
     "help": "เกี่ยวกับหน้านี้",
     "back": "ย้อนกลับ"

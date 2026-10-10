@@ -30,7 +30,7 @@ const importService = {
     URL.revokeObjectURL(url);
   },
 
-  /** Uploads `file` (multipart field "file") with extra form fields; returns the result data of the API. */
+  /** Uploads `file` (multipart field "file") with extra form fields; returns the result data of the API. A refusal throws an error with the API's message (`summary`) and row errors (`errors`). */
   async upload(path, file, fields = {}) {
     const form = new FormData();
     Object.entries(fields).forEach(([key, value]) => {
@@ -39,7 +39,13 @@ const importService = {
     form.append("file", file);
     const response = await fetch(`${BASE_URL}${path}`, { method: "POST", headers: { ...authService.getAuthHeader() }, body: form });
     const json = await response.json().catch(() => ({}));
-    if (!response.ok || json.success === false) throw new Error(apiErrorMessage(json, response.status));
+    if (!response.ok || json.success === false) {
+      const error = new Error(apiErrorMessage(json, response.status));
+      error.status = response.status;
+      error.errors = json.errors || [];
+      error.summary = json.message || null;
+      throw error;
+    }
     return { message: json.message, ...(json.data || {}) };
   },
 };
