@@ -1,0 +1,46 @@
+// Titled card section of a detail view (components/DetailSection). Theme CSS variables only.
+
+.bv-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--bv-radius-md);
+  background: var(--color-surface);
+  font-family: var(--font-body);
+
+  & + & {
+    margin-top: 16px;
+  }
+}
+
+.bv-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bv-section__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-heading);
+}
+
+.bv-section__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bv-section__body {
+  padding: 14px 16px 16px;
+
+  &--flush {
+    padding: 0;
+    border-radius: 0 0 var(--bv-radius-md) var(--bv-radius-md);
+    overflow: hidden;
+  }
+}

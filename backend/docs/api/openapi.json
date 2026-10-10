@@ -51045,6 +51045,136 @@
         ]
       }
     },
+    "/document-templates/letterhead": {
+      "get": {
+        "operationId": "getDocumentTemplatesLetterhead",
+        "summary": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Front-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "addressLines": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "tin": {
+                          "type": "string"
+                        },
+                        "licence": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "website": {
+                          "type": "string"
+                        },
+                        "logo": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "object",
+                          "properties": {
+                            "accent": {
+                              "type": "string"
+                            },
+                            "headingColor": {
+                              "type": "string"
+                            },
+                            "headingBg": {
+                              "type": "string"
+                            },
+                            "tableHeaderBg": {
+                              "type": "string"
+                            },
+                            "tableHeaderText": {
+                              "type": "string"
+                            },
+                            "footerText": {
+                              "type": "string"
+                            },
+                            "showLogo": {
+                              "type": "boolean"
+                            },
+                            "logoHeight": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "generatedBy": {
+                          "type": "string"
+                        },
+                        "generatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "name": "Toyota Insurance Services Philippines, Inc.",
+                    "addressLines": [
+                      "31F Net Park, 5th Avenue",
+                      "Taguig City, Metro Manila 1634, Philippines"
+                    ],
+                    "tin": "000-000-000-000",
+                    "licence": "IC-B-1234",
+                    "phone": "+63 2 8888 0000",
+                    "email": "tisph@example.ph",
+                    "website": "",
+                    "logo": "data:image/png;base64,...",
+                    "documents": {
+                      "accent": "#eb0a1e",
+                      "headingColor": "#eb0a1e",
+                      "headingBg": "#f7f7f7",
+                      "tableHeaderBg": "#eb0a1e",
+                      "tableHeaderText": "#ffffff",
+                      "footerText": "Authorized by the Insurance Commission ...",
+                      "showLogo": true,
+                      "logoHeight": 46
+                    },
+                    "generatedBy": "Rosa Finance",
+                    "generatedAt": "10/10/2026 09:03"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Printable views (Print on screens that print a page of their own)"
+      }
+    },
     "/document-templates/policy-schedule-fire/{id}": {
       "get": {
         "operationId": "getDocumentTemplatesPolicyScheduleFireId",
@@ -106030,8 +106160,20 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "username": {
                             "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "at": {
                             "type": "string"
@@ -106049,7 +106191,12 @@
                   "data": [
                     {
                       "action": "create-version",
+                      "actionLabel": "Create version",
                       "username": "BrokerVerse",
+                      "displayName": "BrokerVerse Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "at": "2026-09-29T08:00:00Z",
                       "version": 2
                     }
@@ -109190,11 +109337,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -109202,6 +109361,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -109224,11 +109386,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -109801,11 +109969,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -109813,6 +109993,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -109835,11 +110018,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -110277,11 +110466,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -110289,6 +110490,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -110311,11 +110515,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -111067,11 +111277,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -111079,6 +111301,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -111101,11 +111326,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -111738,11 +111969,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -111750,6 +111993,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -111772,11 +112018,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -112707,11 +112959,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -112719,6 +112983,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -112741,11 +113008,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Draft",
                           "to": "Active"
                         }
@@ -114543,11 +114816,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -114555,6 +114840,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -114577,11 +114865,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -115015,11 +115309,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -115027,6 +115333,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -115049,11 +115358,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -115767,11 +116082,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -115779,6 +116106,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -115801,11 +116131,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Draft",
                           "to": "Active"
                         }
@@ -116790,11 +117126,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -116802,6 +117150,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -116824,11 +117175,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -117270,11 +117627,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -117282,6 +117651,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -117304,11 +117676,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -117997,11 +118375,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -118009,6 +118399,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -118031,11 +118424,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -130211,6 +130610,9 @@
                           "actionType": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "previousValue": {
                             "type": "string"
                           },
@@ -130220,7 +130622,19 @@
                           "changedBy": {
                             "type": "string"
                           },
+                          "changedByName": {
+                            "type": "string"
+                          },
+                          "changedByRoles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "changeDate": {
+                            "type": "string"
+                          },
+                          "changedAt": {
                             "type": "string"
                           }
                         }
@@ -130234,10 +130648,16 @@
                     {
                       "referenceNo": "REM-2026-00001",
                       "actionType": "approve",
+                      "actionLabel": "Approved",
                       "previousValue": "Pending Approval",
                       "newValue": "Approved",
                       "changedBy": "finance.head",
-                      "changeDate": "2026-09-26 15:45"
+                      "changedByName": "Fe Head",
+                      "changedByRoles": [
+                        "Finance Manager"
+                      ],
+                      "changeDate": "2026-09-26 15:45",
+                      "changedAt": "2026-09-26T15:45:00.000Z"
                     }
                   ]
                 }
@@ -131823,7 +132243,7 @@
     "/remittance/remittances/{id}": {
       "get": {
         "operationId": "getRemittanceRemittancesId",
-        "summary": "Remittance details: insurer, policies, documents, activity log",
+        "summary": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
         "tags": [
           "Remittance"
         ],
@@ -131918,7 +132338,101 @@
                         },
                         "activityLog": {
                           "type": "array",
-                          "items": {}
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "action": {
+                                "type": "string"
+                              },
+                              "by": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "notes": {},
+                              "id": {
+                                "type": "string"
+                              },
+                              "day": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "time": {
+                                "type": "string"
+                              },
+                              "atText": {
+                                "type": "string"
+                              },
+                              "actionCode": {
+                                "type": "string"
+                              },
+                              "actionLabel": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "type": "object",
+                                "properties": {
+                                  "username": {
+                                    "type": "string"
+                                  },
+                                  "displayName": {
+                                    "type": "string"
+                                  },
+                                  "roles": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "role": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "fromStatus": {
+                                "type": "string"
+                              },
+                              "toStatus": {
+                                "type": "string"
+                              },
+                              "remarks": {},
+                              "changes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "before": {},
+                                    "after": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "source": {
+                                "type": "object",
+                                "properties": {
+                                  "channel": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -131950,7 +132464,45 @@
                         "commission": 2250
                       }
                     ],
-                    "activityLog": []
+                    "activityLog": [
+                      {
+                        "action": "submit",
+                        "by": "r.finance",
+                        "at": "2026-10-10T01:03:00.000Z",
+                        "notes": null,
+                        "id": "812",
+                        "day": "2026-10-10",
+                        "date": "10/10/2026",
+                        "time": "09:03",
+                        "atText": "10/10/2026 09:03",
+                        "actionCode": "submit",
+                        "actionLabel": "Remittance submitted",
+                        "user": {
+                          "username": "r.finance",
+                          "displayName": "Rosa Finance",
+                          "roles": [
+                            "Finance Officer"
+                          ],
+                          "role": "Finance Officer"
+                        },
+                        "fromStatus": "Draft",
+                        "toStatus": "Pending Approval",
+                        "remarks": null,
+                        "changes": [
+                          {
+                            "field": "batchId",
+                            "label": "Batch ID",
+                            "before": null,
+                            "after": "BLK-2026-00001"
+                          }
+                        ],
+                        "source": {
+                          "channel": "screen",
+                          "label": "Screen",
+                          "name": "Accounts > Remittance > Tracking"
+                        }
+                      }
+                    ]
                   }
                 }
               }
@@ -132053,6 +132605,62 @@
             }
           }
         }
+      }
+    },
+    "/remittance/remittances/{id}/pdf": {
+      "get": {
+        "operationId": "getRemittanceRemittancesIdPdf",
+        "summary": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Tracking > Print",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
       }
     },
     "/remittance/remittances/{id}/reject": {
@@ -142517,7 +143125,7 @@
     "/schedules/{code}/runs": {
       "get": {
         "operationId": "getSchedulesCodeRuns",
-        "summary": "Run history of a job",
+        "summary": "Run history of a job (who started a run: triggeredBy, triggeredByName)",
         "tags": [
           "Schedules"
         ],
@@ -142564,6 +143172,12 @@
                                 "type": "integer"
                               }
                             }
+                          },
+                          "triggeredBy": {
+                            "type": "string"
+                          },
+                          "triggeredByName": {
+                            "type": "string"
                           }
                         }
                       }
@@ -142579,7 +143193,9 @@
                       "startedAt": "2026-01-01T06:00:00Z",
                       "output": {
                         "notifications": 3
-                      }
+                      },
+                      "triggeredBy": "r.finance",
+                      "triggeredByName": "Rosa Finance"
                     }
                   ]
                 }
