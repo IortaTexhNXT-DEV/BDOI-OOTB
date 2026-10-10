@@ -71,9 +71,9 @@ describe("activity log adapters", () => {
     expect(f).toMatchObject({ actionCode: "Call", user: { displayName: "Carla Agent", username: "c.agent", role: "Collections" } });
     expect(f.changes.map((c) => c.after)).toEqual(["Wrong number", "15/10/2026"]);
     const [r] = fromJobRuns([{ id: 9, startedAt: "2026-10-01T22:00:00Z", status: "failed", error: "SMTP refused", triggeredBy: "schedule" }]);
-    expect(r).toMatchObject({ actionCode: "run", toStatus: "Failed", remarks: "SMTP refused", user: { displayName: null }, source: { channel: "job", label: "Scheduled job" } });
-    const [manual] = fromJobRuns([{ id: 10, startedAt: "2026-10-02T01:00:00Z", status: "success", triggeredBy: "r.finance", triggeredByName: "Rosa Finance" }]);
-    expect(manual).toMatchObject({ toStatus: "Success", user: { displayName: "Rosa Finance", username: "r.finance" }, source: null });
+    expect(r).toMatchObject({ actionCode: "run", toStatus: "Failed", remarks: "SMTP refused", user: { displayName: null }, source: { channel: "job", label: "Scheduled run" } });
+    const [manual] = fromJobRuns([{ id: 10, startedAt: "2026-10-02T01:00:00Z", status: "success", triggeredBy: "r.finance", triggeredByName: "Rosa Finance", triggeredByRoles: ["TIS Finance"] }]);
+    expect(manual).toMatchObject({ toStatus: "Success", user: { displayName: "Rosa Finance", username: "r.finance", role: "TIS Finance" }, source: { channel: "screen", label: "Run now (manual)" } });
   });
 
   it("builds the lifecycle of a record from its own fields, the steps that happened only", () => {

@@ -138,8 +138,19 @@ define({
         u.display_name, (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS roles
       FROM audit_log a LEFT JOIN users u ON u.id = a.user_id OR (a.user_id IS NULL AND u.username = a.username)
       WHERE a.entity = 'posting_rule' AND a.entity_id IN (SELECT id::text FROM posting_rules WHERE event_code = $1) ORDER BY a.at DESC LIMIT 200`, [r.eventCode])).rows;
-    ok(res, rows.map((x) => ({ action: x.action, actionLabel: actionText(x.action), username: x.username, displayName: x.display_name || x.username || 'System', roles: x.roles || [],
-      at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) })));
+    const out = rows.map((x) => ({ action: x.action, actionLabel: actionText(x.action), username: x.username, displayName: x.display_name || x.username || 'System', roles: x.roles || [],
+      at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) }));
+    // versions loaded by the seed or a migration have no audit row: each still shows when it came in and why
+    const told = new Set(out.filter((x) => x.version).map((x) => x.version));
+    const versions = (await pool.query(`SELECT p.id, p.version, p.created_at, p.created_by, p.change_note, u.username, u.display_name,
+        (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS roles
+      FROM posting_rules p LEFT JOIN users u ON u.id = p.created_by OR u.username = p.created_by WHERE p.event_code = $1 ORDER BY p.version`, [r.eventCode])).rows;
+    for (const v of versions.filter((x) => !told.has(Number(x.version)))) {
+      out.push({ action: 'create-version', actionLabel: actionText('create-version'), username: v.username || null, displayName: v.display_name || 'System', roles: v.roles || [],
+        at: v.created_at, version: Number(v.version), changeNote: v.change_note, ruleId: Number(v.id) });
+    }
+    out.sort((a, b) => new Date(b.at) - new Date(a.at) || (b.version || 0) - (a.version || 0));
+    ok(res, out);
   },
 });
 

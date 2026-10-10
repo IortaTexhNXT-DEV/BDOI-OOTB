@@ -79,6 +79,9 @@ const ACTION_VERBS = {
   recompute: 'recomputed', import: 'imported', remind: 'reminder sent', pay: 'paid', 'exclude-line': 'line excluded', 'include-line': 'line included',
   'raise-voucher': 'payment voucher raised', 'in-payment': 'in payment', 'payment-failed': 'payment failed', 'send-advice': 'advice sent',
   'record-confirmation': 'confirmation recorded', 'create-agency-bill': 'agency bill created', 'send-bill': 'bill sent',
+  accrue: 'accrued', 'mark-eligible': 'marked eligible',
+  acknowledge: 'acknowledged by the insurer', 'record-epolicy': 'e-policy recorded', check: 'checked against the slip', book: 'booked',
+  'send-for-approval': 'sent for approval', 'customer-accept': 'accepted by the customer',
 };
 
 /**
@@ -137,6 +140,15 @@ export function actionText(action) {
   const verb = ACTION_VERBS[a.toLowerCase()];
   return verb ? verb.charAt(0).toUpperCase() + verb.slice(1) : sentenceCase(a);
 }
+
+/** Status labels of record types whose stored status codes are not the words the screens show. */
+export const STATUS_LABELS = {
+  placement: { draft: 'Placement raised', sent: 'Sent to insurer', acknowledged: 'Acknowledged', epolicy_received: 'e-Policy received',
+    checked: 'Checked against slip', issued: 'Insurer issued', declined: 'Declined', cancelled: 'Cancelled' },
+  broker_slip: { draft: 'Draft', submitted: 'Submitted', 'responses-in': 'Responses in', closed: 'Closed', cancelled: 'Cancelled' },
+  supplier_invoice: { 'for-approval': 'For approval' },
+  supplier_payment: { 'for-approval': 'For approval' },
+};
 
 /** Field labels shared by every record type. Keys are matched exactly, then without case / separators. */
 const COMMON = {

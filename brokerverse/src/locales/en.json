@@ -2671,7 +2671,13 @@
     "configurationSettings": "Configuration (remittance settings)",
     "address": "Address",
     "contact": "Contact",
-    "accountCategoryDetail": "Account category"
+    "accountCategoryDetail": "Account category",
+    "bankFacts": "Bank",
+    "bankCategory": "Category",
+    "accountCode": "Account code",
+    "bankAccountsOf_one": "Company account at this bank ({{count}})",
+    "bankAccountsOf_other": "Company accounts at this bank ({{count}})",
+    "noBankAccounts": "No company account is held at this bank."
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -6647,7 +6653,11 @@
   "detailView": {
     "close": "Close",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "createdBy": "Created by",
+    "createdOn": "Created on",
+    "updatedOn": "Last changed",
+    "activity": "Activity"
   },
   "makerChecker": {
     "ownRecord": "You initiated this record. A different user must approve or reject it.",
@@ -6753,7 +6763,9 @@
       "manual": "Manual",
       "closeRun": "Month-end close",
       "yearEnd": "Year-end close",
-      "yearEndReversal": "Year-end close reversed"
+      "yearEndReversal": "Year-end close reversed",
+      "scheduled": "Scheduled run",
+      "manualRun": "Run now (manual)"
     }
   },
   "print": {
@@ -6996,7 +7008,9 @@
         "product": "Product"
       },
       "configurationNote": "Document number prefixes and formats are maintained on Master > Document Numbering.",
-      "openScreen": "Open Document Numbering"
+      "openScreen": "Open Document Numbering",
+      "issuedCount": "Numbers issued",
+      "lowestNext": "Lowest next number"
     },
     "commissionRates": {
       "title": "Commission Rate Matrix",
@@ -8668,7 +8682,7 @@
       "insurerPolicyNumber": "Insurer policy number",
       "brokerPolicyNumber": "BrokerVerse policy number",
       "brokerPolicyNumberPlaceholder": "Blank: numbered at booking",
-      "participantName": "Participant name (insured on the policy)",
+      "participantName": "Insured name",
       "sumInsured": "Sum insured",
       "netPremium": "Net premium",
       "grossPremium": "Gross premium",
@@ -9229,7 +9243,10 @@
         "cancelCheque": "The payment journal is reversed and the payable is re-opened.",
         "flag": "The line becomes a reconciling item on the bank side. No journal is posted."
       }
-    }
+    },
+    "close": "Close",
+    "readFile": "Read file",
+    "statementFile": "Statement file"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -9317,7 +9334,7 @@
       "type": "Type"
     },
     "history": {
-      "title": "History {{name}}",
+      "title": "History: {{name}}",
       "empty": "No changes recorded",
       "when": "When",
       "user": "User",
@@ -11280,7 +11297,8 @@
         "message": "The incoming message below is processed again.",
         "action": "Process again"
       }
-    }
+    },
+    "layoutChannels": "Channels"
   },
   "onboarding": {
     "title": "Onboard client",
@@ -11562,7 +11580,7 @@
     },
     "masters": {
       "add": "Add",
-      "new": "New {{name}}",
+      "new": "New record: {{name}}",
       "edit": "Edit {{name}}",
       "saved": "{{name}} saved",
       "allOf": "{{name}}: all",
@@ -11620,7 +11638,9 @@
         "title": "Reason Codes",
         "section": "Insurance Management",
         "intro": "Coded reasons of decisions, by what they are used for: quotations, claims, renewals, prospect reassignment and the accounting decisions. Cancellation and write-off reasons have their own masters."
-      }
+      },
+      "anyValue": "All",
+      "list": "Master"
     },
     "instalments": {
       "issueInvoices": "Issue instalment invoices",
@@ -12018,9 +12038,9 @@
         "post": "Post depreciation"
       },
       "master": {
-        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateTitle": "Deactivate {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
-        "activateTitle": "Activate {{name}} record",
+        "activateTitle": "Activate {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
     }
@@ -12984,8 +13004,15 @@
       "department": "Department",
       "account-category": "Account category",
       "currency": "Currency",
-      "transaction-code": "Transaction code"
-    }
+      "transaction-code": "Transaction code",
+      "remittance-setup": "Remittance setup"
+    },
+    "username": "User name",
+    "roles": "Roles",
+    "currencies": "Currencies",
+    "rate": "Rate",
+    "effectiveFrom": "Effective from",
+    "effectiveTo": "Effective to"
   },
   "schedules": {
     "title": "Schedules",
@@ -13040,7 +13067,8 @@
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday"
-    }
+    },
+    "outputCount": "{{count}} {{what}}"
   },
   "configuration": {
     "leaveTitle": "Leave without saving",
@@ -13235,5 +13263,11 @@
   "detailHeader": {
     "lifecycle": "Lifecycle",
     "currentStep": "(current step)"
+  },
+  "fileField": {
+    "choose": "Choose file",
+    "clear": "Remove file",
+    "none": "No file chosen",
+    "accepted": "{{types}} file"
   }
 }

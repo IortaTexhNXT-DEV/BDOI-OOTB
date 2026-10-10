@@ -49,8 +49,12 @@ export const describeOutput = (out) => {
     if (v && typeof v === "object") return Object.entries(v).map(([k, x]) => `${humanize(k).toLowerCase()} ${x}`).join(", ");
     return v;
   };
+  // counts read as "5 updated", "3 notifications"; other values as "Folder: /exports"
   return Object.entries(out)
-    .map(([k, v]) => `${humanize(k)}: ${value(v)}`)
+    .map(([k, v]) => {
+      const shown = value(v);
+      return typeof shown === "number" ? s("outputCount", { count: shown, what: humanize(k).toLowerCase() }) : `${humanize(k)}: ${shown}`;
+    })
     .join("; ") || s("done");
 };
 const fmt = (d) => formatInstant(d);

@@ -38,7 +38,8 @@ const ConnectorDialog = ({ connector, adapters, onHide, onSaved, toast }) => {
     setV({ ...connector, endpoint: connector.endpoint || "", options: pretty(connector.options),
       credentialRows: Object.entries(connector.credentialEnv || {}).map(([key, envName]) => ({ key, envName })) });
   }, [connector]);
-  if (!v) return null;
+  // closing clears the connector one render before the effect clears the form
+  if (!v || !connector) return null;
   const set = (patch) => setV((x) => ({ ...x, ...patch }));
   const setCred = (i, patch) => set({ credentialRows: v.credentialRows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
   const save = async () => {

@@ -54,9 +54,9 @@ ON CONFLICT (code) DO NOTHING;
 
 -- ---------------------------------------------------------------- scheduled jobs
 INSERT INTO scheduled_jobs(code, name, description, cron, handler, params, enabled) VALUES
- ('cover-note-expiry', 'Cover note expiry', 'Remind the owners of cover notes about to expire (cover_note.reminder_days_before), expire the cover notes past their end date and link those whose policy was issued', '20 6 * * *', 'coverNoteExpiry', '{}', true),
- ('pdc-deposit-due', 'Post-dated cheques due', 'Tell Accounting (write:receipts) which post-dated cheques are due for deposit within pdc.due_window_days', '25 6 * * *', 'pdcDepositDue', '{}', true),
- ('claim-document-reminders', 'Missing claim documents', 'E-mail claimants the documents still missing on their open claims, every claims.document_reminder_days days', '35 6 * * *', 'claimDocumentReminders', '{}', true)
+ ('cover-note-expiry', 'Cover note expiry', 'Remind the owners of cover notes about to expire, expire the cover notes past their end date and link those whose policy was issued', '20 6 * * *', 'coverNoteExpiry', '{}', true),
+ ('pdc-deposit-due', 'Post-dated cheques due', 'Tell Accounting which post-dated cheques are due for deposit within the deposit window', '25 6 * * *', 'pdcDepositDue', '{}', true),
+ ('claim-document-reminders', 'Missing claim documents', 'E-mail claimants the documents still missing on their open claims, at the reminder interval', '35 6 * * *', 'claimDocumentReminders', '{}', true)
 ON CONFLICT (code) DO NOTHING;
 
 -- ---------------------------------------------------------------- masters

@@ -28,6 +28,44 @@ export async function recordId(entity, ref) {
 }
 
 /**
+ * The steps a record keeps in its own columns (when, by whom): [action, time column, user column]. Records created
+ * before their screens wrote the audit trail (sample data, go-live loads, older releases) still show how they got to
+ * where they are; a step is only taken from the record when the trail has no entry for it.
+ */
+const LIFECYCLE = {
+  lead: ['leads', [['create', 'created_at', 'created_by'], ['assign', 'assigned_at', null]]],
+  quotation: ['quotes', [['create', 'created_at', 'created_by'], ['send-for-approval', 'approval_sent_at', null], ['approve', 'approved_at', 'approved_by'],
+    ['customer-accept', 'customer_accepted_at', null], ['submit', 'submitted_to_insurer_at', 'submitted_by']]],
+  broker_slip: ['broker_slips', [['create', 'created_at', 'created_by']]],
+  placement: ['placements', [['create', 'created_at', 'created_by'], ['send', 'sent_at', null], ['acknowledge', 'acknowledged_at', 'acknowledged_by'],
+    ['record-epolicy', 'epolicy_received_at', 'epolicy_received_by'], ['check', 'checked_at', 'checked_by'], ['book', 'issued_at', 'issued_by']]],
+  receipt: ['receipts', [['create', 'created_at', 'created_by'], ['cancel', 'cancelled_at', 'cancelled_by']]],
+  journal_voucher: ['journal_vouchers', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['post', 'posted_at', 'posted_by'],
+    ['reject', 'rejected_at', 'rejected_by'], ['cancel', 'cancelled_at', 'cancelled_by']]],
+  disbursement: ['disbursements', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['pay', 'paid_at', null]]],
+  petty_cash_request: ['petty_cash_requests', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['reject', 'rejected_at', 'rejected_by']]],
+  commission_line: ['commissions', [['accrue', 'accrued_at', null], ['mark-eligible', 'eligible_at', 'eligible_by'], ['approve', 'approved_at', 'approved_by'],
+    ['pay', 'paid_at', 'paid_by'], ['reverse', 'reversed_at', 'reversed_by']]],
+};
+/** Trail actions that already tell a step (a record loaded in bulk was created by the load). */
+const SAME_STEP = { create: /^(create|create-from-.*|bulk-create|go-live-migration|convert.*)$/ };
+
+/** The steps of a record taken from its own columns that its trail does not hold, as audit rows. */
+async function lifecycleRows(entity, id, stored) {
+  const [table, steps] = LIFECYCLE[entity] || [];
+  if (!table) return [];
+  const cols = [...new Set(steps.flatMap(([, at, by]) => [at, by]).filter(Boolean))];
+  const rec = await one(`SELECT ${cols.join(', ')} FROM ${table} WHERE id::text = $1`, [id]).catch(() => null);
+  if (!rec) return [];
+  const told = (action) => stored.some((r) => (SAME_STEP[action] || new RegExp(`^${action}(-|$)`)).test(String(r.action || '')));
+  return steps.filter(([action, at]) => rec[at] && !told(action)).map(([action, at, by]) => {
+    const who = by ? rec[by] : null;
+    return { id: `${action}-${id}`, at: rec[at], user_id: who && /^usr_/.test(who) ? who : null, username: who && !/^usr_/.test(who) ? who : null,
+      entity, entity_id: id, action, before_data: null, after_data: null, source: null };
+  });
+}
+
+/**
  * Events of one record, newest first (sort=asc for oldest first). A claim's history is its field-level trail
  * (claim_field_changes, grouped per action) plus the audited actions the trail does not hold (funds received,
  * payment to the claimant); the source of a trail action is taken from the audit row written with it.
@@ -57,6 +95,10 @@ export async function recordHistory(entityIn, ref, { viewer = null, sort = 'desc
     }
     rows = [...grouped, ...rows.filter((r) => !covered.has(r.action))]
       .sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));
+  }
+  const own = await lifecycleRows(entity, id, rows);
+  if (own.length) {
+    rows = [...rows, ...own].sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));
   }
   return toEvents(rows, { viewer });
 }

@@ -132,11 +132,14 @@ export const fromCollectionActions = (rows = []) =>
 
 /** GET /schedules/:code/runs (Master > Schedules > Run history). */
 export const fromJobRuns = (rows = []) =>
-  rows.map((r, i) => toEntry({
-    id: r.id, at: r.startedAt, actionCode: "run", user: r.triggeredBy === "schedule" ? userOf() : userOf(r.triggeredByName, r.triggeredBy),
-    toStatus: statusLabel(r.status), remarks: r.error,
-    source: r.triggeredBy === "schedule" ? { channel: "job", label: i18n.t("activityLog.sources.job") } : null,
-  }, i));
+  rows.map((r, i) => {
+    const scheduled = r.triggeredBy === "schedule";
+    return toEntry({
+      id: r.id, at: r.startedAt, actionCode: "run", user: scheduled ? userOf() : userOf(r.triggeredByName, r.triggeredBy, r.triggeredByRoles),
+      toStatus: statusLabel(r.status), remarks: r.error,
+      source: scheduled ? { channel: "job", label: i18n.t("activityLog.sources.scheduled") } : { channel: "screen", label: i18n.t("activityLog.sources.manualRun") },
+    }, i);
+  });
 
 /**
  * A record that keeps its lifecycle in its own fields (incentive calculations, commission lines, override computations):
