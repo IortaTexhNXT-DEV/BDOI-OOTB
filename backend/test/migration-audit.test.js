@@ -79,9 +79,10 @@ describe('per-record audit of a migration load', () => {
       policy: (await one("SELECT id FROM policies WHERE policy_number = 'AUD-P-1'")).id,
       receivable: (await one("SELECT id FROM receivables WHERE reference = 'AUD-DN-1'")).id,
       claim: (await one("SELECT id FROM claims WHERE claim_number = 'AUD-CLM-1'")).id,
+      journal: (await one("SELECT id FROM journal_vouchers WHERE source = 'go-live-opening'")).id,
     };
     expect(created.map((e) => [e.entity, e.entity_id])).toEqual([
-      ['claim', ids.claim], ['client', ids.client],
+      ['claim', ids.claim], ['client', ids.client], ['journal_voucher', ids.journal],
       ['opening_balances', `go-live:${cutover}:1202001`], ['opening_balances', `go-live:${cutover}:2201001`],
       ['policy', ids.policy], ['receivable', ids.receivable],
     ]);
@@ -110,7 +111,9 @@ describe('per-record audit of a migration load', () => {
     expect(c.after_data).toMatchObject({ email: 'rosa.diaz@example.ph', loadNumber: r.body.data.batch.loadNumber, batchId: r.body.data.batch.id });
     expect(updated[1].before_data).toEqual({ accountCode: '1202001', balance: 10000 });
     expect(updated[1].after_data).toMatchObject({ accountCode: '1202001', balance: 12000 });
-    expect(await entries('migrate-create')).toHaveLength(6);
+    // the opening balances set replaced, its opening balance journal is written again (a new number)
+    expect((await entries('migrate-create')).map((e) => e.entity).filter((e) => e === 'journal_voucher')).toHaveLength(2);
+    expect(await entries('migrate-create')).toHaveLength(8);
   });
 
   it('a load that fails writes no record entry', async () => {

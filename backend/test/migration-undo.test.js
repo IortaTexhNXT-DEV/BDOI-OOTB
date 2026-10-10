@@ -85,7 +85,7 @@ describe('undo of a load', () => {
     expect(await inventory()).toEqual(before);
     expect(await one('SELECT count(*)::int AS n FROM data_load_rows WHERE batch_id = $1 AND status = \'loaded\'', [id])).toEqual({ n: 0 });
     const audit = await many('SELECT entity, count(*)::int AS n FROM audit_log WHERE action = \'migrate-undo\' AND after_data->>\'loadNumber\' = $1 GROUP BY entity ORDER BY entity', [b.loadNumber]);
-    expect(audit).toEqual([{ entity: 'claim', n: 1 }, { entity: 'client', n: 1 }, { entity: 'opening_balances', n: 2 }, { entity: 'policy', n: 2 }, { entity: 'post_dated_cheque', n: 1 },
+    expect(audit).toEqual([{ entity: 'claim', n: 1 }, { entity: 'client', n: 1 }, { entity: 'journal_voucher', n: 1 }, { entity: 'opening_balances', n: 2 }, { entity: 'policy', n: 2 }, { entity: 'post_dated_cheque', n: 1 },
       { entity: 'receivable', n: 1 }]);
     // the same file loads again afterwards (and is undone again, for the next cases)
     const again = await loaded(sheets);

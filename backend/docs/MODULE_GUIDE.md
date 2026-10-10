@@ -86,7 +86,12 @@ minimal, clearly-correct front-end fix.
   it); an update passes the body through `withoutOriginFields(body, row)`, which refuses a change of the origin
   fields. Figures that leave migrated business out (production, commission, incentive) add `kpiOriginWhere(alias,
   kind)`. All in `src/lib/origin.js`; never test the older flags (`source = 'go-live-migration'`, `doc.source`) in new
-  code. A record created by an import of legacy business is written with `origin = 'migrated'`.
+  code. A record created by an import of legacy business is written with `origin = 'migrated'`. Dashboards take
+  `origin=issued|all` (`dashboard/service.js` `dashboardOrigin`); a renewal-rate denominator counts migrated policies.
+- The opening balance journal of go-live (`journal_vouchers.source = 'go-live-opening'`, status `opening`) has no
+  journal lines (its lines are the opening balances set, `period-end/opening.js` `openingJournalLines`). A query that
+  reads journal headers without a status filter shows it as read-only or leaves status `opening` out; a change to a
+  journal goes through `accounting/lib/ledger.js`, whose `assertNotOpeningJournal` refuses it (409).
 - Go-live workbooks (`src/modules/data-load`): an object of a kit is a sheet declared in `registry.js`; its importer
   translates legacy codes through the value maps (`resolveValue(ctx, object, value)`, `maps.js`), checks peso amounts
   with `pesoValue` (at most two decimals, never rounded) and reports each record it creates or changes with

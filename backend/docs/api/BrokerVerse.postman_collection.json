@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1310 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1328 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -30011,12 +30011,12 @@
       "name": "Dashboards",
       "item": [
         {
-          "name": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
+          "name": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/agent/get-dashboard-details?scope=mine",
+              "raw": "{{baseUrl}}/agent/get-dashboard-details?scope=mine&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -30028,10 +30028,14 @@
                 {
                   "key": "scope",
                   "value": "mine"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
+            "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
           },
           "response": [
             {
@@ -30040,7 +30044,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/agent/get-dashboard-details?scope=mine",
+                  "raw": "{{baseUrl}}/agent/get-dashboard-details?scope=mine&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -30052,10 +30056,14 @@
                     {
                       "key": "scope",
                       "value": "mine"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
+                "description": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations, read:policies"
               },
               "status": "OK",
               "code": 200,
@@ -30121,12 +30129,12 @@
           ]
         },
         {
-          "name": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read",
+          "name": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents, issued since go-live; origin=issued|all: the business counted (default dashboard.default_origin; the retention rate counts migrated policies); asOf = when the figures were read",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous",
+              "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -30142,10 +30150,14 @@
                 {
                   "key": "compare",
                   "value": "previous"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
+            "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents, issued since go-live; origin=issued|all: the business counted (default dashboard.default_origin; the retention rate counts migrated policies); asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
           },
           "response": [
             {
@@ -30154,7 +30166,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous",
+                  "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -30170,10 +30182,14 @@
                     {
                       "key": "compare",
                       "value": "previous"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
+                "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents, issued since go-live; origin=issued|all: the business counted (default dashboard.default_origin; the retention rate counts migrated policies); asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
               },
               "status": "OK",
               "code": 200,
@@ -30239,12 +30255,12 @@
           ]
         },
         {
-          "name": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",
+          "name": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles); origin=issued|all",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/dashboard/sales?scope=mine",
+              "raw": "{{baseUrl}}/dashboard/sales?scope=mine&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -30256,10 +30272,14 @@
                 {
                   "key": "scope",
                   "value": "mine"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: read:leads, read:quotations"
+            "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles); origin=issued|all\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: read:leads, read:quotations"
           },
           "response": [
             {
@@ -30268,7 +30288,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/sales?scope=mine",
+                  "raw": "{{baseUrl}}/dashboard/sales?scope=mine&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -30280,10 +30300,14 @@
                     {
                       "key": "scope",
                       "value": "mine"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: read:leads, read:quotations"
+                "description": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles); origin=issued|all\n\nFront-end touchpoint: Dashboard > Sales\n\nAccess: read:leads, read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -30300,12 +30324,12 @@
           ]
         },
         {
-          "name": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+          "name": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend, issued since go-live. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id); origin=issued|all: the policies counted",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123",
+              "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -30326,10 +30350,14 @@
                 {
                   "key": "salesPerson",
                   "value": "usr_0123"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+            "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend, issued since go-live. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id); origin=issued|all: the policies counted\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
           },
           "response": [
             {
@@ -30338,7 +30366,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123",
+                  "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -30359,10 +30387,14 @@
                     {
                       "key": "salesPerson",
                       "value": "usr_0123"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+                "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend, issued since go-live. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id); origin=issued|all: the policies counted\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -41286,6 +41318,392 @@
           ]
         },
         {
+          "name": "The one-time SAP opening file: whether BrokerVerse sends it (migration.sap_gl_include_opening), the opening balance journal, the requests and, once generated, its SAP GL run and files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file"
+              ]
+            },
+            "description": "The one-time SAP opening file: whether BrokerVerse sends it (migration.sap_gl_include_opening), the opening balance journal, the requests and, once generated, its SAP GL run and files\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file"
+                  ]
+                },
+                "description": "The one-time SAP opening file: whether BrokerVerse sends it (migration.sap_gl_include_opening), the opening balance journal, the requests and, once generated, its SAP GL run and files\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"enabled\": true,\n    \"locked\": true,\n    \"journal\": {\n      \"id\": \"jv_8f0c\",\n      \"journalNumber\": \"OBJ-2026-0001\",\n      \"asAt\": \"2026-10-31\",\n      \"totalDebit\": 18450000,\n      \"totalCredit\": 18450000,\n      \"sapExportedAt\": null\n    },\n    \"pendingRequest\": {\n      \"id\": 2,\n      \"status\": \"pending\",\n      \"reason\": \"SAP takes the opening position from BrokerVerse\",\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-01T15:00:00Z\",\n      \"exportId\": null\n    },\n    \"requests\": [],\n    \"run\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the SAP opening file of the opening balance journal, with a reason; generated on the approval of another user, once",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file"
+              ]
+            },
+            "description": "Request the SAP opening file of the opening balance journal, with a reason; generated on the approval of another user, once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"SAP takes the opening position from BrokerVerse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file"
+                  ]
+                },
+                "description": "Request the SAP opening file of the opening balance journal, with a reason; generated on the approval of another user, once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"SAP takes the opening position from BrokerVerse\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"SAP opening file requested\",\n  \"data\": {\n    \"enabled\": true,\n    \"locked\": true,\n    \"journal\": {\n      \"id\": \"jv_8f0c\",\n      \"journalNumber\": \"OBJ-2026-0001\",\n      \"asAt\": \"2026-10-31\",\n      \"totalDebit\": 18450000,\n      \"totalCredit\": 18450000,\n      \"sapExportedAt\": null\n    },\n    \"pendingRequest\": {\n      \"id\": 2,\n      \"status\": \"pending\",\n      \"reason\": \"SAP takes the opening position from BrokerVerse\",\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-01T15:00:00Z\",\n      \"exportId\": null\n    },\n    \"requests\": [],\n    \"run\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve the request (approve:data-load, not its requester; go-live locked): the file is written to the SAP pick-up folder in the layout of the daily file (a run of trigger opening) and the journal marked sent; refused once generated",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file",
+                "approve"
+              ]
+            },
+            "description": "Approve the request (approve:data-load, not its requester; go-live locked): the file is written to the SAP pick-up folder in the layout of the daily file (a run of trigger opening) and the journal marked sent; refused once generated\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file",
+                    "approve"
+                  ]
+                },
+                "description": "Approve the request (approve:data-load, not its requester; go-live locked): the file is written to the SAP pick-up folder in the layout of the daily file (a run of trigger opening) and the journal marked sent; refused once generated\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"SAP opening file generated\",\n  \"data\": {\n    \"enabled\": true,\n    \"locked\": true,\n    \"journal\": {\n      \"id\": \"jv_8f0c\",\n      \"journalNumber\": \"OBJ-2026-0001\",\n      \"asAt\": \"2026-10-31\",\n      \"totalDebit\": 18450000,\n      \"totalCredit\": 18450000,\n      \"sapExportedAt\": null\n    },\n    \"pendingRequest\": null,\n    \"requests\": [],\n    \"run\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One file of the generated SAP opening file (kind header or line), as written to the SAP pick-up folder",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/files/:kind",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file",
+                "files",
+                ":kind"
+              ],
+              "variable": [
+                {
+                  "key": "kind",
+                  "value": "",
+                  "description": "kind (path parameter)"
+                }
+              ]
+            },
+            "description": "One file of the generated SAP opening file (kind header or line), as written to the SAP pick-up folder\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/files/:kind",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file",
+                    "files",
+                    ":kind"
+                  ],
+                  "variable": [
+                    {
+                      "key": "kind",
+                      "value": "",
+                      "description": "kind (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One file of the generated SAP opening file (kind header or line), as written to the SAP pick-up folder\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(text file)"
+            }
+          ]
+        },
+        {
+          "name": "Reject the request with remarks (approve:data-load, not its requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file",
+                "reject"
+              ]
+            },
+            "description": "Reject the request with remarks (approve:data-load, not its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"SAP loads its own cutover balances\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file",
+                    "reject"
+                  ]
+                },
+                "description": "Reject the request with remarks (approve:data-load, not its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"SAP loads its own cutover balances\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"SAP opening file rejected\",\n  \"data\": {\n    \"enabled\": true,\n    \"locked\": true,\n    \"journal\": {\n      \"id\": \"jv_8f0c\",\n      \"journalNumber\": \"OBJ-2026-0001\",\n      \"asAt\": \"2026-10-31\",\n      \"totalDebit\": 18450000,\n      \"totalCredit\": 18450000,\n      \"sapExportedAt\": null\n    },\n    \"pendingRequest\": {\n      \"id\": 2,\n      \"status\": \"pending\",\n      \"reason\": \"SAP takes the opening position from BrokerVerse\",\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-01T15:00:00Z\",\n      \"exportId\": null\n    },\n    \"requests\": [],\n    \"run\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw the request (its requester)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "sap-opening-file",
+                "withdraw"
+              ]
+            },
+            "description": "Withdraw the request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/sap-opening-file/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "sap-opening-file",
+                    "withdraw"
+                  ]
+                },
+                "description": "Withdraw the request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"SAP opening file request withdrawn\",\n  \"data\": {\n    \"enabled\": true,\n    \"locked\": true,\n    \"journal\": {\n      \"id\": \"jv_8f0c\",\n      \"journalNumber\": \"OBJ-2026-0001\",\n      \"asAt\": \"2026-10-31\",\n      \"totalDebit\": 18450000,\n      \"totalCredit\": 18450000,\n      \"sapExportedAt\": null\n    },\n    \"pendingRequest\": {\n      \"id\": 2,\n      \"status\": \"pending\",\n      \"reason\": \"SAP takes the opening position from BrokerVerse\",\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-01T15:00:00Z\",\n      \"exportId\": null\n    },\n    \"requests\": [],\n    \"run\": null\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",
           "request": {
             "method": "PUT",
@@ -41497,6 +41915,1058 @@
               ],
               "cookie": [],
               "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Reconciliations of the migration loads, newest first (filters runId, status: open, signed, superseded) with their loads, open differences and who signed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations?runId=3&status=open&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations"
+              ],
+              "query": [
+                {
+                  "key": "runId",
+                  "value": "3"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Reconciliations of the migration loads, newest first (filters runId, status: open, signed, superseded) with their loads, open differences and who signed\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations?runId=3&status=open&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations"
+                  ],
+                  "query": [
+                    {
+                      "key": "runId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "status",
+                      "value": "open"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Reconciliations of the migration loads, newest first (filters runId, status: open, signed, superseded) with their loads, open differences and who signed\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"reconNumber\": \"REC-000007\",\n      \"runId\": 3,\n      \"loads\": [\n        \"MIG-000012\"\n      ],\n      \"cutoverDate\": \"2026-11-01\",\n      \"status\": \"open\",\n      \"openDifferences\": 1,\n      \"signedBy\": null,\n      \"createdBy\": \"Andrea Lim\",\n      \"createdAt\": \"2026-11-01T02:10:00Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create the reconciliation of a run: every loaded migration load of the run (refreshed on recompute) or the loads chosen (batchIds); lines counted on the records of those loads, legacy figures from their Control Totals sheets, checks, sub-ledger tie-outs and the differences",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations"
+              ]
+            },
+            "description": "Create the reconciliation of a run: every loaded migration load of the run (refreshed on recompute) or the loads chosen (batchIds); lines counted on the records of those loads, legacy figures from their Control Totals sheets, checks, sub-ledger tie-outs and the differences\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"runId\": 3,\n  \"batchIds\": [\n    12,\n    13\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations"
+                  ]
+                },
+                "description": "Create the reconciliation of a run: every loaded migration load of the run (refreshed on recompute) or the loads chosen (batchIds); lines counted on the records of those loads, legacy figures from their Control Totals sheets, checks, sub-ledger tie-outs and the differences\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"runId\": 3,\n  \"batchIds\": [\n    12,\n    13\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"REC-000007 created\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs and summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs and summary\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs and summary\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Explain a difference: explanation, action, owner and status (explained or fixed)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/differences/:diffId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "differences",
+                ":diffId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "diffId",
+                  "value": "",
+                  "description": "diffId (path parameter)"
+                }
+              ]
+            },
+            "description": "Explain a difference: explanation, action, owner and status (explained or fixed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"explanation\": \"Bill keyed twice in the legacy system\",\n  \"action\": \"Cancel DN-OLD-77 in BrokerVerse\",\n  \"owner\": \"Credit and Collection\",\n  \"status\": \"explained\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/differences/:diffId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "differences",
+                    ":diffId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "diffId",
+                      "value": "",
+                      "description": "diffId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Explain a difference: explanation, action, owner and status (explained or fixed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"explanation\": \"Bill keyed twice in the legacy system\",\n  \"action\": \"Cancel DN-OLD-77 in BrokerVerse\",\n  \"owner\": \"Credit and Collection\",\n  \"status\": \"explained\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Difference explained\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Accept a difference (approve:data-load; never a user who uploaded, submitted or approved a load of the reconciliation); it needs its explanation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/differences/:diffId/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "differences",
+                ":diffId",
+                "accept"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "diffId",
+                  "value": "",
+                  "description": "diffId (path parameter)"
+                }
+              ]
+            },
+            "description": "Accept a difference (approve:data-load; never a user who uploaded, submitted or approved a load of the reconciliation); it needs its explanation\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"explanation\": \"Accepted: cancelled in the legacy system after the extract\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/differences/:diffId/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "differences",
+                    ":diffId",
+                    "accept"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "diffId",
+                      "value": "",
+                      "description": "diffId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Accept a difference (approve:data-load; never a user who uploaded, submitted or approved a load of the reconciliation); it needs its explanation\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"explanation\": \"Accepted: cancelled in the legacy system after the extract\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Difference accepted\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload legacy figures (multipart \"file\"): a workbook with the Control Totals sheet (Object, Measure, Group, Legacy Value); all or nothing, each row sets the legacy figure of its line",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/legacy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "legacy"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Upload legacy figures (multipart \"file\"): a workbook with the Control Totals sheet (Object, Measure, Group, Legacy Value); all or nothing, each row sets the legacy figure of its line\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Upload control totals\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/legacy",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "legacy"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Upload legacy figures (multipart \"file\"): a workbook with the Control Totals sheet (Object, Measure, Group, Legacy Value); all or nothing, each row sets the legacy figure of its line\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Upload control totals\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Legacy figures loaded\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Enter the legacy figure of a line (write:data-load; legacyValue, null clears it) or its tolerance (a tolerance other than zero: approve:data-load, toleranceReason required, not a user who loaded the batches; a count is always exact)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/lines/:lineId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "lines",
+                ":lineId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "lineId",
+                  "value": "",
+                  "description": "lineId (path parameter)"
+                }
+              ]
+            },
+            "description": "Enter the legacy figure of a line (write:data-load; legacyValue, null clears it) or its tolerance (a tolerance other than zero: approve:data-load, toleranceReason required, not a user who loaded the batches; a count is always exact)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Lines\n\nAccess: write:data-load, approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"legacyValue\": 1250000,\n  \"tolerance\": 0.5,\n  \"toleranceReason\": \"Legacy system rounds each instalment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/lines/:lineId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "lines",
+                    ":lineId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "lineId",
+                      "value": "",
+                      "description": "lineId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Enter the legacy figure of a line (write:data-load; legacyValue, null clears it) or its tolerance (a tolerance other than zero: approve:data-load, toleranceReason required, not a user who loaded the batches; a count is always exact)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Lines\n\nAccess: write:data-load, approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legacyValue\": 1250000,\n  \"tolerance\": 0.5,\n  \"toleranceReason\": \"Legacy system rounds each instalment\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Line saved\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Compute an open reconciliation again (none of its slots signed): the figures of the records and of the Control Totals sheets; legacy figures entered on screen or uploaded are kept",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/recompute",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "recompute"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Compute an open reconciliation again (none of its slots signed): the figures of the records and of the Control Totals sheets; legacy figures entered on screen or uploaded are kept\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/recompute",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "recompute"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Compute an open reconciliation again (none of its slots signed): the figures of the records and of the Control Totals sheets; legacy figures entered on screen or uploaded are kept\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"REC-000007 recomputed\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The reconciliation report: format=pdf (letterhead) or xlsx (Summary, Lines, Checks, Differences, Sign-offs), built when downloaded; version=signed: the PDF kept when the last slot signed (X-Content-SHA256)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/report?format=pdf&version=signed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "pdf"
+                },
+                {
+                  "key": "version",
+                  "value": "signed"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The reconciliation report: format=pdf (letterhead) or xlsx (Summary, Lines, Checks, Differences, Sign-offs), built when downloaded; version=signed: the PDF kept when the last slot signed (X-Content-SHA256)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Report\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/report?format=pdf&version=signed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "pdf"
+                    },
+                    {
+                      "key": "version",
+                      "value": "signed"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The reconciliation report: format=pdf (letterhead) or xlsx (Summary, Lines, Checks, Differences, Sign-offs), built when downloaded; version=signed: the PDF kept when the last slot signed (X-Content-SHA256)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Report\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf or xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Sign a slot of the reconciliation with a remark (approve:data-load; not a user who uploaded, submitted or approved one of its loads, nor one who signed another slot; no open difference and every total with its legacy figure). The last slot makes it Signed and keeps its PDF with the SHA-256",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/signoffs/:slot",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "signoffs",
+                ":slot"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "slot",
+                  "value": "",
+                  "description": "slot (path parameter)"
+                }
+              ]
+            },
+            "description": "Sign a slot of the reconciliation with a remark (approve:data-load; not a user who uploaded, submitted or approved one of its loads, nor one who signed another slot; no open difference and every total with its legacy figure). The last slot makes it Signed and keeps its PDF with the SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Sign-off\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Policies and open items agree with the legacy listing of 31/10/2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/signoffs/:slot",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "signoffs",
+                    ":slot"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "slot",
+                      "value": "",
+                      "description": "slot (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Sign a slot of the reconciliation with a remark (approve:data-load; not a user who uploaded, submitted or approved one of its loads, nor one who signed another slot; no open difference and every total with its legacy figure). The last slot makes it Signed and keeps its PDF with the SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Sign-off\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Policies and open items agree with the legacy listing of 31/10/2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Data owner signed\",\n  \"data\": {\n    \"id\": 7,\n    \"reconNumber\": \"REC-000007\",\n    \"runId\": 3,\n    \"allBatches\": true,\n    \"cutoverDate\": \"2026-11-01\",\n    \"openingBalancesAsAt\": \"2026-10-31\",\n    \"status\": \"open\",\n    \"computedAt\": \"2026-11-01T02:10:00Z\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T02:10:00Z\",\n    \"signedAt\": null,\n    \"supersededAt\": null,\n    \"supersededBy\": null,\n    \"signedReport\": false,\n    \"reportSha256\": null,\n    \"batches\": [\n      {\n        \"id\": 12,\n        \"loadNumber\": \"MIG-000012\",\n        \"legacySystem\": \"TISPH Excel\",\n        \"loadedAt\": \"2026-11-01T01:55:00Z\",\n        \"status\": \"loaded\"\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 41,\n        \"kind\": \"measure\",\n        \"object\": \"Policies\",\n        \"measure\": \"gross premium\",\n        \"group\": \"MOTOR\",\n        \"label\": null,\n        \"sides\": {\n          \"system\": \"BrokerVerse\",\n          \"other\": \"Legacy\"\n        },\n        \"systemValue\": 1250000,\n        \"legacyValue\": 1250000,\n        \"legacySource\": \"workbook\",\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      },\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ],\n    \"differences\": [\n      {\n        \"id\": 9,\n        \"kind\": \"extra\",\n        \"lineId\": null,\n        \"batchId\": null,\n        \"loadNumber\": null,\n        \"sheet\": \"Open Items\",\n        \"row\": null,\n        \"recordKey\": \"DN-OLD-77\",\n        \"description\": \"Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)\",\n        \"amount\": null,\n        \"status\": \"open\",\n        \"explanation\": null,\n        \"action\": null,\n        \"owner\": null,\n        \"acceptedBy\": null,\n        \"acceptedAt\": null\n      }\n    ],\n    \"signoffs\": [\n      {\n        \"slot\": \"data-owner\",\n        \"label\": \"Data owner\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      },\n      {\n        \"slot\": \"finance-head\",\n        \"label\": \"Finance Head\",\n        \"signedBy\": null,\n        \"signedAt\": null,\n        \"remarks\": null\n      }\n    ],\n    \"summary\": {\n      \"lines\": 2,\n      \"matched\": 2,\n      \"differences\": 1,\n      \"openDifferences\": 1,\n      \"missingLegacy\": [],\n      \"signed\": 0,\n      \"slots\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The sub-ledger tie-outs: their definitions and the tie-out lines of the reconciliation (both sides, accounts, difference)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/reconciliations/:id/tieouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "reconciliations",
+                ":id",
+                "tieouts"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The sub-ledger tie-outs: their definitions and the tie-out lines of the reconciliation (both sides, accounts, difference)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/reconciliations/:id/tieouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "reconciliations",
+                    ":id",
+                    "tieouts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The sub-ledger tie-outs: their definitions and the tie-out lines of the reconciliation (both sides, accounts, difference)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"definitions\": [\n      {\n        \"key\": \"premiums-receivable\",\n        \"label\": \"Premiums receivable\",\n        \"source\": \"open-items\",\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"measure\": null,\n        \"tolerance\": 0\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sub-ledger tie-outs of the reconciliation (approve:data-load): key, label, source (open-items, pdc, listing with its measure, bank, sap), GL accounts and tolerance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/settings/tieouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "settings",
+                "tieouts"
+              ]
+            },
+            "description": "Sub-ledger tie-outs of the reconciliation (approve:data-load): key, label, source (open-items, pdc, listing with its measure, bank, sap), GL accounts and tolerance\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieouts\": [\n    {\n      \"key\": \"premiums-receivable\",\n      \"label\": \"Premiums receivable\",\n      \"source\": \"open-items\",\n      \"accounts\": [\n        \"1202001\"\n      ],\n      \"measure\": null,\n      \"tolerance\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/settings/tieouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "settings",
+                    "tieouts"
+                  ]
+                },
+                "description": "Sub-ledger tie-outs of the reconciliation (approve:data-load): key, label, source (open-items, pdc, listing with its measure, bank, sap), GL accounts and tolerance\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tieouts\": [\n    {\n      \"key\": \"premiums-receivable\",\n      \"label\": \"Premiums receivable\",\n      \"source\": \"open-items\",\n      \"accounts\": [\n        \"1202001\"\n      ],\n      \"measure\": null,\n      \"tolerance\": 0\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Tie-outs saved\",\n  \"data\": [\n    {\n      \"key\": \"premiums-receivable\",\n      \"label\": \"Premiums receivable\",\n      \"source\": \"open-items\",\n      \"accounts\": [\n        \"1202001\"\n      ],\n      \"measure\": null,\n      \"tolerance\": 0\n    }\n  ]\n}"
             }
           ]
         },
@@ -61509,7 +62979,7 @@
           ]
         },
         {
-          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)",
+          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date and writes their opening balance journal (no journal lines, never posted); all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces both. Also needs write:data-load; refused once go-live is locked (409)",
           "request": {
             "method": "POST",
             "header": [
@@ -61529,7 +62999,7 @@
                 "import"
               ]
             },
-            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
+            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date and writes their opening balance journal (no journal lines, never posted); all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces both. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -61562,7 +63032,7 @@
                     "import"
                   ]
                 },
-                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
+                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date and writes their opening balance journal (no journal lines, never posted); all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces both. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -61583,7 +63053,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"replaced\": 0,\n    \"ignored\": [\n      {\n        \"row\": 9,\n        \"accountCode\": \"1301001\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"replaced\": 0,\n    \"ignored\": [\n      {\n        \"row\": 9,\n        \"accountCode\": \"1301001\"\n      }\n    ],\n    \"journalNumber\": \"OBJ-2026-0001\"\n  }\n}"
             }
           ]
         },

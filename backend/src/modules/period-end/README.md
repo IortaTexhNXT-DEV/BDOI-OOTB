@@ -48,7 +48,10 @@ and the moves the user may make (`actions`).
 Go-live opening balances: `POST /opening-balances/validate` checks the file (rows, accounts, totals, difference, every
 error with its row and column, the earlier load of the year) without loading it; `POST /opening-balances/import` loads
 it (all or nothing; the same go-live date replaces the earlier load). No journal is posted: reports read
-`opening_balances` through `pe_balance_before`.
+`opening_balances` through `pe_balance_before`. Each load writes the opening balance journal of its set
+(`writeOpeningJournal`: number `OBJ-<year>-<n>`, status `opening`, source `go-live-opening`, origin migrated, no journal
+lines; `openingJournalLines` gives its lines from the set), read-only (`accounting/lib/ledger.js`
+`assertNotOpeningJournal`), replaced with the set; `ensureCalendar` ignores it.
 
 Month-end close: create a run for the period, execute it (steps a to e: accruals, recurring journals, commission
 deferral, FX revaluation, checklist), sign the manual checklist items, submit. When

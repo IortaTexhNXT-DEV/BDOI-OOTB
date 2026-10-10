@@ -26,6 +26,10 @@ The ledger itself (numbering, validation, posting, reversal) is `modules/account
   transaction code per voucher, Debit or Credit on each row, debits equal credits, accounts active and open to manual
   entries, cost centres valid, the period open for posting. Any error saves nothing and lists every row to fix. The
   vouchers created are always parked for approval (status `for-approval`), whatever `journal.require_approval` says.
+- The opening balance journal of go-live (source `go-live-opening`, status `opening`, Data Migration & Go-Live) is listed
+  in the register with its origin; it has no journal lines: its entries are the accounts of its opening balances set
+  (`period-end/opening.js` `openingJournalLines`), shown and printed read-only (`readOnly`). Approve, reject, reversal and
+  correction refuse it (409).
 - System journals parked for approval (`accounting.parked_events`, see `modules/accounting/README.md`) are approved here
   and in My Work > Approvals like a voucher; `parked=true` on the register lists them. They cannot be rejected on their
   own: cancelling their source document cancels them.

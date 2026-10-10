@@ -254,6 +254,18 @@ describe('route inventory', () => {
     'POST /period-end/year-end/:id/close': 'the year-end close carries the balances forward in the live book',
     'POST /period-end/year-end/:id/reverse': 'reverses a year-end close of the live book',
     'POST /quote/calculate-premium-quote': 'premium calculation, writes nothing',
+    'POST /data-load/reconciliations': 'reconciles what was loaded, loads nothing',
+    'POST /data-load/reconciliations/:id/recompute': 'reconciles what was loaded, loads nothing',
+    'PUT /data-load/reconciliations/:id/lines/:lineId': 'legacy figures of the reconciliation, no business record',
+    'POST /data-load/reconciliations/:id/legacy': 'legacy figures of the reconciliation, no business record',
+    'PUT /data-load/reconciliations/:id/differences/:diffId': 'explanation of a difference, no business record',
+    'POST /data-load/reconciliations/:id/differences/:diffId/accept': 'acceptance of a difference, no business record',
+    'POST /data-load/reconciliations/:id/signoffs/:slot': 'sign-off of the reconciliation, no business record',
+    'PUT /data-load/settings/tieouts': 'settings of the reconciliation, no data',
+    'POST /data-load/golive/sap-opening-file': 'sends the opening balances to SAP once, loads nothing into BrokerVerse',
+    'POST /data-load/golive/sap-opening-file/approve': 'sends the opening balances to SAP once, loads nothing into BrokerVerse',
+    'POST /data-load/golive/sap-opening-file/reject': 'a decision that loads nothing',
+    'POST /data-load/golive/sap-opening-file/withdraw': 'withdraws a request: loads nothing',
   };
 
   it('every import-like route is guarded by the lock or listed as exempt with a reason', () => {

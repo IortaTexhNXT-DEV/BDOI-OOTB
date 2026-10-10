@@ -15,8 +15,8 @@ the runs and download the files, `write:journal-vouchers` to run now / re-genera
 
 ## Main tables
 
-`sap_gl_exports` (one row per run: day, run number, window, counts, totals, warnings, status `done`, `empty`,
-`failed`), `sap_gl_export_files` (the header and line file of a run, with their content and SHA-256).
+`sap_gl_exports` (one row per run: day, run number, window, trigger `schedule`, `manual` or `opening`, counts, totals,
+warnings, status `done`, `empty`, `failed`), `sap_gl_export_files` (the header and line file of a run, with their content and SHA-256).
 
 ## Main flow
 
@@ -33,6 +33,12 @@ the runs and download the files, `write:journal-vouchers` to run now / re-genera
    names). A day with nothing posted is recorded as `empty` and writes no file.
 5. Lines on accounts that do not match `sap_gl.account_pattern` (default six digits, the SAP chart) and lines without a
    cost centre are written and listed as warnings on the run.
+
+The opening balance journal of go-live (status `opening`, no journal lines) is never in a daily file. When
+`migration.sap_gl_include_opening` is on, Data Migration & Go-Live sends the opening balances once as a separate
+**opening file** (`exportOpening`, called by `data-load/sapOpening.js` on the approval of a second user, after the
+go-live lock): one SAP document of the set, posting date the day before the cutover, in this layout with `_OPENING` in
+the file names, recorded as a run of trigger `opening`; the journal's `sap_exported_at` refuses a second one.
 
 ## Layout (`sap_gl.layout`)
 

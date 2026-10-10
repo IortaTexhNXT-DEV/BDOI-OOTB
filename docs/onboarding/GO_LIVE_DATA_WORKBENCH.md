@@ -471,7 +471,10 @@ the user who ran the check).
   migrated term): it does not carry the origin, legacy number, `go-live-migration` source or load batch of the
   expiring term.
 - **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`)
-  and on `origin`; `load_batch_id` ties every migrated record to its batch.
+  and on `origin`; `load_batch_id` ties every migrated record to its batch. The production register (and premium by
+  product, new business vs renewals) and the dealer production report have the column and Report Criteria **Origin**
+  (Issued in BrokerVerse / Migrated, the earlier criteria name *Source* is still accepted) and the filter Origin; the
+  Report Builder offers the column Origin on the policy, client, bill and claim datasets.
 - **Open items** keep the bill number of the old system (*Bill Reference*) as their bill number, under the same
   rule as the other legacy numbers: a bill number with the format of the invoice series at or above its next number
   (e.g. `INV-2026-00004` while the series is at 1) is refused until the invoice series' Next Number is raised above it
@@ -483,18 +486,91 @@ the user who ran the check).
   (`/api/billing-statement/bills/:id/generate`) find the bill by it. The policy billing statement lists migrated open
   items.
 - **Money.** Open items are collected with normal official receipts. Amounts due to insurers and commission payable
-  are in the opening balances and paid with payment vouchers (Accounts > Disbursement).
+  are in the opening balances and paid with payment vouchers (Accounts > Disbursement). Collecting a migrated open item
+  in full accrues no referrer commission (`commission/service.js` `onPolicyPremiumCollected` returns on a migrated
+  policy unless `migration.commission_include_migrated` is on): its commission belongs to the legacy period.
+
+## Migrated business in the figures
+
+| Figures | Rule | Setting (default) |
+|---|---|---|
+| Executive, sales, sales home dashboards (`/api/dashboard/*`, `/api/agent/get-dashboard-details`) | `origin=issued` ("Issued since go-live") counts only the policies issued in BrokerVerse in premium written, new business, policy counts, policies in force, premium by product, trends, regions, products and agents; `origin=all` counts every policy. Renewals due, expiring policies and the retention rate count migrated policies in every view (they are the renewal opportunities). The executive and sales dashboards return `issuedSinceGoLive`: policies issued in BrokerVerse from the cutover date (count, premium) and the receipts, endorsements and claims registered since | `dashboard.default_origin` (`issued`); `migration.kpi_include_migrated` (off: on counts migrated policies in the issued view too) |
+| Incentive achievement (`incentive/service.js` `achievement`, recent activities) | Premium and policy count leave migrated policies out. The renewal rate counts every policy expiring in the range, migrated ones included, and their renewals issued in BrokerVerse | `migration.incentive_include_migrated` (off) |
+| Commission dashboard and the referrer accrual on full collection | Lines of migrated policies are left out of the commission dashboard; collecting a migrated open item accrues nothing | `migration.commission_include_migrated` (off) |
+| Period-end check "policies without accounting" | Migrated policies are not expected to have a bill or journal (`origin`) | none |
+| SAP GL daily file | Never carries the opening balance journal (it reads posted journals and their lines) | none; the one-time opening file below |
+
+The four `migration.*` settings and `dashboard.default_origin` are changed on Data Migration & Go-Live > Go-Live
+(`PUT /api/data-load/golive/settings`, approve:data-load); `migration.sap_gl_include_opening` only before the lock.
+
+## Opening balance journal
+
+Each opening balances set loaded for go-live (the Opening Balances sheet or Accounts > Period End > Import opening
+balances) also writes one **opening balance journal**: number `OBJ-<year>-<n>` (series `opening_journal`), dated the
+day before the cutover date, status *opening*, origin migrated (legacy number: the load number), totals of the set and
+**no journal lines**. Accounts > Journal Voucher lists it; its view and print show the accounts of the set ("Opening
+balances as at <date>, load MIG-000012"). The opening balances themselves stay the single source of the balances: the
+trial balance, the financial statements, the general ledger, the year-end close and the GL entry search read them as
+before and never count the journal. It is read-only: post, reverse, cancel, approve, reject, reversal and correction
+answer 409. A new load of the same cutover date replaces the set and its journal (a new number); the undo of the load
+removes both and gives the set it restored its journal again. The journal statuses of the trial balance
+(`reports.trial_balance_statuses`) can never include *opening*.
+
+**SAP opening file (optional).** SAP normally takes the opening position by its own cutover load, and the
+reconciliation compares the two trial balances. When TISPH wants BrokerVerse to send it, an approver switches
+`migration.sap_gl_include_opening` on (Go-Live settings); a holder of write:data-load requests the file with a reason
+(`POST /api/data-load/golive/sap-opening-file`) and another user with approve:data-load approves it once go-live is
+locked (`/approve`). The opening balances set goes to the SAP pick-up folder as one SAP document dated the day before
+the cutover, in the layout of the daily file, with `_OPENING` in the file names (an SAP GL run of trigger *opening*).
+It is generated once (`journal_vouchers.sap_exported_at`); afterwards the set can no longer change.
 
 ## Reconciliation
 
-Every validation and load of the migration workbook computes, inside the transaction, the control totals the broker
-compares with the old system (`batch.reconciliation`; download: `GET /api/data-load/batches/:id/reconciliation`):
+Every validation and load of the migration workbook computes, inside the transaction, the control totals of that file
+(`batch.reconciliation`; download: `GET /api/data-load/batches/:id/reconciliation`): rows and totals per sheet and in
+BrokerVerse, trial balance debits = credits, premiums receivable control account = open items.
 
-- per sheet: rows in the workbook and their totals (gross and net premium, sum insured, open balance, cheques on hand,
-  claim estimate, debits and credits; the policy sheets add up to one Policies line) and the records and totals in
-  BrokerVerse after the load (all migrated records);
-- checks: trial balance debits = credits; premiums receivable control account (`accounting.account.premium_receivable`)
-  opening balance = total open balance of the open items of the cutover date.
+The reconciliation of record is made on Data Migration & Go-Live > Reconciliation (`/api/data-load/reconciliations`,
+migration 0443). It covers the loaded migration loads of a run (all of them by default, refreshed on recompute, or the
+loads chosen) and counts the records **of those loads** (`load_batch_id`), never every migrated record of the database:
+
+- **Lines.** Clients (count, by type); Policies (count, gross and net premium, sum insured, in total, by product and by
+  insurer; expiring within 90 days); Open Items (count, original amount, open balance, in total, by insurer and by
+  ageing bucket at the day before the cutover, buckets of `limits.receivable_ageing_buckets`); Post-Dated Cheques
+  (count, amount, by cheque month); Open Claims (count, outstanding estimate, by product); Opening Balances (debit and
+  credit totals, balance per account on its normal side). Each line has the BrokerVerse value, the legacy value, the
+  difference, the tolerance and a status (agrees, difference, no legacy figure, legacy figure missing).
+- **Legacy figures** come from the Control Totals sheet of the loads, from entry on screen
+  (`PUT /reconciliations/:id/lines/:lineId`) or from an upload of a Control Totals sheet (`POST /reconciliations/:id/legacy`,
+  all or nothing). A figure entered on screen or uploaded is kept by a recompute. A legacy group is matched without
+  case (`motor` is the line `MOTOR`).
+- **Checks and tie-outs.** Trial balance debits = credits. The sub-ledger tie-outs of `migration.subledger_tieouts`
+  (maintained on the Reconciliation tab, `PUT /api/data-load/settings/tieouts`, approve:data-load; the accounts seeded
+  from `accounting.account.*`): premiums receivable (GL opening balance against the open items loaded, and per insurer
+  the open items loaded against the legacy listing), post-dated cheques (cheques loaded against the legacy register),
+  due to insurers, commission receivable and unapplied collections (GL opening balance against the legacy listing of
+  the Control Totals object Sub-ledger), cash in bank (per bank account of Bank Reconciliation: GL opening balance
+  against the legacy book balance) and BrokerVerse against the SAP trial balance at the day before the cutover (per
+  account). Each line shows both sides, their labels and the accounts used.
+- **Tolerance.** Counts are exact; amounts agree to the centavo unless `migration.recon_amount_tolerance` or the
+  tie-out's tolerance allows more. A tolerance other than zero on a line is set by a holder of approve:data-load who
+  did not upload, submit or approve one of the loads, with a reason (audited and printed on the report).
+- **Differences.** A line out of tolerance, a tie-out or check that does not agree, each workbook row of the loads not
+  loaded (error, unresolved duplicate) and each migrated record outside the loads (an earlier load, a single-object
+  import). Each is explained (write:data-load: explanation, action, owner; or marked fixed) and accepted
+  (approve:data-load, never by a user who uploaded, submitted or approved one of the loads).
+- **Sign-off.** The slots of `migration.recon_signoffs` (Data owner, Finance Head), each signed with a remark by a holder
+  of approve:data-load who did not load and signed no other slot, once no difference is open and every total has its
+  legacy figure. The first signature freezes the reconciliation; the last makes it **Signed** and keeps its PDF in the
+  storage folder `go-live-evidence` with its SHA-256 (`GET /reconciliations/:id/report?format=pdf&version=signed`, header
+  `X-Content-SHA256`); the stored file never changes afterwards. The go-live lock needs the signed reconciliation of the
+  production run.
+- **Superseded.** A load or an undo of the run after a signature makes the reconciliation *Superseded* and a new one is
+  computed with the legacy figures entered on screen or uploaded and the tolerances set; an open reconciliation is
+  computed again.
+- **Report.** `GET /reconciliations/:id/report?format=pdf|xlsx`, built when downloaded: scope (loads, legacy system,
+  cutover date, opening balances as at), lines, checks and tie-outs, tolerances, differences with their explanations
+  and acceptances, sign-offs. It carries counts, amounts, codes and numbers only, no personal identifier.
 
 ## Load history and the transaction reset
 
@@ -502,7 +578,9 @@ The transaction reset keeps the load history (`data_load_batches`, `data_load_ro
 evidence of the mock runs: the loaded migration batches, whose records the reset removes, and their rows are marked
 `undone` with the reason "transaction reset" (`scripts/lib/table-classification.js`, action `mark-reset`). Batch
 statuses also include the approval and undo states of the Data Migration & Go-Live workspace (`pending-approval`,
-`rejected`, `withdrawn`, `expired`, `running`, `validating`, `undo-pending`, `undoing`, `undone`).
+`rejected`, `withdrawn`, `expired`, `running`, `validating`, `undo-pending`, `undoing`, `undone`). The reconciliations
+with their lines, differences and sign-offs are kept too; the requests of the SAP opening file go with the journals the
+reset removes.
 
 ## Go-live rehearsal
 

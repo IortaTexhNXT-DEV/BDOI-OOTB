@@ -186,8 +186,10 @@ describe('API origin block and filter', () => {
       VALUES ('OBJ-T-1', $1::date - 1, 'opening', 'go-live-opening', 'standard', 10000, 10000, 'migrated', 'TISPH Excel', $2, now(), $3, $4),
              ('JV-T-1', $1, 'draft', 'manual', 'standard', 0, 0, 'issued', NULL, NULL, NULL, NULL, NULL)`, [cutover, batch.loadNumber, admin.id, batch.id]);
     const migrated = (await api('get', '/journal-vouchers/history?all=true&origin=migrated')).body.data;
-    expect(migrated.map((j) => j.transactionNumber)).toEqual(['OBJ-T-1']);
-    expect(migrated[0].origin).toMatchObject({ ...migratedBlock(), legacyNumber: batch.loadNumber });
+    // the opening balance journal of the load and the one inserted here
+    expect(migrated.map((j) => j.transactionNumber)).toContain('OBJ-T-1');
+    expect(migrated.every((j) => j.origin.kind === 'migrated')).toBe(true);
+    expect(migrated.find((j) => j.transactionNumber === 'OBJ-T-1').origin).toMatchObject({ ...migratedBlock(), legacyNumber: batch.loadNumber });
     const issued = (await api('get', '/journal-vouchers/history?all=true&origin=issued')).body.data;
     expect(issued.map((j) => j.transactionNumber)).toContain('JV-T-1');
     expect(issued.some((j) => j.origin.kind === 'migrated')).toBe(false);

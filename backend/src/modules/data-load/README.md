@@ -22,6 +22,9 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
 | `approval.js` | Submit, withdraw, approve (starts the load job), reject with a reason; request, approve, reject and withdraw an undo |
 | `undo.js` | What depends on the records of a load (`dependents`) and the undo itself (reverse load order, before-images, opening balances set) |
 | `golive.js` | Go-Live tab: cutover date, lock and unlock requests, lock conditions, relock, the owned settings |
+| `reconciliation.js` | Reconciliation tab: lines counted on the records of the loads, legacy figures (Control Totals sheet, screen, upload), checks and sub-ledger tie-outs, differences, tolerances, acceptance, sign-off, the signed PDF kept with its SHA-256, superseded reconciliations, the PDF and XLSX report |
+| `reconciliationRoutes.js` | Routes of the reconciliation and of the SAP opening file (declared on the router of `router.js`) |
+| `sapOpening.js` | The one-time SAP opening file of the opening balance journal: request, approval by another user (after the lock), generation once |
 | `workbook.js` | Workbook builder and reader (per-object download, Lists, Instructions, the hidden Control sheet), errors and reconciliation workbooks |
 | `numbering.js` | Legacy numbers against the numbering series and the COC series |
 | `compare.js`, `comparisons.js` | Environment comparison |
@@ -43,6 +46,14 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
 - `go_live_lock_requests` (0442): lock and unlock requests (action, reason, scope, hours, `expires_at`, `relocked_at`,
   steering committee reference, the Go decision), requested by one user and decided by another; one pending at a time.
   Kept by the transaction reset.
+- `migration_reconciliations` (0443; `recon_number` REC- and the id, `batch_ids`, `all_batches`, status `open`,
+  `signed`, `superseded`, `report_file_key` / `report_sha256` of the signed PDF), `migration_recon_lines` (object,
+  measure, group, legacy and BrokerVerse value, legacy source, tolerance and its reason, kind `measure` / `check` /
+  `tieout`, accounts), `migration_recon_differences` (kind `measure` / `check` / `not-loaded` / `extra`, explanation,
+  action, owner, status, acceptance), `migration_recon_signoffs` (slot, label, signer, remarks). Kept by the
+  transaction reset.
+- `sap_opening_file_requests` (0443): the request of the SAP opening file, its decision and the SAP GL run generated;
+  one pending at a time; removed by the transaction reset with the journal it is about.
 
 The load history is kept by the transaction reset: loaded migration batches are marked `undone`
 (`scripts/lib/table-classification.js`, `mark-reset`).
@@ -170,6 +181,56 @@ unlock; the job `golive-relock` (every 5 minutes) ends it at `expires_at`. The s
 configuration and the Settings sheet refuse them; the cutover date is set by `PUT /golive/cutover-date` (refused once
 locked and while a migration load is loaded or in progress), the others by `PUT /golive/settings` (`approve:data-load`).
 
+## Reconciliation
+
+`reconciliation.js` (Data Migration & Go-Live > Reconciliation). A reconciliation covers the loaded migration batches
+of a run (`all_batches`: every one of them, refreshed on recompute; or the batches chosen) and counts the records of
+those batches only (`load_batch_id = ANY(batch_ids)`): clients (by type), policies (by product and insurer, gross and
+net premium, sum insured, expiring within 90 days), open items (by insurer and ageing bucket at the day before the
+cutover), post-dated cheques (by cheque month), open claims (by product), opening balances (debit, credit, balance per
+account on its normal side). Legacy figures: the Control Totals rows of the batches (summed), entry on screen
+(`legacy_source` screen) or an upload of a Control Totals sheet (upload); screen and upload figures survive a
+recompute. Check: trial balance debits = credits. Tie-outs (`migration.subledger_tieouts`, `saveTieouts`): source
+`open-items` (GL opening balance of the accounts against the open items loaded; per insurer the open items loaded
+against the Open Items open balance of the insurer), `pdc` (cheques loaded against the Post-Dated Cheques amount),
+`listing` (GL opening balance against the Sub-ledger measure of the definition), `bank` (per bank account of
+`bank_account_links`, against Sub-ledger cash in bank of the account) and `sap` (per account, against Sub-ledger sap
+trial balance). The tie-out lines of `open-items` per insurer and of `pdc` take the legacy figure of their measure line
+(`mirror`). Differences (`syncDifferences`): found again they keep their explanation and status, no longer found they
+are fixed (an open one is dropped). Tolerance other than zero, acceptance and sign-off: approve:data-load and never a
+user who uploaded, submitted or approved a batch of the reconciliation (`assertNotLoader`); one slot per user; signing
+needs no open difference and every total with its legacy figure (status `missing`). The first signature freezes the
+reconciliation; the last builds the PDF (`reportPdf`) once, stores it in `go-live-evidence` (`EVIDENCE_FOLDER`, refused
+by `/api/s3/object` and the file delete) with its SHA-256. `afterBatchChange(batch, user)`, called by the load and undo
+jobs and the direct load, supersedes the signed (or partly signed) reconciliations of the run with a new one (the screen
+and upload figures and the tolerances carried over) and computes the open ones again; it never fails the load.
+
+## Opening balance journal and the SAP opening file
+
+`period-end/opening.js` writes, with every opening balances set (the Opening Balances sheet and the single-object
+import), its opening balance journal: series `opening_journal` (`OBJ-<year>-<n>`), status `opening`, source
+`go-live-opening`, origin migrated, legacy number = the load number, totals of the set, **no journal lines**. The
+migration load writes its `migrate-create` audit entry (entity `journal_voucher`); an undo removes it and writes the
+journal of the set it restores. It is read-only (`accounting/lib/ledger.js` `assertNotOpeningJournal`: post, reverse,
+cancel; `journal-vouchers` approve, reject, reversal, correction), shown with the lines of its set
+(`openingJournalLines`), ignored by `ensureCalendar` and refused in `reports.trial_balance_statuses`
+(`system-settings/service.js` `localizationErrors`). Nothing that sums journal lines can count it; the SAP GL daily file
+selects posted journals and never carries it.
+
+`sapOpening.js`: when `migration.sap_gl_include_opening` is on, a holder of write:data-load requests the SAP opening
+file with a reason, another user with approve:data-load approves it after the go-live lock; the approval marks the
+journal sent (`sap_exported_at`, compare-and-set) and writes the file (`sap-gl/service.js` `exportOpening`, a run of
+trigger `opening`, `_OPENING` in the file names) in one transaction. A second file is refused, and so is a change of the
+set behind it (`writeOpeningJournal`).
+
+## Migrated business in the figures
+
+Dashboards (`dashboard/service.js`: `dashboardOrigin`, `issuedSinceGoLive`), incentives (`incentive/service.js`
+`achievement`), commission (`commission/service.js` `onPolicyPremiumCollected`, `dashboard`), the production register,
+premium by product, new business vs renewals and dealer production reports (Origin column, criteria and filter) and the
+Report Builder (Origin column) read `origin` (`lib/origin.js` `kpiOriginWhere`). Rules and settings:
+`docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`, *Migrated business in the figures*.
+
 ## Templates
 
 `GET /kits/:kit/template?objects=&prefill=`: the whole kit or some objects, blank or with the current data (masked for a
@@ -214,6 +275,7 @@ sheets). `test/migration-registry.test.js` checks the kits.
 `go-live-workbench.test.js`, `go-live-roundtrip.test.js`, `migration-registry.test.js`, `migration-origin.test.js`,
 `migration-audit.test.js`, `migration-numbers.test.js`, `migration-review.test.js`, `migration-duplicates.test.js`,
 `migration-amounts.test.js`, `migration-pdc.test.js`, `migration-jobs.test.js`, `migration-approval.test.js`,
-`migration-undo.test.js`, `migration-lock.test.js` (fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
+`migration-undo.test.js`, `migration-lock.test.js`, `migration-reconciliation.test.js`, `migration-opening-journal.test.js`,
+`migration-kpis.test.js` (fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
 suites that load at once set the cutover date and switch the approval of loads off with `goLiveSetup` and wait for the
 validation job with `validatedBatch` (`test/helpers.js`).

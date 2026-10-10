@@ -345,7 +345,7 @@ describe('migration kit', () => {
   });
 
   it('loads flagged records without journals, bills or commission accruals, with a reconciliation', async () => {
-    const journals = await count('SELECT count(*)::int AS n FROM journal_vouchers');
+    const journals = await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source <> \'go-live-opening\'');
     const commissions = await count('SELECT count(*)::int AS n FROM commissions');
     const r = await load(loaded.id);
     expect(r.status).toBe(200);
@@ -361,7 +361,10 @@ describe('migration kit', () => {
     const client = await one("SELECT * FROM clients WHERE client_code = 'OLD-C-0001'");
     expect(client).toMatchObject({ source: 'go-live-migration', load_batch_id: loaded.id, display_name: 'Maria Santos' });
     expect(policies.find((p) => p.policy_number === 'OLD-MC-0001').client_id).toBe(client.id);
-    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers')).toBe(journals);
+    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source <> \'go-live-opening\'')).toBe(journals);
+    // the opening balances are documented by their opening balance journal, which has no journal lines
+    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source = \'go-live-opening\' AND status = \'opening\'')).toBe(1);
+    expect(await count('SELECT count(*)::int AS n FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE j.source = \'go-live-opening\'')).toBe(0);
     expect(await count('SELECT count(*)::int AS n FROM commissions')).toBe(commissions);
     // the only bill is the open item, without a booking journal
     const bills = (await query('SELECT * FROM receivables WHERE policy_id = ANY($1)', [policies.map((p) => p.id)])).rows;

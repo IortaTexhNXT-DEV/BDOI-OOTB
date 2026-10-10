@@ -51666,7 +51666,7 @@
     "/agent/get-dashboard-details": {
       "get": {
         "operationId": "getAgentGetDashboardDetails",
-        "summary": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)",
+        "summary": "Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)",
         "tags": [
           "Dashboards"
         ],
@@ -51680,6 +51680,15 @@
               "type": "string"
             },
             "example": "mine"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -51842,7 +51851,7 @@
     "/dashboard/executive": {
       "get": {
         "operationId": "getDashboardExecutive",
-        "summary": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read",
+        "summary": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents, issued since go-live; origin=issued|all: the business counted (default dashboard.default_origin; the retention rate counts migrated policies); asOf = when the figures were read",
         "tags": [
           "Dashboards"
         ],
@@ -51865,6 +51874,15 @@
               "type": "string"
             },
             "example": "previous"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -52071,7 +52089,7 @@
     "/dashboard/sales": {
       "get": {
         "operationId": "getDashboardSales",
-        "summary": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)",
+        "summary": "Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles); origin=issued|all",
         "tags": [
           "Dashboards"
         ],
@@ -52085,6 +52103,15 @@
               "type": "string"
             },
             "example": "mine"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -52176,7 +52203,7 @@
     "/dashboard/sales/overview": {
       "get": {
         "operationId": "getDashboardSalesOverview",
-        "summary": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+        "summary": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend, issued since go-live. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id); origin=issued|all: the policies counted",
         "tags": [
           "Dashboards"
         ],
@@ -52208,6 +52235,15 @@
               "type": "string"
             },
             "example": "usr_0123"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -70573,6 +70609,688 @@
         ]
       }
     },
+    "/data-load/golive/sap-opening-file": {
+      "get": {
+        "operationId": "getDataLoadGoliveSapOpeningFile",
+        "summary": "The one-time SAP opening file: whether BrokerVerse sends it (migration.sap_gl_include_opening), the opening balance journal, the requests and, once generated, its SAP GL run and files",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "journalNumber": {
+                              "type": "string"
+                            },
+                            "asAt": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "sapExportedAt": {}
+                          }
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "exportId": {}
+                          }
+                        },
+                        "requests": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "run": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "enabled": true,
+                    "locked": true,
+                    "journal": {
+                      "id": "jv_8f0c",
+                      "journalNumber": "OBJ-2026-0001",
+                      "asAt": "2026-10-31",
+                      "totalDebit": 18450000,
+                      "totalCredit": 18450000,
+                      "sapExportedAt": null
+                    },
+                    "pendingRequest": {
+                      "id": 2,
+                      "status": "pending",
+                      "reason": "SAP takes the opening position from BrokerVerse",
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-01T15:00:00Z",
+                      "exportId": null
+                    },
+                    "requests": [],
+                    "run": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadGoliveSapOpeningFile",
+        "summary": "Request the SAP opening file of the opening balance journal, with a reason; generated on the approval of another user, once",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "journalNumber": {
+                              "type": "string"
+                            },
+                            "asAt": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "sapExportedAt": {}
+                          }
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "exportId": {}
+                          }
+                        },
+                        "requests": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "run": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "SAP opening file requested",
+                  "data": {
+                    "enabled": true,
+                    "locked": true,
+                    "journal": {
+                      "id": "jv_8f0c",
+                      "journalNumber": "OBJ-2026-0001",
+                      "asAt": "2026-10-31",
+                      "totalDebit": 18450000,
+                      "totalCredit": 18450000,
+                      "sapExportedAt": null
+                    },
+                    "pendingRequest": {
+                      "id": 2,
+                      "status": "pending",
+                      "reason": "SAP takes the opening position from BrokerVerse",
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-01T15:00:00Z",
+                      "exportId": null
+                    },
+                    "requests": [],
+                    "run": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "SAP takes the opening position from BrokerVerse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/golive/sap-opening-file/approve": {
+      "post": {
+        "operationId": "postDataLoadGoliveSapOpeningFileApprove",
+        "summary": "Approve the request (approve:data-load, not its requester; go-live locked): the file is written to the SAP pick-up folder in the layout of the daily file (a run of trigger opening) and the journal marked sent; refused once generated",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "journalNumber": {
+                              "type": "string"
+                            },
+                            "asAt": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "sapExportedAt": {}
+                          }
+                        },
+                        "pendingRequest": {},
+                        "requests": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "run": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "SAP opening file generated",
+                  "data": {
+                    "enabled": true,
+                    "locked": true,
+                    "journal": {
+                      "id": "jv_8f0c",
+                      "journalNumber": "OBJ-2026-0001",
+                      "asAt": "2026-10-31",
+                      "totalDebit": 18450000,
+                      "totalCredit": 18450000,
+                      "sapExportedAt": null
+                    },
+                    "pendingRequest": null,
+                    "requests": [],
+                    "run": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "approve:data-load"
+        ]
+      }
+    },
+    "/data-load/golive/sap-opening-file/files/{kind}": {
+      "get": {
+        "operationId": "getDataLoadGoliveSapOpeningFileFilesKind",
+        "summary": "One file of the generated SAP opening file (kind header or line), as written to the SAP pick-up folder",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(text file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/golive/sap-opening-file/reject": {
+      "post": {
+        "operationId": "postDataLoadGoliveSapOpeningFileReject",
+        "summary": "Reject the request with remarks (approve:data-load, not its requester)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: approve:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "journalNumber": {
+                              "type": "string"
+                            },
+                            "asAt": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "sapExportedAt": {}
+                          }
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "exportId": {}
+                          }
+                        },
+                        "requests": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "run": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "SAP opening file rejected",
+                  "data": {
+                    "enabled": true,
+                    "locked": true,
+                    "journal": {
+                      "id": "jv_8f0c",
+                      "journalNumber": "OBJ-2026-0001",
+                      "asAt": "2026-10-31",
+                      "totalDebit": 18450000,
+                      "totalCredit": 18450000,
+                      "sapExportedAt": null
+                    },
+                    "pendingRequest": {
+                      "id": 2,
+                      "status": "pending",
+                      "reason": "SAP takes the opening position from BrokerVerse",
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-01T15:00:00Z",
+                      "exportId": null
+                    },
+                    "requests": [],
+                    "run": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "SAP loads its own cutover balances"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/golive/sap-opening-file/withdraw": {
+      "post": {
+        "operationId": "postDataLoadGoliveSapOpeningFileWithdraw",
+        "summary": "Withdraw the request (its requester)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "journalNumber": {
+                              "type": "string"
+                            },
+                            "asAt": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "sapExportedAt": {}
+                          }
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "exportId": {}
+                          }
+                        },
+                        "requests": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "run": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "SAP opening file request withdrawn",
+                  "data": {
+                    "enabled": true,
+                    "locked": true,
+                    "journal": {
+                      "id": "jv_8f0c",
+                      "journalNumber": "OBJ-2026-0001",
+                      "asAt": "2026-10-31",
+                      "totalDebit": 18450000,
+                      "totalCredit": 18450000,
+                      "sapExportedAt": null
+                    },
+                    "pendingRequest": {
+                      "id": 2,
+                      "status": "pending",
+                      "reason": "SAP takes the opening position from BrokerVerse",
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-01T15:00:00Z",
+                      "exportId": null
+                    },
+                    "requests": [],
+                    "run": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
     "/data-load/golive/settings": {
       "put": {
         "operationId": "putDataLoadGoliveSettings",
@@ -70871,6 +71589,3748 @@
           "read:data-load",
           "write:data-load"
         ]
+      }
+    },
+    "/data-load/reconciliations": {
+      "get": {
+        "operationId": "getDataLoadReconciliations",
+        "summary": "Reconciliations of the migration loads, newest first (filters runId, status: open, signed, superseded) with their loads, open differences and who signed",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "reconNumber": {
+                            "type": "string"
+                          },
+                          "runId": {
+                            "type": "integer"
+                          },
+                          "loads": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "cutoverDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "openDifferences": {
+                            "type": "integer"
+                          },
+                          "signedBy": {},
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "reconNumber": "REC-000007",
+                      "runId": 3,
+                      "loads": [
+                        "MIG-000012"
+                      ],
+                      "cutoverDate": "2026-11-01",
+                      "status": "open",
+                      "openDifferences": 1,
+                      "signedBy": null,
+                      "createdBy": "Andrea Lim",
+                      "createdAt": "2026-11-01T02:10:00Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadReconciliations",
+        "summary": "Create the reconciliation of a run: every loaded migration load of the run (refreshed on recompute) or the loads chosen (batchIds); lines counted on the records of those loads, legacy figures from their Control Totals sheets, checks, sub-ledger tie-outs and the differences",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "REC-000007 created",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "runId": {
+                    "type": "integer"
+                  },
+                  "batchIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "runId": 3,
+                "batchIds": [
+                  12,
+                  13
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}": {
+      "get": {
+        "operationId": "getDataLoadReconciliationsId",
+        "summary": "A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs and summary",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/reconciliations/{id}/differences/{diffId}": {
+      "put": {
+        "operationId": "putDataLoadReconciliationsIdDifferencesDiffId",
+        "summary": "Explain a difference: explanation, action, owner and status (explained or fixed)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "diffId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Difference explained",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "explanation": {
+                    "type": "string"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "owner": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "explanation": "Bill keyed twice in the legacy system",
+                "action": "Cancel DN-OLD-77 in BrokerVerse",
+                "owner": "Credit and Collection",
+                "status": "explained"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}/differences/{diffId}/accept": {
+      "post": {
+        "operationId": "postDataLoadReconciliationsIdDifferencesDiffIdAccept",
+        "summary": "Accept a difference (approve:data-load; never a user who uploaded, submitted or approved a load of the reconciliation); it needs its explanation",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "diffId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Difference accepted",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Differences",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "explanation": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "explanation": "Accepted: cancelled in the legacy system after the extract"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}/legacy": {
+      "post": {
+        "operationId": "postDataLoadReconciliationsIdLegacy",
+        "summary": "Upload legacy figures (multipart \"file\"): a workbook with the Control Totals sheet (Object, Measure, Group, Legacy Value); all or nothing, each row sets the legacy figure of its line",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Upload control totals\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Legacy figures loaded",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Upload control totals",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}/lines/{lineId}": {
+      "put": {
+        "operationId": "putDataLoadReconciliationsIdLinesLineId",
+        "summary": "Enter the legacy figure of a line (write:data-load; legacyValue, null clears it) or its tolerance (a tolerance other than zero: approve:data-load, toleranceReason required, not a user who loaded the batches; a count is always exact)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Lines\n\nAccess: write:data-load, approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Line saved",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Lines",
+        "x-permissions": [
+          "write:data-load",
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "legacyValue": {
+                    "type": "integer"
+                  },
+                  "tolerance": {
+                    "type": "number"
+                  },
+                  "toleranceReason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "legacyValue": 1250000,
+                "tolerance": 0.5,
+                "toleranceReason": "Legacy system rounds each instalment"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}/recompute": {
+      "post": {
+        "operationId": "postDataLoadReconciliationsIdRecompute",
+        "summary": "Compute an open reconciliation again (none of its slots signed): the figures of the records and of the Control Totals sheets; legacy figures entered on screen or uploaded are kept",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "REC-000007 recomputed",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/reconciliations/{id}/report": {
+      "get": {
+        "operationId": "getDataLoadReconciliationsIdReport",
+        "summary": "The reconciliation report: format=pdf (letterhead) or xlsx (Summary, Lines, Checks, Differences, Sign-offs), built when downloaded; version=signed: the PDF kept when the last slot signed (X-Content-SHA256)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Report\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pdf"
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "signed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(application/pdf or xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Report",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/reconciliations/{id}/signoffs/{slot}": {
+      "post": {
+        "operationId": "postDataLoadReconciliationsIdSignoffsSlot",
+        "summary": "Sign a slot of the reconciliation with a remark (approve:data-load; not a user who uploaded, submitted or approved one of its loads, nor one who signed another slot; no open difference and every total with its legacy figure). The last slot makes it Signed and keeps its PDF with the SHA-256",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Sign-off\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slot",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "reconNumber": {
+                          "type": "string"
+                        },
+                        "runId": {
+                          "type": "integer"
+                        },
+                        "allBatches": {
+                          "type": "boolean"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "openingBalancesAsAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "computedAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "signedAt": {},
+                        "supersededAt": {},
+                        "supersededBy": {},
+                        "signedReport": {
+                          "type": "boolean"
+                        },
+                        "reportSha256": {},
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "loadNumber": {
+                                "type": "string"
+                              },
+                              "legacySystem": {
+                                "type": "string"
+                              },
+                              "loadedAt": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "label": {},
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {
+                                "type": "string"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        },
+                        "differences": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineId": {},
+                              "batchId": {},
+                              "loadNumber": {},
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "row": {},
+                              "recordKey": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "amount": {},
+                              "status": {
+                                "type": "string"
+                              },
+                              "explanation": {},
+                              "action": {},
+                              "owner": {},
+                              "acceptedBy": {},
+                              "acceptedAt": {}
+                            }
+                          }
+                        },
+                        "signoffs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "slot": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "signedBy": {},
+                              "signedAt": {},
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "lines": {
+                              "type": "integer"
+                            },
+                            "matched": {
+                              "type": "integer"
+                            },
+                            "differences": {
+                              "type": "integer"
+                            },
+                            "openDifferences": {
+                              "type": "integer"
+                            },
+                            "missingLegacy": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "signed": {
+                              "type": "integer"
+                            },
+                            "slots": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Data owner signed",
+                  "data": {
+                    "id": 7,
+                    "reconNumber": "REC-000007",
+                    "runId": 3,
+                    "allBatches": true,
+                    "cutoverDate": "2026-11-01",
+                    "openingBalancesAsAt": "2026-10-31",
+                    "status": "open",
+                    "computedAt": "2026-11-01T02:10:00Z",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-11-01T02:10:00Z",
+                    "signedAt": null,
+                    "supersededAt": null,
+                    "supersededBy": null,
+                    "signedReport": false,
+                    "reportSha256": null,
+                    "batches": [
+                      {
+                        "id": 12,
+                        "loadNumber": "MIG-000012",
+                        "legacySystem": "TISPH Excel",
+                        "loadedAt": "2026-11-01T01:55:00Z",
+                        "status": "loaded"
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 41,
+                        "kind": "measure",
+                        "object": "Policies",
+                        "measure": "gross premium",
+                        "group": "MOTOR",
+                        "label": null,
+                        "sides": {
+                          "system": "BrokerVerse",
+                          "other": "Legacy"
+                        },
+                        "systemValue": 1250000,
+                        "legacyValue": 1250000,
+                        "legacySource": "workbook",
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      },
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ],
+                    "differences": [
+                      {
+                        "id": 9,
+                        "kind": "extra",
+                        "lineId": null,
+                        "batchId": null,
+                        "loadNumber": null,
+                        "sheet": "Open Items",
+                        "row": null,
+                        "recordKey": "DN-OLD-77",
+                        "description": "Open Items DN-OLD-77: migrated outside the loads of this reconciliation (no load: single-object import)",
+                        "amount": null,
+                        "status": "open",
+                        "explanation": null,
+                        "action": null,
+                        "owner": null,
+                        "acceptedBy": null,
+                        "acceptedAt": null
+                      }
+                    ],
+                    "signoffs": [
+                      {
+                        "slot": "data-owner",
+                        "label": "Data owner",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      },
+                      {
+                        "slot": "finance-head",
+                        "label": "Finance Head",
+                        "signedBy": null,
+                        "signedAt": null,
+                        "remarks": null
+                      }
+                    ],
+                    "summary": {
+                      "lines": 2,
+                      "matched": 2,
+                      "differences": 1,
+                      "openDifferences": 1,
+                      "missingLegacy": [],
+                      "signed": 0,
+                      "slots": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Sign-off",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Policies and open items agree with the legacy listing of 31/10/2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/reconciliations/{id}/tieouts": {
+      "get": {
+        "operationId": "getDataLoadReconciliationsIdTieouts",
+        "summary": "The sub-ledger tie-outs: their definitions and the tie-out lines of the reconciliation (both sides, accounts, difference)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "definitions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "type": "string"
+                              },
+                              "accounts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "measure": {},
+                              "tolerance": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "object": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "group": {},
+                              "label": {
+                                "type": "string"
+                              },
+                              "sides": {
+                                "type": "object",
+                                "properties": {
+                                  "system": {
+                                    "type": "string"
+                                  },
+                                  "other": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "systemValue": {
+                                "type": "integer"
+                              },
+                              "legacyValue": {
+                                "type": "integer"
+                              },
+                              "legacySource": {},
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "tolerance": {
+                                "type": "integer"
+                              },
+                              "toleranceReason": {},
+                              "accounts": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "updatedBy": {},
+                              "updatedAt": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "definitions": [
+                      {
+                        "key": "premiums-receivable",
+                        "label": "Premiums receivable",
+                        "source": "open-items",
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "measure": null,
+                        "tolerance": 0
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "id": 77,
+                        "kind": "tieout",
+                        "object": "Tie-out",
+                        "measure": "premiums-receivable",
+                        "group": null,
+                        "label": "Premiums receivable",
+                        "sides": {
+                          "system": "GL opening balance",
+                          "other": "Open items loaded"
+                        },
+                        "systemValue": 845300,
+                        "legacyValue": 845300,
+                        "legacySource": null,
+                        "difference": 0,
+                        "tolerance": 0,
+                        "toleranceReason": null,
+                        "accounts": [
+                          "1202001"
+                        ],
+                        "status": "matched",
+                        "updatedBy": null,
+                        "updatedAt": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/settings/tieouts": {
+      "put": {
+        "operationId": "putDataLoadSettingsTieouts",
+        "summary": "Sub-ledger tie-outs of the reconciliation (approve:data-load): key, label, source (open-items, pdc, listing with its measure, bank, sap), GL accounts and tolerance",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs\n\nAccess: approve:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "accounts": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "measure": {},
+                          "tolerance": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Tie-outs saved",
+                  "data": [
+                    {
+                      "key": "premiums-receivable",
+                      "label": "Premiums receivable",
+                      "source": "open-items",
+                      "accounts": [
+                        "1202001"
+                      ],
+                      "measure": null,
+                      "tolerance": 0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Reconciliation > Tie-outs",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tieouts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "measure": {},
+                        "tolerance": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "tieouts": [
+                  {
+                    "key": "premiums-receivable",
+                    "label": "Premiums receivable",
+                    "source": "open-items",
+                    "accounts": [
+                      "1202001"
+                    ],
+                    "measure": null,
+                    "tolerance": 0
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/data-load/value-maps": {
@@ -104198,7 +108658,7 @@
     "/period-end/opening-balances/import": {
       "post": {
         "operationId": "postPeriodEndOpeningBalancesImport",
-        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)",
+        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date and writes their opening balance journal (no journal lines, never posted); all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces both. Also needs write:data-load; refused once go-live is locked (409)",
         "tags": [
           "Period End"
         ],
@@ -104252,6 +108712,9 @@
                               }
                             }
                           }
+                        },
+                        "journalNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -104272,7 +108735,8 @@
                         "row": 9,
                         "accountCode": "1301001"
                       }
-                    ]
+                    ],
+                    "journalNumber": "OBJ-2026-0001"
                   }
                 }
               }
