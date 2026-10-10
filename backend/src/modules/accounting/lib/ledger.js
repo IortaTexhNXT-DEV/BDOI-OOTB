@@ -14,8 +14,8 @@ import { assertCostCentres, defaultCostCentre } from './costCentre.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
 const OPEN_STATES = ['draft', 'for-approval', 'approved', 'pending'];
-/** Journals keyed by a user on Accounts > Journal Voucher (manual, correction and reversal vouchers). */
-export const MANUAL_SOURCES = ['manual', 'correction', 'reversal'];
+/** Journals keyed by a user (manual, correction and reversal vouchers, and the year-end adjustments of period 13). */
+export const MANUAL_SOURCES = ['manual', 'correction', 'reversal', 'adjustment'];
 
 /** GL account code configured for a role, e.g. account('cash_in_bank') reads accounting.account.cash_in_bank. */
 export async function account(key) {

@@ -11,7 +11,14 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import ApprovalActions from "../../components/ApprovalActions";
+import { RecordActivityLog } from "../../components/ActivityLog";
+import { printPdf } from "../../components/Print";
 import { Field, OpsTag, PageHeader, blank, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 
 const STATUSES = ["all", "draft", "for-approval", "open", "approved", "partially-paid", "paid", "rejected", "cancelled"];
@@ -76,7 +83,31 @@ const SupplierInvoices = () => {
     ...(form.ewtCode !== undefined ? { ewtCode: form.ewtCode || null } : {}), submit,
     lines: form.lines.map((l) => ({ description: l.description || form.description || "Supplier invoice", accountCode: l.accountCode || undefined, amount: l.amount, vatable: l.vatable, assetClass: l.assetClass || null })),
   }), (r) => t("opsAcc.ap.saved", { number: r.voucherNumber, status: t(`opsAcc.status.${r.status}`) })).then((ok) => ok && openForm(null));
-  const reason = async (label) => promptText(t(label));
+  const invoiceFacts = (inv) => [
+    { label: t("opsAcc.ap.voucher"), value: inv.voucherNumber },
+    { label: t("opsAcc.ap.supplier"), value: inv.supplierName },
+    { label: t("opsAcc.ap.supplierInvoice"), value: inv.supplierInvoiceNo },
+    { label: t("opsAcc.ap.invoiceDate"), value: inv.invoiceDate, type: "date" },
+    { label: t("opsAcc.ap.gross"), value: inv.grossAmount, type: "amount" },
+    { label: t("opsAcc.ap.payable"), value: inv.payableAmount, type: "amount", emphasis: true },
+  ];
+  // submit, approve, reject and cancel of the invoice in view, each confirmed with the invoice's figures
+  const decide = async (action) => {
+    const withReason = ["reject", "cancel"].includes(action);
+    const answer = await openConfirm({
+      title: t(`opsAcc.confirmations.invoice.${action}Title`, { number: view.voucherNumber }),
+      severity: withReason ? "danger" : "neutral",
+      message: t(`opsAcc.confirmations.invoice.${action}Message`),
+      facts: invoiceFacts(view),
+      input: withReason ? { type: "textarea", label: t(`opsAcc.ap.${action}Reason`), required: true, minLength: 3, maxLength: 500 } : undefined,
+      confirmLabel: t(`opsAcc.confirmations.invoice.${action}`),
+      cancelLabel: action === "cancel" ? t("opsAcc.confirmations.invoice.keep") : undefined,
+    });
+    if (answer === null || answer === false) return;
+    const done = { submit: "opsAcc.ap.submitted", approve: "opsAcc.ap.approved", reject: "opsAcc.ap.rejected", cancel: "opsAcc.ap.cancelled" }[action];
+    act(() => service.invoiceAction(view.id, action, withReason ? { reason: answer } : undefined), t(done));
+  };
+  const print = (inv) => printPdf(`/payables/invoices/${encodeURIComponent(inv.id)}/pdf`, { fileName: `${inv.voucherNumber}.pdf` }).catch((e) => showError(toast, e));
   const setLine = (i, patch) => setForm((f) => ({ ...f, lines: f.lines.map((l, k) => (k === i ? { ...l, ...patch } : l)) }));
   const net = (form?.lines || []).reduce((s, l) => s + Number(l.amount || 0), 0);
 
@@ -105,37 +136,62 @@ const SupplierInvoices = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={view ? `${view.voucherNumber} · ${view.supplierName}` : ""} visible={!!view} style={{ width: "min(960px, 96vw)" }} onHide={() => setView(null)}>
+      <DetailDialog header={t("opsAcc.confirmations.invoice.header")} visible={!!view} onHide={() => setView(null)} size="lg"
+        footer={view && (
+          <>
+            {["draft", "rejected", "for-approval", "approved"].includes(view.status) && (
+              <Button label={t("opsAcc.confirmations.invoice.cancel")} text severity="danger" onClick={() => decide("cancel")} />
+            )}
+            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
+            <Button label={t("opsAcc.print")} icon="pi pi-print" outlined onClick={() => print(view)} />
+            {["draft", "rejected"].includes(view.status) && <Button label={t("opsAcc.confirmations.invoice.submit")} icon="pi pi-send" onClick={() => decide("submit")} />}
+            {view.status === "for-approval" && (
+              <ApprovalActions initiator={{ id: view.createdById }} approveLabel={t("opsAcc.confirmations.invoice.approve")} rejectLabel={t("opsAcc.confirmations.invoice.reject")}
+                onApprove={() => decide("approve")} onReject={() => decide("reject")} />
+            )}
+          </>
+        )}>
         {view && (
           <>
-            <div className="flex flex-wrap gap-2 mb-2">
-              <OpsTag status={view.status} />
-              {["draft", "rejected"].includes(view.status) && <Button label={t("opsAcc.ap.submit")} size="small" onClick={() => act(() => service.invoiceAction(view.id, "submit"), t("opsAcc.ap.submitted"))} />}
-              {view.status === "for-approval" && <Button label={t("opsAcc.approve")} size="small" icon="pi pi-check" onClick={() => act(() => service.invoiceAction(view.id, "approve"), t("opsAcc.ap.approved"))} />}
-              {view.status === "for-approval" && <Button label={t("opsAcc.reject")} size="small" severity="danger" outlined
-                onClick={async () => { const r = await reason("opsAcc.ap.rejectReason"); if (r) act(() => service.invoiceAction(view.id, "reject", { reason: r }), t("opsAcc.ap.rejected")); }} />}
-              {["draft", "rejected", "for-approval", "approved"].includes(view.status) && <Button label={t("opsAcc.cancel")} size="small" text
-                onClick={async () => { const r = await reason("opsAcc.ap.cancelReason"); if (r) act(() => service.invoiceAction(view.id, "cancel", { reason: r }), t("opsAcc.ap.cancelled")); }} />}
-              <Button label={t("opsAcc.print")} size="small" icon="pi pi-print" outlined onClick={() => service.printSupplierInvoice(view.id).catch((e) => showError(toast, e))} />
-            </div>
-            <p className="mt-0">{view.supplierInvoiceNo} · {date(view.invoiceDate)} · {t("opsAcc.ap.dueDate")} {date(view.dueDate)} {view.journalNumber ? `· ${view.journalNumber}` : ""}</p>
-            <DataTable value={view.lines} dataKey="id" size="small">
-              <Column field="description" header={t("opsAcc.description")} />
-              <Column header={t("opsAcc.ap.account")} body={(r) => `${r.accountCode} ${r.accountName || ""}`} />
-              <Column field="assetClass" header={t("opsAcc.ap.assetClass")} />
-              <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
-              <Column header={t("opsAcc.ap.vat")} body={(r) => money(r.vatAmount)} {...numericColumn} />
-            </DataTable>
-            <div className="flex flex-wrap gap-4 mt-2">
-              <span>{t("opsAcc.ap.net")}: <b>{money(view.netAmount)}</b></span>
-              <span>{t("opsAcc.ap.vat")}: <b>{money(view.inputVat)}</b></span>
-              <span>{t("opsAcc.ap.gross")}: <b>{money(view.grossAmount)}</b></span>
-              <span>{t("opsAcc.ap.ewt")} {view.ewtCode ? `(${view.ewtCode} ${view.ewtRate}%)` : ""}: <b>{money(view.ewtAmount)}</b></span>
-              <span>{t("opsAcc.ap.payable")}: <b>{money(view.payableAmount)}</b></span>
-            </div>
+            <DetailHeader title={view.voucherNumber} subtitle={view.supplierName} status={{ code: view.status, label: t(`opsAcc.status.${view.status}`, { defaultValue: view.status }) }}
+              meta={[
+                { label: t("opsAcc.ap.supplierInvoice"), value: view.supplierInvoiceNo },
+                { label: t("opsAcc.ap.invoiceDate"), value: view.invoiceDate, type: "date" },
+                { label: t("opsAcc.ap.dueDate"), value: view.dueDate, type: "date" },
+                { label: t("opsAcc.ap.payable"), value: view.payableAmount, type: "amount" },
+                { label: t("opsAcc.ap.balance"), value: view.balance, type: "amount" },
+              ]} />
+            {view.status === "rejected" && view.rejectReason && <p className="pe-error">{t("opsAcc.confirmations.rejectedBecause", { reason: view.rejectReason })}</p>}
+            {view.status === "cancelled" && view.cancelReason && <p className="pe-error">{t("opsAcc.confirmations.cancelledBecause", { reason: view.cancelReason })}</p>}
+            <DetailSection title={t("opsAcc.confirmations.amounts")}>
+              <KeyValueGrid columns={3} items={[
+                { label: t("opsAcc.ap.net"), value: view.netAmount, type: "amount" },
+                { label: t("opsAcc.ap.vat"), value: view.inputVat, type: "amount" },
+                { label: t("opsAcc.ap.gross"), value: view.grossAmount, type: "amount" },
+                { label: view.ewtCode ? `${t("opsAcc.ap.ewt")} (${view.ewtCode} ${view.ewtRate}%)` : t("opsAcc.ap.ewt"), value: view.ewtAmount, type: "amount" },
+                { label: t("opsAcc.ap.payable"), value: view.payableAmount, type: "amount" },
+                { label: t("opsAcc.confirmations.journal"), value: view.journalNumber },
+                { label: t("opsAcc.confirmations.preparedBy"), value: view.createdBy },
+                { label: t("opsAcc.confirmations.approvedBy"), value: view.approvedBy },
+                { label: t("opsAcc.confirmations.approvedAt"), value: view.approvedAt, type: "datetime" },
+                { label: t("opsAcc.description"), value: view.description, span: "full", hidden: !view.description },
+              ]} />
+            </DetailSection>
+            <DetailSection title={t("opsAcc.confirmations.lines")} flush>
+              <DataTable value={view.lines} dataKey="id" size="small">
+                <Column field="description" header={t("opsAcc.description")} />
+                <Column header={t("opsAcc.ap.account")} body={(r) => `${r.accountCode} ${r.accountName || ""}`} />
+                <Column field="assetClass" header={t("opsAcc.ap.assetClass")} />
+                <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
+                <Column header={t("opsAcc.ap.vat")} body={(r) => money(r.vatAmount)} {...numericColumn} />
+              </DataTable>
+            </DetailSection>
+            <DetailSection title={t("opsAcc.confirmations.activity")}>
+              <RecordActivityLog key={view.status} entity="supplier_invoice" recordId={view.id} />
+            </DetailSection>
           </>
         )}
-      </Dialog>
+      </DetailDialog>
 
       <Dialog className="pe-dialog" header={t("opsAcc.ap.newInvoice")} visible={!!form} style={{ width: "min(1000px, 98vw)" }} onHide={() => openForm(null)}
         footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={t("opsAcc.ap.saveDraft")} outlined onClick={() => save(false)} />

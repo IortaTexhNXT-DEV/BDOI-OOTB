@@ -1395,7 +1395,7 @@ Accounts > Period End holds the fiscal calendar and the closing work of Accounti
 | Month-End Close | Run the month-end steps and checklist for a period and send the close for approval. |
 | Year-End Close | Close income and expense to retained earnings and carry the balances into the next year. |
 | Recurring Journals | Keep templates for journals that repeat every month, and accruals that reverse on day 1 of the next period. |
-| Financial Statements | Income statement, balance sheet and trial balance for any dates. |
+| Financial Statements | Income statement, balance sheet and trial balance of a fiscal period or any dates, with the general ledger of each account. |
 
 The close checklist items are maintained on Master > Finance > Close Checklist.
 
@@ -1412,18 +1412,19 @@ A fiscal year (for example FY2026) has twelve monthly periods (2026-01 to 2026-1
 | Closed | Nobody. Reopen the period first. |
 | Locked | Nobody. The periods of a closed fiscal year are locked. |
 
-The Actions column offers Soft-close and Close for open periods and Reopen for closed ones. Every change asks for remarks and is kept in the period history with the user and time. Reopening a period and posting into a soft-closed period need the Accounting Manager (approve:period-end).
+The Actions column offers Soft-close and Close for open periods and Reopen for soft-closed and closed ones. The side panel of a soft-close or close runs the blocking month-end checks first and lists them with their result and a Resolve link; the action stays disabled while a check fails. Every change asks for a reason from the Reason Codes master (with a note when the reason needs one) and is kept in the period history with the user, role, time and reason. Reopening a period and posting into a soft-closed period need the Accounting Manager (approve:period-end); other users see Reopen disabled. Next fiscal year asks for a confirmation naming the year it creates.
 
 ![Period Management seen by the Accounting Manager](pe-periods-mgr)
 
 ### Import the go-live opening balances
 
-![Import opening balances (go-live)](pe-opening)
+![Import opening balances](pe-opening)
 
 1. Select Import opening balances.
 2. Select Download template (`Opening_Balances_Upload_Template.xlsx`) and enter the old system's trial balance at the day before go-live, one row per account with a debit or a credit.
 3. Enter the Go-live date.
-4. Choose the file and select Upload.
+4. Choose the file and select Validate. The result shows the rows, accounts, total debit and credit and the difference, and lists every error with its row and column; nothing is loaded yet.
+5. Select Load opening balances and confirm. The confirmation states the go-live date and the totals, and the earlier load it replaces.
 
 Debits must equal credits, otherwise nothing is loaded. Loading again with the same date replaces the earlier load. The balances go into the fiscal year that contains the go-live date and are read by the trial balance, financial statements, general ledger detail and bank reconciliation; the year-end close carries them forward. No opening journal is posted, so screens that add up journals only, such as Accounting Query, show movements from the go-live date. A go-live date after journals already posted in the same fiscal year is refused. The balance of Premiums Receivable must equal the open items imported on Accounts > Collections (Chapter 14).
 
@@ -1509,13 +1510,23 @@ Reverse the close (Accounting Manager, with a reason) reverses the closing entri
 
 ![Accounts > Period End > Financial Statements: income statement](pe-statements)
 
-Financial Statements offers three tabs for the From date and To date you choose:
+Financial Statements has three tabs: Income Statement, Balance Sheet and Trial Balance. Choose the **Fiscal year**, the **Period** and the **View**; the screen opens on the period of today.
 
-- Income Statement: current period, year to date, prior year period and prior year to date, grouped into revenue, cost of services and operating expenses, with net income.
-- Balance Sheet: balances at the To date against the prior year end.
-- Trial Balance: opening, movement and closing balance per account.
+| View | Covers |
+|---|---|
+| Month | The period. |
+| Quarter | From the first day of the fiscal quarter to the end of the period. |
+| Year to date | From the first day of the fiscal year to the end of the period. |
+| Custom range | The From and To dates you enter. |
+| Period end, Custom date (Balance Sheet) | The balances as of the end of the period, or as of the date you enter. |
 
-Export downloads the statement. The same statements are reports under Reports > Financial Reports (Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail), where you can also produce them as PDF on the company letterhead.
+The cards above the statement follow the tab: total income, total expenses, net income (or net loss) and the year to date for the income statement; total assets, total liabilities, total equity and the balance check for the balance sheet; total debits, total credits and the difference of the closing balances for the trial balance.
+
+- Income Statement: this period, year to date, same period last year and last year to date, grouped into revenue, cost of services and operating expenses, with net income (loss). An expense credited in the period, such as a commission clawback or the reversal of an earlier month's entry, shows in parentheses.
+- Balance Sheet: balances as of the date against the previous year end. Income and expense not yet closed show under equity as current year earnings (and earnings of prior years not yet closed). The opening balances loaded at go-live are included.
+- Trial Balance: opening, movement and closing debit and credit per account.
+
+Select an account to open its general ledger for the period: opening balance, each posting with its journal, running balance and closing balance. **Export** saves the statement as an Excel workbook or a PDF document with the company name, the period and who printed it and when; **Print** prints the same PDF. The same statements are reports under Reports > Financial Reports (Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail).
 
 # Tax
 

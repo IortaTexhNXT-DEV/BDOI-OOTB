@@ -22,7 +22,6 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { Chips } from "primereact/chips";
 import { ProgressBar } from "primereact/progressbar";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import FieldError from "../../components/FieldError";
 import productConfiguratorService from "../../services/productConfiguratorService";
 import mastersService from "../../services/mastersService";
@@ -39,7 +38,7 @@ import StatCards from "../../components/StatCards";
 import { ChartCard, ShareChart, ThemedChart, formatValue } from "../../components/Dashboard";
 import {
   ConfiguratorPage, FilterBar, HistoryDialog, RowActions, StatusTag, TemplateCell, ViewDialog, IconAction,
-  pagingFor, templateText, productText, useComponentRows, useFilterOptions, toggleComponent,
+  pagingFor, templateText, productText, useComponentRows, useFilterOptions, toggleComponent, confirmStatusChange,
 } from "./shared/ConfiguratorPage";
 import {
   RULE_ACTIONS, RULE_TYPES, OPERATORS, actionSeverity, conditionText, outcomeText, refers, authorityText, insurerText, ruleErrors,
@@ -172,21 +171,21 @@ export const ProductTemplateManager = () => {
     if (templateError) toast.current?.show({ severity: "error", summary: t("productTemplateManager.error"), detail: templateError });
   }, [templateError, t]);
 
-  const setLifecycle = (template) => {
+  const setLifecycle = async (template) => {
     const retire = template.status === "Active";
-    confirmDialog({
-      message: t(retire ? "productTemplateManager.confirmDeactivate" : "productTemplateManager.confirmActivate", { code: template.templateCode }),
-      header: t("common.confirm"),
-      icon: "pi pi-exclamation-triangle",
-      accept: async () => {
-        const done = await persist(
-          () => (retire ? productConfiguratorService.retireProductTemplate(template.id) : productConfiguratorService.reactivateProductTemplate(template.id)),
-          toast,
-          { success: t("productTemplateManager.success"), successDetail: t("productTemplateManager.templateUpdated"), error: t("productTemplateManager.error"), errorDetail: t("productTemplateManager.failedToSaveTemplate") }
-        );
-        if (done) loadTemplates();
-      },
+    const done = await confirmStatusChange({
+      deactivate: retire,
+      kindLabel: t("productConfigurator.kinds.template"),
+      record: { code: template.templateCode, name: template.name },
+      t,
+      message: t(retire ? "productConfigurator.status.retireMessage" : "productConfigurator.status.activateMessage"),
+      note: retire ? t("productConfigurator.status.retireNote") : null,
+      confirmLabel: t(retire ? "productConfigurator.status.retireAction" : "productConfigurator.status.activateTemplateAction"),
+      run: () => (retire ? productConfiguratorService.retireProductTemplate(template.id) : productConfiguratorService.reactivateProductTemplate(template.id)),
     });
+    if (!done) return;
+    toast.current?.show({ severity: "success", summary: t("productTemplateManager.success"), detail: t("productTemplateManager.templateUpdated") });
+    loadTemplates();
   };
 
   const saveTemplate = async () => {
@@ -251,7 +250,6 @@ export const ProductTemplateManager = () => {
       actions={<Button label={t("productTemplateManager.createTemplate")} icon="pi pi-plus" onClick={() => { setSelectedTemplate({ status: "Active" }); setTemplateErrors({}); setShowDialog(true); }} />}
     >
       <Toast ref={toast} />
-      <ConfirmDialog />
       <FilterBar value={filters} onChange={setFilters} show={["lob", "status"]} options={{ lobs: lobOptions }} />
       <DataTable value={visible} loading={templatesLoading} dataKey="id" {...pagingFor(visible.length)} emptyMessage={t("productConfigurator.empty")} size="small">
         <Column field="templateCode" header={t("productTemplateManager.templateCode")} sortable />
@@ -276,15 +274,19 @@ export const ProductTemplateManager = () => {
       </DataTable>
       <HistoryDialog kind="template" row={history} onHide={() => setHistory(null)} />
       <ViewDialog
-        header={viewing ? `${viewing.templateCode} · ${viewing.name}` : ""}
+        header={t("productConfigurator.view.template")}
+        title={viewing?.templateCode}
+        subtitle={viewing?.name}
+        status={viewing?.status}
         visible={Boolean(viewing)}
         onHide={() => setViewing(null)}
+        onHistory={() => { setHistory({ ...viewing, label: viewing.templateCode }); setViewing(null); }}
         rows={viewing ? [
           [t("productTemplateManager.product"), productText(viewing)], [t("productTemplateManager.category"), viewing.category], [t("productTemplateManager.lineOfBusiness"), viewing.lineOfBusiness],
-          [t("productTemplateManager.version"), viewing.version], [t("productTemplateManager.status"), statusLabel(viewing.status)], [t("productTemplateManager.effectiveDate"), formatDate(viewing.effectiveDate)],
-          [t("productTemplateManager.expiryDate"), formatDate(viewing.expiryDate)], [t("productTemplateManager.insurers"), (viewing.insurers || []).join(", ")],
+          [t("productTemplateManager.version"), viewing.version], [t("productTemplateManager.effectiveDate"), viewing.effectiveDate, { type: "date" }],
+          [t("productTemplateManager.expiryDate"), viewing.expiryDate, { type: "date" }], [t("productTemplateManager.inUse"), Boolean(viewing.governsFlow), { type: "boolean" }],
           [t("productTemplateManager.components"), t("productTemplateManager.componentCounts", viewing._count || {})],
-          [t("productTemplateManager.inUse"), viewing.governsFlow ? t("productTemplateManager.inUseHelp") : t("productTemplateManager.notInUse")], [t("productTemplateManager.description"), viewing.description],
+          [t("productTemplateManager.insurers"), (viewing.insurers || []).join(", "), { span: "full" }], [t("productTemplateManager.description"), viewing.description, { span: "full" }],
         ] : []}
       />
 
@@ -394,10 +396,13 @@ export const CoverageBuilder = () => {
         <Column header={t("productConfigurator.actions.title")} body={(r) => <RowActions row={r} onView={s.setViewing} onEdit={open} onToggle={toggle} onHistory={(row) => s.setHistory({ ...row, label: row.coverageCode })} />} />
       </DataTable>
       <HistoryDialog kind="coverages" row={s.history} onHide={() => s.setHistory(null)} />
-      <ViewDialog header={s.viewing?.coverageName} visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)} rows={s.viewing ? [
-        [t("coverageBuilder.code"), s.viewing.coverageCode], [t("productConfigurator.template"), templateText(s.viewing)], [t("productTemplateManager.product"), productText(s.viewing)],
-        [t("coverageBuilder.type"), s.viewing.type], [t("coverageBuilder.deductible"), formatCurrency(s.viewing.deductible ?? 0)], [t("coverageBuilder.waitingPeriodDays"), s.viewing.waitingPeriod],
-        [t("coverageBuilder.quoteField"), quoteFieldText(s.viewing.quoteField)], [t("coverageBuilder.exclusions"), (s.viewing.exclusions || []).join(", ")], [t("coverageBuilder.description"), s.viewing.description],
+      <ViewDialog header={t("productConfigurator.view.coverage")} title={s.viewing?.coverageCode} subtitle={s.viewing?.coverageName} status={s.viewing?.status}
+        visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)}
+        onHistory={() => { s.setHistory({ ...s.viewing, label: s.viewing.coverageCode }); s.setViewing(null); }} rows={s.viewing ? [
+        [t("productConfigurator.template"), templateText(s.viewing)], [t("productTemplateManager.product"), productText(s.viewing)],
+        [t("coverageBuilder.type"), typeOptions.find((o) => o.value === s.viewing.type)?.label || s.viewing.type], [t("coverageBuilder.deductible"), s.viewing.deductible ?? 0, { type: "amount" }],
+        [t("coverageBuilder.waitingPeriodDays"), s.viewing.waitingPeriod, { type: "number" }], [t("coverageBuilder.quoteField"), quoteFieldText(s.viewing.quoteField)],
+        [t("coverageBuilder.exclusions"), (s.viewing.exclusions || []).join(", "), { span: "full" }], [t("coverageBuilder.description"), s.viewing.description, { span: "full" }],
       ] : []} />
 
       <Dialog header={t("coverageBuilder.configureCoverage")} visible={Boolean(selected)} style={{ width: "48rem" }} breakpoints={{ "960px": "95vw" }} onHide={() => setSelected(null)}>
@@ -720,11 +725,15 @@ export const UnderwritingRules = () => {
       </DataTable>
       <HistoryDialog kind="underwriting-rules" row={s.history} onHide={() => s.setHistory(null)} />
       <TestRiskDialog visible={testing} onHide={() => setTesting(false)} templates={templateCodeOptions(s.options.templates)} insurers={s.options.insurers} fields={uw.fields} />
-      <ViewDialog header={s.viewing ? `${s.viewing.ruleCode} · ${s.viewing.ruleName}` : ""} visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)} rows={s.viewing ? [
+      <ViewDialog header={t("productConfigurator.view.rule")} title={s.viewing?.ruleCode} subtitle={s.viewing?.ruleName} status={s.viewing?.status}
+        visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)}
+        onHistory={() => { s.setHistory({ ...s.viewing, label: s.viewing.ruleCode }); s.setViewing(null); }} rows={s.viewing ? [
         [t("productConfigurator.template"), templateText(s.viewing)], [t("productTemplateManager.product"), productText(s.viewing)], [t("underwritingRules.insurer"), insurerText(s.viewing, t)],
-        [t("underwritingRules.type"), t(`underwritingRules.types.${s.viewing.type}`, s.viewing.type)], [t("ratingEngine.condition"), conditionText(s.viewing, uw.fields)],
-        [t("underwritingRules.outcomeColumn"), outcomeText(s.viewing, t)], [t("underwritingRules.message"), s.viewing.message], [t("underwritingRules.otherwiseMessage"), s.viewing.action === "Auto-Accept" ? s.viewing.otherwiseMessage : null],
-        [t("underwritingRules.authorityLevel"), authorityText(s.viewing, uw.roles, t)], [t("underwritingRules.exceptions"), (s.viewing.exceptions || []).join(", ")], [t("productConfigurator.filters.status"), statusLabel(s.viewing.status)],
+        [t("underwritingRules.type"), t(`underwritingRules.types.${s.viewing.type}`, s.viewing.type)], [t("ratingEngine.condition"), conditionText(s.viewing, uw.fields), { span: "full" }],
+        [t("underwritingRules.outcomeColumn"), outcomeText(s.viewing, t)], [t("underwritingRules.authorityLevel"), authorityText(s.viewing, uw.roles, t)],
+        [t("underwritingRules.message"), s.viewing.message, { span: "full" }],
+        s.viewing.action === "Auto-Accept" ? [t("underwritingRules.otherwiseMessage"), s.viewing.otherwiseMessage, { span: "full" }] : null,
+        [t("underwritingRules.exceptions"), (s.viewing.exceptions || []).join(", "), { span: "full" }],
       ] : []} />
 
       <Dialog header={selected?.id ? t("underwritingRules.editRule") : t("underwritingRules.addRule")} visible={Boolean(selected)} style={{ width: "56rem" }} breakpoints={{ "960px": "95vw" }} onHide={() => setSelected(null)}>
@@ -897,12 +906,17 @@ export const MarketMapping = () => {
         <Column header={t("productConfigurator.actions.title")} body={(r) => <RowActions row={r} onView={s.setViewing} onEdit={open} onToggle={toggle} onHistory={(row) => s.setHistory({ ...row, label: row.insurerName })} />} />
       </DataTable>
       <HistoryDialog kind="market-mappings" row={s.history} onHide={() => s.setHistory(null)} />
-      <ViewDialog header={s.viewing?.insurerName} visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)} rows={s.viewing ? [
-        [t("productConfigurator.template"), templateText(s.viewing)], [t("productTemplateManager.product"), productText(s.viewing)], [t("marketMapping.insurerCode"), s.viewing.productCode],
-        [t("marketMapping.agreedCommission"), s.viewing.commissionRate == null ? null : `${s.viewing.commissionRate}%`], [t("marketMapping.overridePercent"), s.viewing.overrideRate == null ? null : `${s.viewing.overrideRate}%`],
-        [t("marketMapping.profitShare"), s.viewing.profitShare == null ? null : `${s.viewing.profitShare}%`], [t("marketMapping.target"), s.viewing.targetPremium ? formatCurrency(s.viewing.targetPremium) : null],
+      <ViewDialog header={t("productConfigurator.view.mapping")} title={s.viewing?.insurerName} subtitle={s.viewing ? templateText(s.viewing) : null} status={s.viewing?.status}
+        visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)}
+        onHistory={() => { s.setHistory({ ...s.viewing, label: s.viewing.insurerName }); s.setViewing(null); }} rows={s.viewing ? [
+        [t("productTemplateManager.product"), productText(s.viewing)], [t("marketMapping.insurerCode"), s.viewing.productCode],
+        [t("marketMapping.agreedCommission"), s.viewing.commissionRate == null ? null : `${s.viewing.commissionRate}%`],
+        [t("marketMapping.overridePercent"), s.viewing.overrideRate == null ? null : `${s.viewing.overrideRate}%`],
+        [t("marketMapping.profitShare"), s.viewing.profitShare == null ? null : `${s.viewing.profitShare}%`],
+        [t("marketMapping.target"), s.viewing.targetPremium || null, { type: "amount" }],
         [t("marketMapping.ytdPerformance"), `${formatCurrency(s.viewing.ytdPremium ?? 0)} (${s.viewing.ytdPolicies ?? 0} ${t("marketMapping.policies")})`],
-        [t("marketMapping.specialTerms"), s.viewing.specialTerms], [t("marketMapping.valid"), `${formatDate(s.viewing.validFrom)} – ${formatDate(s.viewing.validTo)}`],
+        [t("marketMapping.valid"), `${formatDate(s.viewing.validFrom)} – ${formatDate(s.viewing.validTo)}`],
+        [t("marketMapping.specialTerms"), s.viewing.specialTerms, { span: "full" }],
       ] : []} />
 
       <Dialog header={selected?.id ? t("marketMapping.editMapping") : t("marketMapping.mapProduct")} visible={Boolean(selected)} style={{ width: "48rem" }} breakpoints={{ "960px": "95vw" }} onHide={() => setSelected(null)}>

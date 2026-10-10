@@ -156,7 +156,7 @@ const Layouts = ({ toast, banks }) => {
             <div className="col-12">
               <TabView>
                 {SECTIONS.map((s) => (
-                  <TabPanel key={s} header={`${t(`integrations.records.${s}`)} (${v[s].length})`}>
+                  <TabPanel key={s} header={t(`integrations.records.${s}`)}>
                     <FieldsEditor fields={v[s]} sources={meta.sources} fixed={v.format === "fixed"} onChange={(fields) => set({ [s]: fields })} />
                   </TabPanel>
                 ))}

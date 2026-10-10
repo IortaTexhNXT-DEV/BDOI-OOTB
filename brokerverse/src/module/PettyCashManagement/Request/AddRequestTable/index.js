@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { showSuccessMessage } from "../../../../utility/toastUtils";
 import { useTranslation } from "react-i18next";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useFormik } from "formik";
@@ -50,6 +51,18 @@ const AddRequestTable = () => {
   const isEmpty = !AddRequestTable?.length;
 
   const handleapprove = async (actionName) => {
+    if (actionName === "approve") {
+      const ok = await openConfirm({
+        title: t("pettyCash.confirm.submitNewTitle"),
+        message: t("pettyCash.confirm.submitMessage"),
+        facts: [
+          { label: t("pettyCash.confirm.lines"), value: AddRequestTable.length, type: "number" },
+          { label: t("pettyCash.totalAmount"), value: totalAmount, type: "amount", emphasis: true },
+        ],
+        confirmLabel: t("pettyCash.confirm.submit"),
+      });
+      if (!ok) return;
+    }
     const result = await dispatch(
       postAddRequestMiddleware({ submit: actionName === "approve" })
     );
@@ -257,7 +270,7 @@ const AddRequestTable = () => {
               }}
             />
             <Button
-              label={t("pettyCash.approve")}
+              label={t("pettyCash.confirm.submit")}
               className="add__btn"
               onClick={() => {
                 handleapprove("approve");

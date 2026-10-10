@@ -1,0 +1,132 @@
+@import "../../theme/bdoi/tokens";
+
+/* BIR DAT Files, Sales Invoices and E-Invoicing: toolbars, the facts row under the header, file names. */
+.tax-page {
+  .tax-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+
+    .tax-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 9rem;
+
+      label {
+        color: $color-text-muted;
+        font-size: 0.8125rem;
+        font-weight: 600;
+      }
+    }
+
+    .tax-field--search {
+      flex: 1 1 16rem;
+      max-width: 22rem;
+    }
+
+    // a date field takes the width of a date, so From and To stay side by side
+    .tax-field--date {
+      flex: 0 0 10.5rem;
+      width: 10.5rem;
+      min-width: 0;
+    }
+
+    .tax-toolbar__end {
+      margin-left: auto;
+    }
+  }
+
+  .tax-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.75rem;
+    color: $color-text;
+    font-size: 0.875rem;
+
+    .tax-fact__label {
+      margin-right: 0.4rem;
+      color: $color-text-muted;
+    }
+
+    .tax-fact__value {
+      color: $color-heading;
+      font-weight: 600;
+    }
+  }
+
+  .tax-file-name {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8125rem;
+    word-break: break-all;
+  }
+
+  .tax-subtitle {
+    margin: 1.25rem 0 0.5rem;
+    color: $color-heading;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .tax-ellipsis {
+    display: block;
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tax-empty {
+    padding: 0.5rem 0;
+    color: $color-text-muted;
+    font-size: 0.875rem;
+  }
+
+  .tax-row-selected td {
+    background: $color-surface-muted;
+  }
+
+  .tax-status-filter {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+
+    .p-button {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8125rem;
+    }
+
+    // on a phone the statuses wrap two to a row instead of running off the card
+    @media (max-width: 640px) {
+      .p-button {
+        flex: 1 1 45%;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+.tax-dialog {
+  .tax-subtitle {
+    margin: 1.25rem 0 0.5rem;
+    color: $color-heading;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .tax-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+
+    label {
+      color: $color-text-muted;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+  }
+}

@@ -177,6 +177,8 @@ describe('migration 0348 on a database in use', () => {
     await q('DELETE FROM role_permissions rp USING roles r WHERE r.id = rp.role_id AND r.code LIKE \'tis-%\'');
     await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims')");
     await q("DELETE FROM schema_migrations WHERE name = '0348_tisph_roles.sql'");
+    // later migrations that grant to the holders of a module permission (0387: approve:incentive) run again after it
+    await q("DELETE FROM schema_migrations WHERE name = '0387_incentive_approval.sql'");
     await migrate({ log: () => {} });
     const migrated = await grants();
     for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims']) expect(migrated[code], code).toEqual(seeded[code]);

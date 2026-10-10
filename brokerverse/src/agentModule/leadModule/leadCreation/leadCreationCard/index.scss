@@ -41,6 +41,16 @@
 }
 
 .prospect-duplicates {
+  .prospect-duplicates__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .pi {
+      color: var(--bv-warning, #8a5a00);
+    }
+  }
+
   .prospect-duplicates__list {
     list-style: none;
     margin: 0;

@@ -91,12 +91,16 @@ describe("Acceptance Rules screen", () => {
     await waitFor(() => expect(productConfiguratorService.listComponents).toHaveBeenLastCalledWith("underwriting-rules", { search: "PUV" }));
   });
 
-  it("deactivates a rule with its status only", async () => {
+  it("deactivates a rule with its status only, once confirmed", async () => {
     productConfiguratorService.listComponents.mockResolvedValue([rule(1)]);
     productConfiguratorService.updateComponent.mockResolvedValue({});
     renderScreen(<UnderwritingRules />);
     await screen.findByText("R1");
     fireEvent.click(screen.getByRole("button", { name: "Deactivate" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("R1")).toBeInTheDocument();
+    expect(productConfiguratorService.updateComponent).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Deactivate" }));
     await waitFor(() => expect(productConfiguratorService.updateComponent).toHaveBeenCalledWith("underwriting-rules", 1, { status: "Inactive" }));
   });
 });

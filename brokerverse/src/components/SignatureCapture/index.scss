@@ -79,26 +79,23 @@
       display: grid;
       grid-template-columns: 190px 1fr auto;
       gap: 12px;
-      align-items: center;
+      align-items: start;
       padding: 8px 0;
       border-bottom: 1px solid #f0f0f0;
     }
   }
 
-  .bv-sig__meta {
-    font-size: 12px;
-    color: #656565;
-    margin-top: 4px;
+  .bv-sig__version {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
   }
 
-  .bv-sig__revoke {
+  .bv-sig__version-head {
     display: flex;
+    align-items: center;
     gap: 8px;
-    margin-top: 12px;
-
-    .p-inputtext {
-      flex: 1;
-    }
   }
 }
 

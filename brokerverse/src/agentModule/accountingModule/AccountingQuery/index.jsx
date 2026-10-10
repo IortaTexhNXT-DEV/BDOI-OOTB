@@ -11,7 +11,6 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { ConfirmDialog } from "primereact/confirmdialog";
 import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -319,7 +318,6 @@ const AccountingQuery = () => {
   return (
     <div className="accounting-query">
       <Toast ref={toast} />
-      <ConfirmDialog />
 
       {/* Header */}
       <div className="page-header">
@@ -428,6 +426,7 @@ const AccountingQuery = () => {
                 loading={exportLoading}
                 disabled={exportLoading}
                 className="export-button"
+                outlined
               />
               <Button
                 label={t("accounting.reset")}

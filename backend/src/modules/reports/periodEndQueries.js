@@ -3,9 +3,10 @@
  * $2 = to, extras from app_settings follow; columns starting with "_" are internal.
  *
  * Ledger balances come from posted and reversed journals (a reversed journal and its reversal both count). Opening
- * balances use pe_balance_before(date): the opening balances written by the year-end close plus movements since the
- * fiscal year start, or all earlier movements when the year has none. The income statement leaves out the year-end
- * closing entries (source year-end-close) so a closed year still shows its result.
+ * balances use pe_balance_before(date): the opening balances written by the year-end close (or loaded at go-live) plus
+ * movements since the fiscal year start, or all earlier movements when the year has none; the balance sheet reads them
+ * the same way. The income statement leaves out the year-end closing entries (source year-end-close) so a closed year
+ * still shows its result.
  */
 const setting = (key, fallback, type) => ({ key, fallback, type });
 const POSTED = "j.status IN ('posted', 'reversed')";
@@ -20,32 +21,53 @@ const statementOrder = (dims) => dims.map((d) => {
 }).join(', ');
 const ACCOUNT_FILTER = ['account'];
 
-// Income statement: amounts positive for income and for expense; period, year to date (from the fiscal year start of To
-// Date) and the same two windows one year earlier.
+// Opening balances loaded at go-live (source_run go-live:<date>) are the old system's balances at the day before the
+// go-live date (null for the balances carried forward by the year-end close, which are at the day before the fiscal year
+// starts).
+const GO_LIVE_EVE = "(CASE WHEN o.source_run ~ '^go-live:[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN substr(o.source_run, 9)::date - 1 END)";
+
+// Income statement: amounts positive for income and for expense, in their natural sign (a credit on an expense account,
+// such as a clawback or the reversal of an earlier month's expense, is negative); period, year to date (from the
+// fiscal year start of To Date) and the same two windows one year earlier. Income and expense loaded at go-live count in
+// the year-to-date windows only (_opening).
 const incomeStatement = `SELECT a.account_type AS "accountType", ${FS_GROUP} AS "fsGroup", a.code AS "accountCode", a.name AS "accountName", a.code AS _account,
-    j.jv_date AS _date, CASE WHEN a.account_type = 'income' THEN l.credit - l.debit ELSE l.debit - l.credit END AS _amt
-  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
-  WHERE a.account_type IN ('income', 'expense') AND ${POSTED} AND j.source <> 'year-end-close'
-    AND j.jv_date BETWEEN (LEAST($1::date, ${FY_START('$2')}) - interval '1 year')::date AND $2::date`;
+    x.d AS _date, x.opening AS _opening, CASE WHEN a.account_type = 'income' THEN -x.amt ELSE x.amt END AS _amt
+  FROM (
+    SELECT l.account_code, j.jv_date AS d, false AS opening, l.debit - l.credit AS amt FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+     WHERE ${POSTED} AND j.source <> 'year-end-close' AND j.jv_date BETWEEN (LEAST($1::date, ${FY_START('$2')}) - interval '1 year')::date AND $2::date
+    UNION ALL
+    SELECT o.account_code, ${GO_LIVE_EVE}, true, o.balance FROM opening_balances o
+     WHERE ${GO_LIVE_EVE} BETWEEN (LEAST($1::date, ${FY_START('$2')}) - interval '1 year')::date AND $2::date
+  ) x JOIN gl_accounts a ON a.code = x.account_code
+  WHERE a.account_type IN ('income', 'expense')`;
 const YS = FY_START('$2');
 const isMeasures = {
-  currentPeriod: 'COALESCE(sum(t._amt) FILTER (WHERE t._date BETWEEN $1::date AND $2::date), 0)',
+  currentPeriod: 'COALESCE(sum(t._amt) FILTER (WHERE NOT t._opening AND t._date BETWEEN $1::date AND $2::date), 0)',
   yearToDate: `COALESCE(sum(t._amt) FILTER (WHERE t._date BETWEEN ${YS} AND $2::date), 0)`,
-  priorPeriod: "COALESCE(sum(t._amt) FILTER (WHERE t._date BETWEEN ($1::date - interval '1 year')::date AND ($2::date - interval '1 year')::date), 0)",
+  priorPeriod: "COALESCE(sum(t._amt) FILTER (WHERE NOT t._opening AND t._date BETWEEN ($1::date - interval '1 year')::date AND ($2::date - interval '1 year')::date), 0)",
   priorYearToDate: `COALESCE(sum(t._amt) FILTER (WHERE t._date BETWEEN (${YS} - interval '1 year')::date AND ($2::date - interval '1 year')::date), 0)`,
 };
 const net = (col) => `COALESCE(sum(f."${col}") FILTER (WHERE f."accountType" = 'income'), 0) - COALESCE(sum(f."${col}") FILTER (WHERE f."accountType" = 'expense'), 0)`;
 
-// Balance sheet: assets debit-positive, liabilities and equity credit-positive; unclosed income and expense shown as
-// "Current year earnings" under equity. Comparative: the end of the previous fiscal year.
-const balanceSheet = `SELECT CASE WHEN a.account_type IN ('income', 'expense') THEN 'equity' ELSE a.account_type END AS "accountType",
+// Balance sheet: assets debit-positive, liabilities and equity credit-positive, as of To Date; comparative: the end of
+// the previous fiscal year. A fiscal year with opening balances starts from them and leaves out the journals before it,
+// as pe_balance_before does. Income and expense not yet closed show under equity: this fiscal year's as "Current year
+// earnings", earlier years' as "Earnings of prior years not yet closed".
+const balanceSheet = `WITH fy AS (SELECT f.code, f.start_date FROM fiscal_years f WHERE $2::date BETWEEN f.start_date AND f.end_date),
+  ob AS (SELECT o.account_code, COALESCE(${GO_LIVE_EVE}, fy.start_date - 1) AS d, o.balance
+    FROM opening_balances o JOIN fy ON fy.code = o.fiscal_year)
+  SELECT CASE WHEN a.account_type IN ('income', 'expense') THEN 'equity' ELSE a.account_type END AS "accountType",
     CASE WHEN a.account_type IN ('income', 'expense') THEN 'Equity' ELSE ${FS_GROUP} END AS "fsGroup",
-    CASE WHEN a.account_type IN ('income', 'expense') THEN 'CYE' ELSE a.code END AS "accountCode",
-    CASE WHEN a.account_type IN ('income', 'expense') THEN 'Current year earnings (not yet closed)' ELSE a.name END AS "accountName",
-    a.code AS _account, j.jv_date AS _date,
-    CASE WHEN a.account_type = 'asset' THEN l.debit - l.credit ELSE l.credit - l.debit END AS _amt
-  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
-  WHERE ${POSTED} AND j.jv_date <= $2::date`;
+    CASE WHEN a.account_type NOT IN ('income', 'expense') THEN a.code WHEN x.d < ${YS} THEN 'PYE' ELSE 'CYE' END AS "accountCode",
+    CASE WHEN a.account_type NOT IN ('income', 'expense') THEN a.name WHEN x.d < ${YS} THEN 'Earnings of prior years not yet closed' ELSE 'Current year earnings' END AS "accountName",
+    a.code AS _account, x.d AS _date,
+    CASE WHEN a.account_type = 'asset' THEN x.amt ELSE -x.amt END AS _amt
+  FROM (
+    SELECT ob.account_code, ob.d, ob.balance AS amt FROM ob WHERE ob.d <= $2::date
+    UNION ALL
+    SELECT l.account_code, j.jv_date, l.debit - l.credit FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+     WHERE ${POSTED} AND j.jv_date <= $2::date AND (NOT EXISTS (SELECT 1 FROM ob) OR j.jv_date >= (SELECT fy.start_date FROM fy))
+  ) x JOIN gl_accounts a ON a.code = x.account_code`;
 const bsTotal = (col, types) => `COALESCE(sum(f."${col}") FILTER (WHERE f."accountType" IN (${types})), 0)`;
 
 // Trial balance with opening, movement and closing columns

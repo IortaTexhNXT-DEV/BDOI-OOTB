@@ -1,3 +1,5 @@
+@import "../../../theme/bdoi/tokens";
+
 .endorsement__personal__detail__change__container {
   .customer__info__main__title {
     font-size: 34px;
@@ -103,4 +105,8 @@
     border: 1px solid #e5e7eb;
     width: 100%;
   }
+}
+
+.endorsement__personal__detail__change__container .endorsement-cancel-label {
+  color: $color-danger;
 }

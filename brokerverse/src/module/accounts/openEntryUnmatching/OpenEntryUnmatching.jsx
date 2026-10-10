@@ -14,6 +14,7 @@ import accountingService from "../../../services/accountingService";
 import { Dropdown } from "primereact/dropdown";
 import useOpenItemAccounts from "../openEntryMatching/useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const OpenEntryUnmatching = () => {
@@ -99,20 +100,36 @@ const OpenEntryUnmatching = () => {
       return;
     }
 
+    // Get unique matching IDs from selected entries
+    const matchingIds = [
+      ...new Set([
+        ...selectedDebits.map((entry) => entry.matchingId),
+        ...selectedCredits.map((entry) => entry.matchingId),
+      ]),
+    ].filter((id) => id);
+
+    if (matchingIds.length === 0) {
+      notifyWarn(t("openEntryUnmatching.noValidMatchingSelected"));
+      return;
+    }
+
+    const total = (rows) => rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+    const confirmed = await openConfirm({
+      title: t("accounts.openEntryDialogs.unmatchTitle"),
+      severity: "warning",
+      message: t("accounts.openEntryDialogs.unmatchMessage", { count: matchingIds.length }),
+      facts: [
+        { label: t("accounts.openEntryDialogs.debitsSelected"), value: selectedDebits.length, type: "number" },
+        { label: t("accounts.openEntryDialogs.debitTotal"), value: total(selectedDebits), type: "amount" },
+        { label: t("accounts.openEntryDialogs.creditsSelected"), value: selectedCredits.length, type: "number" },
+        { label: t("accounts.openEntryDialogs.creditTotal"), value: total(selectedCredits), type: "amount" },
+      ],
+      confirmLabel: t("accounts.openEntryDialogs.unmatchEntries", { count: matchingIds.length }),
+    });
+    if (!confirmed) return;
+
     setLoading(true);
     try {
-      // Get unique matching IDs from selected entries
-      const matchingIds = [
-        ...new Set([
-          ...selectedDebits.map((entry) => entry.matchingId),
-          ...selectedCredits.map((entry) => entry.matchingId),
-        ]),
-      ].filter((id) => id);
-
-      if (matchingIds.length === 0) {
-        notifyWarn(t("openEntryUnmatching.noValidMatchingSelected"));
-        return;
-      }
 
       const response = await accountingService.unmatchEntries(matchingIds);
 

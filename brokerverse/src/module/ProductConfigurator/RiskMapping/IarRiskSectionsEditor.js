@@ -7,9 +7,10 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import productConfiguratorService from "../../../services/productConfiguratorService";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
-const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) => {
+const IarRiskSectionsEditor = ({ mapping, onReload, toastRef }) => {
   const { t } = useTranslation();
   const [options, setOptions] = useState([]);
   const [sectionCode, setSectionCode] = useState(null);
@@ -84,37 +85,26 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
     }
   };
 
-  const handleRemove = (section) => {
-    confirmDialog({
-      message: t(
-        "productRiskMapping.confirmRemove",
-        "Remove section {{name}}? It will be deactivated (soft delete).",
-        { name: section.sectionLabel }
-      ),
-      header: t("productRiskMapping.confirmHeader", "Confirm"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: async () => {
-        try {
-          await productConfiguratorService.deactivateRiskSection(
-            mapping.id,
-            section.id
-          );
-          toastRef.current?.show({
-            severity: "success",
-            summary: t("productRiskMapping.success", "Success"),
-            detail: t("productRiskMapping.sectionRemoved", "Section removed"),
-          });
-          await onReload();
-        } catch (error) {
-          toastRef.current?.show({
-            severity: "error",
-            summary: t("productRiskMapping.error", "Error"),
-            detail: error.message,
-          });
-        }
-      },
+  const handleRemove = async (section) => {
+    const removed = await openConfirm({
+      title: t("productRiskMapping.removeTitle"),
+      severity: "danger",
+      message: t("productRiskMapping.removeMessage"),
+      facts: [
+        { label: t("productRiskMapping.product"), value: [mapping.productCode, mapping.productName].filter(Boolean).join(" · ") },
+        { label: t("productRiskMapping.section"), value: section.sectionLabel },
+      ],
+      note: t("productRiskMapping.removeNote"),
+      confirmLabel: t("productRiskMapping.removeAction"),
+      onConfirm: () => productConfiguratorService.deactivateRiskSection(mapping.id, section.id),
     });
+    if (!removed) return;
+    toastRef.current?.show({
+      severity: "success",
+      summary: t("productRiskMapping.success", "Success"),
+      detail: t("productRiskMapping.sectionRemoved", "Section removed"),
+    });
+    await onReload();
   };
 
   const handleRowEditComplete = async ({ newData }) => {

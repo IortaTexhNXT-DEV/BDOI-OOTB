@@ -15,11 +15,16 @@ import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import mastersService from "../../services/mastersService";
 import { hasPermission } from "../../utils/canOpen";
-import { Field, PageHeader, StatusTag, dateTime, fromIsoDay, isoDay, money, showError, showSuccess } from "./common";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { Field, PageHeader, StatusTag, dateTime, fromIsoDay, isoDay, money, printFile, showError, showSuccess } from "./common";
 
 const EMPTY = { code: "", name: "", dealerChannelId: null, bankChannelId: null, insuranceCompanyId: null, vehicleType: "private_cars", ownDamageRate: 1.5, actsOfNatureRate: 0.5,
   bodilyInjury: 0, propertyDamage: 0, includeCtpl: true, ctplTermYears: 3, freeFirstYear: false, subsidyPayer: "none", subsidyType: "percent", subsidyValue: 0, issueMode: "quotation",
   mortgageeClause: "", effectiveFrom: null, effectiveTo: null, status: "active", notes: "" };
+
+/** A sale with a financing bank, created: it has a bank endorsement letter. */
+const financed = (sale) => Boolean(sale.bankChannelId) && sale.status === "created";
 
 /**
  * Operations > Sales & Marketing > Dealer Programmes: brand-new vehicle programmes of a captive agency (dealer,
@@ -165,7 +170,7 @@ const DealerProgrammes = () => {
                 <span>{t("distribution.mp.batch", "Batch")} <b>{result.batchNumber}</b></span>
                 <span>{t("distribution.mp.created", "Created")} <b>{result.created}</b></span>
                 <span>{t("distribution.mp.failed", "Failed")} <b>{result.failed}</b></span>
-                {result.errors.length ? <span className="text-red-600">{result.errors.slice(0, 5).map((e) => `${t("distribution.mp.row", "Row")} ${e.row}: ${e.message}`).join(" | ")}</span> : null}
+                {result.errors.length ? <span className="p-error">{result.errors.slice(0, 5).map((e) => `${t("distribution.mp.row", "Row")} ${e.row}: ${e.message}`).join(" | ")}</span> : null}
               </div>
             ) : null}
             <DataTable value={batches} dataKey="id" size="small" stripedRows selectionMode="single" selection={batch} onSelectionChange={(e) => e.value && openBatch(e.value)}
@@ -177,11 +182,16 @@ const DealerProgrammes = () => {
               <Column field="rowsFailed" header={t("distribution.mp.failed", "Failed")} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.common.status", "Status")} body={(b) => <StatusTag status={b.status} />} />
               <Column header={t("distribution.mp.uploaded", "Uploaded")} body={(b) => `${dateTime(b.createdAt)} ${b.createdBy || ""}`} />
-              <Column body={(b) => <Button icon="pi pi-print" text size="small" tooltip={t("distribution.mp.batchLetters", "Bank letters of the batch")} aria-label={t("distribution.mp.batchLetters", "Bank letters of the batch")} onClick={() => run(() => service.batchBankLetters(b.id))} />} />
             </DataTable>
             {batch ? (
               <>
-                <h3 className="mt-4">{t("distribution.mp.salesOf", "Sales of batch {{batch}}", { batch: batch.batchNumber })}</h3>
+                <div className="flex align-items-center justify-content-between gap-2 mt-4 mb-2">
+                  <h3 className="m-0">{t("distribution.mp.salesOf", "Sales of batch {{batch}}", { batch: batch.batchNumber })}</h3>
+                  {sales.some(financed) ? (
+                    <Button label={t("distribution.mp.batchLetters", "Bank letters of the batch")} icon="pi pi-print" outlined size="small"
+                      onClick={() => printFile(toast, `/motor-programmes/batches/${encodeURIComponent(batch.id)}/bank-letters`, `${batch.batchNumber}-bank-letters.pdf`)} />
+                  ) : null}
+                </div>
                 <DataTable value={sales} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("distribution.common.none", "Nothing to show")}>
                   <Column field="rowNo" header={t("distribution.mp.row", "Row")} />
                   <Column field="buyerName" header={t("distribution.mp.buyer", "Buyer")} />
@@ -192,10 +202,11 @@ const DealerProgrammes = () => {
                   <Column header={t("distribution.mp.payerShare", "Dealer / bank")} body={(s) => money(s.payerShare)} className="bv-num" headerClassName="bv-num" />
                   <Column header={t("distribution.mp.buyerShare", "Buyer")} body={(s) => money(s.buyerShare)} className="bv-num" headerClassName="bv-num" />
                   <Column header={t("distribution.mp.document", "Quotation / policy")} body={(s) => s.policyNumber || s.quoteNumber || ""} />
-                  <Column header={t("distribution.common.status", "Status")} body={(s) => (<span><StatusTag status={s.status} />{s.error ? <><br /><span className="text-red-600 text-sm">{s.error}</span></> : null}</span>)} />
-                  <Column body={(s) => (s.bankChannelId && s.status === "created" ? (
+                  <Column header={t("distribution.common.status", "Status")} body={(s) => (<span><StatusTag status={s.status} />{s.error ? <><br /><small className="p-error">{s.error}</small></> : null}</span>)} />
+                  <Column body={(s) => (financed(s) ? (
                     <div className="dist-actions">
-                      <Button icon="pi pi-file-pdf" text size="small" tooltip={t("distribution.mp.bankLetter", "Bank endorsement letter")} aria-label={t("distribution.mp.bankLetter", "Bank endorsement letter")} onClick={() => run(() => service.bankLetter(s.id))} />
+                      <Button icon="pi pi-print" text size="small" tooltip={t("distribution.mp.bankLetter", "Bank endorsement letter")} aria-label={t("distribution.mp.bankLetter", "Bank endorsement letter")}
+                        onClick={() => printFile(toast, `/motor-programmes/sales/${encodeURIComponent(s.id)}/bank-letter`, "bank-letter.pdf")} />
                       {write ? <Button icon="pi pi-envelope" text size="small" tooltip={t("distribution.mp.emailLetter", "E-mail the letter to the bank")} aria-label={t("distribution.mp.emailLetter", "E-mail the letter to the bank")} onClick={() => run(() => service.emailBankLetter(s.id))} /> : null}
                     </div>
                   ) : null)} />
@@ -257,26 +268,28 @@ const DealerProgrammes = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={preview ? `${t("distribution.mp.preview", "Premium preview")} · ${preview.programme.code}` : ""} visible={!!preview} style={{ width: "min(520px, 96vw)" }} onHide={() => setPreview(null)}>
+      <DetailDialog visible={!!preview} onHide={() => setPreview(null)} size="md" header={preview ? `${t("distribution.mp.preview", "Premium preview")} · ${preview.programme.code}` : ""}>
         {preview && (
-          <div>
-            <div className="dist-grid">
-              <Field label={t("distribution.mp.invoicePrice", "Invoice price")}><InputNumber value={preview.invoicePrice} min={1} onValueChange={(e) => setPreview({ ...preview, invoicePrice: e.value })} /></Field>
-              <Field label=" "><Button label={t("distribution.mp.compute", "Compute")} icon="pi pi-calculator" onClick={runPreview} /></Field>
+          <>
+            <div className="flex align-items-end gap-2 mb-3">
+              <Field label={t("distribution.mp.invoicePrice", "Invoice price")} htmlFor="mp-preview-price">
+                <InputNumber inputId="mp-preview-price" value={preview.invoicePrice} min={1} onValueChange={(e) => setPreview({ ...preview, invoicePrice: e.value })} />
+              </Field>
+              <Button label={t("distribution.mp.compute", "Compute")} icon="pi pi-calculator" outlined onClick={runPreview} disabled={!preview.invoicePrice} />
             </div>
             {preview.result ? (
-              <div className="dist-summary">
-                <span>{t("distribution.mp.net", "Net premium")} <b>{money(preview.result.netPremium)}</b></span>
-                <span>{t("distribution.mp.taxes", "Taxes")} <b>{money(preview.result.taxes)}</b></span>
-                <span>CTPL <b>{money(preview.result.ctplPremium)}</b></span>
-                <span>{t("distribution.mp.gross", "Total")} <b>{money(preview.result.grossPremium)}</b></span>
-                <span>{t("distribution.mp.payerShare", "Dealer / bank")} <b>{money(preview.result.payer)}</b></span>
-                <span>{t("distribution.mp.buyerShare", "Buyer")} <b>{money(preview.result.buyer)}</b></span>
-              </div>
+              <KeyValueGrid columns={3} items={[
+                { label: t("distribution.mp.net", "Net premium"), value: preview.result.netPremium, type: "amount" },
+                { label: t("distribution.mp.taxes", "Taxes"), value: preview.result.taxes, type: "amount" },
+                { label: t("distribution.mp.ctpl", "CTPL"), value: preview.result.ctplPremium, type: "amount" },
+                { label: t("distribution.mp.gross", "Total"), value: preview.result.grossPremium, type: "amount" },
+                { label: t("distribution.mp.payerShare", "Dealer / bank"), value: preview.result.payer, type: "amount" },
+                { label: t("distribution.mp.buyerShare", "Buyer"), value: preview.result.buyer, type: "amount" },
+              ]} />
             ) : null}
-          </div>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
     </div>
   );
 };

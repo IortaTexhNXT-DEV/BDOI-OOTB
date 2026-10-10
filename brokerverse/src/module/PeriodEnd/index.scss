@@ -303,8 +303,10 @@
   }
 }
 
+// Printing a BIR 2307 certificate prints the certificate alone. The rule applies only while a certificate is on the
+// page: this stylesheet is loaded with every screen, and any other page must print as it is.
 @media print {
-  body * {
+  body:has(.pe-print-area) * {
     visibility: hidden;
   }
 

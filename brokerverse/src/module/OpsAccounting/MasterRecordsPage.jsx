@@ -17,13 +17,16 @@ import RowActions, { actionsColumn } from "../../components/RowActions";
 import mastersService from "../../services/mastersService";
 import service from "../../services/opsAccountingService";
 import userService from "../../services/userService";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { Field, OpsTag, PageHeader, blank, isoOf, showError, showSuccess, toDate, useFieldErrors } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-const display = (f, v) => {
+const display = (f, v, t) => {
   if (v === null || v === undefined || v === "") return "";
-  if (f.type === "boolean") return v === true || v === "true" ? "Yes" : "No";
+  if (f.type === "boolean") return v === true || v === "true" ? t("detailView.yes") : t("detailView.no");
+  const option = Array.isArray(f.options) ? f.options.find((o) => o?.value === v) : null;
+  if (option) return option.label;
   return String(v);
 };
 // a field picked from another master (optionsFrom) or from the users: a field named ...Code keeps the code, any other the name
@@ -33,20 +36,25 @@ const lookup = async (f) => {
   return (await mastersService.options(f.optionsFrom, { valueField: byCode ? "code" : "label" }))
     .map((o) => ({ label: byCode ? `${o.code} - ${o.label}` : o.label, value: o.value }));
 };
+/** A select field whose values have business labels: its options as { label, value } (the stored value stays the code). */
+const withLabels = (f, label) => (label && Array.isArray(f.options) ? { ...f, options: f.options.map((value) => ({ label: label(value), value })) } : f);
 
 /**
  * A master kept on the generic master store and maintained by the team that uses it (Repair Shops, Suppliers, Asset
  * Classes, Short-Period Rates, Cancellation Reasons, Claim Document Checklist): list, add, edit, activate / deactivate.
  * The fields come from the master type definition, so a field added on Master > Configuration shows here too; a field
  * taken from another master or from the users is a list (it stays a text box when the list cannot be read).
+ * `optionLabels` gives the business labels of the values of a select field ({ field: (value) => label }); `filterBy`
+ * names a select field offered as a filter above the list.
  */
-const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
+const MasterRecordsPage = ({ type, title, group, section, help, columns, optionLabels, filterBy }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
   const [fields, setFields] = useState([]);
   const [lists, setLists] = useState({});
   const [loading, setLoading] = useState(false);
+  const [filterValue, setFilterValue] = useState(null);
   const [search, setSearch] = useState("");
   const [edit, setEdit] = useState(null); // { id, values }
   const { errors, check, fromApi, clear } = useFieldErrors();
@@ -55,21 +63,22 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await service.masterRecords(type, { search: search || undefined, status: "all" });
+      const r = await service.masterRecords(type, { search: search || undefined, status: "all", ...(filterBy && filterValue ? { [filterBy]: filterValue } : {}) });
       setRows(r.rows);
-      setFields((r.type?.fields || []).filter((f) => !HIDDEN.includes(f.type)));
+      setFields((r.type?.fields || []).filter((f) => !HIDDEN.includes(f.type)).map((f) => withLabels(f, optionLabels?.[f.name])));
     } catch (e) {
       showError(toast, e);
     } finally {
       setLoading(false);
     }
-  }, [type, search]);
+  }, [type, search, filterBy, filterValue, optionLabels]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     const listed = fields.filter((f) => f.optionsFrom);
     Promise.all(listed.map((f) => lookup(f).then((options) => [f.name, options]).catch(() => null)))
       .then((loaded) => setLists(Object.fromEntries(loaded.filter(Boolean))));
   }, [fields]);
+  const filterField = filterBy ? fields.find((f) => f.name === filterBy) : null;
 
   const shown = useMemo(() => (columns ? fields.filter((f) => columns.includes(f.name)) : fields.slice(0, 6)), [fields, columns]);
   // the rules of the type definition the API applies: required (a code the system numbers may be left empty), e-mail, length
@@ -97,6 +106,15 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
     }
   };
   const toggle = async (r) => {
+    const action = r.isActive ? "deactivate" : "activate";
+    const ok = await openConfirm({
+      title: t(`opsAcc.confirmations.master.${action}Title`, { name: title }),
+      severity: r.isActive ? "warning" : "neutral",
+      message: t(`opsAcc.confirmations.master.${action}Message`),
+      facts: shown.slice(0, 3).map((f) => ({ label: f.label, value: display(f, r[f.name], t) })),
+      confirmLabel: t(`opsAcc.${action}`),
+    });
+    if (!ok) return;
     try {
       await service.setMasterStatus(type, r.id, r.isActive ? "Inactive" : "Active");
       load();
@@ -135,9 +153,13 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} aria-label={t("opsAcc.search")} />
           </span>
+          {filterField && (
+            <Dropdown value={filterValue} options={filterField.options || []} onChange={(e) => setFilterValue(e.value ?? null)} showClear className="w-18rem"
+              placeholder={t("opsAcc.masters.allOf", { name: filterField.label })} aria-label={filterField.label} />
+          )}
         </div>
         <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("opsAcc.none")}>
-          {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name])} />)}
+          {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name], t)} />)}
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.isActive ? "active" : "inactive"} />} />
           <Column header={t("common.actions")} {...actionsColumn} body={(r) => (
             <RowActions onEdit={() => open({ id: r.id, values: { ...r } })} editLabel={t("opsAcc.edit")} active={r.isActive} onStatus={() => toggle(r)} />

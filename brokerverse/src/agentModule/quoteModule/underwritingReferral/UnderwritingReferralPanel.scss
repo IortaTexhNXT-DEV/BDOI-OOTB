@@ -1,33 +1,9 @@
-@import "../../../theme/bdoi/tokens";
-
-// Underwriting referral of a quotation (acceptance rules of the product): a notice above the quotation actions.
+// Underwriting referral of a quotation (acceptance rules of the product), above the quotation tabs.
 .uw-referral {
   margin: 12px 0;
-  padding: 12px 16px;
-  border-left: 3px solid $brand-gold;
-  background: $color-warning-050;
-  border-radius: 4px;
-  color: $color-text;
-
-  &__row {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
 
   &__reasons {
-    margin: 6px 0;
+    margin: 0;
     padding-left: 18px;
-  }
-
-  &__actions {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  &__loadings {
-    margin: 6px 0 0;
   }
 }

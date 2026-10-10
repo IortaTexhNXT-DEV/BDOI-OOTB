@@ -6,7 +6,6 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Tooltip } from "primereact/tooltip";
 import { useParams, useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import emailService from "../../../services/emailService";
@@ -18,6 +17,7 @@ import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import { ActivityLog, fromCollectionActions } from "../../../components/ActivityLog";
 
 const CollectionDetail = () => {
   const { t } = useTranslation();
@@ -59,21 +59,14 @@ const CollectionDetail = () => {
     return formatAppDate(dateString);
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "-";
-    return formatAppDate(dateString, { withTime: true });
-  };
-
   const handleFollowUpAction = (type) => {
     setFollowUpType(type);
     setShowFollowUpModal(true);
   };
   const handleSendEmail = async (body) => {
     setLoadingFollowUp(true);
-    const sendEmail = await collectionService.sendEmail(collection.id, {
-      notes: body,
-      actionBy: localStorage.getItem("USER_NAME"),
-    });
+    // the server records the signed-in user as the one who sent it
+    const sendEmail = await collectionService.sendEmail(collection.id, { notes: body });
     if (sendEmail.success) {
       toast.current?.show({
         severity: "success",
@@ -458,7 +451,7 @@ const CollectionDetail = () => {
           <Button
             label={t("collectionDetail.addNote")}
             icon="pi pi-file-edit"
-            className="p-button-outlined p-button-warning"
+            className="p-button-outlined p-button-primary"
             onClick={() => handleFollowUpAction("Note")}
           />
           <Button
@@ -472,70 +465,10 @@ const CollectionDetail = () => {
 
       {/* Follow-Up History */}
       <Card title={t("collectionDetail.followUpHistory")} className="history-card">
-        <DataTable
-          value={collection.followUpActions || []}
-          emptyMessage={t("collectionDetail.noFollowUpActions")}
-          className="follow-up-table"
-          scrollable
-          scrollHeight="400px"
-        >
-          <Column
-            field="actionDate"
-            header={t("collectionDetail.date")}
-            body={(rowData) => formatDateTime(rowData.actionDate)}
-            style={{ minWidth: "150px" }}
-          />
-          <Column
-            field="actionType"
-            header={t("collectionDetail.actionType")}
-            style={{ minWidth: "120px" }}
-          />
-          <Column
-            field="actionBy"
-            header={t("collectionDetail.actionBy")}
-            style={{ minWidth: "120px" }}
-          />
-          <Column
-            field="notes"
-            header={t("collectionDetail.notes")}
-            body={(rowData) => {
-              const notes = rowData.notes || "-";
-              const truncatedNotes =
-                notes.length > 75 ? notes.substring(0, 75) + "..." : notes;
-              return (
-                <div>
-                  <span
-                    id={`notes-${rowData.id || Math.random()}`}
-                    className="notes-cell"
-                    data-pr-tooltip={notes}
-                    data-pr-position="top"
-                    data-pr-show-delay="200"
-                    data-pr-hide-delay="100"
-                    data-pr-mouse-track="true"
-                    data-pr-mouse-track-top="10"
-                  >
-                    {truncatedNotes}
-                  </span>
-                  <Tooltip
-                    target={`#notes-${rowData.id || Math.random()}`}
-                    position="top"
-                    showDelay={200}
-                    hideDelay={100}
-                    mouseTrack={true}
-                    mouseTrackTop={10}
-                    className="professional-tooltip"
-                  />
-                </div>
-              );
-            }}
-            style={{ minWidth: "200px", maxWidth: "300px" }}
-          />
-          <Column
-            field="callOutcome"
-            header={t("collectionDetail.outcome")}
-            style={{ minWidth: "120px" }}
-          />
-        </DataTable>
+        <ActivityLog
+          entries={fromCollectionActions(collection.followUpActions || [])}
+          emptyText={t("collectionDetail.noFollowUpActions")}
+        />
       </Card>
 
       {/* Payment History */}

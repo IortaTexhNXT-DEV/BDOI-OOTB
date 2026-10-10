@@ -3,7 +3,7 @@
  * (title and "Product Configurator • <screen>" breadcrumb), the "how this is used" note, the filter bar, the row
  * actions (view / edit / activate-deactivate / history as brand-blue icon buttons with tooltips), status tags in the
  * app's status colours, template / product cells (codes with names), paging only when there is more than one page,
- * and the change-history dialog.
+ * the confirmation of activating or deactivating a record, the record view and the change-history dialog.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
@@ -11,9 +11,6 @@ import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
@@ -22,7 +19,11 @@ import { statusSeverity, statusLabel } from "../../../utils/statusSeverity";
 import { PAGE_SIZE, clientPaging } from "../../../hooks/useServerList";
 import productConfiguratorService from "../../../services/productConfiguratorService";
 import mastersService from "../../../services/mastersService";
-import { formatDate } from "../../../utility/dateFormat";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import DetailDialog from "../../../components/DetailDialog";
+import DetailHeader from "../../../components/DetailHeader";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import { ActivityLog, fromConfigurationHistory } from "../../../components/ActivityLog";
 import "./configurator.scss";
 
 /** Paginator props only when the rows fill more than one page. */
@@ -235,68 +236,106 @@ export const useComponentRows = (kind, filters, toast, errorText) => {
   return { rows, loading, reload: load };
 };
 
-/** Activate / deactivate a component (status only), with the outcome on the toast. */
+/**
+ * Ask before activating or deactivating a configuration record (deactivating changes what new quotations get);
+ * `record` names it: { code, name } shown as facts. Resolves true when confirmed and `run` succeeded (an error stays
+ * in the dialog).
+ */
+export const confirmStatusChange = ({ deactivate, kindLabel, record, t, run, confirmLabel, message, note }) =>
+  openConfirm({
+    title: t(deactivate ? "productConfigurator.status.deactivateTitle" : "productConfigurator.status.activateTitle", { kind: kindLabel }),
+    severity: deactivate ? "warning" : "neutral",
+    message: message || t(deactivate ? "productConfigurator.status.deactivateMessage" : "productConfigurator.status.activateMessage"),
+    facts: [
+      { label: t("productConfigurator.status.recordType"), value: kindLabel },
+      { label: t("productConfigurator.status.code"), value: record.code, hidden: !record.code },
+      { label: t("productConfigurator.status.name"), value: record.name, hidden: !record.name },
+      { label: t("productConfigurator.template"), value: record.template, hidden: !record.template },
+    ],
+    note: note === undefined ? (deactivate ? t("productConfigurator.status.deactivateNote") : null) : note,
+    confirmLabel: confirmLabel || t(deactivate ? "productConfigurator.actions.deactivate" : "productConfigurator.actions.activate"),
+    onConfirm: run,
+  });
+
+const COMPONENT_IDENTITY = {
+  coverages: (r) => ({ code: r.coverageCode, name: r.coverageName }),
+  "rating-factors": (r) => ({ code: r.factorCode, name: r.factorName || r.name }),
+  "underwriting-rules": (r) => ({ code: r.ruleCode, name: r.ruleName }),
+  "market-mappings": (r) => ({ code: r.productCode, name: r.insurerName }),
+  documents: (r) => ({ code: r.documentCode || r.code, name: r.documentName || r.name }),
+};
+
+/** Activate / deactivate a component (status only) once confirmed, with the outcome on the toast. */
 export const toggleComponent = async (kind, row, toast, t) => {
   const status = row.status === "Active" ? "Inactive" : "Active";
-  try {
-    await productConfiguratorService.updateComponent(kind, row.id, { status });
-    toast.current?.show({ severity: "success", summary: t("common.success"), detail: t(status === "Active" ? "productConfigurator.activated" : "productConfigurator.deactivated") });
-    return true;
-  } catch (error) {
-    toast.current?.show({ severity: "error", summary: t("productConfigurator.error"), detail: error?.message });
-    return false;
-  }
+  const identity = (COMPONENT_IDENTITY[kind] || ((r) => ({ code: r.code, name: r.name })))(row);
+  const done = await confirmStatusChange({
+    deactivate: status === "Inactive",
+    kindLabel: t(`productConfigurator.kinds.${kind}`),
+    record: { ...identity, template: templateText(row) },
+    t,
+    run: () => productConfiguratorService.updateComponent(kind, row.id, { status }),
+  });
+  if (!done) return false;
+  toast.current?.show({ severity: "success", summary: t("common.success"), detail: t(status === "Active" ? "productConfigurator.activated" : "productConfigurator.deactivated") });
+  return true;
 };
 
-const valueText = (v) => {
-  if (v === null || v === undefined || v === "") return "—";
-  if (Array.isArray(v)) return v.map(valueText).join(", ");
-  if (typeof v === "object") return JSON.stringify(v);
-  return String(v);
-};
-
-/** Change history of a component (or a template when kind is "template"). */
+/** Change history of a component (or a template when kind is "template"): who changed what, newest first. */
 export const HistoryDialog = ({ kind, row, onHide }) => {
   const { t } = useTranslation();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!row) return;
     setLoading(true);
     setError(null);
     const call = kind === "template" ? productConfiguratorService.getTemplateHistory(row.id)
       : kind === "risk-mapping" ? productConfiguratorService.getRiskMappingHistory(row.id) : productConfiguratorService.getComponentHistory(kind, row.id);
-    call.then((data) => setRows(data || [])).catch((e) => setError(e.message)).finally(() => setLoading(false));
+    call.then((data) => setRows(data || [])).catch((e) => setError(e.message || true)).finally(() => setLoading(false));
   }, [kind, row]);
-  const flat = rows.flatMap((h) => (h.changes?.length ? h.changes.map((c, i) => ({ ...h, key: `${h.id}-${i}`, field: c.field, from: c.from, to: c.to })) : [{ ...h, key: `${h.id}` }]));
+  useEffect(() => {
+    load();
+  }, [load]);
+  if (!row) return null;
   return (
-    <Dialog header={t("productConfigurator.history.title", { name: row?.label || "" })} visible={Boolean(row)} onHide={onHide} style={{ width: "52rem" }} breakpoints={{ "960px": "95vw" }}>
-      {error && <p className="pc-error">{error}</p>}
-      <DataTable value={flat} loading={loading} dataKey="key" emptyMessage={t("productConfigurator.history.empty")} size="small" {...pagingFor(flat.length, 10)} rows={10}>
-        <Column header={t("productConfigurator.history.when")} body={(h) => formatDate(h.at, { withTime: true })} />
-        <Column field="user" header={t("productConfigurator.history.user")} />
-        <Column header={t("productConfigurator.history.action")} body={(h) => statusLabel(h.action)} />
-        <Column field="field" header={t("productConfigurator.history.field")} />
-        <Column header={t("productConfigurator.history.from")} body={(h) => valueText(h.from)} />
-        <Column header={t("productConfigurator.history.to")} body={(h) => valueText(h.to)} />
-      </DataTable>
-    </Dialog>
+    <DetailDialog visible onHide={onHide} header={t("productConfigurator.history.title", { name: row.label || "" })} size="md">
+      <ActivityLog entries={fromConfigurationHistory(rows)} loading={loading} error={error} onRetry={load} emptyText={t("productConfigurator.history.empty")} />
+    </DetailDialog>
   );
 };
 HistoryDialog.propTypes = { kind: PropTypes.string.isRequired, row: PropTypes.object, onHide: PropTypes.func.isRequired };
 
-/** Read-only view of a record: label / value pairs. */
-export const ViewDialog = ({ header, rows, visible, onHide }) => (
-  <Dialog header={header} visible={visible} onHide={onHide} style={{ width: "40rem" }} breakpoints={{ "960px": "95vw" }}>
-    <dl className="pc-view">
-      {rows.filter(Boolean).map(([label, value]) => (
-        <React.Fragment key={label}>
-          <dt>{label}</dt>
-          <dd>{value === null || value === undefined || value === "" ? "—" : value}</dd>
-        </React.Fragment>
-      ))}
-    </dl>
-  </Dialog>
-);
-ViewDialog.propTypes = { header: PropTypes.node, rows: PropTypes.array.isRequired, visible: PropTypes.bool, onHide: PropTypes.func.isRequired };
+/**
+ * Read-only view of a record: its code and name with the status chip, then the facts as label above value. `rows` are
+ * [label, value, { span, type }] (span "full" for long texts); `onHistory` adds a History button to the footer.
+ */
+export const ViewDialog = ({ header, title, subtitle, status, rows, visible, onHide, onHistory }) => {
+  const { t } = useTranslation();
+  if (!visible) return null;
+  const items = rows.filter(Boolean).map(([label, value, options]) => ({ label, value, ...(options || {}) }));
+  const footer = (
+    <>
+      {onHistory ? <Button type="button" label={t("productConfigurator.actions.history")} icon="pi pi-history" text onClick={onHistory} /> : null}
+      <Button type="button" label={t("productConfigurator.close")} outlined onClick={() => onHide()} />
+    </>
+  );
+  return (
+    <DetailDialog visible onHide={onHide} header={header} size="md" footer={footer}>
+      {title ? <DetailHeader title={title} subtitle={subtitle} status={status ? { code: String(status).toLowerCase(), label: statusLabel(status) } : null} /> : null}
+      <KeyValueGrid columns={2} items={items} />
+    </DetailDialog>
+  );
+};
+ViewDialog.propTypes = {
+  header: PropTypes.node,
+  /** the record's code (or name) above the facts, with its status chip */
+  title: PropTypes.node,
+  subtitle: PropTypes.node,
+  status: PropTypes.string,
+  rows: PropTypes.array.isRequired,
+  visible: PropTypes.bool,
+  onHide: PropTypes.func.isRequired,
+  onHistory: PropTypes.func,
+};

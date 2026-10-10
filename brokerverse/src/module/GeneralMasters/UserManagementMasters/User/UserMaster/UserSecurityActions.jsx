@@ -7,8 +7,10 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Tag } from "primereact/tag";
 import userService from "../../../../../services/userService";
-import { confirmAction, notifyError, notifySuccess } from "../../../../../utility/dialogs";
-import { formatDate } from "../../../../../utility/dateFormat";
+import { notifyError, notifySuccess } from "../../../../../utility/dialogs";
+import { formatInstant } from "../../../../../utility/dateFormat";
+import { openConfirm } from "../../../../../components/ConfirmDialog";
+import { humanize } from "../../../../../components/ActivityLog";
 import "../../../../../agentModule/authModule/security/security.scss";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 import { copyText } from "../../../../../utility/clipboard";
@@ -40,6 +42,19 @@ export const accountPermissions = (row) => {
     canManage: canWrite && !self && (isAdmin || !privileged),
     canRead: isAdmin || permissions.includes("read:users") || permissions.includes("write:users"),
   };
+};
+
+const BROWSERS = [[/Edg\//, "Edge"], [/OPR\/|Opera/, "Opera"], [/Firefox\//, "Firefox"], [/Chrome\//, "Chrome"], [/Safari\//, "Safari"]];
+const SYSTEMS = [[/Windows/, "Windows"], [/iPhone|iPad|iOS/, "iOS"], [/Android/, "Android"], [/Mac OS X|Macintosh/, "macOS"], [/Linux/, "Linux"]];
+
+/** "Chrome on Windows" from a user agent; the user agent itself when neither is recognised. */
+export const deviceOf = (userAgent) => {
+  const ua = String(userAgent || "");
+  if (!ua) return "-";
+  const browser = BROWSERS.find(([re]) => re.test(ua))?.[1];
+  const system = SYSTEMS.find(([re]) => re.test(ua))?.[1];
+  if (browser && system) return `${browser} · ${system}`;
+  return browser || system || ua.slice(0, 60);
 };
 
 /** Temporary password, shown once, with a copy button. */
@@ -122,22 +137,22 @@ const LoginHistoryDialog = ({ user, onHide }) => {
         first={(state.page - 1) * state.perPage}
         totalRecords={state.total}
         onPage={(e) => load(e.page + 1, e.rows)}
-        rowsPerPageOptions={[20, 50, 100]}
+        rowsPerPageOptions={[10, 20, 50]}
         loading={state.loading}
         emptyMessage={t("security.noSignIns")}
         size="small"
         responsiveLayout="scroll"
         className="bv-security__history"
       >
-        <Column header={t("security.when")} body={(r) => formatDate(r.at, { withTime: true })} />
+        <Column header={t("security.when")} body={(r) => formatInstant(r.at)} />
         <Column
           header={t("security.result")}
           body={(r) => <Tag severity={r.success ? "success" : "danger"} value={r.success ? t("security.success") : t("security.failed")} />}
         />
         <Column header={t("security.detail")} body={reason} />
-        <Column header={t("security.method")} field="method" />
+        <Column header={t("security.method")} body={(r) => (r.method ? t(`security.methods.${r.method}`, { defaultValue: humanize(r.method) }) : "-")} />
         <Column header={t("security.ipAddress")} field="ip" />
-        <Column header={t("security.device")} body={(r) => <span title={r.userAgent || ""}>{String(r.userAgent || "-").slice(0, 60)}</span>} />
+        <Column header={t("security.device")} body={(r) => <span title={r.userAgent || ""}>{deviceOf(r.userAgent)}</span>} />
       </DataTable>
     </Dialog>
   );
@@ -157,17 +172,31 @@ const UserSecurityActions = ({ row, onChanged }) => {
   const status = String(row.status || "").toLowerCase();
   const twoFactorOn = !!(row.twoFactorEnabled ?? row.fullUserData?.twoFactorEnabled);
 
-  const run = async (question, action, success) => {
-    if (!(await confirmAction(question, { header: t("security.confirm") }))) return;
-    try {
-      const result = await action();
-      if (success) notifySuccess(success);
-      onChanged?.();
-      return result;
-    } catch (error) {
-      notifyError(error);
-      return undefined;
-    }
+  const roles = (row.fullUserData?.roles || row.roles || []).map((r) => humanize(r)).join(", ");
+  const facts = [
+    { label: t("security.user"), value: row.displayName || row.fullUserData?.displayName || name },
+    { label: t("security.userName"), value: name },
+    { label: t("security.roles"), value: roles, hidden: !roles },
+  ];
+
+  // the action runs inside the confirmation, which shows its error and stays open when it fails
+  const run = async ({ title, question, note, confirmLabel, severity, action, success }) => {
+    let result;
+    const done = await openConfirm({
+      title,
+      severity,
+      message: question,
+      facts,
+      note,
+      confirmLabel,
+      onConfirm: async () => {
+        result = await action();
+      },
+    });
+    if (!done) return undefined;
+    if (success) notifySuccess(success);
+    onChanged?.();
+    return result;
   };
 
   const items = [
@@ -176,7 +205,14 @@ const UserSecurityActions = ({ row, onChanged }) => {
           label: t("security.unlock"),
           icon: "pi pi-lock-open",
           disabled: !canManage,
-          command: () => run(t("security.unlockConfirm", { user: name }), () => userService.unlockUser(row.id), t("security.unlocked", { user: name })),
+          command: () => run({
+            title: t("security.unlockTitle"),
+            question: t("security.unlockMessage"),
+            confirmLabel: t("security.unlockAction"),
+            severity: "neutral",
+            action: () => userService.unlockUser(row.id),
+            success: t("security.unlocked", { user: name }),
+          }),
         }]
       : []),
     {
@@ -184,7 +220,14 @@ const UserSecurityActions = ({ row, onChanged }) => {
       icon: "pi pi-key",
       disabled: !canManage || status === "inactive",
       command: async () => {
-        const r = await run(t("security.resetConfirm", { user: name }), () => userService.resetUserPassword(row.id));
+        const r = await run({
+          title: t("security.resetPassword"),
+          question: t("security.resetMessage"),
+          note: t("security.resetNote"),
+          confirmLabel: t("security.resetPassword"),
+          severity: "warning",
+          action: () => userService.resetUserPassword(row.id),
+        });
         if (r?.temporaryPassword) setTemp({ username: name, temporaryPassword: r.temporaryPassword });
       },
     },
@@ -193,7 +236,15 @@ const UserSecurityActions = ({ row, onChanged }) => {
           label: t("security.turnOffUser2fa"),
           icon: "pi pi-shield",
           disabled: !canManage,
-          command: () => run(t("security.turnOff2faConfirm", { user: name }), () => userService.resetUserTwoFactor(row.id), t("security.twoFactorReset", { user: name })),
+          command: () => run({
+            title: t("security.turnOffUser2fa"),
+            question: t("security.turnOff2faMessage"),
+            note: t("security.turnOff2faNote"),
+            confirmLabel: t("security.turnOffAction"),
+            severity: "danger",
+            action: () => userService.resetUserTwoFactor(row.id),
+            success: t("security.twoFactorReset", { user: name }),
+          }),
         }]
       : []),
     { separator: true },

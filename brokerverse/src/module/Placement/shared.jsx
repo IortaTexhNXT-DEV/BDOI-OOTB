@@ -11,11 +11,16 @@ import { AutoComplete } from "primereact/autocomplete";
 import { SelectButton } from "primereact/selectbutton";
 import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
-import { formatDate as formatConfiguredDate } from "../../utility/dateFormat";
+import { formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
 import { statusSeverity as sharedSeverity } from "../../utils/statusSeverity";
 
 export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 export const formatDate = (d) => formatConfiguredDate(d, { empty: "-" });
+/** Date and time of an event, in the business time zone. */
+export const formatDateTime = (d) => formatInstant(d, { empty: "-" });
+
+/** Label of a risk detail of a slip (placement.risk.<key>), the key in words when it has none. */
+export const riskLabel = (t, key) => t(`placement.risk.${key}`, { defaultValue: key.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase()) });
 
 /** Tag severity per status of broker slips, offers, placement slips and participants: the one scheme of every list. */
 export const statusSeverity = (status) => sharedSeverity(status);

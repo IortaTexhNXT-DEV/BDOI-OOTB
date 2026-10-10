@@ -9,7 +9,8 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { printPdf } from "../../components/Print";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 
 /** Accounts > Payables > Supplier Payments: pay approved invoices of a supplier from a bank account (posting rule ap.payment). */
@@ -66,16 +67,28 @@ export const SupplierPayments = () => {
     }
   };
   const cancel = async (p) => {
-    const reason = await promptText(t("opsAcc.ap.cancelPaymentReason"));
-    if (!reason) return;
-    try {
-      await service.cancelSupplierPayment(p.id, reason);
-      showSuccess(toast, t("opsAcc.ap.paymentCancelled"));
-      load();
-    } catch (e) {
-      showError(toast, e);
-    }
+    const reason = await openConfirm({
+      title: t("opsAcc.confirmations.payment.cancelTitle", { number: p.paymentNumber }),
+      severity: "danger",
+      message: t("opsAcc.confirmations.payment.cancelMessage"),
+      facts: [
+        { label: t("opsAcc.ap.supplier"), value: p.supplierName },
+        { label: t("opsAcc.date"), value: p.paymentDate, type: "date" },
+        { label: t("opsAcc.paymentMode"), value: t(`opsAcc.modes.${p.paymentMode}`) },
+        { label: t("opsAcc.ap.cheque"), value: p.chequeNumber, hidden: !p.chequeNumber },
+        { label: t("opsAcc.journal"), value: p.journalNumber },
+        { label: t("opsAcc.amount"), value: p.amount, type: "amount", emphasis: true },
+      ],
+      input: { type: "textarea", label: t("opsAcc.ap.cancelPaymentReason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("opsAcc.confirmations.payment.cancel"),
+      cancelLabel: t("opsAcc.confirmations.payment.keep"),
+      onConfirm: (value) => service.cancelSupplierPayment(p.id, value),
+    });
+    if (reason === null) return;
+    showSuccess(toast, t("opsAcc.ap.paymentCancelled"));
+    load();
   };
+  const print = (p) => printPdf(`/payables/payments/${encodeURIComponent(p.id)}/pdf`, { fileName: `${p.paymentNumber}.pdf` }).catch((e) => showError(toast, e));
   const total = (form?.selected || []).reduce((s, i) => s + Number(i.balance), 0);
 
   return (
@@ -97,7 +110,7 @@ export const SupplierPayments = () => {
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
           <Column body={(r) => (
             <span className="flex gap-1">
-              <Button icon="pi pi-print" text size="small" aria-label={t("opsAcc.print")} tooltip={t("opsAcc.print")} onClick={() => service.printSupplierPayment(r.id).catch((e) => showError(toast, e))} />
+              <Button icon="pi pi-print" text size="small" aria-label={t("opsAcc.print")} tooltip={t("opsAcc.print")} onClick={() => print(r)} />
               {r.status === "posted" && <Button icon="pi pi-times" text size="small" severity="danger" aria-label={t("opsAcc.cancel")} tooltip={t("opsAcc.cancel")} onClick={() => cancel(r)} />}
             </span>
           )} />

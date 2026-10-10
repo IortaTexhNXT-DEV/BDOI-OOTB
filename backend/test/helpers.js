@@ -63,6 +63,15 @@ export async function withCalendarFiscalYear() {
   clearSettingsCache();
 }
 /**
+ * No blocking manual items on the month-end checklist (seed 63_bank_reconciliation.sql signs off the bank
+ * reconciliations), for suites that close whole years from Period Management to test what follows. The sign-off itself
+ * is covered by test/period-end.test.js.
+ */
+export async function withoutManualSignOffs() {
+  const { query } = await import('../src/db/pool.js');
+  await query('UPDATE period_close_checklist SET active = false WHERE item_type = \'manual\' AND severity = \'blocking\'');
+}
+/**
  * The starter accounts of the premium payable roles (seed 40_finance.sql, migration 0131: premiums payable to insurers
  * and the VAT, DST and LGT on premium in their own accounts), for suites whose expected journals name them. The TISPH
  * mapping of these roles to Accounts Payable - Insurance Company (seed 81_tisph_finance.sql) is covered by

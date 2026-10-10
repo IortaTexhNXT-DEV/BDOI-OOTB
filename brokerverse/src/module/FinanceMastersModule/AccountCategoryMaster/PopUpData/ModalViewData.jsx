@@ -1,78 +1,31 @@
-import { Dialog } from "primereact/dialog";
-import "./index.scss";
-import InputField from "../../../../components/InputField";
+import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import DetailDialog from "../../../../components/DetailDialog";
+import DetailHeader from "../../../../components/DetailHeader";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
 
-const ModalViewData = ({
-  visible,
-  setVisible,
-  setEditID,
-  handleSave,
-  handleEdit,
-}) => {
-  const { AccountCategoryDetailView } = useSelector(
-    ({ accountCategoryReducer }) => {
-      return {
-        loading: accountCategoryReducer?.loading,
-        AccountCategoryDetailView:
-          accountCategoryReducer?.AccountCategoryDetailView,
-      };
-    }
-  );
+/** Read-only view of the account category opened from the list (AccountCategoryDetailView of the store). */
+const ModalViewData = ({ visible, setVisible }) => {
+  const { t } = useTranslation();
+  const { AccountCategoryDetailView: category } = useSelector(({ accountCategoryReducer }) => ({
+    AccountCategoryDetailView: accountCategoryReducer?.AccountCategoryDetailView,
+  }));
 
+  if (!visible) return null;
+  const status = category?.status ? String(category.status) : null;
   return (
-    <Dialog
-      header={"Account Category Detail"}
-      visible={visible}
-      className="account__category__jv__Edit__modal__container master__flow__common__dialog__container"
-      onHide={() => setVisible(false)}
-      dismissableMask={true}
-      style={{ boxShadow: "none" }} 
-    >
-      <div className="form__container">
-        <div className="grid m-0 p-0">
-          <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">
-            <InputField
-              disabled={true}
-              classNames="input__field__corrections"
-              className="input__label__corrections"
-              label="Account Category Code"
-              placeholder="enter"
-              value={AccountCategoryDetailView?.categoryCode}
-            />
-          </div>
-          <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
-            <InputField
-              disabled={true}
-              classNames="input__field__corrections"
-              className="input__label__corrections"
-              label="Account Category Name"
-              placeholder="enter"
-              value={AccountCategoryDetailView?.categoryName}
-            />
-          </div>
-          <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
-            <InputField
-              disabled={true}
-              classNames="input__field__corrections"
-              className="input__label__corrections"
-              label="Description"
-              placeholder="enter"
-              value={AccountCategoryDetailView?.description}
-            />
-          </div>
-
-          <div
-            className="col-12 save__popup__correction"
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-            }}
-          ></div>
-        </div>
-      </div>
-    </Dialog>
+    <DetailDialog visible onHide={() => setVisible(false)} header={t("financeMasters.accountCategoryDetail")} size="md">
+      <DetailHeader
+        title={category?.categoryName || category?.categoryCode || "—"}
+        subtitle={category?.categoryCode}
+        status={status ? { code: status.toLowerCase(), label: status } : null}
+      />
+      <KeyValueGrid columns={2} items={[
+        { label: t("financeMasters.accountCategoryCodeHeader"), value: category?.categoryCode },
+        { label: t("financeMasters.accountCategoryNameHeader"), value: category?.categoryName },
+        { label: t("financeMasters.description"), value: category?.description, span: "full" },
+      ]} />
+    </DetailDialog>
   );
 };
 

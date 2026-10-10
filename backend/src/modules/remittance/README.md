@@ -64,6 +64,15 @@ within the limit decides. Only while the matrix has no limit for the type are th
 `remittance.approval_levels` used. The approver must differ from the maker. The `remittance_delegations` table of
 earlier releases is no longer read or written.
 
+Activity log and print: GET `/remittance/remittances/:id` returns `activityLog` oldest first, built by
+`remittanceActivity` from the remittance's audit rows, the decisions taken on its approval (audited as
+`remittance_approval` by approval id) and the approval of the settlement that settled it. Each entry carries the action
+code and label, the user's display name and roles, the status move (from / to, labelled by `remittance.status_labels`),
+the remarks and the other changed fields (`lib/auditEvents.js#activityEntries`); the fields of earlier releases
+(`action`, `by`, `at`, `notes`) are kept. The print icon of Tracking prints GET `/remittance/remittances/:id/pdf`, the
+remittance advice on the broker letterhead (`documents/templates.js#remittanceAdviceDoc`, signature slots of document
+type `remittance-advice`); an agency bill prints with its own title.
+
 Schedules: Accounts > Remittance > Scheduling (remittance-schedule master) says what to remit: insurers, cut-off days
 before the run date, frequency and next run date. The schedules have no timer of their own: the job
 `remittance-schedules` of Master > Schedules (handler `remittanceSchedules`, daily, disabled until switched on) runs the
@@ -73,6 +82,7 @@ active schedules whose next run date has come, in the business time zone, and mo
 
 `remittance.approval_levels` (fallback only), `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
+`remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
 `remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
 specific matching rule wins), `remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
 `remittance.reconciliation_bank_account`, `remittance.reconciliation_tolerance`, and the `direct_bill.*` group

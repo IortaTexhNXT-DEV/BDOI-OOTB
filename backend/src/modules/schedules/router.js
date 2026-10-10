@@ -23,12 +23,15 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:code/runs', summary: 'Run history of a job', screen: 'Master > Schedules > History', middleware: canRead,
-  response: { success: true, data: [{ id: 1, status: 'success', startedAt: '2026-01-01T06:00:00Z', output: { notifications: 3 } }] },
+  method: 'GET', path: '/:code/runs', summary: 'Run history of a job (who started a run: triggeredBy, triggeredByName)', screen: 'Master > Schedules > History', middleware: canRead,
+  response: { success: true, data: [{ id: 1, status: 'success', startedAt: '2026-01-01T06:00:00Z', output: { notifications: 3 }, triggeredBy: 'r.finance', triggeredByName: 'Rosa Finance' }] },
   handler: async (req, res) => {
     const job = await one('SELECT id FROM scheduled_jobs WHERE code = $1', [req.params.code]);
     if (!job) throw notFound('Job not found');
-    ok(res, await many('SELECT id, started_at AS "startedAt", finished_at AS "finishedAt", status, output, error, triggered_by AS "triggeredBy" FROM job_runs WHERE job_id = $1 ORDER BY id DESC LIMIT 100', [job.id]));
+    // triggeredBy: 'schedule' for a run of the timer, else the login name of the user who pressed Run now
+    ok(res, await many(`SELECT r.id, r.started_at AS "startedAt", r.finished_at AS "finishedAt", r.status, r.output, r.error, r.triggered_by AS "triggeredBy",
+        u.display_name AS "triggeredByName"
+      FROM job_runs r LEFT JOIN users u ON u.username = r.triggered_by WHERE r.job_id = $1 ORDER BY r.id DESC LIMIT 100`, [job.id]));
   },
 });
 define({

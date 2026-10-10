@@ -11,11 +11,12 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { CcTag, PageHeader, bucketLabels, date, isoOf, money, showError, showSuccess } from "./common";
 
 const toDate = (iso) => (iso ? new Date(`${iso}T00:00:00`) : null);
-const sum = (rows) => Math.round(rows.reduce((s, r) => s + Number(r.amount || 0), 0) * 100) / 100;
+const sumOf = (rows, field) => Math.round((rows || []).reduce((s, r) => s + Number(r[field] || 0), 0) * 100) / 100;
+const sum = (rows) => sumOf(rows, "amount");
 
 /**
  * Accounts > Credit Control > Instalment Plans: the payment schedule of a broker-billed premium bill (generated from the
@@ -74,29 +75,48 @@ const InstalmentPlans = () => {
       showError(toast, e);
     }
   };
+  // the plan as the confirmations summarise it
+  const planFacts = (plan) => [
+    { label: t("creditControl.policyNumber"), value: data.policyNumber },
+    { label: t("creditControl.client"), value: data.clientName },
+    { label: t("creditControl.bill"), value: plan.billNumber },
+    { label: t("creditControl.frequency"), value: t(`creditControl.freq.${plan.frequency}`, { defaultValue: plan.frequency }) },
+    { label: t("creditControl.count"), value: plan.instalmentCount, type: "number" },
+    { label: t("creditControl.paid"), value: sumOf(plan.instalments, "paid"), type: "amount" },
+    { label: t("creditControl.outstanding"), value: sumOf(plan.instalments, "outstanding"), type: "amount", emphasis: true },
+  ];
+  const afterPlanChange = async (message) => {
+    showSuccess(toast, message);
+    await load(data.policyId);
+    loadAgeing();
+  };
   const cancelPlan = async (plan) => {
-    const reason = await promptText(t("creditControl.cancelPlanReason"));
-    if (reason === null) return;
-    try {
-      await service.cancelPlan(plan.id, reason);
-      showSuccess(toast, t("creditControl.planCancelled"));
-      await load(data.policyId);
-      loadAgeing();
-    } catch (e) {
-      showError(toast, e);
-    }
+    const reason = await openConfirm({
+      title: t("creditControl.confirmations.cancelPlanTitle"),
+      severity: "danger",
+      message: t("creditControl.confirmations.cancelPlanMessage", { bill: plan.billNumber }),
+      note: t("creditControl.confirmations.cancelPlanNote"),
+      facts: planFacts(plan),
+      input: { type: "textarea", label: t("creditControl.cancelPlanReason"), maxLength: 500 },
+      confirmLabel: t("creditControl.cancelPlan"),
+      cancelLabel: t("creditControl.confirmations.keepPlan"),
+      onConfirm: (value) => service.cancelPlan(plan.id, value),
+    });
+    if (reason !== null) await afterPlanChange(t("creditControl.planCancelled"));
   };
 
   // separate instalment invoices: one bill per instalment in place of the plan's bill
   const invoicePlan = async (plan) => {
-    try {
-      const r = await service.invoicePlan(plan.id);
-      showSuccess(toast, t("opsAcc.instalments.invoiced", { count: r.invoices.length, bill: r.replacedBill }));
-      await load(data.policyId);
-      loadAgeing();
-    } catch (e) {
-      showError(toast, e);
-    }
+    let out;
+    const done = await openConfirm({
+      title: t("opsAcc.instalments.issueInvoices"),
+      message: t("creditControl.confirmations.invoicePlanMessage", { count: plan.instalmentCount, bill: plan.billNumber }),
+      facts: planFacts(plan),
+      note: t("creditControl.confirmations.invoicePlanNote"),
+      confirmLabel: t("creditControl.confirmations.issueInvoices", { count: plan.instalmentCount }),
+      onConfirm: async () => { out = await service.invoicePlan(plan.id); },
+    });
+    if (done) await afterPlanChange(t("opsAcc.instalments.invoiced", { count: out.invoices.length, bill: out.replacedBill }));
   };
 
   const bill = data?.bills.find((b) => b.id === terms?.receivableId);
@@ -135,7 +155,7 @@ const InstalmentPlans = () => {
               <Column field="seq" header="#" />
               <Column header={t("creditControl.dueDate")} body={(r) => <Calendar value={r.dueDate} onChange={(e) => setLine(r.seq - 1, { dueDate: e.value })} showIcon />} />
               <Column header={t("creditControl.amount")} body={(r) => <InputNumber value={r.amount} mode="decimal" minFractionDigits={2} maxFractionDigits={2} onValueChange={(e) => setLine(r.seq - 1, { amount: e.value })} />} />
-              <Column body={(r) => <Button icon="pi pi-trash" text size="small" disabled={draft.length < 2} onClick={() => setDraft((d) => d.filter((_, k) => k !== r.seq - 1))} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />} />
+              <Column body={(r) => <Button icon="pi pi-trash" text size="small" disabled={draft.length < 2} onClick={() => setDraft((d) => d.filter((_, k) => k !== r.seq - 1))} aria-label={t("creditControl.confirmations.removeInstalment")} tooltip={t("creditControl.confirmations.removeInstalment")} tooltipOptions={{ position: "top" }} />} />
             </DataTable>
             <div className="flex gap-2 mt-2">
               <Button icon="pi pi-plus" label={t("creditControl.addInstalment")} outlined onClick={() => setDraft((d) => [...d, { dueDate: d.at(-1)?.dueDate || null, amount: 0 }])} />

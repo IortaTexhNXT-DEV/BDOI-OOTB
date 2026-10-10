@@ -1593,7 +1593,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         >
           <Button
             label={t("fireLead.next")}
-            className="p-button-success fire-preview-btn"
+            className="fire-preview-btn"
             onClick={handleProceedToPayment}
             disabled={!isCustomerApproved || isProceedingToUploadPolicy}
             loading={isProceedingToUploadPolicy}

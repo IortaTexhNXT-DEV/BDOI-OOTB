@@ -1,0 +1,124 @@
+@import "../../theme/bdoi/tokens";
+
+.bv-config-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid $color-border;
+  border-radius: 13px;
+  background: $color-surface-muted;
+  color: $color-text;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+
+  .bv-config-status__dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $color-text-muted;
+  }
+
+  .bv-config-status__feature {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: $color-text-muted;
+    font-weight: 600;
+  }
+
+  .bv-config-status__caret {
+    font-size: 11px;
+    color: $color-text-muted;
+  }
+
+  &--ready {
+    border-color: $color-success-050;
+    background: $color-success-050;
+
+    .bv-config-status__dot {
+      background: $color-success;
+    }
+
+    .bv-config-status__state {
+      color: $color-success;
+    }
+  }
+
+  &--incomplete {
+    border-color: $color-warning-050;
+    background: $color-warning-050;
+
+    .bv-config-status__dot {
+      background: $color-warning;
+    }
+
+    .bv-config-status__state {
+      color: $color-warning;
+    }
+  }
+
+  &--action {
+    cursor: pointer;
+
+    &:hover {
+      border-color: $color-border-strong;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+    }
+  }
+}
+
+.bv-config-status__panel.p-overlaypanel {
+  min-width: 15rem;
+  max-width: 22rem;
+
+  .p-overlaypanel-content {
+    padding: 12px 14px;
+  }
+
+  .bv-config-status__panel-title {
+    font-weight: 700;
+    color: $color-heading;
+    margin-bottom: 8px;
+  }
+
+  .bv-config-status__panel-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text-muted;
+    margin-bottom: 4px;
+  }
+
+  .bv-config-status__missing {
+    margin: 0 0 8px;
+    padding-left: 18px;
+    color: $color-text;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .bv-config-status__configure {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $brand-blue;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}

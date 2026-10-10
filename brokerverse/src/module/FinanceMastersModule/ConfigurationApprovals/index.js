@@ -5,17 +5,43 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import postingRulesService from "../../../services/postingRulesService";
-import { promptText } from "../../../utility/dialogs";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import { isInitiator } from "../../../components/ApprovalActions";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import StatusChip from "../../../components/StatusChip";
+import { humanize } from "../../../components/ActivityLog";
+import { formatInstant } from "../../../utility/dateFormat";
 import "../PostingRules/index.scss";
 
 const STATUSES = ["pending", "approved", "rejected", "withdrawn", "all"];
 const SEVERITY = { pending: "warning", approved: "success", rejected: "danger", withdrawn: "secondary" };
-const when = (v) => (v ? new Date(v).toLocaleString("en-PH") : "");
-const show = (v) => (v === null || v === undefined ? "-" : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${typeof x === "object" ? JSON.stringify(x) : x}`).join(", ") : String(v));
+const MIN_REASON = 5;
+
+const plain = (v) => {
+  if (v === null || v === undefined || v === "") return "—";
+  if (Array.isArray(v)) return v.map(plain).join(", ");
+  if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${humanize(k)} ${plain(x)}`).join(", ");
+  return String(v);
+};
+
+/** A requested or previous configuration value: one line per setting, its name in words. */
+const ChangeValue = ({ value }) => {
+  if (value === null || value === undefined) return "—";
+  if (typeof value !== "object" || Array.isArray(value)) return plain(value);
+  return (
+    <dl className="config-approvals__values">
+      {Object.entries(value).map(([k, v]) => (
+        <div key={k}>
+          <dt>{humanize(k)}</dt>
+          <dd>{plain(v)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+};
 
 /**
  * Master > Finance > Configuration Approvals: posting rule versions, their activation and account determination changes
@@ -41,12 +67,34 @@ const ConfigurationApprovals = () => {
   }, [status, t]);
   useEffect(() => { load(); }, [load]);
 
-  const act = async (row, action) => {
-    let remarks;
-    if (action !== "withdraw") {
-      remarks = await promptText(action === "approve" ? t("postingRules.approveRemarks") : t("postingRules.rejectReason"));
-      if (remarks === null) return;
+  const requested = (r) => (r.kind === "commission-taxes" ? r.payload?.body : r.payload);
+
+  const factsOf = (r) => [
+    { label: t("postingRules.changeKind"), value: r.kindLabel },
+    { label: t("postingRules.changeTarget"), value: r.target },
+    { label: t("postingRules.version"), value: r.rule ? `v${r.rule.version}` : null, hidden: !r.rule },
+    { label: t("postingRules.effectiveFrom"), value: r.rule?.effectiveFrom, type: "date", hidden: !r.rule },
+    { label: t("postingRules.requestedBy"), value: r.requestedBy },
+    { label: t("postingRules.requestedAt"), value: r.requestedAt, type: "datetime" },
+  ];
+
+  const ask = (r, action) => {
+    const common = { facts: factsOf(r), message: t(`postingRules.confirm.${action}Message`) };
+    if (action === "approve") {
+      return openConfirm({ ...common, title: t("postingRules.confirm.approveTitle"), severity: "neutral", confirmLabel: t("postingRules.confirm.approveAction"),
+        note: t("postingRules.confirm.approveNote"), input: { type: "textarea", label: t("postingRules.approveRemarks"), maxLength: 500 } });
     }
+    if (action === "reject") {
+      return openConfirm({ ...common, title: t("postingRules.confirm.rejectTitle"), severity: "danger", confirmLabel: t("postingRules.confirm.rejectAction"),
+        input: { type: "textarea", label: t("postingRules.rejectReason"), required: true, minLength: MIN_REASON, maxLength: 500 } });
+    }
+    return openConfirm({ ...common, title: t("postingRules.confirm.withdrawTitle"), severity: "warning", confirmLabel: t("postingRules.confirm.withdrawAction") });
+  };
+
+  const act = async (row, action) => {
+    const answer = await ask(row, action);
+    if (answer === null || answer === false) return;
+    const remarks = typeof answer === "string" ? answer : undefined;
     try {
       const call = { approve: () => postingRulesService.approveChange(row.id, remarks), reject: () => postingRulesService.rejectChange(row.id, remarks),
         withdraw: () => postingRulesService.withdrawChange(row.id) }[action];
@@ -58,18 +106,46 @@ const ConfigurationApprovals = () => {
     }
   };
 
-  const detail = (r) => (r.rule ? (
-    <div className="p-2">
-      <div className="mb-2">{r.rule.event} · v{r.rule.version} · {t("postingRules.effectiveFrom")} {r.rule.effectiveFrom}{r.changeNote ? ` · ${r.changeNote}` : ""}</div>
-      <DataTable value={r.rule.lines} size="small" dataKey="lineNo">
-        <Column field="lineNo" header="#" />
-        <Column field="side" header={t("postingRules.side")} />
-        <Column header={t("postingRules.account")} body={(l) => `${l.accountType}: ${l.account}${l.fallbackRole ? ` (${l.fallbackRole})` : ""}`} />
-        <Column field="amountKey" header={t("postingRules.amount")} />
-        <Column field="narration" header={t("postingRules.lineNarration")} />
-      </DataTable>
+  const detail = (r) => (
+    <div className="config-approvals__detail">
+      <KeyValueGrid columns={4} items={[
+        ...factsOf(r).filter((f) => !f.hidden),
+        { label: t("postingRules.changeNote"), value: r.changeNote, hidden: !r.changeNote, span: "full" },
+        { label: t("postingRules.decidedBy"), value: r.decidedBy, hidden: !r.decidedBy },
+        { label: t("postingRules.decidedAt"), value: r.decidedAt, type: "datetime", hidden: !r.decidedAt },
+        { label: t("postingRules.decisionRemarks"), value: r.decisionRemarks, hidden: !r.decisionRemarks, span: 2 },
+      ]} />
+      {r.rule ? (
+        <DataTable value={r.rule.lines} size="small" dataKey="lineNo" className="mt-3">
+          <Column field="lineNo" header="#" />
+          <Column header={t("postingRules.side")} body={(l) => (l.side === "Cr" || l.side === "credit" ? t("postingRules.credit") : t("postingRules.debit"))} />
+          <Column header={t("postingRules.account")} body={(l) => `${l.account}${l.fallbackRole ? ` (${humanize(l.fallbackRole)})` : ""}`} />
+          <Column header={t("postingRules.accountSource")} body={(l) => humanize(l.accountType)} />
+          <Column header={t("postingRules.amount")} body={(l) => humanize(l.amountKey)} />
+          <Column field="narration" header={t("postingRules.lineNarration")} />
+        </DataTable>
+      ) : null}
     </div>
-  ) : null);
+  );
+
+  const actions = (r) => {
+    if (r.status !== "pending") return null;
+    const own = isInitiator({ id: r.requestedById });
+    const blocked = own ? t("makerChecker.ownRecord") : undefined;
+    return (
+      <div className="flex gap-1">
+        <span title={blocked}>
+          <Button icon="pi pi-check" className="p-button-text p-button-sm" tooltip={blocked ? undefined : t("postingRules.approve")} disabled={own}
+            onClick={() => act(r, "approve")} aria-label={t("postingRules.approve")} />
+        </span>
+        <span title={blocked}>
+          <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip={blocked ? undefined : t("postingRules.reject")} disabled={own}
+            onClick={() => act(r, "reject")} aria-label={t("postingRules.reject")} />
+        </span>
+        <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip={t("postingRules.withdraw")} onClick={() => act(r, "withdraw")} aria-label={t("postingRules.withdraw")} />
+      </div>
+    );
+  };
 
   return (
     <div className="account-determination">
@@ -81,23 +157,27 @@ const ConfigurationApprovals = () => {
         <Dropdown value={status} options={STATUSES.map((s) => ({ label: t(`postingRules.approval.${s}`), value: s }))} onChange={(e) => setStatus(e.value)} className="mb-2 w-12rem" />
         <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={t("postingRules.noChanges")}
           expandedRows={expanded} onRowToggle={(e) => setExpanded(e.data)} rowExpansionTemplate={detail}>
-          <Column expander={(r) => !!r.rule} style={{ width: "3rem" }} />
+          <Column expander style={{ width: "3rem" }} />
           <Column field="id" header="#" />
           <Column field="kindLabel" header={t("postingRules.changeKind")} />
           <Column field="target" header={t("postingRules.changeTarget")} />
-          <Column header={t("postingRules.changeBefore")} body={(r) => show(r.before)} />
-          <Column header={t("postingRules.changeAfter")} body={(r) => show(r.kind === "commission-taxes" ? r.payload.body : r.payload)} />
-          <Column header={t("postingRules.requested")} body={(r) => `${r.requestedBy || ""} ${when(r.requestedAt)}`} />
-          <Column header={t("postingRules.status")} body={(r) => (
-            <span><Tag value={t(`postingRules.approval.${r.status}`)} severity={SEVERITY[r.status]} />{r.decidedBy ? ` ${r.decidedBy}` : ""}{r.decisionRemarks ? `: ${r.decisionRemarks}` : ""}</span>
-          )} />
-          <Column body={(r) => (r.status === "pending" ? (
-            <div className="flex gap-1">
-              <Button icon="pi pi-check" className="p-button-text p-button-sm" tooltip={t("postingRules.approve")} onClick={() => act(r, "approve")} aria-label={t("postingRules.approve")} />
-              <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip={t("postingRules.reject")} onClick={() => act(r, "reject")} aria-label={t("postingRules.reject")} />
-              <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip={t("postingRules.withdraw")} onClick={() => act(r, "withdraw")} aria-label={t("postingRules.withdraw")} />
+          <Column header={t("postingRules.changeBefore")} body={(r) => <ChangeValue value={r.before} />} />
+          <Column header={t("postingRules.changeAfter")} body={(r) => <ChangeValue value={requested(r)} />} />
+          <Column header={t("postingRules.requested")} body={(r) => (
+            <div className="config-approvals__who">
+              <span>{r.requestedBy || "—"}</span>
+              <small>{formatInstant(r.requestedAt)}</small>
             </div>
-          ) : null)} />
+          )} />
+          <Column header={t("postingRules.status")} body={(r) => <StatusChip code={r.status} label={t(`postingRules.approval.${r.status}`)} severity={SEVERITY[r.status]} />} />
+          <Column header={t("postingRules.decided")} body={(r) => (r.decidedBy ? (
+            <div className="config-approvals__who">
+              <span>{r.decidedBy}</span>
+              <small>{formatInstant(r.decidedAt)}</small>
+              {r.decisionRemarks ? <small>{r.decisionRemarks}</small> : null}
+            </div>
+          ) : "—")} />
+          <Column body={actions} />
         </DataTable>
       </div>
     </div>

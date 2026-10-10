@@ -72,6 +72,8 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `84_claim_document_claim_types.sql` | reference | claim types of the M14 claim documents that only some claims need (third party, collision, theft, death), so a claim lists the documents of its cause of loss |
 | `84_lead_reassignment_reasons.sql` | reference | the context reassignment on the Reason Code master and its reasons (account executive left or on leave, territory or branch change, workload balancing, customer request, not worked in time, needs a specialist, other): the reason of a prospect reassigned or sent to the reassignment queue |
 | `85_tisph_campaign_templates.sql` | reference | the TISPH campaign e-mail templates: Motor renewal reminder, Motor insurance for new Toyota owners, Personal Accident offer, Credit Life information |
+| `88_accounting_reasons.sql` | reference | the contexts of the accounting decisions on the Reason Code master (period close, period reopening, year-end reversal, void of a printed CAS book, change of a CAS document, incentive batch rejection) and their reasons, each with an Other that needs a note |
+| `89_tax_invoice_reasons.sql` | reference | the contexts sales_invoice_cancel and invoice_payment_cancel on the Reason Code master and their reasons (wrong buyer, wrong amount, duplicate, service not rendered; cheque returned, wrong invoice, wrong amount, duplicate), each with an Other that needs a note: the reason of a cancelled sales invoice or payment acknowledgement |
 
 ### Sample files (TISPH sample business)
 

@@ -37,11 +37,8 @@ const toIsoDate = (value) => {
 const AddJournalVocture = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [buttonshow, setButtonShow] = useState(0);
-  const [visibleSuccess, setVisibleSuccess] = useState(false);
 
   const toastRef = useRef(null);
-  const printRef = useRef(null);
 
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -57,14 +54,6 @@ const AddJournalVocture = () => {
     },
   ];
   const home = { label: t("sidebar.Accounts") };
-
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      setVisibleSuccess(false);
-    }, 2000);
-
-    return () => clearTimeout(timerId);
-  }, [visibleSuccess]);
 
   const handleGoback = () => {
     navigate("/accounts/journalvoucher");
@@ -275,17 +264,9 @@ const AddJournalVocture = () => {
     return total;
   }, 0);
 
-  const handlePrint = () => {
-    printRef.current.showToast();
-    setVisibleSuccess(true);
-    handleSubmit();
-    navigate("/accounts/journalvoucher");
-  };
-
   return (
     <div className="grid add__JV__container">
       <CustomToast ref={toastRef} message={toastMessage} />
-      <CustomToast ref={printRef} message="Successfully Printed" />
       <div className="col-12"></div>
       <div className="col-12 mb-2">
         <div>
@@ -464,37 +445,26 @@ const AddJournalVocture = () => {
           </div>
         </div>
       </div>
-      {buttonshow === 0 && (
-        <div className="col-12 btn__view__Add__JV mt-2">
-          {Math.abs(totalForeignAmount - totalLocalAmount) > 0.01 && (
-            <div className="mb-2" style={{ fontSize: 12, color: "var(--color-danger)" }}>
-              Debits and credits must be equal before the voucher can be submitted.
-            </div>
-          )}
-          <Button
-            label="Submit for approval"
-            className="save__add__btn__JV"
-            onClick={handleApproval}
-            disabled={
-              !formik.values.transationCode ||
-              !journalVoucherPostTabelData ||
-              !Array.isArray(journalVoucherPostTabelData) ||
-              journalVoucherPostTabelData.length === 0 ||
-              Math.abs(totalForeignAmount - totalLocalAmount) > 0.01
-            }
-          />
-        </div>
-      )}
+      <div className="col-12 btn__view__Add__JV mt-2">
+        {Math.abs(totalForeignAmount - totalLocalAmount) > 0.01 && (
+          <div className="mb-2" style={{ fontSize: 12, color: "var(--color-danger)" }}>
+            {t("accounts.addJournalVoucherForm.unbalanced")}
+          </div>
+        )}
+        <Button
+          label={t("accounts.addJournalVoucherForm.submitForApproval")}
+          className="save__add__btn__JV"
+          onClick={handleApproval}
+          disabled={
+            !formik.values.transationCode ||
+            !journalVoucherPostTabelData ||
+            !Array.isArray(journalVoucherPostTabelData) ||
+            journalVoucherPostTabelData.length === 0 ||
+            Math.abs(totalForeignAmount - totalLocalAmount) > 0.01
+          }
+        />
+      </div>
 
-      {buttonshow === 1 && (
-        <div className="col-12 btn__view__Add__JV mt-2">
-          <Button
-            label="Print"
-            className="save__add__btn__print"
-            onClick={handlePrint}
-          />
-        </div>
-      )}
       <div className="col-12">
         <AddData
           voucherDate={formik.values.date}

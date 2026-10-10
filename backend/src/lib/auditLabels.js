@@ -55,6 +55,7 @@ export const ENTITY_LABELS = {
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
+  cas_document: 'CAS document', cas_book_print: 'Book print',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -74,7 +75,7 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted',
 };
 
 /** Sign-in events read as what the user did. */

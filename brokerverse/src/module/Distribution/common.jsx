@@ -6,6 +6,7 @@ import { Tag } from "primereact/tag";
 import SvgDot from "../../assets/icons/SvgDot";
 import clientService from "../../services/clientService";
 import mastersService from "../../services/mastersService";
+import { printPdf } from "../../components/Print";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 import "./index.scss";
 
@@ -49,6 +50,11 @@ export const Field = ({ label, children, full = false, help, htmlFor, required =
 );
 
 export { apiFieldErrors as fieldErrors } from "../../hooks/useFieldErrors";
+/**
+ * Print a PDF of the API (path as the distribution service writes it, "/fleet/:id/schedule.pdf"), a failure shown in
+ * the toast. Call it straight from the click: where the browser cannot print the PDF in a frame, it opens in a tab.
+ */
+export const printFile = (toast, path, fileName) => printPdf(path, { fileName }).catch((e) => showError(toast, e));
 
 /** Number of a numeric cell, right aligned. */
 export const num = (v, digits = 2) => (v === null || v === undefined || v === "" ? "" : Number(v).toLocaleString("en-PH", { minimumFractionDigits: digits, maximumFractionDigits: digits }));

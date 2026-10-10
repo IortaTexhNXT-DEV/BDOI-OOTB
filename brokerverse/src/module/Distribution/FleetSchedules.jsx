@@ -13,8 +13,12 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
-import { confirmAction, promptText } from "../../utility/dialogs";
-import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, isoDay, money, showError, showSuccess, useInsurers } from "./common";
+import { calendarDateFormat } from "../../utility/dateFormat";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../components/ActivityLog";
+import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, fromIsoDay, isoDay, money, printFile, showError, showSuccess, useInsurers } from "./common";
 
 const BASE = "/operations/fleet-schedules";
 const EMPTY_VEHICLE = { plateNumber: "", conductionSticker: "", chassisNumber: "", engineNumber: "", make: "", model: "", yearModel: null, color: "", vehicleType: "private_cars",
@@ -141,6 +145,7 @@ const FleetDetail = ({ id }) => {
   const insurers = useInsurers();
   const [fleet, setFleet] = useState(null);
   const [vehicle, setVehicle] = useState(null); // { mode: add | edit | endorse, data }
+  const [removing, setRemoving] = useState(null); // { vehicle, effectiveDate, reason }: deletion by endorsement
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -177,16 +182,37 @@ const FleetDetail = ({ id }) => {
     });
     if (r) setVehicle(null);
   };
-  const deleteVehicle = async (v) => {
+  const vehicleFacts = (v) => [
+    { label: t("distribution.fl.item", "Item"), value: v.itemNo },
+    { label: t("distribution.fl.plate", "Plate / CS"), value: v.plateNumber || v.conductionSticker },
+    { label: t("distribution.mp.vehicle", "Vehicle"), value: [v.yearModel, v.make, v.model].filter(Boolean).join(" ") },
+    { label: t("distribution.fl.sumInsured", "Sum insured"), value: v.sumInsured, type: "amount" },
+    { label: t("distribution.fl.total", "Total"), value: v.grossPremium, type: "amount" },
+  ];
+  // an action asked in a confirmation: it runs in the dialog (a failure stays there), then the fleet is reloaded
+  const confirmRun = async (options, fn) => {
+    let result = null;
+    const done = await openConfirm({ ...options, onConfirm: async () => { result = await fn(); } });
+    if (!done) return;
+    if (result?.message) showSuccess(toast, result.message);
+    await load();
+  };
+  const deleteVehicle = (v) => {
     if (fleet.status === "draft") {
-      if (await confirmAction(t("distribution.fl.removeVehicle", "Remove item {{item}} from the draft schedule?", { item: v.itemNo }), { danger: true })) run(() => service.removeVehicle(fleet.id, v.id));
+      confirmRun({
+        title: t("distribution.fl.removeVehicleTitle", "Remove vehicle"),
+        severity: "danger",
+        message: t("distribution.fl.removeVehicleMessage", "The vehicle is removed from the draft schedule."),
+        facts: vehicleFacts(v),
+        confirmLabel: t("distribution.fl.removeVehicleAction", "Remove vehicle"),
+      }, () => service.removeVehicle(fleet.id, v.id));
       return;
     }
-    const when = await promptText(t("distribution.fl.deleteFrom", "Delete item {{item}} by endorsement: effective date (YYYY-MM-DD)", { item: v.itemNo }), isoDay(new Date()), { multiline: false });
-    if (!when) return;
-    const reason = await promptText(t("distribution.fl.deleteReason", "Reason (vehicle sold, total loss ...)"), "", { multiline: false });
-    if (reason === null) return;
-    run(() => service.endorseDeleteVehicle(fleet.id, v.id, { effectiveDate: when, reason: reason || undefined }));
+    setRemoving({ vehicle: v, effectiveDate: new Date(), reason: "" });
+  };
+  const endorseDelete = async () => {
+    const r = await run(() => service.endorseDeleteVehicle(fleet.id, removing.vehicle.id, { effectiveDate: isoDay(removing.effectiveDate), reason: removing.reason.trim() || undefined }));
+    if (r) setRemoving(null);
   };
   const upload = async (file) => {
     if (!file) return;
@@ -206,10 +232,25 @@ const FleetDetail = ({ id }) => {
       <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.fl.title", "Fleet Schedules")} title={`${fleet.fleetNumber} · ${fleet.clientName}`}
         subtitle={`${fleet.insurerName || t("distribution.fl.noInsurer", "Insurer not chosen")} · ${date(fleet.inceptionDate)} to ${date(fleet.expiryDate)}${fleet.policyNumber ? ` · ${t("distribution.fl.policy", "Policy")} ${fleet.policyNumber}` : ""}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
-        <Button label={t("distribution.fl.print", "Schedule PDF")} icon="pi pi-file-pdf" outlined onClick={() => run(() => service.fleetSchedulePdf(fleet.id), false)} />
+        <Button label={t("distribution.fl.printSchedule", "Print schedule")} icon="pi pi-print" outlined
+          onClick={() => printFile(toast, `/fleet/${encodeURIComponent(fleet.id)}/schedule.pdf`, `${fleet.fleetNumber}.pdf`)} />
         <Button label={t("distribution.fl.export", "Excel")} icon="pi pi-file-excel" outlined onClick={() => run(() => service.fleetScheduleXlsx(fleet.id), false)} />
         {write && draft ? <Button label={t("distribution.fl.issue", "Issue policy")} icon="pi pi-check" disabled={busy || !fleet.vehicleList.length}
-          onClick={async () => { if (await confirmAction(t("distribution.fl.confirmIssue", "Issue one policy for the {{count}} vehicles and bill the total premium?", { count: fleet.activeVehicles }))) run(() => service.issueFleet(fleet.id)); }} /> : null}
+          onClick={() => confirmRun({
+            title: t("distribution.fl.issueTitle", "Issue fleet policy"),
+            message: t("distribution.fl.issueMessage", "One policy is issued for the vehicles on the schedule."),
+            facts: [
+              { label: t("distribution.fl.number", "Fleet schedule"), value: fleet.fleetNumber },
+              { label: t("distribution.fl.client", "Client"), value: fleet.clientName },
+              { label: t("distribution.fl.insurer", "Insurer"), value: fleet.insurerName },
+              { label: t("distribution.fl.period", "Period"), value: `${date(fleet.inceptionDate)} – ${date(fleet.expiryDate)}` },
+              { label: t("distribution.fl.vehicles", "Vehicles on cover"), value: fleet.activeVehicles, type: "number" },
+              { label: t("distribution.fl.sumInsured", "Sum insured"), value: fleet.sumInsured, type: "amount" },
+              { label: t("distribution.fl.annualPremium", "Annual premium"), value: fleet.grossPremium, type: "amount", emphasis: true },
+            ],
+            note: t("distribution.fl.issueNote", "The total premium is billed to the client."),
+            confirmLabel: t("distribution.fl.issue", "Issue policy"),
+          }, () => service.issueFleet(fleet.id))} /> : null}
       </PageHeader>
       <div className="pe-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{t("distribution.common.status", "Status")}</div><div className="pe-kpi-value"><StatusTag status={fleet.status} /></div></div>
@@ -280,6 +321,37 @@ const FleetDetail = ({ id }) => {
           </DataTable>
         </div>
       ) : null}
+
+      <div className="pe-card">
+        <div className="pe-card-title">{t("distribution.common.history", "History")}</div>
+        <RecordActivityLog entity="fleet_schedule" recordId={fleet.id} />
+      </div>
+
+      <DetailDialog visible={!!removing} onHide={() => setRemoving(null)} size="md" header={t("distribution.fl.endorseDelete", "Delete by endorsement")}
+        footer={(
+          <>
+            <Button type="button" label={t("distribution.common.cancel", "Cancel")} text onClick={() => setRemoving(null)} />
+            <Button type="button" label={t("distribution.fl.endorseDeleteAction", "Delete vehicle")} severity="danger" loading={busy} disabled={!removing?.effectiveDate} onClick={endorseDelete} />
+          </>
+        )}>
+        {removing && (
+          <>
+            <KeyValueGrid columns={3} items={[...vehicleFacts(removing.vehicle),
+              { label: t("distribution.fl.onCover", "On cover"), value: `${date(removing.vehicle.coverFrom)} – ${date(removing.vehicle.coverTo)}` }]} />
+            <div className="dist-grid mt-3">
+              <Field label={t("distribution.fl.effective", "Effective")} htmlFor="fl-delete-from" help={t("distribution.fl.returnHelp", "The return premium is the vehicle's annual premium for the days left in the period")}>
+                <Calendar inputId="fl-delete-from" value={removing.effectiveDate} dateFormat={calendarDateFormat()} showIcon
+                  minDate={fromIsoDay(removing.vehicle.coverFrom) || undefined} maxDate={fromIsoDay(removing.vehicle.coverTo || fleet.expiryDate) || undefined}
+                  onChange={(e) => setRemoving({ ...removing, effectiveDate: e.value })} />
+              </Field>
+              <Field label={t("distribution.fl.deleteReasonLabel", "Reason")} htmlFor="fl-delete-reason">
+                <InputText id="fl-delete-reason" value={removing.reason} placeholder={t("distribution.fl.deleteReasonHint", "Vehicle sold, total loss ...")}
+                  onChange={(e) => setRemoving({ ...removing, reason: e.target.value })} />
+              </Field>
+            </div>
+          </>
+        )}
+      </DetailDialog>
 
       <Dialog className="pe-dialog" visible={!!vehicle} style={{ width: "min(820px, 96vw)" }} onHide={() => setVehicle(null)}
         header={vehicle?.mode === "endorse" ? t("distribution.fl.endorseAdd", "Add vehicle by endorsement") : vehicle?.mode === "edit" ? t("distribution.fl.editVehicle", "Edit vehicle") : t("distribution.fl.addVehicle", "Add vehicle")}

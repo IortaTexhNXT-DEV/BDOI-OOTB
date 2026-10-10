@@ -10,6 +10,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
 import { addDays, today } from '../../lib/dates.js';
 import { APPROVE, isAdjustmentPeriod } from './posting.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 export const iso = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10));
 /** First day of the month n months after the month of `date` (n may be negative). */
@@ -108,48 +109,69 @@ export async function createNextFiscalYear(db, user, startDate = null) {
   return createFiscalYear(db, addDays(iso(last.end_date), 1), user);
 }
 
-export async function recordStatus(db, p, to, { remarks = null, source = 'manual', referenceId = null, user = null } = {}) {
-  await db.query(`INSERT INTO period_status_history(period, fiscal_year, from_status, to_status, remarks, source, reference_id, changed_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, [p.period, p.fiscal_year, p.status, to, remarks, source, referenceId, user?.id ?? null]);
+export async function recordStatus(db, p, to, { remarks = null, source = 'manual', referenceId = null, user = null, reasonCode = null } = {}) {
+  await db.query(`INSERT INTO period_status_history(period, fiscal_year, from_status, to_status, remarks, source, reference_id, changed_by, reason_code)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [p.period, p.fiscal_year, p.status, to, remarks, source, referenceId, user?.id ?? null, reasonCode]);
 }
 
 /** Write a new status on a period (no rule checks; callers check) and record it in the history. */
-export async function applyStatus(db, p, to, { remarks = null, source = 'manual', referenceId = null, user = null } = {}) {
+export async function applyStatus(db, p, to, { remarks = null, source = 'manual', referenceId = null, user = null, reasonCode = null } = {}) {
   if (!PERIOD_STATUSES.includes(to)) throw badRequest(`Unknown period status ${to}`);
   if (p.status === to) return p;
   const uid = user?.id ?? null;
   const sets = { soft_closed: 'soft_closed_by = $3, soft_closed_at = now()', closed: 'closed_by = $3, closed_at = now()', open: 'reopened_by = $3, reopened_at = now()', locked: 'locked_at = now(), closed_by = COALESCE(closed_by, $3), closed_at = COALESCE(closed_at, now())' }[to];
   const row = (await db.query(`UPDATE accounting_periods SET status = $2, ${sets}, remarks = COALESCE($4, remarks), updated_at = now() WHERE period = $1 RETURNING *`,
     [p.period, to, uid, remarks])).rows[0];
-  await recordStatus(db, p, to, { remarks, source, referenceId, user });
+  await recordStatus(db, p, to, { remarks, source, referenceId, user, reasonCode });
   return row;
 }
 
+const RANK = { open: 0, soft_closed: 1, closed: 2 };
+/** Reason context of a manual status change: period_reopen for a move back towards open, period_close otherwise. */
+export const reasonContextOf = (from, to) => (RANK[to] < RANK[from] ? 'period_reopen' : 'period_close');
+
 /**
- * Status change requested from Period Management. Closing (soft or hard) runs the blocking month-end checks
- * (`runBlockingChecks` supplied by the caller); reopening needs approve:period-end and remarks; a locked period
- * (closed fiscal year) cannot be reopened here.
+ * Why a period cannot move to `to` by hand (Period Management), as { status: 403 | 409, code, message }, or null when it
+ * can. The blocking checks of a close are not part of it (they are reported one by one).
  */
-export async function changePeriodStatus(db, period, to, { remarks, user, runBlockingChecks }) {
-  const p = await getPeriod(db, period, { lock: true });
-  if (!['open', 'soft_closed', 'closed'].includes(to)) throw badRequest('status must be open, soft_closed or closed');
-  if (p.status === 'locked') throw conflict(`Period ${period} is locked: fiscal year ${p.fiscal_year} is closed. Reverse the year-end close to reopen it`);
-  if (p.status === to) throw conflict(`Period ${period} is already ${to.replace('_', '-')}`);
+export async function transitionProblem(db, p, to, user) {
+  const fail = (status, code, message) => ({ status, code, message });
+  if (p.status === 'locked') return fail(409, 'locked', `Period ${p.period} is locked: fiscal year ${p.fiscal_year} is closed. Reverse the year-end close to reopen it`);
+  if (p.status === to) return fail(409, 'unchanged', `Period ${p.period} is already ${to.replace('_', '-')}`);
   const fy = p.fiscal_year ? await getFiscalYear(db, p.fiscal_year) : null;
-  if (fy?.status === 'closed') throw conflict(`Fiscal year ${fy.code} is closed`);
-  const rank = { open: 0, soft_closed: 1, closed: 2 };
-  const reopening = rank[to] < rank[p.status];
-  if (reopening) {
-    if (!hasPermission(user, APPROVE)) throw forbidden(`Reopening a period requires permission ${APPROVE}`);
-    if (!String(remarks || '').trim()) throw badRequest('Remarks are required to reopen a period');
-    if (to === 'open' && isAdjustmentPeriod(period) && !(await getSetting('accounting.adjustment_period_enabled', true))) {
-      throw conflict('The adjustment period is disabled (accounting.adjustment_period_enabled)');
+  if (fy?.status === 'closed') return fail(409, 'year-closed', `Fiscal year ${fy.code} is closed`);
+  // a close is the checker's: the maker submits the month-end close for approval instead
+  if (to === 'closed' && !hasPermission(user, APPROVE)) {
+    return fail(403, 'approval', `Closing a period requires permission ${APPROVE}; submit the month-end close of ${p.period} for approval`);
+  }
+  if (RANK[to] < RANK[p.status]) {
+    if (!hasPermission(user, APPROVE)) return fail(403, 'permission', `Reopening a period requires permission ${APPROVE}`);
+    if (to === 'open' && isAdjustmentPeriod(p.period) && !(await getSetting('accounting.adjustment_period_enabled', true))) {
+      return fail(409, 'adjustment-disabled', 'The adjustment period is disabled (accounting.adjustment_period_enabled)');
     }
     const closedYe = (await db.query('SELECT run_number FROM year_end_runs WHERE fiscal_year = $1 AND status = \'closed\'', [p.fiscal_year])).rows[0];
-    if (closedYe) throw conflict(`Fiscal year ${p.fiscal_year} was closed by ${closedYe.run_number}; reverse it first`);
-  } else if (runBlockingChecks) {
-    const failed = await runBlockingChecks(db, p);
+    if (closedYe) return fail(409, 'year-end-closed', `Fiscal year ${p.fiscal_year} was closed by ${closedYe.run_number}; reverse it first`);
+  }
+  return null;
+}
+
+/**
+ * Status change requested from Period Management. Every change needs a reason of the Reason Codes master (context
+ * period_close to soft-close or close, period_reopen to reopen; the note when the reason asks for one). Closing (soft
+ * or hard) runs the blocking month-end checks (`runBlockingChecks(db, period, to)` supplied by the caller; a close also needs
+ * the blocking manual items signed off); closing and reopening need approve:period-end; a locked period (closed fiscal year) cannot be reopened here.
+ */
+export async function changePeriodStatus(db, period, to, { reasonCode, note, user, runBlockingChecks }) {
+  const p = await getPeriod(db, period, { lock: true });
+  if (!['open', 'soft_closed', 'closed'].includes(to)) throw badRequest('status must be open, soft_closed or closed');
+  const problem = await transitionProblem(db, p, to, user);
+  if (problem) throw (problem.status === 403 ? forbidden : conflict)(problem.message);
+  const context = reasonContextOf(p.status, to);
+  const reason = await requiredReason(db, context, { reasonCode, note });
+  if (context === 'period_close' && runBlockingChecks) {
+    const failed = await runBlockingChecks(db, p, to);
     if (failed.length) throw conflict(`Period ${period} cannot be ${to.replace('_', '-')}: ${failed.map((f) => f.message).join('; ')}`);
   }
-  return applyStatus(db, p, to, { remarks: remarks || null, source: 'manual', user });
+  const row = await applyStatus(db, p, to, { remarks: reason.text, source: 'manual', user, reasonCode: reason.code });
+  return { row, reason };
 }

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { InputSwitch } from "primereact/inputswitch";
@@ -8,6 +9,8 @@ import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import adminService from "../../services/adminService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { formatDate } from "../../utility/dateFormat";
 import { AREAS, HIDDEN_GROUPS, areaOfGroup, groupTitle, presentationOf } from "./configuration/catalog";
 import {
   ChipsEditor, ColorEditor, HtmlEditor, ImageEditor, JsonEditor, KeyValueEditor, NumberEditor, RecordsEditor, SelectEditor, SwitchEditor, TextEditor,
@@ -16,7 +19,7 @@ import "./index.scss";
 import "./configuration/index.scss";
 
 const OTHER = { id: "other", title: "Other settings", icon: "pi pi-sliders-h", summary: "Settings not yet placed in an area.", groups: [], links: [] };
-const when = (d) => (d ? new Date(d).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "2-digit" }) : "");
+const when = (d) => formatDate(d, { empty: "" });
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 /**
@@ -26,6 +29,8 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
  * and recorded in the audit trail. Presentation rules: configuration/catalog.js.
  */
 const Configuration = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const toast = useRef(null);
   const [params, setParams] = useSearchParams();
   const areaId = params.get("area");
@@ -52,13 +57,42 @@ const Configuration = () => {
   useEffect(() => { load(); }, [load]);
 
   const changed = Object.keys(draft).filter((k) => !same(draft[k], rows.find((r) => r.key === k)?.value));
-  // leaving the page with unsaved changes asks first
+  // leaving the page with unsaved changes asks first: the browser's own prompt on reload or close, the application's
+  // confirmation on a link to another screen (the menu, the header)
+  const changedRef = useRef(changed);
+  changedRef.current = changed;
   useEffect(() => {
     if (!changed.length) return undefined;
     const warn = (e) => { e.preventDefault(); e.returnValue = ""; };
+    const leave = async (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      const link = e.target.closest?.("a[href]");
+      if (!link || link.target === "_blank" || link.closest(".cfg") || link.closest(".p-dialog")) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const count = changedRef.current.length;
+      const leaveAnyway = await openConfirm({
+        title: t("configuration.leaveTitle"),
+        severity: "warning",
+        message: t("configuration.leaveMessage", { count }),
+        facts: changedRef.current.slice(0, 6).map((k) => ({ label: rows.find((r) => r.key === k)?.label || k, value: t("configuration.notSaved") })),
+        note: count > 6 ? t("configuration.leaveMore", { count: count - 6 }) : null,
+        confirmLabel: t("configuration.leaveAction"),
+        cancelLabel: t("configuration.stay"),
+      });
+      if (!leaveAnyway) return;
+      setDraft({});
+      navigate(`${url.pathname}${url.search}${url.hash}`);
+    };
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [changed.length]);
+    document.addEventListener("click", leave, true);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("click", leave, true);
+    };
+  }, [changed.length, navigate, rows, t]);
 
   const enriched = useMemo(() => rows.map((r) => ({ ...r, view: presentationOf(r), area: areaOfGroup(r.group) })), [rows]);
   const areas = useMemo(() => {

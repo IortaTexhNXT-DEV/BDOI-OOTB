@@ -164,7 +164,9 @@ export const roleMenuPermissions = {
 // approve). SUPERID includes the System Administrator, so the server returns system-admin among its roles: every menu.
 const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receivable", "Financial Reports > Collection Report"];
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections"] };
+// Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
+const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
+const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
 // Sales & Marketing item by item, for the personas that lack the permission of some of its screens
 const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
   "Comparison Reports", "Campaigns", "Sales Activities"];

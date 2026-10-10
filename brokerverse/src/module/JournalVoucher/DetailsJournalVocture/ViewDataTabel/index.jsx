@@ -6,8 +6,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useTranslation } from "react-i18next";
 const ViewDataTabel = ({
-  handleEdit,
-  newDataTable,
   journalVoucherPostTabelData,
   pagination,
   loading,
@@ -32,7 +30,7 @@ const ViewDataTabel = ({
     subAC: item.subAccount || item.subAC || "",
     Currency: item.currencyCode || item.Currency || "",
     foreignAmount: item.foreignAmount || item.foreign || "",
-    localAmount: item.localAmount || item.local || "500.00",
+    localAmount: item.localAmount ?? item.local ?? "",
     Remarks: item.remarks || item.Remarks || "",
     Entry: item.entryType || item.Entry || "",
     costCentre: item.costCentre || "",

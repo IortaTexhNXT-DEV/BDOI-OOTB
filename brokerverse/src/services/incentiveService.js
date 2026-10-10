@@ -19,10 +19,13 @@ export const incentiveService = {
   listCalculations: (params) => get("/calculations", params),
   getCalculation: (batchId) => get(`/calculations/${id(batchId)}`),
   createCalculation: (payload) => post("/calculations", payload),
-  adjustCalculation: (batchId, lines) => post(`/calculations/${id(batchId)}/adjust`, { lines }),
+  // reason: { reasonCode, note } of the Reason Codes master (context incentive_adjustment)
+  adjustCalculation: (batchId, lines, reason) => post(`/calculations/${id(batchId)}/adjust`, { lines, ...reason }),
   submitCalculation: (batchId) => post(`/calculations/${id(batchId)}/submit`),
-  approveCalculation: (batchId, comments) => post(`/calculations/${id(batchId)}/approve`, { comments }),
-  rejectCalculation: (batchId, reason) => post(`/calculations/${id(batchId)}/reject`, { reason }),
+  calculationActivity: (batchId) => get(`/calculations/${id(batchId)}/activity`),
+  approveCalculation: (batchId, remarks) => post(`/calculations/${id(batchId)}/approve`, { remarks: remarks || undefined }),
+  // reason: { reasonCode, note } of the Reason Codes master (context incentive_batch_reject)
+  rejectCalculation: (batchId, reason) => post(`/calculations/${id(batchId)}/reject`, reason),
   payCalculation: (batchId, payload) => post(`/calculations/${id(batchId)}/pay`, payload),
   approvals: () => get("/approvals"),
 

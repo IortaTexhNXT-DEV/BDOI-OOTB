@@ -18,6 +18,8 @@ import { resetReversalJV } from "./store/reversalReducers";
 import useJvMasterData from "../JournalVoucher/useJvMasterData";
 import SvgBackicon from "../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { printPdf } from "../../components/Print";
 
 const Reversals = () => {
   const { t } = useTranslation();
@@ -25,6 +27,7 @@ const Reversals = () => {
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
   const [toastMessage, setToastMessage] = useState("");
+  const [created, setCreated] = useState(null);
   const { transactionCodesData } = useJvMasterData();
   const { reversalJVList, loading, reversalJVGetDataList } = useSelector(
     ({ reversalMainReducers }) => ({
@@ -92,6 +95,22 @@ const Reversals = () => {
   });
 
   const handleApproval = async () => {
+    const number = formik.values.transactionNumber.trim();
+    const first = reversalJVGetDataList[0] || {};
+    const ok = await openConfirm({
+      title: t("accounts.correctionJVForm.reverseTitle", { number }),
+      message: t("accounts.correctionJVForm.reverseMessage"),
+      facts: [
+        { label: t("accounts.correctionJVForm.originalVoucher"), value: number },
+        { label: t("accounts.correctionJVForm.voucherDate"), value: first.date, type: "date", hidden: !first.date },
+        { label: t("accounts.correctionJVForm.reversalCode"), value: `${formik.values.reversalJVTransactionCode} ${describeCode(formik.values.reversalJVTransactionCode)}`.trim() },
+        { label: t("accounts.correctionJVForm.entries"), value: reversalJVGetDataList.length, type: "number" },
+        { label: t("accounts.correctionJVForm.amount"), value: first.totalDebit, type: "amount", hidden: first.totalDebit === undefined },
+      ],
+      note: t("accounts.correctionJVForm.submitNote"),
+      confirmLabel: t("accounts.correctionJVForm.reverse"),
+    });
+    if (!ok) return;
     const result = await dispatch(
       postReversalJVData({
         transactionNumber: formik.values.transactionNumber.trim(),
@@ -104,12 +123,18 @@ const Reversals = () => {
       return;
     }
     showToast(result.payload?.message);
+    setCreated(result.payload?.data || null);
     setStep(2);
   };
 
-  const handlePrint = () => {
+  const handlePrint = () =>
+    printPdf(`/journal-vouchers/${encodeURIComponent(created.id)}/pdf`, { fileName: `${created.transactionNumber}.pdf` })
+      .catch((error) => showToast(error.message, "error"));
+
+  const handleNew = () => {
     formik.resetForm();
     dispatch(resetReversalJV());
+    setCreated(null);
     setStep(0);
   };
   return (
@@ -267,7 +292,7 @@ const Reversals = () => {
 
       <div className="grid m-0 bottom__container">
         <div className="col-12 button__view__corrections__reversal">
-          {step == 0 && (
+          {step === 0 && (
             <Button
               label="Next"
               className="correction__btn__reversal"
@@ -276,21 +301,32 @@ const Reversals = () => {
             />
           )}
 
-          {step == 1 && (
+          {step === 1 && (
             <Button
-              label="Approve"
+              label={t("accounts.correctionJVForm.reverse")}
               className="correction__btn__reversal"
               onClick={handleApproval}
               disabled={loading || reversalJVGetDataList.length === 0}
             />
           )}
 
-          {step == 2 && (
-            <Button
-              label="Print"
-              className="correction__btn__reversal"
-              onClick={handlePrint}
-            />
+          {step === 2 && (
+            <>
+              <Button
+                label={t("accounts.correctionJVForm.newReversal")}
+                className="correction__btn__reversal"
+                outlined
+                onClick={handleNew}
+              />
+              {created?.id && (
+                <Button
+                  label={t("accounts.correctionJVForm.print", { number: created.transactionNumber })}
+                  icon="pi pi-print"
+                  className="correction__btn__reversal"
+                  onClick={handlePrint}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

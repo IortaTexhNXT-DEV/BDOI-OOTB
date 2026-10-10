@@ -5,7 +5,6 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputSwitch } from "primereact/inputswitch";
@@ -13,6 +12,9 @@ import { SelectButton } from "primereact/selectbutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
+import DetailDialog from "../../../components/DetailDialog";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import { ActivityLog, fromPostingRuleHistory } from "../../../components/ActivityLog";
 import postingRulesService from "../../../services/postingRulesService";
 import DateField from "../../../components/DateField";
 import "./index.scss";
@@ -147,10 +149,28 @@ const PostingRules = () => {
     }
   };
 
+  // switching a posting rule on or off changes the journals the system posts: asked first, run inside the confirmation
   const toggleActive = async () => {
+    const deactivate = rule.active;
+    let out;
+    const done = await openConfirm({
+      title: t(deactivate ? "postingRules.confirm.deactivateTitle" : "postingRules.confirm.activateTitle"),
+      severity: deactivate ? "warning" : "neutral",
+      message: t(deactivate ? "postingRules.confirm.deactivateMessage" : "postingRules.confirm.activateMessage"),
+      facts: [
+        { label: t("postingRules.event"), value: selected?.label || selected?.eventCode },
+        { label: t("postingRules.version"), value: `v${rule.version}` },
+        { label: t("postingRules.effectiveFrom"), value: rule.effectiveFrom, type: "date" },
+      ],
+      note: t("postingRules.confirm.approvalNote"),
+      confirmLabel: t(deactivate ? "postingRules.confirm.deactivateAction" : "postingRules.confirm.activateAction"),
+      onConfirm: async () => {
+        out = await postingRulesService.setActive(rule.id, !rule.active);
+      },
+    });
+    if (!done) return;
+    if (out?.change) toast.current?.show({ severity: "info", summary: t("postingRules.saved"), detail: t("postingRules.changePending"), life: 6000 });
     try {
-      const out = await postingRulesService.setActive(rule.id, !rule.active);
-      if (out.change) toast.current?.show({ severity: "info", summary: t("postingRules.saved"), detail: t("postingRules.changePending"), life: 6000 });
       await loadEvents();
       await loadVersions(selected, rule.id);
     } catch (e) {
@@ -159,10 +179,11 @@ const PostingRules = () => {
   };
 
   const openHistory = async () => {
+    setHistory({ rows: [], loading: true, error: null });
     try {
-      setHistory(await postingRulesService.history(rule.id));
+      setHistory({ rows: await postingRulesService.history(rule.id), loading: false, error: null });
     } catch (e) {
-      fail(e);
+      setHistory({ rows: [], loading: false, error: e.message || true });
     }
   };
 
@@ -349,15 +370,11 @@ const PostingRules = () => {
         </div>
       </div>
 
-      <Dialog header={t("postingRules.history")} visible={!!history} style={{ width: "min(640px, 95vw)" }} onHide={() => setHistory(null)}>
-        <DataTable value={history || []} size="small" emptyMessage={t("postingRules.noHistory")}>
-          <Column field="at" header={t("postingRules.when")} body={(h) => new Date(h.at).toLocaleString()} />
-          <Column field="action" header={t("postingRules.action")} />
-          <Column field="version" header={t("postingRules.version")} />
-          <Column field="username" header={t("postingRules.by")} />
-          <Column field="changeNote" header={t("postingRules.changeNote")} />
-        </DataTable>
-      </Dialog>
+      {history ? (
+        <DetailDialog visible onHide={() => setHistory(null)} header={t("postingRules.historyOf", { event: selected?.label || selected?.eventCode || "" })} size="md">
+          <ActivityLog entries={fromPostingRuleHistory(history.rows)} loading={history.loading} error={history.error} onRetry={openHistory} emptyText={t("postingRules.noHistory")} />
+        </DetailDialog>
+      ) : null}
     </div>
   );
 };

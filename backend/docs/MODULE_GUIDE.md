@@ -39,7 +39,12 @@ minimal, clearly-correct front-end fix.
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the
-  context and the "requires note" flag and returns the code and the text to store.
+  context and the "requires note" flag and returns the code and the text to store. A decision that cannot be taken
+  without a reason (period close and reopening, year-end reversal, void of a printed CAS book, change of a CAS
+  document, incentive batch rejection: the contexts of seed `88_accounting_reasons.sql`; cancellation of a sales
+  invoice or a payment acknowledgement: seed `89_tax_invoice_reasons.sql`) takes `{ reasonCode, note }`
+  and resolves it with `requiredReason(db, context, { reasonCode, note })` from the same file (the code is required;
+  returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns).
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
   to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).

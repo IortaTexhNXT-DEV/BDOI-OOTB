@@ -3,7 +3,7 @@ import runtimeConfig from "../config/runtimeConfig";
 import { setDisplayCurrency } from "./currencyConverter";
 import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 import { setActiveDefaultCurrency } from "./currencyOptions";
-import { setBusinessTimeZone, setDateFormat } from "./dateFormat";
+import { setDateFormat, setTimeZone } from "./dateFormat";
 import { setPhoneConfig } from "./phoneFormat";
 import { setQuoteOptions } from "./quoteOptions";
 
@@ -45,7 +45,7 @@ export function applySystemSettings(settings = {}, options = {}) {
   setDisplayCurrency(merged.displayCurrency);
   setActiveDefaultCurrency(merged.displayCurrency);
   setDateFormat(merged.dateFormat);
-  setBusinessTimeZone(merged.timezone);
+  setTimeZone(merged.timezone);
   setPhoneConfig(merged);
   setQuoteOptions(merged);
   if (settings.systemName) applyAppTitle(settings.systemName, options);

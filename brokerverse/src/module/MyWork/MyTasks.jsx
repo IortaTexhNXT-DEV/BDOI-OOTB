@@ -42,7 +42,17 @@ const MyTasks = ({ state, patch, today, soonDays, isManager, reloadKey, onEdit, 
   const complete = (task) => act(() => myWorkService.completeTask(task.id), t("myWork.task.completed", "Task done"));
   const reopen = (task) => act(() => myWorkService.reopenTask(task.id), t("myWork.task.reopened", "Task reopened"));
   const cancel = async (task) => {
-    const ok = await confirmAction(t("myWork.task.confirmDelete", { title: task.title, defaultValue: "Delete the task \"{{title}}\"?" }), { header: t("myWork.task.delete", "Delete task"), danger: true });
+    const ok = await confirmAction(t("myWork.task.deleteMessage"), {
+      header: t("myWork.task.delete", "Delete task"),
+      acceptLabel: t("myWork.task.delete", "Delete task"),
+      danger: true,
+      facts: [
+        { label: t("myWork.task.title", "Task"), value: task.title },
+        { label: t("myWork.col.due", "Due"), value: task.dueDate, type: "date" },
+        { label: t("myWork.task.assignedTo", "Assigned to"), value: task.assignedToName },
+        { label: t("myWork.col.priority", "Priority"), value: t(`myWork.priority.${task.priority}`, task.priority) },
+      ],
+    });
     if (ok) act(() => myWorkService.cancelTask(task.id), t("myWork.task.deleted", "Task deleted"));
   };
 

@@ -17,6 +17,8 @@ import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOp
 import { notifyError, notifySuccess, notifyWarn } from "../../../../utility/dialogs";
 import { notifyEmailOutcome } from "../../../../utility/emailNotice";
 import { copyText } from "../../../../utility/clipboard";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
+import { printPdf } from "../../../../components/Print";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
@@ -78,7 +80,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const handleDownload = async () => {
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      notifyError("Quotation ID is missing. Cannot download quote PDF.");
+      notifyError(t("shareOption.quotationMissing"));
       return;
     }
     setQuotePdfLoading(true);
@@ -89,13 +91,24 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         { isFire: isFireLOB, fileName }
       );
       if (!result.success) {
-        notifyError(result.error || "Failed to download quote PDF.");
+        notifyError(result.error || t("shareOption.downloadFailed"));
       }
     } catch (err) {
-      notifyError(err?.message || "Failed to download quote PDF.");
+      notifyError(err?.message || t("shareOption.downloadFailed"));
     } finally {
       setQuotePdfLoading(false);
     }
+  };
+
+  // printed from the quote template PDF; started from the click so that a browser that opens it in a tab allows it
+  const handlePrint = () => {
+    const quotationId = quotationData?.quotationId;
+    if (!quotationId) {
+      notifyError(t("shareOption.quotationMissing"));
+      return;
+    }
+    printPdf(`/document-templates/${isFireLOB ? "quote-template-fire" : "quote-template"}/${encodeURIComponent(quotationId)}`,
+      { fileName: `quote-${quotationData?.quotationNumber || quotationId}.pdf` }).catch((err) => notifyError(err?.message || t("shareOption.downloadFailed")));
   };
 
   const handleEmailClick = () => {
@@ -114,7 +127,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      notifyError("Quotation ID is missing. Cannot send quote.");
+      notifyError(t("shareOption.quotationMissing"));
       return;
     }
 
@@ -144,7 +157,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleUseSuggestedContent = async () => {
     if (!quotationData) {
-      notifyError("Quote data is not available");
+      notifyError(t("shareOption.quoteMissing"));
       return;
     }
 
@@ -219,19 +232,19 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleSendEmail = async () => {
     if (!emailAddress) {
-      notifyWarn("Please enter an email address");
+      notifyWarn(t("shareOption.emailRequired"));
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailAddress)) {
-      notifyWarn("Please enter a valid email address");
+      notifyWarn(t("shareOption.emailInvalid"));
       return;
     }
 
     if (!quotationData) {
-      notifyError("Quote data is not available");
+      notifyError(t("shareOption.quoteMissing"));
       return;
     }
 
@@ -264,17 +277,18 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         clearSuggestedContent();
         setModalVisible(false);
       } else {
-        notifyError(`Failed to send email: ${result.error}`);
+        notifyError(result.error || t("shareOption.sendFailed"));
       }
     } catch (error) {
-      notifyError("An error occurred while sending the email");
+      notifyError(t("shareOption.sendFailed"));
     } finally {
       setIsSending(false);
     }
   };
 
   const handleWhatsAppShare = () => {
-    let quoteText;
+    const number = quotationData?.quotationNumber || "-";
+    let lines;
     if (isFireLOB) {
       const totalSI =
         (Number(fireSumInsured.Building) || 0) +
@@ -283,25 +297,26 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         (Number(fireSumInsured.GrossProfit) || 0) +
         (Number(fireSumInsured.Wages) || 0) +
         (Number(fireSumInsured.LossOfRent) || 0);
-      quoteText = `${t("shareOption.productFireAndAlliedPerils")} Quote - ${
-        quotationData?.quotationNumber || "N/A"
-      }%0A%0A${t("shareOption.locationLabel")}: ${fireRiskDetails.locationAddress || "N/A"}%0A${t("shareOption.buildingTypeLabel")}: ${
-        fireRiskDetails.buildingType || "N/A"
-      }%0ATotal Sum Insured: ${formatCurrency(totalSI)}%0ATotal Premium: ${formatCurrency(premiumValue)}%0A%0AFor full details, please contact your agent.`;
+      lines = [
+        t("shareOption.whatsAppFireTitle", { number }),
+        "",
+        `${t("shareOption.locationLabel")}: ${fireRiskDetails.locationAddress || "-"}`,
+        `${t("shareOption.buildingTypeLabel")}: ${fireRiskDetails.buildingType || "-"}`,
+        `${t("shareOption.totalSumInsured")}: ${formatCurrency(totalSI)}`,
+        `${t("shareOption.totalPremium")}: ${formatCurrency(premiumValue)}`,
+      ];
     } else {
-      quoteText = `Insurance Quote - ${
-        quotationData?.quotationNumber || "N/A"
-      }%0A%0ATotal Premium: ${formatCurrency(premiumValue)}%0A%0AFor full details, please contact your agent.`;
+      lines = [t("shareOption.whatsAppTitle", { number }), "", `${t("shareOption.totalPremium")}: ${formatCurrency(premiumValue)}`];
     }
-    const whatsappUrl = `https://wa.me/?text=${quoteText}`;
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    lines.push("", t("shareOption.whatsAppContact"));
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`, "_blank", "noopener,noreferrer");
   };
 
   const dialogHeader = showInsurerForm
     ? t("shareOption.sendToInsurerTitle")
     : showEmailForm
-      ? "Send via Email"
-      : "Share Quote";
+      ? t("shareOption.emailTitle")
+      : t("shareOption.title");
 
   return (
     <Dialog
@@ -387,6 +402,12 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
               {quotePdfLoading ? t("shareOption.downloading") : t("shareOption.download")}
             </div>
           </div>
+          <div onClick={handlePrint} className="col-2 p-0">
+            <div className="common__div mb-2 cursor-pointer">
+              <i className="pi pi-print share__option_icon" aria-hidden="true" />
+            </div>
+            <div className="share__option_caption">{t("shareOption.print")}</div>
+          </div>
           <div onClick={handleEmailClick} className="col-2 p-0">
             <div className="common__div mb-2 cursor-pointer">
               <SvgEmailIcon />
@@ -407,7 +428,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
           </div>
 
           <div className="col-12 submit__container">
-            <div style={{ fontSize: "12px", wordBreak: "break-all" }}>
+            <div className="share__link">
               {`${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`}
             </div>
             <Button onClick={handleCopyToClipboard}>{t("shareOption.copyLink")}</Button>
@@ -417,7 +438,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         <div className="grid m-0">
           <div className="col-12 mb-3">
             <label htmlFor="email" className="block mb-2 font-semibold">
-              Recipient Email *
+              {t("shareOption.recipientEmail")} *
             </label>
             <InputText
               id="email"
@@ -433,7 +454,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
             <>
               <div className="col-12 mb-3">
                 <label htmlFor="message" className="block mb-2 font-semibold">
-                  Custom Message (Optional)
+                  {t("shareOption.customMessage")}
                 </label>
                 <InputTextarea
                   id="message"
@@ -459,9 +480,6 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                   loading={isPreparingSuggestion}
                   disabled={isSending || isPreparingSuggestion}
                 />
-                <small className="block mt-2 text-500">
-                  {t("shareOption.suggestedContentHint")}
-                </small>
               </div>
             </>
           ) : (
@@ -492,9 +510,6 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                   disabled={isSending}
                   style={{ fontFamily: "monospace", fontSize: "12px" }}
                 />
-                <small className="block mt-2 text-500">
-                  {t("shareOption.suggestedContentEditHint")}
-                </small>
               </div>
 
               <div className="col-12 mb-3">
@@ -510,39 +525,15 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
           )}
 
           <div className="col-12 mb-2">
-            <div
-              style={{
-                background: "#f8f9fa",
-                padding: "15px",
-                borderRadius: "8px",
-                fontSize: "13px",
-                color: "#666",
-              }}
-            >
-              <strong>Quote Summary:</strong>
-              <div className="mt-2">
-                Quote ID: {quotationData?.quotationNumber || "N/A"}
-                {isFireLOB ? (
-                  <>
-                    <br />Product: {t("shareOption.productFireAndAlliedPerils")}
-                    <br />{t("shareOption.locationLabel")}: {fireRiskDetails.locationAddress || "N/A"}
-                    <br />{t("shareOption.buildingTypeLabel")}: {fireRiskDetails.buildingType || "N/A"}
-                    <br />{t("shareOption.sumInsuredBuildingLabel")}: {formatCurrency(fireSumInsured.Building ?? 0)}
-                    <br />Total Premium: {formatCurrency(premiumValue)}
-                  </>
-                ) : (
-                  <>
-                    <br />Insurance Company:{" "}
-                    {quotationData?.participantDetails?.[0]?.insuranceCompanyName ||
-                      "N/A"}
-                    <br />Total Premium: {formatCurrency(premiumValue)}
-                  </>
-                )}
-                {useSuggestedContent && (
-                  <div className="mt-2 text-success">{t("shareOption.usingSuggestedContent")}</div>
-                )}
-              </div>
-            </div>
+            <KeyValueGrid columns={2} className="share__summary" items={[
+              { label: t("shareOption.quotationNumber"), value: quotationData?.quotationNumber },
+              { label: t("shareOption.product"), value: isFireLOB ? t("shareOption.productFireAndAlliedPerils") : quotationData?.productType },
+              { label: t("shareOption.insuranceCompany"), value: quotationData?.participantDetails?.[0]?.insuranceCompanyName, hidden: isFireLOB },
+              { label: t("shareOption.locationLabel"), value: fireRiskDetails.locationAddress, hidden: !isFireLOB },
+              { label: t("shareOption.buildingTypeLabel"), value: fireRiskDetails.buildingType, hidden: !isFireLOB },
+              { label: t("shareOption.sumInsuredBuildingLabel"), value: fireSumInsured.Building ?? 0, type: "amount", hidden: !isFireLOB },
+              { label: t("shareOption.totalPremium"), value: premiumValue, type: "amount" },
+            ]} />
           </div>
 
           <div className="col-12 flex justify-content-end gap-2">
@@ -558,7 +549,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
               disabled={isSending || isPreparingSuggestion}
             />
             <Button
-              label={isSending ? "Sending..." : "Send Email"}
+              label={t("shareOption.sendEmail")}
               icon="pi pi-send"
               onClick={handleSendEmail}
               loading={isSending}

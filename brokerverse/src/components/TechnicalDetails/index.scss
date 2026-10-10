@@ -1,0 +1,82 @@
+@import "../../theme/bdoi/tokens";
+
+.bv-tech {
+  margin-top: 16px;
+  border-top: 1px solid $color-border;
+  padding-top: 8px;
+
+  .bv-tech__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    color: $color-text-muted;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    .pi {
+      font-size: 11px;
+    }
+
+    &:hover {
+      color: $color-heading;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+      border-radius: $radius-sm;
+    }
+  }
+
+  .bv-tech__body {
+    display: grid;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .bv-tech__block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 2rem;
+  }
+
+  .bv-tech__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text-muted;
+  }
+
+  .bv-tech__copy.p-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: $color-text-muted;
+  }
+
+  .bv-tech__pre {
+    margin: 0;
+    max-height: 20rem;
+    overflow: auto;
+    padding: 10px 12px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface-muted;
+    color: $color-text;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+    }
+  }
+}

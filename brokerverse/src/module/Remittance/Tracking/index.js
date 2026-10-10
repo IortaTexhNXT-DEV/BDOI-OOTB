@@ -16,6 +16,7 @@ import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Timeline } from "primereact/timeline";
 import { TabView, TabPanel } from "primereact/tabview";
 import remittanceService from "../../../services/remittanceService";
+import { printPdf } from "../../../components/Print";
 import { calendarDateFormat, downloadCsv, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -169,9 +170,10 @@ const RemittanceTracking = () => {
     return formatCurrency(rowData[field]);
   };
 
-  const handlePrint = async (rowData) => {
-    await handleView(rowData);
-    setTimeout(() => window.print(), 300);
+  // the remittance advice PDF of the server, not the screen: a dialog over a list does not print as a document
+  const handlePrint = (rowData) => {
+    printPdf(remittanceService.remittanceAdvicePath(rowData.id), { fileName: `remittance-${rowData.remittanceNo}.pdf` })
+      .catch((error) => showError(toast, error, t("print.failed")));
   };
 
   const handleExport = () => {

@@ -9,37 +9,42 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { MultiSelect } from "primereact/multiselect";
-import { ConfirmDialog } from "primereact/confirmdialog";
+import DateField from "../../../../components/DateField";
 import FieldError from "../../../../components/FieldError";
+import { openConfirm } from "../../../../components/ConfirmDialog";
+import DetailDialog from "../../../../components/DetailDialog";
+import DetailHeader from "../../../../components/DetailHeader";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
 import { useLocation } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../../components/InputField";
 import incentiveService from "../../../../services/incentiveService";
 import mastersService from "../../../../services/mastersService";
-import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittance/shared";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { loadSettings, showError, showSuccess } from "../../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
+import TierEditor, { bandKind, tierProblem } from "./TierEditor";
 import "./index.scss";
 import RowActions, { actionsColumn } from "../../../../components/RowActions";
 import PageActions from "../../../../components/PageActions";
 
 const IncentiveProgramMaster = () => {
   const { t } = useTranslation();
+  const k = (key, opts) => t(`incentiveProgramMaster.${key}`, opts);
   const { formatCurrency } = useFormatCurrency();
   const location = useLocation();
   const toast = useRef(null);
 
   // State management
   const [programs, setPrograms] = useState([]);
-  const [config, setConfig] = useState({ types: [], frequencies: [], metrics: [], currencies: [], defaultCurrency: "" });
+  const [config, setConfig] = useState({ types: [], frequencies: [], metrics: [], metricMap: {}, currencies: [], defaultCurrency: "" });
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -47,10 +52,10 @@ const IncentiveProgramMaster = () => {
 
   // Form state
   const [showDialog, setShowDialog] = useState(false);
+  const [viewed, setViewed] = useState(null);
   const [mode, setMode] = useState("add"); // add, edit, view
   const [currentProgram, setCurrentProgram] = useState(null);
   const [errors, setErrors] = useState({});
-  const [tabIndex, setTabIndex] = useState(0);
   const [formData, setFormData] = useState({
     programCode: "",
     programName: "",
@@ -87,6 +92,7 @@ const IncentiveProgramMaster = () => {
         types: s["incentive.program_types"] || [],
         frequencies: s["incentive.calculation_frequencies"] || [],
         metrics: Object.keys(s["incentive.metric_map"] || {}),
+        metricMap: s["incentive.metric_map"] || {},
         currencies: currencies.map((c) => c.CurrencyCode).filter(Boolean),
         defaultCurrency: (currencies.find((c) => c.isBase === true) || {}).CurrencyCode || s["currency.default"] || ""
       }))
@@ -134,7 +140,9 @@ const IncentiveProgramMaster = () => {
   useEffect(() => {
     if (location.state) {
       const { mode: navMode, data } = location.state;
-      if (navMode && ["add", "edit", "view"].includes(navMode)) {
+      if (navMode === "view" && data) {
+        setViewed(data);
+      } else if (navMode && ["add", "edit"].includes(navMode)) {
         setMode(navMode);
         if (data) {
           setCurrentProgram(data);
@@ -183,7 +191,6 @@ const IncentiveProgramMaster = () => {
       structure: []
     });
     setErrors({});
-    setTabIndex(0);
     setShowDialog(true);
   };
 
@@ -192,26 +199,13 @@ const IncentiveProgramMaster = () => {
     setCurrentProgram(rowData);
     setFormData({
       ...rowData,
-      startDate: rowData.startDate ? new Date(rowData.startDate) : null,
-      endDate: rowData.endDate ? new Date(rowData.endDate) : null,
+      structure: rowData.structure || [],
     });
     setErrors({});
-    setTabIndex(0);
     setShowDialog(true);
   };
 
-  const handleView = (rowData) => {
-    setMode("view");
-    setCurrentProgram(rowData);
-    setFormData({
-      ...rowData,
-      startDate: rowData.startDate ? new Date(rowData.startDate) : null,
-      endDate: rowData.endDate ? new Date(rowData.endDate) : null,
-    });
-    setErrors({});
-    setTabIndex(0);
-    setShowDialog(true);
-  };
+  const handleView = (rowData) => setViewed(rowData);
 
   const handleSave = async () => {
     const found = requiredErrors(formData, [
@@ -224,19 +218,21 @@ const IncentiveProgramMaster = () => {
       ["targetMetric", "Target metric"],
       ["calculationFrequency", "Calculation frequency"],
       ["baseTarget", "Base target", (v) => Number(v.baseTarget) > 0, "Base target must be greater than zero"],
+      ["structure", k("structureSection"), (v) => v.status !== "Active" || v.structure.length > 0, k("tierRequiredActive")],
     ]);
+    const problem = tierProblem(formData.structure, bandKind(config.metricMap[formData.targetMetric], formData.structure));
+    if (problem) found.structure = `${k("tierRow", { n: problem.index + 1 })}: ${k(problem.key, problem.values)}`;
     setErrors(found);
     if (hasErrors(found)) {
       showError(toast, { message: errorSummary(found) }, "Validation");
-      setTabIndex(["targetMetric", "calculationFrequency", "baseTarget"].some((f) => found[f]) && !["programName", "programType", "applicableTo", "startDate", "endDate"].some((f) => found[f]) ? 1 : 0);
       return;
     }
     setLoading(true);
     try {
       const programData = {
         ...formData,
-        startDate: isoDate(formData.startDate) || null,
-        endDate: isoDate(formData.endDate) || null,
+        startDate: formData.startDate || null,
+        endDate: formData.endDate || null,
       };
 
       if (mode === "add") {
@@ -257,17 +253,27 @@ const IncentiveProgramMaster = () => {
   };
 
   const handleStatusChange = async (rowData) => {
-    const newStatus = rowData.status === "Active" ? "Inactive" : "Active";
-    setLoading(true);
-    try {
-      await incentiveService.updateProgram(rowData.id, { status: newStatus });
-      showSuccess(toast, `Program ${newStatus.toLowerCase()} successfully`);
-      await loadPrograms();
-    } catch (error) {
-      showError(toast, error, "Failed to update program status");
-    } finally {
-      setLoading(false);
-    }
+    const deactivate = rowData.status === "Active";
+    const newStatus = deactivate ? "Inactive" : "Active";
+    const action = deactivate ? "deactivate" : "activate";
+    const changed = await openConfirm({
+      title: k(`${action}Title`),
+      severity: deactivate ? "warning" : "neutral",
+      message: k(`${action}Message`),
+      facts: [
+        { label: k("programCode"), value: rowData.programCode },
+        { label: k("programName"), value: rowData.programName },
+        { label: k("programType"), value: rowData.programType },
+        { label: k("startDate"), value: rowData.startDate, type: "date" },
+        { label: k("endDate"), value: rowData.endDate, type: "date" },
+      ],
+      note: deactivate ? k("deactivateNote") : null,
+      confirmLabel: k(`${action}Action`),
+      onConfirm: () => incentiveService.updateProgram(rowData.id, { status: newStatus }),
+    });
+    if (!changed) return;
+    showSuccess(toast, k(deactivate ? "deactivated" : "activated", { code: rowData.programCode }));
+    await loadPrograms();
   };
 
   // Template functions
@@ -303,26 +309,22 @@ const IncentiveProgramMaster = () => {
   const dialogFooter = (
     <div className="dialog-footer">
       <Button
-        label="Cancel"
-        icon="pi pi-times"
+        label={k("cancel")}
         className="p-button-text"
         onClick={() => setShowDialog(false)}
       />
-      {mode !== "view" && (
-        <Button
-          label={mode === "add" ? "Create" : "Update"}
-          icon="pi pi-check"
-          onClick={handleSave}
-          loading={loading}
-        />
-      )}
+      <Button
+        label={mode === "add" ? k("createProgram") : k("saveProgram")}
+        icon="pi pi-check"
+        onClick={handleSave}
+        loading={loading}
+      />
     </div>
   );
 
   return (
     <div className="container__incentive__program__master">
       <Toast ref={toast} />
-      <ConfirmDialog />
 
       {/* Header */}
       <div className="top__container">
@@ -420,209 +422,214 @@ const IncentiveProgramMaster = () => {
 
       {/* Program Dialog */}
       <Dialog
-        header={mode === "add" ? t("incentiveProgramMaster.createIncentiveProgram") : mode === "edit" ? t("incentiveProgramMaster.editIncentiveProgram") : t("incentiveProgramMaster.viewIncentiveProgram")}
+        header={mode === "add" ? t("incentiveProgramMaster.createIncentiveProgram") : t("incentiveProgramMaster.editIncentiveProgram")}
         visible={showDialog}
         onHide={() => setShowDialog(false)}
-        style={{ width: '80vw', maxWidth: '1200px' }}
+        style={{ width: "56rem" }}
+        breakpoints={{ "960px": "94vw" }}
         footer={dialogFooter}
-        maximizable
+        className="ipm-dialog"
       >
-        <TabView activeIndex={tabIndex} onTabChange={(e) => setTabIndex(e.index)}>
-          <TabPanel header="Basic Information">
-            <div className="form-grid">
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Program Code</label>
-                  <InputText
-                    value={formData.programCode}
-                    onChange={(e) => setFormData({...formData, programCode: e.target.value})}
-                    disabled={mode === "view"}
-                    placeholder="Generated when left blank"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Program Name *</label>
-                  <InputText
-                    value={formData.programName}
-                    onChange={(e) => setFormData({...formData, programName: e.target.value})}
-                    disabled={mode === "view"}
-                    placeholder="Enter program name"
-                  />
-                  <FieldError error={errors.programName} />
-                </div>
+        <div className="ipm-form">
+          <h3 className="ipm-form__title">{k("programSection")}</h3>
+          <div className="form-grid">
+            <div className="form-row">
+              <div className="form-field">
+                <label>{k("programCode")}</label>
+                <InputText
+                  value={formData.programCode}
+                  onChange={(e) => setFormData({...formData, programCode: e.target.value})}
+                  placeholder={k("codeWhenBlank")}
+                />
               </div>
-
-              <div className="form-row">
-                <div className="form-field full-width">
-                  <label>Description</label>
-                  <InputTextarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    disabled={mode === "view"}
-                    placeholder="Enter program description"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Program Type *</label>
-                  <Dropdown
-                    value={formData.programType}
-                    options={programTypeOptions}
-                    onChange={(e) => setFormData({...formData, programType: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select program type"
-                  />
-                  <FieldError error={errors.programType} />
-                </div>
-                <div className="form-field">
-                  <label>Applicable To *</label>
-                  <MultiSelect
-                    value={formData.applicableTo}
-                    options={applicableToOptions}
-                    onChange={(e) => setFormData({...formData, applicableTo: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select applicable entities"
-                  />
-                  <FieldError error={errors.applicableTo} />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Start Date *</label>
-                  <Calendar
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select start date"
-                    dateFormat={calendarDateFormat()}
-                  />
-                  <FieldError error={errors.startDate} />
-                </div>
-                <div className="form-field">
-                  <label>End Date *</label>
-                  <Calendar
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select end date"
-                    dateFormat={calendarDateFormat()}
-                  />
-                  <FieldError error={errors.endDate} />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Status</label>
-                  <Dropdown
-                    value={formData.status}
-                    options={statusOptions.filter(opt => opt.value !== "All")}
-                    onChange={(e) => setFormData({...formData, status: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select status"
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Currency</label>
-                  <Dropdown
-                    value={formData.Currency ?? formData.currency}
-                    options={currencyOptions}
-                    onChange={(e) => setFormData({...formData, Currency: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select currency"
-                  />
-                </div>
+              <div className="form-field">
+                <label className="ipm-form__required">{k("programName")}</label>
+                <InputText
+                  value={formData.programName}
+                  onChange={(e) => setFormData({...formData, programName: e.target.value})}
+                />
+                <FieldError error={errors.programName} />
               </div>
             </div>
-          </TabPanel>
 
-          <TabPanel header="Target Configuration">
-            <div className="form-grid">
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Target Metric *</label>
-                  <Dropdown
-                    value={formData.targetMetric}
-                    options={targetMetricOptions}
-                    onChange={(e) => setFormData({...formData, targetMetric: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select target metric"
-                  />
-                  <FieldError error={errors.targetMetric} />
-                </div>
-                <div className="form-field">
-                  <label>Calculation Frequency *</label>
-                  <Dropdown
-                    value={formData.calculationFrequency}
-                    options={frequencyOptions}
-                    onChange={(e) => setFormData({...formData, calculationFrequency: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Select frequency"
-                  />
-                  <FieldError error={errors.calculationFrequency} />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-field">
-                  <label>Base Target *</label>
-                  <InputNumber
-                    value={formData.baseTarget}
-                    onValueChange={(e) => setFormData({...formData, baseTarget: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Enter base target"
-                    mode="decimal"
-                    minFractionDigits={0}
-                    maxFractionDigits={2}
-                  />
-                  <FieldError error={errors.baseTarget} />
-                </div>
-                <div className="form-field">
-                  <label>Stretch Target</label>
-                  <InputNumber
-                    value={formData.stretchTarget}
-                    onValueChange={(e) => setFormData({...formData, stretchTarget: e.value})}
-                    disabled={mode === "view"}
-                    placeholder="Enter stretch target"
-                    mode="decimal"
-                    minFractionDigits={0}
-                    maxFractionDigits={2}
-                  />
-                </div>
+            <div className="form-row">
+              <div className="form-field full-width">
+                <label>{k("description")}</label>
+                <InputTextarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  rows={3}
+                />
               </div>
             </div>
-          </TabPanel>
 
-          <TabPanel header="Incentive Structure">
-            <div className="structure-section">
-              <p className="structure-note">
-                Define the incentive structure based on achievement levels.
-                Structure will be configured based on the program type and target metrics.
-              </p>
-
-              {formData.structure && formData.structure.length > 0 ? (
-                <DataTable value={formData.structure} className="structure-table">
-                  <Column field="level" header="Achievement Level" />
-                  <Column field="type" header="Incentive Type" />
-                  <Column field="value" header="Rate/Amount" />
-                  <Column field="maxPayout" header="Max Payout" body={(data) =>
-                    formatCurrency(data.maxPayout)
-                  } />
-                </DataTable>
-              ) : (
-                <div className="empty-structure">
-                  <p>No incentive structure defined yet.</p>
-                  <p>Structure will be added during detailed configuration.</p>
-                </div>
-              )}
+            <div className="form-row">
+              <div className="form-field">
+                <label className="ipm-form__required">{k("programType")}</label>
+                <Dropdown
+                  value={formData.programType}
+                  options={programTypeOptions}
+                  onChange={(e) => setFormData({...formData, programType: e.value})}
+                />
+                <FieldError error={errors.programType} />
+              </div>
+              <div className="form-field">
+                <label className="ipm-form__required">{k("applicableTo")}</label>
+                <MultiSelect
+                  value={formData.applicableTo}
+                  options={applicableToOptions}
+                  onChange={(e) => setFormData({...formData, applicableTo: e.value})}
+                />
+                <FieldError error={errors.applicableTo} />
+              </div>
             </div>
-          </TabPanel>
-        </TabView>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label className="ipm-form__required">{k("startDate")}</label>
+                <DateField
+                  id="ipm-startDate"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                />
+                <FieldError error={errors.startDate} />
+              </div>
+              <div className="form-field">
+                <label className="ipm-form__required">{k("endDate")}</label>
+                <DateField
+                  id="ipm-endDate"
+                  value={formData.endDate}
+                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                />
+                <FieldError error={errors.endDate} />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label>{k("status")}</label>
+                <Dropdown
+                  value={formData.status}
+                  options={statusOptions.filter(opt => opt.value !== "All")}
+                  onChange={(e) => setFormData({...formData, status: e.value})}
+                />
+              </div>
+              <div className="form-field">
+                <label>{k("currency")}</label>
+                <Dropdown
+                  value={formData.Currency ?? formData.currency}
+                  options={currencyOptions}
+                  onChange={(e) => setFormData({...formData, Currency: e.value})}
+                />
+              </div>
+            </div>
+          </div>
+
+          <h3 className="ipm-form__title">{k("targetsSection")}</h3>
+          <div className="form-grid">
+            <div className="form-row">
+              <div className="form-field">
+                <label className="ipm-form__required">{k("targetMetric")}</label>
+                <Dropdown
+                  value={formData.targetMetric}
+                  options={targetMetricOptions}
+                  onChange={(e) => setFormData({...formData, targetMetric: e.value})}
+                />
+                <FieldError error={errors.targetMetric} />
+              </div>
+              <div className="form-field">
+                <label className="ipm-form__required">{k("frequency")}</label>
+                <Dropdown
+                  value={formData.calculationFrequency}
+                  options={frequencyOptions}
+                  onChange={(e) => setFormData({...formData, calculationFrequency: e.value})}
+                />
+                <FieldError error={errors.calculationFrequency} />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-field">
+                <label className="ipm-form__required">{k("baseTarget")}</label>
+                <InputNumber
+                  value={formData.baseTarget}
+                  onValueChange={(e) => setFormData({...formData, baseTarget: e.value})}
+                  mode="decimal"
+                  minFractionDigits={0}
+                  maxFractionDigits={2}
+                />
+                <FieldError error={errors.baseTarget} />
+              </div>
+              <div className="form-field">
+                <label>{k("stretchTarget")}</label>
+                <InputNumber
+                  value={formData.stretchTarget}
+                  onValueChange={(e) => setFormData({...formData, stretchTarget: e.value})}
+                  mode="decimal"
+                  minFractionDigits={0}
+                  maxFractionDigits={2}
+                />
+              </div>
+            </div>
+          </div>
+
+          <h3 className="ipm-form__title">{k("structureSection")}</h3>
+          <TierEditor
+            value={formData.structure}
+            onChange={(structure) => setFormData((f) => ({ ...f, structure }))}
+            metric={config.metricMap[formData.targetMetric]}
+            target={Number(formData.baseTarget) || null}
+            error={errors.structure}
+          />
+        </div>
       </Dialog>
+
+      {viewed ? (
+        <DetailDialog visible onHide={() => setViewed(null)} header={t("incentiveProgramMaster.viewIncentiveProgram")} size="lg"
+          footer={(
+            <>
+              <Button type="button" label={k("close")} outlined onClick={() => setViewed(null)} />
+              <Button type="button" label={k("edit")} icon="pi pi-pencil" onClick={() => { const row = viewed; setViewed(null); handleEdit(row); }} />
+            </>
+          )}>
+          <DetailHeader
+            title={viewed.programName}
+            subtitle={viewed.programCode}
+            status={{ code: String(viewed.status || "").toLowerCase(), label: viewed.status }}
+            meta={[
+              { label: k("programType"), value: viewed.programType },
+              { label: k("startDate"), value: viewed.startDate, type: "date" },
+              { label: k("endDate"), value: viewed.endDate, type: "date" },
+              { label: k("frequency"), value: viewed.calculationFrequency },
+            ]}
+          />
+          <DetailSection title={k("programSection")}>
+            <KeyValueGrid columns={3} items={[
+              { label: k("applicableTo"), value: (viewed.applicableTo || []).join(", "), span: 2 },
+              { label: k("currency"), value: viewed.Currency ?? viewed.currency },
+              { label: k("description"), value: viewed.description, span: "full" },
+            ]} />
+          </DetailSection>
+          <DetailSection title={k("targetsSection")}>
+            <KeyValueGrid columns={3} items={[
+              { label: k("targetMetric"), value: viewed.targetMetric },
+              { label: k("baseTarget"), value: viewed.baseTarget, type: "number" },
+              { label: k("stretchTarget"), value: viewed.stretchTarget, type: "number" },
+            ]} />
+          </DetailSection>
+          {viewed.structure?.length ? (
+            <DetailSection title={k("structureSection")} flush>
+              <DataTable value={viewed.structure} size="small">
+                <Column header={k("tierName")} body={(data, o) => data.name || k("tierNumber", { n: o.rowIndex + 1 })} />
+                <Column field="level" header={k("achievementLevel")} />
+                <Column header={k("payoutBasis")} body={(data) => (data.basis ? k(`basis.${data.basis}`) : data.type)} />
+                <Column field="value" header={k("rateOrAmount")} className="text-right" headerClassName="text-right" />
+                <Column header={k("maxPayout")} body={(data) => formatCurrency(data.maxPayout)} className="text-right" headerClassName="text-right" />
+              </DataTable>
+            </DetailSection>
+          ) : null}
+        </DetailDialog>
+      ) : null}
     </div>
   );
 };

@@ -16,6 +16,7 @@ import { askApproval, createRemittance, eligiblePolicies, executeAutomated, exec
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { VISIBLE_TO_USER } from '../notifications/service.js';
+import { actionText } from '../../lib/auditLabels.js';
 
 const ts = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : null);
 const ITEM_SELECT = `SELECT x.*, (SELECT display_name FROM users u WHERE u.id = x.created_by) AS created_by_name,
@@ -747,10 +748,15 @@ export async function auditTrail(qs) {
   const p = params();
   let cond = 'a.entity IN (\'remittance\', \'remittance_item\', \'remittance_approval\')';
   if (qs.referenceNo) cond += ` AND (a.entity_id IN (SELECT id FROM remittances WHERE remittance_number = ${p.add(qs.referenceNo)} UNION SELECT id FROM remittance_items WHERE reference_no = $${p.values.length}) OR a.after_data->>'referenceNo' = $${p.values.length})`;
-  const rows = await many(`SELECT a.*, COALESCE((SELECT remittance_number FROM remittances WHERE id = a.entity_id), (SELECT reference_no FROM remittance_items WHERE id = a.entity_id), a.after_data->>'referenceNo') AS ref
-    FROM audit_log a WHERE ${cond} ORDER BY a.id DESC LIMIT 500`, p.values);
-  return rows.map((a) => ({ id: Number(a.id), referenceNo: a.ref, actionType: a.action, previousValue: a.before_data?.status ?? null, newValue: a.after_data?.status ?? null,
-    changedBy: a.username, changeDate: ts(a.at), ipAddress: a.ip, reason: a.after_data?.remarks || a.after_data?.comments || null }));
+  const rows = await many(`SELECT a.*, COALESCE((SELECT remittance_number FROM remittances WHERE id = a.entity_id), (SELECT reference_no FROM remittance_items WHERE id = a.entity_id), a.after_data->>'referenceNo') AS ref,
+      u.display_name AS user_display_name, (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS user_roles
+    FROM audit_log a LEFT JOIN users u ON u.id = a.user_id OR (a.user_id IS NULL AND u.username = a.username)
+    WHERE ${cond} ORDER BY a.id DESC LIMIT 500`, p.values);
+  // changedBy / changeDate are kept as they were (login name, UTC text); the display name, roles, action label and the
+  // instant are added for the activity log
+  return rows.map((a) => ({ id: Number(a.id), referenceNo: a.ref, actionType: a.action, actionLabel: actionText(a.action), previousValue: a.before_data?.status ?? null, newValue: a.after_data?.status ?? null,
+    changedBy: a.username, changedByName: a.user_display_name || a.username || 'System', changedByRoles: a.user_roles || [], changeDate: ts(a.at), changedAt: a.at,
+    ipAddress: a.ip, reason: a.after_data?.remarks || a.after_data?.comments || null }));
 }
 
 export async function systemLogs() {

@@ -166,10 +166,28 @@ const LeadListing = () => {
         visible={showReportModal}
         onHide={handleCloseReportModal}
         header={t("leads.generateReport")}
-        className="report-generation-modal"
-        style={{ width: "500px" }}
+        className="report-generation-modal bv-centered"
+        style={{ width: "32rem" }}
+        breakpoints={{ "640px": "95vw" }}
         modal
         closable={!isGeneratingReport}
+        footer={(
+          <div className="flex justify-content-end gap-2">
+            <Button
+              label={t("common.cancel")}
+              className="p-button-text"
+              onClick={handleCloseReportModal}
+              disabled={isGeneratingReport}
+            />
+            <Button
+              label={t("leads.generateAndDownload")}
+              icon="pi pi-file-excel"
+              onClick={handleReportSubmit}
+              disabled={isGeneratingReport}
+              loading={isGeneratingReport}
+            />
+          </div>
+        )}
       >
         <div className="report-generation-container">
           <div className="report-generation-content">
@@ -178,7 +196,7 @@ const LeadListing = () => {
                 {t("leads.selectReportCategory")}
               </label>
               <Dropdown
-                id="reportCategory"
+                inputId="reportCategory"
                 value={selectedReportCategory}
                 options={reportCategoryOptions}
                 onChange={(e) => setSelectedReportCategory(e.value)}
@@ -186,39 +204,7 @@ const LeadListing = () => {
                 className="w-full"
                 disabled={isGeneratingReport}
               />
-              <small className="form-help-text">
-                {t("leads.reportCategoryHelp")}
-              </small>
             </div>
-          </div>
-          <div
-            className="report-generation-footer"
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-              marginTop: "20px",
-            }}
-          >
-            <Button
-              label={t("common.cancel")}
-              className="p-button-text"
-              onClick={handleCloseReportModal}
-              disabled={isGeneratingReport}
-            />
-            <Button
-              label={
-                isGeneratingReport ? t("leads.generatingReport") : t("leads.generateAndDownload")
-              }
-              icon={
-                isGeneratingReport
-                  ? "pi pi-spin pi-spinner"
-                  : "pi pi-file-excel"
-              }
-              onClick={handleReportSubmit}
-              disabled={isGeneratingReport}
-              loading={isGeneratingReport}
-            />
           </div>
         </div>
       </Dialog>

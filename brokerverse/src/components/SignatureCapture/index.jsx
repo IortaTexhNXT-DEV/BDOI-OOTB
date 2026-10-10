@@ -9,11 +9,12 @@ import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
-import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
 import { Message } from "primereact/message";
 import brandingService from "../../services/brandingService";
 import DateField from "../DateField";
+import StatusChip from "../StatusChip";
+import KeyValueGrid from "../KeyValueGrid";
+import { openConfirm } from "../ConfirmDialog";
 import "./index.scss";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -92,8 +93,6 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
   const [versions, setVersions] = useState([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [revoking, setRevoking] = useState(null);
-  const [reason, setReason] = useState("");
 
   const reload = useCallback(() => {
     if (!visible) return;
@@ -135,15 +134,26 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
       setSaving(false);
     }
   };
-  const revoke = async () => {
-    try {
-      await brandingService.revokeSignature(revoking, reason);
-      setRevoking(null);
-      setReason("");
-      reload();
-    } catch (e) {
-      setError(e.message);
-    }
+  const methodLabel = (m) => t(`signature.methods.${m}`, { defaultValue: m });
+  const statusLabel = (status) => t(`signature.statuses.${status}`, { defaultValue: status });
+
+  const revoke = async (v) => {
+    const reason = await openConfirm({
+      title: t("signature.revokeTitle"),
+      severity: "danger",
+      message: t("signature.revokeMessage"),
+      facts: [
+        { label: t("signature.signer"), value: ownerName, hidden: !ownerName },
+        { label: t("signature.version"), value: `v${v.version}` },
+        { label: t("signature.effectiveFrom", "Effective from"), value: v.effectiveFrom, type: "date" },
+        { label: t("signature.effectiveTo"), value: v.effectiveTo || t("signature.openEnded"), type: v.effectiveTo ? "date" : "text" },
+      ],
+      note: t("signature.revokeNote"),
+      input: { type: "textarea", label: t("signature.reason", "Reason for the revocation"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("signature.confirmRevoke", "Revoke version"),
+      onConfirm: (text) => brandingService.revokeSignature(v.id, text),
+    });
+    if (reason !== null) reload();
   };
   const ready = consent && (mode === "draw" ? !!drawn : !!file);
 
@@ -182,26 +192,28 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
         {versions.map((v) => (
           <li key={v.id}>
             <VersionImage id={v.id} />
-            <div>
-              <strong>v{v.version}</strong> <Tag value={v.status} severity={v.status === "active" ? "success" : v.status === "revoked" ? "danger" : "info"} />
-              <div className="bv-sig__meta">
-                {t("signature.period", "Effective")} {v.effectiveFrom} {v.effectiveTo ? `- ${v.effectiveTo}` : t("signature.onwards", "onwards")} | {v.method} | {v.capturedBy}
-                {v.revokeReason ? ` | ${t("signature.revoked", "revoked")}: ${v.revokeReason}` : ""}
+            <div className="bv-sig__version">
+              <div className="bv-sig__version-head">
+                <strong>{t("signature.versionNo", { version: v.version })}</strong>
+                <StatusChip code={v.status} label={statusLabel(v.status)} severity={v.status === "active" ? "success" : v.status === "revoked" ? "danger" : "info"} />
               </div>
+              <KeyValueGrid columns="auto" items={[
+                { label: t("signature.effectiveFrom", "Effective from"), value: v.effectiveFrom, type: "date" },
+                { label: t("signature.effectiveTo"), value: v.effectiveTo || t("signature.openEnded"), type: v.effectiveTo ? "date" : "text" },
+                { label: t("signature.method"), value: methodLabel(v.method) },
+                { label: t("signature.capturedBy"), value: v.capturedBy },
+                { label: t("signature.capturedAt"), value: v.capturedAt, type: "datetime" },
+                { label: t("signature.revokedBy"), value: v.revokedBy, hidden: v.status !== "revoked" },
+                { label: t("signature.revokedAt"), value: v.revokedAt, type: "datetime", hidden: v.status !== "revoked" },
+                { label: t("signature.revokeReason"), value: v.revokeReason, span: "full", hidden: !v.revokeReason },
+              ]} />
             </div>
             {v.status !== "revoked" && canManage && (
-              <Button type="button" label={t("signature.revoke", "Revoke")} className="p-button-text p-button-danger p-button-sm" onClick={() => { setRevoking(v.id); setReason(""); }} />
+              <Button type="button" label={t("signature.revoke", "Revoke")} className="p-button-text p-button-danger p-button-sm" onClick={() => revoke(v)} />
             )}
           </li>
         ))}
       </ul>
-      {revoking && (
-        <div className="bv-sig__revoke">
-          <InputText value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t("signature.reason", "Reason for the revocation")} />
-          <Button type="button" label={t("signature.confirmRevoke", "Revoke version")} className="p-button-danger p-button-sm" disabled={!reason.trim()} onClick={revoke} />
-          <Button type="button" label={t("common.cancel", "Cancel")} className="p-button-text p-button-sm" onClick={() => setRevoking(null)} />
-        </div>
-      )}
     </Dialog>
   );
 };

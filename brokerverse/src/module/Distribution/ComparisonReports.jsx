@@ -17,8 +17,9 @@ import service from "../../services/distributionService";
 import placementService from "../../services/placementService";
 import quotationService from "../../services/quotationService";
 import { hasPermission } from "../../utils/canOpen";
-import { promptText } from "../../utility/dialogs";
-import { Field, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+import { openConfirm } from "../../components/ConfirmDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { Field, PageHeader, StatusTag, date, dateTime, money, printFile, showError, showSuccess } from "./common";
 
 /** Offers a comparison report needs (the server refuses fewer). */
 export const MIN_OPTIONS = 2;
@@ -117,26 +118,43 @@ const ComparisonReports = () => {
       return false;
     }
   };
-  const act = async (fn) => {
-    try {
-      const r = await fn();
-      if (r?.message) showSuccess(toast, r.message);
-      load();
-      return r;
-    } catch (e) {
-      showError(toast, e);
-      return null;
-    }
+  const reportFacts = (row) => [
+    { label: t("distribution.cr.number", "Report"), value: row.reportNumber },
+    { label: t("distribution.cr.preparedFor", "Prepared for"), value: row.preparedFor },
+  ];
+  // the action runs in the confirmation (a failure stays there); the list is reloaded after it
+  const confirmAct = async (options, fn) => {
+    let result = null;
+    const done = await openConfirm({ ...options, onConfirm: async (value) => { result = await fn(value); } });
+    // with a field the dialog gives its value (an empty address included), null when cancelled
+    if (done === false || done === null) return null;
+    if (result?.message) showSuccess(toast, result.message);
+    load();
+    return result;
   };
-  const email = async (row) => {
-    const to = await promptText(t("distribution.cr.emailTo", "Send to (empty: the client's e-mail on file)"), "", { multiline: false });
-    if (to === null) return;
-    act(() => service.emailComparisonReport(row.id, to || undefined));
-  };
-  const accept = async (row, key) => {
-    const r = await act(() => service.acceptComparisonReport(row.id, key));
+  const email = (row) => confirmAct({
+    title: t("distribution.cr.emailTitle", "E-mail comparison report"),
+    message: t("distribution.cr.emailMessage", "The client report (PDF) is sent from the outbox."),
+    facts: [...reportFacts(row), { label: t("distribution.cr.recommended", "Recommended"), value: row.recommended?.insurer, hidden: !row.recommended }],
+    input: { type: "text", label: t("distribution.cr.emailAddress", "E-mail address"), placeholder: t("distribution.cr.emailOnFile", "The client's e-mail on file"),
+      validate: (v) => (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? t("distribution.cr.emailInvalid", "Enter a valid e-mail address.") : null) },
+    confirmLabel: t("distribution.cr.emailAction", "Send e-mail"),
+  }, (to) => service.emailComparisonReport(row.id, to || undefined));
+  const accept = async (row, option) => {
+    const r = await confirmAct({
+      title: t("distribution.cr.chosenTitle", "Record the client's choice"),
+      message: t("distribution.cr.chosenMessage", "The report is closed with this option and can no longer be changed."),
+      facts: [
+        ...reportFacts(row),
+        { label: t("distribution.cr.insurer", "Insurer"), value: option.insurer },
+        { label: t("distribution.fl.sumInsured", "Sum insured"), value: option.sumInsured, type: "amount" },
+        { label: t("distribution.cr.total", "Total premium"), value: option.grossPremium, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("distribution.cr.chosenAction", "Record choice"),
+    }, () => service.acceptComparisonReport(row.id, option.key));
     if (r) setEdit(null);
   };
+  const printReport = (row) => printFile(toast, `/comparison-reports/${encodeURIComponent(row.id)}/pdf`, `${row.reportNumber}.pdf`);
   const addReason = (reason) => setEdit((e) => ({ ...e, reasonsText: [e.reasonsText, reason].filter(Boolean).join("\n") }));
 
   return (
@@ -160,7 +178,7 @@ const ComparisonReports = () => {
           <Column header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />
           <Column body={(r) => (
             <div className="dist-actions">
-              <Button icon="pi pi-file-pdf" text size="small" tooltip={t("distribution.cr.pdf", "Client report (PDF)")} aria-label={t("distribution.cr.pdf", "Client report (PDF)")} onClick={() => act(() => service.comparisonPdf(r.id))} />
+              <Button icon="pi pi-print" text size="small" tooltip={t("distribution.cr.pdf", "Client report (PDF)")} aria-label={t("distribution.cr.pdf", "Client report (PDF)")} onClick={() => printReport(r)} />
               {write ? <Button icon="pi pi-envelope" text size="small" tooltip={t("distribution.cr.email", "E-mail to the client")} aria-label={t("distribution.cr.email", "E-mail to the client")} onClick={() => email(r)} /> : null}
               {write && r.status !== "accepted" ? <Button icon="pi pi-pencil" text size="small" aria-label={t("distribution.common.edit", "Edit")} onClick={() => setEdit(toEdit(r))} /> : null}
             </div>
@@ -199,12 +217,20 @@ const ComparisonReports = () => {
       <Dialog className="pe-dialog" header={edit ? `${edit.reportNumber} · ${edit.preparedFor}` : ""} visible={!!edit} style={{ width: "min(1000px, 96vw)" }} onHide={() => setEdit(null)}
         footer={edit ? (
           <div>
-            <Button label={t("distribution.cr.pdf", "Client report (PDF)")} icon="pi pi-file-pdf" outlined onClick={async () => { if (await saveEdit()) act(() => service.comparisonPdf(edit.id)); }} />
+            <Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setEdit(null)} />
+            <Button label={t("distribution.cr.pdf", "Client report (PDF)")} icon="pi pi-print" outlined onClick={async () => { if (await saveEdit()) printReport(edit); }} />
             <Button label={t("distribution.common.save", "Save")} icon="pi pi-save" onClick={saveEdit} />
           </div>
         ) : null}>
         {edit && (
           <div>
+            <KeyValueGrid columns={4} className="mb-3" items={[
+              { label: t("distribution.common.status", "Status"), value: <StatusTag status={edit.status} /> },
+              { label: t("distribution.cr.source", "Compared"), value: edit.brokerSlipNumber ? `${t("distribution.cr.rfq", "Request for quotation")} ${edit.brokerSlipNumber}` : t("distribution.cr.quotes", "{{count}} quotations", { count: edit.quoteIds.length }) },
+              { label: t("distribution.cr.createdBy", "Prepared by"), value: edit.createdBy },
+              { label: t("distribution.cr.createdAt", "Prepared on"), value: edit.createdAt, type: "datetime" },
+              { label: t("distribution.cr.sent", "Sent"), value: edit.sentAt ? `${dateTime(edit.sentAt)}${edit.sentTo ? ` · ${edit.sentTo}` : ""}` : null, hidden: !edit.sentAt },
+            ]} />
             <div className="dist-grid">
               <Field label={t("distribution.cr.preparedFor", "Prepared for")}><InputText value={edit.preparedFor} onChange={(e) => setEdit({ ...edit, preparedFor: e.target.value })} /></Field>
               <Field label={t("distribution.cr.titleLabel", "Title")}><InputText value={edit.title} onChange={(e) => setEdit({ ...edit, title: e.target.value })} /></Field>
@@ -221,7 +247,7 @@ const ComparisonReports = () => {
               <Column header={t("distribution.cr.highlights", "What stands out")} body={(o) => (
                 <InputText value={edit.highlights[o.key] || ""} onChange={(e) => setEdit({ ...edit, highlights: { ...edit.highlights, [o.key]: e.target.value } })} className="w-full" />
               )} />
-              <Column body={(o) => <Button label={t("distribution.cr.chosen", "Client chose")} size="small" text onClick={() => accept(edit, o.key)} />} />
+              <Column body={(o) => <Button label={t("distribution.cr.chosen", "Client chose")} size="small" text onClick={() => accept(edit, o)} />} />
             </DataTable>
             <div className="dist-grid mt-3">
               <Field label={t("distribution.cr.reasons", "Why we recommend it (one reason per line)")} full>

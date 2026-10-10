@@ -6,94 +6,77 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
-import { PageHeader, StatusTag, date, dateTime, showError, showSuccess } from "./common";
+import { PageHeader, StatusTag, date, dateTime, money, showError, showSuccess, yearLabel } from "./common";
 import { hasPermission } from "../../utils/canOpen";
+import { useStableLoad } from "../../hooks/useStableLoad";
+import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
+import ConfirmDialog from "../../components/ConfirmDialog";
 import ImportDialog from "../../components/ImportDialog";
+import StatusPanel from "./periodManagement/StatusPanel";
+import HistoryPanel from "./periodManagement/HistoryPanel";
+import { OPENING_UPLOAD, openingConfirm, openingPreviewFacts } from "./periodManagement/openingBalances";
+import "./periodManagement/PeriodManagement.scss";
 
-const OPENING_UPLOAD = [{ label: "Opening balances", templatePath: "/period-end/opening-balances/template", uploadPath: "/period-end/opening-balances/import" }];
+const ACTION_ICONS = { softClose: "pi pi-lock-open", close: "pi pi-lock", reopen: "pi pi-refresh" };
+
+/** The fiscal year after the latest one: code, start and end (a year of twelve months starting the day after). */
+export const nextFiscalYear = (years) => {
+  const last = (years || []).reduce((m, y) => (!m || y.endDate > m.endDate ? y : m), null);
+  if (!last) return null;
+  const [y, m, d] = last.endDate.split("-").map(Number);
+  const start = new Date(Date.UTC(y, m - 1, d + 1));
+  const end = new Date(Date.UTC(start.getUTCFullYear() + 1, start.getUTCMonth(), start.getUTCDate() - 1));
+  const iso = (x) => x.toISOString().slice(0, 10);
+  return { code: `FY${end.getUTCFullYear()}`, startDate: iso(start), endDate: iso(end) };
+};
 
 /**
  * Accounts > Period End > Period Management: fiscal years and their periods (1-12 and adjustment period 13) with
- * status open / soft-closed / closed / locked. Closing runs the blocking month-end checks; reopening needs the
- * Accounting Manager's approval permission and remarks; periods of a closed (locked) fiscal year cannot be reopened.
+ * status open / soft-closed / closed / locked. Each status change opens a side panel that previews the blocking
+ * month-end checks and takes a coded reason; reopening needs approve:period-end; periods of a closed fiscal year are
+ * locked. Go-live opening balances are validated before they are loaded.
  */
 const PeriodManagement = () => {
   const { t } = useTranslation();
-  // Approving, rejecting, reopening and year-end close / reverse need approve:period-end (the server refuses them otherwise)
-  const canApprove = hasPermission("approve:period-end");
   const navigate = useNavigate();
   const toast = useRef(null);
-  const [years, setYears] = useState([]);
+  const canWrite = hasPermission("write:period-end");
   const [selected, setSelected] = useState(null);
-  const [fy, setFy] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [action, setAction] = useState(null); // { period, status }
-  const [remarks, setRemarks] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [history, setHistory] = useState(null);
+  const [request, setRequest] = useState(null);
+  const [historyFor, setHistoryFor] = useState(null);
   const [checks, setChecks] = useState(null);
   const [showOpening, setShowOpening] = useState(false);
+  const [creating, setCreating] = useState(null);
 
-  const loadYears = useCallback(async () => {
-    try {
-      const list = await periodEndService.fiscalYears();
-      setYears(list);
-      setSelected((s) => s || list.find((y) => y.status !== "closed")?.code || list[0]?.code);
-    } catch (e) {
-      showError(toast, e);
-    }
-  }, []);
-  const loadFy = useCallback(async () => {
-    if (!selected) return;
-    setLoading(true);
-    try {
-      setFy(await periodEndService.fiscalYear(selected));
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setLoading(false);
-    }
-  }, [selected]);
-  useEffect(() => { loadYears(); }, [loadYears]);
-  useEffect(() => { loadFy(); }, [loadFy]);
+  const yearsLoader = useCallback(() => periodEndService.fiscalYears(), []);
+  const { data: years, error: yearsError, reload: reloadYears } = useStableLoad(yearsLoader, { initialData: [] });
+  useEffect(() => {
+    if (!selected && years?.length) setSelected(years.find((y) => y.status !== "closed")?.code || years[0].code);
+  }, [years, selected]);
+  const fyLoader = useCallback(() => periodEndService.fiscalYear(selected), [selected]);
+  const { data: fy, loading, refreshing, error: fyError, reload: reloadFy } = useStableLoad(fyLoader, { enabled: !!selected });
+  useEffect(() => {
+    const message = yearsError || fyError;
+    if (message) showError(toast, { message });
+  }, [yearsError, fyError]);
+
+  const statusDone = (req) => {
+    showSuccess(toast, t("periodManagement.done", { period: req.period.period, status: t(`periodEnd.status.${{ softClose: "soft_closed", close: "closed", reopen: "open" }[req.action]}`) }));
+    setRequest(null);
+    reloadFy();
+    reloadYears();
+  };
 
   const createNext = async () => {
-    try {
-      const f = await periodEndService.createFiscalYear();
-      showSuccess(toast, `${f.code} ${t("periodEnd.created")}`);
-      await loadYears();
-      setSelected(f.code);
-    } catch (e) {
-      showError(toast, e);
-    }
+    const f = await periodEndService.createFiscalYear();
+    showSuccess(toast, t("periodManagement.yearCreated", { code: f.code }));
+    await reloadYears();
+    setSelected(f.code);
   };
 
-  const apply = async () => {
-    setBusy(true);
-    try {
-      await periodEndService.setPeriodStatus(action.period, action.status, remarks);
-      showSuccess(toast, `${action.period}: ${t(`periodEnd.status.${action.status}`)}`);
-      setAction(null);
-      setRemarks("");
-      loadFy();
-      loadYears();
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const openHistory = async (row) => {
-    try {
-      setHistory({ period: row.period, rows: await periodEndService.periodHistory(row.period) });
-    } catch (e) {
-      showError(toast, e);
-    }
-  };
   const openChecks = async (row) => {
     setChecks({ period: row.period, rows: null });
     try {
@@ -105,100 +88,108 @@ const PeriodManagement = () => {
   };
 
   const actions = (row) => {
-    const b = [];
-    if (row.status === "locked") return <span className="pe-muted">{t("periodEnd.lockedHint")}</span>;
-    if (row.status === "open" && !row.isAdjustment) b.push(["soft_closed", "pi pi-lock-open", t("periodEnd.softClose")]);
-    if (row.status !== "closed") b.push(["closed", "pi pi-lock", t("periodEnd.close")]);
-    if (canApprove && row.status !== "open") b.push(["open", "pi pi-refresh", t("periodEnd.reopen")]);
+    const offered = row.actions || {};
     return (
-      <div className="flex gap-1 flex-wrap">
-        {b.map(([status, icon, label]) => (
-          <Button key={status} icon={icon} label={label} size="small" outlined={status !== "closed"} severity={status === "open" ? "warning" : undefined}
-            onClick={() => { setAction({ period: row.period, status, current: row.status }); setRemarks(""); }} />
-        ))}
-        <Button icon="pi pi-check-square" size="small" text tooltip={t("periodEnd.previewChecks")} onClick={() => openChecks(row)} aria-label={t("periodEnd.previewChecks")} />
-        <Button icon="pi pi-history" size="small" text tooltip={t("periodEnd.history")} onClick={() => openHistory(row)} aria-label={t("periodEnd.history")} />
+      <div className="pm-actions">
+        {row.status === "locked" && <span className="pe-muted">{t("periodEnd.lockedHint")}</span>}
+        {canWrite && ["softClose", "close", "reopen"].filter((a) => offered[a] && !(a === "reopen" && row.status === "locked")).map((a) => {
+          // a move the user may not make (reopen without the approval permission) stays visible, disabled, with the reason
+          const { allowed, reason, message } = offered[a];
+          const tip = allowed ? undefined : t(`periodManagement.notAllowed.${reason}`, { defaultValue: message || "" });
+          return (
+            <Button key={a} type="button" icon={ACTION_ICONS[a]} label={t(`periodManagement.button.${a}`)} size="small" outlined
+              severity={a === "reopen" ? "warning" : undefined} disabled={!allowed} tooltip={tip} tooltipOptions={{ showOnDisabled: true, position: "top" }}
+              onClick={() => setRequest({ action: a, period: row })} />
+          );
+        })}
+        <Button type="button" icon="pi pi-check-square" size="small" text tooltip={t("periodEnd.previewChecks")} onClick={() => openChecks(row)} aria-label={t("periodEnd.previewChecks")} />
+        <Button type="button" icon="pi pi-history" size="small" text tooltip={t("periodEnd.history")} onClick={() => setHistoryFor(row.period)} aria-label={t("periodEnd.history")} />
+      </div>
+    );
+  };
+
+  const lastChange = (row) => {
+    const c = row.lastChange;
+    if (!c) return <span className="pe-muted">-</span>;
+    return (
+      <div className="pm-last-change">
+        <div className="pm-last-change__who">
+          <StatusChip code={c.to} label={t(`periodEnd.status.${c.to}`)} />
+          <span>{c.byName || t("periodManagement.system")}</span>
+        </div>
+        <div className="pe-muted">{dateTime(c.at)}</div>
+        {(c.reasonName || c.remarks) && <div className="pm-last-change__reason" title={c.remarks || ""}>{c.reasonName || c.remarks}</div>}
       </div>
     );
   };
 
   const counts = (fy?.periods || []).reduce((m, p) => ({ ...m, [p.status]: (m[p.status] || 0) + 1 }), {});
+  const next = nextFiscalYear(years);
 
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]}>
-        <Dropdown value={selected} options={years.map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))} onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} />
-        <Button icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={createNext} />
-        {hasPermission("write:period-end") && (
-          <Button icon="pi pi-upload" label="Import opening balances" className="p-button-outlined" onClick={() => setShowOpening(true)} />
+      <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]} help={t("periodManagement.help")}>
+        <Dropdown value={selected} options={(years || []).map((y) => ({ label: yearLabel(t, y), value: y.code }))}
+          onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} aria-label={t("periodEnd.fiscalYear")} />
+        {canWrite && next && <Button type="button" icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={() => setCreating(next)} />}
+        {canWrite && (
+          <Button type="button" icon="pi pi-upload" label={t("periodManagement.importOpening")} className="p-button-outlined" onClick={() => setShowOpening(true)} />
         )}
       </PageHeader>
-      <ImportDialog visible={showOpening} onHide={() => setShowOpening(false)} title="Import opening balances (go-live)" targets={OPENING_UPLOAD} goLiveDate onDone={loadYears}
-        note="Load the trial balance of the old system at the close of the day before the go-live date. Debits must equal credits; nothing is loaded if any row is wrong. Loading again with the same go-live date replaces the earlier load." />
+      <ImportDialog visible={showOpening} onHide={() => setShowOpening(false)} title={t("periodManagement.importOpening")} targets={OPENING_UPLOAD} goLiveDate
+        help={t("periodManagement.opening.help")} previewFacts={openingPreviewFacts(t)} confirmLoad={openingConfirm(t)} loadLabel={t("periodManagement.opening.load")}
+        onDone={() => { reloadYears(); reloadFy(); }} />
 
       {/* the figures keep their place before the year is loaded, so the periods below do not move */}
-      <div className="pe-kpis">
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy ? fy.code : "-"}</div><div className="pe-muted">{fy ? `${date(fy.startDate)} – ${date(fy.endDate)}` : "\u00a0"}</div></div>
+      <div className="pe-kpis pm-kpis">
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy ? fy.code : "-"}</div><div className="pe-muted">{fy ? `${date(fy.startDate)} – ${date(fy.endDate)}` : " "}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearStatus")}</div><div className="pe-kpi-value">{fy ? <StatusTag status={fy.status} /> : "-"}</div></div>
         {["open", "soft_closed", "closed", "locked"].map((s) => (
           <div className="pe-kpi" key={s}><div className="pe-kpi-label">{t(`periodEnd.status.${s}`)}</div><div className="pe-kpi-value">{fy ? counts[s] || 0 : "-"}</div></div>
         ))}
       </div>
 
-      <div className="pe-card">
+      <div className="pe-card bv-loading-host">
+        <LoadingBar active={refreshing} />
         <div className="pe-card-title">
           <span>{t("periodEnd.periods")}</span>
-          <Button label={t("periodEnd.monthEndClose")} icon="pi pi-arrow-right" iconPos="right" text onClick={() => navigate("/accounts/period-end/close")} />
+          <Button type="button" label={t("periodEnd.monthEndClose")} icon="pi pi-arrow-right" iconPos="right" text onClick={() => navigate("/accounts/period-end/close")} />
         </div>
         <DataTable value={fy?.periods || []} loading={loading} dataKey="period" size="small" stripedRows emptyMessage={t("periodEnd.noRows")}>
           <Column field="periodNo" header={t("periodEnd.no")} style={{ width: "4rem" }} />
           <Column header={t("periodEnd.period")} body={(r) => (r.isAdjustment ? <span>{r.period} <span className="pe-muted">({t("periodEnd.adjustment")})</span></span> : r.period)} />
           <Column header={t("periodEnd.start")} body={(r) => date(r.startDate)} />
           <Column header={t("periodEnd.end")} body={(r) => date(r.endDate)} />
-          <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
+          <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusChip code={r.status} label={t(`periodEnd.status.${r.status}`)} />} />
           <Column header={t("periodEnd.closeRun")} body={(r) => (r.closeRun ? (
             <span><button type="button" className="pe-link" onClick={() => navigate(`/accounts/period-end/close/${r.closeRun.id}`)}>{r.closeRun.runNumber}</button> <StatusTag status={r.closeRun.status} /></span>
           ) : "")} />
-          <Column header={t("periodEnd.lastChange")} body={(r) => dateTime(r.lockedAt || r.closedAt || r.softClosedAt || r.reopenedAt)} />
-          <Column header={t("periodEnd.remarks")} field="remarks" style={{ maxWidth: 220 }} />
-          <Column header={t("periodEnd.actions")} body={actions} style={{ minWidth: 380 }} />
+          <Column header={t("periodEnd.lastChange")} body={lastChange} style={{ minWidth: 200 }} />
+          <Column header={t("periodEnd.actions")} body={actions} className="pm-actions-cell" headerClassName="pm-actions-cell" />
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={action ? `${action.period}: ${t(`periodEnd.status.${action.status}`)}` : ""} visible={!!action} style={{ width: "min(520px, 95vw)" }}
-        onHide={() => setAction(null)} footer={(
-          <div>
-            <Button label={t("periodEnd.cancel")} text onClick={() => setAction(null)} />
-            <Button label={t("periodEnd.confirm")} icon="pi pi-check" loading={busy} onClick={apply} />
-          </div>
-        )}>
-        {action && (
-          <div>
-            <p className="pe-muted">{action.status === "open" ? t("periodEnd.reopenHelp") : t("periodEnd.closeHelp")}</p>
-            <label htmlFor="pe-remarks">{t("periodEnd.remarks")}{action.status === "open" ? " *" : ""}</label>
-            <InputTextarea id="pe-remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)} rows={3} className="w-full" autoResize />
-          </div>
-        )}
-      </Dialog>
+      {request && <StatusPanel request={request} onHide={() => setRequest(null)} onDone={statusDone} />}
+      {historyFor && <HistoryPanel key={historyFor} period={historyFor} onHide={() => setHistoryFor(null)} />}
 
-      <Dialog className="pe-dialog" header={history ? `${t("periodEnd.history")} ${history.period}` : ""} visible={!!history} style={{ width: "min(760px, 95vw)" }} onHide={() => setHistory(null)}>
-        <DataTable value={history?.rows || []} size="small" emptyMessage={t("periodEnd.noRows")}>
-          <Column header={t("periodEnd.when")} body={(r) => dateTime(r.changedAt)} />
-          <Column header={t("periodEnd.from")} body={(r) => <StatusTag status={r.from} />} />
-          <Column header={t("periodEnd.to")} body={(r) => <StatusTag status={r.to} />} />
-          <Column field="changedBy" header={t("periodEnd.by")} />
-          <Column field="source" header={t("periodEnd.source")} />
-          <Column field="remarks" header={t("periodEnd.remarks")} />
-        </DataTable>
-      </Dialog>
+      <ConfirmDialog visible={!!creating} onHide={() => setCreating(null)} onConfirm={createNext}
+        title={t("periodManagement.createYearTitle", { code: creating?.code })}
+        facts={creating ? [
+          { label: t("periodEnd.fiscalYear"), value: creating.code },
+          { label: t("periodEnd.start"), value: creating.startDate, type: "date" },
+          { label: t("periodEnd.end"), value: creating.endDate, type: "date" },
+          { label: t("periodEnd.periods"), value: t("periodManagement.createYearPeriods") },
+        ] : []}
+        confirmLabel={t("periodManagement.createYear")} confirmIcon="pi pi-plus" />
 
       <Dialog className="pe-dialog" header={checks ? `${t("periodEnd.checklist")} ${checks.period}` : ""} visible={!!checks} style={{ width: "min(860px, 95vw)" }} onHide={() => setChecks(null)}>
         <DataTable value={checks?.rows || []} loading={checks && !checks.rows} size="small" emptyMessage={t("periodEnd.noRows")}>
           <Column field="label" header={t("periodEnd.item")} />
           <Column header={t("periodEnd.severity")} body={(r) => t(`periodEnd.severityValue.${r.severity}`)} />
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
-          <Column field="message" header={t("periodEnd.result")} />
+          <Column header={t("periodManagement.countOrAmount")} className="bv-num" headerClassName="bv-num"
+            body={(r) => (r.status === "failed" || r.status === "warning" ? (r.amount !== null && r.amount !== undefined ? money(r.amount) : r.count) : "-")} />
         </DataTable>
       </Dialog>
     </div>

@@ -113,3 +113,39 @@
     min-width: 22rem;
   }
 }
+
+// Configuration Approvals: requested and previous values, who and when
+.config-approvals__values {
+  margin: 0;
+  display: grid;
+  gap: 2px;
+
+  div {
+    display: flex;
+    gap: 6px;
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+}
+
+.config-approvals__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  small {
+    color: var(--color-text-muted);
+  }
+}
+
+.config-approvals__detail {
+  padding: 0.75rem 0.5rem;
+}

@@ -3,16 +3,17 @@ import { useTranslation } from "react-i18next";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
-import { PageHeader as PeHeader, date, money, showError, showSuccess } from "../PeriodEnd/common";
+import SharedPageHeader from "../../components/PageHeader";
+import StatusChip from "../../components/StatusChip";
+import { date, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
 
 export { date, money, showError, showSuccess };
 
-/** Page header with the Accounts > Tax breadcrumb (or the given section). */
+/** Page header with the Accounts > Tax breadcrumb (or the given section); `subtitle` is the help behind the info icon. */
 export const PageHeader = ({ section, ...props }) => {
   const { t } = useTranslation();
-  return <PeHeader section={section || t("periodEnd.tax")} {...props} />;
+  return <SharedPageHeader home={t("periodEnd.accounts")} {...props} section={section || t("periodEnd.tax")} />;
 };
 
 const SEVERITY = {
@@ -20,12 +21,15 @@ const SEVERITY = {
   queued: "info", sending: "info", accepted: "success", rejected: "danger", failed: "danger", manual: "success", printed: "success", voided: "secondary",
   draft: "info", submitted: "warning", approved: "success", partially_settled: "warning", settled: "secondary", active: "success", inactive: "secondary",
 };
-/** Status chip with a translated label (birTax.status.<status>). */
+/** Status chip (the shared StatusChip) with a translated label (birTax.status.<status>). */
 export const BirTag = ({ status }) => {
   const { t } = useTranslation();
   if (!status) return null;
-  return <Tag className="pe-tag" value={t(`birTax.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
+  return <StatusChip code={status} label={t(`birTax.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
 };
+
+/** Roles that see the technical details of the tax files and e-invoices (file content, payloads), besides administrators. */
+export const TECHNICAL_ROLES = ["accounting", "tis-finance", "tis-it-admin"];
 
 const thisYear = () => new Date().getFullYear();
 export const yearOptions = (back = 5) => Array.from({ length: back + 1 }, (_, i) => thisYear() + 1 - i).map((y) => ({ label: String(y), value: y }));

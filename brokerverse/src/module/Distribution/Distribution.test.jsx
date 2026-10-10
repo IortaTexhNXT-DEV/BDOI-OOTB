@@ -63,7 +63,7 @@ describe("Campaigns", () => {
     expect(await screen.findByText("October renewals")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Results" }));
     expect(await screen.findByText("Maria Santos")).toBeInTheDocument();
-    expect(screen.getByText("Opted out", { selector: ".pe-kpi-label" })).toBeInTheDocument();
+    expect(screen.getByText("Opted out", { selector: "dt" })).toBeInTheDocument();
     expect(service.campaignResults).toHaveBeenCalledWith("cpg_1");
   });
 

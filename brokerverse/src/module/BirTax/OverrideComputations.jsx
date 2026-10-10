@@ -12,22 +12,57 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import birTaxService from "../../services/birTaxService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import ApprovalActions, { isInitiator } from "../../components/ApprovalActions";
+import { RecordActivityLog } from "../../components/ActivityLog";
 import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, Kpis, PageHeader, YearPicker, date, money, showError, showSuccess } from "./common";
 
 const pct = (v) => (v === null || v === undefined ? "-" : `${Number(v).toLocaleString("en-PH", { maximumFractionDigits: 2 })}%`);
 
-/** One computation: figures, per line production, settlements, and the actions of its status. */
+/** One computation: figures, per line production, settlements, its activity and the actions of its status. */
 const ComputationDetail = ({ comp, onHide, onChanged, toast }) => {
   const { t } = useTranslation();
-  const [reason, setReason] = useState(null);
   const [settle, setSettle] = useState(null);
   const run = async (fn, msg) => { try { const r = await fn(); if (msg) showSuccess(toast, typeof msg === "function" ? msg(r) : msg); onChanged(); } catch (e) { showError(toast, e); } };
-  const doReason = () => run(async () => {
-    if (reason.kind === "reject") await birTaxService.rejectOverride(comp.id, reason.text);
-    else await birTaxService.cancelOverride(comp.id, reason.text);
-    setReason(null);
-  }, t("birTax.saved"));
+  const facts = [
+    { label: t("birTax.computation"), value: comp.computationNumber },
+    { label: t("birTax.insurer"), value: comp.insurerName },
+    { label: t("birTax.period"), value: comp.periodLabel },
+    { label: t("birTax.commissionAmount"), value: comp.commission, type: "amount" },
+    { label: t("birTax.receivable"), value: comp.receivable, type: "amount", emphasis: true },
+  ];
+  // submit, approve and invoice after a confirmation that shows the computation
+  const confirmThen = async (kind, call, msg) => {
+    const ok = await openConfirm({
+      title: t(`birTax.confirmations.${kind}OverrideTitle`, { number: comp.computationNumber }),
+      message: t(`birTax.confirmations.${kind}OverrideMessage`),
+      facts,
+      confirmLabel: t(`birTax.confirmations.${kind}Override`),
+    });
+    if (ok) run(call, msg);
+  };
+  // reject and cancel take a reason; the dialog stays open with the error when the server refuses
+  const withReason = async (kind) => {
+    const reason = await openConfirm({
+      title: t(`birTax.confirmations.${kind}OverrideTitle`, { number: comp.computationNumber }),
+      severity: "danger",
+      message: t(`birTax.confirmations.${kind}OverrideMessage`),
+      facts,
+      input: { type: "textarea", label: t("birTax.reason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t(`birTax.confirmations.${kind}Override`),
+      cancelLabel: t("birTax.confirmations.keepComputation"),
+      onConfirm: (value) => (kind === "reject" ? birTaxService.rejectOverride(comp.id, value) : birTaxService.cancelOverride(comp.id, value)),
+    });
+    if (reason !== null) {
+      showSuccess(toast, t("birTax.saved"));
+      onChanged();
+    }
+  };
   const doSettle = () => run(async () => {
     const r = await birTaxService.settleOverride(comp.id, { statementReference: settle.statementReference, statementDate: toIsoDate(settle.statementDate), statementAmount: Number(settle.statementAmount || 0),
       cashReceived: Number(settle.cashReceived || 0), ewtWithheld: Number(settle.ewtWithheld || 0), form2307No: settle.form2307No || undefined, differenceTreatment: settle.differenceTreatment,
@@ -35,55 +70,80 @@ const ComputationDetail = ({ comp, onHide, onChanged, toast }) => {
     setSettle(null);
     return r;
   }, (r) => (r.statementMatches ? t("birTax.settledMsg") : t("birTax.statementDiffMsg", { diff: money(r.statementDifference) })));
-  const invoice = () => run(() => birTaxService.issueInvoice({ sourceType: "override_commission", sourceId: comp.id }), (r) => `${r.invoiceNumber} ${t("birTax.issuedMsg")}`);
+  // approved by a user who neither prepared nor submitted the computation
+  const initiator = isInitiator({ id: comp.createdBy }) ? { id: comp.createdBy } : { id: comp.submittedBy };
   return (
-    <Dialog className="pe-dialog" visible header={`${comp.computationNumber} · ${comp.insurerName} · ${comp.periodLabel}`} style={{ width: "min(1000px, 96vw)" }} onHide={onHide}
+    <DetailDialog visible header={t("birTax.confirmations.computationHeader")} size="xl" onHide={onHide}
       footer={(
-        <div className="flex flex-wrap gap-2 justify-content-end">
-          {comp.status === "draft" && <Button label={t("birTax.submit")} icon="pi pi-send" onClick={() => run(() => birTaxService.submitOverride(comp.id), t("birTax.saved"))} />}
-          {comp.status === "submitted" && <Button label={t("birTax.approve")} icon="pi pi-check" onClick={() => run(() => birTaxService.approveOverride(comp.id), t("birTax.approvedMsg"))} />}
-          {comp.status === "submitted" && <Button label={t("birTax.reject")} icon="pi pi-times" severity="danger" outlined onClick={() => setReason({ kind: "reject", text: "" })} />}
-          {["approved", "partially_settled", "settled"].includes(comp.status) && comp.receivable > 0 && <Button label={t("birTax.issueInvoice")} icon="pi pi-file" outlined onClick={invoice} />}
+        <>
+          {["draft", "submitted", "approved"].includes(comp.status) && <Button label={t("birTax.cancelComputation")} icon="pi pi-ban" severity="danger" text onClick={() => withReason("cancel")} />}
+          <Button label={t("detailView.close")} outlined onClick={onHide} />
+          {comp.status === "draft" && <Button label={t("birTax.confirmations.submitOverride")} icon="pi pi-send" onClick={() => confirmThen("submit", () => birTaxService.submitOverride(comp.id), t("birTax.saved"))} />}
+          {comp.status === "submitted" && (
+            <ApprovalActions initiator={initiator} approveLabel={t("birTax.confirmations.approveOverride")} rejectLabel={t("birTax.confirmations.rejectOverride")}
+              onApprove={() => confirmThen("approve", () => birTaxService.approveOverride(comp.id), t("birTax.approvedMsg"))} onReject={() => withReason("reject")} />
+          )}
+          {["approved", "partially_settled", "settled"].includes(comp.status) && comp.receivable > 0 && (
+            <Button label={t("birTax.issueInvoice")} icon="pi pi-file" outlined
+              onClick={() => confirmThen("invoice", () => birTaxService.issueInvoice({ sourceType: "override_commission", sourceId: comp.id }), (r) => `${r.invoiceNumber} ${t("birTax.issuedMsg")}`)} />
+          )}
           {["approved", "partially_settled"].includes(comp.status) && (
             <Button label={t("birTax.settle")} icon="pi pi-wallet" onClick={() => setSettle({ statementReference: "", statementDate: new Date(), statementAmount: comp.receivable,
               cashReceived: Math.round((comp.balance - comp.expectedEwt) * 100) / 100, ewtWithheld: comp.expectedEwt, differenceTreatment: "leave_open" })} />
           )}
-          {["draft", "submitted", "approved"].includes(comp.status) && <Button label={t("birTax.cancelComputation")} icon="pi pi-ban" severity="danger" text onClick={() => setReason({ kind: "cancel", text: "" })} />}
-        </div>
+        </>
       )}>
-      <div className="flex gap-2 align-items-center mb-2"><BirTag status={comp.status} /><span className="pe-muted">{t(`birTax.overrideType.${comp.commissionType}`)} · {t(`birTax.basisValue.${comp.basis}`)} · {date(comp.periodFrom)} to {date(comp.periodTo)}</span></div>
-      <Kpis items={[{ label: t("birTax.production"), value: money(comp.production) }, { label: t("birTax.claimsIncurred"), value: `${money(comp.claimsIncurred)} (${t(`birTax.claimsSource.${comp.claimsSource}`)})` },
-        { label: t("birTax.lossRatio"), value: pct(comp.lossRatioPct) }, { label: t("birTax.growth"), value: pct(comp.growthPct) },
-        { label: t("birTax.tierRate"), value: comp.tierNo ? `${comp.tierNo}: ${comp.rate}%` : "-" }]} />
-      <Kpis items={[{ label: t("birTax.commissionAmount"), value: money(comp.commission) }, { label: "VAT", value: money(comp.vat) }, { label: t("birTax.receivable"), value: money(comp.receivable) },
-        { label: t("birTax.expectedEwt"), value: money(comp.expectedEwt) }, { label: t("birTax.balance"), value: money(comp.balance) }]} />
-      {comp.journalNumber && <p className="pe-muted">{t("birTax.journal")}: {comp.journalNumber}</p>}
-      {comp.claimsNote && <p className="pe-muted">{t("birTax.claimsNote")}: {comp.claimsNote}</p>}
-      <h4>{t("birTax.productionPerLine")}</h4>
-      <DataTable value={comp.details?.perLine || []} size="small" dataKey="lob" emptyMessage={t("birTax.noRows")}>
-        <Column field="lob" header={t("birTax.lineOfBusiness")} />
-        <Column field="policies" header={t("birTax.policies")} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.production")} body={(r) => money(r.premium)} className="bv-num" headerClassName="bv-num" />
-      </DataTable>
-      <h4>{t("birTax.settlements")}</h4>
-      <DataTable value={comp.settlements || []} size="small" dataKey="id" emptyMessage={t("birTax.noRows")}>
-        <Column field="statementReference" header={t("birTax.statementReference")} />
-        <Column header={t("birTax.statementDate")} body={(r) => date(r.statementDate)} />
-        <Column header={t("birTax.statementAmount")} body={(r) => money(r.statementAmount)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.amountReceived")} body={(r) => money(r.cashReceived)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.ewt")} body={(r) => money(r.ewtWithheld)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.applied")} body={(r) => money(r.applied)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.difference")} body={(r) => money(r.difference)} className="bv-num" headerClassName="bv-num" />
-      </DataTable>
-      {reason && (
-        <Dialog className="pe-dialog" visible header={reason.kind === "reject" ? t("birTax.reject") : t("birTax.cancelComputation")} style={{ width: "min(520px, 95vw)" }} onHide={() => setReason(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setReason(null)} /><Button label={t("birTax.confirm")} severity="danger" disabled={reason.text.trim().length < 3} onClick={doReason} /></div>}>
-          <label>{t("birTax.reason")} *</label><InputTextarea value={reason.text} rows={3} onChange={(e) => setReason({ ...reason, text: e.target.value })} className="w-full" />
-        </Dialog>
-      )}
+      <DetailHeader title={comp.computationNumber} subtitle={`${comp.insurerName} · ${comp.periodLabel}`}
+        status={{ code: comp.status, label: t(`birTax.status.${comp.status}`, { defaultValue: comp.status }) }}
+        meta={[
+          { label: t("birTax.confirmations.overrideType"), value: t(`birTax.overrideType.${comp.commissionType}`) },
+          { label: t("birTax.confirmations.basis"), value: t(`birTax.basisValue.${comp.basis}`) },
+          { label: t("birTax.from"), value: comp.periodFrom, type: "date" },
+          { label: t("birTax.to"), value: comp.periodTo, type: "date" },
+          { label: t("birTax.journal"), value: comp.journalNumber, hidden: !comp.journalNumber },
+        ]} />
+      {comp.status === "rejected" && comp.rejectionReason && <Message severity="error" className="w-full mb-3" text={`${t("birTax.confirmations.rejectedBecause")}: ${comp.rejectionReason}`} />}
+      {comp.status === "cancelled" && comp.cancelReason && <Message severity="warn" className="w-full mb-3" text={`${t("birTax.confirmations.cancelledBecause")}: ${comp.cancelReason}`} />}
+      <DetailSection title={t("birTax.confirmations.computationFigures")}>
+        <KeyValueGrid columns={4} items={[
+          { label: t("birTax.production"), value: comp.production, type: "amount" },
+          { label: t("birTax.claimsIncurred"), value: comp.claimsIncurred, type: "amount" },
+          { label: t("birTax.confirmations.claimsSource"), value: t(`birTax.claimsSource.${comp.claimsSource}`) },
+          { label: t("birTax.lossRatio"), value: pct(comp.lossRatioPct) },
+          { label: t("birTax.growth"), value: pct(comp.growthPct) },
+          { label: t("birTax.tierRate"), value: comp.tierNo ? `${comp.tierNo}: ${comp.rate}%` : null },
+          { label: t("birTax.commissionAmount"), value: comp.commission, type: "amount" },
+          { label: "VAT", value: comp.vat, type: "amount" },
+          { label: t("birTax.receivable"), value: comp.receivable, type: "amount" },
+          { label: t("birTax.expectedEwt"), value: comp.expectedEwt, type: "amount" },
+          { label: t("birTax.balance"), value: comp.balance, type: "amount" },
+          { label: t("birTax.claimsNote"), value: comp.claimsNote, span: "full", hidden: !comp.claimsNote },
+        ]} />
+      </DetailSection>
+      <DetailSection title={t("birTax.productionPerLine")} flush>
+        <DataTable value={comp.details?.perLine || []} size="small" dataKey="lob" emptyMessage={t("birTax.noRows")}>
+          <Column field="lob" header={t("birTax.lineOfBusiness")} />
+          <Column field="policies" header={t("birTax.policies")} className="bv-num" headerClassName="bv-num" />
+          <Column header={t("birTax.production")} body={(r) => money(r.premium)} className="bv-num" headerClassName="bv-num" />
+        </DataTable>
+      </DetailSection>
+      <DetailSection title={t("birTax.settlements")} flush>
+        <DataTable value={comp.settlements || []} size="small" dataKey="id" emptyMessage={t("birTax.noRows")}>
+          <Column field="statementReference" header={t("birTax.statementReference")} />
+          <Column header={t("birTax.statementDate")} body={(r) => date(r.statementDate)} />
+          <Column header={t("birTax.statementAmount")} body={(r) => money(r.statementAmount)} className="bv-num" headerClassName="bv-num" />
+          <Column header={t("birTax.amountReceived")} body={(r) => money(r.cashReceived)} className="bv-num" headerClassName="bv-num" />
+          <Column header={t("birTax.ewt")} body={(r) => money(r.ewtWithheld)} className="bv-num" headerClassName="bv-num" />
+          <Column header={t("birTax.applied")} body={(r) => money(r.applied)} className="bv-num" headerClassName="bv-num" />
+          <Column header={t("birTax.difference")} body={(r) => money(r.difference)} className="bv-num" headerClassName="bv-num" />
+        </DataTable>
+      </DetailSection>
+      <DetailSection title={t("birTax.confirmations.activity")}>
+        <RecordActivityLog entity="override_computation" recordId={comp.id} />
+      </DetailSection>
       {settle && (
-        <Dialog className="pe-dialog" visible header={t("birTax.settle")} style={{ width: "min(720px, 95vw)" }} onHide={() => setSettle(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setSettle(null)} /><Button label={t("periodEnd.save")} icon="pi pi-save" disabled={!settle.statementReference} onClick={doSettle} /></div>}>
+        <Dialog className="pe-dialog bv-centered" visible header={t("birTax.settle")} style={{ width: "min(720px, 95vw)" }} onHide={() => setSettle(null)}
+          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setSettle(null)} /><Button label={t("birTax.confirmations.recordSettlement")} icon="pi pi-save" disabled={!settle.statementReference} onClick={doSettle} /></div>}>
           <div className="grid">
             <div className="col-12 md:col-6"><label>{t("birTax.statementReference")} *</label><InputText value={settle.statementReference} onChange={(e) => setSettle({ ...settle, statementReference: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("birTax.statementDate")}</label><Calendar value={settle.statementDate} onChange={(e) => setSettle({ ...settle, statementDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" /></div>
@@ -97,7 +157,7 @@ const ComputationDetail = ({ comp, onHide, onChanged, toast }) => {
           </div>
         </Dialog>
       )}
-    </Dialog>
+    </DetailDialog>
   );
 };
 
@@ -197,7 +257,7 @@ const OverrideComputations = () => {
         </DataTable>
       </div>
       {compute && (
-        <Dialog className="pe-dialog" visible header={`${t("birTax.compute")} ${compute.period.label}`} style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
+        <Dialog className="pe-dialog bv-centered" visible header={`${t("birTax.compute")} ${compute.period.label}`} style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
           footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setCompute(null)} /><Button label={t("birTax.compute")} icon="pi pi-calculator" onClick={doCompute} /></div>}>
           {compute.preview && (
             <>

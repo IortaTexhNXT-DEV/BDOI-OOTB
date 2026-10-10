@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
-import { parsePeriod } from '../src/modules/incentive/service.js';
+import { keysEndingIn, parsePeriod, payout, programPeriodKey } from '../src/modules/incentive/service.js';
 
 let ctx;
 let agentTok;
@@ -29,6 +29,14 @@ describe('periods', () => {
     expect(parsePeriod('2026-h2').to).toBe('2026-12-31');
     expect(parsePeriod('2026-Q3')).toEqual({ label: 'July to September 2026', from: '2026-07-01', to: '2026-09-30' });
     expect(() => parsePeriod('2026-H3')).toThrow();
+    expect(parsePeriod('2026')).toEqual({ label: 'January to December 2026', from: '2026-01-01', to: '2026-12-31' });
+  });
+  it('keys a result by the calculation period of its program, and a statement month by the periods ending in it', () => {
+    expect(['Monthly', 'Quarterly', 'Semi-Annual', 'Annual', ''].map((f) => programPeriodKey({ calculation_frequency: f }, '2026-09-30')))
+      .toEqual(['2026-09', '2026-Q3', '2026-H2', '2026', '2026-09']);
+    expect(keysEndingIn('2026-06')).toEqual(['2026-06', '2026-Q2', '2026-H1']);
+    expect(keysEndingIn('2026-12')).toEqual(['2026-12', '2026-Q4', '2026-H2', '2026']);
+    expect(keysEndingIn('2026-08')).toEqual(['2026-08']);
   });
 });
 
@@ -53,6 +61,30 @@ describe('programs', () => {
     expect((await ctx.api('delete', `/incentive/programs/${c.body.data.id}`)).status).toBe(200);
     expect((await ctx.api('get', `/incentive/programs/${c.body.data.id}`)).status).toBe(404);
   });
+  it('keeps tiers in ascending bands without gaps or overlaps and an active program with at least one tier', async () => {
+    const body = { programName: 'Tier Program', programType: 'Target Based', applicableTo: ['Individual Agent'], startDate: '2026-10-01', endDate: '2026-12-31', targetMetric: 'Policy Count', calculationFrequency: 'Monthly', baseTarget: 10 };
+    const tier = (level, basis, value) => ({ level, basis, value });
+    const bad = async (structure, extra = {}) => (await ctx.api('post', '/incentive/programs').send({ ...body, ...extra, structure })).body;
+    expect((await bad([])).errors[0]).toMatchObject({ path: 'structure', message: 'An active program needs at least one tier' });
+    expect((await bad([tier('0-10', 'perUnit', 100), tier('10-20', 'perUnit', 200)])).errors[0].message).toMatch(/ascending order without overlapping/);
+    expect((await bad([tier('0-10', 'perUnit', 100), tier('15+', 'perUnit', 200)])).errors[0].message).toBe('The band from 10 to 15 is not covered by any tier');
+    expect((await bad([tier('10+', 'perUnit', 100), tier('20+', 'perUnit', 200)])).errors[0].message).toBe('Only the top tier may be open-ended');
+    expect((await bad([tier('0-10', 'percentOfAchieved', 1)])).errors[0].message).toMatch(/does not apply to this measure/);
+    const draft = await ctx.api('post', '/incentive/programs').send({ ...body, status: 'Draft', structure: [] });
+    expect(draft.status).toBe(201);
+    expect((await ctx.api('put', `/incentive/programs/${draft.body.data.id}`).send({ status: 'Active' })).status).toBe(400);
+    const r = await ctx.api('put', `/incentive/programs/${draft.body.data.id}`)
+      .send({ status: 'Active', structure: [tier('0-10', 'perUnit', 100), tier('11+', 'fixed', 5000)] });
+    expect(r.status).toBe(200);
+    expect(r.body.data.structure).toEqual([
+      { level: '0-10', basis: 'perUnit', type: 'Fixed Amount', value: 100, maxPayout: null },
+      { level: '11+', basis: 'fixed', type: 'Fixed Amount', value: 5000, maxPayout: null },
+    ]);
+    const program = { metric: 'policies', target: 10, structure: r.body.data.structure };
+    expect(payout(program, 4, 10)).toMatchObject({ amount: 400, tier: '0-10' });
+    expect(payout(program, 12, 10)).toMatchObject({ amount: 5000, tier: '11+' });
+    await ctx.api('delete', `/incentive/programs/${draft.body.data.id}`);
+  });
 });
 
 describe('calculations', () => {
@@ -63,13 +95,18 @@ describe('calculations', () => {
     const r = await ctx.api('post', '/incentive/calculations').send({ period: 'September 2026', selectedPrograms: ['INC-2026-002', 'INC-2026-001'], description: 'Sept run' });
     expect(r.status).toBe(201);
     batchId = r.body.data.batchId;
-    expect(r.body.data).toMatchObject({ period: 'September 2026', periodFrom: '2026-09-01', periodTo: '2026-09-30', status: 'Calculated' });
+    // the quarterly program is calculated over its quarter, the monthly one over the month
+    expect(r.body.data).toMatchObject({ period: 'July to September 2026', periodFrom: '2026-07-01', periodTo: '2026-09-30', status: 'Calculated' });
     const nb = r.body.data.details.find((d) => d.agentId === agentId && d.programCode === 'INC-2026-002');
     expect(nb).toMatchObject({ achieved: 2, baseIncentive: 1000, finalAmount: 1000, tier: '0-10 policies' });
     const pa = r.body.data.details.find((d) => d.agentId === agentId && d.programCode === 'INC-2026-001');
     expect(pa.finalAmount).toBe(0);
     expect((await ctx.api('post', '/incentive/calculations').send({ period: '2026-09', selectedPrograms: ['INC-2026-002'] })).status).toBe(409);
-    const adj = await ctx.api('post', `/incentive/calculations/${batchId}/adjust`).send({ lines: [{ id: nb.id, adjustments: 250, reason: 'Spot bonus' }] });
+    const adjust = (body) => ctx.api('post', `/incentive/calculations/${batchId}/adjust`).send({ lines: [{ id: nb.id, adjustments: 250 }], ...body });
+    expect((await adjust({ reason: 'Spot bonus' })).status).toBe(400);
+    expect((await adjust({ reasonCode: 'IAD-OTHER' })).status).toBe(400);
+    const adj = await adjust({ reasonCode: 'IAD-OTHER', note: 'Spot bonus' });
+    expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ adjustmentReasonCode: 'IAD-OTHER', adjustmentReason: 'Other: Spot bonus' });
     expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ finalAmount: 1250, status: 'Adjusted' });
     expect(adj.body.data.totalAmount).toBe(1250);
   });
@@ -78,7 +115,7 @@ describe('calculations', () => {
     expect((await ctx.api('post', `/incentive/calculations/${batchId}/submit`)).body.data.status).toBe('Pending Approval');
     expect((await ctx.api('post', `/incentive/calculations/${batchId}/approve`)).status).toBe(403);
     expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({})).status).toBe(400);
-    expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({ reason: 'Recheck' })).body.data.status).toBe('Rejected');
+    expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({ reasonCode: 'IBR-DATA' })).body.data.status).toBe('Rejected');
     const again = await ctx.api('post', '/incentive/calculations').send({ period: '2026-09', selectedPrograms: ['INC-2026-002'] });
     expect(again.status).toBe(201);
     const b2 = again.body.data.batchId;
@@ -122,11 +159,19 @@ describe('agent views and reports', () => {
     expect((await ctx.api('get', '/incentive/agent-programs')).body.data.length).toBeGreaterThanOrEqual(6);
     const t = await ctx.api('get', '/incentive/reports/templates');
     expect(t.body.data).toHaveLength(5);
-    const g = await ctx.api('post', '/incentive/reports/generate').send({ templateId: t.body.data[0].id, parameters: { period: '2026-07' }, format: 'Excel' });
+    const details = t.body.data.find((x) => x.code === 'IRT-002');
+    const g = await ctx.api('post', '/incentive/reports/generate').send({ templateId: details.id, parameters: { period: '2026-07' }, format: 'Excel' });
     expect(g.status).toBe(201);
-    expect(g.body.data.rowCount).toBe(5);
+    expect(g.body.data).toMatchObject({ rowCount: 5, format: 'Excel' });
+    // the payout summary totals the paid incentives by period, program and branch
+    const summary = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-001', parameters: { period: '2026-07' }, format: 'PDF' });
+    expect(summary.body.data).toMatchObject({ rowCount: 0, format: 'PDF' });
+    const paid = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-001', parameters: { period: '2026-06' }, format: 'PDF' });
+    expect(paid.body.data.rowCount).toBeGreaterThan(0);
+    expect(paid.body.data.rowCount).toBeLessThan(5);
+    expect((await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-004', format: 'Excel' })).status).toBe(400);
     const top = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-004', parameters: { 'Top N': 2 } });
     expect(top.body.data.rowCount).toBe(2);
-    expect((await ctx.api('get', '/incentive/reports')).body.data).toHaveLength(2);
+    expect((await ctx.api('get', '/incentive/reports')).body.data).toHaveLength(4);
   });
 });

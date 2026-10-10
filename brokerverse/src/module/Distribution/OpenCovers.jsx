@@ -14,11 +14,33 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
-import { confirmAction, promptText } from "../../utility/dialogs";
-import { ClientPicker, Field, PageHeader, StatusTag, date, isoDay, money, num, showError, showSuccess, useInsurers } from "./common";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../components/ActivityLog";
+import { ClientPicker, Field, PageHeader, StatusTag, date, isoDay, money, num, printFile, showError, showSuccess, useInsurers } from "./common";
 
 const BASE = "/operations/open-covers";
 const CONVEYANCES = ["Sea", "Air", "Land"];
+const month = (y, m) => `${y}-${String(m).padStart(2, "0")}`;
+
+/** Periods (YYYY-MM) of the cover, up to this month, that have no declaration yet, latest first. */
+const openPeriods = (cover) => {
+  const taken = new Set(cover.declarations.map((d) => d.period));
+  const first = String(cover.periodFrom).slice(0, 7);
+  const today = new Date();
+  let [y, m] = [String(cover.periodTo).slice(0, 7), month(today.getFullYear(), today.getMonth() + 1)].sort()[0].split("-").map(Number);
+  const out = [];
+  while (month(y, m) >= first) {
+    if (!taken.has(month(y, m))) out.push(month(y, m));
+    m -= 1;
+    if (m === 0) [y, m] = [y - 1, 12];
+  }
+  return out;
+};
+
 const EMPTY_SHIPMENT = { kind: "certificate", shipmentDate: new Date(), conveyance: "Sea", vesselName: "", voyageFrom: "", voyageTo: "", billOfLading: "", goodsDescription: "", packing: "", consignee: "", invoiceValue: null, markupPercent: null };
 
 /** Operations > Marine Open Covers: the list of open covers, and one cover with its certificates and declarations. */
@@ -173,17 +195,84 @@ const CoverDetail = ({ id }) => {
     const r = await run(() => (kind === "declared" ? service.addDeclaredItem(cover.id, body) : service.issueCertificate(cover.id, body)));
     if (r) setShipment(null);
   };
-  const newDeclaration = async () => {
-    const d = new Date();
-    const suggested = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const period = await promptText(t("distribution.oc.periodPrompt", "Period of the declaration (YYYY-MM)"), suggested, { multiline: false });
-    if (!period) return;
-    run(() => service.createDeclaration(cover.id, period));
+  // an action asked in a confirmation: it runs in the dialog (a failure stays there), then the cover is reloaded
+  const confirmRun = async (options, fn) => {
+    let result = null;
+    const done = await openConfirm({ ...options, onConfirm: async (value) => { result = await fn(value); } });
+    if (!done) return null;
+    if (result?.message) showSuccess(toast, result.message);
+    await load();
+    return result;
+  };
+  const coverFacts = () => [
+    { label: t("distribution.oc.number", "Open cover"), value: cover.coverNumber },
+    { label: t("distribution.fl.client", "Client"), value: cover.clientName },
+    { label: t("distribution.fl.insurer", "Insurer"), value: cover.insurerName },
+    { label: t("distribution.fl.period", "Period"), value: `${date(cover.periodFrom)} – ${date(cover.periodTo)}` },
+  ];
+  const activate = () => confirmRun({
+    title: t("distribution.oc.activateTitle", "Activate open cover"),
+    message: t("distribution.oc.activateMessage", "The open policy is issued. Premium is billed on the declarations."),
+    facts: [...coverFacts(), { label: t("distribution.oc.minimum", "Minimum premium per certificate"), value: cover.minimumPremium, type: "amount" }],
+    confirmLabel: t("distribution.oc.activateAction", "Activate open cover"),
+  }, () => service.activateOpenCover(cover.id));
+  const cancelCover = () => confirmRun({
+    title: t("distribution.oc.cancelTitle", "Cancel open cover"),
+    severity: "danger",
+    message: t("distribution.oc.cancelMessage", "No certificate can be issued on the cover after it is cancelled."),
+    facts: [...coverFacts(), { label: t("distribution.oc.certificates", "Certificates"), value: cover.certificates, type: "number" }],
+    input: { type: "textarea", label: t("distribution.oc.reason", "Reason"), required: true },
+    confirmLabel: t("distribution.oc.cancel", "Cancel cover"),
+    cancelLabel: t("distribution.common.back", "Back"),
+  }, (reason) => service.cancelOpenCover(cover.id, reason));
+  const cancelCertificate = (x) => confirmRun({
+    title: t("distribution.oc.cancelCert", "Cancel certificate"),
+    severity: "danger",
+    message: t("distribution.oc.cancelCertMessage", "The certificate is cancelled and left out of the declaration of its period."),
+    facts: [
+      { label: t("distribution.oc.certificate", "Certificate"), value: x.certificateNumber },
+      { label: t("distribution.oc.shipped", "Shipped"), value: x.shipmentDate, type: "date" },
+      { label: t("distribution.oc.voyage", "Voyage"), value: `${x.voyageFrom} – ${x.voyageTo}` },
+      { label: t("distribution.oc.insured", "Insured value"), value: x.insuredValue, type: "amount" },
+      { label: t("distribution.fl.premium", "Premium"), value: x.premium, type: "amount" },
+    ],
+    input: { type: "textarea", label: t("distribution.oc.reason", "Reason"), required: true },
+    confirmLabel: t("distribution.oc.cancelCert", "Cancel certificate"),
+    cancelLabel: t("distribution.common.back", "Back"),
+  }, (reason) => service.cancelCertificate(x.id, reason));
+  const newDeclaration = () => {
+    const periods = openPeriods(cover);
+    return confirmRun({
+      title: t("distribution.oc.newDeclaration", "New declaration"),
+      message: t("distribution.oc.newDeclarationMessage", "The shipments of the period are attached to the declaration and priced with the premium taxes."),
+      facts: coverFacts(),
+      input: {
+        type: "select", label: t("distribution.oc.period", "Period"), required: true, defaultValue: periods[0] || null,
+        options: periods.map((v) => ({ value: v, label: `${v.slice(5)}/${v.slice(0, 4)}` })),
+      },
+      confirmLabel: t("distribution.oc.openDeclaration", "Open declaration"),
+    }, (period) => service.createDeclaration(cover.id, period));
   };
   const declAction = async (fn) => {
     const r = await run(fn);
     if (r && declaration) openDeclaration(declaration);
   };
+  const deleteDeclaration = async () => {
+    const r = await confirmRun({
+      title: t("distribution.oc.deleteDeclarationTitle", "Delete declaration"),
+      severity: "danger",
+      message: t("distribution.oc.deleteDeclarationMessage", "The draft declaration is deleted. Its shipments stay on the cover for a new declaration of the period."),
+      facts: [
+        { label: t("distribution.oc.declaration", "Declaration"), value: declaration.declarationNumber },
+        { label: t("distribution.oc.period", "Period"), value: declaration.period },
+        { label: t("distribution.oc.shipments", "Shipments"), value: declaration.shipments, type: "number" },
+        { label: t("distribution.oc.gross", "Premium with taxes"), value: declaration.grossPremium, type: "amount" },
+      ],
+      confirmLabel: t("distribution.oc.deleteDeclarationTitle", "Delete declaration"),
+    }, () => service.deleteDeclaration(declaration.id));
+    if (r) setDeclaration(null);
+  };
+  const conveyanceText = (c) => t(`distribution.oc.conveyance.${c}`, c);
 
   if (!cover) return <div className="pe-page"><Toast ref={toast} /></div>;
   const active = cover.status === "active";
@@ -194,9 +283,9 @@ const CoverDetail = ({ id }) => {
         subtitle={`${cover.insurerName} · ${date(cover.periodFrom)} to ${date(cover.periodTo)}${cover.policyNumber ? ` · ${t("distribution.fl.policy", "Policy")} ${cover.policyNumber}` : ""}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         {write && cover.status === "draft" ? <Button label={t("distribution.oc.activate", "Activate")} icon="pi pi-check" disabled={busy}
-          onClick={async () => { if (await confirmAction(t("distribution.oc.confirmActivate", "Activate the open cover? Its open policy is issued; premium is billed on the declarations."))) run(() => service.activateOpenCover(cover.id)); }} /> : null}
+          onClick={activate} /> : null}
         {write && ["draft", "active"].includes(cover.status) ? <Button label={t("distribution.oc.cancel", "Cancel cover")} icon="pi pi-times" severity="danger" outlined
-          onClick={async () => { const reason = await promptText(t("distribution.oc.cancelReason", "Reason for cancelling the open cover")); if (reason) run(() => service.cancelOpenCover(cover.id, reason)); }} /> : null}
+          onClick={cancelCover} /> : null}
       </PageHeader>
       <div className="pe-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{t("distribution.common.status", "Status")}</div><div className="pe-kpi-value"><StatusTag status={cover.status} /></div></div>
@@ -207,21 +296,22 @@ const CoverDetail = ({ id }) => {
       <div className="pe-card">
         <TabView>
           <TabPanel header={t("distribution.oc.contract", "Contract")}>
-            <div className="dist-summary">
-              <span>{t("distribution.oc.goods", "Goods insured")}: <b>{cover.goodsDescription}</b></span>
-              <span>{t("distribution.oc.voyages", "Voyages")}: <b>{cover.voyageScope || "-"}</b></span>
-              <span>{t("distribution.oc.markup", "Mark-up on invoice %")}: <b>{cover.markupPercent}%</b></span>
-              <span>{t("distribution.oc.minimum", "Minimum premium per certificate")}: <b>{money(cover.minimumPremium)}</b></span>
-              <span>{t("distribution.oc.frequency", "Declarations")}: <b>{t(`distribution.oc.freq.${cover.declarationFrequency}`, cover.declarationFrequency)}</b></span>
-            </div>
+            <KeyValueGrid columns={3} className="mb-3" items={[
+              { label: t("distribution.oc.goods", "Goods insured"), value: cover.goodsDescription, span: 2 },
+              { label: t("distribution.oc.insurerReference", "Insurer's reference"), value: cover.insurerReference },
+              { label: t("distribution.oc.voyages", "Voyages"), value: cover.voyageScope, span: 2 },
+              { label: t("distribution.oc.frequency", "Declarations"), value: t(`distribution.oc.freq.${cover.declarationFrequency}`, cover.declarationFrequency) },
+              { label: t("distribution.oc.markup", "Mark-up on invoice %"), value: cover.markupPercent, type: "percent" },
+              { label: t("distribution.oc.minimum", "Minimum premium per certificate"), value: cover.minimumPremium, type: "amount" },
+              { label: t("distribution.oc.clauses", "Clauses"), value: cover.clauses, span: "full" },
+            ]} />
             <DataTable value={cover.rates} size="small" stripedRows>
               <Column header={t("distribution.oc.conveyanceLabel", "Conveyance")} body={(r) => t(`distribution.oc.conveyance.${r.conveyance}`, r.conveyance)} />
               <Column header={t("distribution.oc.rate", "Rate %")} body={(r) => `${num(r.ratePercent, 4)}%`} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.oc.limit", "Limit any one conveyance")} body={(r) => money(r.limit)} className="bv-num" headerClassName="bv-num" />
             </DataTable>
-            <p className="pe-muted">{cover.clauses}</p>
           </TabPanel>
-          <TabPanel header={`${t("distribution.oc.certificates", "Certificates")} (${cover.certificateList.length})`}>
+          <TabPanel header={t("distribution.oc.certificates", "Certificates")}>
             {write && active ? (
               <div className="dist-toolbar">
                 <Button label={t("distribution.oc.issue", "Issue certificate")} icon="pi pi-plus" size="small" onClick={() => setShipment({ ...EMPTY_SHIPMENT, kind: "certificate" })} />
@@ -232,8 +322,8 @@ const CoverDetail = ({ id }) => {
               <Column field="certificateNumber" header={t("distribution.oc.certificate", "Certificate")} />
               <Column header={t("distribution.oc.kind", "Kind")} body={(x) => t(`distribution.oc.kinds.${x.kind}`, x.kind)} />
               <Column header={t("distribution.oc.shipped", "Shipped")} body={(x) => date(x.shipmentDate)} />
-              <Column field="conveyance" header={t("distribution.oc.conveyanceLabel", "Conveyance")} />
-              <Column header={t("distribution.oc.voyage", "Voyage")} body={(x) => `${x.voyageFrom} to ${x.voyageTo}`} />
+              <Column header={t("distribution.oc.conveyanceLabel", "Conveyance")} body={(x) => conveyanceText(x.conveyance)} />
+              <Column header={t("distribution.oc.voyage", "Voyage")} body={(x) => `${x.voyageFrom} – ${x.voyageTo}`} />
               <Column field="vesselName" header={t("distribution.oc.vessel", "Vessel / flight")} />
               <Column header={t("distribution.oc.insured", "Insured value")} body={(x) => money(x.insuredValue)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.fl.premium", "Premium")} body={(x) => money(x.premium)} className="bv-num" headerClassName="bv-num" />
@@ -241,14 +331,14 @@ const CoverDetail = ({ id }) => {
               <Column header={t("distribution.common.status", "Status")} body={(x) => <StatusTag status={x.status} />} />
               <Column body={(x) => (
                 <div className="dist-actions">
-                  <Button icon="pi pi-print" text size="small" aria-label={t("distribution.oc.print", "Print")} tooltip={t("distribution.oc.print", "Print")} onClick={() => run(() => service.printCertificate(x.id), false)} />
+                  <Button icon="pi pi-print" text size="small" aria-label={t("distribution.oc.print", "Print")} tooltip={t("distribution.oc.print", "Print")} onClick={() => printFile(toast, `/marine/certificates/${encodeURIComponent(x.id)}/print`, `${x.certificateNumber}.pdf`)} />
                   {write && x.status === "issued" ? <Button icon="pi pi-times" text size="small" severity="danger" aria-label={t("distribution.oc.cancelCert", "Cancel certificate")}
-                    onClick={async () => { const reason = await promptText(t("distribution.oc.cancelCertReason", "Why is the certificate cancelled?")); if (reason) run(() => service.cancelCertificate(x.id, reason)); }} /> : null}
+                    tooltip={t("distribution.oc.cancelCert", "Cancel certificate")} onClick={() => cancelCertificate(x)} /> : null}
                 </div>
               )} />
             </DataTable>
           </TabPanel>
-          <TabPanel header={`${t("distribution.oc.declarations", "Declarations")} (${cover.declarations.length})`}>
+          <TabPanel header={t("distribution.oc.declarations", "Declarations")}>
             {write && ["active", "expired"].includes(cover.status) ? (
               <div className="dist-toolbar"><Button label={t("distribution.oc.newDeclaration", "New declaration")} icon="pi pi-plus" size="small" onClick={newDeclaration} /></div>
             ) : null}
@@ -263,6 +353,9 @@ const CoverDetail = ({ id }) => {
               <Column header={t("distribution.oc.balance", "Unpaid")} body={(d) => (d.billBalance === null ? "" : money(d.billBalance))} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.common.status", "Status")} body={(d) => <StatusTag status={d.status} />} />
             </DataTable>
+          </TabPanel>
+          <TabPanel header={t("distribution.common.history", "History")}>
+            <RecordActivityLog entity="open_cover" recordId={cover.id} />
           </TabPanel>
         </TabView>
       </div>
@@ -290,45 +383,59 @@ const CoverDetail = ({ id }) => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={declaration ? `${t("distribution.oc.declaration", "Declaration")} ${declaration.declarationNumber} · ${declaration.period}` : ""} visible={!!declaration}
-        style={{ width: "min(960px, 96vw)" }} onHide={() => setDeclaration(null)}
+      <DetailDialog visible={!!declaration} onHide={() => setDeclaration(null)} size="lg"
+        header={declaration ? `${t("distribution.oc.declaration", "Declaration")} ${declaration.declarationNumber}` : ""}
         footer={declaration ? (
-          <div>
-            <Button label={t("distribution.oc.print", "Print")} icon="pi pi-print" outlined onClick={() => run(() => service.printDeclaration(declaration.id), false)} />
+          <>
+            <Button label={t("distribution.common.close", "Close")} text onClick={() => setDeclaration(null)} />
             {write && declaration.status === "draft" ? (
               <>
-                <Button label={t("distribution.oc.refresh", "Recompute")} icon="pi pi-refresh" text onClick={() => declAction(() => service.refreshDeclaration(declaration.id))} />
-                <Button label={t("distribution.common.delete", "Delete")} icon="pi pi-trash" text severity="danger" onClick={async () => { const r = await run(() => service.deleteDeclaration(declaration.id)); if (r) setDeclaration(null); }} />
-                <Button label={t("distribution.oc.submit", "Submit")} icon="pi pi-send" onClick={() => declAction(() => service.submitDeclaration(declaration.id))} />
+                <Button label={t("distribution.oc.deleteDeclarationTitle", "Delete declaration")} icon="pi pi-trash" text severity="danger" disabled={busy} onClick={deleteDeclaration} />
+                <Button label={t("distribution.oc.refresh", "Recompute")} icon="pi pi-refresh" outlined disabled={busy} onClick={() => declAction(() => service.refreshDeclaration(declaration.id))} />
+                <Button label={t("distribution.oc.submit", "Submit")} icon="pi pi-send" disabled={busy} onClick={() => declAction(() => service.submitDeclaration(declaration.id))} />
               </>
             ) : null}
             {write && declaration.status === "submitted" ? <Button label={t("distribution.oc.billIt", "Bill")} icon="pi pi-dollar" disabled={busy} onClick={() => declAction(() => service.billDeclaration(declaration.id))} /> : null}
-          </div>
+          </>
         ) : null}>
         {declaration && (
-          <div>
-            <div className="dist-summary">
-              <StatusTag status={declaration.status} />
-              <span>{t("distribution.oc.shipments", "Shipments")} <b>{declaration.shipments}</b></span>
-              <span>{t("distribution.oc.insured", "Insured value")} <b>{money(declaration.totalInsured)}</b></span>
-              <span>{t("distribution.fl.premium", "Premium")} <b>{money(declaration.premium)}</b></span>
-              <span>VAT <b>{money(declaration.vat)}</b></span>
-              <span>DST <b>{money(declaration.dst)}</b></span>
-              <span>LGT <b>{money(declaration.lgt)}</b></span>
-              <span>{t("distribution.oc.gross", "Premium with taxes")} <b>{money(declaration.grossPremium)}</b></span>
-              {declaration.billNumber ? <span>{t("distribution.oc.bill", "Bill")} <b>{declaration.billNumber}</b></span> : null}
-            </div>
-            <DataTable value={declaration.items} size="small" stripedRows emptyMessage={t("distribution.oc.nil", "No shipment in the period: a nil declaration")}>
-              <Column field="certificateNumber" header={t("distribution.oc.certificate", "Certificate")} />
-              <Column header={t("distribution.oc.shipped", "Shipped")} body={(x) => date(x.shipmentDate)} />
-              <Column field="conveyance" header={t("distribution.oc.conveyanceLabel", "Conveyance")} />
-              <Column header={t("distribution.oc.voyage", "Voyage")} body={(x) => `${x.voyageFrom} to ${x.voyageTo}`} />
-              <Column header={t("distribution.oc.insured", "Insured value")} body={(x) => money(x.insuredValue)} className="bv-num" headerClassName="bv-num" />
-              <Column header={t("distribution.fl.premium", "Premium")} body={(x) => money(x.premium)} className="bv-num" headerClassName="bv-num" />
-            </DataTable>
-          </div>
+          <>
+            <DetailHeader title={declaration.declarationNumber} status={{ code: declaration.status, label: t(`distribution.status.${declaration.status}`, declaration.status) }}
+              subtitle={`${cover.coverNumber} · ${cover.clientName}`}
+              meta={[
+                { label: t("distribution.oc.period", "Period"), value: declaration.period },
+                { label: t("distribution.oc.due", "Due"), value: declaration.dueOn, type: "date", hidden: !declaration.dueOn },
+                { label: t("distribution.oc.bill", "Bill"), value: declaration.billNumber, hidden: !declaration.billNumber },
+              ]}
+              actions={<Button label={t("distribution.oc.print", "Print")} icon="pi pi-print" outlined
+                onClick={() => printFile(toast, `/marine/declarations/${encodeURIComponent(declaration.id)}/print`, `${declaration.declarationNumber}.pdf`)} />} />
+            <DetailSection title={t("distribution.oc.premium", "Premium")}>
+              <KeyValueGrid columns={4} items={[
+                { label: t("distribution.oc.shipments", "Shipments"), value: declaration.shipments, type: "number" },
+                { label: t("distribution.oc.insured", "Insured value"), value: declaration.totalInsured, type: "amount" },
+                { label: t("distribution.fl.premium", "Premium"), value: declaration.premium, type: "amount" },
+                { label: t("distribution.oc.vat", "VAT"), value: declaration.vat, type: "amount" },
+                { label: t("distribution.oc.dst", "Documentary stamp tax"), value: declaration.dst, type: "amount" },
+                { label: t("distribution.oc.lgt", "Local government tax"), value: declaration.lgt, type: "amount" },
+                { label: t("distribution.oc.gross", "Premium with taxes"), value: declaration.grossPremium, type: "amount" },
+              ]} />
+            </DetailSection>
+            <DetailSection title={t("distribution.oc.shipments", "Shipments")} flush>
+              <DataTable value={declaration.items} size="small" stripedRows emptyMessage={t("distribution.oc.nil", "No shipment in the period: a nil declaration")}>
+                <Column field="certificateNumber" header={t("distribution.oc.certificate", "Certificate")} />
+                <Column header={t("distribution.oc.shipped", "Shipped")} body={(x) => date(x.shipmentDate)} />
+                <Column header={t("distribution.oc.conveyanceLabel", "Conveyance")} body={(x) => conveyanceText(x.conveyance)} />
+                <Column header={t("distribution.oc.voyage", "Voyage")} body={(x) => `${x.voyageFrom} – ${x.voyageTo}`} />
+                <Column header={t("distribution.oc.insured", "Insured value")} body={(x) => money(x.insuredValue)} className="bv-num" headerClassName="bv-num" />
+                <Column header={t("distribution.fl.premium", "Premium")} body={(x) => money(x.premium)} className="bv-num" headerClassName="bv-num" />
+              </DataTable>
+            </DetailSection>
+            <DetailSection title={t("distribution.common.history", "History")}>
+              <RecordActivityLog entity="marine_declaration" recordId={declaration.id} />
+            </DetailSection>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
     </div>
   );
 };

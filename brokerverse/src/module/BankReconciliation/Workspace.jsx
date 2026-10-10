@@ -11,6 +11,8 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import bankReconciliationService from "../../services/bankReconciliationService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import periodEndService from "../../services/periodEndService";
 import { Amount, BrTag, JournalDialog, PageHeader, date, money, previousPeriod, recentPeriods, showError, showSuccess, sum } from "./common";
 import ImportStatementDialog from "./ImportStatementDialog";
@@ -46,7 +48,7 @@ const Workspace = () => {
   const [types, setTypes] = useState([]);
   const [formats, setFormats] = useState([]);
   const [glAccounts, setGlAccounts] = useState([]);
-  const [dialog, setDialog] = useState(null); // import | setup | adjust | flag | match | unmatch | stale
+  const [dialog, setDialog] = useState(null); // import | setup | adjust | match | stale
   const [form, setForm] = useState({});
   const [journal, setJournal] = useState(null);
 
@@ -101,6 +103,57 @@ const Workspace = () => {
     }
   };
 
+  // the action runs inside the confirmation (an error stays there); the toast and the reload follow once it succeeded
+  const confirmAct = async (options, fn, message) => {
+    let out;
+    const answer = await openConfirm({ ...options, onConfirm: async (value) => { out = await fn(value); } });
+    if (answer === false || answer === null) return;
+    showSuccess(toast, typeof message === "function" ? message(out) : message);
+    await load();
+  };
+  const bankFacts = (l) => [
+    { label: t("bankReconciliation.date"), value: l.date, type: "date" },
+    { label: t("bankReconciliation.description"), value: l.description },
+    { label: t("bankReconciliation.reference"), value: l.reference },
+    { label: t("bankReconciliation.statement"), value: l.statementNumber },
+    { label: t("bankReconciliation.amount"), value: l.amount, type: "amount", emphasis: true },
+  ];
+  const bookFacts = (v) => [
+    { label: t("bankReconciliation.date"), value: v.date, type: "date" },
+    { label: t("bankReconciliation.document"), value: [v.documentType, v.documentNumber].filter(Boolean).join(" ") },
+    { label: t("bankReconciliation.journal"), value: v.journalNumber },
+    { label: t("bankReconciliation.payeePayer"), value: v.party },
+    { label: t("bankReconciliation.amount"), value: v.amount, type: "amount", emphasis: true },
+  ];
+  const approveAdjustment = (l) => confirmAct({
+    title: t("bankReconciliation.approveAdjustment"),
+    message: t("bankReconciliation.confirmations.approveAdjustmentMessage", { journal: l.adjustmentJournalNumber || "" }),
+    facts: bankFacts(l),
+    confirmLabel: t("bankReconciliation.confirmations.approveAndPost"),
+  }, () => bankReconciliationService.approveAdjustment(l.id), t("bankReconciliation.adjustmentPosted"));
+  const flagLine = (l) => confirmAct({
+    title: t("bankReconciliation.dialog.flag"),
+    severity: "danger",
+    facts: bankFacts(l),
+    note: t("bankReconciliation.confirmations.notes.flag"),
+    input: { type: "textarea", label: t("bankReconciliation.remarks"), required: true, maxLength: 500 },
+    confirmLabel: t("bankReconciliation.flagBankError"),
+  }, (remarks) => bankReconciliationService.flagLine(l.id, "bank-error", remarks), t("bankReconciliation.flagged"));
+  const clearFlag = (l) => confirmAct({
+    title: t("bankReconciliation.clearFlag"),
+    facts: [...bankFacts(l), { label: t("bankReconciliation.remarks"), value: l.flagRemarks }],
+    confirmLabel: t("bankReconciliation.clearFlag"),
+  }, () => bankReconciliationService.flagLine(l.id, null), t("bankReconciliation.flagCleared"));
+  const unmatch = (row, facts) => confirmAct({
+    title: t("bankReconciliation.dialog.unmatch"),
+    severity: "warning",
+    message: t("bankReconciliation.confirmations.unmatchMessage", { date: date(row.clearedDate) }),
+    facts,
+    note: t("bankReconciliation.unmatchHelp"),
+    input: { type: "textarea", label: t("bankReconciliation.reason"), maxLength: 500 },
+    confirmLabel: t("bankReconciliation.unmatch"),
+  }, (reason) => bankReconciliationService.unmatch(row.matchId, reason), t("bankReconciliation.unmatched"));
+
   const bankRows = useMemo(() => (data?.bankLines || []).filter((l) => (bankFilter === "all" || !l.matchId)
     && (!bankSearch || text(`${l.description} ${l.reference} ${l.amount}`).includes(text(bankSearch)))), [data, bankFilter, bankSearch]);
   const bookRows = useMemo(() => (data?.bookLines || []).filter((v) => (bookFilter === "all" || !v.matchId)
@@ -145,22 +198,22 @@ const Workspace = () => {
       )}
       {l.adjustmentJournalStatus === "for-approval" && !l.matchId && hasPermission("write:journal-vouchers") && (
         <Button icon="pi pi-check-circle" text rounded size="small" tooltip={t("bankReconciliation.approveAdjustment")} tooltipOptions={{ position: "left" }}
-          onClick={() => act("approveAdj", () => bankReconciliationService.approveAdjustment(l.id), t("bankReconciliation.adjustmentPosted"))} aria-label={t("bankReconciliation.approveAdjustment")} />
+          onClick={() => approveAdjustment(l)} aria-label={t("bankReconciliation.approveAdjustment")} />
       )}
       {!l.matchId && (
         <Button icon={l.flag ? "pi pi-flag-fill" : "pi pi-flag"} text rounded size="small" severity={l.flag ? "danger" : "secondary"} tooltip={l.flag ? t("bankReconciliation.clearFlag") : t("bankReconciliation.flagBankError")}
           tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.flagBankError")}
-          onClick={() => (l.flag ? act("flag", () => bankReconciliationService.flagLine(l.id, null), t("bankReconciliation.flagCleared")) : (setForm({ line: l, remarks: "" }), setDialog("flag")))} />
+          onClick={() => (l.flag ? clearFlag(l) : flagLine(l))} />
       )}
       {l.matchId && !l.locked && (
-        <Button icon="pi pi-link" text rounded size="small" severity="warning" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
-          onClick={() => { setForm({ matchId: l.matchId, reason: "" }); setDialog("unmatch"); }} />
+        <Button icon="pi pi-link" text rounded size="small" severity="secondary" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
+          onClick={() => unmatch(l, bankFacts(l))} />
       )}
     </div>
   );
   const bookActions = (v) => (v.matchId && !v.locked ? (
-    <Button icon="pi pi-link" text rounded size="small" severity="warning" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
-      onClick={() => { setForm({ matchId: v.matchId, reason: "" }); setDialog("unmatch"); }} />
+    <Button icon="pi pi-link" text rounded size="small" severity="secondary" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
+      onClick={() => unmatch(v, bookFacts(v))} />
   ) : null);
 
   return (
@@ -278,7 +331,7 @@ const Workspace = () => {
             <span className={selDiff === 0 ? "br-sel-diff-ok" : "br-sel-diff-bad"}>{t("bankReconciliation.difference")}<b>{money(selDiff)}</b></span>
           </div>
           <div className="flex gap-2">
-            <Button label={t("bankReconciliation.clear")} text style={{ color: "#fff" }} onClick={() => { setBankSel([]); setBookSel([]); }} />
+            <Button label={t("bankReconciliation.clear")} text className="br-selection-clear" onClick={() => { setBankSel([]); setBookSel([]); }} />
             <Button icon="pi pi-link" label={t("bankReconciliation.matchSelected")} loading={busy === "match"} onClick={matchSelected}
               disabled={bankSel.length + bookSel.length < 2} />
           </div>
@@ -292,25 +345,17 @@ const Workspace = () => {
       <StaleChequesDialog visible={dialog === "stale"} account={account} onHide={() => setDialog(null)} onChanged={load} toast={toast} />
       <JournalDialog journal={journal} onHide={() => setJournal(null)} />
 
-      <Dialog className="pe-dialog" visible={["setup", "flag", "unmatch", "match"].includes(dialog)} style={{ width: "min(560px, 95vw)" }} onHide={() => setDialog(null)}
-        header={dialog ? t(`bankReconciliation.dialog.${dialog}`, { defaultValue: "" }) : ""}
+      <Dialog className="pe-dialog" visible={dialog === "setup"} style={{ width: "min(560px, 95vw)" }} onHide={() => setDialog(null)} header={t("bankReconciliation.dialog.setup")}
         footer={(
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setDialog(null)} />
-            {dialog === "setup" && <Button label={t("bankReconciliation.save")} icon="pi pi-save" loading={busy === "setup"} disabled={!form.glAccountCode}
+            <Button label={t("bankReconciliation.save")} icon="pi pi-save" loading={busy === "setup"} disabled={!form.glAccountCode}
               onClick={() => act("setup", () => bankReconciliationService.linkBankAccount(account, { glAccountCode: form.glAccountCode, statementFormat: form.statementFormat || null,
-                ...((form.reconcileFrom || null) !== (current?.reconcileFrom || null) ? { reconcileFrom: form.reconcileFrom || null } : {}) }), t("bankReconciliation.accountLinked")).then(loadAccounts)} />}
-            {dialog === "flag" && <Button label={t("bankReconciliation.flagBankError")} icon="pi pi-flag" severity="danger" loading={busy === "flag"} disabled={!String(form.remarks || "").trim()}
-              onClick={() => act("flag", () => bankReconciliationService.flagLine(form.line.id, "bank-error", form.remarks), t("bankReconciliation.flagged"))} />}
-            {dialog === "unmatch" && <Button label={t("bankReconciliation.unmatch")} icon="pi pi-link" severity="warning" loading={busy === "unmatch"}
-              onClick={() => act("unmatch", () => bankReconciliationService.unmatch(form.matchId, form.reason), t("bankReconciliation.unmatched"))} />}
-            {dialog === "match" && <Button label={t("bankReconciliation.matchSelected")} icon="pi pi-link" loading={busy === "match"}
-              disabled={form.treatment === "adjustment" && !form.typeCode} onClick={confirmMatchWithDifference} />}
+                ...((form.reconcileFrom || null) !== (current?.reconcileFrom || null) ? { reconcileFrom: form.reconcileFrom || null } : {}) }), t("bankReconciliation.accountLinked")).then(loadAccounts)} />
           </div>
         )}>
         {dialog === "setup" && (
           <div className="grid">
-            <div className="col-12"><p className="pe-muted mt-0">{t("bankReconciliation.setupHelp")}</p></div>
             <div className="col-12">
               <label htmlFor="br-gl">{t("bankReconciliation.glAccount")} *</label>
               <Dropdown inputId="br-gl" value={form.glAccountCode} onChange={(e) => setForm({ ...form, glAccountCode: e.value })} filter className="w-full"
@@ -328,36 +373,40 @@ const Workspace = () => {
             <div className="col-12 md:col-6 flex align-items-end"><span className="pe-muted">{t("bankReconciliation.reconcileFromHelp")}</span></div>
           </div>
         )}
-        {dialog === "flag" && form.line && (
+      </Dialog>
+
+      <Dialog className="pe-dialog bv-centered" visible={dialog === "match"} style={{ width: "min(560px, 95vw)" }} onHide={() => setDialog(null)}
+        header={t("bankReconciliation.dialog.match")} draggable={false}
+        footer={(
           <div>
-            <p className="pe-muted mt-0">{t("bankReconciliation.flagHelp")}</p>
-            <p><b>{date(form.line.date)}</b> · {form.line.description} · <Amount value={form.line.amount} /></p>
-            <label htmlFor="br-flag-remarks">{t("bankReconciliation.remarks")} *</label>
-            <InputTextarea id="br-flag-remarks" rows={3} className="w-full" value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} />
+            <Button label={t("bankReconciliation.cancel")} text onClick={() => setDialog(null)} />
+            <Button label={t("bankReconciliation.matchSelected")} icon="pi pi-link" loading={busy === "match"}
+              disabled={form.treatment === "adjustment" && !form.typeCode} onClick={confirmMatchWithDifference} />
           </div>
-        )}
-        {dialog === "unmatch" && (
-          <div>
-            <p className="pe-muted mt-0">{t("bankReconciliation.unmatchHelp")}</p>
-            <label htmlFor="br-unmatch-reason">{t("bankReconciliation.reason")}</label>
-            <InputTextarea id="br-unmatch-reason" rows={2} className="w-full" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
-          </div>
-        )}
+        )}>
         {dialog === "match" && (
-          <div>
-            <div className="br-notice">{t("bankReconciliation.differenceHelp", { bank: money(selBank), book: money(selBook), difference: money(selDiff) })}</div>
-            <label>{t("bankReconciliation.treatment")}</label>
-            <SelectButton value={form.treatment} onChange={(e) => e.value && setForm({ ...form, treatment: e.value })} className="mb-3"
-              options={["adjustment", "bank-error", "book-error"].map((x) => ({ label: t(`bankReconciliation.treatmentValue.${x}`), value: x }))} />
+          <div className="flex flex-column gap-3">
+            <KeyValueGrid columns={3} items={[
+              { label: t("bankReconciliation.selectedBank", { count: bankSel.length }), value: selBank, type: "amount" },
+              { label: t("bankReconciliation.selectedBook", { count: bookSel.length }), value: selBook, type: "amount" },
+              { label: t("bankReconciliation.difference"), value: selDiff, type: "amount" },
+            ]} />
+            <div>
+              <label htmlFor="br-diff-treatment">{t("bankReconciliation.treatment")}</label>
+              <SelectButton id="br-diff-treatment" value={form.treatment} onChange={(e) => e.value && setForm({ ...form, treatment: e.value })}
+                options={["adjustment", "bank-error", "book-error"].map((x) => ({ label: t(`bankReconciliation.treatmentValue.${x}`), value: x }))} />
+            </div>
             {form.treatment === "adjustment" && (
-              <div className="mb-3">
+              <div>
                 <label htmlFor="br-diff-type">{t("bankReconciliation.transactionType")} *</label>
                 <Dropdown inputId="br-diff-type" value={form.typeCode} onChange={(e) => setForm({ ...form, typeCode: e.value })} className="w-full"
                   options={types.filter((x) => x.action === "journal" && x.direction === (selDiff < 0 ? "debit" : "credit")).map((x) => ({ label: `${x.code} – ${x.name}`, value: x.code }))} />
               </div>
             )}
-            <label htmlFor="br-diff-remarks">{t("bankReconciliation.remarks")}</label>
-            <InputTextarea id="br-diff-remarks" rows={2} className="w-full" value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} />
+            <div>
+              <label htmlFor="br-diff-remarks">{t("bankReconciliation.remarks")}</label>
+              <InputTextarea id="br-diff-remarks" rows={2} className="w-full" value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} />
+            </div>
           </div>
         )}
       </Dialog>

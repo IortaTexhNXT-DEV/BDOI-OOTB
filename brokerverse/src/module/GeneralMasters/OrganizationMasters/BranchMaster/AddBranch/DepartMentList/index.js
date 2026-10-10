@@ -21,8 +21,13 @@ import {
 import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
 import { statusLabel } from "../../../../../../utils/statusSeverity";
+import { useTranslation } from "react-i18next";
+import DetailDialog from "../../../../../../components/DetailDialog";
+import DetailHeader from "../../../../../../components/DetailHeader";
+import KeyValueGrid from "../../../../../../components/KeyValueGrid";
 
 const DepartMentList = ({ action, branchCode }) => {
+  const { t } = useTranslation();
   const { departmentList, depatmentView, getDepartmentPatch } =
     useSelector(({ organizationBranchMainReducers }) => {
       return {
@@ -303,48 +308,14 @@ const DepartMentList = ({ action, branchCode }) => {
           </div>
         </div>
       </Dialog>
-      <Dialog
-        header="Department Details"
-        visible={visibleView}
-        style={{ width: "40vw", boxShadow: "none" }}
-        onHide={() => setVisibleView(false)}
-        className="master__flow__common__dialog__container"
-      >
-        <div class="grid">
-          <div class="sm-col-12 col-12 md:col-6 lg-col-6">
-            <div>
-              <InputField
-                classNames="field__container"
-                label="Department Code"
-                placeholder={"Enter"}
-                value={depatmentView.DepartmentCode}
-              />
-            </div>
-          </div>
-          <div class="sm-col-12 col-12 md:col-6 lg-col-6">
-            <div>
-              <InputField
-                classNames="field__container"
-                label="Department Name"
-                placeholder={"Enter"}
-                value={depatmentView.DepartmentName}
-              />
-            </div>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="sm-col-12 col-12 md:col-12 lg-col-12">
-            <div>
-              <InputField
-                classNames="field__container"
-                label="Description"
-                placeholder={"Enter"}
-                value={depatmentView.Description}
-              />
-            </div>
-          </div>
-        </div>
-      </Dialog>
+      <DetailDialog visible={visibleView} onHide={() => setVisibleView(false)} header={t("generalMasters.departmentDetails")} size="md">
+        <DetailHeader title={depatmentView.DepartmentName || depatmentView.DepartmentCode || "—"} subtitle={depatmentView.DepartmentCode} />
+        <KeyValueGrid columns={2} items={[
+          { label: t("generalMasters.departmentCode"), value: depatmentView.DepartmentCode },
+          { label: t("generalMasters.departmentName"), value: depatmentView.DepartmentName },
+          { label: t("generalMasters.description"), value: depatmentView.Description, span: "full" },
+        ]} />
+      </DetailDialog>
 
       <Dialog
         header="Edit Details"

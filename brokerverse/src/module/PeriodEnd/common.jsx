@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
-import SvgDot from "../../assets/icons/SvgDot";
+import SharedPageHeader from "../../components/PageHeader";
 import periodEndService from "../../services/periodEndService";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import { RecordActivityLog } from "../../components/ActivityLog";
 import { formatCurrency } from "../../utility/currencyConverter";
-import { formatDate } from "../../utility/dateFormat";
+import { formatDate, formatInstant } from "../../utility/dateFormat";
 import "./index.scss";
 
 export const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(Number(v)));
 export const date = (v) => (v ? formatDate(v) : "-");
-export const dateTime = (v) => (v ? formatDate(v, { withTime: true }) : "-");
+/** An instant in the business time zone, as the detail grids and activity logs show it. */
+export const dateTime = (v) => formatInstant(v);
 export const showError = (toast, e) => toast.current?.show({ severity: "error", summary: "Error", detail: e.message, life: 7000 });
-export const showSuccess = (toast, detail) => toast.current?.show({ severity: "success", summary: "Done", detail, life: 3500 });
+export const showSuccess = (toast, detail) => toast.current?.show({ severity: "success", summary: "Done", detail, life: 5000 });
 
 const SEVERITY = {
   open: "success", soft_closed: "warning", closed: "danger", locked: "secondary", closing: "warning",
@@ -24,6 +27,9 @@ const SEVERITY = {
   done: "success", skipped: "secondary", active: "success", undone: "secondary", posted: "success", inactive: "secondary", completed: "secondary", issued: "success",
 };
 
+/** A fiscal year in a year selector, the same on every Period End screen: "FY2026 · Open". */
+export const yearLabel = (t, y) => `${y.code} · ${t(`periodEnd.status.${y.status}`)}`;
+
 /** Status chip with a translated label (periodEnd.status.<status>). */
 export const StatusTag = ({ status }) => {
   const { t } = useTranslation();
@@ -31,20 +37,10 @@ export const StatusTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`periodEnd.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
 };
 
-/** Page title, breadcrumb (Accounts > Period End (or `section`) > page) and action buttons. */
-export const PageHeader = ({ title, trail = [], subtitle, section, children }) => {
+/** Page title, breadcrumb (Accounts > Period End (or `section`) > page), help icon (`subtitle`) and action buttons. */
+export const PageHeader = ({ section, ...props }) => {
   const { t } = useTranslation();
-  return (
-    <div className="pe-header">
-      <div>
-        <h1 className="pe-title">{title}</h1>
-        <BreadCrumb home={{ label: t("periodEnd.accounts") }} model={[{ label: section || t("periodEnd.menu") }, ...trail.map((label) => ({ label }))]}
-          separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-        {subtitle && <p className="pe-subtitle">{subtitle}</p>}
-      </div>
-      <div className="pe-header-actions">{children}</div>
-    </div>
-  );
+  return <SharedPageHeader home={t("periodEnd.accounts")} {...props} section={section || t("periodEnd.menu")} />;
 };
 
 /** Journal lines of a journal (opened from the journal number links). */
@@ -61,24 +57,33 @@ export const JournalDialog = ({ journal, onHide }) => {
   const debit = (rows || []).reduce((s, r) => s + Number(r.debit || 0), 0);
   const credit = (rows || []).reduce((s, r) => s + Number(r.credit || 0), 0);
   return (
-    <Dialog header={journal ? `${t("periodEnd.journal")} ${journal.journalNumber}` : ""} visible={!!journal} onHide={onHide} style={{ width: "min(960px, 96vw)" }} className="pe-dialog">
+    <DetailDialog header={t("periodEnd.journal")} visible={!!journal} onHide={onHide} size="lg">
       {journal && (
-        <div className="pe-journal-meta">
-          <span>{date(journal.date)}</span>
-          {journal.period && <span>{t("periodEnd.period")} {journal.period}</span>}
-          <StatusTag status={journal.journalStatus || journal.status} />
-          <span className="pe-muted">{journal.description}</span>
-        </div>
+        <DetailHeader title={journal.journalNumber} subtitle={journal.description}
+          status={journal.journalStatus || journal.status ? { code: journal.journalStatus || journal.status, label: t(`periodEnd.status.${journal.journalStatus || journal.status}`) } : null}
+          meta={[
+            { label: t("periodEnd.date"), value: journal.date, type: "date" },
+            { label: t("periodEnd.period"), value: journal.period, hidden: !journal.period },
+            { label: t("periodEnd.debit"), value: rows ? debit : null, type: "amount" },
+            { label: t("periodEnd.credit"), value: rows ? credit : null, type: "amount" },
+          ]} />
       )}
-      {error && <div className="pe-error">{error}</div>}
-      <DataTable value={rows || []} loading={!rows && !error} size="small" stripedRows emptyMessage={t("periodEnd.noRows")}>
-        <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} />
-        <Column field="accountName" header={t("periodEnd.accountName")} />
-        <Column field="description" header={t("periodEnd.memo")} />
-        <Column header={t("periodEnd.debit")} body={(r) => (Number(r.debit) ? money(r.debit) : "")} className="bv-num" headerClassName="bv-num" footer={money(debit)} footerClassName="bv-num" />
-        <Column header={t("periodEnd.credit")} body={(r) => (Number(r.credit) ? money(r.credit) : "")} className="bv-num" headerClassName="bv-num" footer={money(credit)} footerClassName="bv-num" />
-      </DataTable>
-    </Dialog>
+      <DetailSection title={t("periodEnd.confirmations.lines")} flush>
+        {error && <div className="pe-error">{error}</div>}
+        <DataTable value={rows || []} loading={!rows && !error} size="small" stripedRows emptyMessage={t("periodEnd.noRows")}>
+          <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} />
+          <Column field="accountName" header={t("periodEnd.accountName")} />
+          <Column field="description" header={t("periodEnd.memo")} />
+          <Column header={t("periodEnd.debit")} body={(r) => (Number(r.debit) ? money(r.debit) : "")} className="bv-num" headerClassName="bv-num" footer={money(debit)} footerClassName="bv-num" />
+          <Column header={t("periodEnd.credit")} body={(r) => (Number(r.credit) ? money(r.credit) : "")} className="bv-num" headerClassName="bv-num" footer={money(credit)} footerClassName="bv-num" />
+        </DataTable>
+      </DetailSection>
+      {journal && (
+        <DetailSection title={t("periodEnd.confirmations.activity")}>
+          <RecordActivityLog entity="journal_voucher" recordId={journal.journalNumber} />
+        </DetailSection>
+      )}
+    </DetailDialog>
   );
 };
 

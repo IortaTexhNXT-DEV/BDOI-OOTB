@@ -80,6 +80,8 @@ describe('finance incentives', () => {
     expect((await ctx.api('post', '/incentive/programs').send({})).status).toBe(400);
   });
   it('finance runs a calculation and a second finance user approves it (maker-checker)', async () => {
+    // a new policy of an agent in the month calculated (a run with no agent line is refused)
+    await pool.query('UPDATE policies SET inception_date = \'2026-08-15\' WHERE id = \'pol_pw3\'');
     const c = await as('pw.finance', 'post', '/incentive/calculations').send({ period: '2026-08', selectedPrograms: ['INC-2026-002'] });
     expect(c.status).toBe(201);
     expect((await as('pw.finance', 'post', `/incentive/calculations/${c.body.data.batchId}/submit`)).status).toBe(200);
