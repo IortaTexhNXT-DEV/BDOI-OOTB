@@ -87,8 +87,7 @@ const FleetList = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.fl.title", "Fleet Schedules")}
-        subtitle={t("distribution.fl.subtitle", "One motor policy covering many vehicles, each with its own premium and CTPL; vehicles added or deleted by endorsement at the pro-rata premium.")}>
+      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.fl.title", "Fleet Schedules")}>
         {write ? <Button label={t("distribution.fl.new", "New fleet schedule")} icon="pi pi-plus" onClick={open} /> : null}
       </PageHeader>
       <div className="pe-card">

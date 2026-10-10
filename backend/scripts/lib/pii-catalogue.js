@@ -234,6 +234,8 @@ export const CATALOGUE = {
   'remittances.data': 'json',
   'remittance_items.data': 'json',
   'remittance_items.remarks': 'freeText',
+  'remittance_imports.purpose_note': 'freeText',
+  'remittance_imports.file_name': 'fileName',
   'remittance_approvals.remarks': 'freeText',
   'remittance_approvals.history': 'json',
   'insurer_statement_lines.insured_name': 'partyName',

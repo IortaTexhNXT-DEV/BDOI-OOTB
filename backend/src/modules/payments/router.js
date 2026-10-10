@@ -9,6 +9,8 @@ import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
 import * as pc from './pettycash.js';
 import { today } from '../../lib/dates.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { pettyCashVoucherDoc } from '../documents/finance.js';
 
 // ---------- Payments (agent) ----------
 const pay = moduleRouter('Payments', '/payments');
@@ -145,6 +147,21 @@ for (const action of ['submit', 'approve', 'reject']) {
     },
   });
 }
+pcr.define({
+  method: 'GET', path: '/disbursements/:id/pdf', summary: 'Printable petty cash voucher (PDF, broker letterhead; prepared, approved and received by blocks)',
+  screen: `${S} > Disbursement > View > Print`, middleware: pcRead, query: { download: 1 }, response: '(application/pdf)',
+  handler: async (req, res) => {
+    const d = await pc.getOne(pool, 'disbursements', req.params.id);
+    // the fund, the requester and who prepared and approved the request, for the voucher's header and signature blocks
+    const extra = (await pool.query(`SELECT f.description AS fund_description, r.requester_name, COALESCE(cu.display_name, cu.username) AS created_by_name,
+        COALESCE(au.display_name, au.username) AS approved_by_name
+      FROM petty_cash_disbursements x JOIN petty_cash_funds f ON f.id = x.fund_id LEFT JOIN petty_cash_requests r ON r.id = x.request_id
+      LEFT JOIN users cu ON cu.id = x.created_by LEFT JOIN users au ON au.id = r.approved_by WHERE x.id = $1`, [d.id])).rows[0] || {};
+    const pdf = buildPdf(await pettyCashVoucherDoc({ ...d, fundDescription: extra.fund_description, requesterName: extra.requester_name,
+      createdByName: extra.created_by_name, approvedByName: extra.approved_by_name }));
+    sendPdf(res, pdf, `petty-cash-voucher-${d.transactionNumber || d.id}.pdf`, req.query.download ? 'attachment' : 'inline');
+  },
+});
 for (const kind of ['disbursements', 'receipts', 'replenishments']) {
   pcr.define({
     method: 'POST', path: `/${kind}/:id/reverse`, summary: `Reverse a petty cash ${kind.slice(0, -1)} entered in error (mirror journal, fund cash restored)`,

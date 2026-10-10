@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
 let fin;
@@ -26,7 +27,8 @@ describe('remittances and approvals', () => {
     expect(r.body.total).toBeGreaterThanOrEqual(10);
     expect(r.body.summary.count).toBe(r.body.total);
     const labels = new Set((await ctx.api('get', '/remittance/remittances?perPage=100')).body.data.map((x) => x.status));
-    expect([...labels]).toEqual(expect.arrayContaining(['Draft', 'Approved', 'Completed']));
+    // TISPH names (seed 90): a settled remittance has its voucher raised
+    expect([...labels]).toEqual(expect.arrayContaining(['Draft', 'Approved', 'Settled (voucher raised)']));
     const pend = await ctx.api('get', '/remittance/remittances?status=Pending%20Approval');
     expect(pend.body.data.every((x) => x.statusCode === 'for-approval')).toBe(true);
     const d = await ctx.api('get', `/remittance/remittances/${r.body.data[0].id}`);
@@ -52,7 +54,7 @@ describe('remittances and approvals', () => {
   it('creates a remittance, validates and processes it, and enforces maker-checker', async () => {
     const bad = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', lines: [] });
     expect(bad.status).toBe(400);
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-100', premium: 20000, commission: 3000, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-100', premium: 20000, commission: 3000, tax: 0 }] }));
     expect(c.status).toBe(201);
     remId = c.body.data.id;
     expect(c.body.data).toMatchObject({ netAmount: 17000, status: 'Draft', policyCount: 1 });
@@ -74,7 +76,15 @@ describe('remittances and approvals', () => {
     expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data.statusCode).toBe('approved');
     const hist = await ctx.api('get', '/remittance/approvals/history');
     expect(hist.body.data.some((h) => h.action === 'Approved' && h.remarks === 'Verified')).toBe(true);
-    expect((await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({})).status).toBe(409);
+    const again = await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({});
+    expect(again.status).toBe(409);
+    expect(again.body.errors[0].code).toBe('ALREADY_DECIDED');
+    expect(again.body.message).toMatch(/^Approved by R Finance at \d{2}:\d{2}\.$/);
+    // the record answers its version and the decision block of its approval
+    const rec = (await ctx.api('get', `/remittance/remittances/${remId}`)).body.data;
+    expect(rec.version).toBeGreaterThan(1);
+    expect(rec.decision).toMatchObject({ canDecide: false, blockedCode: 'ALREADY_DECIDED' });
+    expect(rec.nextStep).toMatchObject({ code: 'settle', label: 'Include in a settlement' });
     expect((await ctx.api('get', '/remittance/processing-history')).body.data[0].batchId).toBe(p.body.data.batchId);
   });
   it('settles through a settlement approved by a second user', async () => {
@@ -92,7 +102,7 @@ describe('remittances and approvals', () => {
     expect(sub.body.data.status).toBe('Pending Approval');
     const ap = await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Settlement')).body.data[0].id}/approve`).send({ comments: 'Paid' });
     expect(ap.body.data.status).toBe('Approved');
-    expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data.status).toBe('Completed');
+    expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data).toMatchObject({ status: 'Settled (voucher raised)', statusCode: 'settled' });
   });
 });
 
@@ -112,10 +122,13 @@ describe('commission taxes on a remittance', () => {
 describe('settlement to money out', () => {
   it('an approved settlement raises the insurer payment voucher for the collected premium', async () => {
     const { rows: [pol] } = await pool.query(`SELECT p.id, p.policy_number FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id
-      JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'STANDARD' LIMIT 1`);
+      JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'STANDARD'
+        AND NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.status = 'settled') LIMIT 1`);
     expect(pol).toBeTruthy();
+    // a policy is on one remittance at a time: the sample remittance holding it is cancelled, so it is ready to remit
+    await pool.query(`UPDATE remittances SET status = 'cancelled' WHERE status <> 'cancelled' AND id IN (SELECT remittance_id FROM remittance_lines WHERE policy_id = $1)`, [pol.id]);
     const rem = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'STANDARD', period: '2026-09', lines: [{ policyId: pol.id }] });
-    expect(rem.status).toBe(201);
+    expect(rem.status, JSON.stringify(rem.body)).toBe(201);
     await ctx.api('post', '/remittance/remittances/process').send({ ids: [rem.body.data.id] });
     const a = (await ctx.api('get', '/remittance/approvals')).body.data.find((x) => x.entityId === rem.body.data.id);
     expect((await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' })).status).toBe(200);
@@ -187,7 +200,18 @@ describe('work items', () => {
     const h = await ctx.api('get', '/remittance/adjustments/history');
     expect(h.body.data.some((x) => x.referenceNo === auto.body.data.referenceNo && x.processedBy)).toBe(true);
   });
-  it('electronic transfers check method limits and need approval before execution', async () => {
+  it('electronic transfers are closed for TISPH: insurers are paid from Insurer payments', async () => {
+    const t = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 40000, method: 'InstaPay', purpose: 'Premium' });
+    expect(t.status).toBe(409);
+    expect(t.body.message).toBe('Electronic transfers are replaced by Insurer payments.');
+    expect(t.body.errors[0].code).toBe('TRANSFERS_OFF');
+    const [approved] = (await pool.query("SELECT id FROM remittance_items WHERE kind = 'transfer' AND status = 'Approved' LIMIT 1")).rows;
+    expect((await ctx.api('post', `/remittance/transfers/${approved.id}/execute`).send({ status: 'Completed', bankReference: 'IP-0' })).status).toBe(409);
+    expect((await as(sales, 'post', '/remittance/transfers').send({})).status).toBe(403);
+  });
+  it('electronic transfers check method limits and need approval before execution (transfers on)', async () => {
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.transfers_enabled'");
+    clearSettingsCache();
     const m = await ctx.api('get', '/remittance/transfers/methods');
     expect(m.body.data.find((x) => x.value === 'InstaPay').limit).toBe(50000);
     expect((await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'X', amount: 60000, method: 'InstaPay' })).status).toBe(400);
@@ -197,6 +221,20 @@ describe('work items', () => {
     await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Electronic%20Transfer')).body.data.find((a) => a.entityId === t.body.data.id).id}/approve`).send({ comments: 'ok' });
     const ex = await ctx.api('post', `/remittance/transfers/${t.body.data.id}/execute`).send({ status: 'Completed', bankReference: 'IP-1' });
     expect(ex.body.data.status).toBe('Completed');
+    // a transfer still pending when transfers are switched off cannot be approved (it would post its journal); it can be rejected
+    const p1 = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 30000, method: 'InstaPay', purpose: 'Premium' });
+    const p2 = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 20000, method: 'InstaPay', purpose: 'Premium' });
+    await pool.query("UPDATE app_settings SET value = 'false' WHERE key = 'remittance.transfers_enabled'");
+    clearSettingsCache();
+    const pending = (await ctx.api('get', '/remittance/approvals?transactionType=Electronic%20Transfer')).body.data;
+    const a1 = pending.find((a) => a.entityId === p1.body.data.id);
+    const refused = await as(fin, 'post', `/remittance/approvals/${a1.id}/approve`).send({ comments: 'ok' });
+    expect(refused.status).toBe(409);
+    expect(refused.body.message).toBe('Electronic transfers are replaced by Insurer payments.');
+    expect((await pool.query('SELECT status, journal_id FROM remittance_items WHERE id = $1', [p1.body.data.id])).rows[0]).toMatchObject({ status: 'Pending', journal_id: null });
+    const a2 = pending.find((a) => a.entityId === p2.body.data.id);
+    const rejected = await as(fin, 'post', `/remittance/approvals/${a2.id}/reject`).send({ reasonCode: 'RRJ-OTHER', note: 'Paid from Insurer payments' });
+    expect(rejected.status, JSON.stringify(rejected.body)).toBe(200);
   });
   it('statements, reports and exceptions', async () => {
     const s = await ctx.api('post', '/remittance/statements/generate').send({ period: '2025-12', selectionType: 'all', templateCode: 'STM-001' });
@@ -215,6 +253,15 @@ describe('work items', () => {
     expect((await ctx.api('post', `/remittance/exceptions/${e.body.data.id}/resolve`).send({})).status).toBe(400);
     const r = await ctx.api('post', `/remittance/exceptions/${e.body.data.id}/resolve`).send({ resolution: 'Insurer credited' });
     expect(r.body.data.status).toBe('Resolved');
+    // escalation takes a reason of the exception_escalate context, never free text alone
+    const x = await ctx.api('post', '/remittance/exceptions').send({ type: 'Amount Mismatch', severity: 'High', amount: 300, description: 'No answer from insurer' });
+    const escalate = (body) => ctx.api('post', `/remittance/exceptions/${x.body.data.id}/escalate`).send(body);
+    expect((await escalate({ reason: 'Past SLA' })).status).toBe(400);
+    expect((await escalate({ reasonCode: 'RRJ-AMOUNT' })).status).toBe(400);
+    expect((await escalate({ reasonCode: 'EXE-OTHER' })).status).toBe(400);
+    const up = await escalate({ reasonCode: 'EXE-SLA', note: 'Five days without an answer' });
+    expect(up.status).toBe(200);
+    expect(up.body.data).toMatchObject({ status: 'Escalated', escalationReason: 'Past SLA: Five days without an answer', escalationReasonCode: 'EXE-SLA' });
     expect((await ctx.api('get', '/remittance/exceptions?status=Open')).body.data.length).toBeGreaterThanOrEqual(2);
   });
   it('notifications and schedules', async () => {
@@ -226,12 +273,17 @@ describe('work items', () => {
     expect(s.body.data.scheduledJobs.length).toBeGreaterThanOrEqual(2);
     const created = await ctx.api('post', '/remittance/schedules').send({ code: 'SCH-9', name: 'Weekly run', frequency: 'Weekly', nextRun: '2026-10-05', time: '09:00', linkedProcesses: ['ARM-001'] });
     expect(created.status).toBe(201);
-    const run = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`);
-    expect(run.status).toBe(200);
-    expect(run.body.data.execution.executionId).toMatch(/^BLK-/);
+    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`)).status).toBe(400);
+    const run = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' });
+    expect(run.status, JSON.stringify(run.body)).toBe(200);
+    expect(run.body.data.run.executionRef).toMatch(/^BLK-/);
+    expect(run.body.data.run).toMatchObject({ scheduleCode: 'SCH-9', reason: { code: 'ROC-MISSED', text: 'Missed run' } });
+    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' })).body.errors[0].code).toBe('WINDOW_DONE');
     const paused = await ctx.api('patch', `/remittance/schedules/${created.body.data.id}/status`).send({ status: 'Paused' });
     expect(paused.body.data.status).toBe('Inactive');
-    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`)).status).toBe(409);
+    const again = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' });
+    expect(again.status).toBe(409);
+    expect(again.body.errors[0].code).toBe('PAUSED');
     // approval cover is given in Master > User Management > Delegations (user_delegations), not on the Remittance screen
     expect((await ctx.api('post', '/remittance/approvals/delegations').send({ delegateTo: 'r.finance', fromDate: '2026-10-01', toDate: '2026-10-07', reason: 'Leave' })).status).toBe(404);
   });
@@ -243,9 +295,21 @@ describe('work items', () => {
     expect(e.status).toBe(200);
     expect((await ctx.api('get', '/remittance/automated/history')).body.data.length).toBeGreaterThanOrEqual(3);
   });
-  it('bulk upload validates rows against the configuration and processes valid ones', async () => {
+  it('bulk upload is closed for TISPH: Import policy list replaces it', async () => {
+    const r = await ctx.api('post', '/remittance/bulk/upload').field('configCode', 'BFM-001').attach('file', Buffer.from('PolicyNo,Premium\nX,1\n'), 'x.csv');
+    expect(r.status).toBe(409);
+    expect(r.body.errors[0]).toMatchObject({ code: 'USE_IMPORT', link: '/finance/remittance/remittances?import=new' });
+    expect((await ctx.api('post', '/remittance/bulk/rmi_x/process')).status).toBe(409);
+    expect((await ctx.api('get', '/remittance/bulk/template')).status).toBe(409);
+    expect((await ctx.api('get', '/remittance/bulk')).status).toBe(200);
+    expect((await pool.query("SELECT status FROM master_records WHERE type_code = 'remittance-bulk-processing' AND code = 'BFM-002'")).rows).toEqual([]);
+  });
+  it('bulk upload validates rows against the configuration and processes valid ones at the booked amounts', async () => {
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.bulk_upload_enabled'");
+    clearSettingsCache();
     const [pol] = await policyFor('MAAGAP');
     await pool.query('DELETE FROM remittance_lines WHERE policy_id = $1', [pol.id]);
+    const booked = (await pool.query('SELECT premium_total, commission_amount FROM policies WHERE id = $1', [pol.id])).rows[0];
     const csv = `PolicyNo,Premium,Commission,InsuredName\n${pol.policy_number},10000,1500,Test\nNOPE-1,500,10,X\n,abc,1,Y\n`;
     const u = await ctx.api('post', '/remittance/bulk/upload').field('configCode', 'BFM-001').attach('file', Buffer.from(csv), { filename: 'sept.csv', contentType: 'text/csv' });
     expect(u.status).toBe(201);
@@ -254,6 +318,10 @@ describe('work items', () => {
     const p = await ctx.api('post', `/remittance/bulk/${u.body.data.id}/process`);
     expect(p.body.data.remittances).toHaveLength(1);
     expect(p.body.data.upload.status).toBe('Processed');
+    // the typed premium and commission are not used
+    const [line] = (await pool.query('SELECT premium, commission FROM remittance_lines WHERE remittance_id = $1', [p.body.data.remittances[0].id])).rows;
+    expect(line.premium).toBe(Number(booked.premium_total));
+    expect(line.premium).not.toBe(10000);
     expect((await ctx.api('post', '/remittance/bulk/upload').attach('file', Buffer.from('A,B\n1,2\n'), 'x.csv')).status).toBe(400);
   });
   it('bank reconciliation: auto-match, manual partial match with exception, unmatch', async () => {

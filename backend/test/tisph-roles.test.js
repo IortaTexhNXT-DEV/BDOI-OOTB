@@ -2,8 +2,9 @@
  * TISPH roles (Pre-BSM M17 RBAC v4, migration 0348 and db/seed.js): the 13 TIS personas and SUPERID with their
  * permission sets, the same on a new database and on one in use; Sales and Operations both make, and the approvals
  * of the front office belong to another user holding approve:quotations / approve:policies / approve:renewals /
- * approve:claims; SUPERID includes the System Administrator and only an administrator grants it; the report catalogue
- * and role-list settings name the TISPH roles.
+ * approve:claims; remittance approvals belong to TIS Finance and the General Manager (approve:remittance, migration
+ * 0400); SUPERID includes the System Administrator and only an administrator grants it; the report catalogue and
+ * role-list settings name the TISPH roles.
  */
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -16,6 +17,7 @@ import { ROLES, ROLE_PERMISSIONS } from '../src/db/seed.js';
 const TIS_ROLES = ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-pdu',
   'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-general-manager', 'tis-superid'];
 const MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0348_tisph_roles.sql', import.meta.url), 'utf8');
+const REMITTANCE_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0400_remittance_approval_authority.sql', import.meta.url), 'utf8');
 
 let ctx;
 const as = {};
@@ -68,6 +70,10 @@ describe('TISPH roles of a new database', () => {
     // the broker roles keep the decisions they made before
     for (const role of ['sales', 'processing', 'operations']) expect(g[role]).toEqual(expect.arrayContaining(['approve:quotations', 'approve:policies', 'approve:renewals']));
     expect(g.claims).toContain('approve:claims');
+    // remittance approvals: Finance and the General Manager (who makes no remittance); CCD-Recon prepares only
+    expect(Object.keys(g).filter((r) => g[r].includes('approve:remittance')).sort()).toEqual(['accounting', 'system-admin', 'tis-finance', 'tis-general-manager']);
+    expect(g['tis-general-manager']).not.toContain('write:remittance');
+    expect(g['tis-ccd-recon']).toContain('write:remittance');
   });
 
   it('names the TISPH roles in the report catalogue and the role-list settings', async () => {
@@ -170,20 +176,21 @@ describe('SUPERID', () => {
   });
 });
 
-describe('migration 0348 on a database in use', () => {
-  it('adds the roles and grants the seed gives, and changes nothing when run again', async () => {
+describe('migrations 0348 and 0400 on a database in use', () => {
+  it('add the roles and grants the seed gives, and change nothing when run again', async () => {
     const seeded = await grants();
     await q('DELETE FROM roles WHERE code LIKE \'tis-%\' AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.role_id = roles.id)');
     await q('DELETE FROM role_permissions rp USING roles r WHERE r.id = rp.role_id AND r.code LIKE \'tis-%\'');
-    await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims')");
-    await q("DELETE FROM schema_migrations WHERE name = '0348_tisph_roles.sql'");
+    await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims', 'approve:remittance')");
+    await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql')");
     // later migrations that grant to the holders of a module permission (0387: approve:incentive) run again after it
     await q("DELETE FROM schema_migrations WHERE name = '0387_incentive_approval.sql'");
     await migrate({ log: () => {} });
     const migrated = await grants();
-    for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims']) expect(migrated[code], code).toEqual(seeded[code]);
+    for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims', 'accounting', 'system-admin']) expect(migrated[code], code).toEqual(seeded[code]);
     expect((await q("SELECT inherits FROM roles WHERE code = 'tis-superid'"))[0].inherits).toEqual(['system-admin']);
     await pool.query(MIGRATION);
+    await pool.query(REMITTANCE_MIGRATION);
     expect(await grants()).toEqual(migrated);
   });
 });

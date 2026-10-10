@@ -1,5 +1,6 @@
-// Row buttons of the lists (components/RowActions): the same size, spacing and colour on every screen, whatever the
-// button rules of the screen around them. The column itself is placed by utility/tableNumericAlign.js (bv-actions).
+// Row buttons and row menu of the lists (components/RowActions): the same size, spacing and colour on every screen,
+// whatever the button rules of the screen around them. The column itself is placed by utility/tableNumericAlign.js
+// (bv-actions). The menu opens in a layer of its own over the page.
 .bv-row-actions {
   display: inline-flex;
   align-items: center;
@@ -38,4 +39,54 @@
 .p-datatable .p-datatable-tbody > tr > td.bv-row-actions-cell {
   white-space: nowrap;
   overflow: visible;
+}
+
+.bv-row-actions__menu {
+  position: fixed;
+  z-index: 1200;
+  min-width: 12rem;
+  max-width: 22rem;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  font-family: var(--font-body);
+}
+
+.bv-row-actions__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--color-heading);
+  cursor: pointer;
+  outline: none;
+
+  &:hover,
+  &:focus {
+    background: var(--color-hover, rgba(0, 0, 0, 0.05));
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+  }
+}
+
+.bv-row-actions__item--blocked {
+  cursor: default;
+
+  .bv-row-actions__label {
+    color: var(--color-text-muted);
+  }
+}
+
+.bv-row-actions__reason {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text);
+  white-space: normal;
 }

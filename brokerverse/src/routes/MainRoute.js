@@ -213,8 +213,6 @@ import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRu
 import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
 import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
 import BankRecReportPage from "../module/BankReconciliation/ReportPage";
-import InsurerStatements from "../module/InsurerReconciliation/Statements";
-import InsurerStatementWorkspace from "../module/InsurerReconciliation/Workspace";
 import InsurerStatementFormats from "../module/InsurerReconciliation/Formats";
 import InstalmentPlans from "../module/CreditControl/InstalmentPlans";
 import WarrantyMonitor from "../module/CreditControl/WarrantyMonitor";
@@ -276,20 +274,8 @@ import NegotiationWorkspace from "../module/Renewal/NegotiationWorkspace";
 import LapseManagement from "../module/Renewal/LapseManagement";
 import PerformanceTracking from "../module/Renewal/PerformanceTracking";
 
-// Remittance Transactions
-import AutomatedRemittanceProcessing from "../module/Remittance/AutomatedProcessing";
-import RemittanceTracking from "../module/Remittance/Tracking";
-import StatementGeneration from "../module/Remittance/Statements";
-import SettlementProcessing from "../module/Remittance/Settlement";
-import ReconciliationProcess from "../module/Remittance/Reconciliation";
-import BulkProcessing from "../module/Remittance/BulkProcessing";
-import SchedulingDashboard from "../module/Remittance/Scheduling";
-import ElectronicTransfer from "../module/Remittance/ElectronicTransfer";
-import RemittanceApproval from "../module/Remittance/RemittanceApproval";
-import RemittanceExceptions from "../module/Remittance/RemittanceExceptions";
-import AgencyBillProcessing from "../module/Remittance/AgencyBillProcessing";
-// K13-K17 Remittance Transactions
-import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
+// Accounts > Remittance
+import { remittanceRoutes } from "../module/Remittance/routes";
 // Placement journey: Broker Slip -> Quotation Slip -> Placement Slip -> Policy
 import BrokerSlipList from "../module/Placement/BrokerSlipList";
 import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
@@ -311,10 +297,6 @@ import PlacementList from "../module/Placement/PlacementList";
 import PlacementDetail from "../module/Placement/PlacementDetail";
 import DirectPlacementForm from "../module/Placement/DirectPlacementForm";
 import RecordEpolicy from "../module/Placement/RecordEpolicy";
-import RemittanceAdjustments from "../module/Remittance/RemittanceAdjustments";
-import RemittanceNotifications from "../module/Remittance/RemittanceNotifications";
-import RemittanceHistory from "../module/Remittance/RemittanceHistory";
-import RemittanceAnalytics from "../module/Remittance/RemittanceAnalytics";
 import PolicyRenewalWaiting from "../agentModule/renewalModule/WaitingScreen/PolicyRenewalWaiting";
 // Integrations: monitor, message templates, insurer integration, CTPL authentication, bank payment files
 import IntegrationsMonitor from "../module/Integrations/IntegrationsMonitor";
@@ -1078,55 +1060,8 @@ const Maincomponent = () => {
             element={<NotificationMaster />}
           />
 
-          {/* Remittance Transaction Routes */}
-          <Route
-            path="finance/remittance/automated/execute"
-            element={<AutomatedRemittanceProcessing />}
-          />
-          <Route
-            path="finance/remittance/tracking/status"
-            element={<RemittanceTracking />}
-          />
-          <Route
-            path="finance/remittance/statements/generate"
-            element={<StatementGeneration />}
-          />
-          <Route
-            path="finance/remittance/settlement/process"
-            element={<SettlementProcessing />}
-          />
-          <Route
-            path="finance/remittance/reconciliation"
-            element={<ReconciliationProcess />}
-          />
-          <Route
-            path="finance/remittance/bulkprocessing"
-            element={<BulkProcessing />}
-          />
-          <Route
-            path="finance/remittance/scheduling"
-            element={<SchedulingDashboard />}
-          />
-          <Route
-            path="finance/remittance/electronictransfer"
-            element={<ElectronicTransfer />}
-          />
-          <Route
-            path="finance/remittance/approval"
-            element={<RemittanceApproval />}
-          />
-          <Route
-            path="finance/remittance/exceptions"
-            element={<RemittanceExceptions />}
-          />
-          <Route
-            path="finance/remittance/agencybill"
-            element={<AgencyBillProcessing />}
-          />
-          <Route
-            path="finance/remittance/directbill"
-            element={<DirectBillProcessing />}
-          />
+          {/* Accounts > Remittance: the menu entries, the record routes and the addresses of the retired screens */}
+          {remittanceRoutes()}
           {/* Placement journey */}
           <Route path="/sales/quick-quote" element={<QuickQuote />} />
           <Route path="/master/generals/usermanagement/access-matrix" element={<UserAccessMatrix />} />
@@ -1157,22 +1092,6 @@ const Maincomponent = () => {
           <Route path="/placement/placement-slips/new" element={<DirectPlacementForm />} />
           <Route path="/placement/placement-slips/:id" element={<PlacementDetail />} />
           <Route path="/placement/record-epolicy" element={<RecordEpolicy />} />
-          <Route
-            path="finance/remittance/adjustments"
-            element={<RemittanceAdjustments />}
-          />
-          <Route
-            path="finance/remittance/notifications"
-            element={<RemittanceNotifications />}
-          />
-          <Route
-            path="finance/remittance/history"
-            element={<RemittanceHistory />}
-          />
-          <Route
-            path="finance/remittance/analytics"
-            element={<RemittanceAnalytics />}
-          />
 
           {/* Incentive Master Routes */}
           <Route
@@ -1684,8 +1603,6 @@ const Maincomponent = () => {
           <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />
           <Route path="/accounts/bank-reconciliation/reconciliations/:id" element={<BankReconciliationRun />} />
           <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
-          <Route path="/accounts/insurer-reconciliation/statements" element={<InsurerStatements />} />
-          <Route path="/accounts/insurer-reconciliation/statements/:id" element={<InsurerStatementWorkspace />} />
           <Route path="/accounts/credit-control/instalments" element={<InstalmentPlans />} />
           <Route path="/accounts/credit-control/warranty" element={<WarrantyMonitor />} />
           <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />

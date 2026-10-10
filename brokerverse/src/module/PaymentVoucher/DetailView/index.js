@@ -27,6 +27,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
+import { statusLabel } from "../../../utils/statusSeverity";
 
 function Detailview() {
   const { t } = useTranslation();
@@ -290,6 +291,16 @@ function Detailview() {
         status: i.status,
       }));
   }, [disbursementDetails]);
+  const paymentModeText = (mode) => (mode ? t(`paymentVoucher.detail.modes.${String(mode).toLowerCase()}`, { defaultValue: statusLabel(mode) }) : null);
+  // gross less withholding tax that the net does not explain (bank charges, offsets)
+  const otherDeductions = useMemo(() => {
+    const d = disbursementDetails || {};
+    const gross = Number(d.grossAmount);
+    const net = Number(d.amount);
+    if (!Number.isFinite(gross) || !Number.isFinite(net) || !gross) return 0;
+    const rest = Math.round((gross - Number(d.whtAmount || 0) - net) * 100) / 100;
+    return rest > 0 ? rest : 0;
+  }, [disbursementDetails]);
   const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(v));
 
   const hasPendingItems = useMemo(() => {
@@ -310,6 +321,15 @@ function Detailview() {
 
   // Approved cheque -> Printed: the voucher becomes Paid and its print (PDF) is printed. The print starts inside the
   // confirmation click, so that a browser that prints the PDF in a tab of its own opens it there.
+  // the voucher itself, printable in any status (a paid voucher is reprinted from here)
+  const printVoucher = () => printPdf(async () => {
+    const printed = await disbursementService.printDisbursement(id);
+    if (!printed.success) throw new Error(printed.error);
+    const response = await fetch(printed.data.url);
+    if (!response.ok) throw new Error(t("print.failed"));
+    return response.blob();
+  }, { fileName: `${disbursementDetails?.voucherNumber || id}.pdf` }).catch((e) => toastRef.current?.showToast("error", t("common.error"), e.message));
+
   const handlePrint = async () => {
     const row = selectedProducts;
     const checkbookId = row?.rawData?.checkbookId;
@@ -417,10 +437,10 @@ function Detailview() {
             : `${actionToast} successfully`
         }
       />
-      <div>
-        <span onClick={() => Navigate(-1)}>
+      <div className="flex align-items-center gap-2">
+        <button type="button" className="p-link" onClick={() => Navigate(-1)} aria-label={t("common.back")}>
           <SvgBackicon />
-        </span>
+        </button>
 
         <label className="label_header">
           {t("paymentVoucher.disbursementDetails")}
@@ -450,11 +470,10 @@ function Detailview() {
         <DetailHeader
           title={disbursementDetails?.voucherNumber || disbursementDetails?.transactionNumber || ""}
           subtitle={disbursementDetails?.payeeName}
-          status={disbursementDetails?.status ? { label: disbursementDetails.status } : null}
+          status={disbursementDetails?.status ? { code: String(disbursementDetails.status).toLowerCase(), label: statusLabel(disbursementDetails.status) } : null}
           meta={[
             { label: t("paymentVoucher.voucherDate", "Voucher Date"), value: disbursementDetails?.voucherDate, type: "date" },
-            { label: t("paymentVoucher.paymentMode", "Payment Mode"), value: disbursementDetails?.paymentMode },
-            { label: t("paymentVoucher.netAmount", "Net Amount"), value: disbursementDetails?.amount, type: "amount" },
+            { label: t("paymentVoucher.paymentMode", "Payment Mode"), value: paymentModeText(disbursementDetails?.paymentMode) },
             { label: t("paymentVoucher.paidAt", "Paid On"), value: disbursementDetails?.paidAt, type: "date" },
           ]}
         />
@@ -464,18 +483,19 @@ function Detailview() {
             { label: t("paymentVoucher.transactionNumber"), value: disbursementDetails?.transactionNumber },
             { label: t("paymentVoucher.grossAmount", "Gross Amount"), value: disbursementDetails?.grossAmount || disbursementDetails?.amount, type: "amount" },
             { label: t("paymentVoucher.whtAmount", "Withholding Tax"), value: disbursementDetails?.whtAmount, type: "amount" },
+            { label: t("paymentVoucher.detail.otherDeductions"), value: otherDeductions, type: "amount", hidden: !otherDeductions },
             { label: t("paymentVoucher.netAmount", "Net Amount"), value: disbursementDetails?.amount, type: "amount" },
             { label: t("paymentVoucher.payeeType"), value: disbursementDetails?.payeeType },
             { label: t("paymentVoucher.customerCode"), value: disbursementDetails?.customerCode },
-            { label: t("paymentVoucher.policyNumber"), value: disbursementDetails?.policyNumber, hidden: !disbursementDetails?.policyNumber },
-            { label: t("paymentVoucher.insurer"), value: disbursementDetails?.insurerName, hidden: !disbursementDetails?.insurerName },
+            { label: t("paymentVoucher.detail.policyNumber"), value: disbursementDetails?.policyNumber, hidden: !disbursementDetails?.policyNumber },
+            { label: t("paymentVoucher.detail.insurer"), value: disbursementDetails?.insurerName, hidden: !disbursementDetails?.insurerName },
             { label: t("paymentVoucher.transactionType"), value: disbursementDetails?.transactionCode },
             { label: t("paymentVoucher.paymentDescription"), value: disbursementDetails?.transactionDescription, span: 2 },
             { label: t("paymentVoucher.paymentCurrency"), value: disbursementDetails?.instrumentCurrency },
             { label: t("paymentVoucher.departmentCode"), value: disbursementDetails?.departmentCode },
             { label: t("paymentVoucher.branchCode"), value: disbursementDetails?.branchCode },
             { label: t("paymentVoucher.criteria"), value: disbursementDetails?.criteria },
-            { label: t("paymentVoucher.paymentNotesOptional"), value: disbursementDetails?.remarks, span: "full", hidden: !disbursementDetails?.remarks },
+            { label: t("paymentVoucher.detail.remarks"), value: disbursementDetails?.remarks, span: "full", hidden: !disbursementDetails?.remarks },
           ]}
         />
       </Card>
@@ -633,26 +653,25 @@ function Detailview() {
       ) : null}
 
       {paymentLines.length > 0 && (
-        <>
-          <label className="headlist_lable">{t("paymentVoucher.paymentLines", "Payment lines")}</label>
-          <div className="tablegap_container">
+        <DetailSection title={t("paymentVoucher.paymentLines", "Payment lines")} className="pv-detail__section">
+          <div>
             <DataTable value={paymentLines} dataKey="id" tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}>
               <Column field="reference" header={t("paymentVoucher.reference", "Reference")} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="description" header={t("paymentVoucher.description", "Description")} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="gross" header={t("paymentVoucher.grossAmount", "Gross Amount")} body={(r) => money(r.gross)} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="wht" header={t("paymentVoucher.whtAmount", "Withholding Tax")} body={(r) => money(r.wht)} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="net" header={t("paymentVoucher.netAmount", "Net Amount")} body={(r) => money(r.net)} headerStyle={headerStyle} className="fieldvalue_container" />
-              <Column field="status" header={t("paymentVoucher.status")} body={(r) => <StatusChip label={r.status} />} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="status" header={t("paymentVoucher.status")} body={(r) => <StatusChip code={String(r.status || "").toLowerCase()} label={statusLabel(r.status)} />} headerStyle={headerStyle} className="fieldvalue_container" />
             </DataTable>
           </div>
-        </>
+        </DetailSection>
       )}
 
-      <label className="headlist_lable">
-        {t("paymentVoucher.chequeBookDetails")}
-      </label>
-
-      <div className="tablegap_container">
+      <DetailSection title={t("paymentVoucher.chequeBookDetails")} className="pv-detail__section"
+        actions={(
+          <Button type="button" icon="pi pi-print" outlined size="small" label={t("paymentVoucher.detail.printVoucher")} onClick={printVoucher} disabled={!disbursementDetails?.disbursementId} />
+        )}>
+      <div>
         <DataTable
           value={processedChequeBookData}
           emptyMessage={t("paymentVoucher.noChequeIssued", "No cheque has been issued on this voucher")}
@@ -711,7 +730,7 @@ function Detailview() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column body={(row) => formatAppDate(row.VoucheDate)}
+          <Column
             field="VoucheDate"
             header={t("paymentVoucher.instrumentBookId")}
             headerStyle={headerStyle}
@@ -745,6 +764,7 @@ function Detailview() {
           ></Column>
         </DataTable>
       </div>
+      </DetailSection>
 
       {(hasPendingItems || hasApprovedItems) && (
         <div className="next_container">
@@ -754,6 +774,8 @@ function Detailview() {
               label={t("paymentVoucher.print")}
               onClick={handlePrint}
               disabled={!selectedProducts || selectedProducts.status !== "Approved"}
+              tooltip={!selectedProducts || selectedProducts.status !== "Approved" ? t("paymentVoucher.detail.selectApprovedCheque") : undefined}
+              tooltipOptions={{ showOnDisabled: true, position: "top" }}
             />
           )}
           {hasPendingItems && (

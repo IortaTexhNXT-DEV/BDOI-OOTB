@@ -40,10 +40,10 @@ export const ENTITY_LABELS = {
   journal_voucher: 'Journal voucher', journal: 'Journal', placement: 'Placement slip', broker_slip: 'Broker slip', insurer_statement: 'Insurer statement',
   disbursement: 'Disbursement', collection: 'Collection', commission_referrer: 'Referrer', commission_debit_note: 'Commission debit note',
   commission_line: 'Commission line', commission_rate: 'Commission rate', remittance: 'Remittance', remittance_item: 'Remittance item',
-  remittance_batch: 'Remittance batch', remittance_statement: 'Remittance statement', data_subject_request: 'Data subject request',
+  remittance_batch: 'Remittance batch', remittance_import: 'Remittance import', remittance_statement: 'Remittance statement', data_subject_request: 'Data subject request',
   privacy_consent: 'Privacy consent', 'system-settings': 'System setting', settings: 'Configuration', risk_mapping: 'Risk mapping',
   product_template: 'Product template', checkbook: 'Checkbook', authority_limit: 'Authority limit', report_schedule: 'Report schedule',
-  premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund',
+  premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund', petty_cash_disbursement: 'Petty cash disbursement',
   payment_link: 'Payment link', package_quote: 'Package quotation', package_bundle: 'Package', data_load_batch: 'Data load batch',
   bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', accounting_flow: 'Accounting flow', sod_rule: 'Segregation of duties rule',
   recurring_journal: 'Recurring journal', receivable: 'Receivable', premium_charge_rule: 'Premium charge rule', period_close_run: 'Month-end close',
@@ -77,11 +77,33 @@ const ACTION_VERBS = {
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
   purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted', 'access-change': 'access changed',
   request: 'requested', withdraw: 'withdrawn', end: 'ended early', 'sign-off': 'signed off', 'sign-out': 'signed out everywhere', keep: 'kept',
-  'remove-roles': 'roles removed', export: 'exported',
+  'remove-roles': 'roles removed', export: 'exported', return: 'returned', revoke: 'revoked',
+  recompute: 'recomputed', import: 'imported', remind: 'reminder sent', pay: 'paid', 'exclude-line': 'line excluded', 'include-line': 'line included',
+  'raise-voucher': 'payment voucher raised', 'in-payment': 'in payment', 'payment-failed': 'payment failed', 'send-advice': 'advice sent',
+  'record-confirmation': 'confirmation recorded', 'create-agency-bill': 'agency bill created', 'send-bill': 'bill sent',
+  accrue: 'accrued', 'mark-eligible': 'marked eligible',
+  acknowledge: 'acknowledged by the insurer', 'record-epolicy': 'e-policy recorded', check: 'checked against the slip', book: 'booked',
+  'send-for-approval': 'sent for approval', 'customer-accept': 'accepted by the customer', 'convert-to-policy': 'converted to a policy', disburse: 'disbursed',
 };
 
-/** Sign-in events read as what the user did. */
-const SESSION_TITLES = { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' };
+/**
+ * Headlines of the actions of a record type that "<record type> <verb>" does not tell well: the sign-in events, and the
+ * steps in the life of a remittance (Accounts > Remittance) with the codes of earlier releases (create-agency-bill,
+ * send-bill, settle). A rejected remittance goes back to its maker, so reject reads as returned.
+ */
+const ACTION_TITLES = {
+  session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' },
+  remittance: {
+    create: 'Remittance created', submit: 'Remittance submitted', withdraw: 'Remittance withdrawn from approval', return: 'Remittance returned to the maker',
+    reject: 'Remittance returned to the maker', approve: 'Remittance approved', revoke: 'Remittance approval revoked', cancel: 'Remittance cancelled',
+    'exclude-line': 'Policy line excluded from the remittance', 'include-line': 'Policy line included in the remittance again', recompute: 'Remittance recomputed',
+    'raise-voucher': 'Payment voucher raised for the remittance', 'in-payment': 'Payment to the insurer started', pay: 'Remittance paid to the insurer',
+    'payment-failed': 'Payment to the insurer failed', 'send-advice': 'Remittance advice sent to the insurer', 'record-confirmation': 'Insurer confirmation recorded',
+    remind: 'Reminder sent', import: 'Remittance created from an imported policy list', run: 'Remittance created by a remittance run',
+    'create-agency-bill': 'Agency bill created', settle: 'Remittance settled', 'send-bill': 'Bill sent to the insurer',
+  },
+  remittance_approval: { approve: 'Approval given', reject: 'Approval refused and returned to the maker', delegate: 'Approval delegated to another approver' },
+};
 
 /**
  * The headline of an event: "Policy updated", "Claim registered", "Settlement submitted", "Insurance company deactivated".
@@ -101,7 +123,7 @@ export function actionTitle(entity, action, masterLabels = {}) {
     return `Status changed to ${sentenceCase(s).toLowerCase()}`;
   }
   const key = a.toLowerCase();
-  if (entity === 'session' && SESSION_TITLES[key]) return SESSION_TITLES[key];
+  if (ACTION_TITLES[entity]?.[key]) return ACTION_TITLES[entity][key];
   if (ACTION_VERBS[key]) return `${label} ${ACTION_VERBS[key]}`;
   const words = sentenceCase(a);
   return words.toLowerCase().startsWith(label.toLowerCase()) ? words : `${label}: ${words.charAt(0).toLowerCase()}${words.slice(1)}`;
@@ -120,6 +142,15 @@ export function actionText(action) {
   const verb = ACTION_VERBS[a.toLowerCase()];
   return verb ? verb.charAt(0).toUpperCase() + verb.slice(1) : sentenceCase(a);
 }
+
+/** Status labels of record types whose stored status codes are not the words the screens show. */
+export const STATUS_LABELS = {
+  placement: { draft: 'Placement raised', sent: 'Sent to insurer', acknowledged: 'Acknowledged', epolicy_received: 'e-Policy received',
+    checked: 'Checked against slip', issued: 'Insurer issued', declined: 'Declined', cancelled: 'Cancelled' },
+  broker_slip: { draft: 'Draft', submitted: 'Submitted', 'responses-in': 'Responses in', closed: 'Closed', cancelled: 'Cancelled' },
+  supplier_invoice: { 'for-approval': 'For approval' },
+  supplier_payment: { 'for-approval': 'For approval' },
+};
 
 /** Field labels shared by every record type. Keys are matched exactly, then without case / separators. */
 const COMMON = {
@@ -150,6 +181,10 @@ const COMMON = {
 
 /** Labels of one record type (override COMMON). */
 const BY_ENTITY = {
+  supplier_invoice: {
+    supplierInvoiceNo: 'Supplier invoice no.', voucherNumber: 'Voucher number', ewtCode: 'EWT code', ewtRate: 'EWT rate', ewtAmount: 'EWT',
+    inputVat: 'Input VAT', payableAmount: 'Payable to supplier',
+  },
   claim: {
     claimStatus: 'Claim status', insuranceCompanyClaimNumber: 'Insurer claim number', insurerClaimNumber: 'Insurer claim number',
     dateOfIncident: 'Date of loss', timeOfIncident: 'Time of loss', addressOfIncident: 'Place of loss', cityOfIncident: 'City / municipality of loss',

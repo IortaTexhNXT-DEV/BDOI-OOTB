@@ -1,351 +1,264 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { Card } from "primereact/card";
-import { Tag } from "primereact/tag";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Sidebar } from "primereact/sidebar";
 import { Toast } from "primereact/toast";
+import PageHeader from "../../../components/PageHeader";
+import StatCards from "../../../components/StatCards";
+import StatusChip from "../../../components/StatusChip";
+import RowActions from "../../../components/RowActions";
+import LoadingBar from "../../../components/LoadingBar";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import ConfirmDialog from "../../../components/ConfirmDialog/ConfirmDialog";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import ReasonDialog from "../../../components/ReasonDialog";
+import { useStableLoad } from "../../../hooks/useStableLoad";
+import { hasPermission } from "../../../utils/canOpen";
 import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
-import { dateBody, downloadCsv, formatDateTime, isoDate, showError, showSuccess } from "../shared";
-import "./index.scss";
-import { promptText } from "../../../utility/dialogs";
+import { REMITTANCE_ROUTES, downloadCsv, formatDateTime, isoDate, money, useUrlState } from "../shared";
+import "../remittance.scss";
 
-const emptyResolution = { resolutionType: "", resolutionAmount: 0, resolutionNotes: "" };
 const SEVERITIES = ["Critical", "High", "Medium", "Low"];
 const STATUSES = ["Open", "In Progress", "Escalated", "Resolved"];
-const allOption = (values) => [{ label: "All", value: "All" }, ...values.map((v) => ({ label: v, value: v }))];
+const RESOLUTION_TYPES = ["manual-adjustment", "write-off", "credit-note", "debit-note", "reverse"];
+const SEVERITY_TONE = { Critical: "danger", High: "warning", Medium: "info", Low: "secondary" };
+const STATUS_TONE = { Open: "warning", "In Progress": "info", Escalated: "danger", Resolved: "success" };
+const OPEN = ["Open", "In Progress", "Escalated"];
+const STATUS_KEYS = { Open: "open", "In Progress": "inProgress", Escalated: "escalated", Resolved: "resolved" };
 
-/** Due date from the exception SLA ("24 hours", "2 days") counted from creation. */
-const dueBy = (row) => {
-  const match = /(\d+)\s*(hour|day)/i.exec(String(row.sla || ""));
-  if (!match || !row.createdAt) return "-";
+/** Due date from the exception SLA ("24 hours", "2 days") counted from creation; null without an SLA. */
+export const dueBy = (row) => {
+  const match = /(\d+)\s*(hour|day)/i.exec(String(row?.sla || ""));
+  if (!match || !row.createdAt) return null;
   const hours = Number(match[1]) * (/day/i.test(match[2]) ? 24 : 1);
-  return formatDateTime(new Date(new Date(row.createdAt).getTime() + hours * 3600000));
+  return new Date(new Date(row.createdAt).getTime() + hours * 3600000).toISOString();
 };
 
+/** What the signed-in user may do with an exception, first View. */
+export const exceptionActions = (row, canWrite) => [
+  { code: "view", allowed: true },
+  { code: "start", allowed: canWrite && row.status === "Open" },
+  { code: "escalate", allowed: canWrite && ["Open", "In Progress"].includes(row.status) },
+  { code: "resolve", allowed: canWrite && OPEN.includes(row.status) },
+].filter((a) => a.allowed);
+
+const emptyResolution = { type: null, amount: null, note: "" };
+
+/**
+ * Accounts > Remittance > Exceptions (/finance/remittance/exceptions): the remittance exceptions with four neutral KPI
+ * cards, the filters and a row menu (View, Start, Escalate…, Resolve…). View opens a 640px side panel. Escalate asks for a
+ * reason of the Reason Codes master (context exception_escalate); Resolve for the resolution type, the amount and a
+ * note. A read-only user sees "View only" and the View item only.
+ */
 const RemittanceExceptions = () => {
   const { t } = useTranslation();
-  const { formatCurrency, currencyCode } = useFormatCurrency();
   const toast = useRef(null);
-  const currentUser = authService.getUser()?.username || localStorage.getItem("USERNAME") || "";
-  const [selectedException, setSelectedException] = useState(null);
-  const [resolutionData, setResolutionData] = useState(emptyResolution);
-  const [exceptions, setExceptions] = useState([]);
-  const [filters, setFilters] = useState({ type: "All", severity: "All", status: "All" });
-  const [loading, setLoading] = useState(false);
+  const canWrite = hasPermission("write:remittance");
+  // assigned by display name, as the other assignees read (the server matches it to the user for My Work)
+  const me = authService.getUser();
+  const currentUser = me?.displayName || me?.username || localStorage.getItem("USERNAME") || "";
+  const [state, update] = useUrlState({});
+  const [escalating, setEscalating] = useState(null);
+  const [resolving, setResolving] = useState(null);
+  const [resolution, setResolution] = useState(emptyResolution);
+  const [tried, setTried] = useState(false);
+  const loader = useCallback(() => remittanceService.listExceptions({ perPage: 500 }), []);
+  const { data, loading, refreshing, error, reload } = useStableLoad(loader);
+  const exceptions = useMemo(() => data || [], [data]);
 
-  const loadExceptions = async () => {
-    setLoading(true);
-    try {
-      const rows = await remittanceService.listExceptions({ perPage: 500 });
-      setExceptions(rows || []);
-      setSelectedException((sel) => (sel ? (rows || []).find((r) => r.id === sel.id) || null : null));
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filters = { type: state.type || "", severity: state.severity || "", status: state.status || "" };
+  const visible = exceptions.filter((e) => (!filters.type || e.type === filters.type) && (!filters.severity || e.severity === filters.severity)
+    && (!filters.status || e.status === filters.status));
+  const selected = exceptions.find((e) => String(e.id) === String(state.exception) || e.exceptionId === state.exception) || null;
 
-  useEffect(() => {
-    loadExceptions();
-  }, []);
-
-  const visible = exceptions.filter((e) =>
-    (filters.type === "All" || e.type === filters.type)
-    && (filters.severity === "All" || e.severity === filters.severity)
-    && (filters.status === "All" || e.status === filters.status));
   const today = isoDate(new Date());
   const unresolved = exceptions.filter((e) => e.status !== "Resolved");
-  const summary = {
-    total: exceptions.length,
-    unresolved: unresolved.length,
-    processing: exceptions.filter((e) => e.status === "In Progress").length,
-    resolvedToday: exceptions.filter((e) => e.status === "Resolved" && String(e.resolvedAt || e.lastModified || "").startsWith(today)).length,
-    atRisk: unresolved.reduce((s, e) => s + Number(e.amount || 0), 0)
-  };
+  // every card carries the amount of its exceptions, so the figures sit on one line; nothing is shown before the load
+  const total = (list) => (data ? money(list.reduce((s, e) => s + Number(e.amount || 0), 0)) : " ");
+  const card = (key, list, status) => ({ key, label: t(`remittance.exceptions.kpis.${key}`), value: data ? list.length : null, note: total(list),
+    active: filters.status === status, onClick: status ? () => update({ status: filters.status === status ? null : status }) : undefined });
+  const byStatus = (status) => exceptions.filter((e) => e.status === status);
+  const cards = [
+    card("unresolved", unresolved),
+    card("inProgress", byStatus("In Progress"), "In Progress"),
+    card("escalated", byStatus("Escalated"), "Escalated"),
+    card("resolvedToday", exceptions.filter((e) => e.status === "Resolved" && String(e.resolvedAt || "").startsWith(today)), "Resolved"),
+  ];
 
-  const run = async (action, message) => {
+  const done = async (message) => {
+    toast.current?.show({ severity: "success", summary: message, life: 3000 });
+    await reload();
+  };
+  const start = async (row) => {
+    const go = await openConfirm({
+      title: t("remittance.exceptions.startTitle", { reference: row.exceptionId }),
+      message: t("remittance.exceptions.startMessage", { reference: row.exceptionId }),
+      confirmLabel: t("remittance.exceptions.actions.start"),
+    });
+    if (!go) return;
     try {
-      await action();
-      showSuccess(toast, message);
-      setResolutionData(emptyResolution);
-      await loadExceptions();
+      await remittanceService.assignException(row.id, currentUser);
+      await done(t("remittance.exceptions.started", { reference: row.exceptionId }));
     } catch (e) {
-      showError(toast, e);
+      toast.current?.show({ severity: "error", summary: e.message, life: 6000 });
     }
   };
 
-  const startException = (row, assignee = currentUser) => run(() => remittanceService.assignException(row.id, assignee), `${row.exceptionId} assigned to ${assignee}`);
-
-  const resolveException = async (row, resolution) => {
-    const text = resolution || await promptText(t("remittance.resolutionNotes"), "");
-    if (!text) return;
-    run(() => remittanceService.resolveException(row.id, text), `${row.exceptionId} resolved`);
-  };
-
-  const escalateException = async (row, reason) => {
-    const text = reason || await promptText(t("remittance.escalate"), "");
-    if (!text) return;
-    run(() => remittanceService.escalateException(row.id, text), `${row.exceptionId} escalated`);
-  };
-
-  const resolutionText = () => [resolutionData.resolutionType, resolutionData.resolutionAmount ? formatCurrency(resolutionData.resolutionAmount) : null, resolutionData.resolutionNotes]
-    .filter(Boolean).join(" - ");
-
-  const handleBulkAssign = async () => {
-    const assignee = await promptText(t("remittance.delegateTo"), currentUser);
-    if (assignee && selectedException) startException(selectedException, assignee);
-  };
-
-  // the report is a CSV of the listed exceptions; say so when there is nothing to put in it
-  const exportRows = (rows, name) => {
-    if (!rows?.length) {
-      toast.current?.show({ severity: "info", summary: t("remittance.createReport"), detail: "There are no exceptions to include in the report.", life: 4000 });
-      return;
-    }
-    exportCsv(rows, name);
-    toast.current?.show({ severity: "success", summary: t("remittance.createReport"), detail: `${rows.length} exception(s) exported to ${name}_${today}.csv`, life: 3000 });
-  };
-  const exportCsv = (rows, name) => downloadCsv(`${name}_${today}.csv`, rows, [
-    { field: "exceptionId", header: "ID" },
-    { field: "severity", header: "Severity" },
-    { field: "type", header: "Type" },
-    { field: "remittanceNo", header: "Reference No" },
-    { field: "amount", header: "Amount" },
-    { field: "age", header: "Age (days)" },
-    { field: "assignedTo", header: "Assigned To" },
-    { field: "status", header: "Status" },
-    { field: "description", header: "Description" }
+  const exportRows = () => downloadCsv(`remittance_exceptions_${today}.csv`, visible, [
+    { field: "exceptionId", header: "ID" }, { field: "severity", header: "Severity" }, { field: "type", header: "Type" }, { field: "remittanceNo", header: "Reference No" },
+    { field: "amount", header: "Amount" }, { field: "age", header: "Age (days)" }, { field: "assignedTo", header: "Assigned To" }, { field: "status", header: "Status" },
+    { field: "description", header: "Description" },
   ]);
+  const overflow = [{ code: "export", label: t("remittance.exceptions.export"), allowed: true }];
 
-  const severityBodyTemplate = (rowData) => {
-    const getSeverity = (severity) => {
-      switch (severity) {
-        case 'Critical': return 'danger';
-        case 'High': return 'warning';
-        case 'Medium': return 'info';
-        case 'Low': return 'success';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.severity} severity={getSeverity(rowData.severity)} />;
-  };
+  const headerActions = (
+    <div className="rm-header-actions">
+      {canWrite ? null : <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />}
+      <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={exportRows} />
+    </div>
+  );
 
-  const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Resolved': return 'success';
-        case 'In Progress': return 'warning';
-        case 'Open': return 'danger';
-        case 'Escalated': return 'info';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
+  const onAction = (row) => (action) => {
+    if (action.code === "view") update({ exception: row.exceptionId });
+    if (action.code === "start") start(row);
+    if (action.code === "escalate") setEscalating(row);
+    if (action.code === "resolve") {
+      setResolution(emptyResolution);
+      setTried(false);
+      setResolving(row);
+    }
   };
+  const actionLabel = (a) => t(`remittance.exceptions.actions.${a.code}`);
+  const statusLabel = (status) => (STATUS_KEYS[status] ? t(`remittance.exceptions.statuses.${STATUS_KEYS[status]}`) : status);
 
-  const actionsBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'Open'} onClick={() => startException(rowData)} aria-label={t("remittance.start")} />
-        <Button icon="pi pi-check" className="p-button-rounded p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} aria-label={t("remittance.resolve")} />
-        <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} disabled={['Resolved', 'Escalated'].includes(rowData.status)} onClick={() => escalateException(rowData)} aria-label={t("remittance.escalate")} />
-      </div>
-    );
-  };
+  const resolutionText = () => [t(`remittance.exceptions.resolutionTypes.${resolution.type}`), resolution.amount ? money(resolution.amount) : null, resolution.note.trim()]
+    .filter(Boolean).join(" · ");
+  const resolutionProblem = !resolution.type || !resolution.note.trim();
+
+  const option = (values, all, labelOf) => [{ label: t(all), value: "" }, ...values.map((v) => ({ label: labelOf ? labelOf(v) : v, value: v }))];
+  const types = [...new Set(exceptions.map((e) => e.type).filter(Boolean))];
+
+  const facts = (x) => [
+    { label: t("remittance.exceptions.fields.type"), value: x.type },
+    { label: t("remittance.exceptions.fields.severity"), value: <StatusChip label={x.severity} severity={SEVERITY_TONE[x.severity]} /> },
+    { label: t("remittance.exceptions.fields.reference"), value: x.remittanceNo },
+    { label: t("remittance.exceptions.fields.assignedTo"), value: x.assignedTo },
+    { label: t("remittance.exceptions.fields.created"), value: x.createdAt, type: "datetime" },
+    { label: t("remittance.exceptions.fields.dueBy"), value: dueBy(x), type: "datetime" },
+    { label: t("remittance.exceptions.fields.expected"), value: money(x.amount) },
+    { label: t("remittance.exceptions.fields.actual"), value: x.difference === null || x.difference === undefined ? null : money(Number(x.amount) - Number(x.difference)) },
+    { label: t("remittance.exceptions.fields.difference"), value: x.difference === null || x.difference === undefined ? null : money(x.difference) },
+    { label: t("remittance.exceptions.fields.age"), value: t("remittance.exceptions.days", { count: x.age || 0 }) },
+    { label: t("remittance.exceptions.fields.description"), value: x.description, span: "full" },
+    { label: t("remittance.exceptions.fields.escalation"), value: x.escalationReason, span: "full", hidden: !x.escalationReason },
+    { label: t("remittance.exceptions.fields.resolution"), value: x.resolution, span: "full", hidden: !x.resolution },
+  ];
+
+  const panelActions = selected ? exceptionActions(selected, canWrite).filter((a) => a.code !== "view") : [];
 
   return (
-    <div className="remittance-exceptions">
+    <div className="rm-page">
       <Toast ref={toast} />
-      <h2>{t("remittance.remittanceExceptions")}</h2>
+      <PageHeader title={t("remittance.exceptions.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
+        trail={[t("remittance.exceptions.title")]} help={t("remittance.exceptions.help")} actions={headerActions} />
+      <StatCards items={cards} />
 
-      <div className="summary-bar">
-        <div className="summary-item">
-          <i className="pi pi-exclamation-triangle" />
-          <div>
-            <div className="value">{summary.total}</div>
-            <div className="label">{t("remittance.totalExceptions")}</div>
-          </div>
-        </div>
-        <div className="summary-item red">
-          <i className="pi pi-clock" />
-          <div>
-            <div className="value">{summary.unresolved}</div>
-            <div className="label">{t("remittance.unresolved")}</div>
-          </div>
-        </div>
-        <div className="summary-item orange">
-          <i className="pi pi-spin pi-spinner" />
-          <div>
-            <div className="value">{summary.processing}</div>
-            <div className="label">{t("remittance.processing")}</div>
-          </div>
-        </div>
-        <div className="summary-item green">
-          <i className="pi pi-check-circle" />
-          <div>
-            <div className="value">{summary.resolvedToday}</div>
-            <div className="label">{t("remittance.resolvedToday")}</div>
-          </div>
-        </div>
-        <div className="summary-item highlight">
-          <i className="pi pi-wallet" />
-          <div>
-            <div className="value">{formatCurrency(summary.atRisk)}</div>
-            <div className="label">{t("remittance.totalValueAtRisk")}</div>
-          </div>
-        </div>
+      <div className="rm-filters">
+        <Dropdown value={filters.type} options={option(types, "remittance.exceptions.filters.allTypes")} onChange={(e) => update({ type: e.value })} aria-label={t("remittance.exceptions.filters.type")} />
+        <Dropdown value={filters.severity} options={option(SEVERITIES, "remittance.exceptions.filters.allSeverities")} onChange={(e) => update({ severity: e.value })}
+          aria-label={t("remittance.exceptions.filters.severity")} />
+        <Dropdown value={filters.status} options={option(STATUSES, "remittance.exceptions.filters.allStatuses", statusLabel)} onChange={(e) => update({ status: e.value })}
+          aria-label={t("remittance.exceptions.filters.status")} />
       </div>
 
-      <div className="split-view">
-        <Card title={t("remittance.exceptionList")} className="left-panel">
-          <div className="filter-section mb-3">
-            <Dropdown placeholder={t("remittance.exceptionType")} value={filters.type}
-              options={allOption([...new Set(exceptions.map((e) => e.type).filter(Boolean))])}
-              onChange={(e) => setFilters({ ...filters, type: e.value })} className="mr-2" />
-            <Dropdown placeholder={t("remittance.severity")} value={filters.severity} options={allOption(SEVERITIES)}
-              onChange={(e) => setFilters({ ...filters, severity: e.value })} className="mr-2" />
-            <Dropdown placeholder={t("remittance.status")} value={filters.status} options={allOption(STATUSES)}
-              onChange={(e) => setFilters({ ...filters, status: e.value })} />
-          </div>
-
-          <DataTable
-            value={visible}
-            loading={loading}
-            selection={selectedException}
-            onSelectionChange={(e) => setSelectedException(e.value)}
-            selectionMode="single"
-            dataKey="id"
-            stripedRows
-          >
-            <Column field="severity" header="" body={severityBodyTemplate} style={{ width: '5%' }} />
-            <Column field="exceptionId" header="ID" />
-            <Column field="type" header={t("remittance.type")} />
-            <Column field="remittanceNo" header={t("remittance.referenceNo")} />
-            <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(data.amount)} />
-            <Column field="age" header={t("remittance.age")} body={(data) => `${data.age}d`} />
-            <Column field="assignedTo" header={t("remittance.delegatedTo")} />
-            <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
-            <Column header="" body={actionsBodyTemplate} style={{ width: '10%' }} />
+      {error ? (
+        <div className="rm-inline-error" role="alert">
+          <span>{t("remittance.exceptions.loadError")}</span>
+          <Button type="button" label={t("remittance.common.tryAgain")} text size="small" onClick={reload} />
+        </div>
+      ) : (
+        <div className="rm-card bv-loading-host">
+          <LoadingBar active={refreshing} />
+          <DataTable value={visible} dataKey="id" size="small" scrollable className="rm-table" loading={loading && !data}
+            emptyMessage={<div className="rm-empty">{t("remittance.exceptions.empty")}</div>}>
+            <Column header={t("remittance.exceptions.fields.id")} frozen style={{ minWidth: "9rem" }}
+              body={(x) => <Button type="button" link className="rm-ref rm-link" label={x.exceptionId} onClick={() => update({ exception: x.exceptionId })} />} />
+            <Column header={t("remittance.exceptions.fields.severity")} body={(x) => <StatusChip label={x.severity} severity={SEVERITY_TONE[x.severity]} />} />
+            <Column header={t("remittance.exceptions.fields.typeReference")} body={(x) => (
+              <span className="rm-cell-stack">
+                <span>{x.type || "-"}</span>
+                {x.remittanceId ? <Link to={REMITTANCE_ROUTES.record(x.remittanceId)} className="rm-ref rm-muted">{x.remittanceNo}</Link>
+                  : x.remittanceNo ? <span className="rm-muted">{x.remittanceNo}</span> : null}
+              </span>
+            )} />
+            <Column header={t("remittance.exceptions.fields.amount")} align="right" body={(x) => <span className="rm-num">{money(x.amount)}</span>} />
+            <Column header={t("remittance.exceptions.fields.age")} align="right" body={(x) => <span className="rm-num">{t("remittance.exceptions.days", { count: x.age || 0 })}</span>} />
+            <Column header={t("remittance.exceptions.fields.assignedTo")} body={(x) => x.assignedTo || "-"} />
+            <Column header={t("remittance.exceptions.fields.status")} body={(x) => <StatusChip label={statusLabel(x.status)} severity={STATUS_TONE[x.status]} />} />
+            <Column header={<span className="p-sr-only">{t("remittance.exceptions.fields.actions")}</span>} align="center" style={{ width: "3.5rem" }}
+              body={(x) => <RowActions label={t("remittance.exceptions.actionsFor", { reference: x.exceptionId })} actions={exceptionActions(x, canWrite)} labelOf={actionLabel} onAction={onAction(x)} />} />
           </DataTable>
-        </Card>
+        </div>
+      )}
 
-        <Card title={t("remittance.exceptionDetails")} className="right-panel">
-          {selectedException ? (
-            <div className="exception-details">
-              <div className="detail-section">
-                <h4>{t("remittance.exceptionInformation")}</h4>
-                <div className="detail-item">
-                  <label>Exception ID:</label>
-                  <span>{selectedException.exceptionId}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.type")}:</label>
-                  <span>{selectedException.type}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.severity")}:</label>
-                  {severityBodyTemplate(selectedException)}
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.created")}:</label>
-                  <span>{dateBody("createdDate")(selectedException)}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.dueBy")}:</label>
-                  <span className="highlight">{dueBy(selectedException)}</span>
-                </div>
-              </div>
-
-              <div className="detail-section">
-                <h4>{t("remittance.transactionDetails")}</h4>
-                <div className="detail-item">
-                  <label>{t("remittance.referenceNo")}:</label>
-                  <span>{selectedException.remittanceNo}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.expectedAmount")}:</label>
-                  <span>{formatCurrency(selectedException.amount)}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.actualAmount")}:</label>
-                  <span>{selectedException.difference == null ? "-" : formatCurrency(Number(selectedException.amount) - Number(selectedException.difference))}</span>
-                </div>
-                <div className="detail-item">
-                  <label>{t("remittance.difference")}:</label>
-                  <span className="highlight">{selectedException.difference == null ? "-" : formatCurrency(selectedException.difference)}</span>
-                </div>
-              </div>
-
-              <div className="detail-section">
-                <h4>{t("remittance.resolution")}</h4>
-                <div className="p-fluid">
-                  <div className="p-field field">
-                    <label>{t("remittance.resolutionType")} *</label>
-                    <Dropdown
-                      value={resolutionData.resolutionType}
-                      options={[
-                        { label: "Manual Adjustment", value: "Manual Adjustment" },
-                        { label: "Write-off", value: "Write-off" },
-                        { label: "Create Credit Note", value: "Create Credit Note" },
-                        { label: "Create Debit Note", value: "Create Debit Note" },
-                        { label: "Reverse Transaction", value: "Reverse Transaction" }
-                      ]}
-                      onChange={(e) => setResolutionData({ ...resolutionData, resolutionType: e.value })}
-                      placeholder={t("remittance.selectResolutionType")}
-                    />
-                  </div>
-                  <div className="p-field field">
-                    <label>{t("remittance.resolutionAmount")} *</label>
-                    <InputNumber
-                      value={resolutionData.resolutionAmount}
-                      onValueChange={(e) => setResolutionData({ ...resolutionData, resolutionAmount: e.value })}
-                      mode="currency"
-                      currency={currencyCode}
-                    />
-                  </div>
-                  <div className="p-field field">
-                    <label>{t("remittance.resolutionNotes")} *</label>
-                    <InputTextarea
-                      value={resolutionData.resolutionNotes}
-                      onChange={(e) => setResolutionData({ ...resolutionData, resolutionNotes: e.target.value })}
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                <div className="action-buttons mt-3">
-                  <Button label={t("remittance.saveProgress")} className="p-button-secondary mr-2"
-                    disabled={selectedException.status !== 'Open'} onClick={() => startException(selectedException)} />
-                  <Button label={t("remittance.resolveException")} className="mr-2"
-                    disabled={selectedException.status === 'Resolved' || !resolutionData.resolutionType || !resolutionData.resolutionNotes}
-                    onClick={() => resolveException(selectedException, resolutionText())} />
-                  <Button label={t("remittance.escalate")} className="p-button-warning"
-                    disabled={['Resolved', 'Escalated'].includes(selectedException.status)}
-                    onClick={() => escalateException(selectedException, resolutionData.resolutionNotes)} />
-                </div>
-              </div>
+      <Sidebar visible={!!selected} position="right" onHide={() => update({ exception: null })} blockScroll className="rm-review rm-payment" aria-label={t("remittance.exceptions.panel")}
+        header={<span className="rm-review__title">{t("remittance.exceptions.panel")}</span>}>
+        {selected ? (
+          <>
+            <div className="rm-review__body">
+              <DetailHeader title={selected.exceptionId} status={{ code: selected.status, label: statusLabel(selected.status), severity: STATUS_TONE[selected.status] }} subtitle={selected.type} />
+              <DetailSection title={t("remittance.exceptions.details")}><KeyValueGrid columns={2} items={facts(selected)} /></DetailSection>
+              <p className="rm-review__line">{formatDateTime(selected.lastModified) ? t("remittance.exceptions.lastChange", { at: formatDateTime(selected.lastModified), by: selected.modifiedBy || "-" }) : null}</p>
             </div>
-          ) : (
-            <div className="no-selection">
-              <p>{t("remittance.selectExceptionToView")}</p>
-            </div>
-          )}
-        </Card>
-      </div>
+            {panelActions.length ? (
+              <div className="rm-review__footer rm-payment__footer">
+                {panelActions.map((a) => (
+                  <Button key={a.code} type="button" label={actionLabel(a)} outlined={a.code !== "resolve"} onClick={() => onAction(selected)(a)} />
+                ))}
+              </div>
+            ) : null}
+          </>
+        ) : null}
+      </Sidebar>
 
-      <div className="action-bar">
-        <Button label={t("remittance.exportExceptions")} icon="pi pi-download" className="p-button-secondary mr-2" onClick={() => exportRows(visible, "remittance_exceptions")} />
-        <Button label={t("remittance.bulkAssign")} icon="pi pi-users" className="p-button-secondary mr-2" disabled={!selectedException || selectedException.status === 'Resolved'} onClick={handleBulkAssign} />
-        <Button label={t("remittance.createReport")} icon="pi pi-file" className="p-button-primary" onClick={() => exportRows(exceptions, "remittance_exception_report")} />
-      </div>
+      <ReasonDialog visible={!!escalating} onHide={(r) => { const row = escalating; setEscalating(null); if (r?.confirmed) done(t("remittance.exceptions.escalated", { reference: row.exceptionId })); }}
+        context="exception_escalate" severity="warning" title={t("remittance.exceptions.escalateTitle", { reference: escalating?.exceptionId || "" })}
+        facts={escalating ? [{ label: t("remittance.exceptions.fields.type"), value: escalating.type }, { label: t("remittance.exceptions.fields.amount"), value: money(escalating.amount) }] : []}
+        confirmLabel={t("remittance.exceptions.actions.escalate")} onConfirm={(reason) => remittanceService.escalateException(escalating.id, reason)} />
+
+      <ConfirmDialog visible={!!resolving} title={t("remittance.exceptions.resolveTitle", { reference: resolving?.exceptionId || "" })}
+        facts={resolving ? [{ label: t("remittance.exceptions.fields.type"), value: resolving.type }, { label: t("remittance.exceptions.fields.amount"), value: money(resolving.amount) }] : []}
+        confirmLabel={t("remittance.exceptions.actions.resolve")} beforeConfirm={() => { setTried(true); return !resolutionProblem; }}
+        onConfirm={() => remittanceService.resolveException(resolving.id, resolutionText())}
+        onHide={(r) => { const row = resolving; setResolving(null); if (r?.confirmed) done(t("remittance.exceptions.resolved", { reference: row.exceptionId })); }}>
+        <div className="rm-form">
+          <div className="rm-field">
+            <label htmlFor="rm-resolution-type" className="bv-field-label">{t("remittance.exceptions.resolutionType")}<span className="required-marker">*</span></label>
+            <Dropdown inputId="rm-resolution-type" value={resolution.type} options={RESOLUTION_TYPES.map((v) => ({ label: t(`remittance.exceptions.resolutionTypes.${v}`), value: v }))}
+              onChange={(e) => setResolution((r) => ({ ...r, type: e.value }))} placeholder={t("remittance.exceptions.chooseType")} className={tried && !resolution.type ? "p-invalid" : ""} />
+          </div>
+          <div className="rm-field">
+            <label htmlFor="rm-resolution-amount" className="bv-field-label">{t("remittance.exceptions.resolutionAmount")}</label>
+            <InputNumber inputId="rm-resolution-amount" value={resolution.amount} onValueChange={(e) => setResolution((r) => ({ ...r, amount: e.value }))} mode="decimal"
+              minFractionDigits={2} maxFractionDigits={2} />
+          </div>
+          <div className="rm-field">
+            <label htmlFor="rm-resolution-note" className="bv-field-label">{t("remittance.exceptions.resolutionNote")}<span className="required-marker">*</span></label>
+            <InputTextarea id="rm-resolution-note" value={resolution.note} rows={3} maxLength={500} onChange={(e) => setResolution((r) => ({ ...r, note: e.target.value }))}
+              className={tried && !resolution.note.trim() ? "p-invalid" : ""} />
+          </div>
+          {tried && resolutionProblem ? <small className="rm-form__error" role="alert">{t("remittance.exceptions.resolutionMissing")}</small> : null}
+        </div>
+      </ConfirmDialog>
     </div>
   );
 };

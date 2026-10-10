@@ -17,8 +17,9 @@ import ImportDialog from "../../../components/ImportDialog";
 import { hasPermission } from "../../../utils/canOpen";
 import StatCards from "../../../components/StatCards";
 import { openConfirm } from "../../../components/ConfirmDialog";
+import { PageHeader } from "../../../module/OpsAccounting/common";
 
-const OPEN_ITEMS_UPLOAD = [{ label: "Open items", templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
+const openItemsUpload = (t) => [{ label: t("collectionsList.openItems"), templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
 
 const CollectionsList = () => {
   const { t } = useTranslation();
@@ -44,6 +45,7 @@ const CollectionsList = () => {
   const [stats, setStats] = useState(null);
   const [sendingReminders, setSendingReminders] = useState(false);
   const [showOpenItems, setShowOpenItems] = useState(false);
+  const [levelBands, setLevelBands] = useState([30, 60]);
 
   const statusOptions = [
     { label: t("collectionsList.allStatus"), value: "" },
@@ -55,11 +57,13 @@ const CollectionsList = () => {
     { label: t("collectionsList.escalated"), value: "Escalated" },
   ];
 
+  // the day bands come from the collections.overdue_levels setting, as the server applies them
+  const [l1, l2] = levelBands;
   const overdueLevelOptions = [
-    { label: "All Levels", value: "" },
-    { label: "Level 1 (1-30 days)", value: "1" },
-    { label: "Level 2 (31-60 days)", value: "2" },
-    { label: "Level 3 (60+ days)", value: "3" },
+    { label: t("collectionsList.allLevels"), value: "" },
+    { label: t("collectionsList.levelBand", { level: 1, from: 1, to: l1 }), value: "1" },
+    { label: t("collectionsList.levelBand", { level: 2, from: l1 + 1, to: l2 }), value: "2" },
+    { label: t("collectionsList.levelBeyond", { level: 3, from: l2 + 1 }), value: "3" },
   ];
 
   useEffect(() => {
@@ -96,6 +100,7 @@ const CollectionsList = () => {
       if (result.success) {
         setCollections(result.data);
         setTotalRecords(result.pagination.total);
+        if (Array.isArray(result.overdueLevels) && result.overdueLevels.length === 2) setLevelBands(result.overdueLevels.map(Number));
       }
     } catch (error) {
       logger.error("Load collections error:", error);
@@ -237,10 +242,30 @@ const CollectionsList = () => {
   // the e-mails go out inside the confirmation (an error stays there); the toast follows once they are sent
   const handleSendDueDateReminders = async () => {
     let result;
+    let scope;
+    try {
+      scope = (await collectionService.getDueDateReminderPreview())?.data;
+    } catch (error) {
+      toast.current?.show({ severity: "error", summary: t("collectionsList.remindersTitle"), detail: error.response?.data?.message || t("collectionsList.remindersFailed"), life: 4000 });
+      return;
+    }
+    if (!scope?.items) {
+      toast.current?.show({ severity: "info", summary: t("collectionsList.remindersTitle"), detail: t("collectionsList.noneToRemind"), life: 4000 });
+      return;
+    }
     const sent = await openConfirm({
       title: t("collectionsList.remindersTitle"),
-      message: t("collectionsList.remindersMessage"),
-      note: t("collectionsList.remindersNote"),
+      message: t("collectionsList.remindersScope", { count: scope.items }),
+      facts: [
+        { label: t("collectionsList.remindClients"), value: scope.clients, type: "number", decimals: 0 },
+        { label: t("collectionsList.remindItems"), value: scope.items, type: "number", decimals: 0 },
+        { label: t("collectionsList.remindOutstanding"), value: scope.totalOutstanding, type: "amount" },
+        ...(scope.byLevel || []).map((l) => ({
+          label: overdueLevelOptions.find((o) => o.value === String(l.level))?.label || t("collectionsList.notYetOverdue"),
+          value: `${l.count} · ${formatCurrency(l.amount)}`,
+        })),
+        { label: t("collectionsList.remindNoEmail"), value: scope.withoutEmail, type: "number", decimals: 0, hidden: !scope.withoutEmail },
+      ],
       confirmLabel: t("collectionsList.sendReminders"),
       confirmIcon: "pi pi-send",
       onConfirm: async () => {
@@ -267,7 +292,7 @@ const CollectionsList = () => {
   return (
     <div className="collections-list-container">
       <Toast ref={toast} />
-      <h2 className="collections-title">{t("collectionsList.title")}</h2>
+      <PageHeader title={t("sidebar.Collections")} group={t("sidebar.Accounts")} />
 
       <div className="reminder-button-section">
         <Button
@@ -282,8 +307,8 @@ const CollectionsList = () => {
           <Button label={t("collectionsList.importOpenItems")} icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
         )}
       </div>
-      <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title="Import open items (go-live)" targets={OPEN_ITEMS_UPLOAD} goLiveDate onDone={() => loadCollections()}
-        note="Unpaid premium bills of the old system, loaded against policies already in BrokerVerse. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped." />
+      <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title={t("collectionsList.importOpenItemsTitle")} targets={openItemsUpload(t)} goLiveDate onDone={() => loadCollections()}
+        note={t("collectionsList.importOpenItemsNote")} />
 
       <StatCards items={[
         { key: "outstanding", label: t("collectionsList.kpiOutstanding"), value: stats ? formatCurrency(stats.totalOutstanding) : null,

@@ -23,9 +23,12 @@ describe("SAP GL export", () => {
     service.downloadSapGlFile.mockResolvedValue();
     render(<MemoryRouter><SapGlExport /></MemoryRouter>);
     expect(await screen.findByText("ARLITISPH20261008.txt")).toBeInTheDocument();
-    expect(screen.getByText(/outside the SAP chart/)).toBeInTheDocument();
+    // the setting key in the warning is not shown to the user
+    expect(screen.getByText("Accounts outside the SAP chart: 1202001")).toBeInTheDocument();
     expect(await screen.findByText(/sap-outbound/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Run now/ }));
+    // the run is confirmed first: nothing is written until the user says so
+    fireEvent.click(await screen.findByRole("button", { name: "Write files" }));
     await waitFor(() => expect(service.runSapGl).toHaveBeenCalledTimes(1));
     expect(service.runSapGl.mock.calls[0][0]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     fireEvent.click(screen.getByText("ARHDTISPH20261008.txt"));

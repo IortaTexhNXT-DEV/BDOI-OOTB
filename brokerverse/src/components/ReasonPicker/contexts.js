@@ -6,6 +6,9 @@ export const REASON_CONTEXTS = [
   "decline", "repudiation", "lapse", "refund", "adjustment", "non-materialise", "reassignment",
   "period_close", "period_reopen", "year_end_reverse", "year_end_cancel", "cas_print_void", "cas_document_change", "incentive_batch_reject", "incentive_adjustment",
   "sales_invoice_cancel", "invoice_payment_cancel", "access_change", "delegation", "delegation_end", "sod_exception", "access_review",
+  "remittance_reject", "remittance_withdraw", "remittance_cancel", "remittance_revoke", "remittance_off_cycle", "remittance_line_exclude",
+  "exception_escalate", "exception_resolve", "exception_reopen", "reconciliation_difference", "reconciliation_unmatch", "confirmation_difference",
+  "payment_duplicate_override", "billing_reject", "billing_cancel",
 ];
 
 const words = (code) => {

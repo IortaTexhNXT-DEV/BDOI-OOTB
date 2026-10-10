@@ -124,8 +124,10 @@ export function buildReportPdf({ title, params = '', columns, rows, totals = nul
   // a listing follows the masking of the user who runs it (lib/piiPolicy.js)
   const table = { columns, rows: protectExportRows(columns || [], rows || []), totals: totals && Object.keys(totals).length ? totals : null };
   const fit = fitReport(table, { pageSize, format: ctx.format });
+  // an empty listing says so under its header row rather than ending on the header alone
+  const empty = table.rows.length ? [] : [{ text: 'No records for the selected period and filters.' }];
   return buildPdf({ ...ctx, title, params, orientation: 'landscape', pageSize: fit.pageSize,
-    sections: [{ table: { ...table, prepared: fit.prepared, fontSize: fit.fontSize } }, ...sections] });
+    sections: [{ table: { ...table, prepared: fit.prepared, fontSize: fit.fontSize } }, ...empty, ...sections] });
 }
 
 export async function renderReportPdf(report, opts = {}) {

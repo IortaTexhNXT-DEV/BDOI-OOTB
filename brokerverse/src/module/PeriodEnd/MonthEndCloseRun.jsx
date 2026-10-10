@@ -142,7 +142,7 @@ const MonthEndCloseRun = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={`${t("periodEnd.monthEndClose")} ${run.period}`} trail={[t("periodEnd.monthEndClose"), run.runNumber]}
-        subtitle={`${run.runNumber} · ${t("periodEnd.fiscalYear")} ${run.fiscalYear || "-"} · ${date(run.periodInfo?.startDate)} – ${date(run.periodInfo?.endDate)}`}>
+        subtitle={`${run.runNumber} · ${t("periodEnd.fiscalYear")} ${run.fiscalYear || "—"} · ${date(run.periodInfo?.startDate)} – ${date(run.periodInfo?.endDate)}`}>
         <Button icon="pi pi-arrow-left" text label={t("periodEnd.back")} onClick={() => navigate("/accounts/period-end/close")} />
         {canExecute && (
           <Button icon="pi pi-play" label={run.executionCount ? t("periodEnd.rerunSteps") : t("periodEnd.runSteps")} loading={busy === "execute"} onClick={execute} />
@@ -164,9 +164,9 @@ const MonthEndCloseRun = () => {
       <div className="pe-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.runStatus")}</div><div className="pe-kpi-value"><StatusTag status={run.status} /></div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.periodStatus")}</div><div className="pe-kpi-value"><StatusTag status={run.periodInfo?.status} /></div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.preparedByName || "-"}</div><div className="pe-muted">{dateTime(run.preparedAt)}</div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.submittedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.submittedByName || "-"}</div><div className="pe-muted">{run.targetStatus ? t(`periodEnd.status.${run.targetStatus}`) : ""}</div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.approvedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.approvedByName || "-"}</div><div className="pe-muted">{dateTime(run.approvedAt)}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.preparedByName || "—"}</div><div className="pe-muted">{run.preparedAt || run.openedAt ? dateTime(run.preparedAt || run.openedAt) : null}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.submittedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.submittedByName || "—"}</div><div className="pe-muted">{run.targetStatus ? t(`periodEnd.status.${run.targetStatus}`) : ""}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.approvedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.approvedByName || "—"}</div><div className="pe-muted">{run.approvedAt ? dateTime(run.approvedAt) : null}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.executions")}</div><div className="pe-kpi-value">{run.executionCount}</div></div>
       </div>
       {run.rejectionReason && run.status !== "closed" && <div className="pe-card pe-error"><strong>{t("periodEnd.rejectedReason")}:</strong> {run.rejectionReason}</div>}

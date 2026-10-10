@@ -23,7 +23,7 @@ const MODULE_OF = {
   // the records of the finance and operations screens, readable with the permission of the screen that shows them
   remittance_item: 'remittance', remittance_approval: 'remittance', commission_debit_note: 'remittance', direct_bill_client_payment: 'remittance',
   supplier_invoice: 'payables', supplier_payment: 'payables', fixed_asset: 'fixed-assets', post_dated_cheque: 'receipts',
-  petty_cash_request: 'disbursements', petty_cash_fund: 'disbursements', commission_line: 'commission', override_computation: 'commission',
+  petty_cash_request: 'disbursements', petty_cash_fund: 'disbursements', petty_cash_disbursement: 'disbursements', commission_line: 'commission', override_computation: 'commission',
   incentive_calculation: 'incentive', sales_invoice: 'period-end', bir_return_filing: 'period-end', cas_book_print: 'period-end',
   period_close_run: 'period-end', year_end_run: 'period-end', recurring_journal: 'period-end', bank_reconciliation: 'bank-reconciliation',
   fleet_schedule: 'fleet', open_cover: 'marine', marine_declaration: 'marine', marine_certificate: 'marine',

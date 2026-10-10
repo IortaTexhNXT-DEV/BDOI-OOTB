@@ -50,6 +50,11 @@ const ACTION_KEYS = {
   adjust: "adjust", adjusted: "adjust",
   "sign-off": "signOff", signoff: "signOff",
   collect: "collect", collection: "collect",
+  revoke: "revoke", revoked: "revoke",
+  // the steps of a remittance (Accounts > Remittance) and the codes of its earlier releases
+  "exclude-line": "excludeLine", "include-line": "includeLine", "raise-voucher": "raiseVoucher", "in-payment": "inPayment",
+  "payment-failed": "paymentFailed", "send-advice": "sendAdvice", "record-confirmation": "recordConfirmation",
+  "create-agency-bill": "createAgencyBill", "send-bill": "sendBill",
   status: "status", "status-change": "status",
   note: "note", call: "call", email: "email", commitment: "commitment",
   // lead assignment history (Operations > Sales & Marketing > Lead Assignment)
@@ -57,10 +62,11 @@ const ACTION_KEYS = {
 };
 
 const TONES = {
-  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect"],
-  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch"],
+  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect", "includeLine",
+    "raiseVoucher", "recordConfirmation", "createAgencyBill"],
+  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch", "revoke", "excludeLine", "paymentFailed"],
   status: ["submit", "send", "acknowledge", "process", "assign", "reassign", "delegate", "escalate", "close", "reopen", "status", "signOff",
-    "assignAuto", "assignQueued", "assignManual", "assignBulk", "assignTaken"],
+    "assignAuto", "assignQueued", "assignManual", "assignBulk", "assignTaken", "inPayment", "sendAdvice", "sendBill"],
 };
 
 const norm = (code) => String(code ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");

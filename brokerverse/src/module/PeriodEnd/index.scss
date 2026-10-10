@@ -70,24 +70,38 @@
     gap: 0.75rem;
   }
 
+  // step cards of one row share their height; the status stays at the top right whatever the title wraps to
   .pe-step {
-    border: 1px solid #e5e9f0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 0.75rem;
-    background: #fafbfd;
+    background: var(--color-surface-muted);
 
     .pe-step-head {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 0.5rem;
+      min-height: 2.5rem;
       font-weight: 700;
-      color: #111927;
+      color: var(--color-heading);
+
+      > span:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .p-tag {
+        flex: 0 0 auto;
+      }
     }
 
     .pe-step-msg {
       margin-top: 0.5rem;
       font-size: 0.85rem;
-      color: #4d5761;
+      color: var(--color-text-muted);
       word-break: break-word;
     }
   }
@@ -183,6 +197,11 @@
 .pe-tag {
   text-transform: capitalize;
   font-size: 0.75rem;
+}
+
+// a tag whose label is already in sentence case keeps it ("For approval", as on the detail views)
+.pe-tag.pe-tag--label {
+  text-transform: none;
 }
 
 .pe-link {

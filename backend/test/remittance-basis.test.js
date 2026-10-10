@@ -136,8 +136,10 @@ describe('gross remittance', () => {
     const s2 = (await ctx.as('maker')('post', '/remittance/direct-bill').send({ insurerCode: 'MALAYAN', itemIds: [it.id], submit: true })).body.data;
     expect((await ctx.as('checker')('post', `/remittance/direct-bill/${s2.id}/approve`).send({})).status).toBe(200);
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${s2.id}/cancel`).send({})).status).toBe(400);
-    const x = await ctx.as('maker')('post', `/remittance/direct-bill/${s2.id}/cancel`).send({ reason: 'Wrong insurer' });
+    expect((await ctx.as('maker')('post', `/remittance/direct-bill/${s2.id}/cancel`).send({ reasonCode: 'BRJ-INSURER' })).status).toBe(400);
+    const x = await ctx.as('maker')('post', `/remittance/direct-bill/${s2.id}/cancel`).send({ reasonCode: 'BCN-INSURER' });
     expect(x.status, JSON.stringify(x.body)).toBe(200);
+    expect(x.body.data.remarks).toBe('Wrong insurer or product line');
     const row = (await query('SELECT d.journal_id, d.reversal_jv_id, j.status AS original, r.reversal_of FROM commission_debit_notes d JOIN journal_vouchers j ON j.id = d.journal_id JOIN journal_vouchers r ON r.id = d.reversal_jv_id WHERE d.id = $1', [s2.id])).rows[0];
     expect(row).toMatchObject({ original: 'reversed', reversal_of: row.journal_id });
     expect((await items(g.policy.id))[0].status).toBe('unbilled');

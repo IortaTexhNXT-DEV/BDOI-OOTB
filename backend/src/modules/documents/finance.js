@@ -119,6 +119,9 @@ export async function vouchersPdf(db, rows) {
  * Journal voucher print (Accounts > Journal Voucher > Print): header, the entries (account, memo, debit, credit,
  * totals) and the prepared / approved signatures. `jv` is journal-vouchers#jvDetail; `row` the journal_vouchers row.
  */
+/** Journal voucher statuses as the journal screens name them. */
+const JV_STATUS = { 'for-approval': 'Pending approval' };
+
 export async function journalVoucherDoc(jv, row = {}) {
   const h = await header('Journal Voucher', jv.transactionNumber);
   const f = formatters(h);
@@ -130,7 +133,7 @@ export async function journalVoucherDoc(jv, row = {}) {
     names: { 'issuing-user': await userName(row.created_by), 'approving-user': await userName(row.approved_by) } },
   { blocks: [{ slot: 'prepared-by', label: 'Prepared by' }, { label: 'Checked by' }, { slot: 'approved-by', label: 'Approved by' }] });
   return { ...h, watermark: sig.watermark,
-    meta: kv([['Voucher date', f.date(jv.voucherDate || jv.date)], ['Status', humanize(jv.status)], ['Kind', humanize(jv.kind || jv.source || '')], ['Transaction code', jv.transactionCode],
+    meta: kv([['Voucher date', f.date(jv.voucherDate || jv.date)], ['Status', JV_STATUS[jv.status] || humanize(jv.status)], ['Kind', humanize(jv.kind || jv.source || '')], ['Transaction code', jv.transactionCode],
       ['Reversal of', jv.reversalOf], ['Correction of', jv.correctionOf], ['Description', jv.description]]),
     sections: [
       { heading: 'Entries', table: { columns: ['Account code', 'Account name', { label: 'Memo', wrap: true }, { label: 'Debit', type: 'money' }, { label: 'Credit', type: 'money' }],
@@ -139,3 +142,25 @@ export async function journalVoucherDoc(jv, row = {}) {
     ] };
 }
 
+
+/**
+ * Petty cash voucher spec: the fund, the request it paid, the expense with its VAT and withholding tax, the net cash
+ * paid out and the prepared / approved / received signature blocks. `d` is payments/pettycash#disbursementRow with
+ * the fund description, the requester and the user names added by the route.
+ */
+export async function pettyCashVoucherDoc(d) {
+  const h = await header('Petty Cash Voucher', d.transactionNumber);
+  const f = formatters(h);
+  const sig = await signatures(h, 'petty-cash-voucher', { status: d.status, date: d.date, issuedBy: d.createdBy },
+    { blocks: [{ label: 'Prepared by', name: d.createdByName || null }, { label: 'Approved by', name: d.approvedByName || null }, { label: 'Received by', name: d.requesterName || null }] });
+  return { ...h, watermark: d.status === 'reversed' ? 'REVERSED' : sig.watermark,
+    meta: kv([['Date', f.date(d.date)], ['Status', humanize(d.status)], ['Petty cash fund', [d.pettyCashCode, d.fundDescription].filter(Boolean).join(' – ')],
+      ['Request', d.requestNumber], ['Requested by', d.requesterName], ['Transaction code', d.transactionCode], ['Remarks', d.remarks]]),
+    sections: [
+      { heading: 'Amounts', table: { columns: ['Expense account', { label: 'Amount', type: 'money' }, { label: 'Input VAT', type: 'money' }, { label: 'Withholding tax', type: 'money' },
+        { label: 'Net cash paid', type: 'money' }],
+      rows: [[d.expenseAccount, round2(num(d.amount)), round2(num(d.vat)), round2(num(d.wht)), round2(num(d.netAmount))]] } },
+      { heading: 'Amount in words', text: amountInWords(round2(num(d.netAmount)), h.format?.currency || 'PHP') },
+      sig.section,
+    ].filter(Boolean) };
+}

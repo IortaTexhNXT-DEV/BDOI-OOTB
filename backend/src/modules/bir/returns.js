@@ -21,6 +21,7 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { withholdingLines } from '../period-end/tax.js';
 import { iso } from '../period-end/fiscal.js';
+import { formatDate, printFormat } from '../../lib/pdf/index.js';
 import { alphalistRows, birIdentity, monthPeriod, monthlyDueDate, quarterPeriod, quarterlyDueDate, round2, splitTin, sum, yearPeriod, MONTH_NAMES } from './common.js';
 
 export const FORMS = {
@@ -122,6 +123,11 @@ export const filingRow = (f) => f && ({
   cancelReason: f.cancel_reason, cancelledAt: f.cancelled_at,
 });
 
+/** A due date as the screens and the printed return show dates (general.date_format). */
+const dueText = async (v) => formatDate(v, await printFormat());
+/** "2026-01" as "01/2026", the way the return names a month. */
+const monthText = (key) => String(key || '').split('-').reverse().join('/');
+
 const headerOf = (id, extra = []) => [
   ['TIN', id.tinFormatted], ['RDO code', id.rdoCode], ["Withholding agent's name / registered name", id.name], ['Registered address', id.address],
   ['ZIP code', id.zip], ['Category of withholding agent', id.category === 'government' ? 'Government' : 'Private'], ...extra,
@@ -143,7 +149,7 @@ async function compute0619E(db, p) {
   const qap = await qapTotals(p.from, p.to);
   const filing = (await filingsOf(db, '0619-E', p.key)).active;
   return {
-    header: headerOf(id, [['For the month (MM/YYYY)', `${String(p.month).padStart(2, '0')}/${p.year}`], ['Due date', await monthlyDueDate(p)],
+    header: headerOf(id, [['For the month (MM/YYYY)', `${String(p.month).padStart(2, '0')}/${p.year}`], ['Due date', await dueText(await monthlyDueDate(p))],
       ['Tax type code', 'WE'], ['Any taxes withheld?', tax > 0 ? 'Yes' : 'No'], ['Top withholding agent', id.topWithholdingAgent ? 'Yes' : 'No']]),
     items: [
       { no: '14', label: 'Amount of remittance', amount: tax },
@@ -175,13 +181,13 @@ async function compute1601EQ(db, p) {
   const due = round2(tax - totalRemit);
   const penalties = prior ? Number(prior.penalties) : 0;
   return {
-    header: headerOf(id, [['For the year', String(p.year)], ['Quarter', `Q${p.quarter}`], ['Due date', quarterlyDueDate(p)],
+    header: headerOf(id, [['For the year', String(p.year)], ['Quarter', `Q${p.quarter}`], ['Due date', await dueText(quarterlyDueDate(p))],
       ['Any taxes withheld?', tax > 0 ? 'Yes' : 'No'], ['Number of sheets attached', '1 (QAP)']]),
     items: [
       ...rows.map((r, i) => ({ no: `${13 + i}`, label: `${r.atc} ${r.nature}`, taxBase: r.taxBase, rate: r.rate, amount: r.tax, schedule: true })),
       { no: '19', label: 'Total taxes withheld for the quarter', amount: tax },
-      { no: '20', label: `Less: remittances made, 1st month of the quarter (0619-E ${p.months[0]})`, amount: m1 },
-      { no: '21', label: `Less: remittances made, 2nd month of the quarter (0619-E ${p.months[1]})`, amount: m2 },
+      { no: '20', label: `Less: remittances made, 1st month of the quarter (0619-E ${monthText(p.months[0])})`, amount: m1 },
+      { no: '21', label: `Less: remittances made, 2nd month of the quarter (0619-E ${monthText(p.months[1])})`, amount: m2 },
       { no: '22', label: 'Tax remitted in the return previously filed, if this is an amended return', amount: previouslyFiled },
       { no: '23', label: 'Over-remittance from the previous quarter of the same taxable year', amount: 0 },
       { no: '24', label: 'Total remittances made (sum of items 20 to 23)', amount: totalRemit },
@@ -254,7 +260,7 @@ async function compute1604E(db, p) {
   const remittedTotal = sum(monthly, 'totalRemitted');
   const penalties = sum(monthly, 'penalties');
   return {
-    header: headerOf(id, [['For the year', String(p.year)], ['Due date', `${p.year + 1}-03-01`], ['Number of sheets attached', '2 (schedules 3 and 4)']]),
+    header: headerOf(id, [['For the year', String(p.year)], ['Due date', await dueText(`${p.year + 1}-03-01`)], ['Number of sheets attached', '2 (schedules 3 and 4)']]),
     items: [
       { no: 'IV', label: 'Total taxes withheld for the year (schedule 3)', amount: tax },
       { no: 'IV', label: 'Total penalties paid', amount: penalties },
@@ -309,8 +315,8 @@ async function compute2551Q(db, p) {
   const prior = (await filingsOf(db, '2551Q', p.key)).active;
   const penalties = prior ? Number(prior.penalties) : 0;
   return {
-    header: headerOf(id, [['Year ended', `12/${p.year}`], ['Quarter', `Q${p.quarter}`], ['Due date', quarterlyDueDate(p)],
-      ['VAT registered', id.vatRegistered ? 'Yes (percentage tax not normally due: check with the tax adviser)' : 'No']]),
+    header: headerOf(id, [['Year ended', `12/${p.year}`], ['Quarter', `Q${p.quarter}`], ['Due date', await dueText(quarterlyDueDate(p))],
+      ['VAT registered', id.vatRegistered ? 'Yes' : 'No']]),
     items: [
       { no: '13', label: `${atc} gross sales / receipts`, taxBase: gross, rate, amount: tax, schedule: true },
       { no: '14', label: 'Total tax due', amount: tax },

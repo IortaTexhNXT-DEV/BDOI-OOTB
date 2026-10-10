@@ -35,7 +35,7 @@ $tablet-md: 1024px;
     gap: 2rem;
     justify-content: space-between;
     align-items: flex-start;
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: $radius-md;
     padding: 24px;
     box-shadow: $shadow-sm;
@@ -110,7 +110,7 @@ $tablet-md: 1024px;
 
     p {
       margin: 0;
-      color: #64748b;
+      color: var(--color-text-muted);
       font-size: 0.95rem;
     }
   }
@@ -126,10 +126,10 @@ $tablet-md: 1024px;
     align-items: center;
     gap: 0.5rem;
     padding: 0.55rem 0.9rem;
-    background: #f8fafc;
+    background: var(--color-surface-muted);
     border-radius: 999px;
     font-size: 0.85rem;
-    color: #334155;
+    color: var(--color-text);
 
     &--status {
       padding: 0.4rem 0.75rem;
@@ -139,7 +139,7 @@ $tablet-md: 1024px;
 
   .meta-icon {
     font-size: 0.95rem;
-    color: #475569;
+    color: var(--color-text);
   }
 
   .breadcrumb {
@@ -152,7 +152,7 @@ $tablet-md: 1024px;
     }
 
     .p-menuitem-text {
-      color: #475569;
+      color: var(--color-text);
       font-weight: 500;
     }
   }
@@ -219,7 +219,7 @@ $tablet-md: 1024px;
 
     .highlight-helper {
       font-size: 0.85rem;
-      color: #475569;
+      color: var(--color-text);
     }
   }
 
@@ -246,7 +246,7 @@ $tablet-md: 1024px;
   }
 
   .policy-section {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: $radius-md;
     padding: 1.75rem;
     box-shadow: $shadow-sm;
@@ -261,7 +261,7 @@ $tablet-md: 1024px;
       justify-content: space-between;
       align-items: flex-start;
       gap: 1rem;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--color-border);
       padding-bottom: 1rem;
       margin-bottom: 1.25rem;
 
@@ -287,7 +287,7 @@ $tablet-md: 1024px;
       .section-subtitle {
         margin: 0;
         font-size: 0.9rem;
-        color: #64748b;
+        color: var(--color-text-muted);
       }
     }
 
@@ -338,7 +338,7 @@ $tablet-md: 1024px;
 
       &--emphasis {
         font-size: 1.05rem;
-        color: #047857;
+        color: var(--color-heading);
       }
 
       .p-button.p-button-link {
@@ -348,13 +348,13 @@ $tablet-md: 1024px;
 
     .info-helper {
       font-size: 0.8rem;
-      color: #475569;
+      color: var(--color-text);
     }
   }
 
   .info-empty {
     font-size: 0.9rem;
-    color: #94a3b8;
+    color: var(--color-text-muted);
   }
 
   .media-block {
@@ -372,12 +372,12 @@ $tablet-md: 1024px;
         margin: 0;
         font-size: 1.05rem;
         font-weight: 600;
-        color: #0f172a;
+        color: var(--color-heading);
       }
 
       span {
         font-size: 0.85rem;
-        color: #64748b;
+        color: var(--color-text-muted);
       }
     }
 
@@ -387,7 +387,7 @@ $tablet-md: 1024px;
       .p-galleria-content {
         border-radius: 14px;
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--color-border);
       }
 
       .vehicle-gallery-image {
@@ -409,8 +409,8 @@ $tablet-md: 1024px;
         justify-content: center;
         gap: 0.5rem;
         min-height: 12rem;
-        background: var(--surface-100, #f1f5f9);
-        color: var(--text-color-secondary, #64748b);
+        background: var(--surface-100, var(--color-surface-muted));
+        color: var(--text-color-secondary, var(--color-text-muted));
         font-size: 0.875rem;
 
         .pi {
@@ -438,12 +438,12 @@ $tablet-md: 1024px;
       margin: 0;
       font-size: 1.05rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--color-heading);
     }
   }
 
   .premium-breakdown {
-    background: #f8fafc;
+    background: var(--color-surface-muted);
     border-radius: 14px;
     padding: 1.25rem;
 
@@ -459,14 +459,14 @@ $tablet-md: 1024px;
       align-items: center;
       gap: 1rem;
       padding: 0.65rem 0;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--color-border);
 
       &:last-child {
         border-bottom: none;
       }
 
       &.is-total {
-        background: #ecfdf5;
+        background: var(--color-surface-muted);
         border-radius: 10px;
         padding: 0.9rem 1rem;
         margin-top: 0.25rem;
@@ -476,25 +476,25 @@ $tablet-md: 1024px;
     .breakdown-label {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #475569;
+      color: var(--color-text);
       display: flex;
       align-items: center;
       gap: 0.35rem;
     }
 
     .breakdown-annotation {
-      color: #2563eb;
+      color: var(--bv-primary);
       font-size: 0.75rem;
     }
 
     .breakdown-amount {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--color-heading);
 
       &.is-total {
         font-size: 1.1rem;
-        color: #047857;
+        color: var(--color-heading);
       }
     }
   }
@@ -512,7 +512,7 @@ $tablet-md: 1024px;
   }
 
   .sidebar-section {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: $radius-md;
     padding: 1.6rem;
     box-shadow: $shadow-sm;
@@ -524,7 +524,7 @@ $tablet-md: 1024px;
 
     .section-header {
       align-items: center;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--color-border);
       margin-bottom: 1rem;
       padding-bottom: 0.9rem;
     }
@@ -538,20 +538,20 @@ $tablet-md: 1024px;
         margin: 0;
         font-size: 1.1rem;
         font-weight: 600;
-        color: #0f172a;
+        color: var(--color-heading);
       }
     }
 
     .section-icon {
       font-size: 1.2rem;
-      color: #2563eb;
+      color: var(--bv-primary);
     }
   }
 
   .payment-description {
     margin: 0;
     font-size: 0.95rem;
-    color: #475569;
+    color: var(--color-text);
     line-height: 1.5;
   }
 
@@ -592,7 +592,7 @@ $tablet-md: 1024px;
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 1rem;
-    background: #f8fafc;
+    background: var(--color-surface-muted);
     border-radius: 12px;
     padding: 0.9rem 1rem;
 
@@ -622,21 +622,24 @@ $tablet-md: 1024px;
     .document-title {
       font-size: 0.95rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--color-heading);
     }
 
     .document-meta {
       font-size: 0.8rem;
-      color: #64748b;
+      color: var(--color-text-muted);
       word-break: break-word;
     }
   }
 
+  // the actions wrap inside the card instead of running past its edge
   .document-item-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
-    flex-shrink: 0;
+    flex: 0 1 auto;
+    min-width: 0;
 
     .p-button {
       min-height: 36px;
@@ -644,11 +647,12 @@ $tablet-md: 1024px;
       font-weight: 600;
       max-width: 100%;
 
-      &.p-button-text {
-        color: #5b6bff;
+      &.p-button-text,
+      &.p-button-text:enabled {
+        color: var(--bv-primary);
 
         &:hover {
-          color: #3b4bff;
+          color: var(--bv-primary-dark);
         }
       }
 
@@ -691,10 +695,10 @@ $tablet-md: 1024px;
     }
 
     .endorsement-item {
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--color-border);
       border-radius: 14px;
       padding: 1.1rem 1.25rem;
-      background: #f9fbfd;
+      background: var(--color-surface-muted);
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -715,12 +719,12 @@ $tablet-md: 1024px;
     .endorsement-title {
       font-size: 1.05rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--color-heading);
     }
 
     .endorsement-subtitle {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--color-text-muted);
       margin-top: 0.15rem;
     }
 
@@ -733,16 +737,16 @@ $tablet-md: 1024px;
     .endorsement-empty-state {
       padding: 1.25rem;
       text-align: center;
-      background: #f8fafc;
-      border: 1px dashed #cbd5f5;
+      background: var(--color-surface-muted);
+      border: 1px dashed var(--color-border);
       border-radius: 12px;
-      color: #64748b;
+      color: var(--color-text-muted);
       font-size: 0.9rem;
     }
   }
 
   .policy-state {
-    background: #ffffff;
+    background: var(--color-surface);
     border-radius: $radius-md;
     padding: 3rem 2rem;
     display: flex;
@@ -757,12 +761,12 @@ $tablet-md: 1024px;
     h3 {
       margin: 0;
       font-size: 1.35rem;
-      color: #0f172a;
+      color: var(--color-heading);
     }
 
     p {
       margin: 0;
-      color: #475569;
+      color: var(--color-text);
       max-width: 420px;
     }
   }
@@ -791,7 +795,7 @@ $tablet-md: 1024px;
   .document-preview-empty {
     padding: 2rem;
     text-align: center;
-    color: #64748b;
+    color: var(--color-text-muted);
   }
 
   .policy-section.co-insurance-ratios-section {
@@ -801,7 +805,7 @@ $tablet-md: 1024px;
       h3 {
         font-size: 1.15rem;
         letter-spacing: 0.02em;
-        color: #e11d48;
+        color: var(--color-danger);
       }
     }
 
@@ -828,8 +832,8 @@ $tablet-md: 1024px;
       align-items: center;
       padding: 0.35rem 0.85rem;
       border-radius: 999px;
-      background: #ffe4e6;
-      color: #e11d48;
+      background: var(--color-surface-muted);
+      color: var(--color-danger);
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.03em;
@@ -852,40 +856,40 @@ $tablet-md: 1024px;
       }
 
       .p-datatable-thead > tr > th {
-        background: #f8fafc;
-        color: #64748b;
+        background: var(--color-surface-muted);
+        color: var(--color-text-muted);
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         border: none;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--color-border);
       }
 
       .p-datatable-tbody > tr > td {
         border: none;
-        border-bottom: 1px solid #f1f5f9;
-        color: #0f172a;
+        border-bottom: 1px solid var(--color-surface-muted);
+        color: var(--color-heading);
         font-size: 0.95rem;
       }
 
       .p-datatable-tbody > tr.co-insurance-total-row > td {
         border-bottom: none;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--color-border);
         font-weight: 700;
         padding-top: 1rem;
       }
 
       .p-datatable-tbody > tr.co-insurance-total-row > td:nth-child(3) {
-        color: #16a34a;
+        color: var(--color-success);
       }
     }
 
     .co-insurance-status {
-      color: #64748b;
+      color: var(--color-text-muted);
       font-weight: 600;
 
       &--active {
-        color: #16a34a;
+        color: var(--color-success);
       }
     }
   }

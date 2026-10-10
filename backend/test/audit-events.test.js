@@ -39,7 +39,7 @@ describe('audit labels', () => {
 
 describe('audit value formatting', () => {
   it('formats values by type', () => {
-    expect(formatValue('grossPremium', '12500', ctx())).toBe('PHP 12,500.00');
+    expect(formatValue('grossPremium', '12500', ctx())).toBe('₱12,500.00');
     expect(formatValue('estimatedClaimAmount', 85000, ctx(), 'USD')).toBe('USD 85,000.00');
     expect(formatValue('commissionRate', '0.15', ctx())).toBe('0.15');
     expect(formatValue('dateOfIncident', '2026-09-28', ctx())).toBe('28/09/2026');
@@ -76,10 +76,20 @@ describe('audit value formatting', () => {
   });
   it('lists the values set on creation and ignores values that only changed form', () => {
     expect(diffFields('policy', null, { policyNumber: 'MC-1', grossPremium: 100, remarks: '' }, ctx()).map((c) => [c.label, c.from, c.to]))
-      .toEqual([['Policy number', null, 'MC-1'], ['Gross premium', null, 'PHP 100.00']]);
+      .toEqual([['Policy number', null, 'MC-1'], ['Gross premium', null, '₱100.00']]);
     expect(diffFields('policy', { grossPremium: '100.00' }, { grossPremium: 100 }, ctx())).toEqual([]);
     const pw = diffFields('user', { password_hash: 'a' }, { password_hash: 'b' }, ctx());
     expect(pw).toEqual([{ key: 'password_hash', label: 'Password hash', from: MASK, to: MASK, masked: true }]);
+  });
+  it('describes a created record by its own facts, without ids, nested working data or repeated labels', () => {
+    const created = diffFields('fleet_schedule', null, {
+      status: 'draft', clientId: 'cl_crs_02', insuranceCompanyId: 8, clientName: 'Bayanihan Logistics Corp.', fleetNumber: 'FLT-2026-00001',
+      summary: { premiumChange: { delta: { commission: -10 } } }, lines: [{ id: 1, amount: 5 }], failed: [], ewtRate: 2, grossPremium: 1000, batchId: 'BLK-1',
+    }, ctx());
+    expect(created.map((c) => [c.label, c.to])).toEqual([
+      ['Fleet number', 'FLT-2026-00001'], ['Client', 'Bayanihan Logistics Corp.'], ['Status', 'Draft'], ['Gross premium', '₱1,000.00'],
+      ['EWT rate', '2%'], ['Batch ID', 'BLK-1'],
+    ]);
   });
   it('gives instants in the business time zone and configured date format', () => {
     expect(instant('2026-10-01T17:30:00Z', FMT)).toEqual({ day: '2026-10-02', date: '02/10/2026', time: '01:30', text: '02/10/2026 01:30' });
@@ -114,7 +124,7 @@ describe('audit grouping, user and source', () => {
   });
   it('exports one row per changed field', () => {
     const rows = exportRows([{ date: '02/10/2026', time: '09:49', user: { displayName: 'A', roles: ['R'] }, entityLabel: 'Policy', reference: 'MC-1', title: 'Policy updated',
-      note: null, source: { label: 'Screen', name: 'Operations > Policies' }, changes: [{ label: 'Gross premium', from: 'PHP 1.00', to: 'PHP 2.00' }, { label: 'Remarks', from: null, to: 'x' }] }]);
+      note: null, source: { label: 'Screen', name: 'Operations > Policies' }, changes: [{ label: 'Gross premium', from: '₱1.00', to: '₱2.00' }, { label: 'Remarks', from: null, to: 'x' }] }]);
     expect(rows).toHaveLength(2);
     expect(rows[1]).toMatchObject({ field: 'Remarks', from: '', to: 'x', source: 'Screen: Operations > Policies', role: 'R' });
   });

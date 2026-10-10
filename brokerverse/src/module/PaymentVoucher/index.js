@@ -140,6 +140,7 @@ const Index = () => {
     const filters = {
       customerCodeFrom: customerCodeString,
       customerCodeTo: customerCodeToString,
+      // the local calendar day chosen (toISOString would move Manila midnight to the previous UTC day)
       createdAtFrom: toIsoDate(dateFrom),
       createdAtTo: toIsoDate(dateTo),
     };
@@ -666,7 +667,7 @@ const Index = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -680,7 +681,7 @@ const Index = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -689,32 +690,30 @@ const Index = () => {
           {/* Date From and Date To */}
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("paymentVoucher.dateFrom")}
+              <LabelWrapper label={t("paymentVoucher.dateFrom")}>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("paymentVoucher.dateTo")}
+              <LabelWrapper label={t("paymentVoucher.dateTo")}>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
           </div>
 

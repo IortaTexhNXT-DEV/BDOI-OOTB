@@ -18,6 +18,7 @@ import DetailSection from "../../components/DetailSection";
 import KeyValueGrid from "../../components/KeyValueGrid";
 import { ActivityLog, fromWarrantyActions, humanize } from "../../components/ActivityLog";
 import { CcTag, PageHeader, date, isoOf, money, showError, showSuccess } from "./common";
+import "./warrantyMonitor.scss";
 
 const FILTERS = ["attention", "breached", "at-risk", "all"];
 
@@ -82,8 +83,7 @@ const WarrantyMonitor = () => {
     title: t("creditControl.confirmations.remindTitle"),
     message: t("creditControl.confirmations.remindMessage"),
     facts: policyFacts(row),
-    input: { type: "textarea", label: t("creditControl.confirmations.reminderMessage"), maxLength: 1000 },
-    note: t("creditControl.confirmations.reminderTemplate"),
+    input: { type: "textarea", label: t("creditControl.confirmations.reminderMessage"), maxLength: 1000, placeholder: t("creditControl.confirmations.reminderPlaceholder") },
     confirmLabel: t("creditControl.remind"),
   }, (notes) => service.remind(row.policyId, notes), (r) => t("creditControl.reminderSent", { to: r.to }));
   const cancellation = (row) => confirmRun({
@@ -92,7 +92,6 @@ const WarrantyMonitor = () => {
     message: t("creditControl.confirmations.cancellationMessage"),
     facts: policyFacts(row),
     input: { type: "textarea", label: t("creditControl.confirmations.notesForOperations"), maxLength: 1000 },
-    note: t("creditControl.confirmations.cancellationNote"),
     confirmLabel: t("creditControl.confirmations.requestCancellation"),
   }, (notes) => service.requestCancellation(row.policyId, notes), (r) => t("creditControl.cancellationRaised", { number: r.endorsementNumber || "" }));
   const saveExtension = async () => {
@@ -168,15 +167,15 @@ const WarrantyMonitor = () => {
           <Column header={t("creditControl.deadline")} body={(r) => <span>{date(r.deadline)}{r.extendedTo ? ` (${t("creditControl.extended")})` : ""}</span>} />
           <Column header={t("creditControl.daysPast")} body={(r) => (r.daysPastDeadline ? r.daysPastDeadline : `-${r.daysToDeadline}`)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("creditControl.premiumDue")} body={(r) => money(r.premiumDue)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("creditControl.statusLabel")} style={{ minWidth: "11rem" }} body={(r) => (
+          <Column header={t("creditControl.statusLabel")} style={{ minWidth: "12rem" }} bodyClassName="cc-status-col" body={(r) => (
             <div className="cc-status-cell">
               <span className="flex align-items-center gap-1 flex-wrap"><CcTag status={r.status} />{r.pendingExtension && <CcTag status="pending" />}</span>
               {r.onInstalmentPlan && <span className="bv-cell-sub nowrap">{t("creditControl.onPlan")}</span>}
               {r.cancellationRequest && <span className="bv-cell-sub">{r.cancellationRequest}</span>}
             </div>
           )} />
-          <Column body={(r) => (
-            <div className="flex gap-1">
+          <Column style={{ width: "11rem", minWidth: "11rem" }} body={(r) => (
+            <div className="flex gap-1 flex-nowrap">
               <Button icon="pi pi-envelope" text size="small" tooltip={t("creditControl.remind")} onClick={() => remind(r)} aria-label={t("creditControl.remind")} />
               <Button icon="pi pi-calendar-plus" text size="small" tooltip={t("creditControl.requestExtension")} disabled={!!r.pendingExtension}
                 onClick={() => setExtension({ row: r, requestedDeadline: null, reason: "" })} aria-label={t("creditControl.requestExtension")}
@@ -188,12 +187,13 @@ const WarrantyMonitor = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={extension ? `${t("creditControl.requestExtension")} · ${extension.row.policyNumber}` : ""} visible={!!extension} style={{ width: "min(520px, 96vw)" }} onHide={() => setExtension(null)}
-        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setExtension(null)} /><Button label={t("creditControl.send")} icon="pi pi-send" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
+      {/* centred like the reminder and cancellation confirms of the same row */}
+      <Dialog className="pe-dialog bv-centered" header={extension ? `${t("creditControl.requestExtension")} · ${extension.row.policyNumber}` : ""} visible={!!extension} style={{ width: "min(520px, 96vw)" }} onHide={() => setExtension(null)}
+        footer={<div><Button label={t("creditControl.cancel")} outlined onClick={() => setExtension(null)} /><Button label={t("creditControl.requestExtension")} icon="pi pi-calendar-plus" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
         {extension && (
           <div className="grid">
             <div className="col-12">
-              <KeyValueGrid columns={2} items={[
+              <KeyValueGrid columns={1} items={[
                 { label: t("creditControl.client"), value: extension.row.clientName },
                 { label: t("creditControl.currentDeadline"), value: extension.row.deadline, type: "date" },
                 { label: t("creditControl.premiumDue"), value: extension.row.premiumDue, type: "amount" },

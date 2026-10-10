@@ -26,7 +26,7 @@ export const TRANSACTION_TABLES = [
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
-  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals',
+  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
   // claims and renewals
@@ -159,7 +159,7 @@ export const MASTER_SERIES = ['petty_cash_fund', 'product_template', 'incentive_
 export const TRANSACTION_FILE_FOLDERS = [
   'vehicle-photos', 'id-cards', 'policy-documents', 'quotation-responses', 'insurer-offers', 'endorsement', 'endorsement-documents',
   'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports',
-  'incentive-reports', 'remittance-statements', 'remittance-bulk',
+  'incentive-reports', 'remittance-statements', 'remittance-bulk', 'remittance-imports',
   // KYC documents of the clients (onboarding)
   'kyc',
   'bi-extract',

@@ -386,12 +386,9 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         </div>
       ) : !showEmailForm ? (
         <div className="grid m-0">
-          <div
-            onClick={quotePdfLoading ? undefined : handleDownload}
-            className={`col-2 p-0 ${quotePdfLoading ? "opacity-60" : ""}`}
-            style={quotePdfLoading ? { pointerEvents: "none" } : {}}
-          >
-            <div className="common__div mb-2 cursor-pointer">
+          <button type="button" onClick={handleDownload} disabled={quotePdfLoading}
+            className={`col-2 p-0 share__option ${quotePdfLoading ? "opacity-60" : ""}`}>
+            <div className="common__div mb-2">
               {quotePdfLoading ? (
                 <i className="pi pi-spin pi-spinner" style={{ fontSize: "1.5rem" }} />
               ) : (
@@ -401,31 +398,31 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
             <div className="share__option_caption">
               {quotePdfLoading ? t("shareOption.downloading") : t("shareOption.download")}
             </div>
-          </div>
-          <div onClick={handlePrint} className="col-2 p-0">
-            <div className="common__div mb-2 cursor-pointer">
-              <i className="pi pi-print share__option_icon" aria-hidden="true" />
+          </button>
+          <button type="button" onClick={handlePrint} className="col-2 p-0 share__option">
+            <div className="common__div mb-2">
+              <span className="share__option_round" aria-hidden="true"><i className="pi pi-print" /></span>
             </div>
             <div className="share__option_caption">{t("shareOption.print")}</div>
-          </div>
-          <div onClick={handleEmailClick} className="col-2 p-0">
-            <div className="common__div mb-2 cursor-pointer">
+          </button>
+          <button type="button" onClick={handleEmailClick} className="col-2 p-0 share__option">
+            <div className="common__div mb-2">
               <SvgEmailIcon />
             </div>
             <div className="share__option_caption">{t("shareOption.email")}</div>
-          </div>
-          <div onClick={handleWhatsAppShare} className="col-2 p-0">
-            <div className="common__div mb-2 cursor-pointer">
+          </button>
+          <button type="button" onClick={handleWhatsAppShare} className="col-2 p-0 share__option">
+            <div className="common__div mb-2">
               <SvgWhatsAppIcon />
             </div>
             <div className="share__option_caption">{t("shareOption.whatsApp")}</div>
-          </div>
-          <div onClick={handleInsurerClick} className="col-2 p-0">
-            <div className="common__div mb-2 cursor-pointer">
+          </button>
+          <button type="button" onClick={handleInsurerClick} className="col-2 p-0 share__option">
+            <div className="common__div mb-2">
               <SvgSendToInsurerIcon />
             </div>
             <div className="share__option_caption">{t("shareOption.sendToInsurer")}</div>
-          </div>
+          </button>
 
           <div className="col-12 submit__container">
             <div className="share__link">

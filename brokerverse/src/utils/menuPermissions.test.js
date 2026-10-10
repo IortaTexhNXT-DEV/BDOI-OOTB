@@ -181,3 +181,27 @@ describe("menu structure", () => {
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["operations"])).toBe(false);
   });
 });
+
+describe("Accounts > Remittance (R1)", () => {
+  const remittanceOf = (roles) => {
+    const accounts = filterMenuForRoles(menuList, roles).find((m) => m.name === "Accounts");
+    return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
+  };
+
+  it("has the seven entries and Settlement, in that order, and no screen of earlier releases", () => {
+    expect(remittanceOf(["accounting"])).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Setup", "Settlement"]);
+    expect(JSON.stringify(menuList)).not.toMatch(/"\/finance\/remittance\/(automated|tracking|scheduling|electronictransfer|approval"|agencybill|analytics)/);
+  });
+
+  it("an item grant (Remittance > Reconciliation) keeps only that entry and guards the others", () => {
+    expect(remittanceOf(["tis-ccd-bp"])).toEqual(["Remittances", "Reconciliation", "Exceptions"]);
+    expect(isPathAllowed("/finance/remittance/reconciliation/statements/12", menuList, ["tis-ccd-bp"])).toBe(true);
+    expect(isPathAllowed("/finance/remittance/setup/schedules", menuList, ["tis-ccd-bp"])).toBe(false);
+    expect(isPathAllowed("/finance/remittance/approvals", menuList, ["tis-ccd-bp"])).toBe(false);
+  });
+
+  it("leaves the landing and the retired addresses open, so they can send the user on", () => {
+    expect(isPathAllowed("/finance/remittance", menuList, ["tis-ccd-bp"])).toBe(true);
+    expect(isPathAllowed("/finance/remittance/scheduling", menuList, ["tis-ccd-bp"])).toBe(true);
+  });
+});

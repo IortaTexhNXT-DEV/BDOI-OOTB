@@ -14,6 +14,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import SvgTable from "../../../assets/icons/SvgTable";
 import ToggleButton from "../../../components/ToggleButton";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
@@ -126,7 +127,8 @@ const RemittanceMaster = () => {
     return (
       <div className="center-content">
         <ToggleButton
-          isChecked={rowData.status}
+          id={`remittance-master-${rowData.id}`}
+          isChecked={!!rowData.status}
           onChange={() => handleStatusChange(rowData)}
         />
       </div>
@@ -178,9 +180,25 @@ const RemittanceMaster = () => {
   };
 
   const handleStatusChange = async (rowData) => {
+    const deactivate = !!rowData.status;
+    if (deactivate) {
+      const kind = t("masterStatus.types.remittance-setup");
+      const confirmed = await openConfirm({
+        title: t("masterStatus.deactivateTitle", { kind }),
+        severity: "warning",
+        message: t("masterStatus.deactivateMessage", { kind: kind.toLowerCase() }),
+        facts: [
+          { label: t("financeMasters.code"), value: rowData.code },
+          { label: t("financeMasters.name"), value: rowData.name },
+          { label: t("financeMasters.type"), value: rowData.type },
+        ],
+        confirmLabel: t("masterStatus.deactivateAction", { kind }),
+      });
+      if (!confirmed) return;
+    }
     try {
-      await masterService.setStatus(rowData.typeCode, rowData.id, rowData.status ? "Inactive" : "Active");
-      showSuccess(toast, `${rowData.code} ${rowData.status ? "deactivated" : "activated"}`);
+      await masterService.setStatus(rowData.typeCode, rowData.id, deactivate ? "Inactive" : "Active");
+      showSuccess(toast, `${rowData.code} ${deactivate ? "deactivated" : "activated"}`);
       loadMasters();
     } catch (error) {
       showError(toast, error);

@@ -304,7 +304,7 @@
     "netPremium": "เบี้ยสุทธิ",
     "paid": "ชำระแล้ว",
     "balance": "ยอดคงเหลือ",
-    "unpaid": "ยังไม่ชำระ",
+    "unpaid": "ค้างชำระ",
     "discounts": "ส่วนลด",
     "others": "อื่นๆ",
     "receiptDetailView": "รายละเอียดใบเสร็จ",
@@ -325,8 +325,8 @@
     "accountNumberRequired": "กรุณากรอกหมายเลขบัญชี",
     "paymentTypeRequired": "กรุณาเลือกประเภทการชำระเงิน",
     "addJournalVoucher": "เพิ่มใบสำคัญ Journal",
-    "correctionsJV": "Corrections JV",
-    "correctionsJVDetails": "รายละเอียด Corrections JV",
+    "correctionsJV": "ปรับปรุงรายการบัญชี (Correction JV)",
+    "correctionsJVDetails": "รายละเอียด Correction JV",
     "receipts": {
       "title": "ใบเสร็จ",
       "bulkPrint": "พิมพ์แบบกลุ่ม",
@@ -371,7 +371,8 @@
       "noReceiptsFound": "ไม่พบใบเสร็จที่ตรงกับตัวกรองที่กำหนด",
       "receiptsExportedSuccessfully": "ส่งออกใบเสร็จสำเร็จ",
       "success": "สำเร็จ",
-      "error": "ข้อผิดพลาด"
+      "error": "ข้อผิดพลาด",
+      "requiredTitle": "ข้อมูลที่ต้องระบุ"
     },
     "addReceipts": {
       "title": "เพิ่มใบเสร็จ",
@@ -421,7 +422,7 @@
       "failedToLoadReceiptDetails": "โหลดรายละเอียดใบเสร็จไม่สำเร็จ กรุณาลองอีกครั้ง",
       "amountReceived": "จำนวนเงินที่ได้รับ",
       "back": "ย้อนกลับ",
-      "balanceHint": "ยอดค้างชำระ: {{balance}} การชำระบางส่วนจะคงยอดที่เหลือไว้",
+      "balanceHint": "ยอดค้างชำระ: {{balance}}",
       "billAmount": "ยอดใบแจ้งหนี้",
       "billBalance": "ยอดคงเหลือ",
       "billDueDate": "วันครบกำหนด",
@@ -542,8 +543,8 @@
       "transactionDescription": "คำอธิบายธุรกรรม",
       "transactionNumber": "หมายเลขธุรกรรม",
       "date": "วันที่",
-      "totalCredit": "เครดิตรวม",
-      "totalDebit": "เดบิตรวม",
+      "totalCredit": "รวมเครดิต",
+      "totalDebit": "รวมเดบิต",
       "net": "สุทธิ",
       "enter": "กรอก",
       "mainAccountRequired": "กรุณาเลือกบัญชีหลัก",
@@ -602,12 +603,20 @@
       "print": "พิมพ์",
       "approvedDone": "อนุมัติใบเสร็จแล้ว",
       "printedDone": "พิมพ์ใบเสร็จแล้ว",
-      "activity": "กิจกรรม"
+      "activity": "กิจกรรม",
+      "receiptDate": "วันที่ใบเสร็จ",
+      "customerCode": "รหัสลูกค้า",
+      "paymentMode": "วิธีการชำระ",
+      "reference": "เลขที่อ้างอิง",
+      "amount": "จำนวนเงินที่รับ",
+      "customer": "ลูกค้า",
+      "policyNumber": "เลขที่กรมธรรม์",
+      "branch": "สาขา"
     },
     "openEntryDialogs": {
       "matchTitle": "จับคู่รายการค้าง",
-      "matchMessage_one": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
-      "matchMessage_other": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "matchMessage_one": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
+      "matchMessage_other": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
       "debitsSelected": "เดบิตที่เลือก",
       "debitTotal": "ยอดรวมเดบิต",
       "creditsSelected": "เครดิตที่เลือก",
@@ -644,8 +653,10 @@
       "totalCredit": "Total credit",
       "new": "New correction",
       "newReversal": "New reversal",
-      "print": "Print {{number}}"
-    }
+      "print": "Print {{number}}",
+      "difference": "ผลต่าง"
+    },
+    "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้"
   },
   "renewalWaiting": {
     "clients": "ลูกค้า",
@@ -778,7 +789,7 @@
     "failedToUploadDisbursements": "อัปโหลดไฟล์การจ่ายเงินไม่สำเร็จ",
     "bulkUploadDisbursements": "อัปโหลดการจ่ายเงินแบบกลุ่ม",
     "instructions": "คำแนะนำ:",
-    "downloadTemplate": "ดาวน์โหลดเทมเพลต",
+    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
     "instruction1": "ดาวน์โหลดไฟล์เทมเพลตตัวอย่าง",
     "instruction2": "กรอกรายละเอียดการจ่ายเงิน หนึ่งแถวต่อหนึ่งใบสำคัญ",
     "instruction3": "อัปโหลดไฟล์ที่กรอกเสร็จแล้ว (สูงสุด 10MB)",
@@ -827,7 +838,24 @@
       "payout": "Record payout",
       "commissionLines": "Commission lines",
       "activity": "Activity"
-    }
+    },
+    "detail": {
+      "policyNumber": "เลขที่กรมธรรม์",
+      "insurer": "บริษัทประกันภัย",
+      "remarks": "หมายเหตุการจ่าย",
+      "otherDeductions": "รายการหักอื่น",
+      "printVoucher": "พิมพ์ใบสำคัญจ่าย",
+      "selectApprovedCheque": "เลือกเช็คที่อนุมัติแล้วเพื่อพิมพ์",
+      "modes": {
+        "check": "เช็ค",
+        "cheque": "เช็ค",
+        "cash": "เงินสด",
+        "bank-transfer": "โอนเงินผ่านธนาคาร",
+        "bank_transfer": "โอนเงินผ่านธนาคาร",
+        "online": "โอนเงินออนไลน์"
+      }
+    },
+    "bulkUploadTitle": "อัปโหลดการจ่ายเงินหลายรายการ"
   },
   "renewal": {
     "renewals": "การต่ออายุ",
@@ -1370,7 +1398,22 @@
     "select": "เลือก",
     "add": "เพิ่ม",
     "edit": "แก้ไข",
-    "view": "ดู",
+    "view": {
+      "netAmount": "ยอดสุทธิ",
+      "posting": "บัญชี",
+      "criteria": "เกณฑ์",
+      "expenseAccount": "บัญชีค่าใช้จ่าย",
+      "lines": "คำขอที่จ่าย",
+      "noLines": "ไม่มีรายการคำขอ",
+      "vat": "ภาษีมูลค่าเพิ่ม",
+      "wht": "ภาษีหัก ณ ที่จ่าย",
+      "pettyCashFund": "กองทุนเงินสดย่อย",
+      "narration": "คำอธิบาย",
+      "purpose": "วัตถุประสงค์",
+      "fund": "กองทุน",
+      "accounts": "ธนาคารและบัญชี",
+      "printVoucher": "พิมพ์ใบสำคัญจ่าย"
+    },
     "delete": "ลบ",
     "search": "ค้นหา",
     "clear": "ล้าง",
@@ -1470,7 +1513,7 @@
       "rejectDone": "Request rejected",
       "lines": "Lines",
       "fund": "Petty cash fund",
-      "approval": "Approval and activity",
+      "approval": "การอนุมัติ",
       "status": "Status",
       "approvedAt": "Approved on",
       "statuses": {
@@ -1493,7 +1536,9 @@
       "disbursementsMessage": "The disbursements are posted against the fund.",
       "wht": "Withholding tax",
       "netAmount": "Net amount",
-      "recordDisbursements": "Record disbursements"
+      "recordDisbursements": "Record disbursements",
+      "approvedBy": "อนุมัติโดย",
+      "activity": "ประวัติการดำเนินการ"
     }
   },
   "employeeBenefit": {
@@ -1610,31 +1655,220 @@
     "back": "กลับ"
   },
   "remittance": {
-    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
+    "list": {
+      "title": "การนำส่งเบี้ยประกัน",
+      "help": "การนำส่งเบี้ยประกันให้บริษัทประกันตั้งแต่ฉบับร่างจนถึงการชำระเงิน ฉบับร่างที่คุณจัดทำจะได้รับอนุมัติจากผู้ใช้อื่นที่มีอำนาจอนุมัติการนำส่ง",
+      "submitSelected": "ส่งขออนุมัติ ({{count}})",
+      "selectDrafts": "เลือกฉบับร่างที่จะส่ง",
+      "import": "นำเข้ารายการกรมธรรม์",
+      "selectAll": "เลือกฉบับร่างทั้งหมดในหน้านี้",
+      "select": "เลือก {{reference}}",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "loadError": "โหลดรายการนำส่งไม่ได้",
+      "total_other": "รวม ({{count}} รายการ)",
+      "policiesHeld": "{{count}} · พัก {{held}}",
+      "overdueOn": "{{date}} · เกินกำหนด",
+      "exceptions_other": "ข้อยกเว้น {{count}} รายการ",
+      "columnChooser": "คอลัมน์",
+      "columnsChosen": "คอลัมน์ (+{{count}})",
+      "strip": {
+        "label": "การรัน",
+        "lastRun": "การรันรายสัปดาห์",
+        "lastFailed": "การรันล่าสุดล้มเหลว",
+        "nextRun": "การรันถัดไป",
+        "schedules": "กำหนดการ"
+      },
+      "segments": {
+        "my-work": "งานของฉัน ({{count}})",
+        "drafts": "ฉบับร่าง ({{count}})",
+        "in-approval": "รออนุมัติ ({{count}})",
+        "in-payment": "อยู่ระหว่างชำระ ({{count}})",
+        "all": "ทั้งหมด"
+      },
+      "kpis": {
+        "to-submit": "รอส่ง",
+        "awaiting-approval": "รออนุมัติ",
+        "approved-not-paid": "อนุมัติแล้ว ยังไม่ชำระ",
+        "overdue": "เกินกำหนดชำระบริษัทประกัน",
+        "oldest_other": "นานสุด {{count}} วัน"
+      },
+      "overflow": {
+        "run-now": "รันทันที…",
+        "run-history": "ประวัติการรัน",
+        "import-history": "ประวัติการนำเข้า",
+        "export": "ส่งออก XLSX"
+      },
+      "actions": {
+        "view": "ดู",
+        "submit": "ส่งขออนุมัติ",
+        "download-schedule-xlsx": "ดาวน์โหลดตารางนำส่ง (XLSX)",
+        "download-schedule-pdf": "ดาวน์โหลดตารางนำส่ง (PDF)",
+        "download-advice": "ดาวน์โหลดใบแจ้งการนำส่ง (PDF)",
+        "open-voucher": "เปิดใบสำคัญจ่าย"
+      },
+      "submit": {
+        "title": "ส่งขออนุมัติ",
+        "message_other": "ส่งการนำส่ง {{count}} รายการ ยอดรวม {{amount}} เพื่อขออนุมัติหรือไม่ ผู้ใช้อื่นที่มีอำนาจอนุมัติการนำส่งจะเป็นผู้อนุมัติ",
+        "verb_other": "ส่ง {{count}} รายการ",
+        "results": "ส่งแล้ว {{submitted}} · ไม่ได้ส่ง {{refused}}",
+        "submitted": "ส่งแล้ว"
+      },
+      "empty": {
+        "myWork": "ไม่มีรายการที่ต้องดำเนินการ",
+        "myWorkNext": "ไม่มีรายการที่ต้องดำเนินการ การรันถัดไป {{next}}",
+        "week": "ไม่มีการนำส่งของ {{week}}",
+        "drafts": "ไม่มีฉบับร่าง",
+        "in-approval": "ไม่มีการนำส่งที่รออนุมัติ",
+        "in-payment": "ไม่มีการนำส่งที่อยู่ระหว่างชำระ",
+        "all": "ไม่มีการนำส่ง"
+      },
+      "filters": {
+        "week": "สัปดาห์ความคุ้มครอง",
+        "allWeeks": "ทุกสัปดาห์",
+        "insurer": "บริษัทประกัน",
+        "allInsurers": "บริษัทประกันทั้งหมด",
+        "productLine": "สายผลิตภัณฑ์",
+        "allLines": "สายผลิตภัณฑ์ทั้งหมด",
+        "status": "สถานะ",
+        "allStatuses": "ทุกสถานะ",
+        "source": "ที่มา",
+        "allSources": "ทุกที่มา",
+        "search": "เลข REM กรมธรรม์ หรือใบเสร็จ"
+      },
+      "productLines": {
+        "Motor": "รถยนต์",
+        "Personal Accident": "อุบัติเหตุส่วนบุคคล",
+        "Credit Life": "ประกันชีวิตสินเชื่อ",
+        "Marine": "ขนส่งทางทะเล"
+      },
+      "statuses": {
+        "draft": "ฉบับร่าง",
+        "rejected": "ส่งคืน",
+        "for-approval": "รออนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "settled": "ชำระบัญชีแล้ว (ออกใบสำคัญจ่าย)",
+        "cancelled": "ยกเลิก"
+      },
+      "sources": {
+        "weekly-run": "การรันรายสัปดาห์",
+        "run-now": "รันทันที",
+        "import": "นำเข้า"
+      },
+      "columns": {
+        "remittanceNo": "เลขที่การนำส่ง",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "basis": "ฐาน",
+        "coverageWeek": "สัปดาห์ความคุ้มครอง",
+        "policies": "กรมธรรม์",
+        "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+        "dueDate": "วันครบกำหนด",
+        "status": "สถานะ",
+        "nextStep": "ขั้นตอนถัดไป",
+        "source": "ที่มา",
+        "voucherNo": "เลขที่ใบสำคัญจ่าย",
+        "paidOn": "วันที่ชำระ",
+        "bankRef": "อ้างอิงธนาคาร",
+        "submittedBy": "ผู้ส่ง",
+        "createdOn": "วันที่สร้าง",
+        "actions": "การดำเนินการ"
+      },
+      "dueOn": "ครบกำหนด {{date}}"
+    },
+    "import": {
+      "title": "นำเข้ารายการกรมธรรม์",
+      "template": "แม่แบบ",
+      "downloadTemplate": "ดาวน์โหลดแม่แบบ",
+      "purpose": "วัตถุประสงค์",
+      "file": "ไฟล์",
+      "fileRule": "เลือกไฟล์ .xlsx หรือ .csv ขนาดไม่เกิน {{mb}} MB",
+      "validate": "ตรวจสอบ",
+      "discard": "ทิ้ง",
+      "create_other": "สร้างการนำส่งฉบับร่าง {{count}} รายการ",
+      "createTitle": "สร้างการนำส่งฉบับร่าง",
+      "createMessage_other": "สร้างการนำส่งฉบับร่าง {{count}} รายการ ยอด {{amount}} จากกรมธรรม์ {{policies}} ฉบับหรือไม่ แถวที่มีข้อผิดพลาดจะไม่ถูกรวม ฉบับร่างยังต้องได้รับอนุมัติ",
+      "createVerb_other": "สร้างฉบับร่าง {{count}} รายการ",
+      "submitDrafts_other": "ส่งฉบับร่าง {{count}} รายการเพื่อขออนุมัติ",
+      "goToDrafts": "ไปที่ฉบับร่าง",
+      "importNo": "เลขที่การนำเข้า",
+      "fileName": "ไฟล์",
+      "status": "สถานะ",
+      "counts": "แถวที่อ่าน",
+      "result": "ผลลัพธ์",
+      "created_other": "สร้างฉบับร่างแล้ว {{count}} รายการ:",
+      "skippedRow": "แถว {{row}} · {{policy}}: {{message}}",
+      "chips": {
+        "rows": "แถว {{count}}",
+        "ready": "พร้อม {{count}}",
+        "errors": "ข้อผิดพลาด {{count}}",
+        "warnings": "คำเตือน {{count}}",
+        "fullyPaid": "การตรวจชำระครบ: ยังไม่เปิดใช้"
+      },
+      "filters": {
+        "all": "ทุกแถว",
+        "ready": "พร้อม",
+        "warnings": "คำเตือน",
+        "errors": "ข้อผิดพลาด"
+      },
+      "rows": {
+        "row": "แถว",
+        "policyNo": "เลขที่กรมธรรม์",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "result": "ผล",
+        "message": "ข้อความ",
+        "systemDue": "ยอดค้างชำระบริษัทประกัน (ระบบ)",
+        "expectedDue": "ยอดที่คาด (ไฟล์)",
+        "variance": "ผลต่าง"
+      },
+      "toCreate": {
+        "title": "การนำส่งที่จะสร้าง",
+        "total": "รวม",
+        "empty": "ไม่มีการนำส่งที่จะสร้าง",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "basis": "ฐาน",
+        "policies": "กรมธรรม์",
+        "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+        "varianceRows": "แถวที่มีผลต่าง"
+      },
+      "fileRequired": "เลือกไฟล์ที่จะนำเข้า"
+    },
+    "importHistory": {
+      "title": "ประวัติการนำเข้า",
+      "loadError": "โหลดรายการนำเข้าไม่ได้",
+      "empty": "ยังไม่มีการนำเข้ารายการกรมธรรม์",
+      "importNo": "เลขที่ IMP",
+      "uploadedOn": "วันที่อัปโหลด",
+      "by": "โดย",
+      "file": "ไฟล์",
+      "purpose": "วัตถุประสงค์",
+      "rows": "แถว",
+      "ready": "พร้อม",
+      "errors": "ข้อผิดพลาด",
+      "drafts": "ฉบับร่างที่สร้าง",
+      "status": "สถานะ",
+      "actionsColumn": "การดำเนินการ",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "downloadFile": "ดาวน์โหลด {{name}}",
+      "actions": {
+        "view": "ดูผลลัพธ์",
+        "errors": "ดาวน์โหลดรายงานข้อผิดพลาด",
+        "file": "ดาวน์โหลดไฟล์"
+      },
+      "filePurpose": "ไฟล์และวัตถุประสงค์"
+    },
     "addExceptionType": "เพิ่มประเภทข้อยกเว้น",
     "addRule": "เพิ่มกฎ",
     "addTemplate": "เพิ่มเทมเพลต",
-    "addStage": "เพิ่มขั้นตอน",
     "addMapping": "เพิ่มการแมป",
     "addType": "เพิ่มประเภท",
-    "addInsurer": "เพิ่มบริษัทประกัน",
-    "addWidget": "เพิ่มวิดเจ็ต",
-    "addKPI": "เพิ่ม KPI",
-    "saveWidget": "บันทึกวิดเจ็ต",
-    "saveKPI": "บันทึก KPI",
-    "saveTemplate": "บันทึกเทมเพลต",
-    "saveConfiguration": "บันทึกการกำหนดค่า",
-    "generateBill": "สร้างใบแจ้งหนี้",
-    "sendReminders": "ส่งการแจ้งเตือน",
     "autoMap": "แมปอัตโนมัติ",
     "selectFileType": "เลือกประเภทไฟล์",
     "selectDelimiter": "เลือกตัวคั่น",
     "selectDateFormat": "เลือกรูปแบบวันที่",
     "selectMainAccount": "เลือกบัญชีหลัก",
     "selectBranchDepartment": "เลือกสาขา/แผนก",
-    "placeholderWorkflowCode": "WFL-0001",
-    "selectTransactionTypes": "เลือกประเภทธุรกรรม",
-    "selectRole": "เลือกบทบาท",
     "placeholderSmtp": "smtp.company.com",
     "placeholderPort": "587",
     "placeholderEmail": "noreply@company.com",
@@ -1649,52 +1883,878 @@
     "placeholderApiKey": "API Key ของคุณ",
     "placeholderRemit": "REMIT",
     "placeholderCountryCode": "+1",
-    "testSmsConfiguration": "ทดสอบการกำหนดค่า SMS",
     "placeholderTemplateMessage": "เรียน {{ClientName}} การชำระเงินสำหรับกรมธรรม์ {{PolicyNumber}} ครบกำหนด...",
     "placeholderStm": "STM-{000}",
     "enterTemplateName": "ใส่ชื่อเทมเพลต",
-    "selectStatementType": "เลือกประเภทใบแจ้งยอด",
     "enterHeaderText": "ใส่ข้อความหัวสำหรับใบแจ้งยอด",
     "enterTermsAndConditions": "ใส่ข้อความข้อกำหนดและเงื่อนไข",
-    "placeholderDbl": "DBL-{000}",
     "placeholderStp": "STP-{000}",
     "enterParameterName": "ใส่ชื่อพารามิเตอร์",
     "selectSettlementType": "เลือกประเภทการชำระ",
     "selectPayableAccount": "เลือกบัญชีเจ้าหนี้",
-    "selectClearingAccount": "เลือกบัญชีเคลียร์",
     "selectCommissionAccount": "เลือกบัญชีคอมมิชชัน",
     "selectTaxAccount": "เลือกบัญชีภาษี",
-    "selectType": "เลือกประเภท",
-    "selectBank": "เลือกธนาคาร",
-    "selectFormat": "เลือกรูปแบบ",
-    "selectAuthType": "เลือกประเภทการยืนยัน",
-    "enterIpAddresses": "ใส่ที่อยู่ IP",
-    "selectFrequency": "เลือกความถี่",
-    "selectRule": "เลือกกฎ",
-    "selectCalendar": "เลือกปฏิทิน",
-    "emailAddressesCommas": "ที่อยู่อีเมลคั่นด้วยเครื่องหมายจุลภาค",
-    "importWidgets": "นำเข้าวิดเจ็ต",
-    "importKpis": "นำเข้า KPI",
-    "scheduleReport": "กำหนดเวลารายงาน",
-    "testConfiguration": "ทดสอบการกำหนดค่า",
-    "resetToDefaults": "รีเซ็ตเป็นค่าเริ่มต้น",
-    "exportConfiguration": "ส่งออกการกำหนดค่า",
-    "testArchiveConfiguration": "ทดสอบการกำหนดค่าสำหรับเก็บถาวร",
-    "viewArchiveStorage": "ดูพื้นที่เก็บถาวร",
-    "uploadFile": "อัปโหลดไฟล์",
-    "validate": "ตรวจสอบ",
-    "process": "ประมวลผล",
-    "complete": "เสร็จสิ้น",
-    "validationResults": "ผลการตรวจสอบ",
-    "processingRecords": "รายการที่กำลังประมวลผล",
-    "processingComplete": "ประมวลผลเสร็จสิ้น",
-    "successfullyProcessed": "ประมวลผลสำเร็จ",
-    "failedRecords": "รายการล้มเหลว",
-    "totalRecords": "รายการทั้งหมด",
-    "downloadReport": "ดาวน์โหลดรายงาน",
-    "processAnotherFile": "ประมวลผลไฟล์อื่น",
-    "back": "กลับ",
-    "startProcessing": "เริ่มประมวลผล"
+    "approvals": {},
+    "common": {
+      "accounts": "บัญชี",
+      "remittance": "การนำส่งเบี้ยประกัน",
+      "cancel": "ยกเลิก",
+      "close": "ปิด",
+      "moreActions": "การดำเนินการเพิ่มเติม",
+      "tryAgain": "ลองอีกครั้ง",
+      "viewOnly": "ดูได้อย่างเดียว"
+    },
+    "landing": {
+      "loading": "กำลังเปิดงานนำส่งเบี้ยประกันของคุณ",
+      "loadError": "เปิดหน้าการนำส่งเบี้ยประกันไม่ได้"
+    },
+    "setup": {
+      "title": "การตั้งค่า",
+      "help": "ข้อมูลที่รอบการนำส่งใช้: กำหนดการของการรัน",
+      "tabs": {
+        "schedules": "กำหนดการ"
+      }
+    },
+    "automation": {
+      "name": "ระบบอัตโนมัติ",
+      "on": "เปิด",
+      "off": "ปิด",
+      "checkedDaily": "ตรวจทุกวันเวลา {{time}} ({{zone}})",
+      "lastCheck": "ตรวจล่าสุด {{at}} {{status}}",
+      "turnOn": "เปิดใช้งาน",
+      "turnOnTitle": "เปิดงานนำส่งเบี้ยประกันรายวันหรือไม่",
+      "cron": "Cron",
+      "job": "งาน"
+    },
+    "schedules": {
+      "new": "กำหนดการใหม่",
+      "empty": "ยังไม่มีกำหนดการ สร้างกำหนดการนำส่งรายสัปดาห์",
+      "loadError": "โหลดกำหนดการไม่ได้",
+      "actionsFor": "การดำเนินการของ {{code}}",
+      "allActive": "ทุกบริษัทที่ใช้งาน ({{count}})",
+      "cutOff_other": "ตัดยอด {{count}} วัน",
+      "lastCounts": "สร้าง {{created}} · พัก {{held}} · ข้อยกเว้น {{exceptions}}",
+      "lastFailed": "ไม่สำเร็จ: {{message}}",
+      "msgRmt007": "ช่วงชำระ \"วันจันทร์ถึงวันศุกร์ก่อนหน้า\" ต้องใช้กำหนดการรายสัปดาห์ เลือกรายสัปดาห์ หรือช่วง \"ตัดยอดตามจำนวนวัน\"",
+      "pauseTitle": "หยุด {{code}} ชั่วคราวหรือไม่",
+      "pauseMessage": "จะไม่มีการสร้างการนำส่งจนกว่าจะเริ่มใหม่",
+      "pauseVerb": "หยุดกำหนดการ",
+      "resumeTitle": "เริ่ม {{code}} ใหม่หรือไม่",
+      "resumeMessage": "กำหนดการจะรันอีกครั้งตั้งแต่วันรันถัดไป",
+      "resumeVerb": "เริ่มกำหนดการใหม่",
+      "viewTitle": "กำหนดการ {{code}}",
+      "details": "รายละเอียด",
+      "latestRuns": "การรันล่าสุด",
+      "runHistory": "ประวัติการรัน",
+      "activity": "กิจกรรม",
+      "columns": {
+        "code": "รหัส",
+        "name": "ชื่อ",
+        "kind": "ประเภท",
+        "covers": "ครอบคลุม",
+        "groupBy": "จัดกลุ่มตาม",
+        "window": "ช่วงเวลา",
+        "runs": "รันเมื่อ",
+        "nextRun": "รันถัดไป",
+        "lastRun": "รันล่าสุด",
+        "lastResult": "ผลล่าสุด",
+        "status": "สถานะ",
+        "actions": "การดำเนินการ",
+        "frequency": "ความถี่",
+        "timeZone": "เขตเวลา",
+        "schedule": "กำหนดการ"
+      },
+      "actions": {
+        "view": "ดู",
+        "edit": "แก้ไข",
+        "preview": "ดูตัวอย่างการรัน",
+        "run-now": "รันทันที…",
+        "pause": "หยุดชั่วคราว",
+        "resume": "เริ่มใหม่"
+      },
+      "statuses": {
+        "Active": "ใช้งาน",
+        "Paused": "หยุดชั่วคราว"
+      },
+      "kinds": {
+        "Remittance run": "รันการนำส่ง",
+        "Billing run": "รันการวางบิล",
+        "Hold check": "ตรวจรายการพัก"
+      },
+      "frequencies": {
+        "Weekly": "รายสัปดาห์",
+        "Monthly": "รายเดือน",
+        "Daily": "รายวัน"
+      },
+      "windows": {
+        "Previous Monday to Friday": "วันจันทร์ถึงวันศุกร์ก่อนหน้า",
+        "Cut-off days": "ตัดยอดตามจำนวนวัน"
+      },
+      "groupByOptions": {
+        "Insurer": "บริษัทประกัน",
+        "Insurer and product line": "บริษัทประกันและสายผลิตภัณฑ์"
+      },
+      "form": {
+        "newTitle": "กำหนดการใหม่",
+        "editTitle": "แก้ไข {{code}}",
+        "name": "ชื่อ",
+        "kind": "ประเภท",
+        "insurers": "บริษัทประกัน",
+        "allInsurers": "บริษัทประกันที่ใช้งานทั้งหมด",
+        "chooseInsurers": "เลือกบริษัทประกัน",
+        "frequency": "ความถี่",
+        "nextRun": "รันถัดไป",
+        "runTime": "เวลารัน",
+        "paymentWindow": "ช่วงชำระ",
+        "cutOffDays": "จำนวนวันตัดยอดก่อนวันรัน",
+        "groupBy": "จัดกลุ่มการนำส่งตาม",
+        "save": "บันทึกกำหนดการ",
+        "create": "สร้างกำหนดการ",
+        "required": "กรอกชื่อ",
+        "monday": "วันรันถัดไปของกำหนดการรายสัปดาห์ต้องเป็นวันจันทร์"
+      },
+      "nextRunAt": "ครั้งถัดไป {{at}}"
+    },
+    "runHistory": {
+      "title": "ประวัติการรัน · {{code}}",
+      "empty": "ยังไม่มีการรัน",
+      "loadError": "โหลดประวัติการรันไม่ได้",
+      "started": "เริ่ม",
+      "trigger": "ผู้สั่งรัน",
+      "reason": "เหตุผล",
+      "window": "ช่วงเวลา",
+      "scanned": "ตรวจแล้ว",
+      "ready": "พร้อม",
+      "held": "พัก",
+      "exceptions": "ข้อยกเว้น",
+      "created": "สร้างแล้ว",
+      "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+      "result": "ผล",
+      "message": "ข้อความ"
+    },
+    "flags": {
+      "offCycle": "นอกรอบ",
+      "offCycleReason": "นอกรอบ · {{reason}}",
+      "overdue": "เกินกำหนด"
+    },
+    "decision": {
+      "approve": "อนุมัติ",
+      "reject": "ปฏิเสธ",
+      "approveTitle": "อนุมัติการนำส่งเบี้ย",
+      "approveMessage": "อนุมัติ {{reference}} จำนวน {{amount}} หรือไม่ การชำระบัญชีและการจ่ายเงินดำเนินการต่อในการจ่ายเงิน",
+      "approveVerb": "อนุมัติ",
+      "approved": "อนุมัติการนำส่งเบี้ยแล้ว การชำระบัญชีและการจ่ายเงินดำเนินการต่อในการจ่ายเงิน",
+      "rejectTitle": "ปฏิเสธ {{reference}}",
+      "rejectNote": "{{reference}} · {{amount}} ส่งกลับไปยัง {{maker}}",
+      "rejectVerb": "ปฏิเสธและส่งกลับผู้จัดทำ",
+      "rejected": "ส่งการนำส่งเบี้ยกลับไปยังผู้จัดทำแล้ว",
+      "theMaker": "ผู้จัดทำ",
+      "reference": "เลขที่อ้างอิง",
+      "amount": "จำนวนเงิน",
+      "reason": "เหตุผล"
+    },
+    "inbox": {
+      "title": "การอนุมัติ",
+      "help": "รายการนำส่งเบี้ยที่รอการตัดสินใจ คุณตัดสินใจได้เฉพาะรายการที่คุณไม่ได้จัดทำหรือส่ง และอยู่ในวงเงินอนุมัติของคุณ",
+      "approveSelected": "อนุมัติที่เลือก ({{count}})",
+      "export": "ส่งออก XLSX",
+      "exportFailed": "ส่งออกไม่สำเร็จ",
+      "cover": "ผู้ปฏิบัติแทนช่วงไม่อยู่",
+      "authority": {
+        "label": "อำนาจอนุมัติ",
+        "upTo": "การนำส่งเบี้ยไม่เกิน {{amount}}",
+        "unlimited": "การนำส่งเบี้ย: ไม่จำกัดวงเงิน",
+        "covering": "ปฏิบัติแทน {{name}} ถึง {{date}}",
+        "none": "ไม่มีอำนาจอนุมัติการนำส่งเบี้ย"
+      },
+      "kpis": {
+        "mine": "รอการตัดสินใจของฉัน",
+        "pastSla": "เกิน SLA",
+        "oldest": "นานสุด {{hours}} ชม.",
+        "submitted": "ที่ฉันส่ง",
+        "awaitingOthers": "รอผู้อื่น",
+        "decidedToday": "ที่ฉันตัดสินใจวันนี้",
+        "approvedRejected": "อนุมัติ {{approved}} / ปฏิเสธ {{rejected}}"
+      },
+      "segments": {
+        "mine": "รอการตัดสินใจของฉัน ({{count}})",
+        "submitted": "ที่ฉันส่ง ({{count}})",
+        "all": "รออนุมัติทั้งหมด",
+        "decided": "ตัดสินใจแล้ว"
+      },
+      "filters": {
+        "type": "ประเภท",
+        "insurer": "บริษัทประกัน",
+        "search": "ค้นหาเลขอ้างอิง"
+      },
+      "allTypes": "ทุกประเภท",
+      "allInsurers": "ทุกบริษัทประกัน",
+      "types": {
+        "remittance": "การนำส่งเบี้ย",
+        "settlement": "การชำระบัญชี"
+      },
+      "columns": {
+        "reference": "เลขอ้างอิง",
+        "type": "ประเภท",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "amount": "จำนวนเงิน",
+        "submittedBy": "ส่งโดย",
+        "submittedOn": "ส่งเมื่อ",
+        "sla": "SLA",
+        "level": "ระดับ",
+        "canDecide": "ฉันตัดสินใจได้หรือไม่",
+        "nextStep": "ขั้นตอนถัดไป",
+        "decision": "การตัดสินใจ",
+        "by": "โดย",
+        "reason": "เหตุผล",
+        "limitAtDecision": "วงเงิน ณ วันตัดสินใจ",
+        "decidedOn": "ตัดสินใจเมื่อ",
+        "actions": "การดำเนินการ",
+        "submitted": "ส่งอนุมัติ",
+        "submittedSla": "ส่งอนุมัติ · SLA"
+      },
+      "outcomes": {
+        "Approved": "อนุมัติแล้ว",
+        "Rejected": "ส่งกลับแล้ว"
+      },
+      "yes": "ได้",
+      "no": "ไม่ได้ · {{reason}}",
+      "short": {
+        "SUBMITTER": "คุณเป็นผู้ส่ง",
+        "MAKER": "คุณเป็นผู้จัดทำ",
+        "EARLIER_LEVEL": "คุณอนุมัติระดับก่อนหน้าแล้ว",
+        "ABOVE_LIMIT": "เกินวงเงินของคุณ ({{limit}})",
+        "NO_AUTHORITY": "ไม่มีอำนาจอนุมัติ",
+        "NO_PERMISSION": "ดูได้อย่างเดียว",
+        "DELEGATED_AWAY": "มอบหมายให้ผู้อนุมัติอื่น",
+        "ALREADY_DECIDED": "ตัดสินใจแล้ว"
+      },
+      "actions": {
+        "view": "ดู",
+        "remind": "เตือนผู้อนุมัติ"
+      },
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "openReview": "ตรวจสอบ {{reference}}",
+      "selectable": "คุณอนุมัติได้ {{count}} จาก {{total}} แถว",
+      "bulkTitle": "อนุมัติ {{count}} รายการ",
+      "bulkMessage": "อนุมัติ {{count}} รายการ จำนวน {{amount}} หรือไม่ การชำระบัญชีและการจ่ายเงินดำเนินการต่อในการจ่ายเงิน",
+      "bulkVerb": "อนุมัติ {{count}} รายการ",
+      "results": "อนุมัติ {{approved}} · ไม่อนุมัติ {{refused}}",
+      "resultApproved": "อนุมัติแล้ว",
+      "reminded": "ส่งการเตือนแล้ว",
+      "remindFailed": "ส่งการเตือนไม่สำเร็จ",
+      "empty": {
+        "mine": "ไม่มีรายการรอการตัดสินใจของคุณ",
+        "submitted": "คุณไม่มีรายการที่รออนุมัติ",
+        "all": "ไม่มีรายการรออนุมัติ",
+        "decided": "ไม่มีการตัดสินใจในช่วง 30 วันที่ผ่านมา"
+      },
+      "loadError": "โหลดรายการอนุมัติไม่สำเร็จ",
+      "total_one": "รวม ({{count}} รายการ)",
+      "total_other": "รวม ({{count}} รายการ)"
+    },
+    "review": {
+      "title": "ตรวจสอบการอนุมัติ",
+      "facts": "การนำส่งเบี้ย",
+      "insurer": "บริษัทประกัน",
+      "productLine": "สายผลิตภัณฑ์",
+      "period": "งวด",
+      "source": "ที่มา",
+      "policies": "กรมธรรม์",
+      "premium": "เบี้ยรวม",
+      "commission": "ค่าคอมมิชชัน",
+      "tax": "ภาษี",
+      "dueToInsurer": "ยอดค้างจ่ายบริษัทประกัน",
+      "dueDate": "วันครบกำหนด",
+      "previous": "การนำส่งเบี้ยครั้งก่อน",
+      "noPrevious": "ไม่มีการนำส่งเบี้ยครั้งก่อนของบริษัทประกันนี้",
+      "checks": "การตรวจสอบเมื่อส่ง",
+      "checkResult": {
+        "pass": "ผ่าน",
+        "fail": "ไม่ผ่าน",
+        "info": "ข้อมูล"
+      },
+      "lines": "รายการ ({{shown}} จาก {{count}})",
+      "openFull": "เปิดการนำส่งเบี้ยฉบับเต็ม",
+      "policyNo": "เลขกรมธรรม์",
+      "client": "ลูกค้า",
+      "exceptions": "ข้อยกเว้น",
+      "noExceptions": "ไม่มีข้อยกเว้นที่เปิดอยู่",
+      "activity": "กิจกรรม",
+      "showActivity": "แสดงกิจกรรม",
+      "hideActivity": "ซ่อนกิจกรรม",
+      "noActivity": "ยังไม่มีความเคลื่อนไหว",
+      "activityCount_one": "1 รายการ · ล่าสุด {{at}}",
+      "activityCount_other": "{{count}} รายการ · ล่าสุด {{at}}",
+      "type": "ประเภท",
+      "amount": "จำนวนเงิน",
+      "description": "รายละเอียด"
+    },
+    "record": {
+      "title": "การนำส่งเบี้ย",
+      "remittances": "การนำส่งเบี้ย",
+      "back": "กลับไปที่การนำส่งเบี้ย",
+      "system": "ระบบ",
+      "states": {
+        "notFound": "ไม่พบการนำส่งเบี้ย",
+        "forbidden": "คุณไม่มีสิทธิ์เข้าถึงการนำส่งเบี้ย",
+        "error": "โหลดการนำส่งเบี้ยไม่สำเร็จ"
+      },
+      "steps": {
+        "created": "สร้าง",
+        "submitted": "ส่งแล้ว",
+        "approved": "อนุมัติแล้ว",
+        "returned": "ส่งกลับแล้ว",
+        "voucher": "ออกใบสำคัญจ่ายแล้ว",
+        "paid": "จ่ายแล้ว"
+      },
+      "sod": {
+        "prepared": "จัดทำ {{name}}",
+        "submitted": "ส่ง {{name}}",
+        "approved": "อนุมัติ {{name}}",
+        "returned": "ส่งกลับโดย {{name}}",
+        "voucher": "ใบสำคัญจ่าย {{number}}"
+      },
+      "basis": "เกณฑ์ {{basis}}",
+      "coverage": "ช่วงคุ้มครอง {{from}}–{{to}}",
+      "due": "ครบกำหนด {{date}}",
+      "source": "ที่มา {{source}}",
+      "checks": "การตรวจสอบ {{passed}}/{{total}}",
+      "banner": {
+        "decide": "รอการตัดสินใจของคุณ · วงเงินของคุณ {{limit}} · รายการนี้ {{amount}}",
+        "noLimit": "ไม่จำกัดวงเงิน",
+        "returned": "ส่งกลับโดย {{name}} เมื่อ {{at}}",
+        "paid": "จ่ายเมื่อ {{at}}",
+        "next": "ขั้นตอนถัดไป: {{step}}"
+      },
+      "stale": "{{message}} โหลดใหม่เพื่อดูฉบับปัจจุบัน",
+      "reload": "โหลดใหม่",
+      "submit": "ส่งเพื่ออนุมัติ",
+      "submitTitle": "ส่ง {{reference}} เพื่ออนุมัติ",
+      "submitMessage": "ส่ง {{reference}} จำนวน {{amount}} หรือไม่ รายการจะส่งไปยังผู้อนุมัติการนำส่งเบี้ย",
+      "submitted": "ส่งเพื่ออนุมัติแล้ว",
+      "submitFailed": "ส่งไม่สำเร็จ",
+      "downloadFailed": "ดาวน์โหลดไม่สำเร็จ",
+      "actions": {
+        "download-schedule-xlsx": "ดาวน์โหลดตารางนำส่ง (XLSX)",
+        "download-schedule-pdf": "ดาวน์โหลดตารางนำส่ง (PDF)",
+        "download-advice": "ดาวน์โหลดใบแจ้งการนำส่ง (PDF)",
+        "open-voucher": "เปิดใบสำคัญจ่าย"
+      },
+      "totals": {
+        "policies": "กรมธรรม์",
+        "premium": "เบี้ยรวม",
+        "commission": "ค่าคอมมิชชัน",
+        "tax": "ภาษี",
+        "adjustments": "รายการปรับปรุง",
+        "due": "ยอดค้างจ่ายบริษัทประกัน",
+        "voucher": "จำนวนเงินตามใบสำคัญจ่าย",
+        "paidOn": "จ่ายเมื่อ"
+      },
+      "tabs": {
+        "lines": "รายการ ({{count}})",
+        "payment": "การจ่ายเงิน",
+        "documents": "เอกสาร",
+        "activity": "กิจกรรม"
+      },
+      "lines": {
+        "policyNo": "เลขกรมธรรม์",
+        "client": "ลูกค้า",
+        "product": "ผลิตภัณฑ์",
+        "effective": "วันที่มีผล",
+        "premium": "เบี้ยรวม",
+        "commission": "ค่าคอมมิชชัน",
+        "tax": "ภาษี",
+        "due": "ยอดค้างจ่ายบริษัทประกัน",
+        "expected": "ยอดที่คาดไว้",
+        "variance": "ผลต่าง",
+        "status": "สถานะ",
+        "statuses": {
+          "active": "รวมอยู่",
+          "settled": "นำส่งแล้ว"
+        },
+        "total": "รวม",
+        "empty": "ไม่มีรายการ",
+        "actions": "การดำเนินการ",
+        "actionsFor": "การดำเนินการของ {{policy}}",
+        "viewPolicy": "ดูกรมธรรม์",
+        "policyClient": "กรมธรรม์และลูกค้า",
+        "productEffective": "ผลิตภัณฑ์และวันที่มีผล"
+      },
+      "payment": {
+        "none": "ยังไม่มีใบสำคัญจ่าย จะออกเมื่อรวมการนำส่งเบี้ยไว้ในการชำระบัญชี",
+        "voucher": "ใบสำคัญจ่าย",
+        "voucherNo": "เลขที่ใบสำคัญจ่าย",
+        "voucherStatus": "สถานะ",
+        "amount": "จำนวนเงิน",
+        "settlement": "การชำระบัญชี",
+        "payment": "การจ่ายเงิน",
+        "method": "วิธีการ",
+        "valueDate": "วันที่มีผล",
+        "bankReference": "เลขอ้างอิงธนาคาร",
+        "paidOn": "จ่ายเมื่อ"
+      },
+      "documents": {
+        "schedule-xlsx": "ตารางนำส่งเบี้ย (XLSX)",
+        "schedule-pdf": "ตารางนำส่งเบี้ย (PDF)",
+        "advice": "ใบแจ้งการนำส่งเบี้ย (PDF)",
+        "download": "ดาวน์โหลด",
+        "downloadOf": "ดาวน์โหลด {{name}}",
+        "none": "ไม่มีเอกสาร"
+      },
+      "activity": {
+        "summary": "สรุปการอนุมัติ",
+        "authority": "อำนาจอนุมัติ",
+        "level": "ระดับ",
+        "content": "เนื้อหา",
+        "unchanged": "ไม่เปลี่ยนแปลงตั้งแต่ส่งอนุมัติ",
+        "changed": "เปลี่ยนแปลงหลังส่งอนุมัติ",
+        "decision": "การตัดสินใจ",
+        "decisions": {
+          "Pending": "รออนุมัติ",
+          "Approved": "อนุมัติแล้ว",
+          "Rejected": "ส่งกลับแล้ว"
+        },
+        "decidedBy": "ตัดสินใจโดย",
+        "decidedOn": "ตัดสินใจเมื่อ",
+        "limit": "วงเงิน ณ วันตัดสินใจ",
+        "limitSource": "ที่มาของวงเงิน",
+        "reason": "เหตุผล",
+        "log": "บันทึกกิจกรรม",
+        "download": "ดาวน์โหลดบันทึก (XLSX)"
+      }
+    },
+    "payments": {
+      "title": "การจ่ายเงินบริษัทประกัน",
+      "help": "ใบสำคัญจ่ายของรายการนำส่งที่อนุมัติแล้ว พร้อมชุดการจ่ายหรือเช็คและผลจากธนาคาร ชุดการจ่ายอนุมัติและปล่อยที่ไฟล์จ่ายเงินธนาคาร ส่วนเช็คที่การจ่ายเงิน",
+      "createBatch_one": "สร้างชุดจ่าย Metrobank ({{count}})",
+      "createBatch_other": "สร้างชุดจ่าย Metrobank ({{count}})",
+      "createBatchPlain": "สร้างชุดจ่าย Metrobank",
+      "selectToBatch": "เลือกรายการที่จะรวมเป็นชุด",
+      "noLayoutChip": "ไม่มีรูปแบบไฟล์ Metrobank",
+      "layoutSetup": "เปิดการตั้งค่ารูปแบบไฟล์",
+      "batchDialog": "สร้างชุดจ่าย Metrobank",
+      "batchCreated": "สร้างชุดการจ่าย {{batch}} แล้ว กรุณาส่งอนุมัติที่ไฟล์จ่ายเงินธนาคาร",
+      "openBatch": "เปิดชุดการจ่าย",
+      "selectAll": "เลือกทุกรายการที่รวมเป็นชุดได้",
+      "select": "เลือก {{voucher}}",
+      "actionsFor": "การดำเนินการของ {{voucher}}",
+      "total_one": "{{count}} รายการ",
+      "total_other": "{{count}} รายการ",
+      "loadError": "ไม่สามารถโหลดรายการจ่ายได้",
+      "kpis": {
+        "toPay": "รอจ่าย",
+        "inPayment": "อยู่ระหว่างจ่าย",
+        "paidThisWeek": "จ่ายแล้วสัปดาห์นี้",
+        "failed": "จ่ายไม่สำเร็จ"
+      },
+      "segments": {
+        "to-pay": "รอจ่าย ({{count}})",
+        "in-payment": "อยู่ระหว่างจ่าย ({{count}})",
+        "paid": "จ่ายแล้ว ({{count}})",
+        "failed": "จ่ายไม่สำเร็จ ({{count}})",
+        "all": "ทั้งหมด ({{count}})",
+        "legacy": "การโอนเดิม ({{count}})"
+      },
+      "overflow": {
+        "export": "ส่งออก XLSX",
+        "bankPaymentFiles": "ไฟล์จ่ายเงินธนาคาร"
+      },
+      "filters": {
+        "insurer": "บริษัทประกัน",
+        "allInsurers": "บริษัทประกันทั้งหมด",
+        "from": "วันที่มีผลตั้งแต่",
+        "to": "วันที่มีผลถึง",
+        "method": "วิธีจ่าย",
+        "allMethods": "ทุกวิธีจ่าย",
+        "search": "ค้นหา PV, REM หรือเลขอ้างอิงธนาคาร",
+        "searchLegacy": "ค้นหา TRF หรือผู้รับเงิน"
+      },
+      "methods": {
+        "fund-transfer": "โอนเงิน",
+        "cheque": "เช็ค"
+      },
+      "columns": {
+        "voucherNo": "เลขที่ใบสำคัญ",
+        "remittance": "รายการนำส่ง",
+        "insurer": "บริษัทประกัน",
+        "amount": "จำนวนเงิน",
+        "payeeAccount": "บัญชีผู้รับเงิน",
+        "method": "วิธีจ่าย",
+        "batch": "ชุดการจ่าย",
+        "batchStatus": "สถานะชุดการจ่าย",
+        "valueDate": "วันที่มีผล",
+        "bankRef": "อ้างอิงธนาคาร",
+        "paidOn": "วันที่จ่าย",
+        "nextStep": "ขั้นตอนถัดไป",
+        "actions": "การดำเนินการ",
+        "insurerPayee": "บริษัทประกันและบัญชีผู้รับเงิน"
+      },
+      "actions": {
+        "view": "ดูการจ่าย",
+        "view-transfer": "ดู",
+        "open-remittance": "เปิดรายการนำส่ง",
+        "open-batch": "เปิดชุดการจ่าย",
+        "pay-by-cheque": "จ่ายด้วยเช็ค",
+        "rebatch": "รวมชุดใหม่",
+        "add-account": "เพิ่มบัญชีธนาคาร",
+        "download-advice": "ดาวน์โหลดใบแจ้งการนำส่ง (PDF)"
+      },
+      "empty": {
+        "to-pay": "ไม่มีรายการนำส่งที่อนุมัติแล้วรอการจ่าย",
+        "in-payment": "ไม่มีรายการที่อยู่ในชุดการจ่ายหรือเช็ค",
+        "paid": "ยังไม่มีรายการที่จ่ายแล้ว",
+        "failed": "ไม่มีรายการที่จ่ายไม่สำเร็จ",
+        "all": "ไม่มีการจ่ายที่ตรงกับตัวกรอง",
+        "legacy": "ไม่มีการโอนเดิม"
+      },
+      "panel": {
+        "title": "การจ่าย",
+        "payee": "ผู้รับเงิน",
+        "insurer": "บริษัทประกัน",
+        "bank": "ธนาคาร",
+        "accountName": "ชื่อบัญชี",
+        "accountNo": "เลขที่บัญชี",
+        "showFull": "แสดงเลขเต็ม",
+        "verification": "การตรวจสอบบัญชี",
+        "payment": "การจ่าย",
+        "method": "วิธีจ่าย",
+        "amount": "จำนวนเงิน",
+        "valueDate": "วันที่มีผล",
+        "debitAccount": "บัญชีที่ตัดจ่าย",
+        "bankReference": "อ้างอิงธนาคาร",
+        "paidOn": "วันที่จ่าย",
+        "failureReason": "เหตุผลที่จ่ายไม่สำเร็จ",
+        "amounts": "จำนวนเงิน",
+        "dueToInsurer": "ยอดค้างจ่ายบริษัทประกัน",
+        "refundCredits": "เครดิตเงินคืนที่หักกลบ",
+        "voucherAmount": "ยอดใบสำคัญจ่าย",
+        "bankAmount": "ยอดตามธนาคาร",
+        "check": "ตรวจสอบยอดเงิน",
+        "links": "เอกสารที่เกี่ยวข้อง",
+        "remittance": "รายการนำส่ง",
+        "schedule": "ตารางนำส่ง",
+        "scheduleOf": "ตารางนำส่ง {{reference}} (XLSX)",
+        "voucher": "ใบสำคัญจ่าย",
+        "batch": "ชุดการจ่าย",
+        "bankFile": "ไฟล์ธนาคาร",
+        "statusFile": "ไฟล์สถานะ",
+        "cheque": "เช็ค",
+        "journal": "สมุดรายวัน",
+        "approvals": "การอนุมัติ",
+        "remittanceApproved": "อนุมัติรายการนำส่ง",
+        "limitAt": "วงเงิน {{limit}} · {{source}}",
+        "voucherMaker": "ผู้จัดทำใบสำคัญ",
+        "batchCreated": "ผู้สร้างชุดการจ่าย",
+        "batchApproved": "ผู้อนุมัติชุดการจ่าย",
+        "fileGenerated": "ผู้สร้างไฟล์",
+        "resultImported": "ผู้นำเข้าผลการจ่าย",
+        "activity": "ประวัติการดำเนินการ",
+        "openRemittance": "เปิดรายการนำส่ง",
+        "openBatch": "เปิดชุดการจ่าย",
+        "checkResult": {
+          "pass": "ตรงกัน",
+          "difference": "มีผลต่าง"
+        }
+      },
+      "legacy": {
+        "title": "การโอนเดิม",
+        "creationDisabled": "ปิดการสร้างรายการ",
+        "transfer": "การโอน",
+        "beneficiary": "ผู้รับเงิน",
+        "bank": "ธนาคาร",
+        "account": "บัญชี",
+        "method": "วิธีโอน",
+        "amount": "จำนวนเงิน",
+        "date": "วันที่",
+        "remittanceNo": "รายการนำส่ง",
+        "bankReference": "อ้างอิงธนาคาร",
+        "purpose": "วัตถุประสงค์",
+        "failureReason": "เหตุผลที่โอนไม่สำเร็จ",
+        "approval": "การอนุมัติ",
+        "createdBy": "ผู้สร้าง",
+        "approvedBy": "ผู้อนุมัติ",
+        "decisions": "ผลการพิจารณา",
+        "journal": "สมุดรายวัน",
+        "journalPosted": "บันทึกบัญชีเมื่ออนุมัติ",
+        "reversal": "การกลับรายการ",
+        "columns": {
+          "reference": "เลขที่ TRF",
+          "beneficiary": "ผู้รับเงิน",
+          "bank": "ธนาคาร",
+          "account": "บัญชี",
+          "method": "วิธีโอน",
+          "amount": "จำนวนเงิน",
+          "status": "สถานะ",
+          "approvedBy": "ผู้อนุมัติ",
+          "journal": "สมุดรายวัน (JV)",
+          "reversal": "การกลับรายการ"
+        },
+        "notPosted": "ไม่ได้บันทึกบัญชีเมื่ออนุมัติ",
+        "notApproved": "ยังไม่อนุมัติ"
+      }
+    },
+    "exceptions": {
+      "title": "รายการผิดปกติ",
+      "help": "ความแตกต่างและปัญหาของการนำส่งที่ต้องติดตาม: เริ่มดำเนินการ ส่งต่อพร้อมเหตุผล หรือปิดรายการ",
+      "panel": "รายการผิดปกติ",
+      "details": "รายละเอียด",
+      "export": "ส่งออก CSV",
+      "loadError": "ไม่สามารถโหลดรายการผิดปกติได้",
+      "empty": "ไม่มีรายการผิดปกติที่ตรงกับตัวกรอง",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "days_one": "{{count}} วัน",
+      "days_other": "{{count}} วัน",
+      "lastChange": "แก้ไขล่าสุด {{at}} โดย {{by}}",
+      "started": "{{reference}} มอบหมายให้คุณแล้ว",
+      "escalated": "ส่งต่อ {{reference}} แล้ว",
+      "resolved": "ปิดรายการ {{reference}} แล้ว",
+      "escalateTitle": "ส่งต่อ {{reference}}",
+      "resolveTitle": "ปิดรายการ {{reference}}",
+      "resolutionType": "วิธีแก้ไข",
+      "chooseType": "เลือกวิธีแก้ไข",
+      "resolutionAmount": "จำนวนเงิน (ไม่บังคับ)",
+      "resolutionNote": "หมายเหตุ",
+      "resolutionMissing": "กรุณาเลือกวิธีแก้ไขและระบุหมายเหตุ",
+      "resolutionTypes": {
+        "manual-adjustment": "ปรับปรุงด้วยมือ",
+        "write-off": "ตัดจำหน่าย",
+        "credit-note": "ใบลดหนี้",
+        "debit-note": "ใบเพิ่มหนี้",
+        "reverse": "กลับรายการ"
+      },
+      "kpis": {
+        "unresolved": "ยังไม่ปิด",
+        "inProgress": "กำลังดำเนินการ",
+        "escalated": "ส่งต่อแล้ว",
+        "resolvedToday": "ปิดวันนี้"
+      },
+      "filters": {
+        "type": "ประเภท",
+        "allTypes": "ทุกประเภท",
+        "severity": "ความรุนแรง",
+        "allSeverities": "ทุกระดับความรุนแรง",
+        "status": "สถานะ",
+        "allStatuses": "ทุกสถานะ"
+      },
+      "actions": {
+        "view": "ดู",
+        "start": "เริ่มดำเนินการ",
+        "escalate": "ส่งต่อ",
+        "resolve": "ปิดรายการ"
+      },
+      "fields": {
+        "id": "รายการ",
+        "type": "ประเภท",
+        "severity": "ความรุนแรง",
+        "reference": "อ้างอิง",
+        "amount": "จำนวนเงิน",
+        "age": "อายุ",
+        "assignedTo": "ผู้รับผิดชอบ",
+        "status": "สถานะ",
+        "actions": "การดำเนินการ",
+        "created": "วันที่สร้าง",
+        "dueBy": "ครบกำหนด",
+        "expected": "ยอดที่คาดไว้",
+        "actual": "ยอดจริง",
+        "difference": "ผลต่าง",
+        "description": "รายละเอียด",
+        "escalation": "เหตุผลการส่งต่อ",
+        "resolution": "การแก้ไข",
+        "typeReference": "ประเภทและการนำส่ง"
+      },
+      "statuses": {
+        "open": "เปิด",
+        "inProgress": "กำลังดำเนินการ",
+        "escalated": "ส่งต่อแล้ว",
+        "resolved": "แก้ไขแล้ว"
+      },
+      "startTitle": "เริ่มดำเนินการ {{reference}}",
+      "startMessage": "{{reference}} จะมอบหมายให้คุณและเปลี่ยนเป็นกำลังดำเนินการ"
+    },
+    "settlementScreen": {
+      "submitTitle": "ส่งการชำระ {{reference}} เพื่ออนุมัติ",
+      "discardTitle": "ยกเลิกการชำระนี้หรือไม่",
+      "discardMessage": "การเปลี่ยนแปลงที่ยังไม่บันทึกจะหายไป",
+      "discard": "ยกเลิกการแก้ไข",
+      "importTitle_one": "เพิ่มกรมธรรม์ที่มี {{count}} รายการ",
+      "importTitle_other": "เพิ่มกรมธรรม์ที่มี {{count}} รายการ",
+      "importAction_one": "เพิ่ม {{count}} กรมธรรม์",
+      "importAction_other": "เพิ่ม {{count}} กรมธรรม์",
+      "insurer": "บริษัทประกัน",
+      "policies": "กรมธรรม์",
+      "removeTitle": "นำ {{policy}} ออกจากการชำระ",
+      "remove": "นำออก",
+      "title": "การชำระเงิน",
+      "help": "ชำระการนำส่งที่อนุมัติแล้วกับบริษัทประกันตามช่วงเวลา เมื่ออนุมัติแล้วระบบจะออกใบสำคัญจ่ายในระบบเบิกจ่าย",
+      "tabs": {
+        "adjustments": "รายการปรับปรุง",
+        "payment": "การชำระเงิน",
+        "workflow": "ขั้นตอนอนุมัติ"
+      }
+    },
+    "billing": {
+      "title": "การเรียกเก็บบริษัทประกัน",
+      "help": "ใบแจ้งหนี้ค่านายหน้าถึงบริษัทประกันสำหรับกรมธรรม์ที่ลูกค้าชำระตรง: ออกใบแจ้งหนี้ตามงวด ผู้ใช้อีกคนอนุมัติ แล้วส่งและบันทึกการรับชำระจากบริษัทประกัน วิธีเรียกเก็บใช้เปลี่ยนกรมธรรม์ระหว่างลูกค้าชำระตรงกับนายหน้าเรียกเก็บ และจะถูกปฏิเสธเมื่อมีการรับหรือนำส่งเบี้ยแล้ว หรือค่านายหน้าอยู่ในใบแจ้งหนี้แล้ว",
+      "ageing": "อายุลูกหนี้ค่านายหน้า (XLSX)",
+      "awaitingApproval_one": "ใบแจ้งหนี้รออนุมัติ {{count}} ฉบับ",
+      "awaitingApproval_other": "ใบแจ้งหนี้รออนุมัติ {{count}} ฉบับ",
+      "kpis": {
+        "unbilled": "ค่านายหน้าที่ยังไม่เรียกเก็บ",
+        "outstanding": "เรียกเก็บแล้ว ค้างชำระ",
+        "overdue": "เกินกำหนด",
+        "receivable": "ลูกหนี้บริษัทประกัน"
+      },
+      "tabs": {
+        "raise": "ออกใบแจ้งหนี้",
+        "notes": "ใบแจ้งหนี้",
+        "mode": "วิธีเรียกเก็บ"
+      },
+      "actionsHeader": "การดำเนินการ",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "actions": {
+        "view": "ดู",
+        "print": "พิมพ์ใบแจ้งหนี้",
+        "submit": "ส่งอนุมัติ",
+        "approve": "อนุมัติ",
+        "reject": "ไม่อนุมัติ",
+        "collect": "บันทึกการรับชำระจากบริษัทประกัน",
+        "email": "อีเมลถึงบริษัทประกัน",
+        "cancel": "ยกเลิกใบแจ้งหนี้"
+      },
+      "facts": {
+        "insurer": "บริษัทประกัน",
+        "policies": "กรมธรรม์",
+        "amount": "จำนวนเงิน",
+        "note": "ใบแจ้งหนี้",
+        "applied": "ยอดที่ตัดชำระ",
+        "policy": "กรมธรรม์"
+      },
+      "approveTitle": "อนุมัติ {{reference}}",
+      "approveRemarks": "หมายเหตุ (ไม่บังคับ)",
+      "rejectTitle": "ไม่อนุมัติ {{reference}}",
+      "cancelTitle": "ยกเลิก {{reference}}",
+      "releaseNote": "ค่านายหน้าจะเรียกเก็บได้อีกในใบแจ้งหนี้ใหม่",
+      "approved": "อนุมัติ {{reference}} แล้ว",
+      "rejected": "ไม่อนุมัติ {{reference}} แล้ว",
+      "cancelled": "ยกเลิก {{reference}} แล้ว",
+      "reverse": "กลับรายการ",
+      "reverseTitle": "กลับรายการรับชำระ {{reference}}",
+      "reverseReason": "เหตุผล",
+      "reversed": "กลับรายการ {{reference}} แล้ว",
+      "clientPayment": "บันทึก",
+      "clientPaymentFacts": "เบี้ยที่บริษัทประกันเรียกเก็บ {{premium}} · ชำระแล้ว {{paid}} · คงเหลือ {{balance}}",
+      "collectFacts": "ยอดคงเหลือ {{balance}} · ภาษีหัก ณ ที่จ่าย {{rate}}% ของค่านายหน้า",
+      "void": "ยกเลิกรายการ",
+      "voidTitle": "ยกเลิกการชำระ {{reference}}",
+      "voidReason": "เหตุผล",
+      "fields": {
+        "insurer": "บริษัทประกัน",
+        "chooseInsurer": "เลือกบริษัทประกัน",
+        "issuedFrom": "ออกตั้งแต่",
+        "issuedTo": "ออกถึง",
+        "line": "ประเภทธุรกิจ",
+        "allLines": "ทุกประเภท",
+        "status": "สถานะ",
+        "allInsurers": "บริษัทประกันทั้งหมด"
+      },
+      "loadPolicies": "โหลดกรมธรรม์",
+      "emptyPolicies": "เลือกบริษัทประกันและช่วงเวลา แล้วโหลดกรมธรรม์ที่เรียกเก็บโดยตรงเพื่อออกใบแจ้งหนี้",
+      "saveDraft": "บันทึกร่าง",
+      "raiseAndSubmit": "ออกใบแจ้งหนี้และส่งอนุมัติ",
+      "refresh": "รีเฟรช",
+      "emptyNotes": "ไม่มีใบแจ้งหนี้ค่านายหน้า",
+      "changeMode": "เปลี่ยนวิธีเรียกเก็บ",
+      "columns": {
+        "policyNo": "เลขที่กรมธรรม์",
+        "reference": "เลขที่อ้างอิง",
+        "insured": "ผู้เอาประกัน",
+        "product": "ผลิตภัณฑ์",
+        "line": "ประเภท",
+        "issued": "วันที่ออก",
+        "grossPremium": "เบี้ยประกันรวม",
+        "rate": "อัตรา",
+        "commission": "ค่านายหน้า",
+        "vat": "ภาษีมูลค่าเพิ่ม",
+        "totalDue": "ยอดที่ต้องชำระ",
+        "ewt": "ภาษีหัก ณ ที่จ่าย",
+        "clientPaid": "ลูกค้าชำระบริษัทประกันแล้ว",
+        "bookedIn": "บันทึกใน",
+        "debitNote": "ใบแจ้งหนี้",
+        "date": "วันที่",
+        "insurer": "บริษัทประกัน",
+        "policies": "กรมธรรม์",
+        "collected": "รับชำระแล้ว",
+        "balance": "คงเหลือ",
+        "due": "ครบกำหนด",
+        "status": "สถานะ"
+      }
+    },
+    "runNow": {
+      "title": "รันทันที",
+      "previewTitle": "ตัวอย่างการรัน · {{code}}",
+      "schedule": "กำหนดการ",
+      "window": "ช่วงเวลา",
+      "runDate": "วันที่รัน",
+      "insurers": "บริษัทประกัน",
+      "insurer": "บริษัทประกัน",
+      "productLine": "สายผลิตภัณฑ์",
+      "basis": "ฐาน",
+      "ready": "พร้อม",
+      "held": "พัก",
+      "exceptions": "ข้อยกเว้น",
+      "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+      "resultColumn": "ผล",
+      "total": "รวม",
+      "draftCount_other": "{{count}} ฉบับร่าง",
+      "create_other": "สร้างการนำส่งฉบับร่าง {{count}} รายการ",
+      "goToDrafts": "ไปที่ฉบับร่าง",
+      "result": "ผลการรัน",
+      "paused": "{{code}} หยุดชั่วคราวอยู่ เริ่มใหม่ก่อนจึงจะรันได้",
+      "nothing": "ไม่มีรายการที่ต้องนำส่งในช่วงนี้",
+      "noInsurers": "ไม่มียอดที่ต้องนำส่งในช่วงนี้",
+      "loadError": "คำนวณตัวอย่างไม่ได้",
+      "nothingToRemit_one": "{{count}} บริษัทประกันไม่มียอดที่ต้องนำส่ง",
+      "nothingToRemit_other": "{{count}} บริษัทประกันไม่มียอดที่ต้องนำส่ง"
+    },
+    "pleaseSelectInsurer": "กรุณาเลือกบริษัทประกัน",
+    "pleaseSelectSettlementPeriod": "กรุณาเลือกช่วงเวลาการชำระ",
+    "pleaseAddPolicy": "กรุณาเพิ่มกรมธรรม์",
+    "pleaseSelectPaymentMethod": "กรุณาเลือกวิธีการชำระเงิน",
+    "pleaseSelectBankAccount": "กรุณาเลือกบัญชีธนาคาร",
+    "validationFailed": "ข้อมูลไม่ถูกต้อง",
+    "draftSaved": "บันทึกร่างแล้ว",
+    "draftSavedDetail": "บันทึกร่างแล้ว",
+    "saveFailed": "บันทึกไม่สำเร็จ",
+    "settlementNo": "เลขที่การชำระ",
+    "netAmount": "ยอดสุทธิ",
+    "submitForApproval": "ส่งอนุมัติ",
+    "submittedSuccessfully": "ส่งอนุมัติแล้ว",
+    "submissionFailed": "ส่งอนุมัติไม่สำเร็จ",
+    "policyNo": "เลขที่กรมธรรม์",
+    "insuredName": "ชื่อผู้เอาประกัน",
+    "cancel": "ยกเลิก",
+    "addSelected": "เพิ่มรายการที่เลือก",
+    "date": "วันที่",
+    "type": "ประเภท",
+    "status": "สถานะ",
+    "settlementDetails": "รายละเอียดการชำระ",
+    "insurerInformation": "ข้อมูลบริษัทประกัน",
+    "insurerCode": "รหัสบริษัทประกัน",
+    "selectInsurer": "เลือกบริษัทประกัน",
+    "insurerName": "ชื่อบริษัทประกัน",
+    "period": "ช่วงเวลา",
+    "selectPeriod": "เลือกช่วงเวลา",
+    "policyDetails": "รายละเอียดกรมธรรม์",
+    "addPolicies": "เพิ่มกรมธรรม์",
+    "calculate": "คำนวณ",
+    "product": "ผลิตภัณฑ์",
+    "premium": "เบี้ยประกัน",
+    "commissionRate": "อัตราค่านายหน้า",
+    "commission": "ค่านายหน้า",
+    "tax": "ภาษี",
+    "saveDraft": "บันทึกร่าง"
   },
   "incentive": {
     "incentive": "สิ่งจูงใจ",
@@ -2354,7 +3414,17 @@
     "accountCategoryNameHeader": "ชื่อหมวดบัญชี",
     "address": "ที่อยู่",
     "contact": "ข้อมูลติดต่อ",
-    "accountCategoryDetail": "หมวดบัญชี"
+    "accountCategoryDetail": "หมวดบัญชี",
+    "bankFacts": "ธนาคาร",
+    "bankCategory": "ประเภท",
+    "accountCode": "รหัสบัญชี",
+    "bankAccountsOf_one": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
+    "bankAccountsOf_other": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
+    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้",
+    "editAccountCategory": "แก้ไขหมวดบัญชี",
+    "addAccountCategory": "เพิ่มหมวดบัญชี",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "cancel": "ยกเลิก"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -2720,7 +3790,9 @@
     "departmentDetails": "แผนก",
     "departmentName": "ชื่อแผนก",
     "branchAndDepartment": "สาขาและแผนก",
-    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้"
+    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้",
+    "primaryCompany": "บริษัทหลัก",
+    "address": "ที่อยู่"
   },
   "agent": {
     "createQuote": "สร้างใบเสนอราคา",
@@ -3051,7 +4123,12 @@
     "deleteMessage": "การแจ้งเตือนด้านล่างจะถูกลบออกจากรายการของคุณ",
     "deleteAction": "ลบการแจ้งเตือน",
     "notification": "การแจ้งเตือน",
-    "received": "ได้รับเมื่อ"
+    "received": "ได้รับเมื่อ",
+    "priority": {
+      "high": "สำคัญสูง",
+      "low": "สำคัญต่ำ",
+      "urgent": "ด่วน"
+    }
   },
   "dashboard": {
     "goodDay": "สวัสดีครับ/ค่ะ!",
@@ -3965,7 +5042,13 @@
     "health": "สุขภาพ",
     "property": "ทรัพย์สิน",
     "travel": "การเดินทาง",
-    "marine": "ทะเล"
+    "marine": "ทะเล",
+    "cloneTitle": "เวอร์ชันใหม่ของ {{code}}",
+    "cloneMessage": "ระบบจะสร้างเวอร์ชันร่างโดยคัดลอกจากแม่แบบนี้",
+    "copiedFrom": "คัดลอกจาก",
+    "newVersion": "เวอร์ชันใหม่",
+    "openDrafts": "เวอร์ชันร่างที่มีอยู่แล้ว",
+    "cloneAction": "สร้างเวอร์ชันร่าง"
   },
   "productTemplateManager": {
     "cardTitle": "การกำหนดค่าเทมเพลตผลิตภัณฑ์",
@@ -4111,7 +5194,9 @@
     "ofTarget": "ของเป้าหมาย",
     "status": "สถานะ",
     "error": "ข้อผิดพลาด",
-    "failedToLoad": "โหลดการแมปตลาดไม่สำเร็จ"
+    "failedToLoad": "โหลดการแมปตลาดไม่สำเร็จ",
+    "policyCount_one": "{{count}} กรมธรรม์",
+    "policyCount_other": "{{count}} กรมธรรม์"
   },
   "documentManager": {
     "cardTitle": "ตัวจัดการเทมเพลตเอกสาร",
@@ -4665,6 +5750,9 @@
       "InitiateCancel": "Cancellation initiated",
       "Completed": "Completed",
       "Cancelled": "Cancelled"
+    },
+    "types": {
+      "cancellation": "ยกเลิกกรมธรรม์"
     }
   },
   "endorsementSummary": {
@@ -4722,7 +5810,8 @@
     "endorsementNo": "Endorsement no.",
     "policyNo": "Policy no.",
     "endorsementType": "Endorsement type",
-    "sendToInsurer": "Send to insurer"
+    "sendToInsurer": "Send to insurer",
+    "policyExtension": "การขยายระยะเวลากรมธรรม์"
   },
   "coverageDetailsReview": {
     "pageTitle": "ตรวจสอบรายละเอียดความคุ้มครอง",
@@ -4915,7 +6004,7 @@
     "bulkUpload": "อัปโหลดหลายรายการ"
   },
   "bulkUploadQuotations": {
-    "header": "อัปโหลดใบเสนอราคาหลายรายการ"
+    "header": "อัปโหลดใบเสนอราคาจำนวนมาก"
   },
   "quoteStats": {
     "totalQuotations": "ใบเสนอราคารวม",
@@ -5020,9 +6109,9 @@
     "netPremium": "เบี้ยสุทธิ",
     "others": "อื่นๆ",
     "discount": "ส่วนลด",
-    "dst": "อากรแสตมป์ (DST)",
+    "dst": "อากรแสตมป์",
     "vat": "ภาษีมูลค่าเพิ่ม (VAT)",
-    "lgt": "ภาษีท้องถิ่น (LGT)",
+    "lgt": "ภาษีท้องถิ่น",
     "auditTrail": "ประวัติการแก้ไข",
     "share": "แชร์",
     "proceedToPolicy": "ดำเนินการเป็นกรมธรรม์",
@@ -5033,6 +6122,10 @@
     "quoteSentToSuccess": "ส่งใบเสนอราคาให้ {{sentTo}} เรียบร้อยแล้ว!",
     "errorSendingQuoteForApproval": "เกิดข้อผิดพลาดในการส่งใบเสนอราคาเพื่ออนุมัติ",
     "pageTitle": "ใบเสนอราคา",
+    "scheduleOfCover": "ตารางความคุ้มครอง",
+    "scheduleSection": "หมวด / รายการ / ภัย",
+    "scheduleSumInsured": "ทุนประกัน",
+    "schedulePremium": "เบี้ยประกัน",
     "fst": "ภาษีบริการดับเพลิง"
   },
   "policyList": {
@@ -5575,6 +6668,31 @@
     "coInsurer": "บริษัทประกันร่วม",
     "total": "รวม",
     "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน",
+    "followUp": {
+      "titles": {
+        "Email": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+        "Call": "บันทึกการโทร",
+        "Note": "เพิ่มบันทึก",
+        "Commitment": "กำหนดวันที่ลูกค้ารับว่าจะชำระ"
+      },
+      "to": "ถึง",
+      "subject": "หัวเรื่อง",
+      "message": "ข้อความ",
+      "callOutcome": "ผลการโทร",
+      "callNotes": "บันทึกการโทร",
+      "note": "บันทึก",
+      "commitmentDate": "วันที่รับว่าจะชำระ",
+      "delayReason": "เหตุผลที่ล่าช้า",
+      "saveFailed": "ไม่สามารถบันทึกการติดตามได้",
+      "outcomes": {
+        "Answered": "รับสาย: รับว่าจะชำระ",
+        "NoAnswer": "ไม่รับสาย",
+        "WrongNumber": "หมายเลขไม่ถูกต้อง",
+        "CallbackRequested": "ขอให้โทรกลับ"
+      },
+      "emailSubject": "เบี้ยประกันถึงกำหนดชำระ: กรมธรรม์ {{policy}}",
+      "emailBody": "เรียน {{name}}\n\nเบี้ยประกันจำนวน {{amount}} ของกรมธรรม์ {{policy}} ถึงกำหนดชำระเมื่อวันที่ {{dueDate}} กรุณาชำระเงินโดยเร็วเพื่อให้ความคุ้มครองต่อเนื่อง\n\nหากท่านชำระแล้ว โปรดละเว้นการแจ้งเตือนนี้\n\nขอบคุณ"
+    },
     "nextStepTitle": "ขั้นตอนถัดไป: บันทึกเบี้ยประกันที่ได้รับ",
     "nextStepText": "ยอดค้างชำระ {{amount}} ของ {{bill}} บันทึกใบเสร็จเมื่อลูกค้าชำระเงิน",
     "recordReceipt": "บันทึกใบเสร็จ"
@@ -5794,7 +6912,9 @@
     "cancel": "Cancel",
     "insured": "Insured",
     "startEndorsement": "Start endorsement",
-    "endorsementTypes": "Endorsement types"
+    "endorsementTypes": "Endorsement types",
+    "claimAfterPayment": "เรียกร้องสินไหม (หลังชำระเบี้ย)",
+    "endorsementAfterPayment": "สลักหลัง (หลังชำระเบี้ย)"
   },
   "collectionsList": {
     "view": "ดู",
@@ -5822,7 +6942,22 @@
     "remindersFailed": "ไม่สามารถส่งการแจ้งเตือนการชำระเงินได้",
     "remindersSentTitle": "ส่งการแจ้งเตือนแล้ว",
     "remindersSent": "ส่งการแจ้งเตือนการชำระเงินแล้ว",
-    "importOpenItems": "นำเข้ารายการค้างชำระ"
+    "importOpenItems": "นำเข้ารายการค้างชำระ",
+    "openItems": "รายการค้างชำระ",
+    "importOpenItemsTitle": "นำเข้ารายการค้างชำระ (เริ่มใช้งานระบบ)",
+    "importOpenItemsNote": "ใบแจ้งเบี้ยที่ยังไม่ชำระจากระบบเดิม นำเข้าตามกรมธรรม์ที่มีในระบบแล้ว ไม่มีการบันทึกบัญชี เนื่องจากยอดยกมาในบัญชีแยกประเภทรวมไว้แล้ว รายการที่นำเข้าแล้วสำหรับวันเริ่มใช้งานเดียวกันจะถูกข้าม",
+    "remindersScope_one": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindersScope_other": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindClients": "ลูกค้า",
+    "remindItems": "รายการเบี้ย",
+    "remindOutstanding": "ยอดค้างชำระรวม",
+    "remindLevel": "{{level}}",
+    "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
+    "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน",
+    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด",
+    "allLevels": "ทุกระดับ",
+    "levelBand": "ระดับ {{level}} ({{from}}–{{to}} วัน)",
+    "levelBeyond": "ระดับ {{level}} ({{from}} วันขึ้นไป)"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6003,7 +7138,7 @@
     "notes": "คำเตือน",
     "files": "ไฟล์",
     "noRuns": "ยังไม่มีไฟล์บัญชีแยกประเภทสำหรับ SAP",
-    "settingsLine": "โฟลเดอร์ {{folder}} · เวลาตัดยอด {{cutOff}} · รูปแบบ {{format}} (Master > Configuration กลุ่ม integrations)",
+    "settingsLine": "โฟลเดอร์ {{folder}} · เวลาตัดยอด {{cutOff}} · รูปแบบ {{format}}",
     "statuses": {
       "done": "เขียนไฟล์แล้ว",
       "empty": "ไม่มีรายการ",
@@ -6013,6 +7148,22 @@
     "triggers": {
       "schedule": "ตามกำหนดเวลา",
       "manual": "สั่งทำทันที"
+    },
+    "folder": "โฟลเดอร์",
+    "cutOff": "เวลาตัดยอด",
+    "previousRuns": "จำนวนครั้งที่เขียนไฟล์แล้วของวันนั้น",
+    "lastJournals": "รายการบัญชี / บรรทัด (ครั้งล่าสุด)",
+    "lastDebit": "เดบิต (ครั้งล่าสุด)",
+    "lastCredit": "เครดิต (ครั้งล่าสุด)",
+    "written": "เขียนไฟล์ SAP GL ของวันที่ {{date}} แล้ว (ครั้งที่ {{n}})",
+    "nothingPosted": "ไม่มีรายการบันทึกบัญชีในวันที่ {{date}} จึงไม่ได้เขียนไฟล์",
+    "confirm": {
+      "runTitle": "เขียนไฟล์ SAP GL",
+      "runMessage": "ไฟล์ส่วนหัวและไฟล์รายการของรายการที่บันทึกในวันนี้จะถูกเขียนไปยังโฟลเดอร์รับไฟล์ของ SAP",
+      "runAction": "เขียนไฟล์",
+      "regenerateTitle": "สร้างไฟล์ SAP GL ใหม่",
+      "regenerateMessage": "ไฟล์ของวันนี้จะถูกเขียนใหม่เป็นอีกครั้งหนึ่ง และ SAP จะรับไฟล์ใหม่",
+      "regenerateAction": "สร้างไฟล์ใหม่"
     }
   },
   "directBillBasis": {
@@ -6029,12 +7180,51 @@
       "leadSources": {
         "title": "แหล่งที่มาของลีด",
         "section": "การจัดการประกันภัย",
+        "item": "แหล่งที่มาของลูกค้าเป้าหมาย",
         "help": "แหล่งที่มาของผู้มุ่งหวัง"
       },
       "reasonCodes": {
         "title": "รหัสเหตุผล",
         "section": "การจัดการประกันภัย",
+        "item": "รหัสเหตุผล",
         "help": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การคืนเงินและการปรับปรุง การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี"
+      },
+      "new": "รายการใหม่: {{name}}",
+      "anyValue": "ทั้งหมด",
+      "list": "ข้อมูลหลัก",
+      "costCentres": {
+        "title": "ศูนย์ต้นทุน",
+        "section": "การเงิน",
+        "intro": "ศูนย์ต้นทุนที่ระบุในรายการบัญชีและในไฟล์บัญชีแยกประเภทสำหรับ SAP ศูนย์ต้นทุนที่กำหนดเป็นค่าเริ่มต้นจะใช้กับทุกรายการที่ไม่ได้ระบุ (TISPH: 900901 Toyota Insurance Services)",
+        "item": "ศูนย์ต้นทุน"
+      },
+      "newItem": "เพิ่ม{{item}}",
+      "editItem": "แก้ไข{{item}}: {{name}}",
+      "days_one": "{{count}} วัน",
+      "days_other": "{{count}} วัน",
+      "shortPeriod": {
+        "item": "อัตราระยะสั้น"
+      },
+      "cancellationReasons": {
+        "item": "เหตุผลการยกเลิก"
+      },
+      "claimChecklist": {
+        "item": "เอกสารเคลม"
+      },
+      "repairShops": {
+        "item": "อู่ซ่อม"
+      },
+      "suppliers": {
+        "item": "ผู้ขาย"
+      },
+      "assetClasses": {
+        "item": "ประเภทสินทรัพย์"
+      },
+      "salesActivityTypes": {
+        "item": "ประเภทกิจกรรมการขาย"
+      },
+      "salesActivityOutcomes": {
+        "item": "ผลลัพธ์กิจกรรมการขาย"
       },
       "allOf": "{{name}}: ทั้งหมด"
     },
@@ -6103,11 +7293,15 @@
         "post": "Post depreciation"
       },
       "master": {
-        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateTitle": "ปิดใช้งาน {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
-        "activateTitle": "Activate {{name}} record",
+        "activateTitle": "เปิดใช้งาน {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
+    },
+    "cancellation": {
+      "confirmTitle": "สร้างสลักหลังยกเลิกกรมธรรม์ {{number}}",
+      "confirmMessage": "ระบบจะสร้างสลักหลังยกเลิกฉบับร่างพร้อมเบี้ยคืนด้านล่าง และส่งให้บริษัทประกันจากหน้าสรุป"
     }
   },
   "placement": {
@@ -6180,7 +7374,7 @@
       "insurerPolicyNumber": "เลขที่กรมธรรม์ของบริษัทประกัน",
       "brokerPolicyNumber": "เลขที่กรมธรรม์ BrokerVerse",
       "brokerPolicyNumberPlaceholder": "เว้นว่าง: ระบบออกเลขเมื่อบันทึก",
-      "participantName": "ชื่อผู้เอาประกันตามกรมธรรม์",
+      "participantName": "ชื่อผู้เอาประกัน",
       "sumInsured": "ทุนประกัน",
       "netPremium": "เบี้ยประกันสุทธิ",
       "grossPremium": "เบี้ยประกันรวม",
@@ -6291,6 +7485,23 @@
     },
     "cancel": {
       "message": "The placement slip is cancelled. The insurers are not told automatically."
+    },
+    "send": {
+      "title": "ส่งใบวางประกัน {{number}} ให้บริษัทประกัน",
+      "resendTitle": "ส่งใบวางประกัน {{number}} อีกครั้ง",
+      "message_one": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกันด้านล่างพร้อมใบวางประกัน",
+      "message_other": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกัน {{count}} แห่งด้านล่าง พร้อมใบวางประกันของแต่ละแห่ง",
+      "leadInsurer": "ผู้รับประกันหลัก",
+      "coInsurer": "ผู้ร่วมรับประกัน"
+    },
+    "compare": {
+      "leadIs": "ผู้รับประกันหลัก: {{lead}}",
+      "deductiblesTerms": "ค่าเสียหายส่วนแรกและเงื่อนไข",
+      "selectFirst": "เลือกข้อเสนออย่างน้อยหนึ่งรายการเพื่อจัดทำสลิป",
+      "sharesMustTotal": "สัดส่วนที่เลือกรวม {{total}}% ต้องรวมเป็น 100%"
+    },
+    "addInsurer": {
+      "invited": "บริษัทประกันที่เชิญแล้ว"
     }
   },
   "salesMarketing": {
@@ -6622,7 +7833,11 @@
   "detailView": {
     "close": "ปิด",
     "yes": "ใช่",
-    "no": "ไม่ใช่"
+    "no": "ไม่ใช่",
+    "createdBy": "สร้างโดย",
+    "createdOn": "สร้างเมื่อ",
+    "updatedOn": "แก้ไขล่าสุด",
+    "activity": "กิจกรรม"
   },
   "makerChecker": {
     "ownRecord": "คุณเป็นผู้สร้างรายการนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
@@ -6698,7 +7913,17 @@
       "assignQueued": "ส่งเข้าคิว",
       "assignManual": "มอบหมายใหม่",
       "assignBulk": "มอบหมายใหม่แบบกลุ่ม",
-      "assignTaken": "รับจากคิว"
+      "assignTaken": "รับจากคิว",
+      "revoke": "เพิกถอนแล้ว",
+      "excludeLine": "ตัดรายการออก",
+      "includeLine": "นำรายการกลับเข้า",
+      "raiseVoucher": "ออกใบสำคัญจ่ายแล้ว",
+      "inPayment": "อยู่ระหว่างชำระเงิน",
+      "paymentFailed": "ชำระเงินไม่สำเร็จ",
+      "sendAdvice": "ส่งใบแจ้งการนำส่งเบี้ยแล้ว",
+      "recordConfirmation": "บันทึกการยืนยันแล้ว",
+      "createAgencyBill": "สร้างใบแจ้งหนี้ตัวแทนแล้ว",
+      "sendBill": "ส่งใบแจ้งหนี้แล้ว"
     },
     "fields": {
       "version": "เวอร์ชัน",
@@ -6718,7 +7943,9 @@
       "manual": "ดำเนินการเอง",
       "closeRun": "ปิดงวดสิ้นเดือน",
       "yearEnd": "ปิดบัญชีสิ้นปี",
-      "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี"
+      "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี",
+      "scheduled": "รันตามกำหนดเวลา",
+      "manualRun": "รันทันที (ด้วยตนเอง)"
     }
   },
   "print": {
@@ -7054,6 +8281,21 @@
       "cas_print_void": "การยกเลิกการพิมพ์สมุดบัญชี CAS",
       "cas_document_change": "การแก้ไขเอกสาร CAS",
       "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ",
+      "remittance_reject": "การปฏิเสธการนำส่งเบี้ยประกัน",
+      "remittance_withdraw": "การถอนการนำส่งเบี้ยประกัน",
+      "remittance_cancel": "การยกเลิกการนำส่งเบี้ยประกัน",
+      "remittance_revoke": "การเพิกถอนการอนุมัติการนำส่งเบี้ยประกัน",
+      "remittance_off_cycle": "การนำส่งเบี้ยประกันนอกรอบ",
+      "remittance_line_exclude": "การตัดรายการออกจากการนำส่งเบี้ยประกัน",
+      "exception_escalate": "การส่งต่อรายการผิดปกติ",
+      "exception_resolve": "การแก้ไขรายการผิดปกติ",
+      "exception_reopen": "การเปิดรายการผิดปกติใหม่",
+      "reconciliation_difference": "การจับคู่ใบแจ้งยอดบริษัทประกันที่มีผลต่าง",
+      "reconciliation_unmatch": "การยกเลิกการจับคู่ใบแจ้งยอดบริษัทประกัน",
+      "confirmation_difference": "ผลต่างจากการยืนยันของบริษัทประกัน",
+      "payment_duplicate_override": "การชำระเงินที่อาจซ้ำ",
+      "billing_reject": "การปฏิเสธใบแจ้งหนี้ถึงบริษัทประกัน",
+      "billing_cancel": "การยกเลิกใบแจ้งหนี้ถึงบริษัทประกัน",
       "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
       "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี",
       "incentive_adjustment": "การปรับปรุงรายการค่าตอบแทนจูงใจ",
@@ -7325,7 +8567,17 @@
       "invoiceOverrideTitle": "Issue sales invoice for {{number}}",
       "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
       "invoiceOverride": "Issue invoice"
-    }
+    },
+    "previewFigures": "ตัวเลขของงวด",
+    "claimsFromSystem": "ค่าสินไหมที่บันทึกในระบบ",
+    "recordAmended": "บันทึกแบบแก้ไขเพิ่มเติม",
+    "paymentChannelPlaceholder": "เช่น eFPS, eBIRForms, LANDBANK Link.BizPortal",
+    "vatRegistered": "จดทะเบียนภาษีมูลค่าเพิ่ม",
+    "percentageTaxHelp": "แบบแสดงรายการภาษีธุรกิจเฉพาะรายไตรมาส (BIR Form 2551Q): ยอดขายรวมรายเดือนจากบัญชีรายได้ตามอัตราที่กำหนด",
+    "fromValue": "ตั้งแต่ (รวม)",
+    "toValue": "ถึง (ไม่รวม)",
+    "computeTitle": "คำนวณ {{period}} · {{agreement}}",
+    "nothingToCompute": "ไม่มียอดผลงานในงวดนี้"
   },
   "importDialog": {
     "about": "เกี่ยวกับการอัปโหลดนี้",
@@ -7350,7 +8602,11 @@
     "errors": "ข้อผิดพลาด",
     "row": "แถว",
     "column": "คอลัมน์",
-    "message": "ข้อความ"
+    "message": "ข้อความ",
+    "rowPreview": "แถวที่อ่านได้",
+    "showRows": "แสดง",
+    "errorReport": "ดาวน์โหลดรายงานข้อผิดพลาด",
+    "noRows": "ไม่มีแถว"
   },
   "periodManagement": {
     "help": "งวดที่ปิดชั่วคราวรับการบันทึกบัญชีจากผู้จัดการฝ่ายบัญชีเท่านั้น งวดที่ปิดแล้วไม่รับการบันทึก",
@@ -7429,6 +8685,11 @@
       "deleteTitle": "ลบอัตราค่านายหน้า",
       "deleteAction": "ลบอัตรา",
       "deleteMessage": "อัตราค่านายหน้าด้านล่างจะถูกลบ"
+    },
+    "documentNumbering": {
+      "period": "งวด",
+      "issuedCount": "จำนวนเลขที่ออกแล้ว",
+      "lowestNext": "เลขถัดไปต่ำสุด"
     }
   },
   "postingRules": {
@@ -7549,8 +8810,15 @@
       "department": "แผนก",
       "account-category": "หมวดบัญชี",
       "currency": "สกุลเงิน",
-      "transaction-code": "รหัสรายการ"
-    }
+      "transaction-code": "รหัสรายการ",
+      "remittance-setup": "การตั้งค่าการนำส่ง"
+    },
+    "username": "ชื่อผู้ใช้",
+    "roles": "บทบาท",
+    "currencies": "สกุลเงิน",
+    "rate": "อัตรา",
+    "effectiveFrom": "มีผลตั้งแต่",
+    "effectiveTo": "มีผลถึง"
   },
   "security": {
     "user": "ผู้ใช้",
@@ -7601,13 +8869,20 @@
       "retireNote": "จะไม่ถูกใช้กับธุรกิจใหม่ กรมธรรม์ที่ออกแล้วยังคงใช้แม่แบบนี้",
       "retireAction": "เลิกใช้แม่แบบ",
       "activateTemplateAction": "เปิดใช้งานแม่แบบ"
+    },
+    "history": {
+      "title": "ประวัติ: {{name}}",
+      "empty": "ไม่มีการเปลี่ยนแปลงที่บันทึกไว้"
     }
   },
   "productRiskMapping": {
     "removeTitle": "ลบส่วนความเสี่ยง",
     "removeMessage": "ส่วนความเสี่ยงด้านล่างจะถูกลบออกจากผลิตภัณฑ์",
     "removeNote": "ผู้มุ่งหวังและใบเสนอราคาใหม่จะไม่แสดงส่วนนี้ ใบเสนอราคาที่ใช้อยู่แล้วยังคงเดิม",
-    "removeAction": "ลบส่วน"
+    "removeAction": "ลบส่วน",
+    "definition": "คำจำกัดความ",
+    "usedBy": "ใช้โดย",
+    "referenceOnly": "ใช้อ้างอิงเท่านั้น (หน้าลูกค้าเป้าหมายและใบเสนอราคาไม่ได้อ่านค่านี้)"
   },
   "integrations": {
     "batchDetail": "ชุดการจ่ายเงินผ่านธนาคาร",
@@ -7689,7 +8964,12 @@
         "message": "ข้อความขาเข้าด้านล่างจะถูกประมวลผลอีกครั้ง",
         "action": "ประมวลผลอีกครั้ง"
       }
-    }
+    },
+    "layoutChannels": "ช่องทาง",
+    "editLayout": "แก้ไขรูปแบบไฟล์ธนาคาร: {{name}}",
+    "editTemplate": "แก้ไขแม่แบบข้อความ: {{name}}",
+    "credentialSet": "ตั้งค่าบนเซิร์ฟเวอร์แล้ว",
+    "credentialNotSet": "ยังไม่ได้ตั้งค่าบนเซิร์ฟเวอร์"
   },
   "schedules": {
     "title": "กำหนดการ",
@@ -7744,7 +9024,10 @@
       "thursday": "พฤหัสบดี",
       "friday": "ศุกร์",
       "saturday": "เสาร์"
-    }
+    },
+    "outputCount": "{{what}} {{count}}",
+    "switchedOn": "เปิดใช้งาน",
+    "neverRun": "ยังไม่เคยทำงาน"
   },
   "configuration": {
     "leaveTitle": "ออกโดยไม่บันทึก",
@@ -7869,7 +9152,11 @@
       "deleteRuleAction": "Remove rule",
       "runMatched": "Matched by a rule",
       "runUnmatched": "Staying in the queue",
-      "leads": "Prospects"
+      "leads": "Prospects",
+      "reassignTitle_one": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "reassignTitle_other": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "queueTitle_one": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว",
+      "queueTitle_other": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว"
     },
     "cr": {
       "emailTitle": "E-mail comparison report",
@@ -7973,7 +9260,7 @@
     "header": "Bulk upload policies",
     "instruction2": "Enter the policies in the file",
     "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
-    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+    "goLive": "กรมธรรม์ที่มีผลบังคับอยู่แล้ว (นำเข้าเมื่อเริ่มใช้ระบบ: ไม่สร้างใบแจ้งหนี้ บัญชี หรือคอมมิชชั่น)"
   },
   "creditControl": {
     "confirmations": {
@@ -8002,8 +9289,24 @@
       "removeInstalment": "ลบงวด",
       "acknowledgeTitle": "รับทราบรายการเกินวงเงินเครดิต",
       "acknowledgeMessage": "กรมธรรม์ที่ออกเกินวงเงินเครดิตของ {{client}} จะถูกบันทึกว่ารับทราบแล้ว",
-      "acknowledgeException": "รับทราบรายการ"
-    }
+      "acknowledgeException": "รับทราบรายการ",
+      "reminderPlaceholder": "เว้นว่างเพื่อส่งข้อความแจ้งเตือนมาตรฐาน"
+    },
+    "actionType": {
+      "collection-email": "ส่งอีเมลติดตามหนี้",
+      "collection-reminder": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+      "collection-call": "โทรติดตามหนี้",
+      "collection-note": "บันทึกการติดตามหนี้",
+      "collection-commitment": "ลูกค้ารับว่าจะชำระ",
+      "collection-sms": "ส่งการแจ้งเตือนชำระเงินทาง SMS",
+      "collection-visit": "เข้าพบเพื่อติดตามการชำระเงิน",
+      "collection-escalation": "ส่งเรื่องติดตามการชำระเงินต่อ"
+    },
+    "currentLimit": "วงเงินปัจจุบัน",
+    "lastChanged": "แก้ไขล่าสุด",
+    "newLimit": "วงเงินใหม่",
+    "limitHistory": "ประวัติการเปลี่ยนวงเงิน",
+    "noLimitChanges": "ยังไม่เคยเปลี่ยนวงเงิน"
   },
   "insurerRec": {
     "confirmations": {
@@ -8022,7 +9325,9 @@
       "unmatchMessage": "บรรทัด {{line}} จะกลับไปอยู่ในรายการที่ไม่พบในข้อมูลของนายหน้า",
       "removeResolutionMessage": "การแก้ไขผลต่างของ {{policy}} จะถูกลบ และผลต่างจะกลับเป็นยังไม่ได้แก้ไข",
       "activity": "กิจกรรม"
-    }
+    },
+    "lineActions": "การดำเนินการของ {{line}}",
+    "editFormat": "แก้ไขรูปแบบใบแจ้งยอด: {{name}}"
   },
   "bankReconciliation": {
     "confirmations": {
@@ -8045,7 +9350,19 @@
         "cancelCheque": "รายการจ่ายเงินจะถูกกลับรายการและเจ้าหนี้จะถูกเปิดใหม่",
         "flag": "บรรทัดนี้จะเป็นรายการกระทบยอดฝั่งธนาคาร โดยไม่มีการบันทึกบัญชี"
       }
-    }
+    },
+    "close": "ปิด",
+    "readFile": "อ่านไฟล์",
+    "statementFile": "ไฟล์รายการเดินบัญชี",
+    "autoMatchTitle": "จับคู่รายการเดินบัญชีอัตโนมัติ",
+    "autoMatchMessage": "กฎการจับคู่จะจับคู่รายการธนาคารที่ยังไม่จับคู่กับรายการในบัญชี และบันทึกการจับคู่",
+    "autoMatched_one": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched_other": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched": "พบการจับคู่ {{count}} รายการ",
+    "notYetPrepared": "ยังไม่ได้จัดทำ",
+    "notYetApproved": "ยังไม่ได้อนุมัติ",
+    "editFormat": "แก้ไขรูปแบบรายการเดินบัญชี: {{name}}",
+    "editType": "แก้ไขประเภทรายการ: {{name}}"
   },
   "periodEnd": {
     "runActivity": "Run activity",
@@ -8095,7 +9412,19 @@
       "issueAll_other": "Issue {{count}} certificates",
       "quarter": "Quarter",
       "certificates": "Certificates to issue"
-    }
+    },
+    "stepHelp": {
+      "accruals": "รายการค้างของงวด กลับรายการในวันที่ 1 ของงวดถัดไป",
+      "recurring": "รายการบัญชีประจำที่ถึงกำหนดจนถึงสิ้นงวด",
+      "deferral": "ค่าคอมมิชชันรอตัดบัญชีสำหรับความคุ้มครองหลังสิ้นงวด",
+      "fx": "ยอดคงเหลือสกุลเงินต่างประเทศตามอัตราสิ้นเดือน",
+      "checks": "การตรวจสอบอัตโนมัติของรายการตรวจสอบการปิดงวด",
+      "depreciation": "ค่าเสื่อมราคาของทะเบียนสินทรัพย์ถาวรสำหรับงวด"
+    },
+    "nothingDue": "ไม่มีรายการบัญชีประจำที่ถึงกำหนดวันนี้",
+    "notDueYet": "ยังไม่ถึงกำหนด",
+    "editItem": "แก้ไขรายการตรวจสอบ: {{name}}",
+    "editTaxCode": "แก้ไขรหัสภาษี: {{name}}"
   },
   "commissionLine": {
     "statuses": {
@@ -8180,6 +9509,72 @@
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
     }
+  },
+  "eligibilityNote": {
+    "approvers": "ผู้ที่ตัดสินได้: {{names}}"
+  },
+  "decisionBar": {
+    "label": "การตัดสิน",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ",
+    "yourLimit": "วงเงินของคุณ {{amount}}",
+    "noLimit": "ไม่มีวงเงินอนุมัติ",
+    "thisItem": "รายการนี้ {{amount}}"
+  },
+  "rowActions": {
+    "label": "การดำเนินการ"
+  },
+  "detailHeader": {
+    "lifecycle": "ขั้นตอนของรายการ",
+    "currentStep": "(ขั้นตอนปัจจุบัน)"
+  },
+  "fileField": {
+    "choose": "เลือกไฟล์",
+    "clear": "นำไฟล์ออก",
+    "none": "ยังไม่ได้เลือกไฟล์",
+    "accepted": "ไฟล์ {{types}}"
+  },
+  "bankBatchDialog": {
+    "title": "ชุดการจ่ายใหม่",
+    "layout": "รูปแบบไฟล์",
+    "chooseLayout": "เลือกรูปแบบไฟล์",
+    "debitAccount": "บัญชีที่ตัดจ่าย",
+    "chooseAccount": "เลือกบัญชีธนาคาร",
+    "channel": "ช่องทาง",
+    "valueDate": "วันที่มีผล",
+    "valueDateProblem": {
+      "required": "กรุณาระบุวันที่มีผล",
+      "past": "วันที่มีผลต้องไม่ก่อนวันนี้",
+      "weekend": "วันที่มีผลตรงกับวันหยุดสุดสัปดาห์ กรุณาเลือกวันทำการ"
+    },
+    "included": "รายการจ่ายที่รวมในชุด",
+    "vouchers": "ใบสำคัญจ่าย",
+    "notEligible_one": "รายการที่เลือก {{count}} รายการไม่สามารถรวมในชุดได้แล้ว",
+    "notEligible_other": "รายการที่เลือก {{count}} รายการไม่สามารถรวมในชุดได้แล้ว",
+    "noVouchers": "ไม่มีใบสำคัญจ่ายที่รอการจ่าย",
+    "include": "รวม {{voucher}}",
+    "voucher": "ใบสำคัญจ่าย",
+    "payee": "ผู้รับเงิน",
+    "insurer": "บริษัทประกัน",
+    "amount": "จำนวนเงิน",
+    "paidTo": "จ่ายเข้าบัญชี",
+    "voucherDate": "วันที่ใบสำคัญ",
+    "noAccount": "ไม่มีบัญชีธนาคารในระบบ",
+    "remarks": "หมายเหตุ",
+    "count_one": "{{count}} รายการ · {{amount}}",
+    "count_other": "{{count}} รายการ · {{amount}}",
+    "cancel": "ยกเลิก",
+    "create_one": "สร้างชุดการจ่าย {{count}} รายการ",
+    "create_other": "สร้างชุดการจ่าย {{count}} รายการ"
+  },
+  "emailDocument": {
+    "sendEmail": "ส่งอีเมล",
+    "ccOptional": "สำเนาถึง (ไม่บังคับ)",
+    "ccPlaceholder": "name@example.com, name2@example.com"
+  },
+  "followUps": {
+    "refundsDueFromInsurer": "เงินคืนที่บริษัทประกันต้องชำระ",
+    "refundsNettedNote": "เบี้ยประกันคืนของเบี้ยที่นำส่งแล้ว จะหักจากใบสำคัญจ่ายเบี้ยประกันฉบับถัดไปให้บริษัทประกัน"
   },
   "accountingFlow": {
     "title": "ผังการบันทึกบัญชี",

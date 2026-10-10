@@ -15,7 +15,7 @@ import { getSetting } from './settings.js';
 import { hasPermission } from './auth.js';
 import { DEFAULT_FORMAT, applyDatePattern, formatAmount } from './pdf/format.js';
 import { printFormat } from './pdf/index.js';
-import { actionTitle, entityLabel, pathLabel, sentenceCase, statusText } from './auditLabels.js';
+import { STATUS_LABELS, actionTitle, entityLabel, pathLabel, sentenceCase, statusText } from './auditLabels.js';
 import { revealPii } from './pii.js';
 import { VIEW_PII } from './piiPolicy.js';
 
@@ -64,6 +64,8 @@ const isNoise = (entity, path) => {
 const MONEY = /(amount|premium|suminsured|balance|fee|fees|charge|charges|deductible|excess|price|cost|outstanding|vat$|dst$|lgt$|tax$|taxes$|commission$|due$|paid$|total$|limit$|salvage|depreciation|estimate$|value$)/;
 const NOT_MONEY = /(rate|percent|pct|count|days|number|no$|id$|code|type|status|method|mode|basis|currency|date|name|label|ratio|share)/;
 const PERCENT = /(percent|pct|sharepercent|ratepercent)$/;
+/** Rates kept as a number of percent ("commissionRate 10", "ewtRate 2"; a fraction such as 0.15 stays as it is); exchange and base rates are plain numbers. */
+const RATE_PERCENT = /(commission|ewt|wht|vat|tax|discount|share|interest|loading)rate$/;
 const DATEISH = /(date|dob|birthday|until|from$|to$|on$|expiry|inception|effective)$/;
 const STATUS = /status$/;
 const ENUM = /(type|mode|method|channel|priority|basis|category|option|frequency|gender|civilstatus|line|lob|kind|level|severity|result|outcome|decision)$/;
@@ -111,7 +113,21 @@ function dateTimeText(v, fmt, dateKey) {
 const isNumeric = (v) => (typeof v === 'number' && Number.isFinite(v)) || (typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()));
 
 /** "PHP 85,000.00" (currency of the record when known, else the configured currency). */
-export const moneyText = (v, fmt = DEFAULT_FORMAT, currency) => `${String(currency || fmt.currency || 'PHP').toUpperCase()} ${formatAmount(v, fmt.decimals ?? 2)}`;
+/** The symbol of the home currency as the screens show it (PHP -> ₱); the code itself when the currency has none. */
+const currencySymbol = (code) => {
+  try {
+    return new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(0).find((p) => p.type === 'currency')?.value || code;
+  } catch {
+    return code;
+  }
+};
+export const moneyText = (v, fmt = DEFAULT_FORMAT, currency) => {
+  const home = String(fmt.currency || 'PHP').toUpperCase();
+  const code = String(currency || home).toUpperCase();
+  // a foreign amount keeps its code, so that $ is never read as another dollar
+  const symbol = code === home ? currencySymbol(code) : code;
+  return symbol === code ? `${code} ${formatAmount(v, fmt.decimals ?? 2)}` : `${symbol}${formatAmount(v, fmt.decimals ?? 2)}`;
+};
 
 const maskTail = (v) => {
   const s = String(v);
@@ -141,13 +157,13 @@ export function formatValue(path, value, ctx, currency) {
   if (REF_ID.test(s)) return ctx.refs.get(s) || s;
   if (STATUS.test(key)) return statusText(s, ctx.statusLabels);
   if (isNumeric(s)) {
-    if (PERCENT.test(key)) return `${Number(s)}%`;
+    if (PERCENT.test(key) || (RATE_PERCENT.test(key) && Number(s) > 1)) return `${Number(s)}%`;
     if (MONEY.test(key) && !NOT_MONEY.test(key)) return moneyText(s, ctx.fmt, currency);
     return s;
   }
   if (ISO_DATE.test(s)) return applyDatePattern(s, ctx.fmt.dateFormat);
   if (ISO_DATETIME.test(s)) return dateTimeText(s, ctx.fmt, DATEISH.test(key));
-  if (ENUM.test(key) && /^[a-z]+([-_][a-z]+)*$/.test(s)) return sentenceCase(s);
+  if (ENUM.test(key) && (/^[a-z]+([-_][a-z]+)*$/.test(s) || /^[A-Z]+([-_][A-Z]+)*$/.test(s))) return sentenceCase(s);
   // timestamps inside free text ("approved 2026-10-02T01:49:37.774Z")
   return s.replace(ISO_IN_TEXT, (m) => instant(m, ctx.fmt)?.text || m);
 }
@@ -178,6 +194,25 @@ export function flatten(value, prefix = '', out = {}, depth = 0) {
   return out;
 }
 
+/** Keys holding the id of another record (clientId, insurance_company_id); ID numbers of a person are not among them. */
+const isIdKey = (path) => /([a-z0-9]Id|_id|ID)$/.test(leaf(path)) && !isIdentifierKey(path);
+/** A database key (8, "cl_crs_10", "usr_b8c15d013470b6e2"), as opposed to a reference a user knows ("BLK-1"). */
+const isInternalId = (v) => typeof v === 'number' || (typeof v === 'string' && (/^\d+$/.test(v) || /^[a-z]{1,8}_[a-z0-9_]+$/.test(v)));
+
+/** The order of the facts of a created record: its number, the parties, status and type, dates, amounts, then the rest. */
+const factRank = (path) => {
+  const k = norm(leaf(path));
+  // the record's own number or code first; a code that classifies it (EWT code, transaction code) reads with the types
+  if (/(number|no)$/.test(k) || k === 'code') return 0;
+  if (/code$/.test(k)) return 3;
+  if (/name$/.test(k) || /^(client|insurer|insured|supplier|product)/.test(k)) return 1;
+  if (STATUS.test(k)) return 2;
+  if (ENUM.test(k)) return 3;
+  if (DATEISH.test(k)) return 4;
+  if (MONEY.test(k) && !NOT_MONEY.test(k)) return 5;
+  return 6;
+};
+
 const same = (a, b) => {
   const empty = (x) => x === null || x === undefined || x === '' || (Array.isArray(x) && !x.length);
   if (empty(a) && empty(b)) return true;
@@ -194,12 +229,19 @@ export function diffFields(entity, before, after, ctx) {
   const a = after ? flatten(after) : {};
   const keys = [...new Set([...Object.keys(b), ...Object.keys(a)])];
   const currency = a.currency || b.currency;
+  // a record created or removed is described by its own facts: nested working data and lists of lines are left out
+  const whole = !before || !after;
   const out = [];
+  const labels = new Set();
   for (const key of keys) {
     if (isNoise(entity, key)) continue;
+    if (whole && key.includes('.')) continue;
     const raw = a[key] ?? b[key];
+    if (whole && Array.isArray(raw) && raw.some((x) => x && typeof x === 'object')) continue;
     // a technical id that names no record a user knows (payment line, receivable ...) says nothing to the reader
     if (typeof raw === 'string' && TECH_ID.test(raw) && !ctx.refs.has(raw) && /id$/i.test(leaf(key))) continue;
+    // a reference kept as an id ("clientId cl_crs_10", "insuranceCompanyId 8") is shown by the name stored next to it
+    if (isIdKey(key) && isInternalId(raw) && !ctx.refs.has(raw)) continue;
     // isActive next to status says the same thing twice
     if (norm(key) === 'isactive' && keys.includes('status')) continue;
     // "paymentModeLabel" next to "paymentMode": the label is the same value in words
@@ -210,11 +252,15 @@ export function diffFields(entity, before, after, ctx) {
     const from = before ? formatValue(key, b[key], ctx, currency) : EMPTY;
     const to = after ? formatValue(key, a[key], ctx, currency) : EMPTY;
     if (before && after && from === to && !isSecretKey(key)) continue; // differs only in form (e.g. "1" and 1)
+    if (from === EMPTY && to === EMPTY) continue;
     let label = pathLabel(entity, key, ctx.fieldLabels);
     if (typeof raw === 'string' && ctx.refs.has(raw)) label = label.replace(/ ID$/, '');
+    // two keys with one label ("clientId" resolved and "clientName"): the first one says it
+    if (labels.has(label)) continue;
+    labels.add(label);
     out.push({ key, label, from, to, ...(isSecretKey(key) ? { masked: true } : {}) });
   }
-  return out;
+  return whole ? out.map((c, i) => ({ c, i })).sort((x, y) => factRank(x.c.key) - factRank(y.c.key) || x.i - y.i).map((x) => x.c) : out;
 }
 
 // ---------------------------------------------------------------- source and user
@@ -225,6 +271,8 @@ export function sourceOf(row) {
   if (s?.channel === 'screen') return { channel: 'screen', label: 'Screen', name: s.name ? String(s.name).replace(/\s*>?\s*\(any [^)]*\)/i, '') : null };
   if (s?.channel === 'api') return { channel: 'api', label: 'API', name: s.name || null };
   if (s?.channel === 'job') return { channel: 'job', label: 'System job', name: s.name || null };
+  // a step read from the record's own columns: who did it is not always kept, which does not make it a job
+  if (s?.channel === 'record') return { channel: 'application', label: 'Application', name: null };
   const action = String(row.action || '');
   const username = String(row.username || '');
   if (username.startsWith('customer:')) return { channel: 'portal', label: 'Customer portal', name: null };
@@ -390,7 +438,7 @@ export async function toEvents(rows, { viewer = null } = {}) {
   const [refs, users, references, anonymised] = await Promise.all([resolveRefs(refIds), usersOf(rows), recordReferences(rows), anonymisedParties(rows)]);
   const base = await formatContext({ viewer, refs, masterLabels });
   return rows.map((r) => {
-    const ctx = { ...base, statusLabels: r.entity === 'claim' ? statusLabels : {}, fieldLabels: masterFields[String(r.entity).slice(7)] || {},
+    const ctx = { ...base, statusLabels: r.entity === 'claim' ? statusLabels : STATUS_LABELS[r.entity] || {}, fieldLabels: masterFields[String(r.entity).slice(7)] || {},
       anonymised: anonymised.has(`${r.entity}|${r.entity_id}`) };
     let changes;
     if (r.changes) {

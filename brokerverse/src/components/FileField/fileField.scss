@@ -1,0 +1,61 @@
+// Themed file picker (components/FileField). Theme CSS variables only.
+
+.bv-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--bv-radius-md);
+  background: var(--color-surface);
+  min-width: 0;
+
+  .p-button {
+    flex: 0 0 auto;
+  }
+}
+
+.bv-file--invalid {
+  border-color: var(--color-danger);
+}
+
+.bv-file--disabled {
+  opacity: 0.6;
+}
+
+// the native control stays in the form (label for, form reset) but out of sight
+.bv-file__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bv-file__name,
+.bv-file__empty {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.bv-file__name {
+  color: var(--color-text);
+}
+
+.bv-file__empty {
+  color: var(--color-text-muted);
+}
+
+.bv-file__size {
+  margin-left: 8px;
+  color: var(--color-text-muted);
+}
+
+.bv-file__clear {
+  flex: 0 0 auto;
+}

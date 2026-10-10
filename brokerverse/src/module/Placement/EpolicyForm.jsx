@@ -13,6 +13,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import { formatDate } from "./shared";
 import { fromIso, isoDate } from "./dates";
+import FileField from "../../components/FileField";
 
 const VEHICLE = ["chassisNumber", "motorNumber", "plateNumber", "mvFileNumber"];
 const AMOUNTS = ["sumInsured", "netPremium", "grossPremium", "commissionAmount"];
@@ -115,18 +116,17 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
     <Dialog className="placement-dialog" header={t("placement.epolicy.title", { number: placement.placementNumber })} visible={visible} onHide={onHide}
       style={{ width: "56rem" }} breakpoints={{ "960px": "96vw" }}
       footer={<><Button label={t("placement.actions.cancel")} text onClick={onHide} /><Button label={t("placement.epolicy.save")} icon="pi pi-upload" loading={busy} onClick={save} /></>}>
-      <p className="muted">{t("placement.epolicy.note")}</p>
       {error && <Message severity="error" className="w-full mb-3" text={error} />}
       <div className="grid">
         <div className="col-12 md:col-6">
           <label htmlFor="ep-file">{t("placement.epolicy.file")} *</label>
-          <input id="ep-file" type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          <FileField id="ep-file" accept=".pdf,.jpg,.jpeg,.png" value={file} onChange={setFile} />
           {!file && placement.epolicy?.documentName && <small className="hint">{t("placement.epolicy.keepFile", { name: placement.epolicy.documentName })}</small>}
         </div>
         {motor && (
           <div className="col-12 md:col-6">
             <label htmlFor="ep-photo">{t("placement.epolicy.vehiclePhoto")}</label>
-            <input id="ep-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
+            <FileField id="ep-photo" accept=".jpg,.jpeg,.png" value={photo} onChange={setPhoto} />
           </div>
         )}
         <div className="col-12 md:col-4">
@@ -160,7 +160,6 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
       {motor && (
         <>
           <h4 className="mt-2 mb-1">{t("placement.epolicy.vehicle")}</h4>
-          <p className="muted mt-0">{t("placement.epolicy.vehicleNote")}</p>
           <div className="grid">
             {VEHICLE.map((k) => (
               <div className="col-12 md:col-3" key={k}>
@@ -186,8 +185,12 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
           </div>
         </>
       )}
-      <label htmlFor="ep-rem" className="mt-2">{t("placement.fields.remarks")}</label>
-      <InputTextarea id="ep-rem" value={form.remarks} onChange={(e) => set("remarks")(e.target.value)} rows={2} className="w-full" />
+      <div className="grid">
+        <div className="col-12">
+          <label htmlFor="ep-rem">{t("placement.fields.remarks")}</label>
+          <InputTextarea id="ep-rem" value={form.remarks} onChange={(e) => set("remarks")(e.target.value)} rows={2} className="w-full" />
+        </div>
+      </div>
     </Dialog>
   );
 };

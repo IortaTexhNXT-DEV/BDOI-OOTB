@@ -13,6 +13,9 @@
  * (the texts are the screen's translations)
  *
  * From an event handler, without state of its own: `await openConfirm({ ...the same props })` (./openConfirm).
+ *
+ * `children` are fields of the screen's own under the facts (components/ReasonDialog puts its ReasonPicker there);
+ * `beforeConfirm()` returning false stops the confirmation, the fields then show what is missing themselves.
  */
 import React, { useEffect, useId, useRef, useState } from "react";
 import PropTypes from "prop-types";
@@ -48,7 +51,7 @@ const outputValue = (input, value) => {
 };
 
 const ConfirmDialog = ({
-  visible, onHide, title, severity, icon, message, facts, note, input, confirmLabel, confirmIcon, cancelLabel, onConfirm, onCancel, className,
+  visible, onHide, title, severity, icon, message, facts, note, input, confirmLabel, confirmIcon, cancelLabel, onConfirm, onCancel, className, children, beforeConfirm,
 }) => {
   const { t } = useTranslation();
   const fieldId = useId();
@@ -83,6 +86,7 @@ const ConfirmDialog = ({
 
   const confirm = async () => {
     if (busyRef.current) return;
+    if (beforeConfirm && beforeConfirm() === false) return;
     const result = input ? outputValue(input, value) : undefined;
     if (input) {
       const problem = input.type === "date" && value && !result ? t("confirmDialog.invalidDate") : problemOf(result);
@@ -230,6 +234,7 @@ const ConfirmDialog = ({
             {fieldError ? <small id={`${fieldId}-error`} className="bv-confirm__field-error" role="alert">{fieldError}</small> : null}
           </div>
         ) : null}
+        {children}
         {note ? <p className="bv-confirm__note">{note}</p> : null}
         {error ? (
           <div className="bv-confirm__error" role="alert">
@@ -298,6 +303,10 @@ ConfirmDialog.propTypes = {
   onConfirm: PropTypes.func,
   onCancel: PropTypes.func,
   className: PropTypes.string,
+  /** fields of the screen's own, under the facts */
+  children: PropTypes.node,
+  /** checked first when the user confirms; false keeps the dialog open without running the action */
+  beforeConfirm: PropTypes.func,
 };
 
 ConfirmDialog.defaultProps = {
@@ -314,6 +323,8 @@ ConfirmDialog.defaultProps = {
   onConfirm: null,
   onCancel: null,
   className: null,
+  children: null,
+  beforeConfirm: null,
 };
 
 export default ConfirmDialog;

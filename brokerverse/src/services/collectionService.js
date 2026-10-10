@@ -152,6 +152,12 @@ class CollectionService {
    * Send due date reminders
    * @returns {Promise<Object>} Result
    */
+  /** What the due-date reminders would send now: { items, clients, withoutEmail, totalOutstanding, byLevel }. */
+  static async getDueDateReminderPreview() {
+    const response = await getRequest("collections/send-due-date-reminders/preview");
+    return response.data;
+  }
+
   static async sendDueDateReminders() {
     try {
       const response = await postRequest("collections/send-due-date-reminders");

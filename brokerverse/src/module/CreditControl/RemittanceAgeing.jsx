@@ -5,6 +5,8 @@ import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { ColumnGroup } from "primereact/columngroup";
+import { Row } from "primereact/row";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
@@ -41,6 +43,18 @@ const RemittanceAgeing = () => {
   useEffect(() => { load(); }, [load]);
 
   const labels = bucketLabels(data?.bucketDays, t);
+  // the totals row lines up with the bucket columns: each bucket's total, then the grand total and the item count
+  const rows = data?.insurers || [];
+  const sum = (key) => rows.reduce((a, r) => a + (Number(r[key]) || 0), 0);
+  const totals = rows.length ? (
+    <ColumnGroup>
+      <Row>
+        <Column footer={`${t("creditControl.total")} (${data.summary.count})`} />
+        {BUCKETS.map((b) => <Column key={b} footer={money(sum(b))} footerClassName="bv-num" />)}
+        <Column footer={<b>{money(data.summary.total)}</b>} footerClassName="bv-num" />
+      </Row>
+    </ColumnGroup>
+  ) : null;
   return (
     <div className="pe-page">
       <Toast ref={toast} />
@@ -55,7 +69,7 @@ const RemittanceAgeing = () => {
         </div>
         {/* the summary keeps the height of a few insurers and its total line from the start, so the detail below does not jump */}
         <DataTable value={data?.insurers || []} dataKey="insurerId" loading={loading} size="small" stripedRows emptyMessage={data ? t("creditControl.none") : " "}
-          className="bv-hold-rows-5" footer={`${t("creditControl.total")}: ${data ? `${money(data.summary.total)} (${data.summary.count})` : "-"}`}>
+          className="bv-hold-rows-5" footerColumnGroup={totals}>
           <Column field="insurerName" header={t("creditControl.insurer")} />
           {BUCKETS.map((b) => <Column key={b} header={labels[b]} body={(r) => money(r[b])} className="bv-num" headerClassName="bv-num" />)}
           <Column header={t("creditControl.total")} body={(r) => <b>{money(r.total)}</b>} className="bv-num" headerClassName="bv-num" />

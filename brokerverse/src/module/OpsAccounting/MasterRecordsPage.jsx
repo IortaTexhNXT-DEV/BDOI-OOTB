@@ -18,15 +18,24 @@ import mastersService from "../../services/mastersService";
 import service from "../../services/opsAccountingService";
 import userService from "../../services/userService";
 import { openConfirm } from "../../components/ConfirmDialog";
+import { humanize } from "../../components/ActivityLog";
 import { Field, OpsTag, PageHeader, blank, isoOf, showError, showSuccess, toDate, useFieldErrors } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+// whole numbers of days: payment terms, follow-up days, maximum days in force
+const DAY_FIELDS = /Days$/;
 const display = (f, v, t) => {
   if (v === null || v === undefined || v === "") return "";
   if (f.type === "boolean") return v === true || v === "true" ? t("detailView.yes") : t("detailView.no");
-  const option = Array.isArray(f.options) ? f.options.find((o) => o?.value === v) : null;
-  if (option) return option.label;
+  if (DAY_FIELDS.test(f.name) && Number.isFinite(Number(v))) return t("opsAcc.masters.days", { count: Number(v) });
+  // "*" matches every line of business or claim type
+  if (v === "*") return t("opsAcc.masters.anyValue");
+  if (f.type === "select" && Array.isArray(f.options)) {
+    const option = f.options.find((o) => (o && typeof o === "object" ? o.value : o) === v);
+    if (option && typeof option === "object") return String(option.label ?? v);
+    return humanize(String(v));
+  }
   return String(v);
 };
 // a field picked from another master (optionsFrom) or from the users: a field named ...Code keeps the code, any other the name
@@ -39,15 +48,35 @@ const lookup = async (f) => {
 /** A select field whose values have business labels: its options as { label, value } (the stored value stays the code). */
 const withLabels = (f, label) => (label && Array.isArray(f.options) ? { ...f, options: f.options.map((value) => ({ label: label(value), value })) } : f);
 
+// the label without the hint it carries on the form ("Line of Business (* = all)")
+const plainLabel = (label) => String(label || "").replace(/\s*\([^)]*\)\s*$/, "");
+
+// the fields that name a record: its code and its name, or the first text fields of the master
+const NAME_FIELDS = /^(name|documentName|title|description)$/;
+const recordName = (r, fields) => {
+  const code = r.code ? String(r.code) : "";
+  const nameField = fields.find((f) => NAME_FIELDS.test(f.name) && r[f.name]);
+  const name = nameField ? String(r[nameField.name]) : "";
+  return [code, name].filter(Boolean).join(" ") || String(r.id);
+};
+// the record as people call it: its name, else its code
+const shortName = (r, fields) => {
+  const nameField = fields.find((f) => NAME_FIELDS.test(f.name) && r[f.name]);
+  return nameField ? String(r[nameField.name]) : String(r.code || r.id || "");
+};
+// select options as the list shows them: a plain code is put in words, a { label, value } option keeps its label
+const optionsOf = (options) => options.map((o) => (o && typeof o === "object" ? o : { label: humanize(String(o)), value: o }));
+
 /**
  * A master kept on the generic master store and maintained by the team that uses it (Repair Shops, Suppliers, Asset
  * Classes, Short-Period Rates, Cancellation Reasons, Claim Document Checklist): list, add, edit, activate / deactivate.
  * The fields come from the master type definition, so a field added on Master > Configuration shows here too; a field
- * taken from another master or from the users is a list (it stays a text box when the list cannot be read).
+ * taken from another master or from the users is a list (it stays a text box when the list cannot be read). `item`
+ * names one record of the master ("supplier") for the titles of the add and edit panels.
  * `optionLabels` gives the business labels of the values of a select field ({ field: (value) => label }); `filterBy`
  * names a select field offered as a filter above the list.
  */
-const MasterRecordsPage = ({ type, title, group, section, help, columns, optionLabels, filterBy }) => {
+const MasterRecordsPage = ({ type, title, item, group, section, help, columns, optionLabels, filterBy }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
@@ -107,11 +136,16 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns, optionL
   };
   const toggle = async (r) => {
     const action = r.isActive ? "deactivate" : "activate";
+    // the code and name are in the title; the facts are the other fields of the list, as they are shown there
+    const named = ["code", ...fields.filter((f) => NAME_FIELDS.test(f.name)).slice(0, 1).map((f) => f.name)];
     const ok = await openConfirm({
-      title: t(`opsAcc.confirmations.master.${action}Title`, { name: title }),
+      title: t(`opsAcc.confirmations.master.${action}Title`, { name: recordName(r, fields) }),
       severity: r.isActive ? "warning" : "neutral",
       message: t(`opsAcc.confirmations.master.${action}Message`),
-      facts: shown.slice(0, 3).map((f) => ({ label: f.label, value: display(f, r[f.name], t) })),
+      facts: [
+        ...shown.filter((f) => !named.includes(f.name) && f.type !== "text").slice(0, 4)
+          .map((f) => ({ label: plainLabel(f.label), value: display(f, r[f.name], t), hidden: display(f, r[f.name], t) === "" })),
+      ],
       confirmLabel: t(`opsAcc.${action}`),
     });
     if (!ok) return;
@@ -130,7 +164,7 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns, optionL
       const options = v && !lists[f.name].some((o) => o.value === v) ? [{ label: String(v), value: v }, ...lists[f.name]] : lists[f.name];
       return <Dropdown inputId={`f-${f.name}`} value={v ?? null} options={options} onChange={(e) => set(f.name, e.value)} className="w-full" filter showClear placeholder={t("opsAcc.select", "Select")} />;
     }
-    if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
+    if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={optionsOf(f.options)} optionLabel="label" optionValue="value" onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
     if (f.type === "multiselect" && Array.isArray(f.options)) return <MultiSelect value={Array.isArray(v) ? v : []} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" display="chip" />;
     if (f.type === "date") return <Calendar value={toDate(v)} onChange={(e) => set(f.name, isoOf(e.value))} dateFormat="yy-mm-dd" showIcon showButtonBar className="w-full" />;
     if (f.type === "number" || f.type === "integer") {
@@ -166,8 +200,8 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns, optionL
           )} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={edit?.id ? t("opsAcc.masters.edit", { name: title }) : t("opsAcc.masters.new", { name: title })} visible={!!edit} style={{ width: "min(720px, 96vw)" }}
-        onHide={() => open(null)} footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => open(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
+      <Dialog className="pe-dialog" header={edit?.id ? t("opsAcc.masters.editItem", { item: item || title, name: shortName(edit.values, fields) }) : t("opsAcc.masters.newItem", { item: item || title })} visible={!!edit} style={{ width: "min(720px, 96vw)" }}
+        onHide={() => open(null)} footer={<div><Button label={t("opsAcc.cancel")} outlined onClick={() => open(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
         {edit && <div className="grid">{fields.map((f) => <Field key={f.name} label={f.label} required={f.required && !f.numbering} error={errors[f.name]}>{input(f)}</Field>)}</div>}
       </Dialog>
     </div>

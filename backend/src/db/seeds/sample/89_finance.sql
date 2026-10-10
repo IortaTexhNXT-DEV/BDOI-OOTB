@@ -324,7 +324,7 @@ BEGIN
         bal_amount, total_amount, bank_code, bank_amount, is_invoice_paid, status, source, created_by)
       VALUES (next_number('invoice-list', pg_temp.fin_setting('numbering.invoice_list.prefix', 'IL')), CASE WHEN p.rn <= 4 THEN v_pv END, p.client_code, p.client_id, p.ic_id, p.id, p.policy_number, 'Insurer',
         p.amount, v_net0, p.amount, p.commission_amount, v_net0, v_net0, 'MBT', p.amount, true,
-        CASE WHEN p.rn <= 2 THEN 'paid' WHEN p.rn = 3 THEN 'in-voucher' ELSE 'open' END, 'seed', v_admin)
+        CASE WHEN p.rn = 1 THEN 'paid' WHEN p.rn <= 3 THEN 'in-voucher' ELSE 'open' END, 'seed', v_admin)
       RETURNING id INTO v_cm;
       UPDATE receipt_applications SET remitted_invoice_id = v_cm WHERE receivable_id = p.rcv_id;
       IF p.rn <= 3 THEN
@@ -363,17 +363,17 @@ BEGIN
       UPDATE petty_cash_funds SET journal_id = pg_temp.fin_jv(current_date - 20, 'Petty cash fund ' || code || ' established', 'petty-cash', 'PETTY_CASH_FUND', transaction_number, 'PettyCash', id, NULL, NULL, NULL, NULL,
         jsonb_build_array(jsonb_build_object('a',main_account,'d',fund_size,'m','Fund ' || code), jsonb_build_object('a',pg_temp.fin_cash('check'),'c',fund_size,'m','Cheque to custodian')), v_admin)
       WHERE code IN ('PCF-MKT', 'PCF-CEB') AND journal_id IS NULL;
-      INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, request_date, department_code, purpose, total_amount, status, approved_by, approved_at, created_by)
-      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Ana Reyes', current_date - 4, '20', 'Courier and office supplies', 1850, 'disbursed', v_admin, now() - interval '3 days', v_admin
+      INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, request_date, department_code, purpose, total_amount, status, approved_by, approved_at, created_by, created_at)
+      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Ana Reyes', current_date - 4, '20', 'Courier and office supplies', 1850, 'disbursed', v_admin, now() - interval '3 days', v_admin, now() - interval '4 days'
       FROM petty_cash_funds WHERE code = 'PCF-MKT';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'LBC courier – e-policies to clients', 650, '612881' FROM petty_cash_requests WHERE purpose = 'Courier and office supplies';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'Bond paper and toner', 1200, '640400' FROM petty_cash_requests WHERE purpose = 'Courier and office supplies';
       INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, request_date, department_code, purpose, total_amount, status, created_by)
       SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Mark Tolentino', current_date, '10', 'Dealer visit meals', 950, 'submitted', v_admin FROM petty_cash_funds WHERE code = 'PCF-MKT';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'Meals – Toyota Makati sales team briefing', 950, '600562' FROM petty_cash_requests WHERE purpose = 'Dealer visit meals';
-      INSERT INTO petty_cash_disbursements(transaction_number, transaction_code, fund_id, request_id, criteria, expense_account, amount, vat, wht, net_amount, vat_account, wht_account, remarks, disbursement_date, created_by)
+      INSERT INTO petty_cash_disbursements(transaction_number, transaction_code, fund_id, request_id, criteria, expense_account, amount, vat, wht, net_amount, vat_account, wht_account, remarks, disbursement_date, created_by, created_at)
       SELECT next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 'PCD', f.id, r.id, 'Specific', '640400', 1850, 198.21, 0, 1850, pg_temp.fin_acct('input_vat'),
-        pg_temp.fin_acct('wht_payable'), 'Courier and office supplies', current_date - 3, v_admin
+        pg_temp.fin_acct('wht_payable'), 'Courier and office supplies', current_date - 3, v_admin, now() - interval '3 days'
       FROM petty_cash_funds f JOIN petty_cash_requests r ON r.fund_id = f.id AND r.purpose = 'Courier and office supplies' WHERE f.code = 'PCF-MKT';
       UPDATE petty_cash_disbursements d SET journal_id = pg_temp.fin_jv(current_date - 3, 'Petty cash PCF-MKT: Courier and office supplies', 'petty-cash', 'PETTY_CASH_DISBURSEMENT', d.transaction_number, 'PettyCash', d.id,
         NULL, NULL, NULL, NULL, jsonb_build_array(jsonb_build_object('a','612881','d',580.36,'m','LBC courier – e-policies to clients'), jsonb_build_object('a','640400','d',1071.43,'m','Bond paper and toner'),

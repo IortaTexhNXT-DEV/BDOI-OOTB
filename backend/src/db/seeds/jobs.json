@@ -72,7 +72,7 @@
   {
     "code": "dormant-users",
     "name": "Dormant accounts",
-    "description": "Deactivate active accounts with no sign-in for access.dormant_days days (the built-in administrator excepted)",
+    "description": "Deactivate active accounts with no sign-in within the dormancy period (the built-in administrator excepted)",
     "cron": "45 1 * * *",
     "handler": "dormantUsers"
   },

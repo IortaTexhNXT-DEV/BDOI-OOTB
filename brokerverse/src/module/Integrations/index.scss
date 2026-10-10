@@ -1,18 +1,22 @@
 // Integration screens (Master > System Configuration > Integrations and the screens built on the framework):
 // the pe-* page frame of the Period End screens, plus the payload / file previews.
-.pe-page {
-  .pe-pre {
-    background: #f8fafc;
-    border: 1px solid #e5e9f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    max-height: 22rem;
-    overflow: auto;
-    font-size: 0.8rem;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
 
+// payload and message previews, on the page and in the edit panels (which open outside the page)
+.pe-page .pe-pre,
+.pe-dialog .pe-pre {
+  max-width: 100%;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  max-height: 22rem;
+  overflow: auto;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pe-page {
   .int-mono {
     font-family: monospace;
   }

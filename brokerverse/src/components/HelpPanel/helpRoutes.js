@@ -78,6 +78,8 @@ export const HELP_ROUTES = [
   ["/accounts/paymentvoucher", "disbursement-payment-vouchers-and-cheques"],
   ["/finance/remittance", "remittance-to-insurers"],
   ["/finance/remittance/directbill", "direct-bill-commission-debit-notes"],
+  ["/finance/remittance/billing", "direct-bill-commission-debit-notes"],
+  ["/finance/remittance/reconciliation", "insurer-statement-reconciliation"],
   ["/accounts/journalvoucher", "journal-vouchers"],
   ["/accounts/correctionsjv", "journal-vouchers"],
   ["/accounts/reversaljv", "journal-vouchers"],

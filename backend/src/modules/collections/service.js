@@ -99,7 +99,7 @@ export async function listCollections(db, q, pg) {
   const sort = SORTS[q.sortField] || 'due_date';
   const dir = String(q.sortOrder).toLowerCase() === 'desc' ? 'DESC' : 'ASC';
   const rows = (await db.query(`SELECT * FROM (${BASE}) y ${f.where} ORDER BY ${sort} ${dir} NULLS LAST, id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset])).rows;
-  return { rows: rows.map(itemRow), total };
+  return { rows: rows.map(itemRow), total, overdueLevels: [t.l1, t.l2] };
 }
 
 export async function getCollection(db, id) {
@@ -170,12 +170,39 @@ export async function sendEmail(db, id, body, user) {
  * Due-date reminders: items due within collections.reminder_days_before days or overdue, not reminded within
  * collections.reminder_repeat_days. Queues a client e-mail and notifies the policy owner.
  */
-export async function sendDueDateReminders(db, user) {
+async function reminderCandidates(db) {
   const t = await thresholds();
   const before = Number(await getSetting('collections.reminder_days_before', 7));
   const repeat = Number(await getSetting('collections.reminder_repeat_days', 7));
-  const rows = (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - $7::date <= $8
+  return (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - $7::date <= $8
     AND (last_reminder_at IS NULL OR last_reminder_at < now() - ($9 || ' days')::interval)`, [...baseParams(t), before, String(repeat)])).rows;
+}
+
+/**
+ * What sendDueDateReminders would send now, for its confirmation: the items, the clients (and those without an
+ * e-mail address), the amount outstanding and the items by overdue level.
+ */
+export async function dueDateReminderPreview(db) {
+  const t = await thresholds();
+  const items = (await reminderCandidates(db)).map(itemRow);
+  const byLevel = {};
+  for (const x of items) {
+    const level = x.overdueLevel || 'Current';
+    byLevel[level] ||= { level, count: 0, amount: 0 };
+    byLevel[level].count += 1;
+    byLevel[level].amount = round2(byLevel[level].amount + x.outstandingAmount);
+  }
+  return {
+    items: items.length, clients: new Set(items.map((x) => x.clientId)).size,
+    withoutEmail: new Set(items.filter((x) => !x.client.email).map((x) => x.clientId)).size,
+    totalOutstanding: round2(items.reduce((sum, x) => sum + x.outstandingAmount, 0)), byLevel: Object.values(byLevel),
+    // the day bands of the levels (collections.overdue_levels): level 1 up to the first, level 2 up to the second, level 3 beyond
+    overdueLevels: [t.l1, t.l2],
+  };
+}
+
+export async function sendDueDateReminders(db, user) {
+  const rows = await reminderCandidates(db);
   const subjectTpl = await getSetting('collections.email_subject');
   const bodyTpl = await getSetting('collections.email_template');
   let emails = 0; let notifications = 0; const skipped = [];

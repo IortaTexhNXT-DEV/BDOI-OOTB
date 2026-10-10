@@ -61,7 +61,10 @@ const ROLE_PERMS = {
     // accounts payable sub-ledger and fixed asset register (permissions of migration 0298)
     'payables', 'fixed-assets',
     // full personal identifiers for BIR forms and payees' bank accounts (migration 0276)
-    'pii:view'],
+    'pii:view',
+    // remittance approvals of another user's remittances, settlements, adjustments and transfers, within the Authority
+    // Matrix limit (migration 0400); the Accounting Manager has it through Accounting
+    'remittance:approve'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and
@@ -119,13 +122,15 @@ Object.assign(ROLE_PERMS, {
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
   'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
     'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
-    'period-end', 'period-end:approve', 'bank-reconciliation', 'bank-reconciliation:approve', 'posting-rules:write', 'posting-rules:approve', 'credit-control:approve'],
+    'period-end', 'period-end:approve', 'bank-reconciliation', 'bank-reconciliation:approve', 'posting-rules:write', 'posting-rules:approve', 'credit-control:approve',
+    // the proposed remittance approvers with the General Manager (migration 0400), until TISPH names them
+    'remittance:approve'],
   'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
     'integrations', 'schedules', 'audit:read'],
   'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
-    'roles:read', 'access-control:read'],
+    'roles:read', 'access-control:read', 'remittance:approve'],
 });
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };

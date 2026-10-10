@@ -18,6 +18,7 @@ import { migrate } from '../src/db/migrate.js';
 import { seed } from '../src/db/seed.js';
 import { createApp } from '../src/app.js';
 import { withCalendarFiscalYear, withoutManualSignOffs } from './helpers.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { cancelJournal, createJournal } from '../src/modules/accounting/lib/ledger.js';
 import { readWorkbook, readXlsx } from '../src/modules/documents/xlsx.js';
@@ -117,11 +118,10 @@ describe('generated upload templates', () => {
     expect(defs.find((x) => x.id === 'remittance-bulk').columns.map((c) => c.header)).toEqual(maps.map((m) => m.sourceField));
   });
 
-  it('the CSV-only templates match the readers outside the API (provisioning script, reconciliation screen)', () => {
+  // the remittance reconciliation screen that read the bank transactions CSV in the browser is retired (R1)
+  it('the CSV-only templates match the readers outside the API (provisioning script)', () => {
     const script = fs.readFileSync(path.join(here, '..', 'scripts', 'provision-users.js'), 'utf8');
     for (const c of defs.find((x) => x.id === 'users').columns) expect(script).toContain(`col('${c.header}')`);
-    const screen = fs.readFileSync(path.join(repo, 'brokerverse', 'src', 'module', 'Remittance', 'Reconciliation', 'index.js'), 'utf8');
-    for (const c of defs.find((x) => x.id === 'remittance-bank-transactions').columns) expect(screen).toContain(`"${c.header.toLowerCase()}"`);
   });
 });
 
@@ -206,6 +206,9 @@ describe('upload coverage', () => {
   });
 
   it('the statement imports and the remittance bulk upload offer their template on the screen', async () => {
+    // the bulk upload of earlier releases, while it is open (TISPH closes it: Import policy list)
+    await query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.bulk_upload_enabled'");
+    clearSettingsCache();
     for (const [route, id] of [['/bank-reconciliation/statements/template', 'bank-statement'], ['/insurer-reconciliation/statements/template', 'insurer-statement'], ['/remittance/bulk/template', 'remittance-bulk']]) {
       const r = await api('get', route).buffer(true).parse(binary);
       expect(r.status, route).toBe(200);

@@ -6,7 +6,6 @@ import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { TabView, TabPanel } from "primereact/tabview";
 import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -37,6 +36,7 @@ import CustomerResponseActions from "../customerResponse/CustomerResponseActions
 import UnderwritingReferralPanel from "../underwritingReferral/UnderwritingReferralPanel";
 import ActivityPanel from "../../../components/SalesActivities/ActivityPanel";
 import logger from "../../../utility/logger";
+import DetailSection from "../../../components/DetailSection";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -66,7 +66,6 @@ const QuoteDetailView = ({ action }) => {
   const [relatedPolicy, setRelatedPolicy] = useState(null);
   const [checkingPolicy, setCheckingPolicy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
 
   // Get quotation ID from URL path parameter, navigation state, or query params
   const quotationIdFromParams = quotationIdFromUrl || state?.quotationId;
@@ -141,9 +140,15 @@ const QuoteDetailView = ({ action }) => {
   const firePremiumDetails = quotationData?.firePremiumDetails || quotationData?.firePremium || {};
   const iarPremiumDetails = quotationData?.iarPremiumDetails || {};
   const iarSections = quotationData?.iarSections || [];
-  const iarScheduleSections =
-    iarPremiumDetails?.sections ||
-    (Array.isArray(iarSections) ? iarSections : []);
+  const iarSectionsGiven = iarPremiumDetails?.sections || (Array.isArray(iarSections) ? iarSections : []);
+  // a quotation priced on its sums insured alone (sample data, a migrated quotation) shows one row per sum insured,
+  // priced at the quotation's rate, as its printed quotation does
+  const iarScheduleSections = iarSectionsGiven.length
+    ? iarSectionsGiven
+    : Object.entries(quotationData?.fireRiskDetails?.sumInsured || {}).filter(([, si]) => Number(si) > 0).map(([key, si]) => ({
+      sectionCode: key, sectionLabel: t(`endorsementSummary.${key.charAt(0).toLowerCase()}${key.slice(1)}`, { defaultValue: key.replace(/([a-z])([A-Z])/g, "$1 $2") }),
+      sectionSumInsured: Number(si), sectionPremium: quotationData?.firePremiumDetails?.rate ? (Number(si) * Number(quotationData.firePremiumDetails.rate)) / 100 : null, items: [],
+    }));
   const fireSumInsured = firePremiumDetails?.sumInsured || {};
   // a fire quotation priced outside the fire wizard (a renewal, an imported policy) has no premium schedule: its
   // premium and sum insured are the quotation's own figures
@@ -371,9 +376,9 @@ const QuoteDetailView = ({ action }) => {
     : null;
   const joinName = (p) => [p?.firstName, p?.lastName].filter(Boolean).join(" ");
   const assured = {
-    name: joinName(quoteLead) || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
-    email: quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
-    phone: quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
+    name: quotationData?.insured?.name || joinName(quoteLead) || quoteLead?.companyName || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
+    email: quotationData?.insured?.emailId || quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
+    phone: quotationData?.insured?.contactNumber || quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
   };
 
   // Send quote for customer approval
@@ -490,14 +495,9 @@ const QuoteDetailView = ({ action }) => {
       </div>
       <UnderwritingReferralPanel quotation={quotationData} onDecided={loadQuotation} />
       <Card className="mt-4">
-        <TabView
-          activeIndex={activeTab}
-          onTabChange={(e) => setActiveTab(e.index)}
-        >
-          <TabPanel header={t("quoteDetailView.details")}>
+        <div>
             <div className="table_header">{t("quoteDetailView.quoteDetails")}</div>
             <div className="quote_details">
-              <label>{t("quoteDetailView.pleaseCheckQuoteDetails")}</label>
               <div
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
@@ -702,20 +702,17 @@ const QuoteDetailView = ({ action }) => {
 
                 <div className="sub_title">
                   <label className="policy_text">
-                    {t("iarLead.scheduleOfCover", "Schedule of Cover")}
+                    {t("quoteDetailView.scheduleOfCover")}
                   </label>
                   <div className="qdv-iar-schedule-wrap">
                     <table className="qdv-iar-schedule-table w-full">
                       <thead>
                         <tr>
                           <th>
-                            {t(
-                              "iarLead.sectionItemPerils",
-                              "SECTION / ITEM / PERILS"
-                            )}
+                            {t("quoteDetailView.scheduleSection")}
                           </th>
-                          <th>{t("iarLead.sumInsured", "SUM INSURED")}</th>
-                          <th>{t("iarLead.premium", "PREMIUM")}</th>
+                          <th>{t("quoteDetailView.scheduleSumInsured")}</th>
+                          <th>{t("quoteDetailView.schedulePremium")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1107,6 +1104,16 @@ const QuoteDetailView = ({ action }) => {
                       {formatCurrency(calculatedPremiums?.valueAddedTax)}
                     </label>
                   </div>
+                  {[
+                    ["documentaryStampTax", t("quoteDetailView.dst", "Documentary stamp tax")],
+                    ["localGovernmentTax", t("quoteDetailView.lgt", "Local government tax")],
+                    ["fireServiceTax", t("quoteDetailView.fst", "Fire service tax")],
+                  ].filter(([key]) => Number(quotationData?.[key]) > 0).map(([key, label]) => (
+                    <div className="quote_details" key={key}>
+                      <label className="insurance_text">{label}</label>
+                      <label className="alpha_text">{formatCurrency(quotationData[key])}</label>
+                    </div>
+                  ))}
                   <div className="quote_details">
                     <label className="insurance_text">
                       {t("quoteDetailView.discount", "Discount")}
@@ -1243,25 +1250,14 @@ const QuoteDetailView = ({ action }) => {
                 </>
               )}
             </div>
-          </TabPanel>
-          <TabPanel header={t("salesActivities.title")}>
-            {(quotationData?.quotationId || quotationIdFromParams) && (
-              <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
-            )}
-          </TabPanel>
-          <TabPanel header={t("quoteDetailView.auditTrail")}>
-            <QuotationAuditTrail
-              quotationId={quotationData?.quotationId || quotationIdFromParams}
-            />
-          </TabPanel>
-        </TabView>
+        </div>
       </Card>
-      {activeTab === 0 && (
+      {(
         <div className="button_component">
           <Button
             label={t("quoteDetailView.share")}
-            text
-            className="download_button"
+            icon="pi pi-share-alt"
+            outlined
             onClick={() => setModalVisible(true)}
           />
           {(quotationData?.quotationStatus === "CustomerAccepted" ||
@@ -1342,6 +1338,15 @@ const QuoteDetailView = ({ action }) => {
             )}
         </div>
       )}
+      {/* the sales activities and the audit trail of the quotation are sections of the page, not thin tabs */}
+      {(quotationData?.quotationId || quotationIdFromParams) && (
+        <DetailSection title={t("salesActivities.title")} className="mt-4">
+          <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
+        </DetailSection>
+      )}
+      <DetailSection title={t("quoteDetailView.auditTrail")} className="mt-4">
+        <QuotationAuditTrail quotationId={quotationData?.quotationId || quotationIdFromParams} />
+      </DetailSection>
       <ShareOption
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}

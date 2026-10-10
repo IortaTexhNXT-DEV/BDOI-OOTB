@@ -3,8 +3,11 @@ import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
+import { formatValue } from "../../../components/KeyValueGrid";
+import { useTranslation } from "react-i18next";
 
 const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
+  const { t } = useTranslation();
 
   const template2 = {
     layout:
@@ -66,6 +69,14 @@ const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
           field="remarks"
           header="Remarks"
           className="fieldvalue_container"
+        ></Column>
+        <Column
+          field="localAmount"
+          header={t("accounts.correctionJVForm.amount")}
+          body={(r) => formatValue(r.localAmount, { type: "amount" })}
+          className="fieldvalue_container"
+          bodyClassName="bv-num"
+          headerClassName="bv-num"
         ></Column>
         <Column
           field="entryType"

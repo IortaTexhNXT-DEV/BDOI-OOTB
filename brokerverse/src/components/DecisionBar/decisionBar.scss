@@ -1,0 +1,32 @@
+// Decision footer of an approval (components/DecisionBar). Theme CSS variables only.
+
+.bv-decision-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.bv-decision-bar__authority {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.bv-decision-bar__item::before {
+  content: "·";
+  margin-right: 4px;
+  color: var(--color-text-muted);
+}
+
+.bv-decision-bar__buttons {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}

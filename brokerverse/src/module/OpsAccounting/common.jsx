@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tag } from "primereact/tag";
 import SharedPageHeader from "../../components/PageHeader";
-import { statusSeverity } from "../../utils/statusSeverity";
+import { statusLabel, statusSeverity } from "../../utils/statusSeverity";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
 
@@ -12,7 +12,8 @@ export { date, dateTime, money, showError, showSuccess };
 export const OpsTag = ({ status }) => {
   const { t } = useTranslation();
   if (!status) return null;
-  return <Tag className="pe-tag" value={t(`opsAcc.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={statusSeverity(status)} />;
+  // the label as translated, in sentence case like the status of the detail views (no capitalised words)
+  return <Tag className="pe-tag pe-tag--label" value={t(`opsAcc.status.${status}`, { defaultValue: statusLabel(status) })} severity={statusSeverity(status)} />;
 };
 
 /**

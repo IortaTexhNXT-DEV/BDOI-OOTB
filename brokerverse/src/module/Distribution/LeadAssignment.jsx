@@ -12,6 +12,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
+import auditService from "../../services/auditService";
 import mastersService from "../../services/mastersService";
 import addressService from "../../services/addressService";
 import useMasterOptions from "../../agentModule/component/useMasterOptions";
@@ -19,7 +20,7 @@ import { hasPermission } from "../../utils/canOpen";
 import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
-import { ActivityLog, fromAssignmentHistory } from "../../components/ActivityLog";
+import { ActivityLog, fromAssignmentHistory, fromAuditEvents } from "../../components/ActivityLog";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
 import { lobChoices, useProductLines } from "../Sales/salesProducts";
 import ReassignDialog from "./ReassignDialog";
@@ -222,8 +223,11 @@ const LeadAssignment = () => {
   const openHistory = async (lead) => {
     setHistory({ lead, entries: [], loading: true, error: null });
     try {
-      const rows = await service.assignmentHistory(lead.id);
-      setHistory({ lead, entries: fromAssignmentHistory(rows), loading: false, error: null });
+      // the assignment moves, with the prospect's own trail (created, assigned on capture) around them
+      const [rows, trail] = await Promise.all([service.assignmentHistory(lead.id), auditService.getRecordHistory("lead", lead.id).catch(() => ({ events: [] }))]);
+      const assignments = fromAssignmentHistory(rows);
+      const own = fromAuditEvents(trail.events).filter((e) => !(assignments.length && /assign/.test(e.actionCode || "")));
+      setHistory({ lead, entries: [...assignments, ...own], loading: false, error: null });
     } catch (e) {
       setHistory({ lead, entries: [], loading: false, error: e?.message || true });
     }
@@ -249,7 +253,7 @@ const LeadAssignment = () => {
   const leadColumns = (list) => [
     <Column key="sel" selectionMode="multiple" headerStyle={{ width: "3rem" }} />,
     <Column key="no" field="leadNumber" header={t("distribution.la.lead", "Prospect")} body={(r) => <span>{r.leadNumber}<br /><span className="pe-muted">{r.name}</span></span>} />,
-    <Column key="status" field="status" header={t("distribution.common.status", "Status")} />,
+    <Column key="status" header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />,
     <Column key="lob" header={t("distribution.la.lob", "Line")} body={(r) => (r.lob ? <span>{r.lob}{r.productName ? <><br /><span className="pe-muted">{r.productName}</span></> : null}</span>
       : <span className="pe-muted">{untaggedOption.label}</span>)} />,
     <Column key="where" header={t("distribution.la.territory", "Territory")} body={(r) => [r.city, r.province].filter(Boolean).join(", ")} />,
@@ -282,8 +286,7 @@ const LeadAssignment = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.la.title", "Lead Assignment")}
-        subtitle={t("distribution.la.subtitle", "Who works each prospect: the team view by reporting line, the reassignment queue and the assignment rules.")} />
+      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.la.title", "Lead Assignment")} />
       <div className="pe-card">
         <TabView activeIndex={tab} onTabChange={(e) => { setTab(e.index); setSelected([]); }}>
           <TabPanel header={t("distribution.la.team", "Team View")}>
@@ -312,8 +315,7 @@ const LeadAssignment = () => {
             </DataTable>
           </TabPanel>
           {manage ? (
-            <TabPanel header={`${t("distribution.la.queue", "Reassignment Queue")} (${queue.length})`}>
-              <p className="pe-muted mt-0">{t("distribution.la.queueHelp", "Prospects no rule could assign, whose account executive is no longer active, that were not worked in time or that were sent here by hand.")}</p>
+            <TabPanel header={t("distribution.la.queue", "Reassignment Queue")}>
               <div className="dist-toolbar">
                 <span className="p-input-icon-left">
                   <i className="pi pi-search" />

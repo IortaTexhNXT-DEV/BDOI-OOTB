@@ -21,6 +21,7 @@ import SvgBackicon from "../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { printPdf } from "../../components/Print";
+import { formatCurrency } from "../../utility/currencyConverter";
 
 const toCorrectionEntry = (row) => ({
   mainAccount: row.mainAccount,
@@ -340,9 +341,8 @@ const CorrectionJV = () => {
                 disabled={true}
                 classNames="input__field__reversal__inactive"
                 className="input__label__reversal"
-                label="Total credit"
-                placeholder="Enter"
-                value={totalForeignAmount}
+                label={t("accounts.correctionJVForm.totalCredit")}
+                value={formatCurrency(totalForeignAmount)}
               />
             </div>
             <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -350,9 +350,8 @@ const CorrectionJV = () => {
                 disabled={true}
                 classNames="input__field__reversal__inactive"
                 className="input__label__reversal"
-                label="Total Debit"
-                placeholder="Enter"
-                value={totalLocalAmount}
+                label={t("accounts.correctionJVForm.totalDebit")}
+                value={formatCurrency(totalLocalAmount)}
               />
             </div>
             <div className="col-12 md:col-3 lg:col-3 xl:col-3 input__view__reversal">
@@ -360,9 +359,8 @@ const CorrectionJV = () => {
                 disabled={true}
                 classNames="input__field__reversal__inactive"
                 className="input__label__reversal"
-                label="Net"
-                placeholder="Enter"
-                value={totalForeignAmount - totalLocalAmount}
+                label={t("accounts.correctionJVForm.difference")}
+                value={formatCurrency(totalForeignAmount - totalLocalAmount)}
               />
             </div>
           </div>

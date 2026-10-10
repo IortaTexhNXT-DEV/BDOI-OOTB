@@ -104,6 +104,25 @@ const PlacementDetail = () => {
     await load();
     return out;
   };
+  // the firm order goes to every insurer still on the slip; the confirmation names them and the slip
+  const sendToInsurers = async () => {
+    const insurers = p.participants.filter((x) => x.status !== "declined");
+    let out = null;
+    const done = await openConfirm({
+      title: t(p.status === "draft" ? "placement.send.title" : "placement.send.resendTitle", { number: p.placementNumber }),
+      message: t("placement.send.message", { count: insurers.length }),
+      facts: [
+        ...slipFacts(),
+        ...insurers.map((x) => ({ label: x.isLead ? t("placement.send.leadInsurer") : t("placement.send.coInsurer"), value: `${x.insuranceCompanyName} · ${x.sharePercent}%` })),
+      ],
+      confirmLabel: t(p.status === "draft" ? "placement.actions.sendToInsurers" : "placement.actions.resend"),
+      confirmIcon: "pi pi-send",
+      onConfirm: async () => { out = await placementService.sendPlacement(p.id); },
+    });
+    if (!done) return;
+    notify("success", withQueuedNotice(t("placement.messages.sent", { count: out?.sent?.length || 0 }), emailSending));
+    await load();
+  };
   const recordDecline = (x) => confirmAct({
     title: t("placement.decline.title", { insurer: x.insuranceCompanyName }),
     severity: "danger",
@@ -160,7 +179,7 @@ const PlacementDetail = () => {
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
         {write && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}
           severity={p.status === "draft" ? undefined : "secondary"} outlined={p.status !== "draft"}
-          onClick={() => act(() => placementService.sendPlacement(p.id), (r) => withQueuedNotice(t("placement.messages.sent", { count: r.sent?.length || 0 }), emailSending))} />}
+          onClick={() => sendToInsurers()} />}
         {write && p.status === "sent" && <Button label={t("placement.actions.acknowledge")} icon="pi pi-inbox" className="ml-2" onClick={() => setAcknowledging({ reference: "", remarks: "" })} />}
         {write && WITH_INSURER.includes(p.status) && <Button label={t("placement.actions.uploadEpolicy")} icon="pi pi-upload" className="ml-2" severity={p.status === "acknowledged" ? undefined : "secondary"} onClick={() => setRecording(true)} />}
         {p.status === "epolicy_received" && <Button label={t("placement.actions.checkAgainstSlip")} icon="pi pi-list-check" className="ml-2" onClick={openCheck} />}
@@ -251,7 +270,7 @@ const PlacementDetail = () => {
         <RecordActivityLog entity="placement" recordId={p.id} />
       </div>
 
-      <DetailDialog header={t("placement.acknowledge.title")} visible={Boolean(acknowledging)} onHide={() => setAcknowledging(null)} size="md"
+      <DetailDialog header={t("placement.acknowledge.title")} visible={Boolean(acknowledging)} onHide={() => setAcknowledging(null)} size="md" className="placement-dialog"
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAcknowledging(null)} /><Button label={t("placement.actions.acknowledge")} icon="pi pi-check" loading={busy}
           onClick={async () => { const ok = await act(() => placementService.acknowledgePlacement(p.id, { reference: acknowledging.reference.trim() || undefined, remarks: acknowledging.remarks || undefined }),
             t("placement.messages.acknowledged")); if (ok) setAcknowledging(null); }} /></>}>

@@ -150,7 +150,7 @@ describe('empty forms are refused with field messages', () => {
       ['/product-configurator/coverages', 'coverageCode'], ['/product-configurator/rating-factors', 'factorCode'], ['/product-configurator/underwriting-rules', 'ruleCode'],
       ['/renewals/campaigns', 'campaignName'], [`/renewals/${rn}/activities`, 'type'], ['/remittance/adjustments', 'adjustmentType'],
       ['/masters/remittance-automated', 'code'], ['/incentive/programs', 'programName'], ['/remittance/exceptions', 'type'],
-      ['/remittance/schedules', 'code'],
+      ['/remittance/schedules', 'name'],
     ];
     for (const [p, field] of cases) {
       const r = await ctx.api('post', p).send({});
@@ -242,7 +242,9 @@ describe('notifications reach only the roles that can act on them', () => {
     const src = (f) => fs.readFileSync(path.join(here, '../src/modules', f), 'utf8');
     expect(src('journal-vouchers/router.js')).toMatch(/audience: 'write:journal-vouchers'/);
     expect(src('payments/pettycash.js')).toMatch(/audience: 'write:disbursements'/);
-    expect(src('remittance/service.js')).toMatch(/audience: 'write:remittance'/);
+    // remittance approvals go to the eligible approvers by name (remittance/decision.js), never to a permission
+    expect(src('remittance/service.js')).toMatch(/notifyApprovers\(\{ users/);
+    expect(src('remittance/service.js')).not.toMatch(/audience: '/);
   });
 });
 

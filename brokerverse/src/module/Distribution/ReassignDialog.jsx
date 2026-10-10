@@ -117,7 +117,8 @@ const ReassignDialog = ({ leads, mode = "reassign", onHide, onDone, onError }) =
         <>
           <Button label={t("distribution.common.cancel", "Cancel")} text onClick={onHide} />
           <Button label={mode === "queue" ? t("distribution.la.toQueue", "Send to queue") : t("distribution.la.reassign", "Reassign")}
-            icon={mode === "queue" ? "pi pi-inbox" : "pi pi-check"} onClick={save} disabled={Boolean(problem)} loading={saving} />
+            icon={mode === "queue" ? "pi pi-inbox" : "pi pi-check"} onClick={save} disabled={Boolean(problem)} loading={saving}
+            tooltip={problem || undefined} tooltipOptions={{ showOnDisabled: true, position: "top" }} />
         </>
       )}>
       {visible && (
@@ -143,8 +144,8 @@ const ReassignDialog = ({ leads, mode = "reassign", onHide, onDone, onError }) =
           <Field label={`${t("distribution.la.note", "Note")}${noteRequired ? " *" : ""}`} full htmlFor="la-note">
             <InputTextarea id="la-note" rows={3} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)}
               placeholder={t("distribution.la.notePlaceholder", "Details for the history (optional unless the reason asks for it)")} />
+            {noteRequired && !note.trim() ? <small className="p-error">{t("distribution.la.noteRequired", "This reason needs a note")}</small> : null}
           </Field>
-          {problem && <small className="pe-muted dist-field--full">{problem}</small>}
         </div>
       )}
     </DetailDialog>

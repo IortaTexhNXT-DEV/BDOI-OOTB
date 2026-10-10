@@ -89,6 +89,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// each half-width pane keeps its columns inside the card: the description gives way, amounts and the status do not
+.br-panes .p-datatable-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.br-panes .bv-num {
+  white-space: nowrap;
 }
 
 .br-sub {

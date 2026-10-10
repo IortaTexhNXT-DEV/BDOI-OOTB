@@ -9,7 +9,7 @@
       margin: 10px 0;
       font-size: 24px;
       font-weight: 600;
-      color: #2c3e50;
+      color: var(--color-heading);
     }
   }
 
@@ -32,10 +32,10 @@
     .p-card-title {
       font-size: 18px;
       font-weight: 600;
-      color: #2c3e50;
+      color: var(--color-heading);
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 2px solid #007ad9;
+      border-bottom: 2px solid var(--bv-primary);
     }
 
     // Ensure tooltips stay within card boundaries
@@ -62,17 +62,17 @@
 
       label {
         font-weight: 600;
-        color: #7f8c8d;
+        color: var(--color-text-muted);
         font-size: 13px;
       }
 
       span {
         font-size: 15px;
-        color: #2c3e50;
+        color: var(--color-heading);
       }
 
       .highlight-danger {
-        color: #e74c3c;
+        color: var(--color-danger);
         font-weight: 600;
       }
 
@@ -152,13 +152,13 @@
       gap: 4px;
       padding: 12px;
       border-radius: 8px;
-      background-color: #f8f9fa;
+      background-color: var(--color-surface-muted);
       min-height: 60px;
       justify-content: center;
 
       label {
         font-weight: 500;
-        color: #7f8c8d;
+        color: var(--color-text-muted);
         font-size: 12px;
         letter-spacing: 0.5px;
       }
@@ -166,7 +166,7 @@
       span {
         padding-top: 5px;
         font-weight: 600;
-        color: #2c3e50;
+        color: var(--color-heading);
         font-size: 14px;
         word-break: break-word;
         overflow-wrap: break-word;
@@ -184,16 +184,16 @@
       }
 
       &.paid {
-        background-color: #e8f5e9;
+        background-color: var(--color-surface-muted);
 
         span {
-          color: #388e3c;
+          color: var(--color-success);
         }
       }
 
       &.outstanding {
-        background-color: #ffebee;
-        border: 2px solid #d32f2f;
+        background-color: var(--color-surface-muted);
+        border: 2px solid var(--color-danger);
 
         span {
           color: var(--color-danger);
@@ -218,18 +218,18 @@
       gap: 8px;
       padding: 15px;
       border-radius: 8px;
-      background-color: #f8f9fa;
+      background-color: var(--color-surface-muted);
       border: 1px solid $color-border;
 
       label {
         font-weight: 500;
-        color: #7f8c8d;
+        color: var(--color-text-muted);
         font-size: 13px;
       }
 
       span {
         font-weight: 700;
-        color: #2c3e50;
+        color: var(--color-heading);
         font-size: 16px;
       }
 
@@ -261,16 +261,16 @@
       }
 
       &::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: var(--color-surface-muted);
         border-radius: 4px;
       }
 
       &::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
+        background: var(--color-border);
         border-radius: 4px;
 
         &:hover {
-          background: #a8a8a8;
+          background: var(--color-text-muted);
         }
       }
     }
@@ -286,7 +286,7 @@
       transition: color 0.2s ease;
 
       &:hover {
-        color: #007ad9;
+        color: var(--bv-primary);
         text-decoration: underline;
       }
     }
@@ -295,7 +295,7 @@
     .p-datatable-tbody > tr > td {
       padding: 14px 12px;
       vertical-align: top;
-      border-bottom: 1px solid #e9ecef;
+      border-bottom: 1px solid var(--color-border);
       transition: background-color 0.2s ease;
     }
 
@@ -303,9 +303,9 @@
     .p-datatable-thead > tr > th {
       padding: 16px 12px;
       font-weight: 600;
-      background: #f8f9fa;
+      background: var(--color-surface-muted);
       border-bottom: 1px solid $color-border;
-      color: #2c3e50;
+      color: var(--color-heading);
       font-size: 13px;
       letter-spacing: 0.5px;
     }
@@ -315,7 +315,7 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background-color: rgba(0, 122, 217, 0.05);
+        background-color: rgba(var(--bv-primary-rgb), 0.05);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
     }
@@ -325,7 +325,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e9ecef;
+      border: 1px solid var(--color-border);
     }
   }
 
@@ -340,7 +340,7 @@
       line-height: 1.4;
       padding: 10px 12px;
       background: $color-heading;
-      color: #ffffff;
+      color: var(--color-surface);
       border-radius: 6px;
       box-shadow: $shadow-md;
       font-weight: 400;
@@ -367,29 +367,29 @@
     }
 
     .p-tooltip-arrow {
-      border-color: #2c3e50 transparent transparent transparent;
+      border-color: var(--color-heading) transparent transparent transparent;
       border-width: 6px 6px 0 6px;
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
     // Enhanced positioning and animation
     &.p-tooltip-top .p-tooltip-arrow {
-      border-color: transparent transparent #2c3e50 transparent;
+      border-color: transparent transparent var(--color-heading) transparent;
       border-width: 0 6px 6px 6px;
     }
 
     &.p-tooltip-bottom .p-tooltip-arrow {
-      border-color: #2c3e50 transparent transparent transparent;
+      border-color: var(--color-heading) transparent transparent transparent;
       border-width: 6px 6px 0 6px;
     }
 
     &.p-tooltip-left .p-tooltip-arrow {
-      border-color: transparent #2c3e50 transparent transparent;
+      border-color: transparent var(--color-heading) transparent transparent;
       border-width: 6px 6px 6px 0;
     }
 
     &.p-tooltip-right .p-tooltip-arrow {
-      border-color: transparent transparent transparent #2c3e50;
+      border-color: transparent transparent transparent var(--color-heading);
       border-width: 6px 0 6px 6px;
     }
   }
@@ -408,9 +408,9 @@
     position: relative;
 
     &:hover {
-      color: #007ad9;
-      background-color: rgba(0, 122, 217, 0.08);
-      box-shadow: 0 2px 8px rgba(0, 122, 217, 0.2);
+      color: var(--bv-primary);
+      background-color: rgba(var(--bv-primary-rgb), 0.08);
+      box-shadow: 0 2px 8px rgba(var(--bv-primary-rgb), 0.2);
     }
 
     // Add a subtle indicator that content is truncated
@@ -446,7 +446,7 @@
     }
 
     .co-insurance-collection-section__title {
-      color: #6b7280;
+      color: var(--color-text-muted);
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.04em;
@@ -474,7 +474,7 @@
     th,
     td {
       border: none;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--color-border);
       font-size: 13px;
       line-height: 20px;
       padding: 12px 10px;
@@ -484,7 +484,7 @@
     }
 
     th {
-      color: #9ca3af;
+      color: var(--color-text-muted);
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.04em;
@@ -493,7 +493,7 @@
     }
 
     td {
-      color: #111927;
+      color: var(--color-heading);
       font-weight: 400;
     }
 
@@ -506,12 +506,12 @@
     }
 
     .paid {
-      color: #16a34a;
+      color: var(--color-success);
       font-weight: 600;
     }
 
     .outstanding {
-      color: #dc2626;
+      color: var(--color-danger);
       font-weight: 600;
     }
 
@@ -580,16 +580,16 @@
   .status-text {
     font-size: 13px;
     font-weight: 600;
-    color: #4b5563;
+    color: var(--color-text);
   }
 
   .status-text--active {
-    color: #16a34a;
+    color: var(--color-success);
   }
 
   .co-insurance-collection-note {
     margin-top: 12px;
-    color: #3b82f6;
+    color: var(--bv-primary);
     font-size: 12px;
     font-style: italic;
     line-height: 18px;

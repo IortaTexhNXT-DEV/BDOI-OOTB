@@ -18,7 +18,7 @@ define({
   method: 'GET', path: '/', summary: 'Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)', screen: SCREEN, middleware: read,
   query: { page: 1, pageSize: 10, status: 'Overdue', overdueLevel: '1', search: 'Santos', sortField: 'dueDate', sortOrder: 'asc' },
   response: { success: true, data: [item], pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 } },
-  handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listCollections(pool, req.query, pg); sendList(res, r.rows, r.total, pg); },
+  handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listCollections(pool, req.query, pg); sendList(res, r.rows, r.total, pg, { overdueLevels: r.overdueLevels }); },
 });
 define({
   method: 'GET', path: '/aging-report', summary: 'Ageing report: bucket totals, percentages and open items', screen: `${SCREEN} > Aging report`, middleware: read, query: { clientId: 'cl_1' },
@@ -29,6 +29,12 @@ define({
   method: 'GET', path: '/dashboard-stats', summary: 'Collections KPIs (outstanding, overdue, committed, escalated, collected this month)', screen: SCREEN, middleware: read,
   response: { success: true, data: { totalOutstanding: 11862.5, overdueCount: 1, overdueAmount: 11862.5, committedCount: 0, escalatedCount: 0, collectedThisMonth: 0 } },
   handler: async (_req, res) => ok(res, await svc.dashboardStats(pool)),
+});
+define({
+  method: 'GET', path: '/send-due-date-reminders/preview', summary: 'What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level',
+  screen: `${SCREEN} > Send payment reminders`, middleware: read,
+  response: { success: true, data: { items: 3, clients: 2, withoutEmail: 0, totalOutstanding: 24813.75, byLevel: [{ level: 'Overdue', count: 2, amount: 18000 }] } },
+  handler: async (_req, res) => ok(res, await svc.dueDateReminderPreview(pool)),
 });
 define({
   method: 'POST', path: '/send-due-date-reminders', summary: 'Queue reminder e-mails and notify owners for items due soon or overdue (not reminded recently)', screen: SCREEN, middleware: write,

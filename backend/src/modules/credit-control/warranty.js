@@ -172,9 +172,23 @@ export async function requestCancellation(db, policyRef, b, user) {
   return { policyNumber: m.policyNumber, endorsementId: e.id, endorsementNumber: e.endorsementNumber || e.endorsement_number || null, remarks };
 }
 
-/** Actions taken on a policy from the monitor (most recent first). */
+/** Role names of a user, for the activity log (u is the users row joined in the query). */
+const ROLE_NAMES = '(SELECT array_agg(r.name ORDER BY r.name) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id)';
+
+/** Actions taken on a policy from the monitor (most recent first), each with the display name and roles of its user. */
 export async function policyActions(db, policyRef) {
-  return (await db.query(`SELECT a.*, e.endorsement_number, (SELECT display_name FROM users u WHERE u.id = a.created_by) AS created_by_name FROM premium_warranty_actions a
-    JOIN policies p ON p.id = a.policy_id LEFT JOIN endorsements e ON e.id = a.endorsement_id WHERE p.id = $1 OR p.policy_number = $1 ORDER BY a.created_at DESC, a.id DESC`, [String(policyRef)])).rows
-    .map((a) => ({ id: Number(a.id), action: a.action, notes: a.notes, endorsementNumber: a.endorsement_number, createdBy: a.created_by_name || a.created_by, createdAt: a.created_at }));
+  const own = (await db.query(`SELECT a.*, e.endorsement_number, u.display_name AS created_by_name, ${ROLE_NAMES} AS created_by_roles FROM premium_warranty_actions a
+    JOIN policies p ON p.id = a.policy_id LEFT JOIN endorsements e ON e.id = a.endorsement_id LEFT JOIN users u ON u.id = a.created_by
+    WHERE p.id = $1 OR p.policy_number = $1 ORDER BY a.created_at DESC, a.id DESC`, [String(policyRef)])).rows
+    .map((a) => ({ id: Number(a.id), action: a.action, notes: a.notes, endorsementNumber: a.endorsement_number, createdBy: a.created_by_name || a.created_by,
+      createdByRoles: a.created_by_roles || [], createdAt: a.created_at }));
+  // the reminders, calls and commitments logged on the policy's collection belong to the same chase for the premium
+  const followUps = (await db.query(`SELECT ca.id, ca.action_type, ca.action_date, ca.notes, ca.commitment_date, ca.call_outcome,
+      COALESCE(u.display_name, ca.action_by) AS by_name, ${ROLE_NAMES} AS by_roles
+    FROM collection_actions ca JOIN collection_items ci ON ci.id = ca.collection_id JOIN policies p ON p.id = ci.policy_id
+    LEFT JOIN users u ON u.username = ca.action_by OR u.id = ca.action_by
+    WHERE p.id = $1 OR p.policy_number = $1`, [String(policyRef)])).rows
+    .map((a) => ({ id: `col-${a.id}`, action: `collection-${String(a.action_type || 'note').toLowerCase()}`, notes: a.notes, commitmentDate: a.commitment_date,
+      callOutcome: a.call_outcome, createdBy: a.by_name, createdByRoles: a.by_roles || [], createdAt: a.action_date, source: 'collection' }));
+  return [...own, ...followUps].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }

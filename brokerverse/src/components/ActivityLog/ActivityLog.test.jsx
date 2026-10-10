@@ -4,7 +4,8 @@ import "../../i18n";
 import auditService from "../../services/auditService";
 import ActivityLog from "./ActivityLog";
 import RecordActivityLog from "./RecordActivityLog";
-import { actionText, actionTone } from "./actions";
+import { actionKey, actionText, actionTone } from "./actions";
+import { fromRemittanceActivity } from "./adapters";
 import { setDateFormat, setTimeZone } from "../../utility/dateFormat";
 
 jest.mock("../../services/auditService", () => ({ __esModule: true, default: { getRecordHistory: jest.fn() } }));
@@ -29,12 +30,35 @@ describe("action dictionary", () => {
   it("turns action codes, and their past forms, into words and a tone", () => {
     expect(actionText("submit")).toBe("Submitted");
     expect(actionText("Approved")).toBe("Approved");
-    expect(actionText("send_bill")).toBe("Send bill");
+    expect(actionText("send_bill")).toBe("Bill sent");
     expect(actionText("create-settlement")).toBe("Create settlement");
     expect(actionTone("reject")).toBe("negative");
     expect(actionTone("post")).toBe("positive");
     expect(actionTone("submit")).toBe("status");
     expect(actionTone("update")).toBe("neutral");
+  });
+
+  it("knows every step in the life of a remittance, so no remittance code reaches the screen raw", () => {
+    const steps = ["create", "submit", "withdraw", "return", "approve", "revoke", "cancel", "exclude-line", "include-line", "recompute", "raise-voucher",
+      "in-payment", "pay", "payment-failed", "send-advice", "record-confirmation", "remind", "import", "run"];
+    const codes = [...steps, "reject", "create-agency-bill", "send-bill", "settle"];
+    expect(codes.filter((code) => !actionKey(code) || /-/.test(actionText(code)))).toEqual([]);
+    expect(steps.map(actionText)).toEqual(["Created", "Submitted", "Withdrawn", "Returned", "Approved", "Revoked", "Cancelled", "Line excluded",
+      "Line included", "Recalculated", "Payment voucher raised", "In payment", "Paid", "Payment failed", "Advice sent", "Confirmation recorded",
+      "Reminder sent", "Imported", "Run"]);
+    expect(["revoke", "exclude-line", "payment-failed"].map(actionTone)).toEqual(["negative", "negative", "negative"]);
+    expect(["include-line", "raise-voucher", "record-confirmation"].map(actionTone)).toEqual(["positive", "positive", "positive"]);
+    expect(["in-payment", "send-advice"].map(actionTone)).toEqual(["status", "status"]);
+  });
+
+  it("shows an earlier release's remittance history in words", () => {
+    render(<ActivityLog entries={fromRemittanceActivity([
+      { action: "create-agency-bill", by: "BrokerVerse", at: "2026-10-09T01:00:00Z" },
+      { action: "send-bill", by: "BrokerVerse", at: "2026-10-09T02:00:00Z", notes: "billing@example.ph" },
+    ])} />);
+    expect(screen.getByText("Agency bill created")).toBeInTheDocument();
+    expect(screen.getByText("Bill sent")).toBeInTheDocument();
+    expect(screen.queryByText(/create-agency-bill|send-bill/)).toBeNull();
   });
 });
 

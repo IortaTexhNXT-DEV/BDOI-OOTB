@@ -125,7 +125,7 @@ describe("Lead Assignment screen", () => {
 
   it("opens the Reassignment Queue tab, takes a prospect and previews the run of the queue through the rules", async () => {
     render(<LeadAssignment />);
-    fireEvent.click(await screen.findByText("Reassignment Queue (1)"));
+    fireEvent.click(await screen.findByText("Reassignment Queue"));
     expect(await screen.findByText("Jose Reyes")).toBeInTheDocument();
     expect(screen.getByText("Product not yet tagged")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Take" }));

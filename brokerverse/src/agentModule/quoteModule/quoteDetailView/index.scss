@@ -67,18 +67,19 @@
     font-weight: 400;
     margin: 10px 0;
   }
+  // the total line: label and figure on one baseline, in the brand colour
   .gross_text {
-    color: #0072d8;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 18px;
-    font-weight: 500;
-    padding-bottom: 24px;
+    color: var(--bv-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 10px 0;
   }
   .gross_count {
-    color: #0072d8;
-    font-family: "Nunito", Arial, sans-serif;
+    color: var(--bv-primary);
+    font-family: var(--font-body);
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     margin: 10px 0;
   }
 

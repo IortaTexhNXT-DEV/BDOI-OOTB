@@ -10,6 +10,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
+import { formatMoney } from '../../lib/money.js';
 import { sendTable } from '../documents/tabular.js';
 import { sendPdf } from '../../lib/pdf/index.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
@@ -56,7 +57,7 @@ define({
     await audit(req, { entity: 'supplier_invoice', entityId: r.id, action: 'create', after: r });
     if (r.status === 'for-approval') {
       await notifyApprovers({ audience: 'approve:payables', document: 'Supplier invoice', number: r.voucherNumber, by: req.user.username,
-        detail: `${r.supplierName} ${r.supplierInvoiceNo}: ${r.grossAmount.toFixed(2)}`, link: LINK, entity: 'supplier_invoice', entityId: r.id });
+        detail: `${r.supplierName} ${r.supplierInvoiceNo}: ${await formatMoney(r.grossAmount)}`, link: LINK, entity: 'supplier_invoice', entityId: r.id });
     }
     created(res, r, `Supplier invoice ${r.voucherNumber} ${r.status === 'draft' ? 'saved' : r.status === 'approved' ? 'posted' : 'sent for approval'}`);
   },
@@ -69,7 +70,7 @@ define({
     await audit(req, { entity: 'supplier_invoice', entityId: r.id, action: 'submit', after: { status: r.status } });
     if (r.status === 'for-approval') {
       await notifyApprovers({ audience: 'approve:payables', document: 'Supplier invoice', number: r.voucherNumber, by: req.user.username,
-        detail: `${r.supplierName} ${r.supplierInvoiceNo}: ${r.grossAmount.toFixed(2)}`, link: LINK, entity: 'supplier_invoice', entityId: r.id });
+        detail: `${r.supplierName} ${r.supplierInvoiceNo}: ${await formatMoney(r.grossAmount)}`, link: LINK, entity: 'supplier_invoice', entityId: r.id });
     }
     ok(res, r, `Supplier invoice ${r.voucherNumber} ${r.status === 'approved' ? 'posted' : 'sent for approval'}`);
   },

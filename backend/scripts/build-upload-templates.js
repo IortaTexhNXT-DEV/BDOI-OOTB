@@ -2,7 +2,7 @@
  * Build the upload templates (docs/package/05_Delivery/Upload_Templates): one XLSX per upload the platform accepts,
  * plus a CSV for the uploads that read CSV only, and the coverage table of the README in that folder. Columns come
  * from the importers themselves (the *_UPLOAD_COLUMNS lists, the master type definitions, the GENERIC bank and insurer
- * statement formats, the remittance bulk-processing configuration), so run this again after an importer, a master
+ * statement formats, the remittance bulk-processing configuration, the remittance policy list), so run this again after an importer, a master
  * type or a format changes. Templates the platform no longer accepts (a retired master type, for example) are removed.
  *
  *   DATABASE_URL=postgres://... node scripts/build-upload-templates.js [output directory]
@@ -22,7 +22,7 @@ import * as masters from '../src/modules/masters/service.js';
 import { MASTER_TEMPLATES } from '../src/modules/masters/uploadSamples.js';
 import { bulkConfig } from '../src/modules/remittance/items.js';
 import {
-  insurerStatementUpload, masterUpload, remittanceUpload, staticUploads, statementUpload, templateCsv, templateWorkbook,
+  insurerStatementUpload, masterUpload, remittancePolicyList, remittanceUpload, staticUploads, statementUpload, templateCsv, templateWorkbook,
 } from '../src/modules/documents/uploadTemplates.js';
 import { KITS, kitSheets, template as kitTemplate } from '../src/modules/data-load/service.js';
 
@@ -55,6 +55,7 @@ export const FILE_ROUTES = [
   { module: 'insurer-reconciliation', method: 'POST', path: '/statements/import', templates: ['insurer-statement'] },
   { module: 'insurer-reconciliation', method: 'POST', path: '/statements/preview', templates: ['insurer-statement'] },
   { module: 'remittance', method: 'POST', path: '/bulk/upload', templates: ['remittance-bulk'] },
+  { module: 'remittance', method: 'POST', path: '/imports/validate', templates: ['remittance-policy-list'] },
   { module: 'data-load', method: 'POST', path: '/batches', templates: ['kit:configuration', 'kit:migration'] },
   { module: 'motor-programmes', method: 'POST', path: '/:id/sales/upload', templates: ['dealer-sales'] },
   { module: 'fleet', method: 'POST', path: '/:id/vehicles/upload', templates: ['fleet-vehicles'] },
@@ -95,8 +96,10 @@ export async function uploadDefinitions() {
   const insurerFormat = (await pool.query('SELECT * FROM insurer_statement_formats WHERE code = \'GENERIC\'')).rows[0];
   if (!insurerFormat) throw new Error('Insurer statement format GENERIC not found');
   const { cfg, maps } = await bulkConfig();
+  const insurerCodes = (await pool.query("SELECT code FROM insurance_companies WHERE status = 'active' AND code IS NOT NULL ORDER BY code")).rows.map((r) => r.code);
   return [...statics.filter((d) => d.id === 'chart-of-accounts'), ...defs, ...statics.filter((d) => d.id !== 'chart-of-accounts'),
-    statementUpload(format), insurerStatementUpload(insurerFormat), remittanceUpload(maps, cfg.code)];
+    statementUpload(format), insurerStatementUpload(insurerFormat), remittanceUpload(maps, cfg.code),
+    remittancePolicyList({ insurerCodes, maxRows: Number(await getSetting('remittance.import_max_rows', 5000)) })];
 }
 
 const cell = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');

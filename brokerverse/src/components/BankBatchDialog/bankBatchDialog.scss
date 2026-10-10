@@ -1,0 +1,83 @@
+// New bank payment batch (components/BankBatchDialog). Theme CSS variables only.
+
+.bv-bank-batch__fields {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.bv-bank-batch__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  grid-column: span 1;
+
+  label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+}
+
+.bv-bank-batch__field--wide {
+  grid-column: span 2;
+}
+
+.bv-bank-batch__problem {
+  color: var(--red-600, #c62828);
+}
+
+.bv-bank-batch__error,
+.bv-bank-batch__starter {
+  margin-bottom: 12px;
+}
+
+.bv-bank-batch__title {
+  margin: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bv-bank-batch__missing {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.bv-bank-batch__muted {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.bv-bank-batch__no-account {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.bv-bank-batch__remarks {
+  margin-top: 12px;
+}
+
+.bv-bank-batch__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.bv-bank-batch__total {
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+@media (max-width: 1280px) {
+  .bv-bank-batch__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bv-bank-batch__field,
+  .bv-bank-batch__field--wide {
+    grid-column: span 1;
+  }
+}

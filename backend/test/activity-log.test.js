@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutConfigurationApproval } from './helpers.js';
+import { setup, loginAs, withoutConfigurationApproval, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { activityEntries } from '../src/lib/auditEvents.js';
 
@@ -44,7 +44,7 @@ describe('remittance activity log', () => {
   let remId;
   let remNo;
   it('tells the whole life of a remittance: created, submitted, approved on the approval screen and settled by a settlement', async () => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ACT-1', premium: 10000, commission: 1500, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ACT-1', premium: 10000, commission: 1500, tax: 0 }] }));
     expect(c.status).toBe(201);
     remId = c.body.data.id;
     remNo = c.body.data.remittanceNo;
@@ -65,12 +65,13 @@ describe('remittance activity log', () => {
     // the fields of earlier releases are kept
     expect(created).toMatchObject({ action: 'create', by: 'BrokerVerse', toStatus: 'Draft' });
     expect(new Date(created.at).getTime()).not.toBeNaN();
-    expect(submitted).toMatchObject({ fromStatus: null, toStatus: 'Pending Approval', user: { displayName: 'BrokerVerse Administrator' } });
+    expect(submitted).toMatchObject({ fromStatus: null, toStatus: 'Pending approval', user: { displayName: 'BrokerVerse Administrator' } });
     expect(approved).toMatchObject({ action: 'approve', by: 'al.finance', notes: 'Checked against the statement', remarks: 'Checked against the statement',
-      fromStatus: 'Pending', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
-    // approval snapshots carry bookkeeping fields (SLA, dates): only the level and the delegate are changes
-    expect(approved.changes.every((c) => ['currentLevel', 'delegatedTo'].includes(c.field))).toBe(true);
-    expect(settled).toMatchObject({ action: 'settle', fromStatus: 'Approved', toStatus: 'Completed', user: { displayName: 'Alma Finance' } });
+      fromStatus: 'Pending approval', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
+    // a decision shows its level, the limit at decision and its source; the bookkeeping fields of the approval are not changes
+    expect(approved.changes.every((c) => ['level', 'limitAtDecision', 'limitSource'].includes(c.field))).toBe(true);
+    expect(approved.approval).toMatchObject({ limitSourceLabel: 'Role limit: Accounting' });
+    expect(settled).toMatchObject({ action: 'settle', fromStatus: 'Approved', toStatus: 'Settled (voucher raised)', user: { displayName: 'Alma Finance' } });
     expect(settled.changes[0]).toMatchObject({ label: 'Settlement', after: settlementApproval.referenceNo });
   });
 
@@ -100,8 +101,11 @@ describe('configuration histories', () => {
     expect(v2.status).toBe(201);
     const h = await ctx.api('get', `/posting-rules/${v2.body.data.id}/history`);
     expect(h.status).toBe(200);
-    expect(h.body.data[0]).toMatchObject({ action: 'create-version', actionLabel: 'Create version', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator',
+    const v = h.body.data[0].version;
+    expect(h.body.data[0]).toMatchObject({ action: 'create-version', actionLabel: `Version ${v} replaced version ${v - 1}`, username: 'BrokerVerse', displayName: 'BrokerVerse Administrator',
       changeNote: 'Same lines as a new version' });
+    // the same lines: only the version moves
+    expect(h.body.data[0].changes).toEqual([{ field: 'version', label: 'Version', from: String(v - 1), to: String(v) }]);
     expect(h.body.data[0].roles.length).toBeGreaterThan(0);
 
     const tpl = (await ctx.api('get', '/product-configurator/products')).body.data[0];
@@ -112,5 +116,37 @@ describe('configuration histories', () => {
       expect(e).toHaveProperty('actionLabel');
       for (const c of e.changes) expect(typeof c.label).toBe('string');
     }
+  });
+});
+
+describe('record history from the record itself', () => {
+  it('tells the rejection, the conversion, the policy issue and the journal steps a record keeps in its own columns', async () => {
+    const q = (sql, params) => pool.query(sql, params);
+    const admin = (await q("SELECT id FROM users WHERE username = 'BrokerVerse'")).rows[0].id;
+    await q(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, created_by) VALUES ('cl_lc1', 'CL-LC-0001', 'Lc Client', 'Lc', 'Client', $1)`, [admin]);
+    await q(`INSERT INTO policies(id, policy_number, client_id, status, inception_date, expiry_date, premium_total, created_by, created_at)
+      VALUES ('pol_lc1', 'POL-LC-0001', 'cl_lc1', 'active', current_date, current_date + 365, 1000, $1, now() - interval '1 day')`, [admin]);
+    await q(`INSERT INTO quotes(id, quote_number, client_id, status, premium_total, valid_until, created_by, created_at, updated_at, approval_sent_at)
+      VALUES ('qt_lc1', 'QT-LC-0001', 'cl_lc1', 'rejected', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', now() - interval '2 days'),
+             ('qt_lc2', 'QT-LC-0002', 'cl_lc1', 'converted', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', NULL)`, [admin]);
+    await q("UPDATE quotes SET policy_id = 'pol_lc1' WHERE id = 'qt_lc2'");
+    await q(`INSERT INTO journal_vouchers(id, jv_number, jv_date, description, status, total_debit, total_credit, created_by, created_at, posted_by, posted_at)
+      VALUES ('jv_lc1', 'JV-LC-0001', current_date, 'Accrual', 'posted', 10, 10, $1, now(), $1, now())`, [admin]);
+
+    const rejected = (await ctx.api('get', '/audit/records/quotation/QT-LC-0001')).body.data;
+    expect(rejected.map((e) => e.title)).toEqual(['Quotation rejected', 'Quotation sent for approval', 'Quotation created']);
+    expect(rejected[0].changes).toEqual([expect.objectContaining({ label: 'Quotation status', to: 'Rejected' })]);
+    expect(rejected[0].source.channel).toBe('application');
+
+    const converted = (await ctx.api('get', '/audit/records/quotation/qt_lc2')).body.data;
+    expect(converted[0]).toMatchObject({ title: 'Quotation converted to a policy', user: { displayName: 'BrokerVerse Administrator' } });
+    expect(converted[0].changes.map((c) => c.to)).toContain('POL-LC-0001');
+
+    const policy = (await ctx.api('get', '/audit/records/policy/POL-LC-0001')).body.data;
+    expect(policy.map((e) => e.title)).toEqual(['Policy created']);
+
+    // looked up by its number, and steps taken at the same moment read newest first: posted above created
+    const journal = (await ctx.api('get', '/audit/records/journal_voucher/JV-LC-0001')).body.data;
+    expect(journal.map((e) => e.action)).toEqual(['post', 'create']);
   });
 });

@@ -128,7 +128,7 @@ const Layouts = ({ toast, banks }) => {
         <Column header={t("integrations.status.label")} body={(l) => <span className="flex gap-1">{l.isExample && <IntTag status="test" />}<IntTag status={l.active ? "active" : "closed"} /></span>} />
         <Column header="" body={(l) => <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("integrations.edit")} tooltip={t("integrations.edit")} tooltipOptions={{ position: "top" }} onClick={() => open(l)} />} />
       </DataTable>
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newLayout") : v.code) : ""} visible={!!editing} style={{ width: "min(1100px, 98vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newLayout") : t("integrations.editLayout", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(1100px, 98vw)" }} onHide={() => setEditing(null)}
         footer={<div><Button label={t("integrations.preview")} icon="pi pi-eye" outlined onClick={runPreview} /><Button label={t("integrations.cancel")} text onClick={() => setEditing(null)} />
           <Button label={t("integrations.save")} icon="pi pi-save" onClick={save} disabled={!v?.code || !v?.name || !v?.detailFields?.length} /></div>}>
         {editing && (

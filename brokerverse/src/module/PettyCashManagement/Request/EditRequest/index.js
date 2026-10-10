@@ -32,9 +32,10 @@ import { calendarDateFormat } from "../../../../utility/dateFormat";
 import { openConfirm } from "../../../../components/ConfirmDialog";
 import ApprovalActions from "../../../../components/ApprovalActions";
 import DetailSection from "../../../../components/DetailSection";
-import KeyValueGrid from "../../../../components/KeyValueGrid";
+import KeyValueGrid, { formatValue } from "../../../../components/KeyValueGrid";
 import StatusChip from "../../../../components/StatusChip";
 import { RecordActivityLog } from "../../../../components/ActivityLog";
+import DetailHeader from "../../../../components/DetailHeader";
 
 const initialValue = {
     Date: new Date(),
@@ -152,7 +153,7 @@ const EditRequestForm = ({ action }) => {
         const RequesterName = editrequestDetails?.RequesterName;
         formik.setValues({
             ...formik.values,
-            TransactionCode: editrequestDetails?.RequestNumber || "",
+            TransactionCode: editrequestDetails?.TransactionCode || "",
             TransactionNumber: editrequestDetails?.TransactionNumber || "",
             RequestDate: editrequestDetails?.requestDateValue
                 ? new Date(editrequestDetails.requestDateValue)
@@ -184,6 +185,72 @@ const EditRequestForm = ({ action }) => {
         (total, item) => total + (parseFloat(item.Amount) || 0),
         0
     );
+    const statusChip = requestStatus
+        ? { code: requestStatus, label: t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus }) }
+        : null;
+
+    // a request opened to view is a detail view: its facts, its lines and its approval, nothing to edit
+    if (action === "view") {
+        return (
+            <div className="requestedit___form requestedit___view">
+                <CustomToast ref={toastRef} message={t("pettyCash.updateSuccessfully")} />
+                <button type="button" className="pettycash__title" onClick={handleClick}>
+                    <SvgBackArrow />{t("pettyCash.requestView")}
+                </button>
+                <BreadCrumb model={items} home={Initiate} className="breadCrums mt-3" separatorIcon={<SvgDot color="currentColor" />} />
+                <DetailHeader
+                    title={editrequestDetails?.RequestNumber || ""}
+                    subtitle={editrequestDetails?.RequesterName}
+                    status={statusChip}
+                    meta={[
+                        { label: t("pettyCash.requestDate"), value: editrequestDetails?.requestDateValue, type: "date" },
+                        { label: t("pettyCash.view.pettyCashFund"), value: editrequestDetails?.PettycashCode },
+                        { label: t("pettyCash.totalAmount"), value: totalAmount, type: "amount" },
+                    ]}
+                    actions={(
+                        <>
+                            {["draft", "rejected"].includes(requestStatus) ? (
+                                <Button label={t("common.submit")} icon="pi pi-send" onClick={() => handleTransition("submit")} disabled={loading} />
+                            ) : null}
+                            {requestStatus === "submitted" ? (
+                                <ApprovalActions
+                                    initiator={{ id: editrequestDetails?.createdBy }}
+                                    approveLabel={t("pettyCash.confirm.approve")}
+                                    rejectLabel={t("pettyCash.confirm.reject")}
+                                    onApprove={() => handleTransition("approve")}
+                                    onReject={() => handleTransition("reject")}
+                                    busy={loading}
+                                />
+                            ) : null}
+                        </>
+                    )}
+                />
+                <DetailSection title={t("pettyCash.requestList")} flush>
+                    <DataTable value={AddRequestTable} dataKey="id" size="small" emptyMessage={t("pettyCash.view.noLines")}>
+                        <Column field="Narration" header={t("pettyCash.view.narration")} />
+                        <Column header={t("pettyCash.amount")} body={(r) => formatValue(r.Amount === "" ? null : r.Amount, { type: "amount" })}
+                            bodyClassName="bv-num" headerClassName="bv-num" />
+                    </DataTable>
+                </DetailSection>
+                {editrequestDetails?.id ? (
+                    <>
+                        <DetailSection title={t("pettyCash.confirm.approval")}>
+                            <KeyValueGrid columns={4} items={[
+                                { label: t("pettyCash.view.purpose"), value: editrequestDetails.purpose, span: 2, hidden: !editrequestDetails.purpose },
+                                { label: t("pettyCash.confirm.approvedBy"), value: editrequestDetails.approvedByName, hidden: !editrequestDetails.approvedAt },
+                                { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime", hidden: !editrequestDetails.approvedAt },
+                                { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
+                            ]} />
+                        </DetailSection>
+                        <DetailSection title={t("pettyCash.confirm.activity")}>
+                            <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
+                        </DetailSection>
+                    </>
+                ) : null}
+            </div>
+        );
+    }
+
     return (
         <div className="requestedit___form">
             <CustomToast ref={toastRef} message={t("pettyCash.updateSuccessfully")} />
@@ -410,14 +477,19 @@ const EditRequestForm = ({ action }) => {
             </div>
             <AddDialog visible={visible} setVisible={setVisible} />
             {action === "view" && editrequestDetails?.id ? (
-                <DetailSection title={t("pettyCash.confirm.approval")} className="mt-4">
-                    <KeyValueGrid columns={4} items={[
-                        { label: t("pettyCash.confirm.status"), value: requestStatus ? <StatusChip code={requestStatus} label={t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus })} /> : null },
-                        { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime" },
-                        { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
-                    ]} />
-                    <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
-                </DetailSection>
+                <>
+                    <DetailSection title={t("pettyCash.confirm.approval")} className="mt-4">
+                        <KeyValueGrid columns={4} items={[
+                            { label: t("pettyCash.confirm.status"), value: requestStatus ? <StatusChip code={requestStatus} label={t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus })} /> : null },
+                            { label: t("pettyCash.confirm.approvedBy"), value: editrequestDetails.approvedByName },
+                            { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime" },
+                            { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
+                        ]} />
+                    </DetailSection>
+                    <DetailSection title={t("pettyCash.confirm.activity")}>
+                        <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
+                    </DetailSection>
+                </>
             ) : null}
         </div>
     );

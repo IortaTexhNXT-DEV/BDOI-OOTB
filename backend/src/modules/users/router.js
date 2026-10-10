@@ -185,12 +185,14 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one user', screen: 'Master > User Management > User > View', middleware: viewer,
-  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', roles: ['sales'] } },
+  method: 'GET', path: '/:id', summary: 'Get one user: the roles assigned to it (as the list and the edit form show them) and its effective roles with the inherited ones',
+  screen: 'Master > User Management > User > View', middleware: viewer,
+  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', roles: ['sales'], roleNames: ['Sales & Marketing (Account Executive)'], effectiveRoles: ['sales'] } },
   handler: async (req, res) => {
     const u = await loadUser('u.id = $1 OR u.username = $1', [req.params.id]);
     if (!u) throw notFound('User not found');
-    ok(res, userRow(u));
+    const assigned = await many('SELECT r.code, r.name FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = $1 ORDER BY r.code', [u.id]);
+    ok(res, { ...userRow(u), roles: assigned.map((r) => r.code), roleNames: assigned.map((r) => r.name), effectiveRoles: u.roles });
   },
 });
 define({

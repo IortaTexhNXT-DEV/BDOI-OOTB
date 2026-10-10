@@ -14,6 +14,7 @@ import { excelBrand } from '../reports/service.js';
 import { accountingFlow, flowExample } from './flow.js';
 import { flowHandbookSpec, flowWorkbook } from './flowExport.js';
 import { actionText } from '../../lib/auditLabels.js';
+import { humanize } from '../../lib/pdf/format.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
 const ad = moduleRouter('Account Determination', '/account-determination');
@@ -184,8 +185,37 @@ define({
         u.display_name, (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS roles
       FROM audit_log a LEFT JOIN users u ON u.id = a.user_id OR (a.user_id IS NULL AND u.username = a.username)
       WHERE a.entity = 'posting_rule' AND a.entity_id IN (SELECT id::text FROM posting_rules WHERE event_code = $1) ORDER BY a.at DESC LIMIT 200`, [r.eventCode])).rows;
-    ok(res, rows.map((x) => ({ action: x.action, actionLabel: actionText(x.action), username: x.username, displayName: x.display_name || x.username || 'System', roles: x.roles || [],
-      at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) })));
+    const out = rows.map((x) => ({ action: x.action, actionLabel: actionText(x.action), username: x.username, displayName: x.display_name || x.username || 'System', roles: x.roles || [],
+      at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) }));
+    // versions loaded by the seed or a migration have no audit row: each still shows when it came in and why
+    const told = new Set(out.filter((x) => x.version).map((x) => x.version));
+    const versions = (await pool.query(`SELECT p.id, p.version, p.created_at, p.created_by, p.change_note, u.username, u.display_name,
+        (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS roles
+      FROM posting_rules p LEFT JOIN users u ON u.id = p.created_by OR u.username = p.created_by WHERE p.event_code = $1 ORDER BY p.version`, [r.eventCode])).rows;
+    for (const v of versions.filter((x) => !told.has(Number(x.version)))) {
+      out.push({ action: 'create-version', actionLabel: actionText('create-version'), username: v.username || null, displayName: v.display_name || 'System', roles: v.roles || [],
+        at: v.created_at, version: Number(v.version), changeNote: v.change_note, ruleId: Number(v.id) });
+    }
+    // what a new version changed against the one before it: the lines added and removed (side, account, amount)
+    const lines = (await pool.query(`SELECT p.version, l.side, l.account_type, l.account, l.fallback_role, l.amount_key FROM posting_rule_lines l
+      JOIN posting_rules p ON p.id = l.rule_id WHERE p.event_code = $1 ORDER BY l.line_no`, [r.eventCode])).rows;
+    const lineText = (l) => `${l.side} ${l.account || humanize(l.fallback_role || l.account_type || '')} · ${humanize(l.amount_key || '')}`;
+    const linesOf = (v) => lines.filter((l) => Number(l.version) === v).map(lineText);
+    for (const x of out) {
+      if (!x.version || x.action !== 'create-version') continue;
+      if (x.version === 1) {
+        x.actionLabel = 'Rule created (version 1)';
+        continue;
+      }
+      const now = linesOf(x.version);
+      const before = linesOf(x.version - 1);
+      x.actionLabel = `Version ${x.version} replaced version ${x.version - 1}`;
+      x.changes = [{ field: 'version', label: 'Version', from: String(x.version - 1), to: String(x.version) },
+        ...now.filter((l) => !before.includes(l)).map((l) => ({ field: 'line', label: 'Line added', from: null, to: l })),
+        ...before.filter((l) => !now.includes(l)).map((l) => ({ field: 'line', label: 'Line removed', from: l, to: null }))];
+    }
+    out.sort((a, b) => new Date(b.at) - new Date(a.at) || (b.version || 0) - (a.version || 0));
+    ok(res, out);
   },
 });
 

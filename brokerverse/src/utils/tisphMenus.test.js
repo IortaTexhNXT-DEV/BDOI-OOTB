@@ -100,4 +100,40 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);
     expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
   });
+
+  describe("Accounts > Remittance (spec §1.1 to §1.3)", () => {
+    const ALL = ["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Setup", "Settlement"];
+    const remittanceOf = (role) => {
+      const accounts = filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts");
+      return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
+    };
+    const sees = (role) => (path) => isPathAllowed(path, menuList, [role]);
+
+    it("Finance sees the seven entries plus Settlement; IT reads them all", () => {
+      expect(remittanceOf("tis-finance")).toEqual(ALL);
+      expect(remittanceOf("tis-it-admin")).toEqual(ALL);
+    });
+
+    it("gives each persona the entries of its grants", () => {
+      expect(remittanceOf("tis-general-manager")).toEqual(ALL.filter((e) => e !== "Setup"));
+      expect(remittanceOf("tis-ccd-recon")).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-bp")).toEqual(["Remittances", "Reconciliation", "Exceptions"]);
+      expect(remittanceOf("tis-ccd-pdc")).toEqual(["Remittances", "Reconciliation", "Exceptions"]);
+      expect(remittanceOf("tis-ops-associate")).toEqual(["Remittances"]);
+      expect(remittanceOf("tis-ops-officer")).toEqual(["Remittances", "Exceptions", "Insurer billing"]);
+      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Remittances", "Exceptions", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-pdu")).toEqual([]);
+      expect(remittanceOf("tis-sales-officer")).toEqual([]);
+      expect(sees("tis-general-manager")("/finance/remittance/setup/schedules")).toBe(false);
+      expect(sees("tis-ccd-recon")("/finance/remittance/reconciliation/statements/7")).toBe(true);
+      expect(sees("tis-ops-officer")("/finance/remittance/payments")).toBe(false);
+    });
+
+    it("no TISPH persona has the Insurer Reconciliation menu: its statements open under Remittance > Reconciliation", () => {
+      const withIt = TIS_ROLES.filter((role) => filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts")?.submenu.some((s) => s.name === "Insurer Reconciliation"));
+      expect(withIt).toEqual([]);
+      expect(helpSectionFor("/finance/remittance/reconciliation/insurer-statements").id).toBe("insurer-statement-reconciliation");
+      expect(helpSectionFor("/finance/remittance/setup/schedules").id).toBe("remittance-to-insurers");
+    });
+  });
 });

@@ -30,6 +30,7 @@
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { hasPermission } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
@@ -38,13 +39,15 @@ import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
-import { formatMoney } from '../../lib/money.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { codeMoney } from './decision.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays } from '../../lib/dates.js';
 import { assertClientPaid, clientPaymentStatus } from './clientPayments.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -326,7 +329,7 @@ export function debitNoteOut(d) {
     ewtRate: Number(d.ewt_rate), expectedEwt: Number(d.expected_ewt), netPayable: round2(Number(d.amount) - Number(d.expected_ewt)),
     collectedCash: Number(d.collected_cash), collectedEwt: Number(d.collected_ewt), collectedAmount: collected, balance: Number(d.balance),
     status: DN_STATUS_LABELS[d.status] || d.status, statusCode: d.status, remarks: d.remarks,
-    createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedAt: d.submitted_at,
+    createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedById: d.submitted_by, submittedAt: d.submitted_at,
     approvedBy: d.approved_by_name || d.approved_by, approvedAt: d.approved_at, rejectedBy: d.rejected_by_name || d.rejected_by, rejectedAt: d.rejected_at,
     rejectionReason: d.rejection_reason, sentTo: d.sent_to, sentAt: d.sent_at, updatedAt: d.updated_at,
     basis: d.basis, documentType: d.basis === 'gross' ? 'Billing Statement' : 'Commission Debit Note', journalNumber: d.journal_number || null,
@@ -373,6 +376,11 @@ export async function listDebitNotes(qs, pg) {
     add('d.status = ANY(?)', wanted);
   }
   if (ITEM_BASES.includes(qs.basis)) add('d.basis = ?', qs.basis);
+  // needing the user's attention: the user's drafts and the notes past their due date with a balance
+  if (qs.attention === 'mine') {
+    vals.push(qs.userId || '', await today());
+    conds.push(`((d.status = 'draft' AND d.created_by = $${vals.length - 1}) OR (d.status IN ('open', 'partial') AND d.due_date < $${vals.length}::date))`);
+  }
   if (isoDate(qs.from)) add('d.dn_date >= ?::date', isoDate(qs.from));
   if (isoDate(qs.to)) add('d.dn_date <= ?::date', isoDate(qs.to));
   if (qs.search) add('(d.dn_number ILIKE \'%\' || ? || \'%\' OR i.name ILIKE \'%\' || $' + (vals.length + 1) + ' || \'%\')', qs.search);
@@ -441,9 +449,12 @@ export async function raiseDebitNote(b, user) {
   return out;
 }
 
-// approved with write:remittance (Remittance > Direct Bill)
+/** Insurer billing with the debit note open (?note=). */
+export const billingLink = (id) => `/finance/remittance/billing?note=${encodeURIComponent(id)}`;
+
+// approved with write:remittance (Remittance > Insurer billing)
 const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
-  detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
+  detail: `${dn.insurerName}, ${codeMoney(dn.amount, dn.currency ? { ...(await printFormat()), currency: dn.currency } : await printFormat())}`, link: billingLink(dn.id), entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
 async function releaseItems(db, dnId) {
@@ -462,10 +473,38 @@ export async function submitDebitNote(id, user) {
   return { before, after };
 }
 
+/**
+ * The reason text of a rejection or cancellation: a reason of `context` (Reason Codes master, with the note it asks
+ * for) when reasonCode is given, else the free text of earlier screens.
+ */
+async function reasonOf(body, context) {
+  if (body?.reasonCode) return (await requiredReason(pool, context, { reasonCode: body.reasonCode, note: body.note })).text;
+  return body?.reason ?? body?.remarks ?? body?.comments ?? null;
+}
+
+/**
+ * Can `user` approve or reject debit note `dn` (debitNoteOut)? The rules of decideDebitNote as a code and the sentence
+ * the screen shows instead of Approve and Reject: { canDecide, blockedCode, blockedReason }. Read only; decideDebitNote
+ * enforces them. Codes: WRONG_STATUS (not pending approval), NO_PERMISSION, MAKER (raised it), SUBMITTER.
+ */
+export async function debitNoteDecision(dn, user) {
+  const no = (blockedCode, blockedReason) => ({ canDecide: false, blockedCode, blockedReason });
+  if (dn.statusCode !== 'for-approval') return no('WRONG_STATUS', null);
+  if (!hasPermission(user, 'write:remittance')) return no('NO_PERMISSION', 'You can view debit notes but not decide them.');
+  if (await getSetting('finance.maker_checker_enabled', true)) {
+    if (dn.createdById && dn.createdById === user?.id) return no('MAKER', `You raised ${dn.dnNumber}. Another user must approve it.`);
+    if (dn.submittedById && dn.submittedById === user?.id) return no('SUBMITTER', `You submitted ${dn.dnNumber}. Another user must approve it.`);
+  }
+  return { canDecide: true, blockedCode: null, blockedReason: null };
+}
+
+/** A debit note (debitNoteOut / getDebitNote) with the decision block of `user`. */
+export const withDecision = async (dn, user) => ({ ...dn, decision: await debitNoteDecision(dn, user) });
+
 /** Maker-checker decision: approve (-> Open, ready to send and collect) or reject (items released). */
 export async function decideDebitNote(id, action, body, user) {
   const before = await getDebitNote(id);
-  const reason = body?.reason ?? body?.remarks ?? body?.comments ?? null;
+  const reason = action === 'reject' ? await reasonOf(body, 'billing_reject') : body?.remarks ?? body?.comments ?? body?.reason ?? null;
   if (action === 'reject' && !String(reason || '').trim()) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
@@ -485,7 +524,7 @@ export async function decideDebitNote(id, action, body, user) {
   });
   const after = await getDebitNote(id);
   await notifyDecision({ userId: before.createdById, decidedBy: user.id, document: after.documentType, number: after.dnNumber, approved: action === 'approve', by: user.username,
-    reason: action === 'approve' ? null : reason, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: after.id });
+    reason: action === 'approve' ? null : reason, link: billingLink(after.id), entity: 'commission_debit_note', entityId: after.id });
   return { before, after: { ...after, decisionRemarks: reason } };
 }
 
@@ -502,7 +541,7 @@ async function postBillingStatement(db, d, user) {
 /** Cancel a draft / pending note, or an open one with no collection; its items become unbilled again (an approved billing statement's journal is reversed). */
 export async function cancelDebitNote(id, body, user) {
   const before = await getDebitNote(id);
-  const reason = body?.reason ?? body?.remarks ?? null;
+  const reason = await reasonOf(body, 'billing_cancel');
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
     if (!['draft', 'for-approval', 'open'].includes(d.status)) throw conflict(`Debit note ${d.dn_number} is ${DN_STATUS_LABELS[d.status]}; it cannot be cancelled`);
