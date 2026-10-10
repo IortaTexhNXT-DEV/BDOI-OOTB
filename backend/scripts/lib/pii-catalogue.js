@@ -354,6 +354,8 @@ export const CATALOGUE = {
   'comparison_reports.prepared_for': 'partyName',
   'comparison_reports.sent_to': 'email',
   'campaigns.notes': 'freeText',
+  // remarks given with the approval of an incentive batch (migration 0387)
+  'incentive_calculations.approval_remarks': 'freeText',
   'campaign_recipients.party_name': 'partyName',
   'campaign_recipients.email': 'email',
 };
