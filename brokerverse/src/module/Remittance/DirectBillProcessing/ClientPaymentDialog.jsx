@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
@@ -8,13 +9,12 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Message } from "primereact/message";
 import { Tag } from "primereact/tag";
 import S3FileUpload from "../../../components/S3FileUpload";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { calendarDateFormat, dateBody, isoDate, showError, showSuccess } from "../shared";
-import { promptText } from "../../../utility/dialogs";
 
 export const PAYMENT_SEVERITY = { Paid: "success", "Partially paid": "warning", Unpaid: "danger" };
 const emptyForm = (balance) => ({ paymentDate: new Date(), amount: balance || null, insurerReference: "", paymentMode: null, proofKey: "", proofFileName: "", remarks: "" });
@@ -24,6 +24,7 @@ const emptyForm = (balance) => ({ paymentDate: new Date(), amount: balance || nu
  * proof) with the payment status, records a new payment and voids one entered in error. Nothing is posted to the GL.
  */
 const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }) => {
+  const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
@@ -61,16 +62,17 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
   };
 
   const voidPayment = async (row) => {
-    const reason = await promptText(`Reason for voiding ${row.insurerReference}`);
-    if (!reason || !reason.trim()) return;
-    try {
-      await remittanceService.voidClientPayment(row.id, reason.trim());
-      showSuccess(toast, `${row.insurerReference} voided`);
-      await load();
-      onChanged?.();
-    } catch (e) {
-      showError(toast, e);
-    }
+    const answer = await openConfirm({
+      title: t("remittance.billing.voidTitle", { reference: row.insurerReference }), severity: "danger",
+      facts: [{ label: t("remittance.billing.facts.policy"), value: data.policyNo }, { label: t("remittance.billing.facts.amount"), value: row.amount, type: "amount" }],
+      input: { type: "textarea", label: t("remittance.billing.voidReason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("remittance.billing.void"),
+      onConfirm: (reason) => remittanceService.voidClientPayment(row.id, String(reason).trim()),
+    });
+    if (answer === null || answer === false) return;
+    showSuccess(toast, `${row.insurerReference} voided`);
+    await load();
+    onChanged?.();
   };
 
   return (
@@ -78,8 +80,9 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
       footer={<div><Button label="Close" className="p-button-text" onClick={onClose} /><Button label="Record payment" icon="pi pi-check" loading={saving} onClick={save} /></div>}>
       {data && form && (
         <>
-          <Message severity="info" className="w-full justify-content-start mb-3"
-            text={`Premium billed by the insurer ${formatCurrency(data.premium)} · paid ${formatCurrency(data.paid)} · balance ${formatCurrency(data.balance)}. The client pays the insurer directly, so nothing is posted to the ledger.`} />
+          <p className="rm-strip__facts mt-0">
+            {t("remittance.billing.clientPaymentFacts", { premium: formatCurrency(data.premium), paid: formatCurrency(data.paid), balance: formatCurrency(data.balance) })}
+          </p>
           <div className="mb-3">Status: <Tag value={data.statusLabel} severity={PAYMENT_SEVERITY[data.statusLabel]} /></div>
           <DataTable value={data.items} size="small" stripedRows emptyMessage="No payment recorded yet" className="mb-3">
             <Column field="paymentDate" header="Paid on" body={dateBody("paymentDate")} />
@@ -89,7 +92,7 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
             <Column header="Proof" body={(r) => (r.proofKey ? <a href={r.proofKey} target="_blank" rel="noopener noreferrer">{r.proofFileName || "View"}</a> : "-")} />
             <Column field="createdBy" header="Recorded by" />
             <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "recorded" ? "success" : "secondary"} />} />
-            <Column body={(r) => (r.status === "recorded" ? <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Void" onClick={() => voidPayment(r)} aria-label="Void" /> : null)} />
+            <Column body={(r) => (r.status === "recorded" ? <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.void")} onClick={() => voidPayment(r)} /> : null)} />
           </DataTable>
           <div className="grid">
             <div className="col-12 md:col-4">

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
@@ -17,11 +18,17 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Message } from "primereact/message";
 import { RadioButton } from "primereact/radiobutton";
+import PageHeader from "../../../components/PageHeader";
+import StatCards from "../../../components/StatCards";
+import StatusChip from "../../../components/StatusChip";
+import RowActions from "../../../components/RowActions";
+import EligibilityNote from "../../../components/EligibilityNote";
+import ReasonDialog from "../../../components/ReasonDialog";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
-import { calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
-import { promptText } from "../../../utility/dialogs";
 import ClientPaymentDialog, { PAYMENT_SEVERITY } from "./ClientPaymentDialog";
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
@@ -31,13 +38,25 @@ const firstOfMonth = () => {
 };
 const STATUS_FILTERS = ["All", "Draft", "Pending Approval", "Open", "Partially Collected", "Collected", "Rejected", "Cancelled"];
 const MODE_LABELS = { "bank-transfer": "Bank transfer", check: "Cheque", cash: "Cash", card: "Card", gcash: "GCash", online: "Online" };
-const PAYMENT_RULES = {
-  any: "A commission debit note can only be approved once the client's payment to the insurer is recorded on each of its policies.",
-  full: "A commission debit note can only be approved once each of its policies is paid in full to the insurer (recorded client payments).",
+
+/** The row menu of a debit note, View first; Approve and Reject only when the server's decision allows them. */
+export const noteActions = (row) => {
+  const s = row.statusCode;
+  return [
+    { code: "view", allowed: true },
+    { code: "print", allowed: true },
+    { code: "submit", allowed: s === "draft" },
+    { code: "approve", allowed: s === "for-approval" && !!row.decision?.canDecide },
+    { code: "reject", allowed: s === "for-approval" && !!row.decision?.canDecide },
+    { code: "collect", allowed: ["open", "partial"].includes(s) },
+    { code: "email", allowed: ["open", "partial"].includes(s) },
+    { code: "cancel", allowed: ["draft", "for-approval", "open"].includes(s) && !(Number(row.collectedAmount) > 0) },
+  ].filter((a) => a.allowed);
 };
 
 /**
- * Remittance > Direct Bill Processing.
+ * Accounts > Remittance > Insurer billing (/finance/remittance/billing; the Direct Bill Processing screen until the
+ * Phase 4 billing statements). ?note=<id> opens a debit note.
  * Direct bill: the client pays the premium directly to the insurer; the broker raises a commission debit note to the
  * insurer. Finance selects an insurer and a period, sees the direct-bill policies with their commission, VAT and total
  * due, raises a numbered debit note (maker-checker approval), prints / e-mails it and records the insurer's payments
@@ -50,12 +69,12 @@ const DirectBillProcessing = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
+  const [params, setParams] = useSearchParams();
   const [activeIndex, setActiveIndex] = useState(0);
   const [summary, setSummary] = useState(null);
   const [insurerOptions, setInsurerOptions] = useState([]);
   const [lineOptions, setLineOptions] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
-  const [paymentRule, setPaymentRule] = useState("none");
   const [paymentPolicy, setPaymentPolicy] = useState(null); // { policyId, policyNo } of the client payment dialog
 
   // raise debit note
@@ -81,7 +100,7 @@ const DirectBillProcessing = () => {
   const [noteInsurer, setNoteInsurer] = useState(null);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [viewNote, setViewNote] = useState(null);
-  const [decision, setDecision] = useState(null); // { note, action: approve | reject | cancel, text }
+  const [decision, setDecision] = useState(null); // { note, action: reject | cancel }
   const [collect, setCollect] = useState(null); // { note, receivedDate, cashAmount, ewtAmount, paymentMode, referenceNo, form2307No, remarks }
 
   // billing mode
@@ -98,10 +117,7 @@ const DirectBillProcessing = () => {
       .catch((e) => showError(toast, e));
     // payment modes are the modes mapped to a GL cash account (accounting.cash_account_by_payment_mode)
     loadSettings()
-      .then((s) => {
-        setPaymentModes(Object.keys(s["accounting.cash_account_by_payment_mode"] || {}).map((m) => ({ label: MODE_LABELS[m] || m, value: m })));
-        setPaymentRule(s["direct_bill.client_payment_required"] || "none");
-      })
+      .then((s) => setPaymentModes(Object.keys(s["accounting.cash_account_by_payment_mode"] || {}).map((m) => ({ label: MODE_LABELS[m] || m, value: m }))))
       .catch((e) => showError(toast, e));
   }, [loadSummary]);
 
@@ -192,26 +208,52 @@ const DirectBillProcessing = () => {
     }
   };
 
-  const openView = async (note) => {
-    try {
-      setViewNote(await remittanceService.getDebitNote(note.id));
-    } catch (e) {
-      showError(toast, e);
+  const setNoteParam = useCallback((id) => setParams((current) => {
+    const next = new URLSearchParams(current);
+    if (id) next.set("note", id);
+    else next.delete("note");
+    return next;
+  }, { replace: true }), [setParams]);
+  const noteParam = params.get("note");
+  useEffect(() => {
+    if (!noteParam) {
+      setViewNote(null);
+      return;
     }
-  };
+    remittanceService.getDebitNote(noteParam).then(setViewNote).catch((e) => showError(toast, e));
+  }, [noteParam]);
+  const openView = (note) => setNoteParam(note.id);
+  const closeView = () => setNoteParam(null);
 
   const printNote = (note) => remittanceService.openDebitNotePdf(note.id).catch((e) => showError(toast, e));
 
-  const submitDecision = async () => {
-    const { note, action, text } = decision;
-    if ((action === "reject" || (action === "cancel" && note.statusCode === "open")) && !String(text || "").trim()) {
-      toast.current?.show({ severity: "warn", summary: "Reason required", detail: `Enter the reason to ${action} ${note.dnNumber}`, life: 3000 });
-      return;
-    }
-    const call = { approve: () => remittanceService.approveDebitNote(note.id, text || undefined), reject: () => remittanceService.rejectDebitNote(note.id, text),
-      cancel: () => remittanceService.cancelDebitNote(note.id, text || undefined) }[action];
-    const out = await run(call, `${note.dnNumber} ${{ approve: "approved", reject: "rejected", cancel: "cancelled" }[action]}`);
-    if (out) setDecision(null);
+  const noteFacts = (note) => [
+    { label: t("remittance.billing.facts.insurer"), value: note.insurerName },
+    { label: t("remittance.billing.facts.policies"), value: note.policyCount, type: "number" },
+    { label: t("remittance.billing.facts.amount"), value: note.amount, type: "amount" },
+  ];
+  const refreshView = async (id) => {
+    if (viewNote && viewNote.id === id) setViewNote(await remittanceService.getDebitNote(id));
+  };
+  const approve = async (note) => {
+    const answer = await openConfirm({
+      title: t("remittance.billing.approveTitle", { reference: note.dnNumber }), facts: noteFacts(note),
+      input: { type: "textarea", label: t("remittance.billing.approveRemarks"), required: false, maxLength: 500 },
+      confirmLabel: t("remittance.billing.actions.approve"),
+      onConfirm: (remarks) => remittanceService.approveDebitNote(note.id, remarks || undefined),
+    });
+    if (answer === null || answer === false) return;
+    showSuccess(toast, t("remittance.billing.approved", { reference: note.dnNumber }));
+    await refreshAll();
+    await refreshView(note.id);
+  };
+  const afterReason = async (result) => {
+    const d = decision;
+    setDecision(null);
+    if (!result?.confirmed) return;
+    showSuccess(toast, t(`remittance.billing.${d.action === "reject" ? "rejected" : "cancelled"}`, { reference: d.note.dnNumber }));
+    await refreshAll();
+    await refreshView(d.note.id);
   };
 
   /** Remaining EWT and cash expected on a note (EWT withheld pro rata to the cash received). */
@@ -244,10 +286,17 @@ const DirectBillProcessing = () => {
   };
 
   const reverseCollection = async (note, col) => {
-    // eslint-disable-next-line no-alert
-    const reason = await promptText(`Reason for reversing ${col.collectionNumber}`);
-    if (!reason || reason.trim().length < 3) return;
-    const out = await run(() => remittanceService.reverseDebitNoteCollection(note.id, col.id, reason.trim()), `${col.collectionNumber} reversed`);
+    let out;
+    const answer = await openConfirm({
+      title: t("remittance.billing.reverseTitle", { reference: col.collectionNumber }), severity: "danger",
+      facts: [{ label: t("remittance.billing.facts.note"), value: note.dnNumber }, { label: t("remittance.billing.facts.applied"), value: col.appliedAmount, type: "amount" }],
+      input: { type: "textarea", label: t("remittance.billing.reverseReason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("remittance.billing.reverse"),
+      onConfirm: async (reason) => { out = await remittanceService.reverseDebitNoteCollection(note.id, col.id, String(reason).trim()); },
+    });
+    if (answer === null || answer === false) return;
+    showSuccess(toast, t("remittance.billing.reversed", { reference: col.collectionNumber }));
+    await refreshAll();
     if (out) setViewNote(out);
   };
 
@@ -274,7 +323,7 @@ const DirectBillProcessing = () => {
   const clientPaymentBody = (row) => (
     <div className="flex align-items-center gap-1">
       <Tag value={row.clientPaymentStatus || "Unpaid"} severity={PAYMENT_SEVERITY[row.clientPaymentStatus] || "danger"} />
-      <Button icon="pi pi-credit-card" className="p-button-text p-button-sm" tooltip="Record client payment to insurer" onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} aria-label="Record client payment to insurer" />
+      <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.clientPayment")} onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} />
     </div>
   );
   const reloadAfterPayment = async () => {
@@ -283,31 +332,22 @@ const DirectBillProcessing = () => {
   };
   const statusTag = (row) => <Tag value={row.status} severity={statusSeverity(row.statusCode === "collected" ? "completed" : row.statusCode)} />;
 
-  const noteActions = (row) => (
-    <div className="flex flex-wrap gap-1">
-      <Button icon="pi pi-eye" className="p-button-text p-button-sm" tooltip="View" onClick={() => openView(row)} aria-label="View" />
-      <Button icon="pi pi-print" className="p-button-text p-button-sm" tooltip="Print debit note" onClick={() => printNote(row)} aria-label="Print debit note" />
-      {row.statusCode === "draft" && (
-        <Button icon="pi pi-send" className="p-button-text p-button-sm" tooltip="Submit for approval" onClick={() => run(() => remittanceService.submitDebitNote(row.id), `${row.dnNumber} submitted for approval`)} aria-label="Submit for approval" />
-      )}
-      {row.statusCode === "for-approval" && (
-        <>
-          <Button icon="pi pi-check" className="p-button-text p-button-sm" tooltip="Approve" onClick={() => setDecision({ note: row, action: "approve", text: "" })} aria-label="Approve" />
-          <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip="Reject" onClick={() => setDecision({ note: row, action: "reject", text: "" })} aria-label="Reject" />
-        </>
-      )}
-      {["open", "partial"].includes(row.statusCode) && (
-        <>
-          <Button icon="pi pi-wallet" className="p-button-text p-button-sm" tooltip="Record insurer payment" onClick={() => openCollect(row)} aria-label="Record insurer payment" />
-          <Button icon="pi pi-envelope" className="p-button-text p-button-sm" tooltip="E-mail to the insurer"
-            onClick={() => run(() => remittanceService.sendDebitNote(row.id), (dn) => `${dn.dnNumber} e-mailed to ${dn.emailedTo}`)} aria-label="E-mail to the insurer"
-            />
-        </>
-      )}
-      {["draft", "for-approval", "open"].includes(row.statusCode) && !(Number(row.collectedAmount) > 0) && (
-        <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Cancel" onClick={() => setDecision({ note: row, action: "cancel", text: "" })} aria-label="Cancel" />
-      )}
-    </div>
+  const onNoteAction = (row) => (action) => {
+    if (action.code === "view") openView(row);
+    if (action.code === "print") printNote(row);
+    if (action.code === "submit") run(() => remittanceService.submitDebitNote(row.id), `${row.dnNumber} submitted for approval`);
+    if (action.code === "approve") approve(row);
+    if (action.code === "reject" || action.code === "cancel") setDecision({ note: row, action: action.code });
+    if (action.code === "collect") openCollect(row);
+    if (action.code === "email") run(() => remittanceService.sendDebitNote(row.id), (dn) => `${dn.dnNumber} e-mailed to ${dn.emailedTo}`);
+  };
+  const noteActionLabel = (a) => t(`remittance.billing.actions.${a.code}`);
+  const noteStatus = (row) => (
+    <span className="rm-status-cell">
+      {statusTag(row)}
+      {row.statusCode === "for-approval" && row.decision && !row.decision.canDecide && row.decision.blockedReason
+        ? <span className="rm-row-result">{row.decision.blockedReason}</span> : null}
+    </span>
   );
 
   const collectPreview = collect ? (() => {
@@ -316,35 +356,21 @@ const DirectBillProcessing = () => {
   })() : null;
 
   return (
-    <div className="direct-bill-processing">
+    <div className="direct-bill-processing rm-page">
       <Toast ref={toast} />
-      <div className="header-section">
-        <h2>{t("remittance.directBillProcessing")}</h2>
-      </div>
-
-      <div className="grid summary-cards mb-2">
-        {[
-          ["Unbilled commission", summary?.unbilled],
-          ["Billed, outstanding", summary?.billedOutstanding],
-          ["Overdue", summary?.overdue],
-          ["Receivable from insurers", summary?.total],
-        ].map(([label, value]) => (
-          <div className="col-12 md:col-3" key={label}>
-            <Card className="summary-card">
-              <div className="card-title">{label}</div>
-              <div className="card-value">{formatCurrency(value || 0)}</div>
-            </Card>
-          </div>
-        ))}
-      </div>
-      {PAYMENT_RULES[paymentRule] && <Message severity="warn" className="w-full justify-content-start mb-3" text={PAYMENT_RULES[paymentRule]} />}
-      {summary?.pendingApproval > 0 && (
-        <Message severity="info" className="w-full justify-content-start mb-3" text={`${summary.pendingApproval} debit note(s) awaiting approval`} />
-      )}
+      <PageHeader title={t("remittance.billing.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
+        trail={[t("remittance.billing.title")]} help={t("remittance.billing.help")}
+        actions={<RowActions label={t("remittance.common.moreActions")} actions={[{ code: "ageing", label: t("remittance.billing.ageing"), allowed: true }]} onAction={downloadAgeing} />} />
+      {summary?.pendingApproval > 0 ? (
+        <div className="rm-strip"><StatusChip label={t("remittance.billing.awaitingApproval", { count: summary.pendingApproval })} severity="warning" /></div>
+      ) : null}
+      <StatCards items={[
+        ["unbilled", summary?.unbilled], ["outstanding", summary?.billedOutstanding], ["overdue", summary?.overdue], ["receivable", summary?.total],
+      ].map(([key, value]) => ({ key, label: t(`remittance.billing.kpis.${key}`), value: summary ? formatCurrency(value || 0) : null }))} />
 
       <Card>
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-          <TabPanel header="1. Raise Debit Note">
+          <TabPanel header={t("remittance.billing.tabs.raise")}>
             <div className="filter-section mb-3">
               <div className="grid">
                 <div className="col-12 md:col-2">
@@ -370,7 +396,7 @@ const DirectBillProcessing = () => {
                 </div>
                 <div className="col-12 md:col-2">
                   <label>&nbsp;</label>
-                  <Button label="Load policies" icon="pi pi-search" className="w-full" onClick={loadItems} loading={loadingItems} />
+                  <Button label="Load policies" icon="pi pi-search" outlined className="w-full" onClick={loadItems} loading={loadingItems} />
                 </div>
               </div>
             </div>
@@ -432,14 +458,14 @@ const DirectBillProcessing = () => {
                   </div>
                 </div>
                 <div className="action-buttons mt-3">
-                  <Button label="Save draft" icon="pi pi-save" className="p-button-secondary mr-2" onClick={() => raise(false)} disabled={saving || !selected.length} />
+                  <Button label="Save draft" icon="pi pi-save" outlined className="mr-2" onClick={() => raise(false)} disabled={saving || !selected.length} />
                   <Button label="Raise debit note and submit for approval" icon="pi pi-check" onClick={() => raise(true)} loading={saving} disabled={!selected.length} />
                 </div>
               </>
             )}
           </TabPanel>
 
-          <TabPanel header="2. Debit Notes">
+          <TabPanel header={t("remittance.billing.tabs.notes")}>
             <div className="filter-section mb-3">
               <div className="grid">
                 <div className="col-12 md:col-3">
@@ -451,8 +477,7 @@ const DirectBillProcessing = () => {
                   <Dropdown value={noteInsurer} options={insurerOptions} onChange={(e) => setNoteInsurer(e.value)} placeholder="All insurers" showClear filter className="w-full" />
                 </div>
                 <div className="col-12 md:col-6 flex align-items-end justify-content-end gap-2">
-                  <Button label="Refresh" icon="pi pi-refresh" className="p-button-outlined" onClick={loadNotes} />
-                  <Button label="Commission receivable ageing" icon="pi pi-file-excel" className="p-button-outlined" onClick={downloadAgeing} />
+                  <Button label="Refresh" icon="pi pi-refresh" outlined onClick={loadNotes} />
                 </div>
               </div>
             </div>
@@ -468,17 +493,13 @@ const DirectBillProcessing = () => {
               <Column field="collectedAmount" header="Collected" body={money("collectedAmount")} className="text-right" />
               <Column field="balance" header="Balance" body={(r) => <strong>{formatCurrency(r.balance)}</strong>} className="text-right" />
               <Column field="dueDate" body={dateBody("dueDate")} header="Due" />
-              <Column field="status" header="Status" body={statusTag} />
-              <Column header="Actions" body={noteActions} style={{ minWidth: "12rem" }} />
+              <Column field="status" header="Status" body={noteStatus} style={{ minWidth: "10rem" }} />
+              <Column header={<span className="p-sr-only">{t("remittance.billing.actionsHeader")}</span>} align="center" style={{ width: "3.5rem" }}
+                body={(r) => <RowActions label={t("remittance.billing.actionsFor", { reference: r.dnNumber })} actions={noteActions(r)} labelOf={noteActionLabel} onAction={onNoteAction(r)} />} />
             </DataTable>
           </TabPanel>
 
-          <TabPanel header="3. Billing Mode">
-            <p className="mt-0">
-              Mark an issued policy as direct bill (the client pays the insurer) or return it to broker billing. Direct bill cancels the premium bill and books
-              the commission due from the insurer; the change is refused once premium was collected or remitted, or once the commission is on a debit note.
-              New policies take their billing mode from the payment step at issue (default in System Settings, direct_bill.default_billing_mode).
-            </p>
+          <TabPanel header={t("remittance.billing.tabs.mode")}>
             <div className="grid">
               <div className="col-12 md:col-4">
                 <label>Policy number *</label>
@@ -500,9 +521,9 @@ const DirectBillProcessing = () => {
                 <InputText value={modeForm.reason} onChange={(e) => setModeForm({ ...modeForm, reason: e.target.value })} className="w-full" />
               </div>
             </div>
-            <Button label="Change billing mode" icon="pi pi-sync" className="mt-2" onClick={changeMode} />
+            <Button label="Change billing mode" icon="pi pi-sync" outlined className="mt-2" onClick={changeMode} />
             {modeResult && (
-              <Message className="w-full justify-content-start mt-3" severity="success"
+              <Message className="w-full justify-content-start mt-3" severity="info"
                 text={`${modeResult.policyNumber}: ${modeResult.before} → ${modeResult.billingModeLabel}${modeResult.billingMode === "direct"
                   ? ` · commission due from the insurer ${formatCurrency(modeResult.directBill?.commissionDue || 0)}` : ` · bill ${modeResult.billNumber || "-"}`}`} />
             )}
@@ -510,7 +531,7 @@ const DirectBillProcessing = () => {
         </TabView>
       </Card>
 
-      <Dialog className="direct-bill-dialog" header={viewNote ? `${viewNote.dnNumber} · ${viewNote.insurerName}` : ""} visible={!!viewNote} style={{ width: "min(1100px, 95vw)" }} onHide={() => setViewNote(null)}>
+      <Dialog className="direct-bill-dialog" header={viewNote ? `${viewNote.dnNumber} · ${viewNote.insurerName}` : ""} visible={!!viewNote} style={{ width: "min(1100px, 95vw)" }} onHide={closeView}>
         {viewNote && (
           <>
             <div className="grid">
@@ -548,10 +569,18 @@ const DirectBillProcessing = () => {
               <Column field="appliedAmount" header="Applied" body={money("appliedAmount")} className="text-right" />
               <Column field="journalNumber" header="Journal" />
               <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "posted" ? "success" : "secondary"} />} />
-              <Column body={(r) => (r.status === "posted" ? <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip="Reverse" onClick={() => reverseCollection(viewNote, r)} aria-label="Reverse" /> : null)} />
+              <Column body={(r) => (r.status === "posted" ? <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.reverse")} onClick={() => reverseCollection(viewNote, r)} /> : null)} />
             </DataTable>
-            <div className="action-buttons mt-3">
-              <Button label="Print" icon="pi pi-print" className="p-button-outlined" onClick={() => printNote(viewNote)} />
+            <div className="action-buttons mt-3 flex flex-wrap align-items-center gap-2">
+              {viewNote.statusCode === "for-approval" && viewNote.decision && !viewNote.decision.canDecide && viewNote.decision.blockedReason
+                ? <EligibilityNote reason={viewNote.decision.blockedReason} className="mr-auto" /> : null}
+              <Button label={t("remittance.billing.actions.print")} outlined onClick={() => printNote(viewNote)} />
+              {viewNote.statusCode === "for-approval" && viewNote.decision?.canDecide ? (
+                <>
+                  <Button label={t("remittance.billing.actions.reject")} outlined severity="danger" onClick={() => setDecision({ note: viewNote, action: "reject" })} />
+                  <Button label={t("remittance.billing.actions.approve")} onClick={() => approve(viewNote)} />
+                </>
+              ) : null}
             </div>
           </>
         )}
@@ -559,25 +588,10 @@ const DirectBillProcessing = () => {
 
       <ClientPaymentDialog policy={paymentPolicy} paymentModes={paymentModes} toast={toast} onClose={() => setPaymentPolicy(null)} onChanged={reloadAfterPayment} />
 
-      <Dialog className="direct-bill-dialog" header={decision ? `${{ approve: "Approve", reject: "Reject", cancel: "Cancel" }[decision.action]} ${decision.note.dnNumber}` : ""} visible={!!decision}
-        style={{ width: "min(520px, 95vw)" }} onHide={() => setDecision(null)}
-        footer={decision && (
-          <div>
-            <Button label="Close" className="p-button-text" onClick={() => setDecision(null)} />
-            <Button label={{ approve: "Approve", reject: "Reject", cancel: "Cancel debit note" }[decision.action]} className={decision.action === "approve" ? "" : "p-button-danger"} onClick={submitDecision} />
-          </div>
-        )}>
-        {decision && (
-          <>
-            <p className="mt-0">
-              {decision.note.insurerName} · {formatCurrency(decision.note.amount)} ({decision.note.policyCount} policies).
-              {decision.action === "approve" ? " The approver must be a different user from the one who raised it." : " Its commission becomes available for a new debit note."}
-            </p>
-            <label>{decision.action === "approve" ? "Remarks" : "Reason"}{decision.action === "reject" ? " *" : ""}</label>
-            <InputTextarea value={decision.text} onChange={(e) => setDecision({ ...decision, text: e.target.value })} rows={3} className="w-full" autoResize />
-          </>
-        )}
-      </Dialog>
+      <ReasonDialog visible={!!decision} onHide={afterReason} context={decision?.action === "cancel" ? "billing_cancel" : "billing_reject"} severity="danger"
+        title={decision ? t(`remittance.billing.${decision.action}Title`, { reference: decision.note.dnNumber }) : ""} facts={decision ? noteFacts(decision.note) : []}
+        note={t("remittance.billing.releaseNote")} confirmLabel={decision ? t(`remittance.billing.actions.${decision.action}`) : ""}
+        onConfirm={(reason) => (decision.action === "reject" ? remittanceService.rejectDebitNote(decision.note.id, reason) : remittanceService.cancelDebitNote(decision.note.id, reason))} />
 
       <Dialog className="direct-bill-dialog" header={collect ? `Record insurer payment · ${collect.note.dnNumber}` : ""} visible={!!collect} style={{ width: "min(640px, 95vw)" }} onHide={() => setCollect(null)}
         footer={collect && (
@@ -589,8 +603,7 @@ const DirectBillProcessing = () => {
         {collect && (
           <div className="grid">
             <div className="col-12">
-              <Message severity="info" className="w-full justify-content-start"
-                text={`Balance ${formatCurrency(collect.note.balance)} · the insurer withholds ${round2(Number(collect.note.ewtRate) * 100)}% EWT on the commission (creditable, BIR Form 2307)`} />
+              <div className="rm-strip__facts">{t("remittance.billing.collectFacts", { balance: formatCurrency(collect.note.balance), rate: round2(Number(collect.note.ewtRate) * 100) })}</div>
             </div>
             <div className="col-12 md:col-6">
               <label>Received on *</label>

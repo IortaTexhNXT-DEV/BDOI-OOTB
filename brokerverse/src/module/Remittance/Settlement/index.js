@@ -14,9 +14,9 @@ import { Column } from "primereact/column";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Tag } from "primereact/tag";
 import { Timeline } from "primereact/timeline";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import remittanceService from "../../../services/remittanceService";
 import { calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -202,19 +202,11 @@ const SettlementProcessing = () => {
     if (!validateSettlement(true)) return;
 
     const summary = calculateSummary();
-    confirmDialog({
-      message: (
-        <div>
-          <p>{t("remittance.submitSettlementApproval")}</p>
-          <p>{t("remittance.settlementNo")}: <strong>{settlementData.settlementNo}</strong></p>
-          <p>{t("remittance.netAmount")}: <strong>
-            {formatCurrency(summary.netSettlement)}
-          </strong></p>
-        </div>
-      ),
-      header: t("remittance.confirmSubmission"),
-      icon: 'pi pi-send',
-      accept: () => submitForApproval()
+    openConfirm({
+      title: t("remittance.settlementScreen.submitTitle", { reference: settlementData.settlementNo }),
+      facts: [{ label: t("remittance.settlementNo"), value: settlementData.settlementNo }, { label: t("remittance.netAmount"), value: summary.netSettlement, type: "amount" }],
+      confirmLabel: t("remittance.submitForApproval"),
+      onConfirm: () => submitForApproval(),
     });
   };
 
@@ -276,31 +268,19 @@ const SettlementProcessing = () => {
 
   const unselectedPolicies = availablePolicies.filter((p) => !policies.some((x) => x.id === p.id));
 
-  const handleImport = () => {
-    confirmDialog({
-      message: `Add all ${unselectedPolicies.length} available policies for ${settlementData.insurerName || "the insurer"}?`,
-      header: 'Import Policies',
-      icon: 'pi pi-upload',
-      accept: () => setPolicies((prev) => [...prev, ...unselectedPolicies])
-    });
-  };
+  const handleImport = () => openConfirm({
+    title: t("remittance.settlementScreen.importTitle", { count: unselectedPolicies.length }),
+    facts: [{ label: t("remittance.settlementScreen.insurer"), value: settlementData.insurerName }, { label: t("remittance.settlementScreen.policies"), value: unselectedPolicies.length, type: "number" }],
+    confirmLabel: t("remittance.settlementScreen.importAction", { count: unselectedPolicies.length }),
+    onConfirm: () => setPolicies((prev) => [...prev, ...unselectedPolicies]),
+  });
 
-  const handleDeletePolicy = (rowData) => {
-    confirmDialog({
-      message: `Remove policy ${rowData.policyNo} from settlement?`,
-      header: 'Confirm Delete',
-      icon: 'pi pi-trash',
-      accept: () => {
-        setPolicies(prev => prev.filter(p => p.id !== rowData.id));
-        toast.current.show({
-          severity: 'success',
-          summary: 'Policy Removed',
-          detail: `${rowData.policyNo} removed from settlement`,
-          life: 2000
-        });
-      }
-    });
-  };
+  const handleDeletePolicy = (rowData) => openConfirm({
+    title: t("remittance.settlementScreen.removeTitle", { policy: rowData.policyNo }), severity: "warning",
+    facts: [{ label: t("remittance.policyNo"), value: rowData.policyNo }, { label: t("remittance.insuredName"), value: rowData.insuredName }],
+    confirmLabel: t("remittance.settlementScreen.remove"),
+    onConfirm: () => setPolicies((prev) => prev.filter((p) => p.id !== rowData.id)),
+  });
 
   const confirmAddPolicies = () => {
     if (selectedPolicies.length === 0) {
@@ -344,11 +324,8 @@ const SettlementProcessing = () => {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <Button
-        icon="pi pi-trash"
-        className="p-button-danger p-button-text p-button-sm"
-        onClick={() => handleDeletePolicy(rowData)}
-        disabled={!editable} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
+      <Button type="button" link size="small" className="rm-link" label={t("remittance.settlementScreen.remove")}
+        onClick={() => handleDeletePolicy(rowData)} disabled={!editable} />
     );
   };
 
@@ -370,7 +347,6 @@ const SettlementProcessing = () => {
   return (
     <div className="container__settlement__processing__master">
         <Toast ref={toast} />
-        <ConfirmDialog />
         <div className="top__container">
           <h1 className="page__title">{t("remittance.insurerSettlement")}</h1>
           <BreadCrumb model={items} home={home} />
@@ -480,14 +456,14 @@ const SettlementProcessing = () => {
                     <Button
                       label="Import"
                       icon="pi pi-upload"
-                      className="p-button-sm p-button-secondary"
+                      className="p-button-sm" outlined
                       onClick={handleImport}
                       disabled={!editable || unselectedPolicies.length === 0}
                     />
                     <Button
                       label={t("remittance.calculate")}
                       icon="pi pi-calculator"
-                      className="p-button-sm p-button-secondary"
+                      className="p-button-sm" outlined
                       onClick={handleCalculate}
                       loading={loading}
                     />
@@ -716,7 +692,7 @@ const SettlementProcessing = () => {
             <Button
               label={t("remittance.saveDraft")}
               icon="pi pi-save"
-              className="p-button-secondary"
+              outlined
               onClick={handleSaveDraft}
               disabled={!editable || loading}
             />
@@ -729,14 +705,10 @@ const SettlementProcessing = () => {
             <Button
               label={t("remittance.cancel")}
               className="p-button-text"
-              onClick={() => {
-                confirmDialog({
-                  message: 'Cancel settlement processing? Any unsaved changes will be lost.',
-                  header: 'Confirm Cancel',
-                  icon: 'pi pi-exclamation-triangle',
-                  accept: handleCancel
-                });
-              }}
+              onClick={() => openConfirm({
+                title: t("remittance.settlementScreen.discardTitle"), severity: "warning", message: t("remittance.settlementScreen.discardMessage"),
+                confirmLabel: t("remittance.settlementScreen.discard"), onConfirm: handleCancel,
+              })}
             />
           </div>
 
@@ -774,9 +746,6 @@ const SettlementProcessing = () => {
           >
             {approvalResult && (
               <div className="approval-success">
-                <div className="success-icon">
-                  <i className="pi pi-check-circle" style={{ fontSize: '3em', color: 'var(--green)' }} />
-                </div>
                 <p>Settlement has been submitted for approval.</p>
                 <div className="approval-details">
                   <div className="detail-item">
@@ -792,9 +761,6 @@ const SettlementProcessing = () => {
                     <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                   </div>
                 </div>
-                <p className="info-message">
-                  You will receive a notification once the settlement is approved.
-                </p>
               </div>
             )}
           </Dialog>

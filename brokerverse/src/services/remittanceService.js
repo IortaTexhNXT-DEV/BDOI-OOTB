@@ -45,33 +45,20 @@ const R = "/remittance";
 const id = (v) => encodeURIComponent(v);
 
 export const remittanceService = {
-  // remittances / tracking / automated processing
-  listRemittances: (params) => apiRequest("GET", `${R}/remittances`, { params }),
+  // remittances
   getRemittance: (remId) => get(`${R}/remittances/${id(remId)}`),
-  /** API path of the printable remittance advice (agency bill), for components/Print printPdf. */
-  remittanceAdvicePath: (remId) => `${R}/remittances/${id(remId)}/pdf`,
-  createRemittance: (payload) => post(`${R}/remittances`, payload),
-  validateRemittances: (ids) => post(`${R}/remittances/validate`, { ids }),
-  processRemittances: (ids) => post(`${R}/remittances/process`, { ids }),
-  approveRemittance: (remId, comments) => post(`${R}/remittances/${id(remId)}/approve`, { comments }),
-  rejectRemittance: (remId, reason) => post(`${R}/remittances/${id(remId)}/reject`, reason),
-  settleRemittance: (remId, payload) => post(`${R}/remittances/${id(remId)}/settle`, payload),
-  processingHistory: () => get(`${R}/processing-history`),
-  automatedCandidates: (configCode) => get(`${R}/automated/candidates`, { configCode }),
-  executeAutomated: (payload) => post(`${R}/automated/execute`, payload),
-  automatedHistory: () => get(`${R}/automated/history`),
 
   // direct bill: the client pays the insurer; the broker bills its commission with a commission debit note
   directBillSummary: () => get(`${R}/direct-bill/summary`),
   directBillItems: (params) => apiRequest("GET", `${R}/direct-bill/policies`, { params }),
   listDebitNotes: (params) => apiRequest("GET", `${R}/direct-bill`, { params }),
-  listDirectBills: (params) => get(`${R}/direct-bill`, params),
   getDebitNote: (dnId) => get(`${R}/direct-bill/${id(dnId)}`),
   raiseDebitNote: (payload) => post(`${R}/direct-bill`, payload),
   submitDebitNote: (dnId) => post(`${R}/direct-bill/${id(dnId)}/submit`),
   approveDebitNote: (dnId, remarks) => post(`${R}/direct-bill/${id(dnId)}/approve`, { remarks }),
-  rejectDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/reject`, { reason }),
-  cancelDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/cancel`, { reason }),
+  // reason: { reasonCode, note } of the billing_reject / billing_cancel context
+  rejectDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/reject`, reason),
+  cancelDebitNote: (dnId, reason) => post(`${R}/direct-bill/${id(dnId)}/cancel`, reason),
   sendDebitNote: (dnId, email) => post(`${R}/direct-bill/${id(dnId)}/send`, email ? { email } : {}),
   collectDebitNote: (dnId, payload) => post(`${R}/direct-bill/${id(dnId)}/collections`, payload),
   reverseDebitNoteCollection: (dnId, collectionId, reason) => post(`${R}/direct-bill/${id(dnId)}/collections/${id(collectionId)}/reverse`, { reason }),
@@ -80,7 +67,6 @@ export const remittanceService = {
   clientPayments: (policyId) => get(`${R}/direct-bill/policies/${id(policyId)}/client-payments`),
   recordClientPayment: (policyId, payload) => post(`${R}/direct-bill/policies/${id(policyId)}/client-payments`, payload),
   voidClientPayment: (paymentId, reason) => post(`${R}/direct-bill/client-payments/${id(paymentId)}/void`, { reason }),
-  listClientPayments: (params) => get(`${R}/direct-bill/client-payments`, params),
   /** Opens the printable debit note (PDF fetched with the session token). */
   openDebitNotePdf: async (dnId) => {
     const response = await fetch(`${BASE_URL}${R}/direct-bill/${id(dnId)}/pdf`, { headers: { ...authService.getAuthHeader() } });
@@ -93,59 +79,28 @@ export const remittanceService = {
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   },
   // agency bills
-  agencies: (billPeriod) => get(`${R}/agency-bill/agencies`, { billPeriod }),
-  generateAgencyBills: (payload) => post(`${R}/agency-bill/generate`, payload),
   listAgencyBills: (params) => get(`${R}/agency-bill`, params),
-  sendBill: (billId, payload) => post(`${R}/bills/${id(billId)}/send`, payload),
 
   // approvals
   listApprovals: (params) => get(`${R}/approvals`, params),
-  approvalHistory: () => get(`${R}/approvals/history`),
-  approve: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/approve`, { comments }),
-  // reason: { reasonCode, note } of the remittance_reject context (ReasonPicker reasonPayload)
-  reject: (approvalId, reason) => post(`${R}/approvals/${id(approvalId)}/reject`, reason),
-  delegate: (approvalId, delegateTo, comments) => post(`${R}/approvals/${id(approvalId)}/delegate`, { delegateTo, comments }),
-  listApprovers: () => get(`${R}/approvals/approvers`),
 
   // settlements
   settlementPolicies: (insurerCode) => get(`${R}/settlements/available-policies`, { insurerCode }),
   // refunds due from the insurer (return premium already remitted), netted against its next remittance voucher
   insurerCredits: (insurer, status = "open") => get(`${R}/insurer-credits`, { insurer, status }),
   calculateSettlement: (payload) => post(`${R}/settlements/calculate`, payload),
-  listSettlements: (params) => get(`${R}/settlements`, params),
-  getSettlement: (settlementId) => get(`${R}/settlements/${id(settlementId)}`),
   createSettlement: (payload) => post(`${R}/settlements`, payload),
   updateSettlement: (settlementId, payload) => put(`${R}/settlements/${id(settlementId)}`, payload),
   submitSettlement: (settlementId, payload) => post(`${R}/settlements/${id(settlementId)}/submit`, payload),
 
-  // adjustments
-  listAdjustments: (params) => get(`${R}/adjustments`, params),
-  adjustmentHistory: () => get(`${R}/adjustments/history`),
-  createAdjustment: (payload) => post(`${R}/adjustments`, payload),
-  completeAdjustment: (adjId) => post(`${R}/adjustments/${id(adjId)}/complete`),
-
-  // electronic transfers
-  transferMethods: () => get(`${R}/transfers/methods`),
-  listTransfers: (params) => get(`${R}/transfers`, params),
-  createTransfer: (payload) => post(`${R}/transfers`, payload),
-  executeTransfer: (transferId, payload) => post(`${R}/transfers/${id(transferId)}/execute`, payload),
-
-  // statements
-  listStatements: () => get(`${R}/statements`),
-  previewStatement: (params) => get(`${R}/statements/preview`, params),
-  generateStatement: (payload) => post(`${R}/statements/generate`, payload),
-
   // exceptions
   listExceptions: (params) => get(`${R}/exceptions`, params),
-  createException: (payload) => post(`${R}/exceptions`, payload),
   assignException: (excId, assignedTo) => post(`${R}/exceptions/${id(excId)}/assign`, { assignedTo }),
   resolveException: (excId, resolution) => post(`${R}/exceptions/${id(excId)}/resolve`, { resolution }),
-  escalateException: (excId, reason) => post(`${R}/exceptions/${id(excId)}/escalate`, { reason }),
+  // reason: { reasonCode, note } of the exception_escalate context
+  escalateException: (excId, reason) => post(`${R}/exceptions/${id(excId)}/escalate`, reason),
 
   // notifications
-  inbox: () => get(`${R}/notifications/inbox`),
-  sentNotifications: () => get(`${R}/notifications/sent`),
-  notificationTemplates: () => get(`${R}/notifications/templates`),
   sendNotification: (payload) => post(`${R}/notifications`, payload),
 
   // scheduling
@@ -160,28 +115,8 @@ export const remittanceService = {
   scheduleActivity: (scheduleId) => get(`${R}/schedules/${id(scheduleId)}/activity`),
   previewRun: (scheduleId) => post(`${R}/schedules/${id(scheduleId)}/preview`),
 
-  // bulk processing
-  listBulk: () => get(`${R}/bulk`),
-  uploadBulk: async (file, configCode) => {
-    const form = new FormData();
-    form.append("file", file);
-    if (configCode) form.append("configCode", configCode);
-    return (await apiRequest("POST", `${R}/bulk/upload`, { form })).data;
-  },
-  processBulk: (uploadId) => post(`${R}/bulk/${id(uploadId)}/process`),
-
-  // reconciliation
-  reconciliation: () => get(`${R}/reconciliation`),
-  importBankTransactions: (transactions) => post(`${R}/reconciliation/bank-transactions`, { transactions }),
-  autoMatch: (tolerance) => post(`${R}/reconciliation/auto-match`, tolerance === undefined ? {} : { tolerance }),
-  match: (bankId, remittanceId) => post(`${R}/reconciliation/match`, { bankId, remittanceId }),
-  unmatch: (bankId) => post(`${R}/reconciliation/unmatch`, { bankId }),
-
-  // analytics / reports / history
-  analytics: (params) => get(`${R}/analytics`, params),
-  history: (params) => apiRequest("GET", `${R}/history`, { params }),
+  // history
   auditTrail: (referenceNo) => get(`${R}/history/audit`, { referenceNo }),
-  systemLogs: () => get(`${R}/history/system-logs`),
 
   // Accounts > Remittance (R1): the landing and menu counts, the register, approvals, insurer payments and imports
   summary: () => get(`${R}/summary`),
