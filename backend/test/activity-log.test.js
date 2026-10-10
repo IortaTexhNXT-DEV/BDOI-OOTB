@@ -162,7 +162,10 @@ describe('record history from the record itself', () => {
     expect(catTrail).toHaveLength(1);
     expect(catTrail[0]).toMatchObject({ action: 'create', user: { displayName: 'BrokerVerse Administrator' } });
     const sig = (await q("SELECT id FROM signatories ORDER BY id LIMIT 1")).rows[0];
-    expect((await ctx.api('get', `/audit/records/master:signatory/${sig.id}`)).body.data.map((e) => e.action)).toEqual(['create']);
+    const sigTrail = (await ctx.api('get', `/audit/records/master:signatory/${sig.id}`)).body.data;
+    expect(sigTrail.map((e) => [e.action, e.user.displayName])).toEqual([['create', 'BrokerVerse Administrator']]);
+    const seeded = (await q(`INSERT INTO master_records(type_code, code, name, data, created_by) VALUES ('account-category', 'AC-LC2', 'Lc seeded', '{}', 'seed') RETURNING id`)).rows[0];
+    expect((await ctx.api('get', `/audit/records/master:account-category/${seeded.id}`)).body.data[0].user.displayName).toBe('BrokerVerse Administrator');
 
     // looked up by its number, and steps taken at the same moment read newest first: posted above created
     const journal = (await ctx.api('get', '/audit/records/journal_voucher/JV-LC-0001')).body.data;

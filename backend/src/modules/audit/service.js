@@ -9,7 +9,7 @@ import { businessTimeZone } from '../../lib/dates.js';
 import { ENTITIES } from '../../lib/scope.js';
 import { RECORD_KEYS, groupFieldChanges, toEvents } from '../../lib/auditEvents.js';
 import { actionText, entityLabel } from '../../lib/auditLabels.js';
-import { getType } from '../masters/service.js';
+import { SETUP_ACTOR_NAMES, getType } from '../masters/service.js';
 
 const COLUMNS = 'a.id, a.at, a.user_id, a.username, a.entity, a.entity_id, a.action, a.before_data, a.after_data, a.source';
 
@@ -90,7 +90,8 @@ async function masterCreation(entity, id, stored) {
     ? await one(`SELECT created_at, created_by FROM "${t.table_name}" WHERE id::text = $1`, [id]).catch(() => null)
     : await one('SELECT created_at, created_by FROM master_records WHERE id::text = $1 AND type_code = $2', [id, t.code]).catch(() => null);
   if (!rec?.created_at) return [];
-  const by = rec.created_by || null;
+  // loaded at set-up: shown under the administrator who owns the set-up, as the master screens do
+  const by = !rec.created_by || SETUP_ACTOR_NAMES.includes(rec.created_by) ? 'BrokerVerse' : rec.created_by;
   return [{ id: `create-${id}`, at: rec.created_at, user_id: by && /^usr_/.test(by) ? by : null, username: by && !/^usr_/.test(by) ? by : null,
     entity, entity_id: id, action: 'create', before_data: null, after_data: null, source: { channel: 'record' }, step: 0 }];
 }

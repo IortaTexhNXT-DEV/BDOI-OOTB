@@ -42,8 +42,8 @@ describe('signatories master (order summary Authorized Signature)', () => {
     const byName = Object.fromEntries(list.body.data.map((s) => [s.signatoryName, s]));
     expect(byName['Maria Regina Cruz']).toMatchObject({ designation: 'President & CEO', status: 'Active' });
     expect(byName['Maria Regina Cruz'].signatoryCode).toMatch(/^SIG-\d{3}$/);
-    // loaded with the set-up data, it was last changed by the system; one added on the screen names its user
-    expect(byName['Maria Regina Cruz'].modifiedBy).toBe('System');
+    // loaded with the set-up data, it is shown under the administrator who owns the set-up
+    expect(byName['Maria Regina Cruz'].modifiedBy).toBe('BrokerVerse Administrator');
     const opts = await as(salesToken, 'get', '/masters/signatory/options');
     expect(opts.status).toBe(200);
     expect(opts.body.data.map((o) => o.value)).toEqual(expect.arrayContaining(['Maria Regina Cruz', 'Jose Antonio Reyes', 'Ana Patricia Lim']));
