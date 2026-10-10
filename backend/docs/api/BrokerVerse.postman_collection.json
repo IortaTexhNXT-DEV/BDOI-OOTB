@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1238 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1240 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -430,7 +430,7 @@
           ]
         },
         {
-          "name": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it",
+          "name": "A proposal waiting for approval: withdraw it (the proposer only). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it",
           "request": {
             "method": "DELETE",
             "header": [
@@ -457,7 +457,7 @@
                 }
               ]
             },
-            "description": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
+            "description": "A proposal waiting for approval: withdraw it (the proposer only). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"referenceNo\": \"BR-2026-020\",\n  \"referenceDate\": \"2026-10-05\",\n  \"remarks\": \"Role merged into Finance\"\n}",
@@ -497,7 +497,7 @@
                     }
                   ]
                 },
-                "description": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
+                "description": "A proposal waiting for approval: withdraw it (the proposer only). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"referenceNo\": \"BR-2026-020\",\n  \"referenceDate\": \"2026-10-05\",\n  \"remarks\": \"Role merged into Finance\"\n}",
@@ -1066,7 +1066,7 @@
           ]
         },
         {
-          "name": "Withdraw a change of access waiting for approval (the requester or an approver)",
+          "name": "Withdraw a change of access waiting for approval (the requester only; an approver rejects it with a reason)",
           "request": {
             "method": "POST",
             "header": [],
@@ -1089,7 +1089,7 @@
                 }
               ]
             },
-            "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+            "description": "Withdraw a change of access waiting for approval (the requester only; an approver rejects it with a reason)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
           },
           "response": [
             {
@@ -1116,7 +1116,7 @@
                     }
                   ]
                 },
-                "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+                "description": "Withdraw a change of access waiting for approval (the requester only; an approver rejects it with a reason)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1129,6 +1129,132 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"ref\": \"CFG-12\",\n    \"kind\": \"role-access\",\n    \"kindLabel\": \"Role access\",\n    \"target\": \"tis-finance\",\n    \"targetLabel\": \"TIS Finance & General Accounting\",\n    \"summary\": [\n      \"Added: Accounts › Bank reconciliation › Approve\"\n    ],\n    \"status\": \"withdrawn\",\n    \"requestedBy\": \"IT administrator\",\n    \"requestedAt\": \"2026-10-09T02:15:00Z\",\n    \"canDecide\": true,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The access controls (approval of access changes, segregation of duties and approval limits enforced) with their values and the change waiting for approval",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/controls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "controls"
+              ]
+            },
+            "description": "The access controls (approval of access changes, segregation of duties and approval limits enforced) with their values and the change waiting for approval\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/controls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "controls"
+                  ]
+                },
+                "description": "The access controls (approval of access changes, segregation of duties and approval limits enforced) with their values and the change waiting for approval\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"key\": \"access.change_approval\",\n        \"name\": \"Changes of access wait for a second administrator\",\n        \"type\": \"boolean\",\n        \"options\": null,\n        \"value\": true\n      }\n    ],\n    \"pending\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Propose new values of the access controls with a reason (access_change); applies only once a different administrator approves it, whatever access.change_approval says",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/controls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "controls"
+              ]
+            },
+            "description": "Propose new values of the access controls with a reason (access_change); applies only once a different administrator approves it, whatever access.change_approval says\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"values\": {\n    \"access.sod_enforced\": false\n  },\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Data migration week\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/controls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "controls"
+                  ]
+                },
+                "description": "Propose new values of the access controls with a reason (access_change); applies only once a different administrator approves it, whatever access.change_approval says\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"values\": {\n    \"access.sod_enforced\": false\n  },\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Data migration week\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"ref\": \"CFG-12\",\n    \"kind\": \"access-controls\",\n    \"kindLabel\": \"Access controls\",\n    \"target\": \"access-controls\",\n    \"targetLabel\": \"Access controls\",\n    \"summary\": [\n      \"Segregation of duties is checked when roles are given: On → Off\"\n    ],\n    \"status\": \"pending\",\n    \"requestedBy\": \"IT administrator\",\n    \"requestedAt\": \"2026-10-09T02:15:00Z\",\n    \"canDecide\": true,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n  }\n}"
             }
           ]
         },
@@ -1515,7 +1641,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"maxDays\": 90,\n    \"approval\": true,\n    \"withoutLimit\": \"allow\",\n    \"departments\": [\n      {\n        \"name\": \"Finance and Accounting\",\n        \"order\": 4\n      }\n    ],\n    \"types\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"measure\": \"amount\",\n        \"step\": \"Accounts > Journal Vouchers > Approve\"\n      }\n    ],\n    \"people\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Mariela S. Valentino\",\n        \"department\": \"Finance and Accounting\",\n        \"roleNames\": [\n          \"TIS Finance & General Accounting\"\n        ],\n        \"approves\": [\n          \"journal_voucher\"\n        ],\n        \"authority\": {\n          \"journal_voucher\": {\n            \"set\": true,\n            \"limit\": 750000,\n            \"unlimited\": false,\n            \"source\": \"user limit\"\n          }\n        }\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"maxDays\": 90,\n    \"approval\": true,\n    \"withoutLimit\": \"allow\",\n    \"departments\": [\n      {\n        \"name\": \"Finance and Accounting\",\n        \"order\": 4\n      }\n    ],\n    \"types\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"measure\": \"amount\",\n        \"step\": \"Accounts > Journal Vouchers > Approve\"\n      }\n    ],\n    \"people\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Mariela S. Valentino\",\n        \"department\": \"Finance and Accounting\",\n        \"roleNames\": [\n          \"TIS Finance & General Accounting\"\n        ],\n        \"approves\": [\n          \"journal_voucher\"\n        ],\n        \"authority\": {\n          \"journal_voucher\": {\n            \"set\": true,\n            \"limit\": 750000,\n            \"unlimited\": false,\n            \"source\": \"personal limit\"\n          }\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },

@@ -721,7 +721,7 @@
     "/access-control/authority-limits/{id}": {
       "delete": {
         "operationId": "deleteAccessControlAuthorityLimitsId",
-        "summary": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it",
+        "summary": "A proposal waiting for approval: withdraw it (the proposer only). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it",
         "tags": [
           "Access Control"
         ],
@@ -1732,7 +1732,7 @@
     "/access-control/changes/{id}/withdraw": {
       "post": {
         "operationId": "postAccessControlChangesIdWithdraw",
-        "summary": "Withdraw a change of access waiting for approval (the requester or an approver)",
+        "summary": "Withdraw a change of access waiting for approval (the requester only; an approver rejects it with a reason)",
         "tags": [
           "Access Control"
         ],
@@ -1846,6 +1846,225 @@
           "write:access-control",
           "approve:access-control"
         ]
+      }
+    },
+    "/access-control/controls": {
+      "get": {
+        "operationId": "getAccessControlControls",
+        "summary": "The access controls (approval of access changes, segregation of duties and approval limits enforced) with their values and the change waiting for approval",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "options": {},
+                              "value": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "pending": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "key": "access.change_approval",
+                        "name": "Changes of access wait for a second administrator",
+                        "type": "boolean",
+                        "options": null,
+                        "value": true
+                      }
+                    ],
+                    "pending": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlControls",
+        "summary": "Propose new values of the access controls with a reason (access_change); applies only once a different administrator approves it, whatever access.change_approval says",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "targetLabel": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "canDecide": {
+                          "type": "boolean"
+                        },
+                        "canWithdraw": {
+                          "type": "boolean"
+                        },
+                        "link": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "ref": "CFG-12",
+                    "kind": "access-controls",
+                    "kindLabel": "Access controls",
+                    "target": "access-controls",
+                    "targetLabel": "Access controls",
+                    "summary": [
+                      "Segregation of duties is checked when roles are given: On → Off"
+                    ],
+                    "status": "pending",
+                    "requestedBy": "IT administrator",
+                    "requestedAt": "2026-10-09T02:15:00Z",
+                    "canDecide": true,
+                    "canWithdraw": true,
+                    "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Role Permissions",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "values": {
+                    "type": "object",
+                    "properties": {
+                      "access.sod_enforced": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "values": {
+                  "access.sod_enforced": false
+                },
+                "reasonCode": "ACC-REDESIGN",
+                "note": "Data migration week"
+              }
+            }
+          }
+        }
       }
     },
     "/access-control/delegations": {
@@ -2724,7 +2943,7 @@
                             "set": true,
                             "limit": 750000,
                             "unlimited": false,
-                            "source": "user limit"
+                            "source": "personal limit"
                           }
                         }
                       }

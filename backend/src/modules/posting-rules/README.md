@@ -57,8 +57,9 @@ already applies) or is inactive or missing. Each pending item (account role, pay
 write-off reason) is listed once with the events that use it and the screen where it is mapped.
 
 The edition is the first eight characters of a SHA-256 over the rules in force, their lines and resolved accounts, the
-provisional list and the chart pattern: the same configuration gives the same edition, printed on both exports so a
-signed handbook can be matched to the configuration.
+provisional list and the chart pattern: the same configuration gives the same edition. It is kept with the audit
+entry of each export (a signed handbook is matched to the configuration through the audit trail), not shown on the
+page or the exports.
 
 ## Key settings
 

@@ -50,7 +50,10 @@ minimal, clearly-correct front-end fix.
   `src/modules/access-control/changes.js` and registers its kind with `registerAccessKind` (label, link, summary in
   business words, extra checks on the approver, what approving applies, what a rejection undoes). The table is the
   configuration approval (`accounting_config_changes`); a new kind is added to its kind CHECK by a migration. Changes
-  that only reduce access (ending a delegation or an exception early) apply at once.
+  that only reduce access (ending a delegation or an exception early) apply at once. Only the requester withdraws a
+  change; the approver holds none of the roles it changes (`rolesHeldBy`). A setting that decides how access is
+  enforced is changed through `controls.js` (kind `access-controls`) and listed in `src/lib/settingOwners.js`, so the
+  generic configuration endpoints refuse it.
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the
