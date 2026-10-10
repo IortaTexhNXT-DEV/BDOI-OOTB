@@ -36,13 +36,6 @@
      "modules": []
     },
     {
-     "section": "Dashboard",
-     "screen": "Sales Dashboard",
-     "path": "/sales/dashboard",
-     "access": "View",
-     "modules": []
-    },
-    {
      "section": "Operations > Sales & Marketing",
      "screen": "Prospects",
      "path": "/agent/leadlisting",
@@ -104,24 +97,6 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "View",
-     "modules": [
-      "Marketing campaigns"
      ]
     },
     {
@@ -207,24 +182,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -242,27 +199,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -746,13 +685,6 @@
      "modules": []
     },
     {
-     "section": "Dashboard",
-     "screen": "Sales Dashboard",
-     "path": "/sales/dashboard",
-     "access": "View",
-     "modules": []
-    },
-    {
      "section": "Operations > Sales & Marketing",
      "screen": "Prospects",
      "path": "/agent/leadlisting",
@@ -814,24 +746,6 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
      ]
     },
     {
@@ -917,24 +831,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -952,27 +848,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -1499,13 +1377,6 @@
      "modules": []
     },
     {
-     "section": "Dashboard",
-     "screen": "Sales Dashboard",
-     "path": "/sales/dashboard",
-     "access": "View",
-     "modules": []
-    },
-    {
      "section": "Operations > Sales & Marketing",
      "screen": "Prospects",
      "path": "/agent/leadlisting",
@@ -1567,24 +1438,6 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
      ]
     },
     {
@@ -1670,24 +1523,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -1705,27 +1540,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -1765,33 +1582,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Invoices",
-     "path": "/accounts/payables/invoices",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Payments",
-     "path": "/accounts/payables/payments",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "AP Ageing",
-     "path": "/accounts/payables/ageing",
-     "access": "View",
-     "modules": [
-      "Payables"
      ]
     },
     {
@@ -2458,15 +2248,6 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
      "screen": "Sales Activities",
      "path": "/sales/activities",
      "access": "View",
@@ -2548,24 +2329,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -2583,27 +2346,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -3190,15 +2935,6 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
      "screen": "Sales Activities",
      "path": "/sales/activities",
      "access": "View",
@@ -3280,24 +3016,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -3315,27 +3033,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -3393,33 +3093,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Asset Register",
-     "path": "/accounts/fixed-assets/register",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Depreciation Run",
-     "path": "/accounts/fixed-assets/depreciation",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Disposals",
-     "path": "/accounts/fixed-assets/disposals",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
      ]
     },
     {
@@ -3988,15 +3661,6 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
      "screen": "Sales Activities",
      "path": "/sales/activities",
      "access": "View",
@@ -4078,24 +3742,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -4113,27 +3759,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -4195,33 +3823,6 @@
     },
     {
      "section": "Accounts > Payables",
-     "screen": "Supplier Invoices",
-     "path": "/accounts/payables/invoices",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Payments",
-     "path": "/accounts/payables/payments",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "AP Ageing",
-     "path": "/accounts/payables/ageing",
-     "access": "View",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
      "screen": "Suppliers",
      "path": "/accounts/payables/suppliers",
      "access": "View",
@@ -4236,33 +3837,6 @@
      "access": "View",
      "modules": [
       "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Asset Register",
-     "path": "/accounts/fixed-assets/register",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Depreciation Run",
-     "path": "/accounts/fixed-assets/depreciation",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Disposals",
-     "path": "/accounts/fixed-assets/disposals",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
      ]
     },
     {
@@ -5254,15 +4828,6 @@
      ]
     },
     {
-     "section": "Accounts",
-     "screen": "Claims Settlements",
-     "path": "/accounts/claims-settlements",
-     "access": "Create and edit",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
      "section": "Accounts > Remittance",
      "screen": "Remittances",
      "path": "/finance/remittance/remittances",
@@ -5529,15 +5094,6 @@
      "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
-     "access": "Create and edit",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Claims Settlements",
-     "path": "/accounts/claims-settlements",
      "access": "Create and edit",
      "modules": [
       "Receipts"
@@ -5944,15 +5500,6 @@
     },
     {
      "section": "Accounts > Credit Control",
-     "screen": "Client Credit Limits",
-     "path": "/accounts/credit-control/limits",
-     "access": "Approve",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
      "screen": "Remittance Ageing",
      "path": "/accounts/credit-control/remittance-ageing",
      "access": "View",
@@ -5967,42 +5514,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Claims Settlements",
-     "path": "/accounts/claims-settlements",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Invoices",
-     "path": "/accounts/payables/invoices",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Payments",
-     "path": "/accounts/payables/payments",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "AP Ageing",
-     "path": "/accounts/payables/ageing",
-     "access": "View",
-     "modules": [
-      "Payables"
      ]
     },
     {
@@ -6021,33 +5532,6 @@
      "access": "View",
      "modules": [
       "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Asset Register",
-     "path": "/accounts/fixed-assets/register",
-     "access": "Create and edit",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Depreciation Run",
-     "path": "/accounts/fixed-assets/depreciation",
-     "access": "Create and edit",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Disposals",
-     "path": "/accounts/fixed-assets/disposals",
-     "access": "Create and edit",
-     "modules": [
-      "Fixed assets"
      ]
     },
     {
@@ -6206,51 +5690,6 @@
      "modules": []
     },
     {
-     "section": "Accounts > Petty Cash",
-     "screen": "Initiate",
-     "path": "/accounts/pettycash/pettycashcodeinitiate",
-     "access": "Create and edit",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Request",
-     "path": "/accounts/pettycash/pettycashrequest",
-     "access": "Create and edit",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Disbursement",
-     "path": "/accounts/pettycash/disbursement",
-     "access": "Create and edit",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Receipts",
-     "path": "/accounts/pettycash/receipts",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Replenish",
-     "path": "/accounts/pettycash/replenish",
-     "access": "Create and edit",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
      "section": "Accounts > Bank Reconciliation",
      "screen": "Reconciliation Workspace",
      "path": "/accounts/bank-reconciliation",
@@ -6324,98 +5763,8 @@
     },
     {
      "section": "Accounts > Tax",
-     "screen": "VAT Summary",
-     "path": "/accounts/tax/reports/bir-vat-summary",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SAWT",
-     "path": "/accounts/tax/reports/bir-sawt",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "QAP",
-     "path": "/accounts/tax/reports/bir-qap",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SLSP Sales",
-     "path": "/accounts/tax/reports/bir-slsp-sales",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SLSP Purchases",
-     "path": "/accounts/tax/reports/bir-slsp-purchases",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Withholding Returns",
-     "path": "/accounts/tax/withholding-returns",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Annual Alphalist 1604-E",
-     "path": "/accounts/tax/alphalist-1604e",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Percentage Tax 2551Q",
-     "path": "/accounts/tax/percentage-tax",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "BIR DAT Files",
-     "path": "/accounts/tax/dat-files",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
      "screen": "Sales Invoices",
      "path": "/accounts/tax/sales-invoices",
-     "access": "Create and edit",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "E-Invoicing (EIS)",
-     "path": "/accounts/tax/eis",
      "access": "Create and edit",
      "modules": [
       "Period end and tax"
@@ -6452,15 +5801,6 @@
      "section": "Accounts > Period End",
      "screen": "Year-End Close",
      "path": "/accounts/period-end/year-end",
-     "access": "Approve",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Period End",
-     "screen": "Recurring Journals",
-     "path": "/accounts/period-end/recurring",
      "access": "Approve",
      "modules": [
       "Period end and tax"
@@ -6533,24 +5873,6 @@
      "section": "Commission",
      "screen": "Agents/Referrer Accounts",
      "path": "/commission/referrer-accounts",
-     "access": "Create and edit",
-     "modules": [
-      "Commission"
-     ]
-    },
-    {
-     "section": "Commission > Insurer Overrides",
-     "screen": "Agreements",
-     "path": "/commission/insurer-overrides/agreements",
-     "access": "Create and edit",
-     "modules": [
-      "Commission"
-     ]
-    },
-    {
-     "section": "Commission > Insurer Overrides",
-     "screen": "Computations",
-     "path": "/commission/insurer-overrides/computations",
      "access": "Create and edit",
      "modules": [
       "Commission"
@@ -6681,24 +6003,6 @@
      ]
     },
     {
-     "section": "Reports > Financial Reports",
-     "screen": "Co-insurance Register",
-     "path": "/reports/financialreports/coinsuranceregister",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Due to Insurers",
-     "path": "/reports/financialreports/duetoinsurers",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -6754,15 +6058,6 @@
     },
     {
      "section": "Master > Finance",
-     "screen": "Payment Gateways",
-     "path": "/master/finance/payment-gateways",
-     "access": "View",
-     "modules": [
-      "Reference masters"
-     ]
-    },
-    {
-     "section": "Master > Finance",
      "screen": "Taxation",
      "path": "/master/finance/taxation",
      "access": "View",
@@ -6774,15 +6069,6 @@
      "section": "Master > Finance",
      "screen": "Close Checklist",
      "path": "/master/finance/close-checklist",
-     "access": "View",
-     "modules": [
-      "Reference masters"
-     ]
-    },
-    {
-     "section": "Master > Finance",
-     "screen": "Asset Classes",
-     "path": "/master/finance/asset-classes",
      "access": "View",
      "modules": [
       "Reference masters"
@@ -7351,15 +6637,6 @@
      ]
     },
     {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "View",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -7415,24 +6692,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "View",
@@ -7450,27 +6709,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "View",
      "modules": [
       "Policies"
@@ -7523,33 +6764,6 @@
     },
     {
      "section": "Accounts > Payables",
-     "screen": "Supplier Invoices",
-     "path": "/accounts/payables/invoices",
-     "access": "View",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Payments",
-     "path": "/accounts/payables/payments",
-     "access": "View",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "AP Ageing",
-     "path": "/accounts/payables/ageing",
-     "access": "View",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
      "screen": "Suppliers",
      "path": "/accounts/payables/suppliers",
      "access": "View",
@@ -7564,33 +6778,6 @@
      "access": "View",
      "modules": [
       "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Asset Register",
-     "path": "/accounts/fixed-assets/register",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Depreciation Run",
-     "path": "/accounts/fixed-assets/depreciation",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Disposals",
-     "path": "/accounts/fixed-assets/disposals",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
      ]
     },
     {
@@ -7848,24 +7035,6 @@
      "section": "Reports > Financial Reports",
      "screen": "Month-End Close Status",
      "path": "/reports/financialreports/pe/month-end-close-status",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Co-insurance Register",
-     "path": "/reports/financialreports/coinsuranceregister",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Due to Insurers",
-     "path": "/reports/financialreports/duetoinsurers",
      "access": "View",
      "modules": [
       "Reports"
@@ -8143,24 +7312,6 @@
     },
     {
      "section": "Master > Finance",
-     "screen": "Package Bundles",
-     "path": "/master/finance/package-bundles",
-     "access": "Create and edit",
-     "modules": [
-      "Reference masters"
-     ]
-    },
-    {
-     "section": "Master > Finance",
-     "screen": "Insurer Rate Tables",
-     "path": "/master/finance/insurer-rate-tables",
-     "access": "Create and edit",
-     "modules": [
-      "Reference masters"
-     ]
-    },
-    {
-     "section": "Master > Finance",
      "screen": "Premium Taxes & LGU Rates",
      "path": "/master/finance/premium-taxes",
      "access": "Create and edit",
@@ -8190,15 +7341,6 @@
      "section": "Master > Finance",
      "screen": "Currency",
      "path": "/master/finance/currency",
-     "access": "Create and edit",
-     "modules": [
-      "Reference masters"
-     ]
-    },
-    {
-     "section": "Master > Finance",
-     "screen": "Exchange Rate",
-     "path": "/master/finance/exchangerate",
      "access": "Create and edit",
      "modules": [
       "Reference masters"
@@ -8296,20 +7438,11 @@
     },
     {
      "section": "Master > System",
-     "screen": "Message Templates",
-     "path": "/master/configuration/message-templates",
-     "access": "Create and edit",
+     "screen": "Features & Releases",
+     "path": "/master/configuration/features",
+     "access": "View",
      "modules": [
-      "Integrations"
-     ]
-    },
-    {
-     "section": "Master > System",
-     "screen": "Insurer Integration",
-     "path": "/master/configuration/insurer-integration",
-     "access": "Create and edit",
-     "modules": [
-      "Integrations"
+      "Features and releases"
      ]
     },
     {
@@ -8380,15 +7513,6 @@
      "screen": "Risk Mapping",
      "path": "/product-configurator/risk-mapping",
      "access": "Create and edit",
-     "modules": [
-      "Products"
-     ]
-    },
-    {
-     "section": "Product Configurator",
-     "screen": "Product Analytics",
-     "path": "/product-configurator/analytics",
-     "access": "View",
      "modules": [
       "Products"
      ]
@@ -8594,6 +7718,12 @@
      "meaning": "See the audit trail"
     },
     {
+     "area": "Master data and configuration",
+     "module": "Features and releases",
+     "level": "View",
+     "meaning": "See the catalogue of features and releases with their status (read only)"
+    },
+    {
      "area": "Users and access",
      "module": "Users",
      "level": "View",
@@ -8715,13 +7845,6 @@
      "modules": []
     },
     {
-     "section": "Dashboard",
-     "screen": "Sales Dashboard",
-     "path": "/sales/dashboard",
-     "access": "View",
-     "modules": []
-    },
-    {
      "section": "Operations > Sales & Marketing",
      "screen": "Prospects",
      "path": "/agent/leadlisting",
@@ -8783,24 +7906,6 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
      ]
     },
     {
@@ -8886,24 +7991,6 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Retention Analytics",
-     "path": "/renewal/analytics",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "At-Risk Policies",
-     "path": "/renewal/at-risk",
-     "access": "Create and edit",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -8921,27 +8008,9 @@
      ]
     },
     {
-     "section": "Operations > Renewals",
-     "screen": "Performance",
-     "path": "/renewal/performance",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
-     "access": "Create and edit",
-     "modules": [
-      "Policies"
-     ]
-    },
-    {
-     "section": "Operations",
-     "screen": "CTPL Authentication",
-     "path": "/operations/ctpl-authentication",
      "access": "Create and edit",
      "modules": [
       "Policies"
@@ -9021,15 +8090,6 @@
     },
     {
      "section": "Accounts > Credit Control",
-     "screen": "Client Credit Limits",
-     "path": "/accounts/credit-control/limits",
-     "access": "View",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
      "screen": "Remittance Ageing",
      "path": "/accounts/credit-control/remittance-ageing",
      "access": "View",
@@ -9044,42 +8104,6 @@
      "access": "View",
      "modules": [
       "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Claims Settlements",
-     "path": "/accounts/claims-settlements",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Invoices",
-     "path": "/accounts/payables/invoices",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "Supplier Payments",
-     "path": "/accounts/payables/payments",
-     "access": "Approve",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Payables",
-     "screen": "AP Ageing",
-     "path": "/accounts/payables/ageing",
-     "access": "View",
-     "modules": [
-      "Payables"
      ]
     },
     {
@@ -9098,33 +8122,6 @@
      "access": "View",
      "modules": [
       "Payables"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Asset Register",
-     "path": "/accounts/fixed-assets/register",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Depreciation Run",
-     "path": "/accounts/fixed-assets/depreciation",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
-     ]
-    },
-    {
-     "section": "Accounts > Fixed Assets",
-     "screen": "Disposals",
-     "path": "/accounts/fixed-assets/disposals",
-     "access": "View",
-     "modules": [
-      "Fixed assets"
      ]
     },
     {
@@ -9274,51 +8271,6 @@
      "modules": []
     },
     {
-     "section": "Accounts > Petty Cash",
-     "screen": "Initiate",
-     "path": "/accounts/pettycash/pettycashcodeinitiate",
-     "access": "View",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Request",
-     "path": "/accounts/pettycash/pettycashrequest",
-     "access": "View",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Disbursement",
-     "path": "/accounts/pettycash/disbursement",
-     "access": "View",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Receipts",
-     "path": "/accounts/pettycash/receipts",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts > Petty Cash",
-     "screen": "Replenish",
-     "path": "/accounts/pettycash/replenish",
-     "access": "View",
-     "modules": [
-      "Disbursements and petty cash"
-     ]
-    },
-    {
      "section": "Accounts > Bank Reconciliation",
      "screen": "Reconciliation Workspace",
      "path": "/accounts/bank-reconciliation",
@@ -9392,98 +8344,8 @@
     },
     {
      "section": "Accounts > Tax",
-     "screen": "VAT Summary",
-     "path": "/accounts/tax/reports/bir-vat-summary",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SAWT",
-     "path": "/accounts/tax/reports/bir-sawt",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "QAP",
-     "path": "/accounts/tax/reports/bir-qap",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SLSP Sales",
-     "path": "/accounts/tax/reports/bir-slsp-sales",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "SLSP Purchases",
-     "path": "/accounts/tax/reports/bir-slsp-purchases",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Withholding Returns",
-     "path": "/accounts/tax/withholding-returns",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Annual Alphalist 1604-E",
-     "path": "/accounts/tax/alphalist-1604e",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "Percentage Tax 2551Q",
-     "path": "/accounts/tax/percentage-tax",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "BIR DAT Files",
-     "path": "/accounts/tax/dat-files",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
      "screen": "Sales Invoices",
      "path": "/accounts/tax/sales-invoices",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Tax",
-     "screen": "E-Invoicing (EIS)",
-     "path": "/accounts/tax/eis",
      "access": "View",
      "modules": [
       "Period end and tax"
@@ -9520,15 +8382,6 @@
      "section": "Accounts > Period End",
      "screen": "Year-End Close",
      "path": "/accounts/period-end/year-end",
-     "access": "View",
-     "modules": [
-      "Period end and tax"
-     ]
-    },
-    {
-     "section": "Accounts > Period End",
-     "screen": "Recurring Journals",
-     "path": "/accounts/period-end/recurring",
      "access": "View",
      "modules": [
       "Period end and tax"
@@ -9601,24 +8454,6 @@
      "section": "Commission",
      "screen": "Agents/Referrer Accounts",
      "path": "/commission/referrer-accounts",
-     "access": "View",
-     "modules": [
-      "Commission"
-     ]
-    },
-    {
-     "section": "Commission > Insurer Overrides",
-     "screen": "Agreements",
-     "path": "/commission/insurer-overrides/agreements",
-     "access": "View",
-     "modules": [
-      "Commission"
-     ]
-    },
-    {
-     "section": "Commission > Insurer Overrides",
-     "screen": "Computations",
-     "path": "/commission/insurer-overrides/computations",
      "access": "View",
      "modules": [
       "Commission"
@@ -9785,24 +8620,6 @@
      ]
     },
     {
-     "section": "Reports > Financial Reports",
-     "screen": "Co-insurance Register",
-     "path": "/reports/financialreports/coinsuranceregister",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
-     "section": "Reports > Financial Reports",
-     "screen": "Due to Insurers",
-     "path": "/reports/financialreports/duetoinsurers",
-     "access": "View",
-     "modules": [
-      "Reports"
-     ]
-    },
-    {
      "section": "Master > Insurance",
      "screen": "Distribution Channels",
      "path": "/master/insurance/channels",
@@ -9872,6 +8689,15 @@
      "access": "View",
      "modules": [
       "Audit trail"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Features & Releases",
+     "path": "/master/configuration/features",
+     "access": "View",
+     "modules": [
+      "Features and releases"
      ]
     },
     {
@@ -10187,6 +9013,12 @@
      "module": "Audit trail",
      "level": "View",
      "meaning": "See the audit trail"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Features and releases",
+     "level": "View",
+     "meaning": "See the catalogue of features and releases with their status (read only)"
     },
     {
      "area": "Users and access",
@@ -10508,27 +9340,6 @@
     }
    ]
   },
-  "/sales/dashboard": {
-   "menu": "Dashboard > Sales Dashboard",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/agent/leadlisting": {
    "menu": "Operations > Sales & Marketing > Prospects",
    "roles": [
@@ -10781,64 +9592,6 @@
     {
      "role": "TIS General Manager",
      "access": "View"
-    }
-   ]
-  },
-  "/sales/comparison-reports": {
-   "menu": "Operations > Sales & Marketing > Comparison Reports",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/sales/campaigns": {
-   "menu": "Operations > Sales & Marketing > Campaigns",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
     }
    ]
   },
@@ -11163,80 +9916,6 @@
     }
    ]
   },
-  "/renewal/analytics": {
-   "menu": "Operations > Renewals > Retention Analytics",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/renewal/at-risk": {
-   "menu": "Operations > Renewals > At-Risk Policies",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
-    }
-   ]
-  },
   "/renewal/negotiations": {
    "menu": "Operations > Renewals > Negotiations",
    "roles": [
@@ -11311,43 +9990,6 @@
     }
    ]
   },
-  "/renewal/performance": {
-   "menu": "Operations > Renewals > Performance",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/agent/payments": {
    "menu": "Operations > Payments",
    "roles": [
@@ -11394,43 +10036,6 @@
     {
      "role": "TIS Finance & General Accounting",
      "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/operations/ctpl-authentication": {
-   "menu": "Operations > CTPL Authentication",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -11694,19 +10299,6 @@
     }
    ]
   },
-  "/accounts/credit-control/limits": {
-   "menu": "Accounts > Credit Control > Client Credit Limits",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/accounts/credit-control/remittance-ageing": {
    "menu": "Accounts > Credit Control > Remittance Ageing",
    "roles": [
@@ -11738,102 +10330,6 @@
     {
      "role": "CCD-Recon (Reconciliation and Reversals)",
      "access": "Create and edit"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/claims-settlements": {
-   "menu": "Accounts > Claims Settlements",
-   "roles": [
-    {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/payables/invoices": {
-   "menu": "Accounts > Payables > Supplier Invoices",
-   "roles": [
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Approve"
-    }
-   ]
-  },
-  "/accounts/payables/payments": {
-   "menu": "Accounts > Payables > Supplier Payments",
-   "roles": [
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Approve"
-    }
-   ]
-  },
-  "/accounts/payables/ageing": {
-   "menu": "Accounts > Payables > AP Ageing",
-   "roles": [
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
     },
     {
      "role": "TIS Finance & General Accounting",
@@ -11888,81 +10384,6 @@
     {
      "role": "TIS Finance & General Accounting",
      "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/fixed-assets/register": {
-   "menu": "Accounts > Fixed Assets > Asset Register",
-   "roles": [
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/fixed-assets/depreciation": {
-   "menu": "Accounts > Fixed Assets > Depreciation Run",
-   "roles": [
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/fixed-assets/disposals": {
-   "menu": "Accounts > Fixed Assets > Disposals",
-   "roles": [
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12348,71 +10769,6 @@
     }
    ]
   },
-  "/accounts/pettycash/pettycashcodeinitiate": {
-   "menu": "Accounts > Petty Cash > Initiate",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/pettycash/pettycashrequest": {
-   "menu": "Accounts > Petty Cash > Request",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/pettycash/disbursement": {
-   "menu": "Accounts > Petty Cash > Disbursement",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/pettycash/receipts": {
-   "menu": "Accounts > Petty Cash > Receipts",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/pettycash/replenish": {
-   "menu": "Accounts > Petty Cash > Replenish",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/accounts/bank-reconciliation": {
    "menu": "Accounts > Bank Reconciliation > Reconciliation Workspace",
    "roles": [
@@ -12601,138 +10957,8 @@
     }
    ]
   },
-  "/accounts/tax/reports/bir-vat-summary": {
-   "menu": "Accounts > Tax > VAT Summary",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/reports/bir-sawt": {
-   "menu": "Accounts > Tax > SAWT",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/reports/bir-qap": {
-   "menu": "Accounts > Tax > QAP",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/reports/bir-slsp-sales": {
-   "menu": "Accounts > Tax > SLSP Sales",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/reports/bir-slsp-purchases": {
-   "menu": "Accounts > Tax > SLSP Purchases",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/withholding-returns": {
-   "menu": "Accounts > Tax > Withholding Returns",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/alphalist-1604e": {
-   "menu": "Accounts > Tax > Annual Alphalist 1604-E",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/percentage-tax": {
-   "menu": "Accounts > Tax > Percentage Tax 2551Q",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/dat-files": {
-   "menu": "Accounts > Tax > BIR DAT Files",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/accounts/tax/sales-invoices": {
    "menu": "Accounts > Tax > Sales Invoices",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/tax/eis": {
-   "menu": "Accounts > Tax > E-Invoicing (EIS)",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -12785,19 +11011,6 @@
   },
   "/accounts/period-end/year-end": {
    "menu": "Accounts > Period End > Year-End Close",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/period-end/recurring": {
-   "menu": "Accounts > Period End > Recurring Journals",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -12954,32 +11167,6 @@
   },
   "/commission/referrer-accounts": {
    "menu": "Commission > Agents/Referrer Accounts",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/commission/insurer-overrides/agreements": {
-   "menu": "Commission > Insurer Overrides > Agreements",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/commission/insurer-overrides/computations": {
-   "menu": "Commission > Insurer Overrides > Computations",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -13497,40 +11684,6 @@
     }
    ]
   },
-  "/reports/financialreports/coinsuranceregister": {
-   "menu": "Reports > Financial Reports > Co-insurance Register",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/reports/financialreports/duetoinsurers": {
-   "menu": "Reports > Financial Reports > Due to Insurers",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/reports/builder": {
    "menu": "Reports > Report Builder",
    "roles": [
@@ -13946,24 +12099,6 @@
     }
    ]
   },
-  "/master/finance/package-bundles": {
-   "menu": "Master > Finance > Package Bundles",
-   "roles": [
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/master/finance/insurer-rate-tables": {
-   "menu": "Master > Finance > Insurer Rate Tables",
-   "roles": [
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    }
-   ]
-  },
   "/master/finance/premium-taxes": {
    "menu": "Master > Finance > Premium Taxes & LGU Rates",
    "roles": [
@@ -13974,15 +12109,6 @@
     {
      "role": "TIS IT AppSupport / Admin",
      "access": "Create and edit"
-    }
-   ]
-  },
-  "/master/finance/payment-gateways": {
-   "menu": "Master > Finance > Payment Gateways",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
     }
    ]
   },
@@ -14013,15 +12139,6 @@
     }
    ]
   },
-  "/master/finance/exchangerate": {
-   "menu": "Master > Finance > Exchange Rate",
-   "roles": [
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    }
-   ]
-  },
   "/master/finance/bank": {
    "menu": "Master > Finance > Bank",
    "roles": [
@@ -14042,15 +12159,6 @@
   },
   "/master/finance/close-checklist": {
    "menu": "Master > Finance > Close Checklist",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "View"
-    }
-   ]
-  },
-  "/master/finance/asset-classes": {
-   "menu": "Master > Finance > Asset Classes",
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
@@ -14196,21 +12304,16 @@
     }
    ]
   },
-  "/master/configuration/message-templates": {
-   "menu": "Master > System > Message Templates",
+  "/master/configuration/features": {
+   "menu": "Master > System > Features & Releases",
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/master/configuration/insurer-integration": {
-   "menu": "Master > System > Insurer Integration",
-   "roles": [
+     "access": "View"
+    },
     {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },
@@ -14341,15 +12444,6 @@
      "access": "Create and edit"
     }
    ]
-  },
-  "/product-configurator/analytics": {
-   "menu": "Product Configurator > Product Analytics",
-   "roles": [
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    }
-   ]
   }
  },
  "permissionHolders": {
@@ -14406,6 +12500,7 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
+  "manage:feature-entitlements": [],
   "read:access-control": [
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
@@ -14503,6 +12598,10 @@
    "TIS Operations Officer",
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
+  "read:features": [
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],

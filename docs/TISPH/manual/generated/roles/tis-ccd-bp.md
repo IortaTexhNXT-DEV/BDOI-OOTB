@@ -9,7 +9,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Receipts | Create and edit |
 | Accounts | Collections | Create and edit |
 | Accounts | Post-Dated Cheques | Create and edit |
-| Accounts | Claims Settlements | Create and edit |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
@@ -30,7 +29,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |

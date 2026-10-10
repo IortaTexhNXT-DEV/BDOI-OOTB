@@ -8,7 +8,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Dashboard | Executive Dashboard | View |
 | Dashboard | Claims Dashboard | View |
 | Dashboard | Processing Dashboard | View |
-| Dashboard | Sales Dashboard | View |
 | Operations > Sales & Marketing | Prospects | Create and edit |
 | Operations > Sales & Marketing | Quick Quote | Create and edit |
 | Operations > Sales & Marketing | Requests for Quotation | Create and edit |
@@ -16,8 +15,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Lead Assignment | Create and edit |
 | Operations > Sales & Marketing | Dealer Programmes | View |
-| Operations > Sales & Marketing | Comparison Reports | Create and edit |
-| Operations > Sales & Marketing | Campaigns | Create and edit |
 | Operations > Sales & Marketing | Sales Activities | Create and edit |
 | Operations | Clients | Create and edit |
 | Operations | Policy | Approve |
@@ -27,13 +24,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
-| Operations > Renewals | Retention Analytics | View |
-| Operations > Renewals | At-Risk Policies | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
-| Operations > Renewals | Performance | View |
 | Operations | Payments | Create and edit |
-| Operations | CTPL Authentication | Create and edit |
 | Operations | Cover Notes | Create and edit |
 | Operations | Policy Cancellation | Create and edit |
 | Operations | Claims Awaiting Documents | Create and edit |
@@ -42,18 +35,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | View |
 | Accounts > Credit Control | Premium Warranty Monitor | View |
-| Accounts > Credit Control | Client Credit Limits | View |
 | Accounts > Credit Control | Remittance Ageing | View |
 | Accounts | Post-Dated Cheques | View |
-| Accounts | Claims Settlements | View |
-| Accounts > Payables | Supplier Invoices | Approve |
-| Accounts > Payables | Supplier Payments | Approve |
-| Accounts > Payables | AP Ageing | View |
 | Accounts > Payables | Suppliers | View |
 | Accounts > Payables | Supplier 2307 | View |
-| Accounts > Fixed Assets | Asset Register | View |
-| Accounts > Fixed Assets | Depreciation Run | View |
-| Accounts > Fixed Assets | Disposals | View |
 | Accounts | Disbursement | View |
 | Accounts | Bank Payment Files | View |
 | Accounts > Remittance | Remittances | View |
@@ -71,11 +56,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Open Entry Unmatching | View |
 | Accounts | Accounting Query | View |
 | Accounts | All Clients Accounting | View |
-| Accounts > Petty Cash | Initiate | View |
-| Accounts > Petty Cash | Request | View |
-| Accounts > Petty Cash | Disbursement | View |
-| Accounts > Petty Cash | Receipts | View |
-| Accounts > Petty Cash | Replenish | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -84,22 +64,11 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
 | Accounts > Tax | BIR Form 2307 | View |
-| Accounts > Tax | VAT Summary | View |
-| Accounts > Tax | SAWT | View |
-| Accounts > Tax | QAP | View |
-| Accounts > Tax | SLSP Sales | View |
-| Accounts > Tax | SLSP Purchases | View |
-| Accounts > Tax | Withholding Returns | View |
-| Accounts > Tax | Annual Alphalist 1604-E | View |
-| Accounts > Tax | Percentage Tax 2551Q | View |
-| Accounts > Tax | BIR DAT Files | View |
 | Accounts > Tax | Sales Invoices | View |
-| Accounts > Tax | E-Invoicing (EIS) | View |
 | Accounts > Tax | CAS Books and Documents | View |
 | Accounts > Period End | Period Management | View |
 | Accounts > Period End | Month-End Close | View |
 | Accounts > Period End | Year-End Close | View |
-| Accounts > Period End | Recurring Journals | View |
 | Accounts > Period End | Financial Statements | View |
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Calculations | View |
@@ -108,8 +77,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Agents/Referrer Accounts | View |
-| Commission > Insurer Overrides | Agreements | View |
-| Commission > Insurer Overrides | Computations | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -128,8 +95,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Financial Reports | General Ledger Detail | View |
 | Reports > Financial Reports | Aged Payables to Insurers | View |
 | Reports > Financial Reports | Month-End Close Status | View |
-| Reports > Financial Reports | Co-insurance Register | View |
-| Reports > Financial Reports | Due to Insurers | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Users and Access | User | View |
 | Master > Users and Access | Role | View |
@@ -138,6 +103,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Authority Matrix | View |
 | Master > Users and Access | Segregation of Duties | View |
 | Master > System | Audit Trail | View |
+| Master > System | Features & Releases | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -149,24 +115,24 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Lead assignment | Create and edit | Maintain assignment rules and reassign prospects |  |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
-| Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | Campaigns |
+| Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | No screen of its own |
 | Sales & Marketing | Marketing campaigns | Create and edit | Prepare and send campaigns; maintain segments and templates |  |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Sales & Marketing | Sales activities | Create and edit | Log, change and cancel calls, meetings, e-mails and visits |  |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Clients | Create and edit | Create and edit clients |  |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
@@ -176,26 +142,27 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Insurer payments, Initiate, Request and Replenish |
-| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files and Insurer payments |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
-| Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
+| Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing and Settlement |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
-| Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents, Period Management, Month-End Close, Year-End Close, Recurring Journals and Financial Statements |
+| Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, Sales Invoices, CAS Books and Documents, Period Management, Month-End Close, Year-End Close and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews | Authority Matrix and Segregation of Duties |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |

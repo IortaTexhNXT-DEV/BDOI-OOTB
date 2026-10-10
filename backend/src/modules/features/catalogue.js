@@ -123,7 +123,7 @@ export const FEATURES = Object.freeze([
     decision: { question: 'TIS-BRD-RPT-02 (Phase 1) names the same measures as the Phase 2 dashboards DSH-05 to DSH-07. Is the Sales Dashboard the Phase 1 delivery of RPT-02 (always on) or a Phase 2 dashboard?',
       options: ['Phase 1 (RPT-02 delivery, always on)', 'Phase 2 (enable with Phase 2)'] },
     menus: ['Dashboard > Sales Dashboard'], api: ['/dashboard/sales'],
-    sections: ['Executive Dashboard: agent performance'], documents: ['sales-dashboard'],
+    sections: ['Executive Dashboard: agent performance'], documents: ['sales-dashboard', 'tis-sales-unit-head-dashboard'],
     permissions: ['read:leads', 'read:quotations'],
   }),
   feature({
@@ -187,7 +187,7 @@ export const FEATURES = Object.freeze([
     decision: { question: 'No BRD or FRS requirement asks for marketing campaigns (NFR-17.1 covers consent and opt-out only). Are campaigns wanted?',
       options: ['Not wanted', 'Wanted in a later release'] },
     menus: ['Operations > Sales & Marketing > Campaigns'], api: ['/campaigns'], jobs: ['campaign-dispatch'], settings: ['campaigns.conversion_window_days', 'campaigns.max_recipients'],
-    data: ['campaigns'], documents: ['campaigns'], permissions: ['read:campaigns', 'write:campaigns'],
+    data: ['campaigns'], documents: ['campaigns', 'tis-sales-officer-campaign'], permissions: ['read:campaigns', 'write:campaigns'],
   }),
   feature({
     key: 'quote-online-approval', name: 'Online quotation approval by the client', module: 'Sales & Marketing', tier: FUT,
@@ -288,6 +288,7 @@ export const FEATURES = Object.freeze([
       options: ['Not wanted', 'Wanted'] },
     menus: ['Operations > CTPL Authentication'], api: ['/ctpl'], connectors: ['CTPL_AUTH', 'LTO_FEED'],
     settings: ['ctpl.register_on_issue', 'ctpl.authenticate_on_issue', 'ctpl.lto_feed'], data: ['ctpl_authentications'], permissions: ['read:policies', 'write:policies'],
+    documents: ['ctpl-authentication'],
   }),
   feature({
     key: 'lines-fire-engineering', name: 'Fire, engineering and industrial all risks', module: 'Operations', tier: P2,
@@ -343,7 +344,7 @@ export const FEATURES = Object.freeze([
       options: ['Never: not wanted', 'Yes: wanted'] },
     dependsOn: ['claims'],
     menus: ['Accounts > Claims Settlements'], api: ['/claim-payments'], data: ['claim_settlement_movements'],
-    documents: ['claims-settlements-paid-through-the-broker'], permissions: ['read:receipts', 'write:receipts'],
+    documents: ['claims-settlements-paid-through-the-broker', 'ccd-bp-qrph-receipting-claim-funds'], permissions: ['read:receipts', 'write:receipts'],
   }),
   feature({
     key: 'suppliers', name: 'Suppliers and supplier BIR 2307', module: 'Accounts', tier: P1,
@@ -358,7 +359,9 @@ export const FEATURES = Object.freeze([
     dependsOn: ['suppliers'],
     menus: ['Accounts > Payables > Supplier Invoices', 'Accounts > Payables > Supplier Payments', 'Accounts > Payables > AP Ageing'],
     api: ['/payables/invoices', '/payables/payments', '/payables/ageing'], data: ['supplier_invoices', 'supplier_payments'],
-    documents: ['accounts-payable'], permissions: ['read:payables', 'write:payables', 'approve:payables'],
+    sections: ['Accounts > Payables: supplier invoices, payments and ageing (the manual section also explains the suppliers)'],
+    permissions: ['read:payables', 'write:payables', 'approve:payables'],
+    documents: ['tis-finance-and-general-accounting-payables', 'tis-general-manager-supplier-invoice', 'tis-operations-unit-head-supplier-invoices', 'tis-sales-unit-head-supplier-invoice'],
   }),
   feature({
     key: 'fixed-assets', name: 'Fixed assets', module: 'Accounts', tier: P2,
@@ -367,7 +370,7 @@ export const FEATURES = Object.freeze([
     decision: { question: 'MOM-S5-AP-ASSET-MASTER (Phase 1) asks for an asset master at requisition while fixed assets (TIS-BRD-NIA-07) are Phase 2. Does the asset master go live in Phase 1?',
       options: ['Phase 2 (enable with Phase 2)', 'Asset master in Phase 1'] },
     menus: ['Accounts > Fixed Assets > Asset Register', 'Accounts > Fixed Assets > Depreciation Run', 'Accounts > Fixed Assets > Disposals', 'Master > Finance > Asset Classes'],
-    api: ['/fixed-assets'], data: ['fixed_assets'], documents: ['fixed-assets-and-depreciation', 'asset-disposal'],
+    api: ['/fixed-assets'], data: ['fixed_assets'], documents: ['fixed-assets-and-depreciation', 'asset-disposal', 'tis-finance-and-general-accounting-depreciation', 'tis-operations-officer-fixed-assets'],
     permissions: ['read:fixed-assets', 'write:fixed-assets'],
   }),
   feature({
@@ -446,7 +449,7 @@ export const FEATURES = Object.freeze([
     dependsOn: ['tax'],
     menus: ['Accounts > Tax > Withholding Returns', 'Accounts > Tax > Annual Alphalist 1604-E', 'Accounts > Tax > BIR DAT Files'],
     api: ['/bir/returns', '/bir/filings', '/bir/dat-files'], data: ['bir_return_filings', 'bir_dat_files'],
-    documents: ['withholding-returns-0619-e-1601-eq-and-their-filing-records', 'annual-information-return-1604-e-and-alphalist-of-payees', 'bir-dat-files'],
+    documents: ['withholding-returns-0619-e-1601-eq-and-their-filing-records', 'annual-information-return-1604-e-and-alphalist-of-payees', 'bir-dat-files', 'tis-finance-and-general-accounting-bir'],
     permissions: ['read:period-end', 'write:period-end'],
   }),
   feature({
@@ -500,6 +503,7 @@ export const FEATURES = Object.freeze([
     description: 'Overriding, profit and contingent commission agreements with insurers and their computations',
     menus: ['Commission > Insurer Overrides > Agreements', 'Commission > Insurer Overrides > Computations'], api: ['/insurer-overrides'],
     data: ['override_agreements'], permissions: ['read:commission', 'write:commission'],
+    documents: ['overriding-profit-and-contingent-commission-from-insurers'],
   }),
 
   // ---------------------------------------------------------------- reports
@@ -601,6 +605,7 @@ export const FEATURES = Object.freeze([
     menus: ['Master > System Configuration > Message Templates'], api: ['/messaging'],
     jobs: ['sms-renewal-notices', 'sms-payment-reminders'], connectors: ['SMS_SEMAPHORE', 'SMS_GLOBE_LABS', 'SMS_GENERIC', 'VIBER_BUSINESS'],
     permissions: ['read:integrations', 'write:integrations'],
+    documents: ['sms-and-message-templates'],
   }),
   feature({
     key: 'insurer-api', name: 'Insurer API integration', module: 'Master data', tier: P2,
@@ -608,6 +613,7 @@ export const FEATURES = Object.freeze([
     requirements: ['TIS-BRD-INTG-05'],
     menus: ['Master > System Configuration > Insurer Integration'], api: ['/insurer-integration'], connectors: ['INSURER_API'],
     data: ['insurer_api_mappings'], permissions: ['read:integrations', 'write:integrations'],
+    documents: ['insurer-integration'],
   }),
   feature({
     key: 'integration-inbound', name: 'Inbound integration messages', module: 'Master data', tier: FUT,
@@ -631,6 +637,7 @@ export const FEATURES = Object.freeze([
     key: 'product-analytics', name: 'Product analytics', module: 'Product Configurator', tier: FUT,
     description: 'Top products, trends and category breakdown',
     menus: ['Product Configurator > Product Analytics'], api: ['/product-configurator/analytics'],
+    documents: ['product-analytics'],
   }),
 ]);
 

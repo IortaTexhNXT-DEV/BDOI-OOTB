@@ -2,8 +2,9 @@
  * Which section of the user manual (public/help/user-manual.html, built by `npm run help:build` for the edition of
  * help.config.json) explains a screen: [address prefix, heading id, ...other ids]. The longest matching prefix wins;
  * record numbers in the address do not matter. Where the editions name the section differently, the TISPH id comes
- * first and the product manual's id after it: the first id the published manual has is used. helpRoutes.test.js checks
- * the routes against public/help/sections.json.
+ * first and the product manual's id after it: the first id the published manual has is used. A screen of a feature the
+ * edition does not run (its section is left out of the manual, scripts/help/features.js) falls back to its chapter.
+ * helpRoutes.test.js checks the routes against public/help/sections.json.
  */
 export const HELP_ROUTES = [
   // home and dashboards
@@ -15,7 +16,7 @@ export const HELP_ROUTES = [
   ["/executive/dashboard", "dashboard"],
   ["/claims/dashboard", "claims-dashboard"],
   ["/processing/dashboard", "processing-dashboard"],
-  ["/sales/dashboard", "sales-dashboard"],
+  ["/sales/dashboard", "sales-dashboard", "screens-dashboards-and-commission"],
   // sales and placement
   ["/agent/leadlisting", "prospects"],
   ["/agent/createlead", "create-a-prospect"],
@@ -66,14 +67,14 @@ export const HELP_ROUTES = [
   ["/operations/claim-documents", "claims-awaiting-documents"],
   ["/operations/motor-claim-repairs", "motor-claim-repairs-and-letters-of-authority"],
   ["/accounts/post-dated-cheques", "post-dated-cheques"],
-  ["/accounts/claims-settlements", "claims-settlements-paid-through-the-broker"],
+  ["/accounts/claims-settlements", "claims-settlements-paid-through-the-broker", "screens-accounts"],
   ["/accounts/payables", "accounts-payable"],
-  ["/accounts/fixed-assets", "fixed-assets-and-depreciation"],
+  ["/accounts/fixed-assets", "fixed-assets-and-depreciation", "screens-accounts"],
   // sales activities, the BIR 2307 of suppliers and asset disposal
   ["/sales/activities", "sales-activities"],
   ["/master/organization/sales-activity", "sales-activities"],
   ["/accounts/payables/2307", "bir-form-2307-for-suppliers"],
-  ["/accounts/fixed-assets/disposals", "asset-disposal"],
+  ["/accounts/fixed-assets/disposals", "asset-disposal", "screens-accounts"],
   ["/master/insurance/", "operational-masters"],
   ["/master/finance/asset-classes", "operational-masters"],
   ["/master/finance/cost-centres", "operational-masters"],
@@ -94,18 +95,18 @@ export const HELP_ROUTES = [
   ["/accounts/open-entry-matching", "open-entry-matching-and-write-offs"],
   ["/accounts/open-entry-unmatching", "open-entry-matching-and-write-offs"],
   ["/agent/accounting", "accounting-query-and-all-clients-accounting"],
-  ["/accounts/pettycash", "petty-cash"],
+  ["/accounts/pettycash", "petty-cash", "screens-accounts"],
   ["/accounts/bank-reconciliation", "bank-reconciliation"],
   ["/accounts/insurer-reconciliation", "insurer-statement-reconciliation"],
   ["/accounts/tax", "tax-bir-forms-and-returns"],
-  ["/accounts/tax/withholding-returns", "withholding-returns-0619-e-1601-eq-and-their-filing-records"],
-  ["/accounts/tax/alphalist-1604e", "annual-information-return-1604-e-and-alphalist-of-payees"],
-  ["/accounts/tax/percentage-tax", "percentage-tax-2551q-non-vat-broker-or-agent"],
-  ["/accounts/tax/dat-files", "bir-dat-files"],
+  ["/accounts/tax/withholding-returns", "withholding-returns-0619-e-1601-eq-and-their-filing-records", "screens-accounts"],
+  ["/accounts/tax/alphalist-1604e", "annual-information-return-1604-e-and-alphalist-of-payees", "screens-accounts"],
+  ["/accounts/tax/percentage-tax", "percentage-tax-2551q-non-vat-broker-or-agent", "screens-accounts"],
+  ["/accounts/tax/dat-files", "bir-dat-files", "screens-accounts"],
   ["/accounts/tax/sales-invoices", "sales-invoices-eopt-act"],
-  ["/accounts/tax/eis", "e-invoicing-eis"],
+  ["/accounts/tax/eis", "e-invoicing-eis", "screens-accounts"],
   ["/accounts/tax/cas", "cas-books-and-documents"],
-  ["/commission/insurer-overrides", "overriding-profit-and-contingent-commission-from-insurers"],
+  ["/commission/insurer-overrides", "overriding-profit-and-contingent-commission-from-insurers", "screens-dashboards-and-commission"],
   ["/master/finance/bank", "masters-that-work-the-same-way"],
   ["/master/finance/taxation", "finance-masters-kept-by-accounting"],
   ["/master/finance/close-checklist", "finance-masters-kept-by-accounting"],
@@ -121,7 +122,7 @@ export const HELP_ROUTES = [
   ["/master/insurance/reason-codes", "lead-sources-and-reason-codes"],
   ["/accounts/period-end", "period-end"],
   ["/accounts/period-end/year-end", "year-end-close-preparer"],
-  ["/accounts/period-end/recurring", "recurring-journals"],
+  ["/accounts/period-end/recurring", "recurring-journals", "screens-accounts"],
   ["/incentive", "incentives"],
   ["/commission", "commission-to-agents-and-referrers"],
   ["/reports", "reports-catalogue", "reports-dashboards-schedules-and-notifications-reports"],
@@ -152,11 +153,13 @@ export const HELP_ROUTES = [
   ["/master/configuration/document-numbering", "document-numbering"],
   ["/master/configuration/schedules", "schedules", "system-administrator-schedules"],
   ["/master/configuration/audit-trail", "audit-trail"],
+  ["/master/configuration/features", "features-and-releases"],
+  ["/master/platform/features", "features-and-releases"],
   ["/master/configuration/email-outbox", "e-mail-outbox"],
   ["/master/configuration/integrations", "integrations"],
-  ["/master/configuration/message-templates", "sms-and-message-templates"],
-  ["/master/configuration/insurer-integration", "insurer-integration"],
-  ["/operations/ctpl-authentication", "ctpl-authentication"],
+  ["/master/configuration/message-templates", "sms-and-message-templates", "screens-master"],
+  ["/master/configuration/insurer-integration", "insurer-integration", "screens-master"],
+  ["/operations/ctpl-authentication", "ctpl-authentication", "screens-operations"],
   ["/master/finance/bank-file-layouts", "bank-file-layouts-and-payee-bank-accounts"],
   ["/accounts/bank-payment-files", "bank-payment-files"],
   ["/accounts/sap-gl-export", "sap-gl-export"],
@@ -177,8 +180,8 @@ export const HELP_ROUTES = [
   ["/sales/dealer-programmes", "dealer-programmes"],
   ["/operations/fleet-schedules", "fleet-schedules"],
   ["/operations/open-covers", "marine-open-covers"],
-  ["/sales/comparison-reports", "comparison-reports"],
-  ["/sales/campaigns", "campaigns"],
+  ["/sales/comparison-reports", "comparison-reports", "screens-operations"],
+  ["/sales/campaigns", "campaigns", "screens-operations"],
   ["/reports/run/dealer-production", "distribution-channels"],
   ["/reports/builder", "report-builder"],
   // the user's own pages

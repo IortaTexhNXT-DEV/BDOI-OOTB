@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "b00a98b1bd0ab1a9b809e34e76e78f21d40085517d515ed85e5f70b7b28b2218",
+ "sourceHash": "e10914a963d3bf6ed437d124eb9a838afa2a3fd452e3d0cc477da463625d96d2",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -640,13 +640,6 @@
    "chapter": "TIS Sales Officer"
   },
   {
-   "id": "tis-sales-officer-campaign",
-   "number": "5.7.6",
-   "title": "Prepare and send a campaign",
-   "level": 3,
-   "chapter": "TIS Sales Officer"
-  },
-  {
    "id": "tis-sales-unit-head",
    "number": "6",
    "title": "TIS Sales Unit Head",
@@ -703,37 +696,23 @@
    "chapter": "TIS Sales Unit Head"
   },
   {
-   "id": "tis-sales-unit-head-dashboard",
-   "number": "6.7.1",
-   "title": "Review the unit's performance",
-   "level": 3,
-   "chapter": "TIS Sales Unit Head"
-  },
-  {
    "id": "tis-sales-unit-head-escalation",
-   "number": "6.7.2",
+   "number": "6.7.1",
    "title": "Follow an escalated renewal",
    "level": 3,
    "chapter": "TIS Sales Unit Head"
   },
   {
    "id": "tis-sales-unit-head-incentive-run",
-   "number": "6.7.3",
+   "number": "6.7.2",
    "title": "Run the incentive calculation",
    "level": 3,
    "chapter": "TIS Sales Unit Head"
   },
   {
    "id": "tis-sales-unit-head-incentive-approval",
-   "number": "6.7.4",
+   "number": "6.7.3",
    "title": "Approve an incentive calculation",
-   "level": 3,
-   "chapter": "TIS Sales Unit Head"
-  },
-  {
-   "id": "tis-sales-unit-head-supplier-invoice",
-   "number": "6.7.5",
-   "title": "Approve a supplier invoice",
    "level": 3,
    "chapter": "TIS Sales Unit Head"
   },
@@ -920,13 +899,6 @@
    "chapter": "TIS Operations Officer"
   },
   {
-   "id": "tis-operations-officer-fixed-assets",
-   "number": "8.7.2",
-   "title": "Look up a fixed asset",
-   "level": 3,
-   "chapter": "TIS Operations Officer"
-  },
-  {
    "id": "tis-operations-unit-head",
    "number": "9",
    "title": "TIS Operations Unit Head",
@@ -1035,13 +1007,6 @@
    "id": "tis-operations-unit-head-quotations",
    "number": "9.7.8",
    "title": "Approve a quotation or an underwriting referral",
-   "level": 3,
-   "chapter": "TIS Operations Unit Head"
-  },
-  {
-   "id": "tis-operations-unit-head-supplier-invoices",
-   "number": "9.7.9",
-   "title": "Approve a supplier invoice",
    "level": 3,
    "chapter": "TIS Operations Unit Head"
   },
@@ -1312,13 +1277,6 @@
    "chapter": "CCD-BP / QRPh (Receipting)"
   },
   {
-   "id": "ccd-bp-qrph-receipting-claim-funds",
-   "number": "12.7.6",
-   "title": "Record claim settlement funds received from an insurer",
-   "level": 3,
-   "chapter": "CCD-BP / QRPh (Receipting)"
-  },
-  {
    "id": "ccd-recon-reconciliation-and-reversals",
    "number": "13",
    "title": "CCD-Recon (Reconciliation and Reversals)",
@@ -1543,64 +1501,43 @@
    "chapter": "TIS Finance & General Accounting"
   },
   {
-   "id": "tis-finance-and-general-accounting-payables",
-   "number": "14.7.5",
-   "title": "Enter and pay a supplier invoice",
-   "level": 3,
-   "chapter": "TIS Finance & General Accounting"
-  },
-  {
    "id": "tis-finance-and-general-accounting-remittance",
-   "number": "14.7.6",
+   "number": "14.7.5",
    "title": "Prepare and approve a remittance to an insurer",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
   },
   {
    "id": "tis-finance-and-general-accounting-commission",
-   "number": "14.7.7",
+   "number": "14.7.6",
    "title": "Pay the commission of agents and referrers",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
   },
   {
    "id": "tis-finance-and-general-accounting-bank-reconciliation",
-   "number": "14.7.8",
+   "number": "14.7.7",
    "title": "Reconcile a bank account",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
   },
   {
-   "id": "tis-finance-and-general-accounting-depreciation",
-   "number": "14.7.9",
-   "title": "Post the monthly depreciation",
-   "level": 3,
-   "chapter": "TIS Finance & General Accounting"
-  },
-  {
    "id": "tis-finance-and-general-accounting-month-end",
-   "number": "14.7.10",
+   "number": "14.7.8",
    "title": "Close the month",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
   },
   {
-   "id": "tis-finance-and-general-accounting-bir",
-   "number": "14.7.11",
-   "title": "File the BIR returns",
-   "level": 3,
-   "chapter": "TIS Finance & General Accounting"
-  },
-  {
    "id": "tis-finance-and-general-accounting-posting-rules",
-   "number": "14.7.12",
+   "number": "14.7.9",
    "title": "Approve a change to the posting rules",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
   },
   {
    "id": "tis-finance-and-general-accounting-year-end",
-   "number": "14.7.13",
+   "number": "14.7.10",
    "title": "Close the fiscal year",
    "level": 3,
    "chapter": "TIS Finance & General Accounting"
@@ -1816,29 +1753,22 @@
    "chapter": "TIS General Manager"
   },
   {
-   "id": "tis-general-manager-supplier-invoice",
-   "number": "16.7.4",
-   "title": "Approve a supplier invoice",
-   "level": 3,
-   "chapter": "TIS General Manager"
-  },
-  {
    "id": "tis-general-manager-dashboards",
-   "number": "16.7.5",
+   "number": "16.7.4",
    "title": "Review the business on the dashboards",
    "level": 3,
    "chapter": "TIS General Manager"
   },
   {
    "id": "tis-general-manager-access-review",
-   "number": "16.7.6",
+   "number": "16.7.5",
    "title": "Review access and segregation of duties",
    "level": 3,
    "chapter": "TIS General Manager"
   },
   {
    "id": "tis-general-manager-audit-trail",
-   "number": "16.7.7",
+   "number": "16.7.6",
    "title": "Look up a change in the audit trail",
    "level": 3,
    "chapter": "TIS General Manager"
@@ -1928,183 +1858,162 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "comparison-reports",
-   "number": "17.8",
-   "title": "Comparison Reports",
-   "level": 2,
-   "chapter": "Screen reference: Operations"
-  },
-  {
-   "id": "campaigns",
-   "number": "17.9",
-   "title": "Campaigns",
-   "level": 2,
-   "chapter": "Screen reference: Operations"
-  },
-  {
    "id": "sales-activities",
-   "number": "17.10",
+   "number": "17.8",
    "title": "Sales activities",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "clients",
-   "number": "17.11",
+   "number": "17.9",
    "title": "Clients",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "onboard-a-client-before-the-first-policy",
-   "number": "17.11.1",
+   "number": "17.9.1",
    "title": "Onboard a client before the first policy",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "policies",
-   "number": "17.12",
+   "number": "17.10",
    "title": "Policies",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "raise-an-endorsement-request",
-   "number": "17.12.1",
+   "number": "17.10.1",
    "title": "Raise an endorsement request",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "fleet-schedules",
-   "number": "17.13",
+   "number": "17.11",
    "title": "Fleet Schedules",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "marine-open-covers",
-   "number": "17.14",
+   "number": "17.12",
    "title": "Marine Open Covers",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "the-claims-list",
-   "number": "17.15",
+   "number": "17.13",
    "title": "The claims list",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "register-a-claim",
-   "number": "17.15.1",
+   "number": "17.13.1",
    "title": "Register a claim",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "adjuster-report",
-   "number": "17.15.2",
+   "number": "17.13.2",
    "title": "Adjuster report",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "assessment-and-settlement-maker",
-   "number": "17.15.3",
+   "number": "17.13.3",
    "title": "Assessment and settlement (maker)",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "approve-a-settlement-checker",
-   "number": "17.15.4",
+   "number": "17.13.4",
    "title": "Approve a settlement (checker)",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claim-details-documents-and-audit-trail",
-   "number": "17.15.5",
+   "number": "17.13.5",
    "title": "Claim details, documents and audit trail",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "renewal-policy",
-   "number": "17.16",
+   "number": "17.14",
    "title": "Renewal Policy",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "renew-a-policy",
-   "number": "17.16.1",
+   "number": "17.14.1",
    "title": "Renew a policy",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "renewal-batch-lapse-management-and-the-analytics",
-   "number": "17.17",
+   "number": "17.15",
    "title": "Renewal Batch, Lapse Management and the analytics",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "renewal-queue-and-at-risk-policies",
-   "number": "17.18",
+   "number": "17.16",
    "title": "Renewal Queue and At-Risk Policies",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "negotiations",
-   "number": "17.19",
+   "number": "17.17",
    "title": "Negotiations",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "payments",
-   "number": "17.20",
+   "number": "17.18",
    "title": "Payments",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "ctpl-authentication",
-   "number": "17.21",
-   "title": "CTPL authentication",
-   "level": 2,
-   "chapter": "Screen reference: Operations"
-  },
-  {
    "id": "cover-notes-binders",
-   "number": "17.22",
+   "number": "17.19",
    "title": "Cover notes (binders)",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cancel-a-policy-computed-return-premium",
-   "number": "17.23",
+   "number": "17.20",
    "title": "Cancel a policy: computed return premium",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claims-awaiting-documents",
-   "number": "17.24",
+   "number": "17.21",
    "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
-   "number": "17.25",
+   "number": "17.22",
    "title": "Motor claim repairs and letters of authority",
    "level": 2,
    "chapter": "Screen reference: Operations"
@@ -2145,253 +2054,183 @@
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "claims-settlements-paid-through-the-broker",
-   "number": "18.5",
-   "title": "Claims settlements paid through the broker",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "accounts-payable",
-   "number": "18.6",
+   "number": "18.5",
    "title": "Accounts payable",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "bir-form-2307-for-suppliers",
-   "number": "18.7",
+   "number": "18.6",
    "title": "BIR Form 2307 for suppliers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "fixed-assets-and-depreciation",
-   "number": "18.8",
-   "title": "Fixed assets and depreciation",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
-   "id": "asset-disposal",
-   "number": "18.9",
-   "title": "Asset disposal",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "disbursement-payment-vouchers-and-cheques",
-   "number": "18.10",
+   "number": "18.7",
    "title": "Disbursement: payment vouchers and cheques",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "bank-payment-files",
-   "number": "18.11",
+   "number": "18.8",
    "title": "Bank payment files",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-to-insurers",
-   "number": "18.12",
+   "number": "18.9",
    "title": "Remittance to insurers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittances-worklist",
-   "number": "18.12.1",
+   "number": "18.9.1",
    "title": "Remittances",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-import-policy-list",
-   "number": "18.12.2",
+   "number": "18.9.2",
    "title": "Import policy list",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-record",
-   "number": "18.12.3",
+   "number": "18.9.3",
    "title": "The remittance page",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-approvals",
-   "number": "18.12.4",
+   "number": "18.9.4",
    "title": "Approvals",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "insurer-payments",
-   "number": "18.12.5",
+   "number": "18.9.5",
    "title": "Insurer payments",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-exceptions",
-   "number": "18.12.6",
+   "number": "18.9.6",
    "title": "Exceptions",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-schedules",
-   "number": "18.12.7",
+   "number": "18.9.7",
    "title": "Setup: remittance schedules",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-settlement",
-   "number": "18.12.8",
+   "number": "18.9.8",
    "title": "Settlement",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "direct-bill-commission-debit-notes",
-   "number": "18.13",
+   "number": "18.10",
    "title": "Direct bill: commission debit notes",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "journal-vouchers",
-   "number": "18.14",
+   "number": "18.11",
    "title": "Journal vouchers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "sap-gl-export",
-   "number": "18.15",
+   "number": "18.12",
    "title": "SAP GL export",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "open-entry-matching-and-write-offs",
-   "number": "18.16",
+   "number": "18.13",
    "title": "Open entry matching and write-offs",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "accounting-query-and-all-clients-accounting",
-   "number": "18.17",
+   "number": "18.14",
    "title": "Accounting Query and All Clients Accounting",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "petty-cash",
-   "number": "18.18",
-   "title": "Petty cash",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "bank-reconciliation",
-   "number": "18.19",
+   "number": "18.15",
    "title": "Bank reconciliation",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "insurer-statement-reconciliation",
-   "number": "18.20",
+   "number": "18.16",
    "title": "Insurer statement reconciliation",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "tax-bir-forms-and-returns",
-   "number": "18.21",
+   "number": "18.17",
    "title": "Tax: BIR forms and returns",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "withholding-returns-0619-e-1601-eq-and-their-filing-records",
-   "number": "18.22",
-   "title": "Withholding returns: 0619-E, 1601-EQ and their filing records",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
-   "id": "annual-information-return-1604-e-and-alphalist-of-payees",
-   "number": "18.23",
-   "title": "Annual information return 1604-E and alphalist of payees",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
-   "id": "percentage-tax-2551q-non-vat-broker-or-agent",
-   "number": "18.24",
-   "title": "Percentage tax 2551Q (non-VAT broker or agent)",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
-   "id": "bir-dat-files",
-   "number": "18.25",
-   "title": "BIR DAT files",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "sales-invoices-eopt-act",
-   "number": "18.26",
+   "number": "18.18",
    "title": "Sales invoices (EOPT Act)",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "e-invoicing-eis",
-   "number": "18.27",
-   "title": "E-invoicing (EIS)",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "cas-books-and-documents",
-   "number": "18.28",
+   "number": "18.19",
    "title": "CAS books and documents",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "period-end",
-   "number": "18.29",
+   "number": "18.20",
    "title": "Period end",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "year-end-close-preparer",
-   "number": "18.30",
+   "number": "18.21",
    "title": "Year-end close (preparer)",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "recurring-journals",
-   "number": "18.31",
-   "title": "Recurring journals",
-   "level": 2,
-   "chapter": "Screen reference: Accounts"
-  },
-  {
    "id": "incentives",
-   "number": "18.32",
+   "number": "18.22",
    "title": "Incentives",
    "level": 2,
    "chapter": "Screen reference: Accounts"
@@ -2425,23 +2264,9 @@
    "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "sales-dashboard",
-   "number": "19.4",
-   "title": "Sales Dashboard",
-   "level": 2,
-   "chapter": "Screen reference: Dashboards and Commission"
-  },
-  {
    "id": "commission-to-agents-and-referrers",
-   "number": "19.5",
+   "number": "19.4",
    "title": "Commission to agents and referrers",
-   "level": 2,
-   "chapter": "Screen reference: Dashboards and Commission"
-  },
-  {
-   "id": "overriding-profit-and-contingent-commission-from-insurers",
-   "number": "19.6",
-   "title": "Overriding, profit and contingent commission from insurers",
    "level": 2,
    "chapter": "Screen reference: Dashboards and Commission"
   },
@@ -2635,30 +2460,23 @@
    "chapter": "Screen reference: Master"
   },
   {
-   "id": "e-mail-outbox",
+   "id": "features-and-releases",
    "number": "20.27",
+   "title": "Features & Releases",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "e-mail-outbox",
+   "number": "20.28",
    "title": "E-mail Outbox",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "integrations",
-   "number": "20.28",
-   "title": "Integrations",
-   "level": 2,
-   "chapter": "Screen reference: Master"
-  },
-  {
-   "id": "sms-and-message-templates",
    "number": "20.29",
-   "title": "SMS and message templates",
-   "level": 2,
-   "chapter": "Screen reference: Master"
-  },
-  {
-   "id": "insurer-integration",
-   "number": "20.30",
-   "title": "Insurer integration",
+   "title": "Integrations",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
@@ -2722,13 +2540,6 @@
    "id": "risk-mapping",
    "number": "21.8",
    "title": "Risk Mapping",
-   "level": 2,
-   "chapter": "Screen reference: Product Configurator"
-  },
-  {
-   "id": "product-analytics",
-   "number": "21.9",
-   "title": "Product Analytics",
    "level": 2,
    "chapter": "Screen reference: Product Configurator"
   },

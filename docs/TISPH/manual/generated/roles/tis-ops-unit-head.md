@@ -15,7 +15,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Lead Assignment | View |
 | Operations > Sales & Marketing | Dealer Programmes | View |
-| Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Sales Activities | View |
 | Operations | Clients | View |
 | Operations | Policy | Approve |
@@ -25,27 +24,17 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
-| Operations > Renewals | Retention Analytics | View |
-| Operations > Renewals | At-Risk Policies | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
-| Operations > Renewals | Performance | View |
 | Operations | Payments | Create and edit |
-| Operations | CTPL Authentication | Create and edit |
 | Operations | Cover Notes | Create and edit |
 | Operations | Policy Cancellation | Create and edit |
 | Operations | Claims Awaiting Documents | Create and edit |
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
-| Accounts > Payables | Supplier Invoices | Approve |
-| Accounts > Payables | Supplier Payments | Approve |
-| Accounts > Payables | AP Ageing | View |
 | Accounts > Payables | Suppliers | View |
 | Accounts > Payables | Supplier 2307 | View |
-| Accounts > Fixed Assets | Asset Register | View |
-| Accounts > Fixed Assets | Depreciation Run | View |
-| Accounts > Fixed Assets | Disposals | View |
 | Accounts | Disbursement | View |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Exceptions | View |
@@ -72,19 +61,19 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
@@ -97,9 +86,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
-| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
-| Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
+| Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |

@@ -15,7 +15,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | Create and edit |
 | Operations > Sales & Marketing | Lead Assignment | View |
 | Operations > Sales & Marketing | Dealer Programmes | View |
-| Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Sales Activities | View |
 | Operations | Clients | View |
 | Operations | Policy | Create and edit |
@@ -25,13 +24,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
-| Operations > Renewals | Retention Analytics | View |
-| Operations > Renewals | At-Risk Policies | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
-| Operations > Renewals | Performance | View |
 | Operations | Payments | Create and edit |
-| Operations | CTPL Authentication | Create and edit |
 | Operations | Cover Notes | Create and edit |
 | Operations | Policy Cancellation | Create and edit |
 | Operations | Claims Awaiting Documents | Create and edit |
@@ -60,17 +55,17 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |

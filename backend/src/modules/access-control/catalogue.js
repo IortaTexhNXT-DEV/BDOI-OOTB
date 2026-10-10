@@ -155,7 +155,7 @@ const PERMISSION_LIST = {
   'write:audit': ['audit', 'edit', 'Not used by any screen', { checked: false }],
   'read:data-load': ['data-load', 'view', 'Download go-live workbooks, read the load history, compare environments'],
   'write:data-load': ['data-load', 'edit', 'Upload, validate and load the go-live workbooks'],
-  'read:features': ['features', 'view', 'See the catalogue of features and releases with their status (read only; the iorta TechNXT platform administrator enables them)'],
+  'read:features': ['features', 'view', 'See the catalogue of features and releases with their status (read only)'],
   'read:users': ['users', 'view', 'See users and their sign-in history'],
   'write:users': ['users', 'edit', 'Create users, change their roles, reset passwords, lock and unlock'],
   'read:roles': ['roles', 'view', 'Not used by any screen (every signed-in user sees the list of roles)', { checked: false }],
