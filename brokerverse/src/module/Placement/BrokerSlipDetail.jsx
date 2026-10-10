@@ -54,7 +54,7 @@ const BrokerSlipDetail = () => {
     try {
       const s = await placementService.getSlip(id);
       setSlip(s);
-      if (s.status === "responses-in") setTab((current) => (current === 0 ? 1 : current));
+      if (s.status === "responses-in" && (s.comparison?.rows || []).some((o) => o.status === "offered")) setTab((current) => (current === 0 ? 1 : current));
     } catch (e) {
       notify("error", e.message);
     }
@@ -198,6 +198,7 @@ const BrokerSlipDetail = () => {
           <Field label={t("placement.fields.submitted")}>{formatDate(slip.submissionDate)}</Field>
           <Field label={t("placement.fields.responseDue")}>{formatDate(slip.responseDueDate)}</Field>
           <Field label={t("placement.fields.bestPremium")}>{slip.comparison.summary.bestPremium == null ? "-" : formatCurrency(slip.comparison.summary.bestPremium)}</Field>
+          <Field label={t("placement.compare.capacity")}>{`${slip.comparison.summary.capacityPercent}%`}</Field>
           <Field label={t("placement.fields.createdBy")}>{slip.createdBy}</Field>
           {slip.remarks && <Field wide label={t("placement.fields.remarks")}>{slip.remarks}</Field>}
           {slip.cancelReason && <Field wide label={t("placement.fields.reason")}>{slip.cancelReason}</Field>}
@@ -218,14 +219,8 @@ const BrokerSlipDetail = () => {
                   </table>
                 </div>
               </TabPanel>
-              <TabPanel header={t("placement.brokerSlip.tabCompare")}>
-                <div className="compare-summary">
-                  <span><strong>{slip.comparison.summary.offered}</strong> {t("placement.compare.offers")}</span>
-                  <span><strong>{slip.comparison.summary.declined}</strong> {t("placement.compare.declines")}</span>
-                  <span><strong>{slip.comparison.summary.pending}</strong> {t("placement.compare.pending")}</span>
-                  <span>{t("placement.compare.capacity")}: <strong>{slip.comparison.summary.capacityPercent}%</strong></span>
-                </div>
-                {offered.length ? (
+              {offered.length > 0 && (
+                <TabPanel header={t("placement.brokerSlip.tabCompare")}>
                   <div className="table-scroll"><table className="participant-table compare">
                     <thead><tr>
                       <th className="center">{t("placement.compare.select")}</th><th className="center">{t("placement.participants.lead")}</th><th>{t("placement.fields.insurer")}</th>
@@ -262,20 +257,19 @@ const BrokerSlipDetail = () => {
                     <tfoot><tr><td colSpan={8} className="num">{t("placement.compare.selectedTotal")}</td>
                       <td className="num"><strong className={Math.abs(selectedTotal - 100) < 0.0001 ? "total-ok" : "total-bad"}>{selectedTotal}%</strong></td></tr></tfoot>
                   </table></div>
-                ) : <div className="empty-note">{t("placement.compare.noOffers")}</div>}
-                {canSelect && (
-                  <div className="form-actions">
-                    {chosen.length > 1 && lead ? <span className="muted">{t("placement.compare.leadIs", { lead: lead.insuranceCompanyName })}</span> : null}
-                    {!chosen.length ? <span className="muted">{t("placement.compare.selectFirst")}</span> : null}
-                    {chosen.length > 0 && Math.abs(selectedTotal - 100) > 0.0001 ? <span className="muted">{t("placement.compare.sharesMustTotal", { total: selectedTotal })}</span> : null}
-                    {journey.quotationSlip !== "skip" && <Button label={t("placement.actions.prepareQuotation")} icon="pi pi-file-edit" disabled={!chosen.length || Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("quotation")} />}
-                    {journey.quotationSlip !== "required" && journey.placementSlip !== "skip" && (
-                      <Button label={t("placement.actions.preparePlacement")} icon="pi pi-briefcase" severity={journey.quotationSlip === "skip" ? undefined : "secondary"} outlined={journey.quotationSlip !== "skip"}
-                        disabled={!chosen.length || Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("placement")} />
-                    )}
-                  </div>
-                )}
-              </TabPanel>
+                  {canSelect && chosen.length > 0 && (
+                    <div className="form-actions">
+                      {chosen.length > 1 && lead ? <span className="muted">{t("placement.compare.leadIs", { lead: lead.insuranceCompanyName })}</span> : null}
+                      {Math.abs(selectedTotal - 100) > 0.0001 ? <span className="muted">{t("placement.compare.sharesMustTotal", { total: selectedTotal })}</span> : null}
+                      {journey.quotationSlip !== "skip" && <Button label={t("placement.actions.prepareQuotation")} icon="pi pi-file-edit" disabled={Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("quotation")} />}
+                      {journey.quotationSlip !== "required" && journey.placementSlip !== "skip" && (
+                        <Button label={t("placement.actions.preparePlacement")} icon="pi pi-briefcase" severity={journey.quotationSlip === "skip" ? undefined : "secondary"} outlined={journey.quotationSlip !== "skip"}
+                          disabled={Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("placement")} />
+                      )}
+                    </div>
+                  )}
+                </TabPanel>
+              )}
               <TabPanel header={t("placement.brokerSlip.tabRisk")}>
                 <div className="field-grid">
                   {Object.entries(slip.riskDetails || {}).map(([k, v]) => <Field key={k} label={riskLabel(t, k)}>{String(v)}</Field>)}

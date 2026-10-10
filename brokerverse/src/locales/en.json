@@ -8807,21 +8807,16 @@
       "coInsurers": "+{{count}} co-insurer(s)"
     },
     "compare": {
-      "offers": "offers",
-      "declines": "declined",
-      "pending": "pending",
       "capacity": "Market capacity (lines offered)",
       "select": "Select",
       "vsBest": "vs best",
       "shareTaken": "Share taken",
       "best": "Best",
       "selectedTotal": "Selected shares total",
-      "noOffers": "No insurer has made an offer yet.",
       "coNote": "Several offers make a co-insurance led by {{lead}}; the premium follows the lead's terms.",
       "singleNote": "Select the offer(s) to place; the shares must total exactly 100%.",
       "leadIs": "Lead insurer: {{lead}}",
       "deductiblesTerms": "Deductibles and terms",
-      "selectFirst": "Select at least one offer to prepare a slip",
       "sharesMustTotal": "Selected shares total {{total}}%; they must total 100%"
     },
     "offer": {

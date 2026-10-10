@@ -385,15 +385,6 @@
   .placement-field { border-bottom: 1px dashed $color-border; padding: 0.35rem 0; }
 }
 
-.compare-summary {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: $color-text;
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -435,7 +426,6 @@
 }
 .slip-comparison tr.check-mismatch td { background: $color-danger-050; }
 .slip-comparison tr.check-mismatch td:first-child { box-shadow: inset 3px 0 0 $color-danger; }
-.empty-note { padding: 1rem; color: $color-text-muted; }
 .attachment-line { display: flex; align-items: center; gap: 0.5rem; }
 
 // Journey panel on the quotation detail (Quotation Slip)
