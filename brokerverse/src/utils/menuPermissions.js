@@ -251,7 +251,7 @@ roleMenuPermissions["tis-it-admin"].operations = roleMenuPermissions["tis-it-adm
 roleMenuPermissions["tis-finance"].operations = [...(roleMenuPermissions["tis-finance"].operations || []), "Sales & Marketing > Prospects"];
 // Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
 // Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).
-const SALES_REPORTS = ["APR Operation Report", "Production per Product Line", "Agent Policy Conversion", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
+const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Policy Conversion", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
 ["accounting", "tis-finance"].forEach((role) => { roleMenuPermissions[role].reports = [...roleMenuPermissions[role].reports, ...SALES_REPORTS]; });
 
 /** Roles of the signed-in user, from the login response stored by authService. */

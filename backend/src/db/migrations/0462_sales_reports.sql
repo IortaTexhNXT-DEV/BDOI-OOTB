@@ -1,6 +1,6 @@
 -- Sales reports of TISPH (TIS-BRD-RPT-SLS-01..04, RPT-02, CR-13), queries in src/modules/reports/salesQueries.js:
 --   apr-operation           APR Operation Report, month to date or year to date per business category
---   production-by-line      Production per Product Line, by month or product
+--   production-by-line      Production per Line, by month or product
 --   agent-conversion        Agent Policy Conversion per month, with the incentive tier and payout
 --   renewal-notice-listing  Renewal Notice Listing, 30/60/90 days from the as-of date
 -- Roles: those of the Sales, Processing, Operations and Accounting broker roles; seeds/82_tisph_roles.sql extends them
@@ -19,9 +19,9 @@ INSERT INTO report_definitions(code, name, category, description, screen, parame
   'aprOperation',
   '[{"key":"month","type":"text","label":"Month"},{"key":"category","type":"text","label":"Business Category"},{"key":"productLine","type":"text","label":"Product Line"},{"key":"policies","type":"integer","label":"Policies"},{"key":"sumInsured","type":"money","label":"Sum Insured"},{"key":"premium","type":"money","label":"Gross Premium"},{"key":"commission","type":"money","label":"Commission"}]',
   '{sales,processing,operations,accounting}', 'read:reports', 270),
- ('production-by-line', 'Production per Product Line', 'operational',
+ ('production-by-line', 'Production per Line', 'operational',
   'Policy count, sum insured, premium and commission per product line, by month or by product.',
-  'Reports > Operational Reports > Production per Product Line',
+  'Reports > Operational Reports > Production per Line',
   '{"type": "object", "required": ["ReportCriteria"], "properties": {"FromDate": {"type": "string", "title": "From Date", "format": "date"}, "ToDate": {"type": "string", "title": "To Date", "format": "date"}, "ReportCriteria": {"enum": ["Product Line", "Product Line by Month", "Product", "Business Type"], "type": "string", "title": "Report Criteria", "default": "Product Line"}, "Agent": {"type": "string", "title": "Agent", "x-options": "agents", "description": "id, username or name"}, "Company": {"type": "string", "title": "Company (principal insurer)", "x-options": "insurance_companies", "description": "id, code or name"}, "Branch": {"type": "string", "title": "Branch", "x-options": "branches", "description": "id, code or name"}, "Product": {"type": "string", "title": "Product", "x-options": "products", "description": "id, code or name"}, "format": {"enum": ["csv", "xlsx", "pdf"], "type": "string", "title": "File format (generate only)", "default": "xlsx"}, "period": {"enum": ["today", "yesterday", "last-7-days", "last-30-days", "month-to-date", "previous-month", "year-to-date"], "type": "string", "title": "Relative period (schedules; used when no dates are given)"}}}',
   'productionByLine',
   '[{"key":"month","type":"text","label":"Month"},{"key":"productLine","type":"text","label":"Product Line"},{"key":"product","type":"text","label":"Product"},{"key":"businessType","type":"text","label":"Business Type"},{"key":"policies","type":"integer","label":"Policies"},{"key":"sumInsured","type":"money","label":"Sum Insured"},{"key":"premium","type":"money","label":"Gross Premium"},{"key":"commission","type":"money","label":"Commission"}]',

@@ -817,7 +817,7 @@ export const menuList = [
           {
             // policy count, sum insured, premium and commission per product line (TIS-BRD-RPT-SLS-02)
             id: 8,
-            name: "Production per Product Line",
+            name: "Production per Line",
             path: "/reports/run/production-by-line",
             includes: ["/reports/run/production-by-line"],
             permissions: ["read:reports"],

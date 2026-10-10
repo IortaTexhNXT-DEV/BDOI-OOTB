@@ -1,6 +1,6 @@
 /**
  * Sales reports of TISPH (TIS-BRD-RPT-SLS-01..04, RPT-02, CR-13): the APR Operation Report per business category month
- * to date and year to date, Production per Product Line, Agent Policy Conversion with the incentive tier and payout,
+ * to date and year to date, Production per Line, Agent Policy Conversion with the incentive tier and payout,
  * and the Renewal Notice Listing in 30/60/90 day buckets with the lock-in treatment; who may run them.
  * The policies of the tests are written with their own insurer (RPTEST) and agent so that the sample data stays out.
  */
@@ -103,7 +103,7 @@ describe('APR Operation Report', () => {
   });
 });
 
-describe('Production per Product Line', () => {
+describe('Production per Line', () => {
   it('counts the policies, sum insured, premium and commission per product line and month, leaving out cancelled policies', async () => {
     const r = await run('production-by-line', { ReportCriteria: 'Product Line by Month', FromDate: '2025-01-01', ToDate: '2025-03-31' });
     expect(r.status).toBe(200);
