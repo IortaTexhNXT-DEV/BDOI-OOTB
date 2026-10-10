@@ -36,8 +36,10 @@ const HEX = /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{3}$/;
 const LANGUAGE = /^[a-z]{2,3}(-[A-Za-z]{2})?$/;
 
 /**
- * Errors of the display currency (an active currency of the Currency master) and the default language in a change
- * ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
+ * Errors of the display currency (an active currency of the Currency master), the default language and the journal
+ * statuses of the trial balance (never the opening balance journal, status opening: its balances are the opening
+ * balances the trial balance already reads) in a change ([key, value] pairs, the currency code normalised in place);
+ * `paths` names the field of each key in the errors.
  */
 export async function localizationErrors(changes, paths = {}) {
   const errors = [];
@@ -47,6 +49,9 @@ export async function localizationErrors(changes, paths = {}) {
       if (!(await currencyChoices()).some((c) => c.code === change[1])) errors.push({ path: paths[change[0]] || change[0], message: 'Currency is not an active currency of the Currency master' });
     }
     if (change[0] === 'general.default_language' && !LANGUAGE.test(String(change[1] ?? '').trim())) errors.push({ path: paths[change[0]] || change[0], message: 'must be a language code such as en' });
+    if (change[0] === 'reports.trial_balance_statuses' && (!Array.isArray(change[1]) || change[1].some((x) => String(x).trim().toLowerCase() === 'opening'))) {
+      errors.push({ path: paths[change[0]] || change[0], message: 'must list journal statuses; the opening balance journal (opening) is never part of the trial balance' });
+    }
   }
   return errors;
 }

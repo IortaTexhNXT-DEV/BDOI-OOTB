@@ -614,7 +614,7 @@ const openingBalancesSheet = () => ({
     if (same) return { rows: rows.map((_, i) => (zero[i] ? ignored : { action: 'unchanged' })) };
     let out;
     try {
-      out = await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover, batchId: ctx.batchId });
+      out = await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover, batchId: ctx.batchId, userId: ctx.migratedBy, legacySystem: ctx.legacySystem });
     } catch (e) {
       const byRow = new Map();
       for (const d of e.details || []) {
@@ -639,6 +639,11 @@ const openingBalancesSheet = () => ({
       await ctx.record({ entity: 'opening_balances', table: 'opening_balances', id: `${run}:${code}`, key: code, action: existing.has(code) ? 'updated' : 'created',
         before: existing.has(code) ? { accountCode: code, balance: existing.get(code) } : null, after: { accountCode: code, balance: after.get(code) ?? 0 } });
     }
+    // the opening balance journal written with the set (no journal lines; period-end/opening.js)
+    if (!ctx.dryRun && out.journalId) {
+      ctx.audits.push({ entity: 'journal_voucher', entityId: out.journalId, action: 'migrate-create',
+        after: { journalNumber: out.journalNumber, asAt: out.asAt, totalDebit: out.totalDebit, totalCredit: out.totalCredit, batchId: ctx.batchId, loadNumber: ctx.loadNumber, legacySystem: ctx.legacySystem } });
+    }
     return { rows: rows.map((r, i) => (skipped.has(i) ? ignored : { action: existing.has(String(r.values.accountCode).trim()) ? 'updated' : 'created' })) };
   },
   totals: (rows) => ({ debit: pesoSum(rows.map((r) => r.debit)), credit: pesoSum(rows.map((r) => r.credit)), zeroBalanceRows: rows.filter(zeroBalanceRow).length }),
@@ -656,6 +661,8 @@ export const CONTROL_MEASURES = {
   'Opening Balances': ['debit', 'credit', 'balance'],
   'Sub-ledger': ['due to insurers', 'commission receivable', 'unapplied collections', 'cash in bank', 'sap trial balance'],
 };
+/** Measures whose legacy value may be negative: an account balance on its normal side (a contra account, an overdraft). */
+export const SIGNED_MEASURES = ['balance', 'cash in bank', 'sap trial balance'];
 
 const controlTotalsSheet = () => ({
   key: 'control-totals', name: 'Control Totals', menu: 'Data Migration & Go-Live > Reconciliation',
@@ -663,7 +670,7 @@ const controlTotalsSheet = () => ({
     { key: 'object', header: 'Object', required: true, list: 'Control Objects', format: `One of ${Object.keys(CONTROL_MEASURES).join(', ')}` },
     { key: 'measure', header: 'Measure', required: true, list: 'Control Measures', format: 'count, gross premium, open balance ... (Instructions: measures per object)' },
     { key: 'group', header: 'Group', format: 'Product, insurer, ageing bucket, account or bank account; empty for the total' },
-    { key: 'legacyValue', header: 'Legacy Value', required: true, type: 'number', format: 'Figure of the legacy system at the close of the day before the cutover; amounts in PHP, at most two decimals' },
+    { key: 'legacyValue', header: 'Legacy Value', required: true, type: 'number', format: 'Figure of the legacy system at the close of the day before the cutover; amounts in PHP, at most two decimals; an account balance on its normal side (debit for assets and expenses, credit for the others)' },
   ],
   keyColumns: ['object', 'measure', 'group'], keyOf: (v) => keyText(v.object, v.measure, v.group),
   sample: { object: 'Policies', measure: 'gross premium', group: 'MOTOR', legacyValue: '1250000.00' },
@@ -671,9 +678,11 @@ const controlTotalsSheet = () => ({
     const object = Object.keys(CONTROL_MEASURES).find((o) => o.toLowerCase() === String(v.object).trim().toLowerCase());
     if (!object) fail('object', `Object must be one of ${Object.keys(CONTROL_MEASURES).join(', ')}`);
     if (!CONTROL_MEASURES[object].includes(String(v.measure).trim().toLowerCase())) fail('measure', `Measure of ${object} must be one of ${CONTROL_MEASURES[object].join(', ')}`);
-    const n = amountValue('legacyValue', v.legacyValue, 'Legacy Value');
-    if (String(v.measure).trim().toLowerCase() === 'count' ? !Number.isInteger(n) : centavos(n) === null) {
-      fail('legacyValue', String(v.measure).trim().toLowerCase() === 'count' ? 'A count is a whole number' : 'Legacy Value has more than two decimals');
+    const measure = String(v.measure).trim().toLowerCase();
+    const n = SIGNED_MEASURES.includes(measure) ? numberCell(v.legacyValue) : amountValue('legacyValue', v.legacyValue, 'Legacy Value');
+    if (n === null || Number.isNaN(n)) fail('legacyValue', 'Legacy Value must be a number (no currency sign)');
+    if (measure === 'count' ? !Number.isInteger(n) : centavos(n) === null) {
+      fail('legacyValue', measure === 'count' ? 'A count is a whole number' : 'Legacy Value has more than two decimals');
     }
     return 'ignored';
   },

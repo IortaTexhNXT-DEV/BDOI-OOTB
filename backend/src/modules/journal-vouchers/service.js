@@ -8,7 +8,8 @@
 import { getSetting } from '../../lib/settings.js';
 import { baseCurrency, rateToBase } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { MANUAL_SOURCES, assertPeriodOpen, createJournal, postJournal, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
+import { MANUAL_SOURCES, assertNotOpeningJournal, assertPeriodOpen, createJournal, postJournal, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
+import { OPENING_JOURNAL_SOURCE, openingJournalLines } from '../period-end/opening.js';
 import { assertCostCentres } from '../accounting/lib/costCentre.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { assertAuthority } from '../access-control/service.js';
@@ -30,21 +31,28 @@ export const lineRow = (l, j) => ({
   departmentCode: l.department_code || '', departmentDescription: l.department_description || '', costCentre: l.cost_centre || '',
 });
 
+/** A voucher by id or number; lock: for a change (FOR UPDATE), refused for the opening balance journal (read-only, 409). */
 export async function getJv(db, ref, lock = false) {
   const j = (await db.query(`SELECT j.*, ${originColumns('j')} FROM journal_vouchers j WHERE j.id = $1 OR j.jv_number = $1${lock ? ' FOR UPDATE' : ''}`, [String(ref)])).rows[0];
   if (!j) throw notFound('Journal voucher not found');
+  if (lock) assertNotOpeningJournal(j);
   return j;
 }
+/** A voucher with its entries; the opening balance journal has no journal lines: its entries are the accounts of its opening balances set. */
 export async function jvDetail(db, ref) {
   const j = await getJv(db, ref);
-  const lines = (await db.query('SELECT * FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [j.id])).rows;
-  return { ...headerRow(j), entries: lines.map((l) => lineRow(l, j)) };
+  const lines = j.source === OPENING_JOURNAL_SOURCE
+    ? (await openingJournalLines(db, j)).map((l) => ({ id: `${j.id}-${l.lineNo}`, line_no: l.lineNo, account_code: l.accountCode, account_name: l.accountName, debit: l.debit, credit: l.credit,
+      currency_code: j.currency, exchange_rate: 1, foreign_amount: null, memo: 'Opening balance' }))
+    : (await db.query('SELECT * FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [j.id])).rows;
+  return { ...headerRow(j), readOnly: j.source === OPENING_JOURNAL_SOURCE, entries: lines.map((l) => lineRow(l, j)) };
 }
 
 export async function history(db, q, pg) {
   const where = []; const p = [];
   const add = (sql, v) => { p.push(v); where.push(sql.replaceAll('?', `$${p.length}`)); };
-  if (String(q.all) !== 'true' && String(q.parked) !== 'true') add('source = ANY(?)', MANUAL_SOURCES);
+  // the register lists the vouchers keyed by users and the opening balance journal of go-live
+  if (String(q.all) !== 'true' && String(q.parked) !== 'true') add('source = ANY(?)', [...MANUAL_SOURCES, OPENING_JOURNAL_SOURCE]);
   // system journals parked for approval (accounting.parked_events)
   if (String(q.parked) === 'true') add('NOT (source = ANY(?)) AND status = \'for-approval\'', MANUAL_SOURCES);
   if (q.transactionCode) add('transaction_code ILIKE \'%\' || ? || \'%\'', q.transactionCode);

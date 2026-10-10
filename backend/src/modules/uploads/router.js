@@ -6,7 +6,7 @@ import { query } from '../../db/pool.js';
 import { config } from '../../config.js';
 import { memoryUpload } from '../../lib/uploadLimits.js';
 import { verifyFileSignature } from '../../lib/secrets.js';
-import { LOAD_FOLDER, deleteObject, findDocument, keyFromUrlOrKey, objectExists, publicUrl, reserveKey, resolveKey, safeKey, signedUrl, storeFile, writeObject } from './storage.js';
+import { EVIDENCE_FOLDER, LOAD_FOLDER, deleteObject, findDocument, keyFromUrlOrKey, objectExists, publicUrl, reserveKey, resolveKey, safeKey, signedUrl, storeFile, writeObject } from './storage.js';
 import { INLINE_TYPES, allowedTypes, assertAllowedFile } from './fileTypes.js';
 
 /**
@@ -133,6 +133,7 @@ define({
     if (!doc) throw notFound('File not found');
     if (doc.category === 'e-signatures') throw forbidden('Signature images are revoked through E-signatures, not deleted');
     if (doc.category === LOAD_FOLDER) throw forbidden('The workbook of a data load is kept as evidence of the load');
+    if (doc.category === EVIDENCE_FOLDER) throw forbidden('The evidence of the go-live is kept');
     if (!canModify(req.user, doc)) throw forbidden('You can only delete files you uploaded or files of a module you can edit');
     await deleteObject(key);
     await query('INSERT INTO audit_log(user_id, username, entity, entity_id, action) VALUES ($1,$2,\'document\',$3,\'delete\')', [req.user.id, req.user.username, key]);
@@ -158,6 +159,8 @@ async function serveObject(req, res) {
   if (doc.category === 'e-signatures') throw forbidden('Signature images are not available through file links');
   // uploaded data load workbooks hold personal data in clear: GET /api/data-load/batches/:id/file checks the caller
   if (doc.category === LOAD_FOLDER) throw forbidden('The workbook of a data load is not available through file links');
+  // signed reconciliation reports: GET /api/data-load/reconciliations/:id/report?version=signed checks the caller
+  if (doc.category === EVIDENCE_FOLDER) throw forbidden('The evidence of the go-live is not available through file links');
   const stored = String(doc.content_type || '').split(';')[0].trim().toLowerCase();
   const known = [...await allowedTypes(), ...INLINE_TYPES];
   const type = known.includes(stored) && stored !== 'text/html' ? stored : 'application/octet-stream';

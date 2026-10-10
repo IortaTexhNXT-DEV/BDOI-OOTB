@@ -104,8 +104,16 @@ export async function exportDay({ date = null, trigger = 'manual', userId = null
     if (e.code === '23505') throw conflict(`The SAP GL file of ${day} is being made by another run; try again`);
     throw e;
   }
+  return writeRun(run, documentsFor(window, day), { layout, dir, day });
+}
+
+/**
+ * Write the files of a run from its documents (or the promise of them: a failure to read them fails the run) and record
+ * them; a run without lines is recorded as empty. Returns the run.
+ */
+async function writeRun(run, documents, { layout, dir, day, suffix = '' }) {
   try {
-    const docs = await documentsFor(window, day);
+    const docs = await documents;
     const lines = docs.flatMap((d) => d.lines);
     const totals = { debit: round2(lines.reduce((s, l) => s + l.debit, 0)), credit: round2(lines.reduce((s, l) => s + l.credit, 0)) };
     const summary = [new Set(lines.map((l) => l.jvId)).size, lines.length, docs.length, totals.debit, totals.credit, JSON.stringify(await warningsFor(docs))];
@@ -118,9 +126,11 @@ export async function exportDay({ date = null, trigger = 'manual', userId = null
     fs.mkdirSync(dir, { recursive: true });
     for (const [kind, f] of Object.entries(files)) {
       const buffer = Buffer.from(f.content, layout.encoding === 'latin1' ? 'latin1' : 'utf8');
-      fs.writeFileSync(path.join(dir, path.basename(f.fileName)), buffer);
+      const ext = path.extname(path.basename(f.fileName));
+      const name = suffix ? `${path.basename(f.fileName, ext)}${suffix}${ext}` : path.basename(f.fileName);
+      fs.writeFileSync(path.join(dir, name), buffer);
       await query('INSERT INTO sap_gl_export_files(export_id, kind, file_name, records, bytes, sha256, content) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-        [run.id, kind, path.basename(f.fileName), f.records, buffer.length, crypto.createHash('sha256').update(buffer).digest('hex'), f.content]);
+        [run.id, kind, name, f.records, buffer.length, crypto.createHash('sha256').update(buffer).digest('hex'), f.content]);
     }
     await query(`UPDATE sap_gl_exports SET status = 'done', journal_count = $2, line_count = $3, document_count = $4, total_debit = $5, total_credit = $6, warnings = $7,
       finished_at = now() WHERE id = $1`, [run.id, ...summary]);
@@ -129,6 +139,28 @@ export async function exportDay({ date = null, trigger = 'manual', userId = null
     throw e;
   }
   return getRun(run.id);
+}
+
+/**
+ * The one-time SAP opening file (Data Migration & Go-Live > Go-Live, when migration.sap_gl_include_opening is on): the
+ * opening balances set of the opening balance journal ({ id, jv_number, jv_date, currency }) as one SAP document posted
+ * on the journal's date (the day before the go-live date), in the layout of the daily file with _OPENING added to the
+ * file names (the daily file of the same day keeps its own), recorded as a run of trigger opening. A daily run never carries it: it selects posted journals and their lines, and the opening balance
+ * journal is never posted and has no lines. lines: [{ lineNo, accountCode, accountName, debit, credit }]. Returns the run.
+ */
+export async function exportOpening({ journal, lines, userId = null }) {
+  const layout = await currentLayout();
+  const { dir, label } = await targetFolder();
+  const day = await today();
+  const postingDate = isoDate(journal.jv_date);
+  const run = await one(`INSERT INTO sap_gl_exports(export_date, run_no, window_from, window_to, trigger, folder, created_by)
+    SELECT $1, COALESCE(max(run_no), 0) + 1, now(), now(), 'opening', $2, $3 FROM sap_gl_exports WHERE export_date = $1 RETURNING *`, [day, label, userId]);
+  const fallback = await defaultCostCentre({ query }, postingDate);
+  const docs = [{ docNo: 1, postingDate, currency: journal.currency, lines: lines.filter((l) => l.debit || l.credit).map((l) => ({
+    glCode: l.accountCode, accountName: l.accountName || '', debit: l.debit, credit: l.credit, text: `Opening balance ${journal.jv_number}`, costCentre: fallback || '',
+    valueDate: postingDate, assignment: '', clientCode: '', insurerCode: '', journalNumber: journal.jv_number, journalLine: `${journal.jv_number}-${l.lineNo}`,
+    sourceDocument: journal.jv_number, jvId: journal.id })) }];
+  return writeRun(run, docs, { layout, dir, day, suffix: '_OPENING' });
 }
 
 export async function getRun(id) {

@@ -10,6 +10,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.j
 import { round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { assertPostingAllowed } from '../../period-end/posting.js';
+import { OPENING_JOURNAL_SOURCE } from '../../period-end/opening.js';
 import { assertCostCentres, defaultCostCentre } from './costCentre.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
@@ -136,9 +137,20 @@ export async function resolveJournalId(db, ref) {
   throw notFound('Journal / transaction not found');
 }
 
+/**
+ * Refuse a change to the opening balance journal (409): it documents the go-live opening balances, has no lines of its
+ * own and is never posted, reversed, corrected or cancelled (period-end/opening.js).
+ */
+export function assertNotOpeningJournal(jv) {
+  if (jv?.source === OPENING_JOURNAL_SOURCE) {
+    throw conflict(`Journal ${jv.jv_number} is the opening balance journal of go-live: it cannot be changed, posted, reversed, corrected or cancelled`);
+  }
+}
+
 async function lockJournal(db, id) {
   const jv = (await db.query('SELECT * FROM journal_vouchers WHERE id = $1 FOR UPDATE', [id])).rows[0];
   if (!jv) throw notFound('Journal not found');
+  assertNotOpeningJournal(jv);
   return jv;
 }
 

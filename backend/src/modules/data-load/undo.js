@@ -18,7 +18,7 @@ import { auditMany } from '../../lib/audit.js';
 import { clearSettingsCache } from '../../lib/settings.js';
 import { protectPayload } from '../../lib/pii.js';
 import { assertMigrationOpen } from '../../lib/goLiveLock.js';
-import { GO_LIVE_PREFIX } from '../period-end/opening.js';
+import { GO_LIVE_PREFIX, OPENING_JOURNAL_SOURCE, writeOpeningJournal } from '../period-end/opening.js';
 import * as svc from './service.js';
 
 /**
@@ -235,6 +235,13 @@ async function restoreOpening(ctx, batch) {
     ctx.audits.push({ entity: 'opening_balances', entityId: `${run}:${code}`, action: 'migrate-undo', before: { accountCode: code, balance: now.get(code) ?? 0 },
       after: { accountCode: code, balance: was.get(code) ?? 0, batchId: batch.id, loadNumber: batch.loadNumber } });
     n += 1;
+  }
+  // the opening balance journal of the load goes with its set; the set restored gets its journal again (a new number)
+  const journal = await one('SELECT id, jv_number FROM journal_vouchers WHERE source = $1 AND load_batch_id = $2', [OPENING_JOURNAL_SOURCE, batch.id]);
+  const restored = await writeOpeningJournal({ query }, { goLiveDate: batch.cutoverDate, batchId: before[0]?.load_batch_id ?? null, userId: ctx.user.id });
+  if (journal) {
+    ctx.audits.push({ entity: 'journal_voucher', entityId: journal.id, action: 'migrate-undo', before: { journalNumber: journal.jv_number },
+      after: { removed: true, replacedBy: restored?.jv_number || null, batchId: batch.id, loadNumber: batch.loadNumber } });
   }
   return n;
 }

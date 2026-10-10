@@ -98,6 +98,12 @@ export const SYSTEM_RESET_ACTIONS = {
   data_load_rows: 'mark-reset',
   data_load_comparisons: 'keep', // environment comparisons stay with the load history
   go_live_lock_requests: 'keep', // the requests that locked go-live and lifted the lock: evidence of the cutover
+  // reconciliations of the migration loads, their lines, differences and sign-offs: evidence of the mock runs and the cutover
+  migration_reconciliations: 'keep',
+  migration_recon_lines: 'keep',
+  migration_recon_differences: 'keep',
+  migration_recon_signoffs: 'keep',
+  sap_opening_file_requests: 'remove', // the SAP opening file of an opening balance journal the reset removes
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances
@@ -178,7 +184,7 @@ export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-
  * sample seed fills with demo rows (bundles, insurer rate tables, petty cash funds, delegations).
  */
 export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances',
-  'integration_outbox', 'integration_attempts', 'integration_inbox'];
+  'integration_outbox', 'integration_attempts', 'integration_inbox', 'sap_opening_file_requests'];
 export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'user_delegations', 'remittance_delegations', 'sod_exceptions',
   // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/98_integrations.sql

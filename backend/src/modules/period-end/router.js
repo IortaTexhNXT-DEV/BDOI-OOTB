@@ -66,12 +66,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)',
+  method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date and writes their opening balance journal (no journal lines, never posted); all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces both. Also needs write:data-load; refused once go-live is locked (409)',
   screen: `${S} > Period Management > Import opening balances`, middleware: [...openingImport, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
-  response: { success: true, data: { fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', accounts: 7, totalDebit: 2102400, totalCredit: 2102400, replaced: 0, ignored: [{ row: 9, accountCode: '1301001' }] } },
+  response: { success: true, data: { fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', accounts: 7, totalDebit: 2102400, totalCredit: 2102400, replaced: 0, ignored: [{ row: 9, accountCode: '1301001' }], journalNumber: 'OBJ-2026-0001' } },
   handler: async (req, res) => {
     const rows = openingRows(req);
-    const out = await tx((db) => importOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10) }));
+    const out = await tx((db) => importOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10), userId: req.user.id }));
     await audit(req, { entity: 'opening_balances', entityId: out.fiscalYear, action: 'go-live-import', after: out });
     const zero = out.ignored.length ? `; ${out.ignored.length} row(s) with no debit or credit (zero balance) ignored: ${out.ignored.map((x) => x.accountCode).join(', ')}` : '';
     ok(res, out, `Opening balances of ${out.fiscalYear} loaded: ${out.accounts} accounts, debits and credits ${await formatMoney(out.totalDebit)} each${zero}`);

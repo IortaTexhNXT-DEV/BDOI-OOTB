@@ -9,12 +9,24 @@
  * a trial balance export, is accepted and ignored (listed in `ignored`). Loading the same go-live date again replaces
  * the earlier load (idempotent); another date is refused. validateOpeningBalances runs the same rules without loading
  * (the Validate step of the import dialog) and lists every error with its row and column.
+ *
+ * Each load also writes the opening balance journal of the set (writeOpeningJournal): a journal header numbered in the
+ * series opening_journal, dated the day before the go-live date, status opening, source go-live-opening, origin
+ * migrated, with the set's totals and no journal lines. Its lines are read from the set (openingJournalLines), so the
+ * reports, the year-end close and the GL entry search, which read the set or sum journal lines, never count it twice,
+ * and the SAP GL daily file (posted journals) never selects it. It is read-only (accounting/lib/ledger.js) and replaced
+ * with the set; once the one-time SAP opening file was generated from it the set can no longer change.
  */
 import { badRequest, conflict } from '../../lib/errors.js';
 import { formatMoney, round2 } from '../../lib/money.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
+import { MIGRATED, legacySystemName, loadNumberOf } from '../../lib/origin.js';
 import { ensureCalendar, iso } from './fiscal.js';
 
 export const GO_LIVE_PREFIX = 'go-live:';
+/** Source and status of the opening balance journal (migration 0443). */
+export const OPENING_JOURNAL_SOURCE = 'go-live-opening';
+export const OPENING_STATUS = 'opening';
 
 /** Columns of the opening balance upload; the upload template is built from this list. */
 export const OPENING_BALANCE_COLUMNS = [
@@ -137,7 +149,7 @@ export async function validateOpeningBalances(db, rows, { goLiveDate }) {
  * with no balance, [{ row, accountCode }]); throws 400 with every row error when anything is wrong (nothing is loaded).
  * batchId: the migration load that carries the balances (load_batch_id of the set).
  */
-export async function importOpeningBalances(db, rows, { goLiveDate, batchId = null }) {
+export async function importOpeningBalances(db, rows, { goLiveDate, batchId = null, userId = null, legacySystem = null }) {
   if (!DATE.test(String(goLiveDate || ''))) throw badRequest('goLiveDate is required (YYYY-MM-DD): the first day of live transactions');
   if (!rows.length) throw badRequest('The file has no rows');
   const fy = await fiscalYearOf(db, goLiveDate);
@@ -159,7 +171,41 @@ export async function importOpeningBalances(db, rows, { goLiveDate, batchId = nu
   for (const l of lines) {
     await db.query('INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run, load_batch_id) VALUES ($1,$2,$3,$4,$5)', [fy.code, l.code, l.balance, run, batchId]);
   }
-  return { fiscalYear: fy.code, goLiveDate, asAt: asAtOf(goLiveDate), accounts: lines.length, totalDebit, totalCredit, replaced, ignored };
+  const journal = await writeOpeningJournal(db, { goLiveDate, batchId, userId, legacySystem });
+  return { fiscalYear: fy.code, goLiveDate, asAt: asAtOf(goLiveDate), accounts: lines.length, totalDebit, totalCredit, replaced, ignored,
+    journalId: journal?.id || null, journalNumber: journal?.jv_number || null };
+}
+
+/**
+ * Write the opening balance journal of the go-live set of a date, replacing the journal written for the set before (its
+ * number is not reused); none when the set is empty. batchId: the migration load of the set (legacy number = its load
+ * number); userId: who migrated it. Refused (409) once the SAP opening file was generated from the journal it replaces.
+ */
+export async function writeOpeningJournal(db, { goLiveDate, batchId = null, userId = null, legacySystem = null }) {
+  const asAt = asAtOf(goLiveDate);
+  const earlier = (await db.query('SELECT jv_number, sap_exported_at FROM journal_vouchers WHERE source = $1 AND jv_date = $2', [OPENING_JOURNAL_SOURCE, asAt])).rows;
+  const sent = earlier.find((j) => j.sap_exported_at);
+  if (sent) throw conflict(`The opening balances of ${goLiveDate} were sent to SAP with ${sent.jv_number}; they can no longer change`);
+  await db.query('DELETE FROM journal_vouchers WHERE source = $1 AND jv_date = $2', [OPENING_JOURNAL_SOURCE, asAt]);
+  const t = (await db.query(`SELECT count(*)::int AS n, COALESCE(sum(balance) FILTER (WHERE balance > 0), 0) AS debit, COALESCE(-sum(balance) FILTER (WHERE balance < 0), 0) AS credit
+    FROM opening_balances WHERE source_run = $1`, [`${GO_LIVE_PREFIX}${goLiveDate}`])).rows[0];
+  if (!t.n) return null;
+  const number = await nextDocumentNumber('opening_journal', { db, date: goLiveDate, unique: { table: 'journal_vouchers', column: 'jv_number' } });
+  const load = batchId ? loadNumberOf(batchId) : null;
+  return (await db.query(`INSERT INTO journal_vouchers(jv_number, jv_date, description, status, total_debit, total_credit, created_by, source, kind, entry_type, reference_type,
+      reference_id, period, origin, legacy_system, legacy_number, migrated_at, migrated_by, load_batch_id)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'standard','OPENING_BALANCE',$9,$10,$11,$12,$13,$14,now(),$7,$15) RETURNING *`,
+  [number, asAt, `Opening balances as at ${asAt}${load ? `, load ${load}` : ''}`, OPENING_STATUS, round2(t.debit), round2(t.credit), userId, OPENING_JOURNAL_SOURCE,
+    batchId ? 'DataLoadBatch' : 'OpeningBalances', batchId ? String(batchId) : goLiveDate, asAt.slice(0, 7), MIGRATED, legacySystem || await legacySystemName(), load,
+    batchId])).rows[0];
+}
+
+/** Lines of an opening balance journal (journal_vouchers row): the accounts of its set, debit-positive balances split into debit and credit. */
+export async function openingJournalLines(db, jv) {
+  const rows = (await db.query(`SELECT o.account_code, a.name, o.balance FROM opening_balances o LEFT JOIN gl_accounts a ON a.code = o.account_code
+    WHERE o.source_run = $1 || ($2::date + 1)::text ORDER BY o.account_code`, [GO_LIVE_PREFIX, iso(jv.jv_date)])).rows;
+  return rows.map((r, i) => ({ lineNo: i + 1, accountCode: r.account_code, accountName: r.name || r.account_code,
+    debit: Number(r.balance) > 0 ? round2(Number(r.balance)) : 0, credit: Number(r.balance) < 0 ? round2(-Number(r.balance)) : 0 }));
 }
 
 /** Opening balances of a fiscal year (default: the latest year that has any) with account names and totals. */
