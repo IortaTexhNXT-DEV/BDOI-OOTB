@@ -1665,7 +1665,11 @@
     "transferredToday": "Transferred today",
     "transferLimitsNote": "Limits per method: Master > Configuration (remittance.transfer_methods)",
     "pause": "Pause",
-    "resume": "Resume"
+    "resume": "Resume",
+    "approvals": {
+      "rejectHeader": "Reject and return to maker ({{count}})",
+      "rejectVerb": "Reject and return to maker"
+    }
   },
   "incentive": {
     "incentive": "Incentive",

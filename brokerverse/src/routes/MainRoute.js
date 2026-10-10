@@ -1113,6 +1113,10 @@ const Maincomponent = () => {
             path="finance/remittance/approval"
             element={<RemittanceApproval />}
           />
+          {/* the links of notifications and My Work (?approval=<id>); the Approvals, record and Insurer billing pages replace these */}
+          <Route path="finance/remittance/approvals" element={<RemittanceApproval />} />
+          <Route path="finance/remittance/remittances/:id" element={<RemittanceTracking />} />
+          <Route path="finance/remittance/billing" element={<DirectBillProcessing />} />
           <Route
             path="finance/remittance/exceptions"
             element={<RemittanceExceptions />}

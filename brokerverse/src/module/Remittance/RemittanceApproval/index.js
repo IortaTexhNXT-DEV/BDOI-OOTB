@@ -17,8 +17,8 @@ import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
 import { calendarDateFormat, dateBody, isoDate, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import ReasonPicker, { reasonPayload, reasonProblem } from "../../../components/ReasonPicker";
 import "./index.scss";
-import { promptText } from "../../../utility/dialogs";
 
 // Delegating one pending approval to another approver. Standing cover for a period (leave) is given in
 // Master > User Management > Delegations, which the approval check (Authority Matrix) follows.
@@ -38,6 +38,10 @@ const RemittanceApproval = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [approvalAction, setApprovalAction] = useState("");
   const [comments, setComments] = useState("");
+  // a rejection returns the remittance to its maker with a reason of the remittance_reject context
+  const [reason, setReason] = useState(null);
+  const [rejecting, setRejecting] = useState(null);
+  const [showReasonErrors, setShowReasonErrors] = useState(false);
   const [showDelegationDialog, setShowDelegationDialog] = useState(false);
   const [delegationData, setDelegationData] = useState(emptyDelegation);
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -110,10 +114,17 @@ const RemittanceApproval = () => {
 
   const approveRows = (rows, note) => run(() => Promise.all(rows.map((r) => remittanceService.approve(r.id, note))), `${rows.length} approval(s) recorded`);
 
-  const rejectRows = async (rows, note) => {
-    const reason = note || await promptText(t("remittance.comments"), "");
-    if (!reason) return Promise.resolve(false);
-    return run(() => Promise.all(rows.map((r) => remittanceService.reject(r.id, reason))), `${rows.length} transaction(s) rejected`);
+  const rejectRows = (rows, value) => run(() => Promise.all(rows.map((r) => remittanceService.reject(r.id, reasonPayload(value)))), `${rows.length} transaction(s) rejected`);
+
+  const openReject = (rows) => {
+    setReason(null);
+    setShowReasonErrors(false);
+    setRejecting(rows);
+  };
+
+  const confirmReject = async () => {
+    if (reasonProblem(reason)) { setShowReasonErrors(true); return; }
+    if (await rejectRows(rejecting, reason)) setRejecting(null);
   };
 
   const priorityBodyTemplate = (rowData) => {
@@ -150,6 +161,8 @@ const RemittanceApproval = () => {
             setSelectedTransaction(rowData);
             setApprovalAction("");
             setComments("");
+            setReason(null);
+            setShowReasonErrors(false);
             setShowDetailDialog(true);
           }} aria-label={t("remittance.view")}
         />
@@ -163,7 +176,7 @@ const RemittanceApproval = () => {
           icon="pi pi-times"
           className="p-button-rounded p-button-danger p-button-text"
           tooltip={t("common.reject")}
-          onClick={() => rejectRows([rowData])} aria-label={t("common.reject")}
+          onClick={() => openReject([rowData])} aria-label={t("common.reject")}
         />
       </div>
     );
@@ -171,9 +184,10 @@ const RemittanceApproval = () => {
 
   const handleSubmitDecision = async () => {
     if (!approvalAction) return;
+    if (approvalAction === "reject" && reasonProblem(reason)) { setShowReasonErrors(true); return; }
     const done = approvalAction === "approve"
       ? await approveRows([selectedTransaction], comments || undefined)
-      : await rejectRows([selectedTransaction], comments);
+      : await rejectRows([selectedTransaction], reason);
     if (done) setShowDetailDialog(false);
   };
 
@@ -191,8 +205,14 @@ const RemittanceApproval = () => {
   const detailDialogFooter = (
     <div>
       <Button label={t("common.cancel")} icon="pi pi-times" onClick={() => setShowDetailDialog(false)} className="p-button-text" />
-      <Button label={t("remittance.submit")} icon="pi pi-check" onClick={handleSubmitDecision} autoFocus
-        disabled={!approvalAction || (approvalAction === 'reject' && !comments)} />
+      <Button label={t("remittance.submit")} icon="pi pi-check" onClick={handleSubmitDecision} autoFocus disabled={!approvalAction} />
+    </div>
+  );
+
+  const rejectDialogFooter = (
+    <div>
+      <Button label={t("common.cancel")} onClick={() => setRejecting(null)} className="p-button-outlined" />
+      <Button label={t("remittance.approvals.rejectVerb")} onClick={confirmReject} className="p-button-outlined p-button-danger" />
     </div>
   );
 
@@ -309,7 +329,7 @@ const RemittanceApproval = () => {
             {selectedRows.length > 0 && (
               <div className="bulk-actions mt-3">
                 <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="mr-2" onClick={() => approveRows(selectedRows)} />
-                <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" onClick={() => rejectRows(selectedRows)} />
+                <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" onClick={() => openReject(selectedRows)} />
                 <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" onClick={openDelegation} />
               </div>
             )}
@@ -395,9 +415,12 @@ const RemittanceApproval = () => {
                 </div>
               </div>
 
-              {approvalAction && (
+              {approvalAction === 'reject' && (
+                <ReasonPicker context="remittance_reject" value={reason} onChange={setReason} showErrors={showReasonErrors} className="mt-3" />
+              )}
+              {approvalAction === 'approve' && (
                 <div className="mt-3">
-                  <label>{t("remittance.comments")}{approvalAction === 'reject' ? " *" : ""}</label>
+                  <label>{t("remittance.comments")}</label>
                   <InputTextarea
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
@@ -409,6 +432,11 @@ const RemittanceApproval = () => {
             </div>
           </div>
         )}
+      </Dialog>
+
+      <Dialog header={t("remittance.approvals.rejectHeader", { count: rejecting?.length || 0 })} visible={!!rejecting} style={{ width: '40vw', minWidth: '480px' }}
+        footer={rejectDialogFooter} onHide={() => setRejecting(null)}>
+        <ReasonPicker context="remittance_reject" value={reason} onChange={setReason} showErrors={showReasonErrors} autoFocus />
       </Dialog>
 
       <Dialog

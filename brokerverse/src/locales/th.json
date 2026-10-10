@@ -1242,7 +1242,11 @@
     "downloadReport": "ดาวน์โหลดรายงาน",
     "processAnotherFile": "ประมวลผลไฟล์อื่น",
     "back": "กลับ",
-    "startProcessing": "เริ่มประมวลผล"
+    "startProcessing": "เริ่มประมวลผล",
+    "approvals": {
+      "rejectHeader": "ปฏิเสธและส่งคืนผู้จัดทำ ({{count}})",
+      "rejectVerb": "ปฏิเสธและส่งคืนผู้จัดทำ"
+    }
   },
   "incentive": {
     "incentive": "สิ่งจูงใจ",

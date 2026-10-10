@@ -43,7 +43,7 @@ export const remittanceService = {
   validateRemittances: (ids) => post(`${R}/remittances/validate`, { ids }),
   processRemittances: (ids) => post(`${R}/remittances/process`, { ids }),
   approveRemittance: (remId, comments) => post(`${R}/remittances/${id(remId)}/approve`, { comments }),
-  rejectRemittance: (remId, comments) => post(`${R}/remittances/${id(remId)}/reject`, { comments }),
+  rejectRemittance: (remId, reason) => post(`${R}/remittances/${id(remId)}/reject`, reason),
   settleRemittance: (remId, payload) => post(`${R}/remittances/${id(remId)}/settle`, payload),
   processingHistory: () => get(`${R}/processing-history`),
   automatedCandidates: (configCode) => get(`${R}/automated/candidates`, { configCode }),
@@ -91,7 +91,8 @@ export const remittanceService = {
   listApprovals: (params) => get(`${R}/approvals`, params),
   approvalHistory: () => get(`${R}/approvals/history`),
   approve: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/approve`, { comments }),
-  reject: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/reject`, { comments }),
+  // reason: { reasonCode, note } of the remittance_reject context (ReasonPicker reasonPayload)
+  reject: (approvalId, reason) => post(`${R}/approvals/${id(approvalId)}/reject`, reason),
   delegate: (approvalId, delegateTo, comments) => post(`${R}/approvals/${id(approvalId)}/delegate`, { delegateTo, comments }),
   listApprovers: () => get(`${R}/approvals/approvers`),
 
