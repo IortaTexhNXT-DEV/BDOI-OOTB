@@ -9,7 +9,11 @@ themselves are in `src/modules/users/router.js`.
 | File | What it does |
 |---|---|
 | `router.js` | Routes of the screens, with the audit entries and the approval notifications. |
-| `service.js` | Authority limits (propose, decide, withdraw, `applyLimit` with effective dating) and the check used by the approval steps (`assertAuthority`), delegations, segregation-of-duties rules (`sodConflicts`, `assertSod` used by the user form), the user and role matrices, access reviews, dormant accounts. |
+| `service.js` | Authority limits (propose, decide, withdraw, `applyLimit` with effective dating) and the check used by the approval steps (`assertAuthority`, `effectiveAuthority`), segregation-of-duties rules (`sodConflicts`, `assertSod` used by the user form and the go-live kit), the role matrix, ending sessions, dormant accounts. |
+| `delegations.js` | Delegations: the options of the New delegation panel, the checks, the request (kind `delegation`), ending one early, the effect on a date (`userAuthority`), the export. |
+| `sod.js` | Segregation of Duties: conflicts by user with their state, rule changes (kind `sod-rule`), exceptions (kind `sod-exception`), the workbook. |
+| `reviews.js` | Access Reviews: scope, outcomes, bulk keep, submit for sign-off (kind `access-review`), applying the removals, the workbooks. |
+| `userAccess.js` | User Access Matrix: users with roles by name, included roles, department, conflicts, pending changes and last review; the access panel; the workbook. |
 | `catalogue.js` | The access catalogue: every permission code in business words (area of the menu, module, level, what it allows). |
 | `roles.js` | Role directory: department, summary and order of each role, the base platform roles, full-access roles. |
 | `roleAccess.js` | Role Permissions: the overview, the check of a change of a role's access, the request, applying it, the export for audit. |
@@ -19,8 +23,9 @@ themselves are in `src/modules/users/router.js`.
 ## Main tables
 
 `roles`, `permissions`, `role_permissions` (users module), `sod_rules`, `authority_transaction_types`,
-`authority_limits`, `user_delegations`, `access_reviews`, `access_review_items`, and `accounting_config_changes`
-(kinds `role-access` and `authority-limits`) for the changes waiting for approval. Uploaded Authority Matrix files are
+`authority_limits`, `user_delegations`, `sod_exceptions`, `access_reviews`, `access_review_items`, and
+`accounting_config_changes` (kinds `role-access`, `authority-limits`, `delegation`, `sod-rule`, `sod-exception`,
+`access-review`) for the changes waiting for approval. Uploaded Authority Matrix files are
 kept in `documents` (category `authority-matrix`, linked to their change).
 
 ## Access catalogue
@@ -121,17 +126,79 @@ permissions holding a code of each set, worked out on the permissions of the act
 left out. Rules are checked when roles are given to a user (`assertSod`), on the User Access Matrix and when the
 access of a role changes. The default access rules (seed `91_role_access.sql`) warn.
 
+## Delegations
+
+- An approver away lends his or her limit for chosen transactions and dates to the person covering. Only the
+  transactions an approval step checks (`AUTHORITY_STEPS`) can be lent; the approver away must reach their step and so
+  must the person covering (`approvalsByUser` in `authority.js`). `GET /delegations/options` gives the panel everything
+  at once; `POST /delegations/preview` the effect per transaction.
+- `POST /delegations` (`write:access-control`, reason of context `delegation`): from today (business date), at most
+  `access.delegation_max_days` days, no other delegation of the approver away for the same days and transactions
+  (approved or waiting, 409), the person covering not away himself or herself (409). It waits for approval (kind
+  `delegation`, target `<approver>:<cover>:<from>`); the approver is never the requester or the person covering.
+  Approving checks again, writes `user_delegations` with the change and the approver, and tells both people. With
+  `access.change_approval` off it is written at once, never to the requester.
+- Status (business date): `scheduled`, `in-effect`, `ended`, `ended-early` (status `revoked`), and for requests
+  `pending`, `rejected`, `withdrawn`. `GET /delegations?view=current|pending|ended|all`.
+- `POST /delegations/:id/end` (reason of `delegation_end`): stops at once, both people are told.
+- A delegation never lowers authority: under `access.authority_without_limit = allow` a person without a limit of his
+  or her own is not restricted and a delegated limit is not applied (`effectiveAuthority`).
+
+## Segregation of duties: conflicts and exceptions
+
+- `GET /sod-conflicts`: users x rules broken with the state `open`, `accepted` (an exception in force), `pending`
+  (an exception waiting) or `expired` (open again after the exception's date, without any job).
+- `POST /sod-rules`, `PUT /sod-rules/:id` (also `active` to switch a rule on again), `DELETE /sod-rules/:id` (switch
+  off): reason of `access_change`; kind `sod-rule`, target the rule code (`SOD-<n>` given by the server for a new
+  rule). The audit entry keeps the rule before and after.
+- `POST /sod-exceptions` (reason of `sod_exception`, `validUntil` after today and at most
+  `access.sod_exception_max_days` days away): not for oneself; kind `sod-exception`, target `<rule id>:<user id>`; the
+  person concerned does not approve it. `POST /sod-exceptions/:id/end` applies at once. An exception does not lift
+  a Block rule when roles are given.
+
+## Access reviews
+
+- `POST /reviews` with a scope (`all`, `departments` of the role directory, `roles`) and a due date from today;
+  `POST /reviews/preview` counts the users.
+- `POST /reviews/:id/items/:itemId`: `keep`, `remove-roles` (`removeRoles`, all roles = deactivate) or
+  `deactivate`, a reason of `access_review` for a removal, a note to keep a dormant user or one with an open
+  conflict. Nobody decides his or her own line; an administrator account (full-access role or the built-in
+  administrator) only a System Administrator; the built-in administrator is never deactivated. The earlier
+  `{ decision: 'revoke' }` means deactivate. `POST /reviews/:id/items/keep` keeps several lines.
+- `POST /reviews/:id/submit` once every line is decided: status `awaiting-signoff`, kind `access-review`, target
+  `AR-<id>`. Another approver who decided none of its removals signs it off: the roles still held are removed, an
+  account is deactivated (or noted as already inactive), sessions are renewed, the review closes. A rejection
+  (returned) or a withdrawal opens it again. With approval off the removals apply when decided and
+  `POST /reviews/:id/close` closes it.
+
+## User Access Matrix
+
+`GET /user-matrix` (all statuses; the screen shows Active by default) and `GET /users/:id/access` (the panel). Ages
+and dormancy on the business date. Pending changes per user: role access of a role held, delegations from or to the
+user, exceptions, review removals, personal limits and limits of a role held. Ending sessions
+(`POST /users/:id/sign-out`) of an administrator account needs a System Administrator.
+
+## Exports
+
+Every screen downloads a workbook with the letterhead banner, "as at" and "exported by" on the first sheet
+(`?format=xlsx`, `csv` = the first sheet; `&technical=1` adds the codes for an administrator): user matrix (Users,
+Roles of users, Segregation of duties, Delegations in effect), delegations, segregation of duties (Rules, Conflicts by
+user, Exceptions, Waiting for approval), the list of reviews and one review (Summary, Users).
+
 ## Changes of access (maker-checker)
 
 `changes.js` keeps the changes in `accounting_config_changes`; a kind registers its handler with
-`registerAccessKind(kind, { label, link, describe, assertDecider, apply, requested, applied })` (`role-access` in
-`roleAccess.js`, `authority-limits` in `authority.js`). The
-kinds `delegation`, `sod-rule`, `sod-exception` and `access-review` are allowed by the table (migration 0392) for the
-other screens of this menu. `posting-rules/service.js` only lists and decides its own kinds.
+`registerAccessKind(kind, { label, link, describe, assertDecider, apply, closed, requested, applied })`
+(`role-access` in `roleAccess.js`, `authority-limits` in `authority.js`, `delegation` in `delegations.js`, `sod-rule`
+and `sod-exception` in `sod.js`, `access-review` in `reviews.js`). `closed` runs on a rejection or a withdrawal (a
+review returns to Open). `apply` may return `notices` (personal notifications after the commit). My Work lists every
+waiting change to the approvers other than the requester and the person concerned. `posting-rules/service.js` only
+lists and decides its own kinds.
 
 ## Key settings
 
-`access.change_approval`, `access.sod_enforced`, `access.role_groups`, `access.platform_roles`,
+`access.change_approval`, `access.sod_enforced`, `access.role_groups`, `access.platform_roles`, `access.delegation_max_days`,
+`access.sod_exception_max_days`, `access.review_due_days`,
 `access.authority_enforced`, `access.authority_without_limit`, `access.authority_reference_required`, `access.dormant_days`,
 `limits.bulk_upload_max_rows` (rows of an upload).
 
@@ -145,3 +212,7 @@ other screens of this menu. `posting-rules/service.js` only lists and decides it
 - A limit approved today still shows the old value: its effective date is later; the cell shows the scheduled change.
 - An upload says a row "has a change waiting for approval": decide or withdraw that change first, or put its value in
   the file.
+- A delegation is approved but the person covering is still "not restricted": the approver away has no limit, or the
+  person covering has none and "Not set" allows; a delegation only raises a limit.
+- A conflict shows Open again although an exception was approved: its Valid until date has passed.
+- A review cannot be submitted: a line is still To review, or the review is already waiting for sign-off.

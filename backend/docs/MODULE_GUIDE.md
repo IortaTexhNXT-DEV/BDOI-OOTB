@@ -45,6 +45,12 @@ minimal, clearly-correct front-end fix.
   (`src/modules/access-control/authority.js`) with the screen and the permissions of the step; the matrix shows which
   roles can approve it from there, and `test/authority-matrix.test.js` fails while a checked type is missing. Limits are
   changed on the Authority Matrix (one change approved by another administrator, also for an uploaded workbook).
+- Changes of access: a screen of Master > Users and Access that changes access (role access, limits, delegations,
+  segregation-of-duties rules and exceptions, access review removals) requests it with `requestAccessChange` of
+  `src/modules/access-control/changes.js` and registers its kind with `registerAccessKind` (label, link, summary in
+  business words, extra checks on the approver, what approving applies, what a rejection undoes). The table is the
+  configuration approval (`accounting_config_changes`); a new kind is added to its kind CHECK by a migration. Changes
+  that only reduce access (ending a delegation or an exception early) apply at once.
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the

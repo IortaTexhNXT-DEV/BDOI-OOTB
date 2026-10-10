@@ -289,6 +289,15 @@ async function approvals(ctx) {
     out.push(`SELECT ${select({ ...base, kind: "'Authority matrix change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(cc.payload->>'title', cc.target)",
       due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/authority-matrix?tab=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
       FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = 'authority-limits' AND ${notMine(ctx, 'cc.requested_by')}`);
+    // delegations, segregation-of-duties rules and exceptions, access review sign-offs: not to the person a change is for
+    out.push(`SELECT ${select({ ...base, kind: `CASE cc.kind WHEN 'delegation' THEN 'Delegation' WHEN 'sod-rule' THEN 'Segregation of duties rule'
+        WHEN 'sod-exception' THEN 'Segregation of duties exception' ELSE 'Access review sign-off' END`, id: 'cc.id', ref: "'CFG-' || cc.id",
+      title: "COALESCE(cc.payload->>'title', cc.target)", due_date: due('cc.requested_at'), status: 'cc.status',
+      link: `CASE cc.kind WHEN 'delegation' THEN '/master/generals/usermanagement/delegations?view=pending&change=' || cc.id
+        WHEN 'access-review' THEN '/master/generals/usermanagement/access-reviews?review=' || (cc.payload->>'reviewId')
+        ELSE '/master/generals/usermanagement/segregation-of-duties?tab=pending&change=' || cc.id END`, created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind IN ('delegation', 'sod-rule', 'sod-exception', 'access-review') AND ${notMine(ctx, 'cc.requested_by')}
+        AND NOT (COALESCE(cc.payload->>'delegateId', cc.payload->>'userId', '') = ANY(${ctx.ME}::text[]))`);
   }
   if (ctx.can('approve:period-end') && await has('period_close_runs')) {
     out.push(`SELECT ${select({ ...base, kind: "'Month-end close'", id: 'pr.id', ref: 'pr.run_number', title: "'Close of period ' || pr.period", due_date: due('COALESCE(pr.submitted_at, pr.created_at)'),
@@ -408,8 +417,9 @@ async function access(ctx) {
   if (ctx.can('read:access-control') && await exists(ctx, 'access_reviews')) {
     out.push(`SELECT ${select({
       category: "'access'", kind: "'Access review'", id: "'ar-' || ar.id", ref: "'AR-' || ar.id", title: 'ar.name', due_date: 'ar.due_date', status: 'ar.status',
-      next_action: "'Decide ' || p.pending || ' of ' || p.total || ' users (keep or revoke)'", queue: ctx.can('write:access-control') ? 'true' : 'false',
-      link: "'/master/generals/usermanagement/access-reviews'", created_at: 'ar.created_at',
+      priority: `CASE WHEN ar.due_date < ${ctx.T}::date THEN 'high' ELSE 'normal' END`,
+      next_action: "CASE WHEN p.pending = 0 THEN 'Submit the review for sign-off' ELSE 'Decide ' || p.pending || ' of ' || p.total || ' users' END",
+      queue: ctx.can('write:access-control') ? 'true' : 'false', link: "'/master/generals/usermanagement/access-reviews?review=' || ar.id", created_at: 'ar.created_at',
     })} FROM access_reviews ar LEFT JOIN LATERAL (SELECT count(*)::int AS total, count(*) FILTER (WHERE i.decision = 'pending')::int AS pending
       FROM access_review_items i WHERE i.review_id = ar.id) p ON true WHERE ar.status = 'open'`);
   }

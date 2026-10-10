@@ -203,7 +203,7 @@ describe('a change of a role\'s access', () => {
     await persona('ra.desk', ['ra-desk']);
     const reasons = await as['ra.desk']('get', '/ops-masters/reason-code?status=Active&context=access_change');
     expect(reasons.status).toBe(200);
-    expect(reasons.body.data.map((r) => r.code).sort()).toEqual(['ACC-AUDIT', 'ACC-CORRECT', 'ACC-DUTIES', 'ACC-OTHER', 'ACC-PROCESS', 'ACC-REDESIGN']);
+    expect(reasons.body.data.map((r) => r.code).sort()).toEqual(['ACC-AUDIT', 'ACC-CORRECT', 'ACC-DUTIES', 'ACC-NOTNEEDED', 'ACC-OTHER', 'ACC-PROCESS', 'ACC-REDESIGN']);
     expect((await q("SELECT count(*)::int AS n FROM accounting_config_changes WHERE kind = 'role-access' AND status = 'pending'"))[0].n).toBe(0);
   });
 
@@ -247,20 +247,23 @@ describe('segregation of duties on access', () => {
   });
 
   it('keeps the rules on two roles and adds access rules on the Segregation of Duties screen', async () => {
-    const rules = (await ctx.api('get', '/access-control/sod-rules')).body.data;
+    const rules = (await ctx.api('get', '/access-control/sod-rules')).body.data.rows;
     expect(rules.find((s) => s.code === 'SOD-TIS-BP-RECON')).toMatchObject({ kind: 'roles', roleA: 'tis-ccd-bp', roleB: 'tis-ccd-recon' });
     expect(rules.find((s) => s.code === 'SOD-ACC-CLAIM-PAY')).toMatchObject({ kind: 'access', accessA: ['write:claims'],
       accessANames: ['Operations › Claims › Create and edit'], accessBNames: ['Accounts › Disbursements and petty cash › Create and edit'] });
+    await setApproval(false);
     const added = await ctx.api('post', '/access-control/sod-rules').send({ code: 'SOD-ACC-TEST', name: 'Payables and payments', kind: 'access',
-      accessA: ['approve:payables'], accessB: ['write:disbursements'], action: 'warn' });
-    expect(added.status, JSON.stringify(added.body)).toBe(201);
+      accessA: ['approve:payables'], accessB: ['write:disbursements'], action: 'warn', reasonCode: 'ACC-AUDIT' });
+    expect(added.status, JSON.stringify(added.body)).toBe(200);
     expect((await ctx.api('post', '/access-control/sod-rules').send({ code: 'SOD-ACC-BAD', name: 'Same on both sides', kind: 'access',
-      accessA: ['write:claims'], accessB: ['write:claims'], action: 'warn' })).status).toBe(400);
-    expect((await ctx.api('post', '/access-control/sod-rules').send({ code: 'SOD-ACC-BAD', name: 'One side', kind: 'access', accessA: ['write:claims'], accessB: [], action: 'warn' })).status).toBe(400);
+      accessA: ['write:claims'], accessB: ['write:claims'], action: 'warn', reasonCode: 'ACC-AUDIT' })).status).toBe(400);
+    expect((await ctx.api('post', '/access-control/sod-rules').send({ code: 'SOD-ACC-BAD', name: 'One side', kind: 'access', accessA: ['write:claims'], accessB: [], action: 'warn',
+      reasonCode: 'ACC-AUDIT' })).status).toBe(400);
     // Finance approves supplier invoices and prepares payments: the user matrix shows it
     const m = (await ctx.api('get', '/access-control/user-matrix')).body.data.rows.find((u) => u.username === 'ra.fin');
-    expect(m.sodConflicts).toEqual(expect.arrayContaining([{ name: 'Payables and payments', action: 'warn', kind: 'access' }]));
-    await ctx.api('delete', `/access-control/sod-rules/${added.body.data.id}`);
+    expect(m.sodConflicts).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'Payables and payments', action: 'warn', kind: 'access', state: 'open' })]));
+    await ctx.api('delete', `/access-control/sod-rules/${added.body.data.rule.id}`).send({ reasonCode: 'ACC-NOTNEEDED' });
+    await setApproval(true);
   });
 
   it('no TISPH role breaks a default access rule on its own', async () => {

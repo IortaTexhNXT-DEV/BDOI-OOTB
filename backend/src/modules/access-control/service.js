@@ -1,18 +1,22 @@
 /**
- * Access control of the broker's staff: the authority matrix (who may approve how much, per transaction type), delegation
- * of authority, segregation-of-duties rules, the user and role matrices, periodic access reviews and dormant accounts.
+ * Access control of the broker's staff: the authority limits (who may approve how much, per transaction type) and the
+ * check of the approval steps, segregation-of-duties rules and the check when roles are given, the role matrix,
+ * ending sessions and dormant accounts. Delegations, the segregation-of-duties screen, access reviews and the user
+ * access matrix are in delegations.js, sod.js, reviews.js and userAccess.js.
  *
  * Authority check (assertAuthority): the approver's limit for a transaction type is
  *   - their own user limit when one is active, otherwise the highest limit of their roles (inherited roles included),
  *   - raised by any active delegation to them that covers the type (the delegator's limit, worked out the same way),
  *   - "no limit" when a matching row has max_amount NULL.
- * When no row applies at all, access.authority_without_limit decides (allow, the default, or refuse).
+ * When no row applies at all, access.authority_without_limit decides (allow, the default, or refuse); under allow a
+ * person without a limit of their own is not restricted, and a delegation does not restrict them.
  */
-import { adminEquivalentRoles, hasPermission } from '../../lib/auth.js';
+import { adminEquivalentRoles, hasPermission, isAdmin } from '../../lib/auth.js';
 import { businessName } from './catalogue.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, today } from '../../lib/dates.js';
+import { BUILT_IN_ADMIN, isAdminAccount } from './roles.js';
 
 const money = (v) => (v === null || v === undefined ? null : Math.round(Number(v) * 100) / 100);
 
@@ -154,7 +158,7 @@ export async function withdrawLimit(db, id, user) {
 }
 
 /** The limit of one user for a type, without delegations: { found, limit (null = no limit), source }. */
-async function ownLimit(db, userId, type, onDate) {
+export async function ownLimit(db, userId, type, onDate) {
   const inEffect = `status = 'active' AND effective_from <= $3::date AND (effective_to IS NULL OR effective_to >= $3::date)`;
   const own = (await db.query(`SELECT max_amount FROM authority_limits WHERE transaction_type = $1 AND user_id = $2 AND ${inEffect}
     ORDER BY requested_at DESC LIMIT 1`, [type, userId, onDate])).rows[0];
@@ -168,10 +172,16 @@ async function ownLimit(db, userId, type, onDate) {
   return { found: true, limit: money(best.max_amount), source: `role ${best.role_code}` };
 }
 
-/** Effective authority of a user for a transaction type on a date, delegations included. */
+/**
+ * Effective authority of a user for a transaction type on a date, delegations included. A delegation never lowers it:
+ * a person with no limit of their own while access.authority_without_limit is allow is not restricted, so a delegated
+ * limit is not applied to them.
+ */
 export async function effectiveAuthority(db, userId, type, onDate = null) {
   onDate = onDate || (await today());
-  const candidates = [await ownLimit(db, userId, type, onDate)];
+  const own = await ownLimit(db, userId, type, onDate);
+  if (!own.found && String(await getSetting('access.authority_without_limit', 'allow')) !== 'refuse') return { found: false, limit: null, unlimited: false, source: null };
+  const candidates = [own];
   const { rows: dels } = await db.query(`SELECT d.delegator_id, u.display_name FROM user_delegations d JOIN users u ON u.id = d.delegator_id
     WHERE d.delegate_id = $1 AND d.status = 'active' AND $2::date BETWEEN d.date_from AND d.date_to
       AND (cardinality(d.transaction_types) = 0 OR $3 = ANY(d.transaction_types)) AND u.status = 'active'`, [userId, onDate, type]);
@@ -212,40 +222,6 @@ export async function assertAuthority(db, user, type, amount, { onDate } = {}) {
   return a;
 }
 
-// ---------------------------------------------------------------- delegations
-
-export async function listDelegations(db, { activeOnly = false } = {}) {
-  const { rows } = await db.query(`SELECT d.id, d.delegator_id AS "delegatorId", a.display_name AS "delegatorName", d.delegate_id AS "delegateId", b.display_name AS "delegateName",
-      d.transaction_types AS "transactionTypes", d.date_from AS "dateFrom", d.date_to AS "dateTo", d.reason, d.status,
-      (d.status = 'active' AND CURRENT_DATE BETWEEN d.date_from AND d.date_to) AS "inEffect", c.display_name AS "createdBy", d.created_at AS "createdAt"
-    FROM user_delegations d JOIN users a ON a.id = d.delegator_id JOIN users b ON b.id = d.delegate_id LEFT JOIN users c ON c.id = d.created_by
-    WHERE ($1::boolean IS FALSE OR (d.status = 'active' AND d.date_to >= CURRENT_DATE)) ORDER BY d.date_from DESC, d.id DESC`, [activeOnly]);
-  return rows;
-}
-
-export async function createDelegation(db, b, user) {
-  if (b.delegatorId === b.delegateId) throw badRequest('A person cannot delegate to themselves');
-  if (b.dateTo < b.dateFrom) throw badRequest('The end date is before the start date');
-  const users = (await db.query("SELECT id, status FROM users WHERE id = ANY($1)", [[b.delegatorId, b.delegateId]])).rows;
-  if (users.length !== 2) throw badRequest('Unknown user');
-  if (users.some((u) => u.status !== 'active')) throw badRequest('Both people must have active accounts');
-  const types = b.transactionTypes || [];
-  if (types.length) {
-    const known = (await db.query('SELECT code FROM authority_transaction_types WHERE code = ANY($1)', [types])).rows.map((r) => r.code);
-    const unknown = types.filter((t) => !known.includes(t));
-    if (unknown.length) throw badRequest(`Unknown transaction type: ${unknown.join(', ')}`);
-  }
-  const { rows } = await db.query(`INSERT INTO user_delegations(delegator_id, delegate_id, transaction_types, date_from, date_to, reason, created_by)
-    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`, [b.delegatorId, b.delegateId, types, b.dateFrom, b.dateTo, b.reason || null, user.id]);
-  return (await listDelegations(db)).find((d) => d.id === rows[0].id);
-}
-
-export async function revokeDelegation(db, id, user) {
-  const { rows } = await db.query(`UPDATE user_delegations SET status = 'revoked', revoked_by = $2, revoked_at = now() WHERE id = $1 AND status = 'active' RETURNING id`, [id, user.id]);
-  if (!rows[0]) throw notFound('No active delegation with this id');
-  return { id: Number(id), status: 'revoked' };
-}
-
 // ---------------------------------------------------------------- segregation of duties
 //
 // Two kinds of rule. Roles held together (kind roles): two roles one person may not hold. Access combined (kind access):
@@ -257,13 +233,13 @@ const sodOut = (r) => ({ ...r, accessANames: r.accessA.map((c) => businessName(c
 
 export async function listSodRules(db) {
   const { rows } = await db.query(`SELECT s.id, s.code, s.name, s.kind, s.role_a AS "roleA", a.name AS "roleAName", s.role_b AS "roleB", b.name AS "roleBName",
-      s.access_a AS "accessA", s.access_b AS "accessB", s.action, s.reason, s.active
-    FROM sod_rules s LEFT JOIN roles a ON a.code = s.role_a LEFT JOIN roles b ON b.code = s.role_b ORDER BY s.code`);
+      s.access_a AS "accessA", s.access_b AS "accessB", s.action, s.reason, s.active, u.display_name AS "updatedBy", s.updated_at AS "updatedAt"
+    FROM sod_rules s LEFT JOIN roles a ON a.code = s.role_a LEFT JOIN roles b ON b.code = s.role_b LEFT JOIN users u ON u.id = s.updated_by ORDER BY s.code`);
   return rows.map(sodOut);
 }
 
 /** The two sides of a rule: two different known roles, or two sets of known permissions that do not overlap. */
-async function sodSides(db, b, kind) {
+export async function sodSides(db, b, kind) {
   if (kind === 'access') {
     const a = [...new Set(b.accessA || [])];
     const c = [...new Set(b.accessB || [])];
@@ -281,35 +257,17 @@ async function sodSides(db, b, kind) {
   return { roleA: b.roleA, roleB: b.roleB, accessA: [], accessB: [] };
 }
 
-export async function saveSodRule(db, b, id = null) {
-  const existing = id ? (await db.query('SELECT kind FROM sod_rules WHERE id = $1', [id])).rows[0] : null;
-  if (id && !existing) throw notFound('Rule not found');
-  const kind = b.kind || existing?.kind || 'roles';
-  const x = await sodSides(db, b, kind);
-  if (id) {
-    await db.query(`UPDATE sod_rules SET name = $2, kind = $3, role_a = $4, role_b = $5, access_a = $6, access_b = $7, action = $8, reason = $9, active = $10 WHERE id = $1`,
-      [id, b.name, kind, x.roleA, x.roleB, x.accessA, x.accessB, b.action, b.reason || null, b.active !== false]);
-  } else {
-    await db.query(`INSERT INTO sod_rules(code, name, kind, role_a, role_b, access_a, access_b, action, reason, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [b.code, b.name, kind, x.roleA, x.roleB, x.accessA, x.accessB, b.action, b.reason || null, b.active !== false]);
-  }
-  return (await listSodRules(db)).find((r) => (id ? r.id === Number(id) : r.code === b.code));
-}
-
-/** Removing a rule switches it off (kept for the record; the default rules would otherwise come back with the seed). */
-export async function deleteSodRule(db, id) {
-  const { rowCount } = await db.query('UPDATE sod_rules SET active = false WHERE id = $1', [id]);
-  if (!rowCount) throw notFound('Rule not found');
-  return { id: Number(id), active: false };
-}
-
 /** Does a set of permission codes break an access rule (a code of each side)? */
 export const breaksAccessRule = (rule, codes) => rule.accessA.some((c) => codes.has(c)) && rule.accessB.some((c) => codes.has(c));
 
-/** Rules broken by a set of role codes (inherited roles count; access rules on the permissions of the active roles). */
+/**
+ * Rules broken by a set of role codes: the active roles and the active roles they include (as user_effective_roles
+ * gives them to a user); access rules on the permissions of those roles.
+ */
 export async function sodConflicts(db, roleCodes) {
   if (!(await db.query("SELECT to_regclass('sod_rules') IS NOT NULL AS ok")).rows[0].ok) return [];
-  const { rows: expanded } = await db.query(`WITH RECURSIVE r(code) AS (SELECT unnest($1::text[]) UNION SELECT unnest(x.inherits) FROM roles x JOIN r ON r.code = x.code)
+  const { rows: expanded } = await db.query(`WITH RECURSIVE r(code) AS (SELECT code FROM roles WHERE code = ANY($1::text[]) AND status = 'active'
+      UNION SELECT i.code FROM roles x JOIN r ON r.code = x.code JOIN roles i ON i.code = ANY(x.inherits) AND i.status = 'active')
     SELECT DISTINCT code FROM r`, [roleCodes || []]);
   const have = new Set(expanded.map((r) => r.code));
   const rules = (await listSodRules(db)).filter((s) => s.active);
@@ -325,63 +283,33 @@ export async function sodConflicts(db, roleCodes) {
 
 const sodBetween = (s) => (s.kind === 'access' ? `${s.accessANames.join(', ')} with ${s.accessBNames.join(', ')} (${s.name})` : `${s.roleAName} and ${s.roleBName} (${s.name})`);
 
-/** Throws when a blocking rule is broken; returns the warnings otherwise. */
-export async function assertSod(db, roleCodes) {
+/** The exceptions in force of a user (rule id -> valid until), for the warnings of assertSod. */
+async function exceptionsInForce(db, userId) {
+  if (!userId || !(await db.query("SELECT to_regclass('sod_exceptions') IS NOT NULL AS ok")).rows[0].ok) return new Map();
+  const { rows } = await db.query(`SELECT rule_id, to_char(valid_until, 'YYYY-MM-DD') AS until FROM sod_exceptions
+    WHERE user_id = $1 AND status = 'active' AND valid_until >= $2::date`, [userId, await today()]);
+  return new Map(rows.map((r) => [Number(r.rule_id), r.until]));
+}
+
+/**
+ * Throws when a blocking rule is broken (an exception does not lift a Block); returns the warnings otherwise. With
+ * `userId`, a warning says when the conflict is accepted for that person until a date.
+ */
+export async function assertSod(db, roleCodes, { userId = null } = {}) {
   if (!(await getSetting('access.sod_enforced', true))) return [];
   const found = await sodConflicts(db, roleCodes);
   const blocking = found.filter((s) => s.action === 'block');
   if (blocking.length) {
     throw conflict(`Segregation of duties: ${blocking.map(sodBetween).join('; ')} may not be held by the same person`);
   }
-  return found.map((s) => (s.kind === 'access' ? `${s.name}: ${s.reason || sodBetween(s)}` : `${s.roleAName} with ${s.roleBName}: ${s.reason || s.name}`));
+  const accepted = await exceptionsInForce(db, userId);
+  return found.map((s) => {
+    const text = s.kind === 'access' ? `${s.name}: ${s.reason || sodBetween(s)}` : `${s.roleAName} with ${s.roleBName}: ${s.reason || s.name}`;
+    return accepted.has(Number(s.id)) ? `${text} (exception in force until ${accepted.get(Number(s.id))})` : text;
+  });
 }
 
 // ---------------------------------------------------------------- matrices
-
-const USER_MATRIX_SQL = `SELECT u.id, u.username, u.display_name AS "displayName", u.employee_code AS "employeeCode", u.branch_code AS "branch", u.department,
-    u.designation, u.status, u.email, rt.display_name AS "reportingTo",
-    COALESCE((SELECT array_agg(r.code ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS roles,
-    COALESCE((SELECT array_agg(DISTINCT er.code ORDER BY er.code) FROM user_effective_roles(u.id) er), '{}') AS "effectiveRoles",
-    u.last_login_at AS "lastLoginAt", u.totp_enabled AS "twoFactor", u.must_change_password AS "mustChangePassword", u.failed_logins AS "failedLogins",
-    (CURRENT_DATE - u.password_changed_at::date) AS "passwordAgeDays",
-    (CURRENT_DATE - COALESCE(u.last_login_at, u.created_at)::date) AS "daysSinceLogin", u.created_at AS "createdAt"
-  FROM users u LEFT JOIN users rt ON rt.id = u.reporting_to
-  WHERE ($1::text IS NULL OR u.status = $1) ORDER BY u.display_name`;
-
-/** The permissions of every user through their active roles, full-access roles left out (only when an access rule is active). */
-async function userAccessCodes(db, rules) {
-  if (!rules.some((s) => s.kind === 'access')) return new Map();
-  const { rows } = await db.query(`SELECT u.id, array_agg(DISTINCT p.code) AS codes FROM users u CROSS JOIN LATERAL user_effective_roles(u.id) er
-    JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id
-    WHERE NOT (er.code = ANY($1)) GROUP BY u.id`, [await adminEquivalentRoles(db)]);
-  return new Map(rows.map((r) => [r.id, new Set(r.codes)]));
-}
-
-/** Every user with roles, branch, status and sign-in facts, plus their segregation-of-duties conflicts. */
-export async function userMatrix(db, { status = null } = {}) {
-  const { rows } = await db.query(USER_MATRIX_SQL, [status]);
-  const dormantDays = Number(await getSetting('access.dormant_days', 90)) || 0;
-  const rules = (await listSodRules(db)).filter((s) => s.active);
-  const roles = (await db.query("SELECT code, name FROM roles ORDER BY id")).rows;
-  const access = await userAccessCodes(db, rules);
-  return {
-    roles,
-    dormantDays,
-    rows: rows.map((u) => {
-      const have = new Set(u.effectiveRoles);
-      const codes = access.get(u.id) || new Set();
-      const broken = rules.filter((s) => (s.kind === 'access' ? breaksAccessRule(s, codes) : have.has(s.roleA) && have.has(s.roleB)));
-      return { ...u, sodConflicts: broken.map((s) => ({ name: s.name, action: s.action, kind: s.kind })),
-        dormant: dormantDays > 0 && u.status === 'active' && Number(u.daysSinceLogin) >= dormantDays };
-    }),
-  };
-}
-
-export const USER_MATRIX_HEADER = ['Username', 'Name', 'Employee code', 'Branch', 'Department', 'Designation', 'Reporting to', 'Status', 'Roles',
-  'Last sign-in', 'Days since sign-in', 'Two-factor', 'Password age (days)', 'Segregation of duties'];
-export const userMatrixRows = (m) => m.rows.map((u) => [u.username, u.displayName, u.employeeCode || '', u.branch || '', u.department || '', u.designation || '',
-  u.reportingTo || '', u.status, u.roles.join(', '), u.lastLoginAt ? new Date(u.lastLoginAt).toISOString().slice(0, 16).replace('T', ' ') : 'never',
-  u.daysSinceLogin, u.twoFactor ? 'on' : 'off', u.passwordAgeDays, u.sodConflicts.map((c) => `${c.name} (${c.action})`).join('; ')]);
 
 /** Permissions down, roles across (what each role may do), grouped by module. */
 export async function roleMatrix(db) {
@@ -395,73 +323,19 @@ export async function roleMatrix(db) {
   };
 }
 
-// ---------------------------------------------------------------- access reviews
-
-export async function listReviews(db) {
-  const { rows } = await db.query(`SELECT a.id, a.name, a.due_date AS "dueDate", a.status, c.display_name AS "createdBy", a.created_at AS "createdAt", a.closed_at AS "closedAt",
-      count(i.id)::int AS users, count(i.id) FILTER (WHERE i.decision = 'pending')::int AS pending, count(i.id) FILTER (WHERE i.decision = 'revoke')::int AS revoked
-    FROM access_reviews a LEFT JOIN access_review_items i ON i.review_id = a.id LEFT JOIN users c ON c.id = a.created_by
-    GROUP BY a.id, c.display_name ORDER BY a.created_at DESC`);
-  return rows;
-}
-
-/** Start a review: a snapshot of every active user and their roles, to be confirmed or revoked one by one. */
-export async function startReview(db, { name, dueDate }, user) {
-  const { rows } = await db.query('INSERT INTO access_reviews(name, due_date, created_by) VALUES ($1, $2, $3) RETURNING id', [name, dueDate, user.id]);
-  await db.query(`INSERT INTO access_review_items(review_id, user_id, roles, last_login_at)
-    SELECT $1, u.id, COALESCE((SELECT array_agg(r.code ORDER BY r.code) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}'), u.last_login_at
-    FROM users u WHERE u.status = 'active'`, [rows[0].id]);
-  return getReview(db, rows[0].id);
-}
-
-export async function getReview(db, id) {
-  const review = (await listReviews(db)).find((r) => r.id === Number(id));
-  if (!review) throw notFound('Access review not found');
-  const { rows } = await db.query(`SELECT i.id, i.user_id AS "userId", u.username, u.display_name AS "displayName", u.branch_code AS branch, u.status AS "currentStatus",
-      i.roles, i.last_login_at AS "lastLoginAt", i.decision, i.remarks, d.display_name AS "decidedBy", i.decided_at AS "decidedAt"
-    FROM access_review_items i JOIN users u ON u.id = i.user_id LEFT JOIN users d ON d.id = i.decided_by WHERE i.review_id = $1 ORDER BY u.display_name`, [id]);
-  return { ...review, items: rows };
-}
-
-/** Keep or revoke one user's access. Revoking deactivates the account and signs it out (roles stay for the record). */
-export async function decideReviewItem(db, reviewId, itemId, { decision, remarks }, user) {
-  const item = (await db.query(`SELECT i.*, a.status AS review_status FROM access_review_items i JOIN access_reviews a ON a.id = i.review_id
-    WHERE i.id = $1 AND i.review_id = $2 FOR UPDATE`, [itemId, reviewId])).rows[0];
-  if (!item) throw notFound('Review item not found');
-  if (item.review_status !== 'open') throw conflict('This review is closed');
-  if (item.user_id === user.id) throw forbidden('You cannot review your own access');
-  if (decision === 'revoke' && !remarks) throw badRequest('Give the reason for revoking the access');
-  await db.query('UPDATE access_review_items SET decision = $2, remarks = $3, decided_by = $4, decided_at = now() WHERE id = $1', [itemId, decision, remarks || null, user.id]);
-  if (decision === 'revoke') {
-    await db.query("UPDATE users SET status = 'inactive', token_version = token_version + 1, updated_by = $2, updated_at = now() WHERE id = $1", [item.user_id, user.id]);
-  }
-  return getReview(db, reviewId);
-}
-
-export async function closeReview(db, id, user) {
-  const r = await getReview(db, id);
-  if (r.status !== 'open') throw conflict('This review is already closed');
-  if (r.pending > 0) throw conflict(`${r.pending} user(s) still to be reviewed`);
-  await db.query("UPDATE access_reviews SET status = 'closed', closed_by = $2, closed_at = now() WHERE id = $1", [id, user.id]);
-  return getReview(db, id);
-}
-
-export const REVIEW_HEADER = ['Username', 'Name', 'Branch', 'Roles', 'Last sign-in', 'Decision', 'Remarks', 'Decided by', 'Decided at'];
-export const reviewRows = (r) => r.items.map((i) => [i.username, i.displayName, i.branch || '', i.roles.join(', '),
-  i.lastLoginAt ? new Date(i.lastLoginAt).toISOString().slice(0, 10) : 'never', i.decision, i.remarks || '', i.decidedBy || '', i.decidedAt ? new Date(i.decidedAt).toISOString().slice(0, 16).replace('T', ' ') : '']);
-
 // ---------------------------------------------------------------- sessions and dormant accounts
 
-/** End every session of a user (their tokens stop working at the next request). */
+/** End every session of a user (their tokens stop working at the next request); an administrator account only by a System Administrator. */
 export async function signOutEverywhere(db, userId, user) {
   if (userId === user.id) throw badRequest('Use Sign out to end your own session');
+  if (!isAdmin(user) && (await isAdminAccount(db, userId))) throw forbidden('Only a System Administrator can end the sessions of an administrator account');
   const { rows } = await db.query('UPDATE users SET token_version = token_version + 1, updated_at = now() WHERE id = $1 RETURNING username', [userId]);
   if (!rows[0]) throw notFound('User not found');
   return { userId, username: rows[0].username, signedOut: true };
 }
 
 /** Daily job: deactivate active accounts not signed in for access.dormant_days (the built-in administrator excepted). */
-export async function deactivateDormant(db, { adminUsername = 'BrokerVerse' } = {}) {
+export async function deactivateDormant(db, { adminUsername = BUILT_IN_ADMIN } = {}) {
   const days = Number(await getSetting('access.dormant_days', 90)) || 0;
   if (days <= 0) return { deactivated: 0, reason: 'access.dormant_days is 0' };
   const { rows } = await db.query(`UPDATE users SET status = 'inactive', token_version = token_version + 1, updated_by = 'system', updated_at = now()

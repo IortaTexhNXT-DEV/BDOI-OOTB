@@ -267,7 +267,7 @@ describe('access control', () => {
     const r = await admin('post', '/access-control/reviews').send({ name: 'Approval test review', dueDate: '2026-12-15' });
     expect(r.status).toBe(201);
     const [n] = await approvalRequests('access_review', r.body.data.id);
-    expect(n).toMatchObject({ audience: 'write:access-control', link: '/master/generals/usermanagement/access-reviews', title: 'Access review Approval test review awaiting decisions' });
+    expect(n).toMatchObject({ audience: 'write:access-control', link: `/master/generals/usermanagement/access-reviews?review=${r.body.data.id}`, title: 'Access review Approval test review awaiting decisions' });
   });
 });
 

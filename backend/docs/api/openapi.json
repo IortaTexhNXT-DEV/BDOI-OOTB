@@ -1851,87 +1851,31 @@
     "/access-control/delegations": {
       "get": {
         "operationId": "getAccessControlDelegations",
-        "summary": "Delegations of authority (?active=true for current and future ones)",
+        "summary": "Delegations of approval authority and the requests not yet in effect (?view=current|pending|ended|all, default current; ?active=true is current; ?format=xlsx|csv for audit, &technical=1 adds the codes)",
         "tags": [
           "Access Control"
         ],
         "description": "Front-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "delegatorName": {
-                            "type": "string"
-                          },
-                          "delegateName": {
-                            "type": "string"
-                          },
-                          "dateFrom": {
-                            "type": "string"
-                          },
-                          "dateTo": {
-                            "type": "string"
-                          },
-                          "inEffect": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "id": 1,
-                      "delegatorName": "Teresa Villaroman",
-                      "delegateName": "Ramon Almario",
-                      "dateFrom": "2026-10-01",
-                      "dateTo": "2026-10-10",
-                      "inEffect": false
-                    }
-                  ]
-                }
-              }
-            }
+        "parameters": [
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "current"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
           }
-        },
-        "x-screen": "Master > Users and Access > Delegations",
-        "x-permissions": [
-          "read:access-control"
-        ]
-      },
-      "post": {
-        "operationId": "postAccessControlDelegations",
-        "summary": "Delegate approval authority for a period (leave, travel); empty transaction types = all",
-        "tags": [
-          "Access Control"
         ],
-        "description": "Front-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "Success",
@@ -1946,11 +1890,106 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "status": {
+                        "asOf": {
                           "type": "string"
+                        },
+                        "approval": {
+                          "type": "boolean"
+                        },
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "current": {
+                              "type": "integer"
+                            },
+                            "pending": {
+                              "type": "integer"
+                            },
+                            "ended": {
+                              "type": "integer"
+                            },
+                            "all": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "integer"
+                              },
+                              "changeId": {
+                                "type": "integer"
+                              },
+                              "ref": {
+                                "type": "string"
+                              },
+                              "delegatorId": {
+                                "type": "string"
+                              },
+                              "delegatorName": {
+                                "type": "string"
+                              },
+                              "delegatorDepartment": {
+                                "type": "string"
+                              },
+                              "delegateId": {
+                                "type": "string"
+                              },
+                              "delegateName": {
+                                "type": "string"
+                              },
+                              "delegateDepartment": {
+                                "type": "string"
+                              },
+                              "transactionTypes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "transactionNames": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "dateTo": {
+                                "type": "string"
+                              },
+                              "days": {
+                                "type": "integer"
+                              },
+                              "reasonCode": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "requestedBy": {
+                                "type": "string"
+                              },
+                              "approvedBy": {
+                                "type": "string"
+                              },
+                              "canEnd": {
+                                "type": "boolean"
+                              },
+                              "change": {}
+                            }
+                          }
                         }
                       }
                     }
@@ -1959,8 +1998,44 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1,
-                    "status": "active"
+                    "asOf": "2026-10-10",
+                    "approval": true,
+                    "counts": {
+                      "current": 1,
+                      "pending": 0,
+                      "ended": 3,
+                      "all": 4
+                    },
+                    "rows": [
+                      {
+                        "key": "D-4",
+                        "id": 4,
+                        "changeId": 40,
+                        "ref": "CFG-40",
+                        "delegatorId": "usr_1",
+                        "delegatorName": "Mariela S. Valentino",
+                        "delegatorDepartment": "Finance and Accounting",
+                        "delegateId": "usr_2",
+                        "delegateName": "Chrystal G. Malinay",
+                        "delegateDepartment": "Finance and Accounting",
+                        "transactionTypes": [
+                          "journal_voucher"
+                        ],
+                        "transactionNames": [
+                          "Journal voucher approval"
+                        ],
+                        "dateFrom": "2026-10-12",
+                        "dateTo": "2026-10-16",
+                        "days": 5,
+                        "reasonCode": "DLG-LEAVE",
+                        "reason": "Vacation or annual leave",
+                        "status": "in-effect",
+                        "requestedBy": "IT administrator",
+                        "approvedBy": "General Manager",
+                        "canEnd": true,
+                        "change": null
+                      }
+                    ]
                   }
                 }
               }
@@ -1977,6 +2052,121 @@
           }
         },
         "x-screen": "Master > Users and Access > Delegations",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlDelegations",
+        "summary": "Request a delegation of approval authority for a period (reason from the Reason Codes master, context delegation); it applies once another administrator approves it (at once with access.change_approval off). Empty transaction types = every transaction the approver away can approve",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "delegation": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "delegation",
+                      "kindLabel": "Delegation",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    },
+                    "delegation": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Delegations > New delegation",
         "x-permissions": [
           "write:access-control"
         ],
@@ -2005,7 +2195,7 @@
                   "dateTo": {
                     "type": "string"
                   },
-                  "reason": {
+                  "reasonCode": {
                     "type": "string"
                   }
                 }
@@ -2014,21 +2204,21 @@
                 "delegatorId": "usr_1",
                 "delegateId": "usr_2",
                 "transactionTypes": [
-                  "payment_voucher"
+                  "journal_voucher"
                 ],
-                "dateFrom": "2026-10-01",
-                "dateTo": "2026-10-10",
-                "reason": "Annual leave"
+                "dateFrom": "2026-10-12",
+                "dateTo": "2026-10-16",
+                "reasonCode": "DLG-LEAVE"
               }
             }
           }
         }
       }
     },
-    "/access-control/delegations/{id}/revoke": {
+    "/access-control/delegations/{id}/end": {
       "post": {
-        "operationId": "postAccessControlDelegationsIdRevoke",
-        "summary": "End a delegation early",
+        "operationId": "postAccessControlDelegationsIdEnd",
+        "summary": "End a delegation before its last day (reason of context delegation_end); it stops at once and both people are told",
         "tags": [
           "Access Control"
         ],
@@ -2057,12 +2247,76 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "key": {
+                          "type": "string"
+                        },
                         "id": {
                           "type": "integer"
                         },
+                        "changeId": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "delegatorId": {
+                          "type": "string"
+                        },
+                        "delegatorName": {
+                          "type": "string"
+                        },
+                        "delegatorDepartment": {
+                          "type": "string"
+                        },
+                        "delegateId": {
+                          "type": "string"
+                        },
+                        "delegateName": {
+                          "type": "string"
+                        },
+                        "delegateDepartment": {
+                          "type": "string"
+                        },
+                        "transactionTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "transactionNames": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {
+                          "type": "string"
+                        },
+                        "days": {
+                          "type": "integer"
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
                         "status": {
                           "type": "string"
-                        }
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "approvedBy": {
+                          "type": "string"
+                        },
+                        "canEnd": {
+                          "type": "boolean"
+                        },
+                        "change": {}
                       }
                     }
                   }
@@ -2070,8 +2324,32 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1,
-                    "status": "revoked"
+                    "key": "D-4",
+                    "id": 4,
+                    "changeId": 40,
+                    "ref": "CFG-40",
+                    "delegatorId": "usr_1",
+                    "delegatorName": "Mariela S. Valentino",
+                    "delegatorDepartment": "Finance and Accounting",
+                    "delegateId": "usr_2",
+                    "delegateName": "Chrystal G. Malinay",
+                    "delegateDepartment": "Finance and Accounting",
+                    "transactionTypes": [
+                      "journal_voucher"
+                    ],
+                    "transactionNames": [
+                      "Journal voucher approval"
+                    ],
+                    "dateFrom": "2026-10-12",
+                    "dateTo": "2026-10-16",
+                    "days": 5,
+                    "reasonCode": "DLG-LEAVE",
+                    "reason": "Vacation or annual leave",
+                    "status": "ended-early",
+                    "requestedBy": "IT administrator",
+                    "approvedBy": "General Manager",
+                    "canEnd": true,
+                    "change": null
                   }
                 }
               }
@@ -2090,18 +2368,713 @@
         "x-screen": "Master > Users and Access > Delegations",
         "x-permissions": [
           "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "DLE-RETURNED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/delegations/{id}/revoke": {
+      "post": {
+        "operationId": "postAccessControlDelegationsIdRevoke",
+        "summary": "End a delegation early (the earlier name of /delegations/:id/end)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "integer"
+                        },
+                        "changeId": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "delegatorId": {
+                          "type": "string"
+                        },
+                        "delegatorName": {
+                          "type": "string"
+                        },
+                        "delegatorDepartment": {
+                          "type": "string"
+                        },
+                        "delegateId": {
+                          "type": "string"
+                        },
+                        "delegateName": {
+                          "type": "string"
+                        },
+                        "delegateDepartment": {
+                          "type": "string"
+                        },
+                        "transactionTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "transactionNames": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {
+                          "type": "string"
+                        },
+                        "days": {
+                          "type": "integer"
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "approvedBy": {
+                          "type": "string"
+                        },
+                        "canEnd": {
+                          "type": "boolean"
+                        },
+                        "change": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "key": "D-4",
+                    "id": 4,
+                    "changeId": 40,
+                    "ref": "CFG-40",
+                    "delegatorId": "usr_1",
+                    "delegatorName": "Mariela S. Valentino",
+                    "delegatorDepartment": "Finance and Accounting",
+                    "delegateId": "usr_2",
+                    "delegateName": "Chrystal G. Malinay",
+                    "delegateDepartment": "Finance and Accounting",
+                    "transactionTypes": [
+                      "journal_voucher"
+                    ],
+                    "transactionNames": [
+                      "Journal voucher approval"
+                    ],
+                    "dateFrom": "2026-10-12",
+                    "dateTo": "2026-10-16",
+                    "days": 5,
+                    "reasonCode": "DLG-LEAVE",
+                    "reason": "Vacation or annual leave",
+                    "status": "ended-early",
+                    "requestedBy": "IT administrator",
+                    "approvedBy": "General Manager",
+                    "canEnd": true,
+                    "change": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Delegations",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "DLE-RETURNED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/delegations/options": {
+      "get": {
+        "operationId": "getAccessControlDelegationsOptions",
+        "summary": "What a new delegation offers: the transactions an approval step checks, every active person with the transactions he or she can approve and the authority today, the departments, the longest delegation",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "maxDays": {
+                          "type": "integer"
+                        },
+                        "approval": {
+                          "type": "boolean"
+                        },
+                        "withoutLimit": {
+                          "type": "string"
+                        },
+                        "departments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "order": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "types": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "step": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "people": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "department": {
+                                "type": "string"
+                              },
+                              "roleNames": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "approves": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "authority": {
+                                "type": "object",
+                                "properties": {
+                                  "journal_voucher": {
+                                    "type": "object",
+                                    "properties": {
+                                      "set": {
+                                        "type": "boolean"
+                                      },
+                                      "limit": {
+                                        "type": "integer"
+                                      },
+                                      "unlimited": {
+                                        "type": "boolean"
+                                      },
+                                      "source": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-10",
+                    "maxDays": 90,
+                    "approval": true,
+                    "withoutLimit": "allow",
+                    "departments": [
+                      {
+                        "name": "Finance and Accounting",
+                        "order": 4
+                      }
+                    ],
+                    "types": [
+                      {
+                        "code": "journal_voucher",
+                        "name": "Journal voucher approval",
+                        "measure": "amount",
+                        "step": "Accounts > Journal Vouchers > Approve"
+                      }
+                    ],
+                    "people": [
+                      {
+                        "id": "usr_1",
+                        "name": "Mariela S. Valentino",
+                        "department": "Finance and Accounting",
+                        "roleNames": [
+                          "TIS Finance & General Accounting"
+                        ],
+                        "approves": [
+                          "journal_voucher"
+                        ],
+                        "authority": {
+                          "journal_voucher": {
+                            "set": true,
+                            "limit": 750000,
+                            "unlimited": false,
+                            "source": "user limit"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Delegations > New delegation",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/delegations/preview": {
+      "post": {
+        "operationId": "postAccessControlDelegationsPreview",
+        "summary": "The effect of a delegation per transaction: the approver's own limit and the authority of the person covering with and without it (a delegation never lowers authority)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "transactionType": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "measure": {
+                                "type": "string"
+                              },
+                              "lent": {
+                                "type": "object",
+                                "properties": {
+                                  "set": {
+                                    "type": "boolean"
+                                  },
+                                  "limit": {
+                                    "type": "integer"
+                                  }
+                                }
+                              },
+                              "before": {
+                                "type": "object",
+                                "properties": {
+                                  "set": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              },
+                              "after": {
+                                "type": "object",
+                                "properties": {
+                                  "set": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              },
+                              "changes": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-12",
+                    "lines": [
+                      {
+                        "transactionType": "journal_voucher",
+                        "name": "Journal voucher approval",
+                        "measure": "amount",
+                        "lent": {
+                          "set": true,
+                          "limit": 750000
+                        },
+                        "before": {
+                          "set": false
+                        },
+                        "after": {
+                          "set": false
+                        },
+                        "changes": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Delegations > New delegation",
+        "x-permissions": [
+          "read:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "delegatorId": {
+                    "type": "string"
+                  },
+                  "delegateId": {
+                    "type": "string"
+                  },
+                  "transactionTypes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "dateFrom": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "delegatorId": "usr_1",
+                "delegateId": "usr_2",
+                "transactionTypes": [
+                  "journal_voucher"
+                ],
+                "dateFrom": "2026-10-12"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/directory": {
+      "get": {
+        "operationId": "getAccessControlDirectory",
+        "summary": "Role directory of the access screens: the departments in order and each role with its department, summary, base platform flag and full access; the settings of the screens and what the signed-in user may do",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "approval": {
+                          "type": "boolean"
+                        },
+                        "departments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "order": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "department": {
+                                "type": "string"
+                              },
+                              "platform": {
+                                "type": "boolean"
+                              },
+                              "fullAccess": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "settings": {
+                          "type": "object",
+                          "properties": {
+                            "delegationMaxDays": {
+                              "type": "integer"
+                            },
+                            "sodExceptionMaxDays": {
+                              "type": "integer"
+                            },
+                            "reviewDueDays": {
+                              "type": "integer"
+                            },
+                            "dormantDays": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "abilities": {
+                          "type": "object",
+                          "properties": {
+                            "edit": {
+                              "type": "boolean"
+                            },
+                            "approve": {
+                              "type": "boolean"
+                            },
+                            "signOut": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-10",
+                    "approval": true,
+                    "departments": [
+                      {
+                        "name": "Cash Control",
+                        "order": 3
+                      }
+                    ],
+                    "roles": [
+                      {
+                        "code": "tis-ccd-bp",
+                        "name": "CCD-BP / QRPh (Receipting)",
+                        "department": "Cash Control",
+                        "platform": false,
+                        "fullAccess": false,
+                        "status": "active"
+                      }
+                    ],
+                    "settings": {
+                      "delegationMaxDays": 90,
+                      "sodExceptionMaxDays": 365,
+                      "reviewDueDays": 14,
+                      "dormantDays": 90
+                    },
+                    "abilities": {
+                      "edit": true,
+                      "approve": true,
+                      "signOut": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access",
+        "x-permissions": [
+          "read:access-control"
         ]
       }
     },
     "/access-control/reviews": {
       "get": {
         "operationId": "getAccessControlReviews",
-        "summary": "Access reviews (recertification campaigns) with progress",
+        "summary": "Access reviews with scope, progress, removals and the overdue state (?format=xlsx|csv for audit)",
         "tags": [
           "Access Control"
         ],
         "description": "Front-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -2124,17 +3097,41 @@
                           "name": {
                             "type": "string"
                           },
+                          "scopeText": {
+                            "type": "string"
+                          },
                           "dueDate": {
                             "type": "string"
                           },
                           "status": {
                             "type": "string"
                           },
+                          "overdue": {
+                            "type": "boolean"
+                          },
                           "users": {
                             "type": "integer"
                           },
                           "pending": {
                             "type": "integer"
+                          },
+                          "kept": {
+                            "type": "integer"
+                          },
+                          "removeRoles": {
+                            "type": "integer"
+                          },
+                          "deactivate": {
+                            "type": "integer"
+                          },
+                          "removals": {
+                            "type": "integer"
+                          },
+                          "applied": {
+                            "type": "integer"
+                          },
+                          "createdBy": {
+                            "type": "string"
                           }
                         }
                       }
@@ -2145,17 +3142,28 @@
                   "success": true,
                   "data": [
                     {
-                      "id": 1,
-                      "name": "Q4 2026 access review",
-                      "dueDate": "2026-12-15",
+                      "id": 3,
+                      "name": "Access review Q3 FY2026",
+                      "scopeText": "All active users",
+                      "dueDate": "2026-10-24",
                       "status": "open",
-                      "users": 14,
-                      "pending": 3
+                      "overdue": false,
+                      "users": 17,
+                      "pending": 5,
+                      "kept": 10,
+                      "removeRoles": 1,
+                      "deactivate": 1,
+                      "removals": 2,
+                      "applied": 0,
+                      "createdBy": "IT administrator"
                     }
                   ]
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2171,7 +3179,7 @@
       },
       "post": {
         "operationId": "postAccessControlReviews",
-        "summary": "Start an access review of every active user",
+        "summary": "Start an access review of the active users of a scope (all, departments or roles); due date today or later",
         "tags": [
           "Access Control"
         ],
@@ -2194,6 +3202,45 @@
                         "id": {
                           "type": "integer"
                         },
+                        "name": {
+                          "type": "string"
+                        },
+                        "scopeText": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "users": {
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "type": "integer"
+                        },
+                        "kept": {
+                          "type": "integer"
+                        },
+                        "removeRoles": {
+                          "type": "integer"
+                        },
+                        "deactivate": {
+                          "type": "integer"
+                        },
+                        "removals": {
+                          "type": "integer"
+                        },
+                        "applied": {
+                          "type": "integer"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
                         "items": {
                           "type": "array",
                           "items": {}
@@ -2205,7 +3252,20 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1,
+                    "id": 3,
+                    "name": "Access review Q3 FY2026",
+                    "scopeText": "All active users",
+                    "dueDate": "2026-10-24",
+                    "status": "open",
+                    "overdue": false,
+                    "users": 17,
+                    "pending": 5,
+                    "kept": 10,
+                    "removeRoles": 1,
+                    "deactivate": 1,
+                    "removals": 2,
+                    "applied": 0,
+                    "createdBy": "IT administrator",
                     "items": []
                   }
                 }
@@ -2238,12 +3298,23 @@
                   },
                   "dueDate": {
                     "type": "string"
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               },
               "example": {
-                "name": "Q4 2026 access review",
-                "dueDate": "2026-12-15"
+                "name": "Access review Q3 FY2026",
+                "dueDate": "2026-10-24",
+                "scope": {
+                  "kind": "all"
+                }
               }
             }
           }
@@ -2253,7 +3324,7 @@
     "/access-control/reviews/{id}": {
       "get": {
         "operationId": "getAccessControlReviewsId",
-        "summary": "One access review with every user and decision (?format=xlsx|csv to download)",
+        "summary": "One access review with every user, outcome and removal state and the sign-off waiting for approval (?format=xlsx|csv: Summary and Users, &technical=1 adds the role codes)",
         "tags": [
           "Access Control"
         ],
@@ -2285,15 +3356,63 @@
                         "id": {
                           "type": "integer"
                         },
+                        "name": {
+                          "type": "string"
+                        },
+                        "scopeText": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "users": {
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "type": "integer"
+                        },
+                        "kept": {
+                          "type": "integer"
+                        },
+                        "removeRoles": {
+                          "type": "integer"
+                        },
+                        "deactivate": {
+                          "type": "integer"
+                        },
+                        "removals": {
+                          "type": "integer"
+                        },
+                        "applied": {
+                          "type": "integer"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "canSubmit": {
+                          "type": "boolean"
+                        },
                         "items": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "properties": {
-                              "username": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "displayName": {
                                 "type": "string"
                               },
-                              "roles": {
+                              "department": {
+                                "type": "string"
+                              },
+                              "roleNamesAtStart": {
                                 "type": "array",
                                 "items": {
                                   "type": "string"
@@ -2301,6 +3420,22 @@
                               },
                               "decision": {
                                 "type": "string"
+                              },
+                              "removeRoleNames": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "remarks": {
+                                "type": "string"
+                              },
+                              "removalState": {
+                                "type": "string"
+                              },
+                              "blocked": {},
+                              "canDecide": {
+                                "type": "boolean"
                               }
                             }
                           }
@@ -2312,14 +3447,37 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1,
+                    "id": 3,
+                    "name": "Access review Q3 FY2026",
+                    "scopeText": "All active users",
+                    "dueDate": "2026-10-24",
+                    "status": "open",
+                    "overdue": false,
+                    "users": 17,
+                    "pending": 5,
+                    "kept": 10,
+                    "removeRoles": 1,
+                    "deactivate": 1,
+                    "removals": 2,
+                    "applied": 0,
+                    "createdBy": "IT administrator",
+                    "canSubmit": false,
                     "items": [
                       {
-                        "username": "maria.rivera",
-                        "roles": [
-                          "sales"
+                        "id": 41,
+                        "displayName": "Wendy Siading",
+                        "department": "Cash Control",
+                        "roleNamesAtStart": [
+                          "CCD-Recon"
                         ],
-                        "decision": "pending"
+                        "decision": "remove-roles",
+                        "removeRoleNames": [
+                          "CCD-Recon"
+                        ],
+                        "remarks": "Moved to another job or department",
+                        "removalState": "waiting",
+                        "blocked": null,
+                        "canDecide": true
                       }
                     ]
                   }
@@ -2346,7 +3504,7 @@
     "/access-control/reviews/{id}/close": {
       "post": {
         "operationId": "postAccessControlReviewsIdClose",
-        "summary": "Close a review once every user has been decided",
+        "summary": "Close a review once every user is decided (only with access.change_approval off; otherwise the sign-off closes it)",
         "tags": [
           "Access Control"
         ],
@@ -2378,7 +3536,43 @@
                         "id": {
                           "type": "integer"
                         },
+                        "name": {
+                          "type": "string"
+                        },
+                        "scopeText": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
                         "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "users": {
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "type": "integer"
+                        },
+                        "kept": {
+                          "type": "integer"
+                        },
+                        "removeRoles": {
+                          "type": "integer"
+                        },
+                        "deactivate": {
+                          "type": "integer"
+                        },
+                        "removals": {
+                          "type": "integer"
+                        },
+                        "applied": {
+                          "type": "integer"
+                        },
+                        "createdBy": {
                           "type": "string"
                         }
                       }
@@ -2388,8 +3582,20 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1,
-                    "status": "closed"
+                    "id": 3,
+                    "name": "Access review Q3 FY2026",
+                    "scopeText": "All active users",
+                    "dueDate": "2026-10-24",
+                    "status": "closed",
+                    "overdue": false,
+                    "users": 17,
+                    "pending": 5,
+                    "kept": 10,
+                    "removeRoles": 1,
+                    "deactivate": 1,
+                    "removals": 2,
+                    "applied": 0,
+                    "createdBy": "IT administrator"
                   }
                 }
               }
@@ -2414,7 +3620,7 @@
     "/access-control/reviews/{id}/items/{itemId}": {
       "post": {
         "operationId": "postAccessControlReviewsIdItemsItemId",
-        "summary": "Keep or revoke one user's access (revoke deactivates the account and signs it out)",
+        "summary": "Decide one user: keep access, remove roles or deactivate the account (reason of context access_review for a removal; a note for keeping a dormant user or one with an open conflict). The earlier decision revoke means deactivate",
         "tags": [
           "Access Control"
         ],
@@ -2453,6 +3659,49 @@
                       "properties": {
                         "id": {
                           "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "scopeText": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "users": {
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "type": "integer"
+                        },
+                        "kept": {
+                          "type": "integer"
+                        },
+                        "removeRoles": {
+                          "type": "integer"
+                        },
+                        "deactivate": {
+                          "type": "integer"
+                        },
+                        "removals": {
+                          "type": "integer"
+                        },
+                        "applied": {
+                          "type": "integer"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {}
                         }
                       }
                     }
@@ -2461,7 +3710,21 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 1
+                    "id": 3,
+                    "name": "Access review Q3 FY2026",
+                    "scopeText": "All active users",
+                    "dueDate": "2026-10-24",
+                    "status": "open",
+                    "overdue": false,
+                    "users": 17,
+                    "pending": 5,
+                    "kept": 10,
+                    "removeRoles": 1,
+                    "deactivate": 1,
+                    "removals": 2,
+                    "applied": 0,
+                    "createdBy": "IT administrator",
+                    "items": []
                   }
                 }
               }
@@ -2488,13 +3751,412 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "decision": {
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "removeRoles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reasonCode": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "decision": "keep"
+                "outcome": "remove-roles",
+                "removeRoles": [
+                  "tis-ccd-recon"
+                ],
+                "reasonCode": "ARV-MOVED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/reviews/{id}/items/keep": {
+      "post": {
+        "operationId": "postAccessControlReviewsIdItemsKeep",
+        "summary": "Keep several users at once (optional note); lines that need a note or may not be decided by this user are left out and named",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "kept": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "kept": [
+                      "Wendy Siading"
+                    ],
+                    "skipped": [
+                      {
+                        "name": "Gene Kelly Jaen",
+                        "reason": "The user has a segregation-of-duties conflict without an exception"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Access Reviews",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "itemIds": [
+                  41,
+                  42
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/reviews/{id}/submit": {
+      "post": {
+        "operationId": "postAccessControlReviewsIdSubmit",
+        "summary": "Submit a review whose users are all decided for sign-off by another administrator; its removals apply at sign-off",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "review": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "scopeText": {
+                              "type": "string"
+                            },
+                            "dueDate": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "overdue": {
+                              "type": "boolean"
+                            },
+                            "users": {
+                              "type": "integer"
+                            },
+                            "pending": {
+                              "type": "integer"
+                            },
+                            "kept": {
+                              "type": "integer"
+                            },
+                            "removeRoles": {
+                              "type": "integer"
+                            },
+                            "deactivate": {
+                              "type": "integer"
+                            },
+                            "removals": {
+                              "type": "integer"
+                            },
+                            "applied": {
+                              "type": "integer"
+                            },
+                            "createdBy": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "review": {
+                      "id": 3,
+                      "name": "Access review Q3 FY2026",
+                      "scopeText": "All active users",
+                      "dueDate": "2026-10-24",
+                      "status": "awaiting-signoff",
+                      "overdue": false,
+                      "users": 17,
+                      "pending": 5,
+                      "kept": 10,
+                      "removeRoles": 1,
+                      "deactivate": 1,
+                      "removals": 2,
+                      "applied": 0,
+                      "createdBy": "IT administrator"
+                    },
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "access-review",
+                      "kindLabel": "Role access",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Access Reviews",
+        "x-permissions": [
+          "write:access-control"
+        ]
+      }
+    },
+    "/access-control/reviews/preview": {
+      "post": {
+        "operationId": "postAccessControlReviewsPreview",
+        "summary": "How many active users a scope reviews",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Access Reviews > Start a review\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "users": {
+                          "type": "integer"
+                        },
+                        "scopeText": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "users": 4,
+                    "scopeText": "Cash Control"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Access Reviews > Start a review",
+        "x-permissions": [
+          "read:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string"
+                  },
+                  "departments": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "kind": "departments",
+                "departments": [
+                  "Cash Control"
+                ]
               }
             }
           }
@@ -3262,7 +4924,7 @@
     "/access-control/sod-check": {
       "post": {
         "operationId": "postAccessControlSodCheck",
-        "summary": "Rules a set of roles would break (used by the user form before saving)",
+        "summary": "Rules a set of roles would break (the user form before saving); with userId, the warnings say when an exception is in force",
         "tags": [
           "Access Control"
         ],
@@ -3289,7 +4951,8 @@
                           },
                           "action": {
                             "type": "string"
-                          }
+                          },
+                          "exceptionUntil": {}
                         }
                       }
                     }
@@ -3300,7 +4963,8 @@
                   "data": [
                     {
                       "name": "Placement and payment",
-                      "action": "block"
+                      "action": "block",
+                      "exceptionUntil": null
                     }
                   ]
                 }
@@ -3348,10 +5012,977 @@
         }
       }
     },
+    "/access-control/sod-conflicts": {
+      "get": {
+        "operationId": "getAccessControlSodConflicts",
+        "summary": "Segregation-of-duties conflicts by user: every user (active by default, ?status=all) breaking an active rule, with the state of the conflict (open, accepted with its exception, waiting for approval, expired) (?userId, ruleId)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "active"
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 6
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "ruleId": {
+                                "type": "integer"
+                              },
+                              "ruleName": {
+                                "type": "string"
+                              },
+                              "action": {
+                                "type": "string"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "userName": {
+                                "type": "string"
+                              },
+                              "department": {
+                                "type": "string"
+                              },
+                              "heldTogether": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "exception": {},
+                              "change": {},
+                              "canRequest": {
+                                "type": "boolean"
+                              },
+                              "canEnd": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-10",
+                    "rows": [
+                      {
+                        "key": "6:usr_9",
+                        "ruleId": 6,
+                        "ruleName": "Receipting and reversals",
+                        "action": "warn",
+                        "userId": "usr_9",
+                        "userName": "Gene Kelly Jaen",
+                        "department": "Cash Control",
+                        "heldTogether": [
+                          "CCD-BP / QRPh (Receipting)",
+                          "CCD-Recon"
+                        ],
+                        "state": "open",
+                        "exception": null,
+                        "change": null,
+                        "canRequest": true,
+                        "canEnd": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/sod-exceptions": {
+      "post": {
+        "operationId": "postAccessControlSodExceptions",
+        "summary": "Request an exception for a conflict (one person, one rule) until a date, with a reason of context sod_exception; it applies once another administrator approves it, who is not the person concerned. Not for oneself",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "sod-exception",
+                      "kindLabel": "Segregation of duties exception",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ruleId": {
+                    "type": "integer"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "validUntil": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "ruleId": 6,
+                "userId": "usr_9",
+                "validUntil": "2027-03-31",
+                "reasonCode": "SXE-REVIEWED",
+                "note": "Reversals reviewed weekly by the Finance head"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/sod-exceptions/{id}/end": {
+      "post": {
+        "operationId": "postAccessControlSodExceptionsIdEnd",
+        "summary": "End an exception in force; the conflict is open again at once",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "status": "ended"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ]
+      }
+    },
     "/access-control/sod-rules": {
       "get": {
         "operationId": "getAccessControlSodRules",
-        "summary": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine",
+        "summary": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine, with the active users breaking each and the change waiting for approval (?format=xlsx|csv: the workbook of the screen, &technical=1 adds the codes, &base=1 the rules between base platform roles)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "roleA": {
+                                "type": "string"
+                              },
+                              "roleAName": {
+                                "type": "string"
+                              },
+                              "roleB": {
+                                "type": "string"
+                              },
+                              "roleBName": {
+                                "type": "string"
+                              },
+                              "accessA": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "accessB": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "action": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              },
+                              "users": {
+                                "type": "integer"
+                              },
+                              "platform": {
+                                "type": "boolean"
+                              },
+                              "change": {},
+                              "canEdit": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "pendingNew": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "approval": {
+                          "type": "boolean"
+                        },
+                        "maxExceptionDays": {
+                          "type": "integer"
+                        },
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "abilities": {
+                          "type": "object",
+                          "properties": {
+                            "edit": {
+                              "type": "boolean"
+                            },
+                            "approve": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "rows": [
+                      {
+                        "id": 6,
+                        "code": "SOD-TIS-BP-RECON",
+                        "name": "Receipting and reversals",
+                        "kind": "roles",
+                        "roleA": "tis-ccd-bp",
+                        "roleAName": "CCD-BP / QRPh (Receipting)",
+                        "roleB": "tis-ccd-recon",
+                        "roleBName": "CCD-Recon",
+                        "accessA": [],
+                        "accessB": [],
+                        "action": "warn",
+                        "reason": "Receipts and their reversals are kept apart",
+                        "active": true,
+                        "users": 2,
+                        "platform": false,
+                        "change": null,
+                        "canEdit": true
+                      }
+                    ],
+                    "pendingNew": [],
+                    "approval": true,
+                    "maxExceptionDays": 365,
+                    "asOf": "2026-10-10",
+                    "abilities": {
+                      "edit": true,
+                      "approve": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      },
+      "post": {
+        "operationId": "postAccessControlSodRules",
+        "summary": "Request a new segregation-of-duties rule (reason of context access_change; the code is given by the server unless sent); it applies once another administrator approves it",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "sod-rule",
+                      "kindLabel": "Segregation of duties rule",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "roleA": {
+                    "type": "string"
+                  },
+                  "roleB": {
+                    "type": "string"
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Cheque encoding and reversals",
+                "roleA": "tis-ccd-pdu",
+                "roleB": "tis-ccd-recon",
+                "action": "warn",
+                "reason": "The person who encodes cheques should not reverse them",
+                "reasonCode": "ACC-AUDIT"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/sod-rules/{id}": {
+      "put": {
+        "operationId": "putAccessControlSodRulesId",
+        "summary": "Request a change of a segregation-of-duties rule, or switch it off or on with active (reason of context access_change)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "sod-rule",
+                      "kindLabel": "Segregation of duties rule",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "action": "block",
+                "reasonCode": "ACC-AUDIT"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAccessControlSodRulesId",
+        "summary": "Request to switch a segregation-of-duties rule off (reason of context access_change in the body; the rule is kept for the record)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "sod-rule",
+                      "kindLabel": "Segregation of duties rule",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Segregation of Duties",
+        "x-permissions": [
+          "write:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "ACC-NOTNEEDED"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/sod-rules/check": {
+      "post": {
+        "operationId": "postAccessControlSodRulesCheck",
+        "summary": "What a rule would do: the active users who hold both sides today",
         "tags": [
           "Access Control"
         ],
@@ -3369,34 +6000,14 @@
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "code": {
-                            "type": "string"
-                          },
-                          "kind": {
-                            "type": "string"
-                          },
-                          "roleA": {
-                            "type": "string"
-                          },
-                          "roleB": {
-                            "type": "string"
-                          },
-                          "accessA": {
-                            "type": "array",
-                            "items": {}
-                          },
-                          "accessB": {
-                            "type": "array",
-                            "items": {}
-                          },
-                          "action": {
+                      "type": "object",
+                      "properties": {
+                        "users": {
+                          "type": "integer"
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
                             "type": "string"
                           }
                         }
@@ -3406,41 +6017,19 @@
                 },
                 "example": {
                   "success": true,
-                  "data": [
-                    {
-                      "id": 1,
-                      "code": "SOD-PROC-ACCT",
-                      "kind": "roles",
-                      "roleA": "processing",
-                      "roleB": "accounting",
-                      "accessA": [],
-                      "accessB": [],
-                      "action": "block"
-                    },
-                    {
-                      "id": 7,
-                      "code": "SOD-ACC-CLAIM-PAY",
-                      "kind": "access",
-                      "roleA": null,
-                      "roleB": null,
-                      "accessA": [
-                        "write:claims"
-                      ],
-                      "accessB": [
-                        "write:disbursements"
-                      ],
-                      "accessANames": [
-                        "Operations › Claims › Create and edit"
-                      ],
-                      "accessBNames": [
-                        "Accounts › Disbursements and petty cash › Create and edit"
-                      ],
-                      "action": "warn"
-                    }
-                  ]
+                  "data": {
+                    "users": 2,
+                    "names": [
+                      "Gene Kelly Jaen",
+                      "Marta Loi Dapula"
+                    ]
+                  }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -3452,59 +6041,6 @@
         "x-screen": "Master > Users and Access > Segregation of Duties",
         "x-permissions": [
           "read:access-control"
-        ]
-      },
-      "post": {
-        "operationId": "postAccessControlSodRules",
-        "summary": "Add a segregation-of-duties rule",
-        "tags": [
-          "Access Control"
-        ],
-        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": 6
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > Users and Access > Segregation of Duties",
-        "x-permissions": [
-          "write:access-control"
         ],
         "requestBody": {
           "required": true,
@@ -3513,189 +6049,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "code": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
                   "roleA": {
                     "type": "string"
                   },
                   "roleB": {
                     "type": "string"
-                  },
-                  "action": {
-                    "type": "string"
                   }
                 }
               },
               "example": {
-                "code": "SOD-OPS-ACCT",
-                "name": "Servicing and payment",
-                "roleA": "operations",
-                "roleB": "accounting",
-                "action": "warn"
+                "roleA": "tis-ccd-bp",
+                "roleB": "tis-ccd-recon"
               }
             }
           }
         }
-      }
-    },
-    "/access-control/sod-rules/{id}": {
-      "put": {
-        "operationId": "putAccessControlSodRulesId",
-        "summary": "Change a segregation-of-duties rule",
-        "tags": [
-          "Access Control"
-        ],
-        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": 4
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > Users and Access > Segregation of Duties",
-        "x-permissions": [
-          "write:access-control"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "roleA": {
-                    "type": "string"
-                  },
-                  "roleB": {
-                    "type": "string"
-                  },
-                  "action": {
-                    "type": "string"
-                  }
-                }
-              },
-              "example": {
-                "name": "Sales and collection",
-                "roleA": "sales",
-                "roleB": "accounting",
-                "action": "block"
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "deleteAccessControlSodRulesId",
-        "summary": "Switch off a segregation-of-duties rule",
-        "tags": [
-          "Access Control"
-        ],
-        "description": "Front-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": 4
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Master > Users and Access > Segregation of Duties",
-        "x-permissions": [
-          "write:access-control"
-        ]
       }
     },
     "/access-control/transaction-types": {
@@ -3856,7 +6224,7 @@
     "/access-control/user-matrix": {
       "get": {
         "operationId": "getAccessControlUserMatrix",
-        "summary": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)",
+        "summary": "Every user with roles by name (and the roles they include), department, branch, status, last sign-in, two-step, password age, segregation-of-duties conflicts with their exceptions, changes waiting for approval and the last review (?status; ?format=xlsx|csv: Users, Roles of users, Segregation of duties, Delegations in effect; &technical=1 adds the codes)",
         "tags": [
           "Access Control"
         ],
@@ -3895,6 +6263,26 @@
                     "data": {
                       "type": "object",
                       "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "dormantDays": {
+                          "type": "integer"
+                        },
+                        "departments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "order": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
                         "roles": {
                           "type": "array",
                           "items": {
@@ -3905,19 +6293,31 @@
                               },
                               "name": {
                                 "type": "string"
+                              },
+                              "department": {
+                                "type": "string"
+                              },
+                              "platform": {
+                                "type": "boolean"
                               }
                             }
                           }
-                        },
-                        "dormantDays": {
-                          "type": "integer"
                         },
                         "rows": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "properties": {
+                              "id": {
+                                "type": "string"
+                              },
                               "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "department": {
                                 "type": "string"
                               },
                               "roles": {
@@ -3925,6 +6325,16 @@
                                 "items": {
                                   "type": "string"
                                 }
+                              },
+                              "roleNames": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "included": {
+                                "type": "array",
+                                "items": {}
                               },
                               "status": {
                                 "type": "string"
@@ -3934,8 +6344,32 @@
                               },
                               "sodConflicts": {
                                 "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "action": {
+                                      "type": "string"
+                                    },
+                                    "state": {
+                                      "type": "string"
+                                    },
+                                    "validUntil": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "openConflicts": {
+                                "type": "integer"
+                              },
+                              "pending": {
+                                "type": "array",
                                 "items": {}
-                              }
+                              },
+                              "lastReview": {}
                             }
                           }
                         }
@@ -3946,22 +6380,50 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "roles": [
+                    "asOf": "2026-10-10",
+                    "dormantDays": 90,
+                    "departments": [
                       {
-                        "code": "sales",
-                        "name": "Sales & Marketing"
+                        "name": "Cash Control",
+                        "order": 3
                       }
                     ],
-                    "dormantDays": 90,
+                    "roles": [
+                      {
+                        "code": "tis-ccd-bp",
+                        "name": "CCD-BP / QRPh (Receipting)",
+                        "department": "Cash Control",
+                        "platform": false
+                      }
+                    ],
                     "rows": [
                       {
-                        "username": "maria.rivera",
+                        "id": "usr_9",
+                        "username": "gene.jaen",
+                        "displayName": "Gene Kelly Jaen",
+                        "department": "Cash Control",
                         "roles": [
-                          "sales"
+                          "tis-ccd-bp",
+                          "tis-ccd-recon"
                         ],
+                        "roleNames": [
+                          "CCD-BP / QRPh (Receipting)",
+                          "CCD-Recon"
+                        ],
+                        "included": [],
                         "status": "active",
                         "dormant": false,
-                        "sodConflicts": []
+                        "sodConflicts": [
+                          {
+                            "name": "Receipting and reversals",
+                            "action": "warn",
+                            "state": "accepted",
+                            "validUntil": "2027-03-31"
+                          }
+                        ],
+                        "openConflicts": 0,
+                        "pending": [],
+                        "lastReview": null
                       }
                     ]
                   }
@@ -3985,10 +6447,303 @@
         ]
       }
     },
+    "/access-control/users/{id}/access": {
+      "get": {
+        "operationId": "getAccessControlUsersIdAccess",
+        "summary": "The access panel of one person: roles with the roles they include, what he or she can do by area and module, approval authority today, delegations, conflicts, last review and changes waiting for approval",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "displayName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "included": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "fullAccess": {
+                          "type": "boolean"
+                        },
+                        "access": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "modules": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "levels": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "authority": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "delegations": {
+                          "type": "object",
+                          "properties": {
+                            "given": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "received": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-10",
+                    "user": {
+                      "id": "usr_9",
+                      "displayName": "Gene Kelly Jaen"
+                    },
+                    "roles": [
+                      {
+                        "code": "tis-ccd-bp",
+                        "name": "CCD-BP / QRPh (Receipting)",
+                        "included": []
+                      }
+                    ],
+                    "fullAccess": false,
+                    "access": [
+                      {
+                        "code": "accounts",
+                        "name": "Accounts",
+                        "modules": [
+                          {
+                            "code": "receipts",
+                            "name": "Receipts",
+                            "levels": [
+                              "view",
+                              "edit"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "authority": [],
+                    "delegations": {
+                      "given": [],
+                      "received": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > User Access Matrix",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/users/{id}/authority": {
+      "get": {
+        "operationId": "getAccessControlUsersIdAuthority",
+        "summary": "The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-12"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "transactionType": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "canApprove": {
+                                "type": "boolean"
+                              },
+                              "set": {
+                                "type": "boolean"
+                              },
+                              "limit": {
+                                "type": "integer"
+                              },
+                              "unlimited": {
+                                "type": "boolean"
+                              },
+                              "source": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-12",
+                    "lines": [
+                      {
+                        "transactionType": "journal_voucher",
+                        "name": "Journal voucher approval",
+                        "canApprove": true,
+                        "set": true,
+                        "limit": 750000,
+                        "unlimited": false,
+                        "source": "delegated by Mariela S. Valentino (user limit)"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Users and Access > Delegations",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
     "/access-control/users/{id}/sign-out": {
       "post": {
         "operationId": "postAccessControlUsersIdSignOut",
-        "summary": "End every session of a user (lost device, suspected misuse, role change)",
+        "summary": "End every session of a user (lost device, suspected misuse, role change); an administrator account only by a System Administrator",
         "tags": [
           "Access Control"
         ],

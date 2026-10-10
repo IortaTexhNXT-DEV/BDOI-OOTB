@@ -16,7 +16,7 @@
  */
 import { badRequest, conflict, forbidden } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { hasPermission } from '../../lib/auth.js';
+import { adminEquivalentRoles, hasPermission } from '../../lib/auth.js';
 import { today } from '../../lib/dates.js';
 import { APPROVER, listAccessChanges, registerAccessKind, requestAccessChange } from './changes.js';
 import { roleDirectory } from './roles.js';
@@ -86,6 +86,28 @@ const referralRoles = async (db) => new Set((await db.query(`SELECT DISTINCT dat
 const approvesOf = (role, perms, ruleRoles) => Object.entries(AUTHORITY_STEPS)
   .filter(([, s]) => role.fullAccess || (s.permissions.every((p) => perms?.has(p)) && (!s.ruleRoles || ruleRoles.has(role.code))))
   .map(([type]) => type);
+
+/**
+ * The transaction types each active user can approve: those whose approval step the permissions of all their roles
+ * reach together (full access reaches every step; the underwriting referral only with a role of an acceptance rule).
+ * Map user id -> [type codes]. One query after the other: db may be the client of a transaction.
+ */
+export async function approvalsByUser(db) {
+  const perms = await rolePermissions(db);
+  const ruleRoles = await referralRoles(db);
+  const full = await adminEquivalentRoles(db);
+  const { rows } = await db.query(`SELECT u.id, COALESCE(array_agg(er.code) FILTER (WHERE er.code IS NOT NULL), '{}') AS roles
+    FROM users u LEFT JOIN LATERAL user_effective_roles(u.id) er ON true WHERE u.status = 'active' GROUP BY u.id`);
+  return new Map(rows.map((u) => {
+    const held = new Set();
+    u.roles.forEach((c) => perms.get(c)?.forEach((p) => held.add(p)));
+    const fullAccess = u.roles.some((c) => full.includes(c));
+    const types = Object.entries(AUTHORITY_STEPS)
+      .filter(([, st]) => fullAccess || (st.permissions.every((p) => held.has(p)) && (!st.ruleRoles || u.roles.some((c) => ruleRoles.has(c)))))
+      .map(([type]) => type);
+    return [u.id, types];
+  }));
+}
 
 /**
  * Everything the matrix, the checks and the exports read: types, roles, people with a limit, and per cell the limit

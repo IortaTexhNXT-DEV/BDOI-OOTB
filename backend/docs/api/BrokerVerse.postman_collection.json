@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1225 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1238 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -1133,21 +1133,31 @@
           ]
         },
         {
-          "name": "Delegations of authority (?active=true for current and future ones)",
+          "name": "Delegations of approval authority and the requests not yet in effect (?view=current|pending|ended|all, default current; ?active=true is current; ?format=xlsx|csv for audit, &technical=1 adds the codes)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/access-control/delegations",
+              "raw": "{{baseUrl}}/access-control/delegations?view=current&format=xlsx",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "access-control",
                 "delegations"
+              ],
+              "query": [
+                {
+                  "key": "view",
+                  "value": "current"
+                },
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
               ]
             },
-            "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
+            "description": "Delegations of approval authority and the requests not yet in effect (?view=current|pending|ended|all, default current; ?active=true is current; ?format=xlsx|csv for audit, &technical=1 adds the codes)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1156,16 +1166,26 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/access-control/delegations",
+                  "raw": "{{baseUrl}}/access-control/delegations?view=current&format=xlsx",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "access-control",
                     "delegations"
+                  ],
+                  "query": [
+                    {
+                      "key": "view",
+                      "value": "current"
+                    },
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
                   ]
                 },
-                "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
+                "description": "Delegations of approval authority and the requests not yet in effect (?view=current|pending|ended|all, default current; ?active=true is current; ?format=xlsx|csv for audit, &technical=1 adds the codes)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1177,12 +1197,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"delegatorName\": \"Teresa Villaroman\",\n      \"delegateName\": \"Ramon Almario\",\n      \"dateFrom\": \"2026-10-01\",\n      \"dateTo\": \"2026-10-10\",\n      \"inEffect\": false\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"approval\": true,\n    \"counts\": {\n      \"current\": 1,\n      \"pending\": 0,\n      \"ended\": 3,\n      \"all\": 4\n    },\n    \"rows\": [\n      {\n        \"key\": \"D-4\",\n        \"id\": 4,\n        \"changeId\": 40,\n        \"ref\": \"CFG-40\",\n        \"delegatorId\": \"usr_1\",\n        \"delegatorName\": \"Mariela S. Valentino\",\n        \"delegatorDepartment\": \"Finance and Accounting\",\n        \"delegateId\": \"usr_2\",\n        \"delegateName\": \"Chrystal G. Malinay\",\n        \"delegateDepartment\": \"Finance and Accounting\",\n        \"transactionTypes\": [\n          \"journal_voucher\"\n        ],\n        \"transactionNames\": [\n          \"Journal voucher approval\"\n        ],\n        \"dateFrom\": \"2026-10-12\",\n        \"dateTo\": \"2026-10-16\",\n        \"days\": 5,\n        \"reasonCode\": \"DLG-LEAVE\",\n        \"reason\": \"Vacation or annual leave\",\n        \"status\": \"in-effect\",\n        \"requestedBy\": \"IT administrator\",\n        \"approvedBy\": \"General Manager\",\n        \"canEnd\": true,\n        \"change\": null\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Delegate approval authority for a period (leave, travel); empty transaction types = all",
+          "name": "Request a delegation of approval authority for a period (reason from the Reason Codes master, context delegation); it applies once another administrator approves it (at once with access.change_approval off). Empty transaction types = every transaction the approver away can approve",
           "request": {
             "method": "POST",
             "header": [
@@ -1201,10 +1221,10 @@
                 "delegations"
               ]
             },
-            "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+            "description": "Request a delegation of approval authority for a period (reason from the Reason Codes master, context delegation); it applies once another administrator approves it (at once with access.change_approval off). Empty transaction types = every transaction the approver away can approve\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
+              "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"journal_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-12\",\n  \"dateTo\": \"2026-10-16\",\n  \"reasonCode\": \"DLG-LEAVE\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1233,10 +1253,10 @@
                     "delegations"
                   ]
                 },
-                "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+                "description": "Request a delegation of approval authority for a period (reason from the Reason Codes master, context delegation); it applies once another administrator approves it (at once with access.change_approval off). Empty transaction types = every transaction the approver away can approve\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
+                  "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"journal_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-12\",\n  \"dateTo\": \"2026-10-16\",\n  \"reasonCode\": \"DLG-LEAVE\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1254,15 +1274,115 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"active\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"delegation\",\n      \"kindLabel\": \"Delegation\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    },\n    \"delegation\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "End a delegation early",
+          "name": "End a delegation before its last day (reason of context delegation_end); it stops at once and both people are told",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/delegations/:id/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "delegations",
+                ":id",
+                "end"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "End a delegation before its last day (reason of context delegation_end); it stops at once and both people are told\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DLE-RETURNED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/delegations/:id/end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "delegations",
+                    ":id",
+                    "end"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "End a delegation before its last day (reason of context delegation_end); it stops at once and both people are told\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"DLE-RETURNED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"key\": \"D-4\",\n    \"id\": 4,\n    \"changeId\": 40,\n    \"ref\": \"CFG-40\",\n    \"delegatorId\": \"usr_1\",\n    \"delegatorName\": \"Mariela S. Valentino\",\n    \"delegatorDepartment\": \"Finance and Accounting\",\n    \"delegateId\": \"usr_2\",\n    \"delegateName\": \"Chrystal G. Malinay\",\n    \"delegateDepartment\": \"Finance and Accounting\",\n    \"transactionTypes\": [\n      \"journal_voucher\"\n    ],\n    \"transactionNames\": [\n      \"Journal voucher approval\"\n    ],\n    \"dateFrom\": \"2026-10-12\",\n    \"dateTo\": \"2026-10-16\",\n    \"days\": 5,\n    \"reasonCode\": \"DLG-LEAVE\",\n    \"reason\": \"Vacation or annual leave\",\n    \"status\": \"ended-early\",\n    \"requestedBy\": \"IT administrator\",\n    \"approvedBy\": \"General Manager\",\n    \"canEnd\": true,\n    \"change\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "End a delegation early (the earlier name of /delegations/:id/end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/access-control/delegations/:id/revoke",
               "host": [
@@ -1282,14 +1402,28 @@
                 }
               ]
             },
-            "description": "End a delegation early\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control"
+            "description": "End a delegation early (the earlier name of /delegations/:id/end)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DLE-RETURNED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [
             {
               "name": "Example response",
               "originalRequest": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/access-control/delegations/:id/revoke",
                   "host": [
@@ -1309,7 +1443,16 @@
                     }
                   ]
                 },
-                "description": "End a delegation early\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control"
+                "description": "End a delegation early (the earlier name of /delegations/:id/end)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"DLE-RETURNED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "status": "OK",
               "code": 200,
@@ -1321,26 +1464,27 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"revoked\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"key\": \"D-4\",\n    \"id\": 4,\n    \"changeId\": 40,\n    \"ref\": \"CFG-40\",\n    \"delegatorId\": \"usr_1\",\n    \"delegatorName\": \"Mariela S. Valentino\",\n    \"delegatorDepartment\": \"Finance and Accounting\",\n    \"delegateId\": \"usr_2\",\n    \"delegateName\": \"Chrystal G. Malinay\",\n    \"delegateDepartment\": \"Finance and Accounting\",\n    \"transactionTypes\": [\n      \"journal_voucher\"\n    ],\n    \"transactionNames\": [\n      \"Journal voucher approval\"\n    ],\n    \"dateFrom\": \"2026-10-12\",\n    \"dateTo\": \"2026-10-16\",\n    \"days\": 5,\n    \"reasonCode\": \"DLG-LEAVE\",\n    \"reason\": \"Vacation or annual leave\",\n    \"status\": \"ended-early\",\n    \"requestedBy\": \"IT administrator\",\n    \"approvedBy\": \"General Manager\",\n    \"canEnd\": true,\n    \"change\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "Access reviews (recertification campaigns) with progress",
+          "name": "What a new delegation offers: the transactions an approval step checks, every active person with the transactions he or she can approve and the authority today, the departments, the longest delegation",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/access-control/reviews",
+              "raw": "{{baseUrl}}/access-control/delegations/options",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "access-control",
-                "reviews"
+                "delegations",
+                "options"
               ]
             },
-            "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+            "description": "What a new delegation offers: the transactions an approval step checks, every active person with the transactions he or she can approve and the authority today, the departments, the longest delegation\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1349,16 +1493,17 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/access-control/reviews",
+                  "raw": "{{baseUrl}}/access-control/delegations/options",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "access-control",
-                    "reviews"
+                    "delegations",
+                    "options"
                   ]
                 },
-                "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+                "description": "What a new delegation offers: the transactions an approval step checks, every active person with the transactions he or she can approve and the authority today, the departments, the longest delegation\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1370,12 +1515,201 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Q4 2026 access review\",\n      \"dueDate\": \"2026-12-15\",\n      \"status\": \"open\",\n      \"users\": 14,\n      \"pending\": 3\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"maxDays\": 90,\n    \"approval\": true,\n    \"withoutLimit\": \"allow\",\n    \"departments\": [\n      {\n        \"name\": \"Finance and Accounting\",\n        \"order\": 4\n      }\n    ],\n    \"types\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"measure\": \"amount\",\n        \"step\": \"Accounts > Journal Vouchers > Approve\"\n      }\n    ],\n    \"people\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Mariela S. Valentino\",\n        \"department\": \"Finance and Accounting\",\n        \"roleNames\": [\n          \"TIS Finance & General Accounting\"\n        ],\n        \"approves\": [\n          \"journal_voucher\"\n        ],\n        \"authority\": {\n          \"journal_voucher\": {\n            \"set\": true,\n            \"limit\": 750000,\n            \"unlimited\": false,\n            \"source\": \"user limit\"\n          }\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Start an access review of every active user",
+          "name": "The effect of a delegation per transaction: the approver's own limit and the authority of the person covering with and without it (a delegation never lowers authority)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/delegations/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "delegations",
+                "preview"
+              ]
+            },
+            "description": "The effect of a delegation per transaction: the approver's own limit and the authority of the person covering with and without it (a delegation never lowers authority)\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"journal_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-12\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/delegations/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "delegations",
+                    "preview"
+                  ]
+                },
+                "description": "The effect of a delegation per transaction: the approver's own limit and the authority of the person covering with and without it (a delegation never lowers authority)\n\nFront-end touchpoint: Master > Users and Access > Delegations > New delegation\n\nAccess: read:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"journal_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-12\",\n    \"lines\": [\n      {\n        \"transactionType\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"measure\": \"amount\",\n        \"lent\": {\n          \"set\": true,\n          \"limit\": 750000\n        },\n        \"before\": {\n          \"set\": false\n        },\n        \"after\": {\n          \"set\": false\n        },\n        \"changes\": false\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Role directory of the access screens: the departments in order and each role with its department, summary, base platform flag and full access; the settings of the screens and what the signed-in user may do",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/directory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "directory"
+              ]
+            },
+            "description": "Role directory of the access screens: the departments in order and each role with its department, summary, base platform flag and full access; the settings of the screens and what the signed-in user may do\n\nFront-end touchpoint: Master > Users and Access\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/directory",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "directory"
+                  ]
+                },
+                "description": "Role directory of the access screens: the departments in order and each role with its department, summary, base platform flag and full access; the settings of the screens and what the signed-in user may do\n\nFront-end touchpoint: Master > Users and Access\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"approval\": true,\n    \"departments\": [\n      {\n        \"name\": \"Cash Control\",\n        \"order\": 3\n      }\n    ],\n    \"roles\": [\n      {\n        \"code\": \"tis-ccd-bp\",\n        \"name\": \"CCD-BP / QRPh (Receipting)\",\n        \"department\": \"Cash Control\",\n        \"platform\": false,\n        \"fullAccess\": false,\n        \"status\": \"active\"\n      }\n    ],\n    \"settings\": {\n      \"delegationMaxDays\": 90,\n      \"sodExceptionMaxDays\": 365,\n      \"reviewDueDays\": 14,\n      \"dormantDays\": 90\n    },\n    \"abilities\": {\n      \"edit\": true,\n      \"approve\": true,\n      \"signOut\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Access reviews with scope, progress, removals and the overdue state (?format=xlsx|csv for audit)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            },
+            "description": "Access reviews with scope, progress, removals and the overdue state (?format=xlsx|csv for audit)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ]
+                },
+                "description": "Access reviews with scope, progress, removals and the overdue state (?format=xlsx|csv for audit)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"name\": \"Access review Q3 FY2026\",\n      \"scopeText\": \"All active users\",\n      \"dueDate\": \"2026-10-24\",\n      \"status\": \"open\",\n      \"overdue\": false,\n      \"users\": 17,\n      \"pending\": 5,\n      \"kept\": 10,\n      \"removeRoles\": 1,\n      \"deactivate\": 1,\n      \"removals\": 2,\n      \"applied\": 0,\n      \"createdBy\": \"IT administrator\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start an access review of the active users of a scope (all, departments or roles); due date today or later",
           "request": {
             "method": "POST",
             "header": [
@@ -1394,10 +1728,10 @@
                 "reviews"
               ]
             },
-            "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+            "description": "Start an access review of the active users of a scope (all, departments or roles); due date today or later\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
+              "raw": "{\n  \"name\": \"Access review Q3 FY2026\",\n  \"dueDate\": \"2026-10-24\",\n  \"scope\": {\n    \"kind\": \"all\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1426,10 +1760,10 @@
                     "reviews"
                   ]
                 },
-                "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+                "description": "Start an access review of the active users of a scope (all, departments or roles); due date today or later\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
+                  "raw": "{\n  \"name\": \"Access review Q3 FY2026\",\n  \"dueDate\": \"2026-10-24\",\n  \"scope\": {\n    \"kind\": \"all\"\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1447,12 +1781,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"items\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"Access review Q3 FY2026\",\n    \"scopeText\": \"All active users\",\n    \"dueDate\": \"2026-10-24\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"users\": 17,\n    \"pending\": 5,\n    \"kept\": 10,\n    \"removeRoles\": 1,\n    \"deactivate\": 1,\n    \"removals\": 2,\n    \"applied\": 0,\n    \"createdBy\": \"IT administrator\",\n    \"items\": []\n  }\n}"
             }
           ]
         },
         {
-          "name": "One access review with every user and decision (?format=xlsx|csv to download)",
+          "name": "One access review with every user, outcome and removal state and the sign-off waiting for approval (?format=xlsx|csv: Summary and Users, &technical=1 adds the role codes)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1474,7 +1808,7 @@
                 }
               ]
             },
-            "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+            "description": "One access review with every user, outcome and removal state and the sign-off waiting for approval (?format=xlsx|csv: Summary and Users, &technical=1 adds the role codes)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1500,7 +1834,7 @@
                     }
                   ]
                 },
-                "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
+                "description": "One access review with every user, outcome and removal state and the sign-off waiting for approval (?format=xlsx|csv: Summary and Users, &technical=1 adds the role codes)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1512,12 +1846,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"items\": [\n      {\n        \"username\": \"maria.rivera\",\n        \"roles\": [\n          \"sales\"\n        ],\n        \"decision\": \"pending\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"Access review Q3 FY2026\",\n    \"scopeText\": \"All active users\",\n    \"dueDate\": \"2026-10-24\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"users\": 17,\n    \"pending\": 5,\n    \"kept\": 10,\n    \"removeRoles\": 1,\n    \"deactivate\": 1,\n    \"removals\": 2,\n    \"applied\": 0,\n    \"createdBy\": \"IT administrator\",\n    \"canSubmit\": false,\n    \"items\": [\n      {\n        \"id\": 41,\n        \"displayName\": \"Wendy Siading\",\n        \"department\": \"Cash Control\",\n        \"roleNamesAtStart\": [\n          \"CCD-Recon\"\n        ],\n        \"decision\": \"remove-roles\",\n        \"removeRoleNames\": [\n          \"CCD-Recon\"\n        ],\n        \"remarks\": \"Moved to another job or department\",\n        \"removalState\": \"waiting\",\n        \"blocked\": null,\n        \"canDecide\": true\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Close a review once every user has been decided",
+          "name": "Close a review once every user is decided (only with access.change_approval off; otherwise the sign-off closes it)",
           "request": {
             "method": "POST",
             "header": [],
@@ -1540,7 +1874,7 @@
                 }
               ]
             },
-            "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
+            "description": "Close a review once every user is decided (only with access.change_approval off; otherwise the sign-off closes it)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
           },
           "response": [
             {
@@ -1567,7 +1901,7 @@
                     }
                   ]
                 },
-                "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
+                "description": "Close a review once every user is decided (only with access.change_approval off; otherwise the sign-off closes it)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1579,12 +1913,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"closed\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"Access review Q3 FY2026\",\n    \"scopeText\": \"All active users\",\n    \"dueDate\": \"2026-10-24\",\n    \"status\": \"closed\",\n    \"overdue\": false,\n    \"users\": 17,\n    \"pending\": 5,\n    \"kept\": 10,\n    \"removeRoles\": 1,\n    \"deactivate\": 1,\n    \"removals\": 2,\n    \"applied\": 0,\n    \"createdBy\": \"IT administrator\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Keep or revoke one user's access (revoke deactivates the account and signs it out)",
+          "name": "Decide one user: keep access, remove roles or deactivate the account (reason of context access_review for a removal; a note for keeping a dormant user or one with an open conflict). The earlier decision revoke means deactivate",
           "request": {
             "method": "POST",
             "header": [
@@ -1618,10 +1952,10 @@
                 }
               ]
             },
-            "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+            "description": "Decide one user: keep access, remove roles or deactivate the account (reason of context access_review for a removal; a note for keeping a dormant user or one with an open conflict). The earlier decision revoke means deactivate\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"decision\": \"keep\"\n}",
+              "raw": "{\n  \"outcome\": \"remove-roles\",\n  \"removeRoles\": [\n    \"tis-ccd-recon\"\n  ],\n  \"reasonCode\": \"ARV-MOVED\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1665,10 +1999,10 @@
                     }
                   ]
                 },
-                "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+                "description": "Decide one user: keep access, remove roles or deactivate the account (reason of context access_review for a removal; a note for keeping a dormant user or one with an open conflict). The earlier decision revoke means deactivate\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"decision\": \"keep\"\n}",
+                  "raw": "{\n  \"outcome\": \"remove-roles\",\n  \"removeRoles\": [\n    \"tis-ccd-recon\"\n  ],\n  \"reasonCode\": \"ARV-MOVED\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1686,7 +2020,250 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"Access review Q3 FY2026\",\n    \"scopeText\": \"All active users\",\n    \"dueDate\": \"2026-10-24\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"users\": 17,\n    \"pending\": 5,\n    \"kept\": 10,\n    \"removeRoles\": 1,\n    \"deactivate\": 1,\n    \"removals\": 2,\n    \"applied\": 0,\n    \"createdBy\": \"IT administrator\",\n    \"items\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Keep several users at once (optional note); lines that need a note or may not be decided by this user are left out and named",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/:id/items/keep",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                ":id",
+                "items",
+                "keep"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Keep several users at once (optional note); lines that need a note or may not be decided by this user are left out and named\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemIds\": [\n    41,\n    42\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/:id/items/keep",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    ":id",
+                    "items",
+                    "keep"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Keep several users at once (optional note); lines that need a note or may not be decided by this user are left out and named\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"itemIds\": [\n    41,\n    42\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"kept\": [\n      \"Wendy Siading\"\n    ],\n    \"skipped\": [\n      {\n        \"name\": \"Gene Kelly Jaen\",\n        \"reason\": \"The user has a segregation-of-duties conflict without an exception\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a review whose users are all decided for sign-off by another administrator; its removals apply at sign-off",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a review whose users are all decided for sign-off by another administrator; its removals apply at sign-off\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a review whose users are all decided for sign-off by another administrator; its removals apply at sign-off\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"review\": {\n      \"id\": 3,\n      \"name\": \"Access review Q3 FY2026\",\n      \"scopeText\": \"All active users\",\n      \"dueDate\": \"2026-10-24\",\n      \"status\": \"awaiting-signoff\",\n      \"overdue\": false,\n      \"users\": 17,\n      \"pending\": 5,\n      \"kept\": 10,\n      \"removeRoles\": 1,\n      \"deactivate\": 1,\n      \"removals\": 2,\n      \"applied\": 0,\n      \"createdBy\": \"IT administrator\"\n    },\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"access-review\",\n      \"kindLabel\": \"Role access\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "How many active users a scope reviews",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/reviews/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "reviews",
+                "preview"
+              ]
+            },
+            "description": "How many active users a scope reviews\n\nFront-end touchpoint: Master > Users and Access > Access Reviews > Start a review\n\nAccess: read:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"departments\",\n  \"departments\": [\n    \"Cash Control\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/reviews/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "reviews",
+                    "preview"
+                  ]
+                },
+                "description": "How many active users a scope reviews\n\nFront-end touchpoint: Master > Users and Access > Access Reviews > Start a review\n\nAccess: read:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"departments\",\n  \"departments\": [\n    \"Cash Control\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"users\": 4,\n    \"scopeText\": \"Cash Control\"\n  }\n}"
             }
           ]
         },
@@ -1997,7 +2574,7 @@
           ]
         },
         {
-          "name": "Rules a set of roles would break (used by the user form before saving)",
+          "name": "Rules a set of roles would break (the user form before saving); with userId, the warnings say when an exception is in force",
           "request": {
             "method": "POST",
             "header": [
@@ -2016,7 +2593,7 @@
                 "sod-check"
               ]
             },
-            "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
+            "description": "Rules a set of roles would break (the user form before saving); with userId, the warnings say when an exception is in force\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
@@ -2048,7 +2625,7 @@
                     "sod-check"
                   ]
                 },
-                "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
+                "description": "Rules a set of roles would break (the user form before saving); with userId, the warnings say when an exception is in force\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
@@ -2069,26 +2646,36 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"name\": \"Placement and payment\",\n      \"action\": \"block\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"name\": \"Placement and payment\",\n      \"action\": \"block\",\n      \"exceptionUntil\": null\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine",
+          "name": "Segregation-of-duties conflicts by user: every user (active by default, ?status=all) breaking an active rule, with the state of the conflict (open, accepted with its exception, waiting for approval, expired) (?userId, ruleId)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/access-control/sod-rules",
+              "raw": "{{baseUrl}}/access-control/sod-conflicts?status=active&ruleId=6",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "access-control",
-                "sod-rules"
+                "sod-conflicts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "ruleId",
+                  "value": "6"
+                }
               ]
             },
-            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
+            "description": "Segregation-of-duties conflicts by user: every user (active by default, ?status=all) breaking an active rule, with the state of the conflict (open, accepted with its exception, waiting for approval, expired) (?userId, ruleId)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -2097,16 +2684,26 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/access-control/sod-rules",
+                  "raw": "{{baseUrl}}/access-control/sod-conflicts?status=active&ruleId=6",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "access-control",
-                    "sod-rules"
+                    "sod-conflicts"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "active"
+                    },
+                    {
+                      "key": "ruleId",
+                      "value": "6"
+                    }
                   ]
                 },
-                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
+                "description": "Segregation-of-duties conflicts by user: every user (active by default, ?status=all) breaking an active rule, with the state of the conflict (open, accepted with its exception, waiting for approval, expired) (?userId, ruleId)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -2118,12 +2715,217 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SOD-PROC-ACCT\",\n      \"kind\": \"roles\",\n      \"roleA\": \"processing\",\n      \"roleB\": \"accounting\",\n      \"accessA\": [],\n      \"accessB\": [],\n      \"action\": \"block\"\n    },\n    {\n      \"id\": 7,\n      \"code\": \"SOD-ACC-CLAIM-PAY\",\n      \"kind\": \"access\",\n      \"roleA\": null,\n      \"roleB\": null,\n      \"accessA\": [\n        \"write:claims\"\n      ],\n      \"accessB\": [\n        \"write:disbursements\"\n      ],\n      \"accessANames\": [\n        \"Operations › Claims › Create and edit\"\n      ],\n      \"accessBNames\": [\n        \"Accounts › Disbursements and petty cash › Create and edit\"\n      ],\n      \"action\": \"warn\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"rows\": [\n      {\n        \"key\": \"6:usr_9\",\n        \"ruleId\": 6,\n        \"ruleName\": \"Receipting and reversals\",\n        \"action\": \"warn\",\n        \"userId\": \"usr_9\",\n        \"userName\": \"Gene Kelly Jaen\",\n        \"department\": \"Cash Control\",\n        \"heldTogether\": [\n          \"CCD-BP / QRPh (Receipting)\",\n          \"CCD-Recon\"\n        ],\n        \"state\": \"open\",\n        \"exception\": null,\n        \"change\": null,\n        \"canRequest\": true,\n        \"canEnd\": false\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Add a segregation-of-duties rule",
+          "name": "Request an exception for a conflict (one person, one rule) until a date, with a reason of context sod_exception; it applies once another administrator approves it, who is not the person concerned. Not for oneself",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-exceptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-exceptions"
+              ]
+            },
+            "description": "Request an exception for a conflict (one person, one rule) until a date, with a reason of context sod_exception; it applies once another administrator approves it, who is not the person concerned. Not for oneself\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleId\": 6,\n  \"userId\": \"usr_9\",\n  \"validUntil\": \"2027-03-31\",\n  \"reasonCode\": \"SXE-REVIEWED\",\n  \"note\": \"Reversals reviewed weekly by the Finance head\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-exceptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-exceptions"
+                  ]
+                },
+                "description": "Request an exception for a conflict (one person, one rule) until a date, with a reason of context sod_exception; it applies once another administrator approves it, who is not the person concerned. Not for oneself\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ruleId\": 6,\n  \"userId\": \"usr_9\",\n  \"validUntil\": \"2027-03-31\",\n  \"reasonCode\": \"SXE-REVIEWED\",\n  \"note\": \"Reversals reviewed weekly by the Finance head\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"sod-exception\",\n      \"kindLabel\": \"Segregation of duties exception\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "End an exception in force; the conflict is open again at once",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-exceptions/:id/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-exceptions",
+                ":id",
+                "end"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "End an exception in force; the conflict is open again at once\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-exceptions/:id/end",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-exceptions",
+                    ":id",
+                    "end"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "End an exception in force; the conflict is open again at once\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"status\": \"ended\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine, with the active users breaking each and the change waiting for approval (?format=xlsx|csv: the workbook of the screen, &technical=1 adds the codes, &base=1 the rules between base platform roles)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            },
+            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine, with the active users breaking each and the change waiting for approval (?format=xlsx|csv: the workbook of the screen, &technical=1 adds the codes, &base=1 the rules between base platform roles)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ]
+                },
+                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine, with the active users breaking each and the change waiting for approval (?format=xlsx|csv: the workbook of the screen, &technical=1 adds the codes, &base=1 the rules between base platform roles)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"id\": 6,\n        \"code\": \"SOD-TIS-BP-RECON\",\n        \"name\": \"Receipting and reversals\",\n        \"kind\": \"roles\",\n        \"roleA\": \"tis-ccd-bp\",\n        \"roleAName\": \"CCD-BP / QRPh (Receipting)\",\n        \"roleB\": \"tis-ccd-recon\",\n        \"roleBName\": \"CCD-Recon\",\n        \"accessA\": [],\n        \"accessB\": [],\n        \"action\": \"warn\",\n        \"reason\": \"Receipts and their reversals are kept apart\",\n        \"active\": true,\n        \"users\": 2,\n        \"platform\": false,\n        \"change\": null,\n        \"canEdit\": true\n      }\n    ],\n    \"pendingNew\": [],\n    \"approval\": true,\n    \"maxExceptionDays\": 365,\n    \"asOf\": \"2026-10-10\",\n    \"abilities\": {\n      \"edit\": true,\n      \"approve\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request a new segregation-of-duties rule (reason of context access_change; the code is given by the server unless sent); it applies once another administrator approves it",
           "request": {
             "method": "POST",
             "header": [
@@ -2142,10 +2944,10 @@
                 "sod-rules"
               ]
             },
-            "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+            "description": "Request a new segregation-of-duties rule (reason of context access_change; the code is given by the server unless sent); it applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
+              "raw": "{\n  \"name\": \"Cheque encoding and reversals\",\n  \"roleA\": \"tis-ccd-pdu\",\n  \"roleB\": \"tis-ccd-recon\",\n  \"action\": \"warn\",\n  \"reason\": \"The person who encodes cheques should not reverse them\",\n  \"reasonCode\": \"ACC-AUDIT\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2174,10 +2976,10 @@
                     "sod-rules"
                   ]
                 },
-                "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+                "description": "Request a new segregation-of-duties rule (reason of context access_change; the code is given by the server unless sent); it applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
+                  "raw": "{\n  \"name\": \"Cheque encoding and reversals\",\n  \"roleA\": \"tis-ccd-pdu\",\n  \"roleB\": \"tis-ccd-recon\",\n  \"action\": \"warn\",\n  \"reason\": \"The person who encodes cheques should not reverse them\",\n  \"reasonCode\": \"ACC-AUDIT\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2195,12 +2997,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 6\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"sod-rule\",\n      \"kindLabel\": \"Segregation of duties rule\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "Change a segregation-of-duties rule",
+          "name": "Request a change of a segregation-of-duties rule, or switch it off or on with active (reason of context access_change)",
           "request": {
             "method": "PUT",
             "header": [
@@ -2227,10 +3029,10 @@
                 }
               ]
             },
-            "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+            "description": "Request a change of a segregation-of-duties rule, or switch it off or on with active (reason of context access_change)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
+              "raw": "{\n  \"action\": \"block\",\n  \"reasonCode\": \"ACC-AUDIT\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2267,10 +3069,10 @@
                     }
                   ]
                 },
-                "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+                "description": "Request a change of a segregation-of-duties rule, or switch it off or on with active (reason of context access_change)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
+                  "raw": "{\n  \"action\": \"block\",\n  \"reasonCode\": \"ACC-AUDIT\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2288,15 +3090,20 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 4\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"sod-rule\",\n      \"kindLabel\": \"Segregation of duties rule\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "Switch off a segregation-of-duties rule",
+          "name": "Request to switch a segregation-of-duties rule off (reason of context access_change in the body; the rule is kept for the record)",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/access-control/sod-rules/:id",
               "host": [
@@ -2315,14 +3122,28 @@
                 }
               ]
             },
-            "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
+            "description": "Request to switch a segregation-of-duties rule off (reason of context access_change in the body; the rule is kept for the record)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"ACC-NOTNEEDED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [
             {
               "name": "Example response",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/access-control/sod-rules/:id",
                   "host": [
@@ -2341,7 +3162,16 @@
                     }
                   ]
                 },
-                "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
+                "description": "Request to switch a segregation-of-duties rule off (reason of context access_change in the body; the rule is kept for the record)\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"ACC-NOTNEEDED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "status": "OK",
               "code": 200,
@@ -2353,7 +3183,86 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 4\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"sod-rule\",\n      \"kindLabel\": \"Segregation of duties rule\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What a rule would do: the active users who hold both sides today",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/sod-rules/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "sod-rules",
+                "check"
+              ]
+            },
+            "description": "What a rule would do: the active users who hold both sides today\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleA\": \"tis-ccd-bp\",\n  \"roleB\": \"tis-ccd-recon\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/sod-rules/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "sod-rules",
+                    "check"
+                  ]
+                },
+                "description": "What a rule would do: the active users who hold both sides today\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"roleA\": \"tis-ccd-bp\",\n  \"roleB\": \"tis-ccd-recon\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"users\": 2,\n    \"names\": [\n      \"Gene Kelly Jaen\",\n      \"Marta Loi Dapula\"\n    ]\n  }\n}"
             }
           ]
         },
@@ -2500,7 +3409,7 @@
           ]
         },
         {
-          "name": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)",
+          "name": "Every user with roles by name (and the roles they include), department, branch, status, last sign-in, two-step, password age, segregation-of-duties conflicts with their exceptions, changes waiting for approval and the last review (?status; ?format=xlsx|csv: Users, Roles of users, Segregation of duties, Delegations in effect; &technical=1 adds the codes)",
           "request": {
             "method": "GET",
             "header": [],
@@ -2524,7 +3433,7 @@
                 }
               ]
             },
-            "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
+            "description": "Every user with roles by name (and the roles they include), department, branch, status, last sign-in, two-step, password age, segregation-of-duties conflicts with their exceptions, changes waiting for approval and the last review (?status; ?format=xlsx|csv: Users, Roles of users, Segregation of duties, Delegations in effect; &technical=1 adds the codes)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -2552,7 +3461,7 @@
                     }
                   ]
                 },
-                "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
+                "description": "Every user with roles by name (and the roles they include), department, branch, status, last sign-in, two-step, password age, segregation-of-duties conflicts with their exceptions, changes waiting for approval and the last review (?status; ?format=xlsx|csv: Users, Roles of users, Segregation of duties, Delegations in effect; &technical=1 adds the codes)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -2564,12 +3473,158 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [\n      {\n        \"code\": \"sales\",\n        \"name\": \"Sales & Marketing\"\n      }\n    ],\n    \"dormantDays\": 90,\n    \"rows\": [\n      {\n        \"username\": \"maria.rivera\",\n        \"roles\": [\n          \"sales\"\n        ],\n        \"status\": \"active\",\n        \"dormant\": false,\n        \"sodConflicts\": []\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"dormantDays\": 90,\n    \"departments\": [\n      {\n        \"name\": \"Cash Control\",\n        \"order\": 3\n      }\n    ],\n    \"roles\": [\n      {\n        \"code\": \"tis-ccd-bp\",\n        \"name\": \"CCD-BP / QRPh (Receipting)\",\n        \"department\": \"Cash Control\",\n        \"platform\": false\n      }\n    ],\n    \"rows\": [\n      {\n        \"id\": \"usr_9\",\n        \"username\": \"gene.jaen\",\n        \"displayName\": \"Gene Kelly Jaen\",\n        \"department\": \"Cash Control\",\n        \"roles\": [\n          \"tis-ccd-bp\",\n          \"tis-ccd-recon\"\n        ],\n        \"roleNames\": [\n          \"CCD-BP / QRPh (Receipting)\",\n          \"CCD-Recon\"\n        ],\n        \"included\": [],\n        \"status\": \"active\",\n        \"dormant\": false,\n        \"sodConflicts\": [\n          {\n            \"name\": \"Receipting and reversals\",\n            \"action\": \"warn\",\n            \"state\": \"accepted\",\n            \"validUntil\": \"2027-03-31\"\n          }\n        ],\n        \"openConflicts\": 0,\n        \"pending\": [],\n        \"lastReview\": null\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "End every session of a user (lost device, suspected misuse, role change)",
+          "name": "The access panel of one person: roles with the roles they include, what he or she can do by area and module, approval authority today, delegations, conflicts, last review and changes waiting for approval",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/users/:id/access",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "users",
+                ":id",
+                "access"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The access panel of one person: roles with the roles they include, what he or she can do by area and module, approval authority today, delegations, conflicts, last review and changes waiting for approval\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/users/:id/access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "users",
+                    ":id",
+                    "access"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The access panel of one person: roles with the roles they include, what he or she can do by area and module, approval authority today, delegations, conflicts, last review and changes waiting for approval\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"user\": {\n      \"id\": \"usr_9\",\n      \"displayName\": \"Gene Kelly Jaen\"\n    },\n    \"roles\": [\n      {\n        \"code\": \"tis-ccd-bp\",\n        \"name\": \"CCD-BP / QRPh (Receipting)\",\n        \"included\": []\n      }\n    ],\n    \"fullAccess\": false,\n    \"access\": [\n      {\n        \"code\": \"accounts\",\n        \"name\": \"Accounts\",\n        \"modules\": [\n          {\n            \"code\": \"receipts\",\n            \"name\": \"Receipts\",\n            \"levels\": [\n              \"view\",\n              \"edit\"\n            ]\n          }\n        ]\n      }\n    ],\n    \"authority\": [],\n    \"delegations\": {\n      \"given\": [],\n      \"received\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/users/:id/authority?date=2026-10-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "users",
+                ":id",
+                "authority"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-10-12"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/users/:id/authority?date=2026-10-12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "users",
+                    ":id",
+                    "authority"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-10-12"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-12\",\n    \"lines\": [\n      {\n        \"transactionType\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"canApprove\": true,\n        \"set\": true,\n        \"limit\": 750000,\n        \"unlimited\": false,\n        \"source\": \"delegated by Mariela S. Valentino (user limit)\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "End every session of a user (lost device, suspected misuse, role change); an administrator account only by a System Administrator",
           "request": {
             "method": "POST",
             "header": [],
@@ -2592,7 +3647,7 @@
                 }
               ]
             },
-            "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
+            "description": "End every session of a user (lost device, suspected misuse, role change); an administrator account only by a System Administrator\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
           },
           "response": [
             {
@@ -2619,7 +3674,7 @@
                     }
                   ]
                 },
-                "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
+                "description": "End every session of a user (lost device, suspected misuse, role change); an administrator account only by a System Administrator\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
               },
               "status": "OK",
               "code": 200,

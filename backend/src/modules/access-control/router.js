@@ -13,7 +13,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { mapColumns, parseUploadedRows, sendTable, uploadFile } from '../documents/tabular.js';
+import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
 import { storeFile } from '../uploads/storage.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -28,6 +28,11 @@ import * as svc from './service.js';
 import * as roleAccess from './roleAccess.js';
 import * as changes from './changes.js';
 import * as authority from './authority.js';
+import * as delegations from './delegations.js';
+import * as sod from './sod.js';
+import * as reviews from './reviews.js';
+import * as userAccess from './userAccess.js';
+import { roleDirectory } from './roles.js';
 
 const { router, define } = moduleRouter('Access Control', '/access-control');
 const read = [requireAuth, requirePermission('read:access-control')];
@@ -46,14 +51,42 @@ const limitText = async (l) => `${l.transactionName || l.transactionType} for ${
 
 // ---------- matrices ----------
 define({
-  method: 'GET', path: '/user-matrix', summary: 'Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)',
-  screen: `${S} > User Access Matrix`, middleware: read, query: { status: 'active', format: 'xlsx' },
-  response: { success: true, data: { roles: [{ code: 'sales', name: 'Sales & Marketing' }], dormantDays: 90, rows: [{ username: 'maria.rivera', roles: ['sales'], status: 'active', dormant: false, sodConflicts: [] }] } },
+  method: 'GET', path: '/directory', summary: 'Role directory of the access screens: the departments in order and each role with its department, summary, base platform flag and full access; the settings of the screens and what the signed-in user may do',
+  screen: `${S}`, middleware: read,
+  response: { success: true, data: { asOf: '2026-10-10', approval: true, departments: [{ name: 'Cash Control', order: 3 }],
+    roles: [{ code: 'tis-ccd-bp', name: 'CCD-BP / QRPh (Receipting)', department: 'Cash Control', platform: false, fullAccess: false, status: 'active' }],
+    settings: { delegationMaxDays: 90, sodExceptionMaxDays: 365, reviewDueDays: 14, dormantDays: 90 }, abilities: { edit: true, approve: true, signOut: true } } },
   handler: async (req, res) => {
-    const m = await svc.userMatrix(pool, { status: req.query.status || null });
-    if (req.query.format) return sendTable(res, { header: svc.USER_MATRIX_HEADER, rows: svc.userMatrixRows(m), fileBase: 'user-access-matrix', format: format(req.query), sheetName: 'Users' });
-    return ok(res, m);
+    const dir = await roleDirectory(pool);
+    const n = async (key, fallback) => Number(await getSetting(key, fallback)) || fallback;
+    ok(res, { asOf: await today(), approval: await changes.changeApproval(), departments: dir.departments,
+      roles: dir.roles.map((r) => ({ code: r.code, name: r.name, department: r.department, summary: r.summary, platform: r.platform, fullAccess: r.fullAccess, status: r.status, inherits: r.inherits })),
+      settings: { delegationMaxDays: await n('access.delegation_max_days', 90), sodExceptionMaxDays: await n('access.sod_exception_max_days', 365),
+        reviewDueDays: await n('access.review_due_days', 14), dormantDays: Number(await getSetting('access.dormant_days', 90)) || 0 },
+      abilities: { edit: hasPermission(req.user, 'write:access-control'), approve: hasPermission(req.user, 'approve:access-control'), signOut: hasPermission(req.user, 'write:users') } });
   },
+});
+define({
+  method: 'GET', path: '/user-matrix', summary: 'Every user with roles by name (and the roles they include), department, branch, status, last sign-in, two-step, password age, segregation-of-duties conflicts with their exceptions, changes waiting for approval and the last review (?status; ?format=xlsx|csv: Users, Roles of users, Segregation of duties, Delegations in effect; &technical=1 adds the codes)',
+  screen: `${S} > User Access Matrix`, middleware: read, query: { status: 'active', format: 'xlsx' },
+  response: { success: true, data: { asOf: '2026-10-10', dormantDays: 90, departments: [{ name: 'Cash Control', order: 3 }], roles: [{ code: 'tis-ccd-bp', name: 'CCD-BP / QRPh (Receipting)', department: 'Cash Control', platform: false }],
+    rows: [{ id: 'usr_9', username: 'gene.jaen', displayName: 'Gene Kelly Jaen', department: 'Cash Control', roles: ['tis-ccd-bp', 'tis-ccd-recon'], roleNames: ['CCD-BP / QRPh (Receipting)', 'CCD-Recon'],
+      included: [], status: 'active', dormant: false, sodConflicts: [{ name: 'Receipting and reversals', action: 'warn', state: 'accepted', validUntil: '2027-03-31' }], openConflicts: 0, pending: [], lastReview: null }] } },
+  handler: async (req, res) => {
+    const status = ['active', 'inactive', 'locked'].includes(req.query.status) ? req.query.status : null;
+    if (!req.query.format) return ok(res, await userAccess.userMatrix(pool, { status }, req.user));
+    const ctx = await printContext();
+    const sheets = await userAccess.userMatrixSheets(pool, req.user, ctx.format, { technical: technicalOf(req), status });
+    await audit(req, { entity: 'user', entityId: 'access-matrix', action: 'export', after: { users: sheets[0].rows.length, format: format(req.query) } });
+    return sendSheets(res, { title: 'User access matrix', fileBase: 'user-access-matrix', format: format(req.query), sheets, ctx });
+  },
+});
+define({
+  method: 'GET', path: '/users/:id/access', summary: 'The access panel of one person: roles with the roles they include, what he or she can do by area and module, approval authority today, delegations, conflicts, last review and changes waiting for approval',
+  screen: `${S} > User Access Matrix`, middleware: read,
+  response: { success: true, data: { asOf: '2026-10-10', user: { id: 'usr_9', displayName: 'Gene Kelly Jaen' }, roles: [{ code: 'tis-ccd-bp', name: 'CCD-BP / QRPh (Receipting)', included: [] }],
+    fullAccess: false, access: [{ code: 'accounts', name: 'Accounts', modules: [{ code: 'receipts', name: 'Receipts', levels: ['view', 'edit'] }] }], authority: [], delegations: { given: [], received: [] } } },
+  handler: async (req, res) => ok(res, await userAccess.userAccessPanel(pool, req.params.id, req.user)),
 });
 define({
   method: 'GET', path: '/role-matrix', summary: 'Permissions down, roles across: what each role may do (inherited roles listed per role)', screen: `${S} > Role Permissions`, middleware: read,
@@ -139,6 +172,7 @@ define({
     const approved = req.body.decision === 'approve';
     await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: req.body.decision, after: c });
     if (r.result?.audit) await audit(req, r.result.audit);
+    if (r.result?.notices) await sendNotices(r.result.notices, req.user, c.link);
     await notifyDecision({ userId: c.requestedById, decidedBy: req.user.id, document: `${c.kindLabel} change`, number: c.ref, approved, by: req.user.username,
       reason: approved ? null : c.decisionRemarks, message: approved ? `${changes.appliedText(c)}, approved by ${req.user.username}`.replace(/^./, (x) => x.toUpperCase()) : null,
       link: c.link, entity: 'accounting_config_change', entityId: c.id });
@@ -179,20 +213,27 @@ async function assertReference(b) {
 }
 
 /** Excel download with the letterhead and an "as at" line on the first sheet (CSV: the first sheet only). */
-async function sendSheets(res, { title, fileBase, sheets, format: fmt }) {
+async function sendSheets(res, { title, fileBase, sheets, format: fmt, ctx: given = null }) {
   const name = `${fileBase}-${(await today()).replace(/-/g, '')}`;
   if (fmt === 'csv') {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${name}.csv"`);
     return res.send(toCsv(sheets[0].columns, sheets[0].rows));
   }
-  const ctx = await printContext();
+  const ctx = given || await printContext();
   const banner = [ctx.letterhead?.name, title, `As at ${ctx.generatedAt} · exported by ${ctx.generatedBy}`].filter(Boolean);
   const buf = writeXlsx({ title, brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', `attachment; filename="${name}.xlsx"`);
   return res.send(buf);
 }
+/** Personal notices of an access change ({ userId, document, number, status, message }) after it has committed. */
+const sendNotices = async (notices, user, link) => {
+  for (const n of notices || []) {
+    await notifyDecision({ userId: n.userId, decidedBy: user.id, document: n.document, number: n.number, approved: true, status: n.status, by: user.username, message: n.message,
+      link: n.link || link, entity: 'user_delegation', entityId: n.number });
+  }
+};
 const columnsOf = (header) => header.map((h) => ({ header: h, width: Math.max(12, Math.min(40, h.length + 6)) }));
 
 define({
@@ -351,128 +392,280 @@ define({
 });
 
 // ---------- delegations ----------
+const reasonBody = { reasonCode: z.string().max(40).optional(), note: z.string().max(1000).optional() };
+const technicalOf = (req) => yes(req.query.technical) && hasPermission(req.user, 'write:access-control');
+const delegationExample = { key: 'D-4', id: 4, changeId: 40, ref: 'CFG-40', delegatorId: 'usr_1', delegatorName: 'Mariela S. Valentino', delegatorDepartment: 'Finance and Accounting',
+  delegateId: 'usr_2', delegateName: 'Chrystal G. Malinay', delegateDepartment: 'Finance and Accounting', transactionTypes: ['journal_voucher'],
+  transactionNames: ['Journal voucher approval'], dateFrom: '2026-10-12', dateTo: '2026-10-16', days: 5, reasonCode: 'DLG-LEAVE', reason: 'Vacation or annual leave',
+  status: 'in-effect', requestedBy: 'IT administrator', approvedBy: 'General Manager', canEnd: true, change: null };
 define({
-  method: 'GET', path: '/delegations', summary: 'Delegations of authority (?active=true for current and future ones)', screen: `${S} > Delegations`, middleware: read,
-  response: { success: true, data: [{ id: 1, delegatorName: 'Teresa Villaroman', delegateName: 'Ramon Almario', dateFrom: '2026-10-01', dateTo: '2026-10-10', inEffect: false }] },
-  handler: async (req, res) => ok(res, await svc.listDelegations(pool, { activeOnly: String(req.query.active) === 'true' })),
-});
-define({
-  method: 'POST', path: '/delegations', summary: 'Delegate approval authority for a period (leave, travel); empty transaction types = all', screen: `${S} > Delegations`,
-  middleware: [...write, validate(z.object({ delegatorId: z.string(), delegateId: z.string(), transactionTypes: z.array(z.string()).optional(), dateFrom: date, dateTo: date, reason: z.string().max(500).optional() }))],
-  request: { delegatorId: 'usr_1', delegateId: 'usr_2', transactionTypes: ['payment_voucher'], dateFrom: '2026-10-01', dateTo: '2026-10-10', reason: 'Annual leave' },
-  response: { success: true, data: { id: 1, status: 'active' } },
+  method: 'GET', path: '/delegations', summary: 'Delegations of approval authority and the requests not yet in effect (?view=current|pending|ended|all, default current; ?active=true is current; ?format=xlsx|csv for audit, &technical=1 adds the codes)',
+  screen: `${S} > Delegations`, middleware: read, query: { view: 'current', format: 'xlsx' },
+  response: { success: true, data: { asOf: '2026-10-10', approval: true, counts: { current: 1, pending: 0, ended: 3, all: 4 }, rows: [delegationExample] } },
   handler: async (req, res) => {
-    const r = await withTransaction((db) => svc.createDelegation(db, req.body, req.user));
-    await audit(req, { entity: 'user_delegation', entityId: String(r.id), action: 'create', after: r });
-    created(res, r, 'Delegation recorded');
+    const view = String(req.query.active) === 'true' ? 'current' : delegations.VIEWS.includes(req.query.view) ? req.query.view : 'current';
+    const list = await delegations.listDelegations(pool, { view }, req.user);
+    if (!req.query.format) return ok(res, list);
+    const ctx = await printContext();
+    await audit(req, { entity: 'user_delegation', entityId: view, action: 'export', after: { rows: list.rows.length, format: format(req.query) } });
+    return sendSheets(res, { title: 'Delegations', fileBase: 'delegations', format: format(req.query), ctx,
+      sheets: [{ name: 'Delegations', columns: delegations.delegationColumns({ technical: technicalOf(req) }), rows: delegations.delegationRows(list.rows, ctx.format, { technical: technicalOf(req) }) }] });
   },
 });
 define({
-  method: 'POST', path: '/delegations/:id/revoke', summary: 'End a delegation early', screen: `${S} > Delegations`, middleware: write, response: { success: true, data: { id: 1, status: 'revoked' } },
+  method: 'GET', path: '/delegations/options', summary: 'What a new delegation offers: the transactions an approval step checks, every active person with the transactions he or she can approve and the authority today, the departments, the longest delegation',
+  screen: `${S} > Delegations > New delegation`, middleware: read,
+  response: { success: true, data: { asOf: '2026-10-10', maxDays: 90, approval: true, withoutLimit: 'allow', departments: [{ name: 'Finance and Accounting', order: 4 }],
+    types: [{ code: 'journal_voucher', name: 'Journal voucher approval', measure: 'amount', step: 'Accounts > Journal Vouchers > Approve' }],
+    people: [{ id: 'usr_1', name: 'Mariela S. Valentino', department: 'Finance and Accounting', roleNames: ['TIS Finance & General Accounting'], approves: ['journal_voucher'],
+      authority: { journal_voucher: { set: true, limit: 750000, unlimited: false, source: 'user limit' } } }] } },
+  handler: async (_req, res) => ok(res, await delegations.delegationOptions(pool)),
+});
+define({
+  method: 'POST', path: '/delegations/preview', summary: 'The effect of a delegation per transaction: the approver\'s own limit and the authority of the person covering with and without it (a delegation never lowers authority)',
+  screen: `${S} > Delegations > New delegation`, middleware: [...read, validate(z.object({ delegatorId: z.string().max(80).optional(), delegateId: z.string().max(80).optional(),
+    transactionTypes: z.array(z.string().max(60)).max(50).default([]), dateFrom: z.string().max(20).optional() }))],
+  request: { delegatorId: 'usr_1', delegateId: 'usr_2', transactionTypes: ['journal_voucher'], dateFrom: '2026-10-12' },
+  response: { success: true, data: { asOf: '2026-10-12', lines: [{ transactionType: 'journal_voucher', name: 'Journal voucher approval', measure: 'amount',
+    lent: { set: true, limit: 750000 }, before: { set: false }, after: { set: false }, changes: false }] } },
+  handler: async (req, res) => ok(res, await delegations.previewDelegation(pool, req.body)),
+});
+define({
+  method: 'POST', path: '/delegations', summary: 'Request a delegation of approval authority for a period (reason from the Reason Codes master, context delegation); it applies once another administrator approves it (at once with access.change_approval off). Empty transaction types = every transaction the approver away can approve',
+  screen: `${S} > Delegations > New delegation`,
+  middleware: [...write, validate(z.object({ delegatorId: z.string().max(80), delegateId: z.string().max(80), transactionTypes: z.array(z.string().max(60)).max(50).optional(),
+    dateFrom: date, dateTo: date, ...reasonBody }))],
+  request: { delegatorId: 'usr_1', delegateId: 'usr_2', transactionTypes: ['journal_voucher'], dateFrom: '2026-10-12', dateTo: '2026-10-16', reasonCode: 'DLG-LEAVE' },
+  response: { success: true, data: { change: { ...changeExample, kind: 'delegation', kindLabel: 'Delegation' }, delegation: null } },
   handler: async (req, res) => {
-    const r = await svc.revokeDelegation(pool, req.params.id, req.user);
-    await audit(req, { entity: 'user_delegation', entityId: req.params.id, action: 'revoke', after: r });
-    ok(res, r, 'Delegation revoked');
+    const r = await withTransaction((db) => delegations.requestDelegation(db, req.body, req.user));
+    if (r.change) {
+      await audit(req, { entity: 'accounting_config_change', entityId: r.change.id, action: 'request', after: r.change });
+      await changes.askAccessApproval(r.change, req.user);
+      return created(res, r, `Delegation ${r.change.ref} sent for approval; it applies once another administrator approves it`);
+    }
+    await audit(req, { entity: 'user_delegation', entityId: String(r.delegation.id), action: 'create', after: r.delegation });
+    return created(res, r, 'Delegation recorded');
   },
+});
+const endDelegation = async (req, res) => {
+  const r = await withTransaction((db) => delegations.endDelegation(db, req.params.id, req.body || {}, req.user));
+  await audit(req, { entity: 'user_delegation', entityId: req.params.id, action: 'end', before: r.before, after: r.delegation });
+  await sendNotices(r.notices, req.user, `${delegations.DELEGATIONS_PATH}?view=ended`);
+  ok(res, r.delegation, 'Delegation ended');
+};
+define({
+  method: 'POST', path: '/delegations/:id/end', summary: 'End a delegation before its last day (reason of context delegation_end); it stops at once and both people are told',
+  screen: `${S} > Delegations`, middleware: [...write, validate(z.object(reasonBody))], request: { reasonCode: 'DLE-RETURNED' },
+  response: { success: true, data: { ...delegationExample, status: 'ended-early' } }, handler: endDelegation,
+});
+define({
+  method: 'POST', path: '/delegations/:id/revoke', summary: 'End a delegation early (the earlier name of /delegations/:id/end)', screen: `${S} > Delegations`,
+  middleware: [...write, validate(z.object(reasonBody))], request: { reasonCode: 'DLE-RETURNED' }, response: { success: true, data: { ...delegationExample, status: 'ended-early' } },
+  handler: endDelegation,
+});
+define({
+  method: 'GET', path: '/users/:id/authority', summary: 'The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step',
+  screen: `${S} > Delegations`, middleware: read, query: { date: '2026-10-12' },
+  response: { success: true, data: { asOf: '2026-10-12', lines: [{ transactionType: 'journal_voucher', name: 'Journal voucher approval', canApprove: true, set: true, limit: 750000,
+    unlimited: false, source: 'delegated by Mariela S. Valentino (user limit)' }] } },
+  handler: async (req, res) => ok(res, await delegations.userAuthority(pool, req.params.id, req.query.date || null)),
 });
 
 // ---------- segregation of duties ----------
-const SOD = z.object({ code: z.string().min(2).max(40).optional(), name: z.string().min(2).max(120), kind: z.enum(['roles', 'access']).optional(),
+const SOD = z.object({ code: z.string().min(2).max(40).optional(), name: z.string().min(2).max(120).optional(), kind: z.enum(['roles', 'access']).optional(),
   roleA: z.string().nullable().optional(), roleB: z.string().nullable().optional(), accessA: z.array(z.string()).max(100).optional(), accessB: z.array(z.string()).max(100).optional(),
-  action: z.enum(['block', 'warn']), reason: z.string().max(500).optional(), active: z.boolean().optional() });
+  action: z.enum(['block', 'warn']).optional(), reason: z.string().max(500).nullable().optional(), active: z.boolean().optional(), ...reasonBody });
+const ruleExample = { id: 6, code: 'SOD-TIS-BP-RECON', name: 'Receipting and reversals', kind: 'roles', roleA: 'tis-ccd-bp', roleAName: 'CCD-BP / QRPh (Receipting)',
+  roleB: 'tis-ccd-recon', roleBName: 'CCD-Recon', accessA: [], accessB: [], action: 'warn', reason: 'Receipts and their reversals are kept apart', active: true, users: 2,
+  platform: false, change: null, canEdit: true };
+const sodAnswer = async (req, res, r, verb) => {
+  if (r.change) {
+    await audit(req, { entity: 'accounting_config_change', entityId: r.change.id, action: 'request', after: r.change });
+    await changes.askAccessApproval(r.change, req.user);
+    return created(res, r, `Change ${r.change.ref} sent for approval; it applies once another administrator approves it`);
+  }
+  await audit(req, r.audit);
+  return ok(res, r, verb);
+};
 define({
-  method: 'GET', path: '/sod-rules', summary: 'Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine',
-  screen: `${S} > Segregation of Duties`, middleware: read,
-  response: { success: true, data: [{ id: 1, code: 'SOD-PROC-ACCT', kind: 'roles', roleA: 'processing', roleB: 'accounting', accessA: [], accessB: [], action: 'block' },
-    { id: 7, code: 'SOD-ACC-CLAIM-PAY', kind: 'access', roleA: null, roleB: null, accessA: ['write:claims'], accessB: ['write:disbursements'],
-      accessANames: ['Operations › Claims › Create and edit'], accessBNames: ['Accounts › Disbursements and petty cash › Create and edit'], action: 'warn' }] },
-  handler: async (_req, res) => ok(res, await svc.listSodRules(pool)),
-});
-define({
-  method: 'POST', path: '/sod-rules', summary: 'Add a segregation-of-duties rule', screen: `${S} > Segregation of Duties`, middleware: [...write, validate(SOD.required({ code: true }))],
-  request: { code: 'SOD-OPS-ACCT', name: 'Servicing and payment', roleA: 'operations', roleB: 'accounting', action: 'warn' }, response: { success: true, data: { id: 6 } },
+  method: 'GET', path: '/sod-rules', summary: 'Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine, with the active users breaking each and the change waiting for approval (?format=xlsx|csv: the workbook of the screen, &technical=1 adds the codes, &base=1 the rules between base platform roles)',
+  screen: `${S} > Segregation of Duties`, middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: { rows: [ruleExample], pendingNew: [], approval: true, maxExceptionDays: 365, asOf: '2026-10-10', abilities: { edit: true, approve: true } } },
   handler: async (req, res) => {
-    const r = await svc.saveSodRule(pool, req.body);
-    await audit(req, { entity: 'sod_rule', entityId: String(r.id), action: 'create', after: r });
-    created(res, r, 'Rule added');
+    if (!req.query.format) return ok(res, await sod.sodRuleList(pool, req.user));
+    const ctx = await printContext();
+    const sheets = await sod.sodSheets(pool, req.user, ctx.format, { technical: technicalOf(req), base: yes(req.query.base) });
+    await audit(req, { entity: 'sod_rule', entityId: 'workbook', action: 'export', after: { rules: sheets[0].rows.length, conflicts: sheets[1].rows.length } });
+    return sendSheets(res, { title: 'Segregation of duties', fileBase: 'segregation-of-duties', format: format(req.query), sheets, ctx });
   },
 });
 define({
-  method: 'PUT', path: '/sod-rules/:id', summary: 'Change a segregation-of-duties rule', screen: `${S} > Segregation of Duties`, middleware: [...write, validate(SOD)],
-  request: { name: 'Sales and collection', roleA: 'sales', roleB: 'accounting', action: 'block' }, response: { success: true, data: { id: 4 } },
+  method: 'POST', path: '/sod-rules', summary: 'Request a new segregation-of-duties rule (reason of context access_change; the code is given by the server unless sent); it applies once another administrator approves it',
+  screen: `${S} > Segregation of Duties`, middleware: [...write, validate(SOD.required({ name: true, action: true }))],
+  request: { name: 'Cheque encoding and reversals', roleA: 'tis-ccd-pdu', roleB: 'tis-ccd-recon', action: 'warn', reason: 'The person who encodes cheques should not reverse them', reasonCode: 'ACC-AUDIT' },
+  response: { success: true, data: { change: { ...changeExample, kind: 'sod-rule', kindLabel: 'Segregation of duties rule' } } },
+  handler: async (req, res) => sodAnswer(req, res, await withTransaction((db) => sod.requestSodRule(db, req.body, null, req.user)), 'Rule added'),
+});
+define({
+  method: 'PUT', path: '/sod-rules/:id', summary: 'Request a change of a segregation-of-duties rule, or switch it off or on with active (reason of context access_change)', screen: `${S} > Segregation of Duties`,
+  middleware: [...write, validate(SOD)], request: { action: 'block', reasonCode: 'ACC-AUDIT' },
+  response: { success: true, data: { change: { ...changeExample, kind: 'sod-rule', kindLabel: 'Segregation of duties rule' } } },
+  handler: async (req, res) => sodAnswer(req, res, await withTransaction((db) => sod.requestSodRule(db, req.body, req.params.id, req.user)), 'Rule saved'),
+});
+define({
+  method: 'DELETE', path: '/sod-rules/:id', summary: 'Request to switch a segregation-of-duties rule off (reason of context access_change in the body; the rule is kept for the record)',
+  screen: `${S} > Segregation of Duties`, middleware: [...write, validate(z.object(reasonBody))], request: { reasonCode: 'ACC-NOTNEEDED' },
+  response: { success: true, data: { change: { ...changeExample, kind: 'sod-rule', kindLabel: 'Segregation of duties rule' } } },
+  handler: async (req, res) => sodAnswer(req, res, await withTransaction((db) => sod.requestSodRule(db, { ...req.body, active: false }, req.params.id, req.user)), 'Rule switched off'),
+});
+define({
+  method: 'POST', path: '/sod-rules/check', summary: 'What a rule would do: the active users who hold both sides today', screen: `${S} > Segregation of Duties`,
+  middleware: [...read, validate(z.object({ kind: z.enum(['roles', 'access']).optional(), roleA: z.string().nullable().optional(), roleB: z.string().nullable().optional(),
+    accessA: z.array(z.string()).max(100).optional(), accessB: z.array(z.string()).max(100).optional() }))],
+  request: { roleA: 'tis-ccd-bp', roleB: 'tis-ccd-recon' }, response: { success: true, data: { users: 2, names: ['Gene Kelly Jaen', 'Marta Loi Dapula'] } },
+  handler: async (req, res) => ok(res, await sod.checkSodRule(pool, req.body)),
+});
+define({
+  method: 'GET', path: '/sod-conflicts', summary: 'Segregation-of-duties conflicts by user: every user (active by default, ?status=all) breaking an active rule, with the state of the conflict (open, accepted with its exception, waiting for approval, expired) (?userId, ruleId)',
+  screen: `${S} > Segregation of Duties`, middleware: read, query: { status: 'active', ruleId: 6 },
+  response: { success: true, data: { asOf: '2026-10-10', rows: [{ key: '6:usr_9', ruleId: 6, ruleName: 'Receipting and reversals', action: 'warn', userId: 'usr_9',
+    userName: 'Gene Kelly Jaen', department: 'Cash Control', heldTogether: ['CCD-BP / QRPh (Receipting)', 'CCD-Recon'], state: 'open', exception: null, change: null,
+    canRequest: true, canEnd: false }] } },
+  handler: async (req, res) => ok(res, await sod.sodConflictList(pool, { status: req.query.status === 'all' ? 'all' : 'active', userId: req.query.userId || null,
+    ruleId: req.query.ruleId || null }, req.user)),
+});
+define({
+  method: 'POST', path: '/sod-exceptions', summary: 'Request an exception for a conflict (one person, one rule) until a date, with a reason of context sod_exception; it applies once another administrator approves it, who is not the person concerned. Not for oneself',
+  screen: `${S} > Segregation of Duties`, middleware: [...write, validate(z.object({ ruleId: z.coerce.number().int(), userId: z.string().max(80), validUntil: date, ...reasonBody }))],
+  request: { ruleId: 6, userId: 'usr_9', validUntil: '2027-03-31', reasonCode: 'SXE-REVIEWED', note: 'Reversals reviewed weekly by the Finance head' },
+  response: { success: true, data: { change: { ...changeExample, kind: 'sod-exception', kindLabel: 'Segregation of duties exception' } } },
   handler: async (req, res) => {
-    const r = await svc.saveSodRule(pool, req.body, req.params.id);
-    await audit(req, { entity: 'sod_rule', entityId: req.params.id, action: 'update', after: r });
-    ok(res, r, 'Rule saved');
+    const r = await withTransaction((db) => sod.requestSodException(db, req.body, req.user));
+    if (r.change) {
+      await audit(req, { entity: 'accounting_config_change', entityId: r.change.id, action: 'request', after: r.change });
+      await changes.askAccessApproval(r.change, req.user);
+      return created(res, r, `Exception ${r.change.ref} sent for approval; it applies once another administrator approves it`);
+    }
+    await audit(req, { entity: 'sod_exception', entityId: String(r.exception.id), action: 'create', after: r.exception });
+    return created(res, r, 'Exception recorded');
   },
 });
 define({
-  method: 'DELETE', path: '/sod-rules/:id', summary: 'Switch off a segregation-of-duties rule', screen: `${S} > Segregation of Duties`, middleware: write, response: { success: true, data: { id: 4 } },
+  method: 'POST', path: '/sod-exceptions/:id/end', summary: 'End an exception in force; the conflict is open again at once', screen: `${S} > Segregation of Duties`, middleware: write,
+  response: { success: true, data: { id: 3, status: 'ended' } },
   handler: async (req, res) => {
-    const r = await svc.deleteSodRule(pool, req.params.id);
-    await audit(req, { entity: 'sod_rule', entityId: req.params.id, action: 'delete', after: r });
-    ok(res, r, 'Rule switched off');
+    const r = await withTransaction((db) => sod.endSodException(db, req.params.id, req.user));
+    await audit(req, { entity: 'sod_exception', entityId: req.params.id, action: 'end', after: r });
+    ok(res, r, 'Exception ended');
   },
 });
 define({
-  method: 'POST', path: '/sod-check', summary: 'Rules a set of roles would break (used by the user form before saving)', screen: `${S} > User`,
-  middleware: [requireAuth, requirePermission('write:users', 'read:access-control'), validate(z.object({ roles: z.array(z.string()) }))], request: { roles: ['processing', 'accounting'] },
-  response: { success: true, data: [{ name: 'Placement and payment', action: 'block' }] },
-  handler: async (req, res) => ok(res, await svc.sodConflicts(pool, req.body.roles)),
+  method: 'POST', path: '/sod-check', summary: 'Rules a set of roles would break (the user form before saving); with userId, the warnings say when an exception is in force',
+  screen: `${S} > User`, middleware: [requireAuth, requirePermission('write:users', 'read:access-control'), validate(z.object({ roles: z.array(z.string()), userId: z.string().max(80).optional() }))],
+  request: { roles: ['processing', 'accounting'] }, response: { success: true, data: [{ name: 'Placement and payment', action: 'block', exceptionUntil: null }] },
+  handler: async (req, res) => {
+    const found = await svc.sodConflicts(pool, req.body.roles);
+    const day = await today();
+    const accepted = req.body.userId ? (await sod.listExceptions(pool, { status: 'active', userId: req.body.userId })).filter((e) => e.validUntil >= day) : [];
+    ok(res, found.map((r) => ({ ...r, exceptionUntil: accepted.find((e) => e.ruleId === Number(r.id))?.validUntil || null })));
+  },
 });
 
 // ---------- access reviews ----------
+const scopeSchema = z.object({ kind: z.enum(['all', 'departments', 'roles']).default('all'), departments: z.array(z.string().max(120)).max(50).optional(),
+  roles: z.array(z.string().max(80)).max(100).optional() });
+const reviewExample = { id: 3, name: 'Access review Q3 FY2026', scopeText: 'All active users', dueDate: '2026-10-24', status: 'open', overdue: false, users: 17, pending: 5, kept: 10,
+  removeRoles: 1, deactivate: 1, removals: 2, applied: 0, createdBy: 'IT administrator' };
 define({
-  method: 'GET', path: '/reviews', summary: 'Access reviews (recertification campaigns) with progress', screen: `${S} > Access Reviews`, middleware: read,
-  response: { success: true, data: [{ id: 1, name: 'Q4 2026 access review', dueDate: '2026-12-15', status: 'open', users: 14, pending: 3 }] },
-  handler: async (_req, res) => ok(res, await svc.listReviews(pool)),
+  method: 'GET', path: '/reviews', summary: 'Access reviews with scope, progress, removals and the overdue state (?format=xlsx|csv for audit)', screen: `${S} > Access Reviews`, middleware: read,
+  query: { format: 'xlsx' }, response: { success: true, data: [reviewExample] },
+  handler: async (req, res) => {
+    if (!req.query.format) return ok(res, await reviews.listReviews(pool));
+    const ctx = await printContext();
+    return sendSheets(res, { title: 'Access reviews', fileBase: 'access-reviews', format: format(req.query), sheets: await reviews.reviewListSheets(pool, ctx.format), ctx });
+  },
 });
 define({
-  method: 'POST', path: '/reviews', summary: 'Start an access review of every active user', screen: `${S} > Access Reviews`,
-  middleware: [...write, validate(z.object({ name: z.string().min(3).max(120), dueDate: date }))], request: { name: 'Q4 2026 access review', dueDate: '2026-12-15' },
-  response: { success: true, data: { id: 1, items: [] } },
+  method: 'POST', path: '/reviews/preview', summary: 'How many active users a scope reviews', screen: `${S} > Access Reviews > Start a review`,
+  middleware: [...read, validate(scopeSchema)], request: { kind: 'departments', departments: ['Cash Control'] },
+  response: { success: true, data: { users: 4, scopeText: 'Cash Control' } },
+  handler: async (req, res) => ok(res, await reviews.previewReview(pool, req.body)),
+});
+define({
+  method: 'POST', path: '/reviews', summary: 'Start an access review of the active users of a scope (all, departments or roles); due date today or later', screen: `${S} > Access Reviews`,
+  middleware: [...write, validate(z.object({ name: z.string().min(3).max(120), dueDate: date, scope: scopeSchema.optional() }))],
+  request: { name: 'Access review Q3 FY2026', dueDate: '2026-10-24', scope: { kind: 'all' } }, response: { success: true, data: { ...reviewExample, items: [] } },
   handler: async (req, res) => {
-    const r = await withTransaction((db) => svc.startReview(db, req.body, req.user));
-    await audit(req, { entity: 'access_review', entityId: String(r.id), action: 'start', after: { name: r.name, users: r.items.length } });
-    // the users are kept or revoked with write:access-control (not by the person reviewed)
+    const r = await withTransaction((db) => reviews.startReview(db, req.body, req.user));
+    await audit(req, { entity: 'access_review', entityId: String(r.id), action: 'start', after: { name: r.name, scope: r.scope, users: r.items.length, dueDate: r.dueDate } });
+    // the users are decided with write:access-control (not by the person reviewed)
     await notifyApprovers({ audience: 'write:access-control', document: 'Access review', number: r.name, by: req.user.username, title: `Access review ${r.name} awaiting decisions`,
-      message: `${req.user.username} started ${r.name}: ${r.items.length} user(s) to keep or revoke by ${r.dueDate instanceof Date ? r.dueDate.toISOString().slice(0, 10) : r.dueDate}`,
-      link: '/master/generals/usermanagement/access-reviews', entity: 'access_review', entityId: r.id });
+      message: `${req.user.username} started ${r.name} (${r.scopeText}): ${r.items.length} user(s) to decide by ${r.dueDate}`,
+      link: `${reviews.REVIEWS_PATH}?review=${r.id}`, entity: 'access_review', entityId: r.id });
     created(res, r, `Access review started for ${r.items.length} user(s)`);
   },
 });
 define({
-  method: 'GET', path: '/reviews/:id', summary: 'One access review with every user and decision (?format=xlsx|csv to download)', screen: `${S} > Access Reviews`, middleware: read,
-  response: { success: true, data: { id: 1, items: [{ username: 'maria.rivera', roles: ['sales'], decision: 'pending' }] } },
+  method: 'GET', path: '/reviews/:id', summary: 'One access review with every user, outcome and removal state and the sign-off waiting for approval (?format=xlsx|csv: Summary and Users, &technical=1 adds the role codes)',
+  screen: `${S} > Access Reviews`, middleware: read,
+  response: { success: true, data: { ...reviewExample, canSubmit: false, items: [{ id: 41, displayName: 'Wendy Siading', department: 'Cash Control', roleNamesAtStart: ['CCD-Recon'],
+    decision: 'remove-roles', removeRoleNames: ['CCD-Recon'], remarks: 'Moved to another job or department', removalState: 'waiting', blocked: null, canDecide: true }] } },
   handler: async (req, res) => {
-    const r = await svc.getReview(pool, req.params.id);
-    if (req.query.format) return sendTable(res, { header: svc.REVIEW_HEADER, rows: svc.reviewRows(r), fileBase: `access-review-${r.id}`, format: format(req.query), sheetName: 'Review' });
-    return ok(res, r);
+    if (!req.query.format) return ok(res, await reviews.getReview(pool, req.params.id, req.user));
+    const ctx = await printContext();
+    const sheets = await reviews.reviewSheets(pool, req.params.id, req.user, ctx.format, { technical: technicalOf(req) });
+    await audit(req, { entity: 'access_review', entityId: req.params.id, action: 'export', after: { rows: sheets[1].rows.length } });
+    return sendSheets(res, { title: `Access review ${sheets[0].rows[0][1]}`, fileBase: `access-review-${req.params.id}`, format: format(req.query), sheets, ctx });
   },
 });
 define({
-  method: 'POST', path: '/reviews/:id/items/:itemId', summary: 'Keep or revoke one user\'s access (revoke deactivates the account and signs it out)', screen: `${S} > Access Reviews`,
-  middleware: [...write, validate(z.object({ decision: z.enum(['keep', 'revoke']), remarks: z.string().max(500).optional() }))], request: { decision: 'keep' },
-  response: { success: true, data: { id: 1 } },
+  method: 'POST', path: '/reviews/:id/items/keep', summary: 'Keep several users at once (optional note); lines that need a note or may not be decided by this user are left out and named',
+  screen: `${S} > Access Reviews`, middleware: [...write, validate(z.object({ itemIds: z.array(z.coerce.number().int()).min(1).max(1000), note: z.string().max(1000).optional() }))],
+  request: { itemIds: [41, 42] }, response: { success: true, data: { kept: ['Wendy Siading'], skipped: [{ name: 'Gene Kelly Jaen', reason: 'The user has a segregation-of-duties conflict without an exception' }] } },
   handler: async (req, res) => {
-    const r = await withTransaction((db) => svc.decideReviewItem(db, req.params.id, req.params.itemId, req.body, req.user));
-    await audit(req, { entity: 'access_review_item', entityId: req.params.itemId, action: req.body.decision, after: req.body });
-    ok(res, r, req.body.decision === 'revoke' ? 'Access revoked; the account is deactivated' : 'Access confirmed');
+    const r = await withTransaction((db) => reviews.keepReviewItems(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'access_review_item', entityId: `AR-${req.params.id}`, action: 'keep', after: { kept: r.kept, skipped: r.skipped, note: req.body.note || null } });
+    ok(res, r, `${r.kept.length} user(s) kept${r.skipped.length ? `; ${r.skipped.length} left out` : ''}`);
   },
 });
 define({
-  method: 'POST', path: '/reviews/:id/close', summary: 'Close a review once every user has been decided', screen: `${S} > Access Reviews`, middleware: write,
-  response: { success: true, data: { id: 1, status: 'closed' } },
+  method: 'POST', path: '/reviews/:id/items/:itemId', summary: 'Decide one user: keep access, remove roles or deactivate the account (reason of context access_review for a removal; a note for keeping a dormant user or one with an open conflict). The earlier decision revoke means deactivate',
+  screen: `${S} > Access Reviews`,
+  middleware: [...write, validate(z.object({ outcome: z.enum(['keep', 'remove-roles', 'deactivate']).optional(), decision: z.enum(['keep', 'revoke']).optional(),
+    removeRoles: z.array(z.string().max(80)).max(50).optional(), remarks: z.string().max(1000).optional(), ...reasonBody }))],
+  request: { outcome: 'remove-roles', removeRoles: ['tis-ccd-recon'], reasonCode: 'ARV-MOVED' }, response: { success: true, data: { ...reviewExample, items: [] } },
   handler: async (req, res) => {
-    const r = await svc.closeReview(pool, req.params.id, req.user);
-    await audit(req, { entity: 'access_review', entityId: req.params.id, action: 'close', after: { revoked: r.revoked } });
+    const r = await withTransaction((db) => reviews.decideReviewItem(db, req.params.id, req.params.itemId, req.body, req.user));
+    const item = r.review.items.find((i) => i.id === Number(req.params.itemId));
+    await audit(req, { entity: 'access_review_item', entityId: req.params.itemId, action: r.outcome, before: r.before,
+      after: { outcome: r.outcome, removeRoles: item?.removeRoles, reason: item?.remarks, applied: !!item?.appliedAt } });
+    ok(res, r.review, `${reviews.OUTCOME_WORDS[r.outcome]}: ${item?.displayName || ''}${item?.appliedAt ? ' (applied)' : ''}`);
+  },
+});
+define({
+  method: 'POST', path: '/reviews/:id/submit', summary: 'Submit a review whose users are all decided for sign-off by another administrator; its removals apply at sign-off',
+  screen: `${S} > Access Reviews`, middleware: write, response: { success: true, data: { review: { ...reviewExample, status: 'awaiting-signoff' }, change: { ...changeExample, kind: 'access-review' } } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => reviews.submitReview(db, req.params.id, req.user));
+    await audit(req, { entity: 'access_review', entityId: req.params.id, action: 'submit', after: r.change });
+    await changes.askAccessApproval(r.change, req.user);
+    created(res, r, `Access review sent for sign-off (${r.change.ref})`);
+  },
+});
+define({
+  method: 'POST', path: '/reviews/:id/close', summary: 'Close a review once every user is decided (only with access.change_approval off; otherwise the sign-off closes it)', screen: `${S} > Access Reviews`,
+  middleware: write, response: { success: true, data: { ...reviewExample, status: 'closed' } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => reviews.closeReview(db, req.params.id, req.user));
+    await audit(req, { entity: 'access_review', entityId: req.params.id, action: 'close', after: { removals: r.removals, applied: r.applied } });
     ok(res, r, 'Access review closed');
   },
 });
 
 // ---------- sessions ----------
 define({
-  method: 'POST', path: '/users/:id/sign-out', summary: 'End every session of a user (lost device, suspected misuse, role change)', screen: `${S} > User`,
+  method: 'POST', path: '/users/:id/sign-out', summary: 'End every session of a user (lost device, suspected misuse, role change); an administrator account only by a System Administrator', screen: `${S} > User`,
   middleware: [requireAuth, requirePermission('write:users')], response: { success: true, data: { userId: 'usr_1', signedOut: true } },
   handler: async (req, res) => {
     const r = await svc.signOutEverywhere(pool, req.params.id, req.user);
