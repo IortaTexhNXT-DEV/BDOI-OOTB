@@ -50,7 +50,7 @@ describe('fiscal year starting in April', () => {
     const sub = await ctx.as('maker')('post', `/period-end/close-runs/${run.id}/submit`).send({ target: 'closed' });
     expect(sub.body.data.status).toBe('closed');
     for (const p of ['2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03']) {
-      const r = await ctx.api('post', `/period-end/periods/${p}/status`).send({ status: 'closed', remarks: 'FY2026 close' });
+      const r = await ctx.api('post', `/period-end/periods/${p}/status`).send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'FY2026 close' });
       expect(r.status, `${p} ${r.body.message}`).toBe(200);
     }
     const prev = (await ctx.api('get', '/period-end/fiscal-years')).body.data.find((f) => f.code === 'FY2025');

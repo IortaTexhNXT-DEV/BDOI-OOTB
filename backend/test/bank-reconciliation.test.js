@@ -340,7 +340,7 @@ describe('month-end close integration', () => {
     bank = checks.find((c) => c.code === 'unreconciled_bank');
     expect(bank.detail.map((d) => d.bankAccount)).not.toContain(ACCT);
     expect((await admin('put', '/period-end/checklist/unreconciled_bank').send({ severity: 'blocking' })).status).toBe(200);
-    const close = await admin('post', '/period-end/periods/2026-07/status').send({ status: 'closed', remarks: 'try' });
+    const close = await admin('post', '/period-end/periods/2026-07/status').send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'try' });
     expect(close.status).toBe(409);
     expect(close.body.message).toMatch(/no approved bank reconciliation.*ACC-TEST-001/);
     await query('UPDATE app_settings SET value = \'"2026-08"\' WHERE key = \'bank_reconciliation.check_from_period\'');

@@ -55,8 +55,8 @@ describe('fiscal calendar and period statuses', () => {
     expect((await ctx.as('agent')('get', '/period-end/fiscal-years')).status).toBe(403);
   });
 
-  it('soft-closed periods accept postings only from finance managers; reopening needs approve:period-end and remarks', async () => {
-    const soft = await maker('post', '/period-end/periods/2026-02/status').send({ status: 'soft_closed', remarks: 'waiting for statements' });
+  it('soft-closed periods accept postings only from finance managers; reopening needs approve:period-end and a reason', async () => {
+    const soft = await maker('post', '/period-end/periods/2026-02/status').send({ status: 'soft_closed', reasonCode: 'PCL-OTHER', note: 'waiting for statements' });
     expect(soft.status, JSON.stringify(soft.body)).toBe(200);
     expect(soft.body.data.status).toBe('soft_closed');
     const lines = [{ accountCode: '4401008', debit: 100, credit: 0 }, { accountCode: '1101001', debit: 0, credit: 100 }];
@@ -65,13 +65,13 @@ describe('fiscal calendar and period statuses', () => {
     const mgr = { id: 'x', roles: ['accounting'], permissions: ['approve:period-end'] };
     const ok = await withTransaction((db) => createJournal(db, { date: '2026-02-10', lines, description: 'late supplies' }, mgr));
     expect(ok.status).toBe('posted');
-    expect((await maker('post', '/period-end/periods/2026-02/status').send({ status: 'open', remarks: 'x' })).status).toBe(403);
+    expect((await maker('post', '/period-end/periods/2026-02/status').send({ status: 'open', reasonCode: 'PRO-OTHER', note: 'x' })).status).toBe(403);
     expect((await admin('post', '/period-end/periods/2026-02/status').send({ status: 'open' })).status).toBe(400);
-    const reopen = await admin('post', '/period-end/periods/2026-02/status').send({ status: 'open', remarks: 'statement received' });
+    const reopen = await admin('post', '/period-end/periods/2026-02/status').send({ status: 'open', reasonCode: 'PRO-OTHER', note: 'statement received' });
     expect(reopen.status).toBe(200);
     const hist = (await maker('get', '/period-end/periods/2026-02/history')).body.data;
     expect(hist.map((h) => h.to)).toEqual(['open', 'soft_closed']);
-    expect(hist[0].remarks).toBe('statement received');
+    expect(hist[0]).toMatchObject({ remarks: 'Other: statement received', reasonCode: 'PRO-OTHER', reasonName: 'Other' });
   });
 });
 
@@ -91,7 +91,7 @@ describe('month-end close run', () => {
     expect(unposted).toMatchObject({ status: 'failed', count: 1 });
     expect(ex.body.data.checks.find((c) => c.code === 'trial_balance').status).toBe('passed');
     expect((await maker('post', `/period-end/close-runs/${runJul.id}/submit`).send({ target: 'closed' })).status).toBe(409);
-    const direct = await admin('post', '/period-end/periods/2026-07/status').send({ status: 'closed', remarks: 'force' });
+    const direct = await admin('post', '/period-end/periods/2026-07/status').send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'force' });
     expect(direct.status).toBe(409);
     expect(direct.body.message).toMatch(/not posted/);
 
@@ -274,7 +274,7 @@ describe('year-end close', () => {
     expect((await admin('post', `/period-end/year-end/${ye.id}/close`).send({})).status).toBe(409);
     for (let m = 1; m <= 12; m += 1) {
       const p = `2025-${String(m).padStart(2, '0')}`;
-      const r = await admin('post', `/period-end/periods/${p}/status`).send({ status: 'closed', remarks: 'year end' });
+      const r = await admin('post', `/period-end/periods/${p}/status`).send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'year end' });
       expect(r.status, `${p} ${r.body.message}`).toBe(200);
     }
     const ok = await maker('post', `/period-end/year-end/${ye.id}/check`).send({});
@@ -327,7 +327,7 @@ describe('year-end close', () => {
 
   it('a locked year refuses postings and reopening; the close is reversible until the next year\'s first period closes', async () => {
     await expect(journal({ date: '2025-06-10', lines: [{ accountCode: '4401008', debit: 1, credit: 0 }, { accountCode: '1101001', debit: 0, credit: 1 }] })).rejects.toThrow(/locked/);
-    const reopen = await admin('post', '/period-end/periods/2025-06/status').send({ status: 'open', remarks: 'fix' });
+    const reopen = await admin('post', '/period-end/periods/2025-06/status').send({ status: 'open', reasonCode: 'PRO-OTHER', note: 'fix' });
     expect(reopen.status).toBe(409);
     expect(reopen.body.message).toMatch(/locked/);
     await expect(query('UPDATE accounting_periods SET status = \'open\' WHERE period = \'2025-06\'')).rejects.toThrow(/locked/);
@@ -355,7 +355,7 @@ describe('year-end close', () => {
     expect(closed.status, JSON.stringify(closed.body)).toBe(200);
     expect(closed.body.data.netIncome).toBeCloseTo(netIncome - 1500, 2);
 
-    const jan = await admin('post', '/period-end/periods/2026-01/status').send({ status: 'closed', remarks: 'January' });
+    const jan = await admin('post', '/period-end/periods/2026-01/status').send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'January' });
     expect(jan.status, jan.body.message).toBe(200);
     const late = await admin('post', `/period-end/year-end/${again.id}/reverse`).send({ reason: 'too late' });
     expect(late.status).toBe(409);

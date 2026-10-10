@@ -103,8 +103,13 @@ export async function runChecks(db, p, items) {
   return out;
 }
 
+/** Results of the active blocking auto checks for a period (the checks every close runs first). */
+export async function blockingChecks(db, p) {
+  const items = (await checklistItems(db)).filter((i) => i.item_type === 'auto' && i.severity === 'blocking');
+  return runChecks(db, p, items);
+}
+
 /** Blocking auto checks that fail for a period (used before any close). */
 export async function blockingFailures(db, p) {
-  const items = (await checklistItems(db)).filter((i) => i.item_type === 'auto' && i.severity === 'blocking');
-  return (await runChecks(db, p, items)).filter((r) => r.status === 'failed');
+  return (await blockingChecks(db, p)).filter((r) => r.status === 'failed');
 }
