@@ -118,11 +118,10 @@ describe('generated upload templates', () => {
     expect(defs.find((x) => x.id === 'remittance-bulk').columns.map((c) => c.header)).toEqual(maps.map((m) => m.sourceField));
   });
 
-  it('the CSV-only templates match the readers outside the API (provisioning script, reconciliation screen)', () => {
+  // the remittance reconciliation screen that read the bank transactions CSV in the browser is retired (R1)
+  it('the CSV-only templates match the readers outside the API (provisioning script)', () => {
     const script = fs.readFileSync(path.join(here, '..', 'scripts', 'provision-users.js'), 'utf8');
     for (const c of defs.find((x) => x.id === 'users').columns) expect(script).toContain(`col('${c.header}')`);
-    const screen = fs.readFileSync(path.join(repo, 'brokerverse', 'src', 'module', 'Remittance', 'Reconciliation', 'index.js'), 'utf8');
-    for (const c of defs.find((x) => x.id === 'remittance-bank-transactions').columns) expect(screen).toContain(`"${c.header.toLowerCase()}"`);
   });
 });
 
