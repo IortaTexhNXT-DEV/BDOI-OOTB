@@ -7734,7 +7734,9 @@
         "systemDescription": "System description approved",
         "backupProcedure": "Backup procedure approved",
         "books": "Books printed at least once"
-      }
+      },
+      "action": "Action",
+      "setByAdministrator": "Set by the administrator"
     },
     "casReg": {
       "title": {
@@ -7822,7 +7824,8 @@
       "discardMessage": "Draft version {{version}} is cancelled; the approved version stays in force.",
       "unsavedTitle": "Unsaved changes",
       "unsavedMessage": "The changes to the draft are not saved.",
-      "closeWithoutSaving": "Close without saving"
+      "closeWithoutSaving": "Close without saving",
+      "withdraw": "Withdraw submission"
     },
     "systemDescription": "System description",
     "backupProcedure": "Backup procedure",

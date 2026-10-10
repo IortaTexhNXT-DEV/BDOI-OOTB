@@ -129,6 +129,7 @@ const birTaxService = {
   approveCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/approve`, remarks ? { remarks } : {}),
   rejectCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/reject`, { remarks }),
   discardCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft/discard`),
+  withdrawCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft/withdraw`),
   auditExtract: (from, to, format) => openFile(`/bir/cas/audit-extract${qs({ from, to, format })}`, { fallbackName: `audit-trail.${format}` }),
 
   // overriding commission from insurers

@@ -2,7 +2,7 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import CasPack from "./CasPack";
-import CasDocumentDialog, { CompareView, resolveFields } from "./CasDocumentDialog";
+import CasDocumentDialog, { CompareView, fromLabels, resolveFields, toLabels } from "./CasDocumentDialog";
 import birTaxService from "../../services/birTaxService";
 
 jest.mock("react-i18next", () => ({
@@ -71,8 +71,8 @@ describe("CAS Books and Documents", () => {
   it("links the company items to the Company master for an administrator", async () => {
     signIn({ roles: ["system-admin"] });
     renderPage();
-    const link = await screen.findByText("birTax.casReadiness.openCompany");
-    expect(link.getAttribute("href")).toBe("/master/generals/organization/companymaster");
+    expect(await screen.findAllByRole("button", { name: "birTax.casReadiness.openCompany" })).not.toHaveLength(0);
+    expect(screen.queryByText("birTax.casReadiness.setByAdministrator")).toBeNull();
   });
 
   it("hides the registration actions from a read-only user", async () => {
@@ -80,6 +80,8 @@ describe("CAS Books and Documents", () => {
     renderPage();
     await screen.findByText("RDO code");
     expect(screen.queryByRole("button", { name: "birTax.casReadiness.enter.permit" })).toBeNull();
+    // the company items are the administrator's
+    expect(screen.getAllByText("birTax.casReadiness.setByAdministrator").length).toBeGreaterThan(0);
   });
 
   it("asks for the permit number and date before saving them", async () => {
@@ -98,13 +100,17 @@ describe("CAS Books and Documents", () => {
 describe("CAS document dialog", () => {
   it("resolves the live fields as printed", () => {
     expect(resolveFields("{{taxpayerName}} / {{tin}} / {{other}}", fields)).toBe("TISPH / - / {{other}}");
+    expect(toLabels("{{taxpayerName}} ({{tin}})", fields)).toBe("[Taxpayer name] ([TIN])");
+    expect(fromLabels("[Taxpayer name] ([TIN])", fields)).toBe("{{taxpayerName}} ({{tin}})");
   });
 
-  it("edits a draft: sections, insert field, add section; submit asks for a reason and a change note", async () => {
+  it("edits a draft: sections, insert field, add section; submit asks for a reason with its note as the change note", async () => {
     birTaxService.casDocument.mockResolvedValue({ slug: "system-description", title: "System Description and Controls", open: draft, approved: null, versions: [draft], fields, activity: [] });
     render(<CasDocumentDialog slug="system-description" onHide={jest.fn()} onChanged={jest.fn()} />);
     const heading = await screen.findByLabelText("birTax.casDoc.heading");
     expect(heading.value).toBe("Purpose and scope");
+    // the live fields are edited by their label, and kept as fields
+    expect(screen.getByLabelText("birTax.casDoc.text").value).toBe("System of [Taxpayer name]");
     fireEvent.change(heading, { target: { value: "Scope" } });
     fireEvent.click(screen.getByRole("button", { name: "birTax.casDoc.addSection" }));
     expect(screen.getAllByLabelText("birTax.casDoc.heading")).toHaveLength(2);
@@ -112,7 +118,9 @@ describe("CAS document dialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "birTax.submit" }));
     const submit = await screen.findAllByRole("button", { name: "birTax.submit" });
     fireEvent.click(submit[submit.length - 1]);
-    expect(await screen.findByText("birTax.casReg.required")).toBeInTheDocument();
+    expect(await screen.findByText("reasonPicker.reasonRequired")).toBeInTheDocument();
+    expect(screen.getByLabelText(/birTax.casDoc.changeNote/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Note/)).toBeNull();
     expect(birTaxService.submitCasDraft).not.toHaveBeenCalled();
     expect(birTaxService.saveCasDraft).not.toHaveBeenCalled();
   });

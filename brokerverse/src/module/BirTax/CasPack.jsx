@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -64,6 +64,7 @@ const CasPack = () => {
   const [registering, setRegistering] = useState(null);
   const [range, setRange] = useState({ from: "", to: toIsoDate(new Date()) });
 
+  const navigate = useNavigate();
   const canWrite = hasPermission("write:period-end");
   const companyLink = mayConfigure(COMPANY_MASTER_PATH);
   const documentSlug = params.get("document");
@@ -81,14 +82,17 @@ const CasPack = () => {
     booksRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     booksRef.current?.focus({ preventScroll: true });
   };
+  // one style for every action of the readiness list: a link of the table's text size
+  const actionLink = (label, onClick) => <Button type="button" link size="small" className="cas-action-link" label={label} onClick={onClick} />;
   const actionOf = (r) => {
     if (r.status === "complete") return null;
     if (r.action === "company") {
-      return companyLink ? <Link to={COMPANY_MASTER_PATH} className="cas-action-link">{t("birTax.casReadiness.openCompany")}</Link> : null;
+      return companyLink ? actionLink(t("birTax.casReadiness.openCompany"), () => navigate(COMPANY_MASTER_PATH))
+        : <span className="pe-muted">{t("birTax.casReadiness.setByAdministrator")}</span>;
     }
-    if (r.action === "document") return <Button type="button" text size="small" label={t("birTax.casReadiness.openDocument")} onClick={() => openDocument(DOCUMENT_OF[r.code])} />;
-    if (r.action === "books") return <Button type="button" text size="small" label={t("birTax.casReadiness.goToBooks")} onClick={goToBooks} />;
-    return canWrite ? <Button type="button" text size="small" label={t(`birTax.casReadiness.enter.${r.action}`)} onClick={() => setRegistering(r.action)} /> : null;
+    if (r.action === "document") return actionLink(t("birTax.casReadiness.openDocument"), () => openDocument(DOCUMENT_OF[r.code]));
+    if (r.action === "books") return actionLink(t("birTax.casReadiness.goToBooks"), goToBooks);
+    return canWrite ? actionLink(t(`birTax.casReadiness.enter.${r.action}`), () => setRegistering(r.action)) : null;
   };
 
   const confirmVoid = async () => {
@@ -131,7 +135,7 @@ const CasPack = () => {
             )} />
             <Column header={t("birTax.statusLabel")} style={{ width: "9rem" }}
               body={(r) => <StatusChip code={r.status} label={t(`birTax.casReadiness.${r.status}`)} severity={r.status === "complete" ? "success" : "warning"} />} />
-            <Column style={{ width: "12rem" }} body={actionOf} />
+            <Column header={t("birTax.casReadiness.action")} style={{ width: "13rem" }} body={actionOf} />
           </DataTable>
         )}
         {pack.error ? <div className="pe-error" role="alert">{pack.error}</div> : null}
@@ -146,10 +150,10 @@ const CasPack = () => {
             <Column header={t("birTax.casDoc.approvedVersion")} className="bv-num" headerClassName="bv-num" body={(d) => (d.approved ? d.approved.version : DASH)} />
             <Column header={t("birTax.casDoc.approvedAt")} body={(d) => dateTime(d.approved?.approvedAt)} />
             <Column header={t("birTax.casDoc.inProgress")} body={(d) => (d.open ? <span className="flex gap-2 align-items-center">{d.open.version}<DocStatus status={d.open.status} t={t} /></span> : DASH)} />
-            <Column style={{ width: "13rem" }} body={(d) => (
+            <Column header={t("birTax.casReadiness.action")} style={{ width: "13rem" }} body={(d) => (
               <span className="flex gap-1 justify-content-end">
                 <Button type="button" outlined size="small" label={t("birTax.open")} onClick={() => openDocument(d.slug)} />
-                <Button type="button" icon="pi pi-file-pdf" text size="small" label={t("birTax.print")} onClick={() => run(() => birTaxService.casDocumentPdf(d.slug))} />
+                <Button type="button" icon="pi pi-file-pdf" outlined size="small" label={t("birTax.print")} onClick={() => run(() => birTaxService.casDocumentPdf(d.slug))} />
               </span>
             )} />
           </DataTable>

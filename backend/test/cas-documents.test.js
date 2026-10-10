@@ -86,11 +86,10 @@ describe('CAS documents: draft, submit, approve', () => {
     const wrong = await maker('post', `${SD}/draft/submit`).send({ reasonCode: 'CPV-MISPRINT', changeNote: 'First version' });
     expect(wrong.status).toBe(400);
     expect(wrong.body.errors[0].path).toBe('reasonCode');
-    const note = await maker('post', `${SD}/draft/submit`).send({ reasonCode: 'CDC-OTHER', changeNote: 'First version' });
-    expect(note.body.errors[0].path).toBe('note');
     const r = await maker('post', `${SD}/draft/submit`).send({ reasonCode: 'CDC-SYSTEM', changeNote: 'First version for the registration file' });
     expect(r.status, JSON.stringify(r.body)).toBe(200);
-    expect(r.body.data.open).toMatchObject({ status: 'submitted', reasonCode: 'CDC-SYSTEM', changeNote: 'First version for the registration file' });
+    // the change note is the note of the reason; the reason keeps its name
+    expect(r.body.data.open).toMatchObject({ status: 'submitted', reasonCode: 'CDC-SYSTEM', reason: 'System or software version change', changeNote: 'First version for the registration file' });
     expect((await maker('put', `${SD}/draft`).send({ sections: detail.open.sections })).status).toBe(409);
   });
 
@@ -164,6 +163,26 @@ describe('CAS documents: draft, submit, approve', () => {
     expect(discarded.body.data.versions[0]).toMatchObject({ version: 3, status: 'cancelled' });
     expect((await maker('post', `${BP}/draft/discard`)).status).toBe(409);
   });
+
+  it('the submitter may not return their own version, but withdraws it; only the submitter withdraws', async () => {
+    expect((await mgr('post', `${BP}/draft`)).status).toBe(201);
+    expect((await mgr('post', `${BP}/draft/submit`).send({ reasonCode: 'CDC-TEXT', changeNote: 'Wording' })).status).toBe(200);
+    const own = await mgr('post', `${BP}/draft/reject`).send({ remarks: 'self' });
+    expect(own.status).toBe(403);
+    expect(own.body.message).toMatch(/Maker-checker/);
+    expect((await maker('post', `${BP}/draft/withdraw`)).status).toBe(403);
+    const back = await mgr('post', `${BP}/draft/withdraw`);
+    expect(back.status, JSON.stringify(back.body)).toBe(200);
+    expect(back.body.data.open).toMatchObject({ status: 'draft', submittedBy: null });
+    expect((await mgr('post', `${BP}/draft/discard`)).status).toBe(200);
+  });
+
+  it('prints the preparer and the custodian it names on the backup procedure, and no number on the document', async () => {
+    const pdf = (await maker('get', BP).buffer(true).parse(binary)).body.toString('latin1');
+    expect(pdf).toMatch(/Prepared by/);
+    expect(pdf).toMatch(/Custodian/);
+    expect(pdf).not.toMatch(/No\. iNXT/);
+  });
 });
 
 describe('CAS registration values and readiness', () => {
@@ -180,6 +199,7 @@ describe('CAS registration values and readiness', () => {
     expect((await sales('put', '/bir/cas/registration').send({ permitNumber: 'X' })).status).toBe(403);
     expect((await maker('put', '/bir/cas/registration').send({ 'cas.permit_number': 'X' })).status).toBe(400);
     expect((await maker('put', '/bir/cas/registration').send({ permitDate: '01/02/2026' })).status).toBe(400);
+    expect((await maker('put', '/bir/cas/registration').send({ permitDate: '2026-02-31' })).status).toBe(400);
     expect((await maker('put', '/bir/cas/registration').send({ custodianUserId: 'nobody' })).body.errors[0].path).toBe('custodianUserId');
     const reg = (await maker('get', '/bir/cas/registration')).body.data;
     const person = reg.people.find((p) => p.name === 'checker user');

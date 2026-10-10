@@ -64,7 +64,9 @@ export async function fieldValues(db) {
   const fmt = await printFormat();
   const permitDate = await s('cas.permit_date');
   const series = (await db.query('SELECT name, prefix FROM document_numbering WHERE active ORDER BY name')).rows;
-  const roles = (await db.query('SELECT name FROM roles ORDER BY name')).rows;
+  // the active roles, without those kept out of the registration documents (cas.document_excluded_roles: test roles)
+  const excluded = (await getSetting('cas.document_excluded_roles', [])) || [];
+  const roles = (await db.query('SELECT name FROM roles WHERE status = \'active\' AND NOT (code = ANY($1::text[])) ORDER BY name', [excluded])).rows;
   const accounts = (await db.query('SELECT count(*)::int AS n FROM gl_accounts WHERE status = \'active\'')).rows[0].n;
   return {
     taxpayerName: id.name, tin: id.tinFormatted, address: id.address, rdoCode: id.rdoCode, casPermitNumber: await s('cas.permit_number'),
@@ -233,10 +235,11 @@ export async function submitDraft(db, slug, { reasonCode, note, changeNote }, us
   const open = await lockOpen(db, type);
   if (!open || open.status !== 'draft') throw conflict(`The ${DOCUMENTS[type].title} has no draft to submit`);
   if (!String(changeNote || '').trim()) throw badRequest('Validation failed', [{ path: 'changeNote', message: 'changeNote is required' }]);
-  const reason = await requiredReason(db, 'cas_document_change', { reasonCode, note });
+  // the change note is the note of the reason (a reason that asks for a note gets it); the reason keeps its name
+  const reason = await requiredReason(db, 'cas_document_change', { reasonCode, note: note ?? changeNote });
   const r = (await db.query(`UPDATE cas_documents SET status = 'submitted', change_note = $2, reason_code = $3, reason = $4, submitted_by = $5, submitted_at = now(),
       rejected_by = NULL, rejected_at = NULL, rejection_remarks = NULL WHERE id = $1 RETURNING *`,
-  [open.id, String(changeNote).trim(), reason.code, reason.text, user?.id ?? null])).rows[0];
+  [open.id, String(changeNote).trim(), reason.code, note ? reason.text : reason.name, user?.id ?? null])).rows[0];
   return { before: open, after: r };
 }
 
@@ -258,8 +261,19 @@ export async function rejectVersion(db, slug, { remarks }, user) {
   const type = docType(slug);
   const open = await lockOpen(db, type);
   if (!open || open.status !== 'submitted') throw conflict(`The ${DOCUMENTS[type].title} has no version awaiting approval`);
+  for (const maker of [open.created_by, open.updated_by, open.submitted_by]) await assertChecker(user, maker, 'document version');
   const r = (await db.query('UPDATE cas_documents SET status = \'draft\', rejected_by = $2, rejected_at = now(), rejection_remarks = $3 WHERE id = $1 RETURNING *',
     [open.id, user?.id ?? null, String(remarks).trim()])).rows[0];
+  return { before: open, after: r };
+}
+
+/** The submitter takes back a version awaiting approval: it returns to draft, nobody decided on it. */
+export async function withdrawSubmission(db, slug, user) {
+  const type = docType(slug);
+  const open = await lockOpen(db, type);
+  if (!open || open.status !== 'submitted') throw conflict(`The ${DOCUMENTS[type].title} has no version awaiting approval`);
+  if (open.submitted_by && open.submitted_by !== user?.id) throw forbidden('Only the user who submitted the version may withdraw it');
+  const r = (await db.query('UPDATE cas_documents SET status = \'draft\', submitted_by = NULL, submitted_at = NULL, updated_at = now() WHERE id = $1 RETURNING *', [open.id])).rows[0];
   return { before: open, after: r };
 }
 
@@ -346,11 +360,13 @@ export async function documentPdf(db, slug, { version = null, user = null } = {}
       ['Form of books', values.booksForm], ['CAS permit / acknowledgement', values.casPermitNumber || 'to be issued'], ['Contact person', values.contact || MISSING]]
     : [['Taxpayer', values.taxpayerName], ['TIN', values.tin], ['Custodian', values.custodian || MISSING]];
   const pdf = await renderPdf({
-    title: d.pdfTitle, number: type === 'system_description' ? `${values.software} ${pkg.version}` : values.software,
+    title: d.pdfTitle,
     meta: [...meta, ...control],
     sections: [
       ...sections.map((s, i) => ({ heading: `${i + 1}. ${s.heading}`, text: resolveText(s.text, values) })),
-      { signatures: [{ label: type === 'system_description' ? 'Prepared by' : 'Custodian', name: row ? name(row.submitted_by || row.created_by) : '' },
+      // the preparer signs; the backup procedure is also signed by the custodian it names
+      { signatures: [{ label: 'Prepared by', name: row ? name(row.submitted_by || row.created_by) : '' },
+        ...(type === 'backup_procedure' ? [{ label: 'Custodian', name: values.custodian || '' }] : []),
         { label: 'Approved by (taxpayer)', name: row?.approved_by ? name(row.approved_by) : '', date: row?.approved_at ? formatDate(row.approved_at, fmt) : undefined }] },
     ],
     ...(MARKS[status] ? { watermark: MARKS[status] } : {}),

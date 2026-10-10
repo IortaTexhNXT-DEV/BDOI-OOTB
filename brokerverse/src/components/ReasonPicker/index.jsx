@@ -33,10 +33,11 @@ export const reasonPayload = (value) => ({
 /**
  * The reason of a decision, chosen from the Reason Codes master (Master > Insurance Management > Reason Codes) for one
  * context or several, with a note that becomes required when the chosen reason asks for one (Other). The value is
- * { reasonCode, reasonLabel, note, noteRequired }; reasonProblem(value) tells what is missing and reasonPayload(value)
+ * { reasonCode, reasonLabel, note, noteRequired } (noteRequired: the reason asks for a note, or the screen always does);
+ * reasonProblem(value) tells what is missing and reasonPayload(value)
  * gives the fields to send. The server checks the same rules again.
  */
-const ReasonPicker = ({ context, value, onChange, label, noteLabel, required = true, disabled = false, showErrors = false, autoFocus = false, className = "" }) => {
+const ReasonPicker = ({ context, value, onChange, label, noteLabel, required = true, noteRequired = false, disabled = false, showErrors = false, autoFocus = false, className = "" }) => {
   const { t } = useTranslation();
   const id = `bv-reason-${useId().replace(/:/g, "")}`;
   const contexts = useMemo(() => [].concat(context), [context]);
@@ -54,7 +55,7 @@ const ReasonPicker = ({ context, value, onChange, label, noteLabel, required = t
   const emit = (patch) => onChange({ reasonCode: null, reasonLabel: null, note: "", noteRequired: false, ...current, ...patch });
   const choose = (code) => {
     const option = options.find((o) => o.value === code);
-    emit({ reasonCode: option ? option.value : null, reasonLabel: option ? option.label : null, noteRequired: !!option?.requiresNote });
+    emit({ reasonCode: option ? option.value : null, reasonLabel: option ? option.label : null, noteRequired: noteRequired || !!option?.requiresNote });
   };
 
   return (
@@ -72,7 +73,7 @@ const ReasonPicker = ({ context, value, onChange, label, noteLabel, required = t
       <div className="bv-reason__field">
         <label htmlFor={`${id}-note`} className="bv-field-label">
           {noteLabel || t("reasonPicker.note", "Note")}
-          {current.noteRequired ? <span className="required-marker">*</span> : <span className="bv-reason__optional">{t("reasonPicker.optional", "(optional)")}</span>}
+          {current.noteRequired || noteRequired ? <span className="required-marker">*</span> : <span className="bv-reason__optional">{t("reasonPicker.optional", "(optional)")}</span>}
         </label>
         <InputTextarea id={`${id}-note`} value={current.note || ""} onChange={(e) => emit({ note: e.target.value })} disabled={disabled} rows={3} autoResize maxLength={NOTE_MAX_LENGTH}
           className={`w-full${problem === "note" ? " p-invalid" : ""}`} aria-invalid={problem === "note" || undefined} aria-describedby={problem === "note" ? `${id}-note-error` : undefined} />
@@ -95,6 +96,8 @@ ReasonPicker.propTypes = {
   noteLabel: PropTypes.string,
   /** a reason must be chosen (true by default) */
   required: PropTypes.bool,
+  /** the note is required whatever the reason (the change note of a controlled document) */
+  noteRequired: PropTypes.bool,
   disabled: PropTypes.bool,
   /** shows what is missing under the fields (set it once the user tried to confirm) */
   showErrors: PropTypes.bool,
