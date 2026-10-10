@@ -35,10 +35,12 @@ describe('masters', () => {
     expect(sources.map((s) => s.code)).toContain('UCFP');
     // the reasons of the accounting decisions (seed 88) are counted in accounting-reasons.test.js, those of the remittance
     // decisions (seed 89) in remittance-authority.test.js, the invoice cancellations (seed 89) in bir-forms.test.js,
-    // those of access decisions (seeds 91) in role-permissions.test.js and access-screens.test.js
+    // those of access decisions (seeds 91) in role-permissions.test.js and access-screens.test.js, those of renewal
+    // disposition and claim handling (seed 92) in renewal-controls.test.js and claim-controls.test.js
     const reasons = await q(`SELECT data->>'context' AS context, count(*)::int AS n FROM master_records WHERE type_code = 'reason-code'
       AND data->>'context' NOT IN ('period_close', 'period_reopen', 'year_end_reverse', 'year_end_cancel', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject',
-      'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review')
+      'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review',
+      'renewal_reassign', 'non_renewal', 'claim_cancel', 'claim_cash_reversal')
       AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
       { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);

@@ -86,7 +86,7 @@ describe('renewal notice schedule', () => {
     // the sample book has other renewals due too: the counts cover at least this suite's policies
     expect(r.sent).toBeGreaterThanOrEqual(8);
     expect(r.caughtUp).toBeGreaterThanOrEqual(2);
-    expect(r.withheld).toBe(3);
+    expect(r.withheld).toBeGreaterThanOrEqual(3);
     expect(await noticesOf('n90')).toEqual([1]);
     expect(await noticesOf('n85')).toEqual([1]);
     expect(await noticesOf('n55')).toEqual([2]);
@@ -193,7 +193,8 @@ describe('lock-in accounts and the TFS loan status', () => {
     expect(hld).toMatchObject({ loanStatus: 'past-due', loanStatusLabel: 'Past due', sourceLabel: 'Scheme 1 ARA' });
     expect(hld.noticeTreatment.code).toBe('held');
     const held = await as('rn.sales', 'get', '/renewals/lock-ins?treatment=held');
-    expect(held.body.data.items.map((x) => x.policyNumber)).toEqual(['POL-hld']);
+    expect(held.body.data.items.map((x) => x.policyNumber)).toContain('POL-hld');
+    expect(held.body.data.items.map((x) => x.noticeTreatment.code)).toEqual(held.body.data.items.map(() => 'held'));
     const x = await as('rn.sales', 'get', '/renewals/lock-ins?format=excel').buffer(true).parse((res, cb) => { const c = []; res.on('data', (d) => c.push(d)); res.on('end', () => cb(null, Buffer.concat(c))); });
     expect(x.headers['content-type']).toContain('spreadsheetml');
   });

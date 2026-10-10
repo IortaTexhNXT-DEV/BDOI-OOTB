@@ -96,6 +96,7 @@ describe('renewal terms: frozen while awaiting approval, approved premium booked
 
 describe('renewal approval within the Authority Matrix', () => {
   it('approves within the limit, refuses above it and refuses an approver without a renewal terms limit', async () => {
+    await setSetting('renewals.require_authority_limit', true);
     const r = await submitted('rc04');
     expect(r.renewalPremium).toBeGreaterThan(20000);
     await query("UPDATE authority_limits SET max_amount = 20000 WHERE transaction_type = 'renewal_terms' AND role_code = 'tis-sales-officer'");
@@ -114,6 +115,7 @@ describe('renewal approval within the Authority Matrix', () => {
     expect(gm.body.data.approvedBy).toBe('Gloria Manalo');
     await query("UPDATE authority_limits SET max_amount = 250000 WHERE transaction_type = 'renewal_terms' AND role_code = 'tis-sales-officer'");
     await query("UPDATE authority_limits SET status = 'active' WHERE transaction_type = 'renewal_terms' AND role_code = 'tis-sales-unit-head'");
+    await setSetting('renewals.require_authority_limit', false);
   });
 });
 

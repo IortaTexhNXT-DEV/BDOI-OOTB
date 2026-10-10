@@ -330,7 +330,7 @@ export async function acceptanceCheck(policy, lossDate) {
       problems.push({ code: 'LOSS_OUTSIDE_PERIOD', message: `Date of loss ${lossDate} is outside the policy period ${policy.inception_date} to ${policy.expiry_date}` });
     }
   }
-  if (await getSetting('claims.block_unpaid_premium', true)) {
+  if ((await getSetting('claims.block_unpaid_premium')) !== false) {
     const due = (await one(`SELECT COALESCE(sum(balance), 0)::numeric AS due FROM receivables
       WHERE policy_id = $1 AND balance > 0 AND status NOT IN ('paid', 'written-off')`, [policy.id])).due;
     if (due > 0) problems.push({ code: 'UNPAID_PREMIUM', message: `Policy ${policy.policy_number} has unpaid premium of ${await formatMoney(due)}`, outstanding: due });
@@ -487,7 +487,7 @@ export async function registrationCheck({ policyRef, lossDate, reportedDate }) {
   const due = (await one(`SELECT COALESCE(sum(balance), 0)::numeric AS due FROM receivables WHERE policy_id = $1 AND balance > 0 AND status NOT IN ('paid', 'written-off')`, [policy.id])).due;
   return {
     policyId: policy.id, policyNumber: policy.policy_number, outstandingPremium: round2(Number(due)),
-    blockUnpaidPremium: (await getSetting('claims.block_unpaid_premium', true)) !== false,
+    blockUnpaidPremium: (await getSetting('claims.block_unpaid_premium')) !== false,
     problems: loss ? await acceptanceCheck(policy, loss) : [], claimsRatio: await claimsRatio(policy.client_id),
     intimation: loss ? await intimation(loss, reported) : null,
     duplicates: loss ? (await duplicatesOf(policy.id, loss)).map((d) => ({ claimNumber: d.claim_number, status: d.status, lossCause: d.loss_type })) : [],
