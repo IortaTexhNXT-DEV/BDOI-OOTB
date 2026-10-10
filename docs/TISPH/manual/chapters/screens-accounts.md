@@ -40,6 +40,8 @@ A payment recorded on the policy carries its proof of payment (deposit slip, che
 
 A receipt issued in error, or paid by a cheque that bounced, is reversed from the receipt page, section **Reversal**. CCD-Recon selects **Reverse receipt**, chooses the reason (cheque returned DAIF, duplicate receipt, wrong amount, applied to the wrong policy or client, payment not received in the bank, other with a note) and sends it for approval. The receipt stays posted until another user approves: {{roles:approve:receipt-reversal}}, never the user who asked. On approval the receipt is cancelled, its journals are reversed, the bills it paid are open again and an amount it held On Account is taken back. The approver can instead **Return** the request with a reason; the receipt is unchanged. The request is on My Work of the approvers.
 
+![The Reversal section of a receipt, approved](images/screens-accounts/receipt-reversal.png)
+
 ### Bulk upload and receipt batches {#receipt-batches}
 
 **Bulk Upload** takes three files, each with its template:
@@ -61,6 +63,8 @@ Accounts > Unapplied Collections lists the money received that no bill takes yet
 - **Advance payment**: paid by a client before the bill exists.
 
 {{screen:/accounts/unapplied-collections}}
+
+![Accounts > Unapplied Collections](images/screens-accounts/unapplied-collections.png)
 
 Each is posted to the clients' deposits and unapplied collections account and must be allocated within two working days (**Allocate by**; past it, the row shows **Overdue** and the item is on My Work of Cash Control). The cards show the open items, the open amount and the items past their date. Filter by status and kind, or search by client, policy, receipt or reference.
 
