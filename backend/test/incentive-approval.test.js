@@ -35,6 +35,13 @@ beforeAll(async () => {
   checker = await persona('ia.checker', [...base, 'approve:incentive'], 'Cora Checker');
   calculator = await persona('ia.calculator', base, 'Cal Culator');
   viewer = await persona('ia.viewer', ['read:profile', 'read:incentive'], 'Vic Viewer');
+  // a producer with one new policy in each month the batches below are run for (a batch with no agent line is refused)
+  expect((await ctx.api('post', '/users').send({ username: 'ia.agent', password: 'Welcome@123', displayName: 'Ava Agent', email: 'ia.agent@example.ph', roles: ['sales'] })).status).toBe(201);
+  const agent = (await q('SELECT id FROM users WHERE username = \'ia.agent\''))[0].id;
+  const policies = await q('SELECT id FROM policies WHERE status <> \'cancelled\' ORDER BY policy_number LIMIT 3');
+  for (const [i, day] of ['2026-07-15', '2026-06-15', '2026-05-15'].entries()) {
+    await q('UPDATE policies SET owner_user_id = $2, inception_date = $3 WHERE id = $1', [policies[i].id, agent, day]);
+  }
 });
 afterAll(async () => { await pool.end(); });
 
@@ -97,6 +104,9 @@ describe('maker-checker on a batch', () => {
     const r = await checker('post', `/incentive/calculations/${batch.batchId}/approve`).send({ remarks: 'Checked against the production report' });
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ status: 'Approved', approvedBy: 'Cora Checker', approvalRemarks: 'Checked against the production report' });
+    // the accrual is dated at the end of the incentive period, which is open
+    const jv = (await q('SELECT to_char(jv_date, \'YYYY-MM-DD\') AS d FROM journal_vouchers WHERE reference_id = $1 AND entry_type = \'INCENTIVE_ACCRUAL\'', [batch.batchId]))[0];
+    expect(jv).toEqual({ d: '2026-07-31' });
   });
   it('lists the batch on My Work only for approvers who neither ran nor submitted it', async () => {
     const other = await runBatch('2026-06');
@@ -114,10 +124,51 @@ describe('maker-checker on a batch', () => {
     expect(log.map((e) => e.actionCode)).toEqual(['calculate', 'submit', 'reject', 'submit', 'approve']);
     expect(log[0]).toMatchObject({ remarks: 'Run 2026-07', user: { displayName: 'Mara Maker', username: 'ia.maker' }, changes: [] });
     expect(log[0].user.roles).toEqual(['Role ia.maker']);
-    expect(log[2]).toMatchObject({ fromStatus: 'Pending approval', toStatus: 'Rejected', remarks: 'Rates or targets to be corrected: Tier 2 rate', user: { displayName: 'Cora Checker' } });
-    expect(log[4]).toMatchObject({ fromStatus: 'Pending approval', toStatus: 'Approved', remarks: 'Checked against the production report' });
+    expect(log.map((e) => e.actionLabel)).toEqual(['Calculated', 'Submitted for approval', 'Rejected', 'Submitted for approval', 'Approved']);
+    expect(log[0]).toMatchObject({ toStatus: 'Calculated', source: null });
+    expect(log[2]).toMatchObject({ fromStatus: 'Pending Approval', toStatus: 'Rejected', remarks: 'Rates or targets to be corrected: Tier 2 rate', user: { displayName: 'Cora Checker' } });
+    expect(log[4]).toMatchObject({ fromStatus: 'Pending Approval', toStatus: 'Approved', remarks: 'Checked against the production report' });
     expect(log[4].date).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
     expect((await viewer('get', '/incentive/calculations/CALC-NONE/activity')).status).toBe(404);
+  });
+});
+
+describe('adjusting a batch', () => {
+  it('needs a reason of the incentive_adjustment context, and the adjuster may not approve the batch', async () => {
+    const b = await runBatch('2026-05');
+    const line = b.details[0];
+    const adjust = (body) => checker('post', `/incentive/calculations/${b.batchId}/adjust`).send({ lines: [{ id: line.id, adjustments: 200 }], ...body });
+    expect((await adjust({ reason: 'Spot bonus' })).body.errors[0].path).toBe('reasonCode');
+    expect((await adjust({ reasonCode: 'IBR-DATA' })).status).toBe(400);
+    const adj = await adjust({ reasonCode: 'IAD-PRODUCTION' });
+    expect(adj.status, JSON.stringify(adj.body)).toBe(200);
+    expect(adj.body.data).toMatchObject({ adjustedByUsernames: ['ia.checker'], adjustedBy: ['Cora Checker'], programNames: ['New Business Champion'] });
+    expect(adj.body.data.details[0]).toMatchObject({ adjustmentReasonCode: 'IAD-PRODUCTION', adjustmentReason: 'Production corrected after the calculation', status: 'Adjusted' });
+    expect((await submitter('post', `/incentive/calculations/${b.batchId}/submit`)).status).toBe(200);
+    const refused = await checker('post', `/incentive/calculations/${b.batchId}/approve`).send({});
+    expect(refused.status).toBe(403);
+    expect(refused.body.message).toMatch(/Maker-checker/);
+    const log = (await viewer('get', `/incentive/calculations/${b.batchId}/activity`)).body.data;
+    expect(log.map((e) => e.actionLabel)).toEqual(['Calculated', 'Adjusted', 'Submitted for approval']);
+    expect(log[1].remarks).toBe('Production corrected after the calculation');
+  });
+
+  it('calculates a quarterly program over its quarter, in the last month of the quarter only', async () => {
+    const early = await maker('post', '/incentive/calculations').send({ period: '2026-08', selectedPrograms: ['INC-2026-001'] });
+    expect(early.status).toBe(400);
+    expect(early.body.errors[0].message).toMatch(/INC-2026-001 is calculated quarterly: its period ends in September 2026; run it for September 2026/);
+  });
+
+  it('refuses a run with no agent line, and the submission of an empty batch', async () => {
+    await q('UPDATE policies SET inception_date = inception_date + 31 WHERE inception_date BETWEEN \'2026-01-01\' AND \'2026-01-31\'');
+    const r = await maker('post', '/incentive/calculations').send({ period: '2026-01', selectedPrograms: ['INC-2026-002'] });
+    expect(r.status).toBe(400);
+    expect(r.body.errors[0].message).toMatch(/INC-2026-002 for January 2026; there is nothing to calculate/);
+    await q(`INSERT INTO incentive_calculations(batch_id, period, period_from, period_to, programs_included, total_amount, agent_count, status, created_by)
+             VALUES ('CALC-EMPTY', 'April 2026', '2026-04-01', '2026-04-30', '["INC-2026-002"]', 0, 0, 'Calculated', $1)`, [maker.id]);
+    const s = await maker('post', '/incentive/calculations/CALC-EMPTY/submit');
+    expect(s.status).toBe(409);
+    expect(s.body.message).toMatch(/no agent lines/);
   });
 });
 

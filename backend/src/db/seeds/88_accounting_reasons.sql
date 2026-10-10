@@ -8,18 +8,19 @@
 --   cas_print_void          void a print of a loose-leaf book (Accounts > Tax > CAS Books and Documents)
 --   cas_document_change     change the system description or the backup procedure of the CAS registration
 --   incentive_batch_reject  reject an incentive calculation batch (Incentive > Approvals)
+--   incentive_adjustment    adjust the agent lines of an incentive calculation batch (Incentive > Calculations)
 -- Idempotent: a context is added once and a reason only when its code is missing, so administrator changes are kept.
 
 UPDATE master_types t SET fields = (
   SELECT jsonb_agg(CASE WHEN f->>'name' = 'context'
     THEN jsonb_set(f, '{options}', (f->'options') || (
       SELECT COALESCE(jsonb_agg(c ORDER BY n), '[]'::jsonb)
-      FROM unnest(ARRAY['period_close', 'period_reopen', 'year_end_reverse', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject']) WITH ORDINALITY AS a(c, n)
+      FROM unnest(ARRAY['period_close', 'period_reopen', 'year_end_reverse', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject', 'incentive_adjustment']) WITH ORDINALITY AS a(c, n)
       WHERE NOT (f->'options' ? c)))
     ELSE f END ORDER BY i)
   FROM jsonb_array_elements(t.fields) WITH ORDINALITY AS x(f, i))
 WHERE t.code = 'reason-code' AND EXISTS (
-  SELECT 1 FROM jsonb_array_elements(t.fields) f, unnest(ARRAY['period_close', 'period_reopen', 'year_end_reverse', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject']) c
+  SELECT 1 FROM jsonb_array_elements(t.fields) f, unnest(ARRAY['period_close', 'period_reopen', 'year_end_reverse', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject', 'incentive_adjustment']) c
   WHERE f->>'name' = 'context' AND NOT (f->'options' ? c));
 
 INSERT INTO master_records(type_code, code, name, data, status, created_by)
@@ -56,6 +57,11 @@ FROM (VALUES ('PCL-MONTHEND', 'Month-end close completed', 'period_close', false
              ('IBR-RATES', 'Rates or targets to be corrected', 'incentive_batch_reject', false, 1020),
              ('IBR-ELIGIBLE', 'Eligibility of participants to be reviewed', 'incentive_batch_reject', false, 1030),
              ('IBR-DUPLICATE', 'Duplicate calculation batch', 'incentive_batch_reject', false, 1040),
-             ('IBR-OTHER', 'Other', 'incentive_batch_reject', true, 1090)) AS v(code, name, context, note, sort)
+             ('IBR-OTHER', 'Other', 'incentive_batch_reject', true, 1090),
+             ('IAD-PRODUCTION', 'Production corrected after the calculation', 'incentive_adjustment', false, 1100),
+             ('IAD-CLAWBACK', 'Clawback of a cancelled or lapsed policy', 'incentive_adjustment', false, 1110),
+             ('IAD-SPLIT', 'Shared production split between producers', 'incentive_adjustment', false, 1120),
+             ('IAD-MGMT', 'Instruction of the Head of Sales', 'incentive_adjustment', true, 1130),
+             ('IAD-OTHER', 'Other', 'incentive_adjustment', true, 1190)) AS v(code, name, context, note, sort)
 WHERE EXISTS (SELECT 1 FROM master_types WHERE code = 'reason-code')
   AND NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'reason-code' AND lower(m.code) = lower(v.code));

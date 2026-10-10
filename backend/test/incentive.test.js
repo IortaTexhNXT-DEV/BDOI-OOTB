@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
-import { parsePeriod } from '../src/modules/incentive/service.js';
+import { keysEndingIn, parsePeriod, programPeriodKey } from '../src/modules/incentive/service.js';
 
 let ctx;
 let agentTok;
@@ -28,6 +28,14 @@ describe('periods', () => {
     expect(parsePeriod('2026-h2').to).toBe('2026-12-31');
     expect(parsePeriod('2026-Q3')).toEqual({ label: 'July to September 2026', from: '2026-07-01', to: '2026-09-30' });
     expect(() => parsePeriod('2026-H3')).toThrow();
+    expect(parsePeriod('2026')).toEqual({ label: 'January to December 2026', from: '2026-01-01', to: '2026-12-31' });
+  });
+  it('keys a result by the calculation period of its program, and a statement month by the periods ending in it', () => {
+    expect(['Monthly', 'Quarterly', 'Semi-Annual', 'Annual', ''].map((f) => programPeriodKey({ calculation_frequency: f }, '2026-09-30')))
+      .toEqual(['2026-09', '2026-Q3', '2026-H2', '2026', '2026-09']);
+    expect(keysEndingIn('2026-06')).toEqual(['2026-06', '2026-Q2', '2026-H1']);
+    expect(keysEndingIn('2026-12')).toEqual(['2026-12', '2026-Q4', '2026-H2', '2026']);
+    expect(keysEndingIn('2026-08')).toEqual(['2026-08']);
   });
 });
 
@@ -62,13 +70,18 @@ describe('calculations', () => {
     const r = await ctx.api('post', '/incentive/calculations').send({ period: 'September 2026', selectedPrograms: ['INC-2026-002', 'INC-2026-001'], description: 'Sept run' });
     expect(r.status).toBe(201);
     batchId = r.body.data.batchId;
-    expect(r.body.data).toMatchObject({ period: 'September 2026', periodFrom: '2026-09-01', periodTo: '2026-09-30', status: 'Calculated' });
+    // the quarterly program is calculated over its quarter, the monthly one over the month
+    expect(r.body.data).toMatchObject({ period: 'July to September 2026', periodFrom: '2026-07-01', periodTo: '2026-09-30', status: 'Calculated' });
     const nb = r.body.data.details.find((d) => d.agentId === agentId && d.programCode === 'INC-2026-002');
     expect(nb).toMatchObject({ achieved: 2, baseIncentive: 1000, finalAmount: 1000, tier: '0-10 policies' });
     const pa = r.body.data.details.find((d) => d.agentId === agentId && d.programCode === 'INC-2026-001');
     expect(pa.finalAmount).toBe(0);
     expect((await ctx.api('post', '/incentive/calculations').send({ period: '2026-09', selectedPrograms: ['INC-2026-002'] })).status).toBe(409);
-    const adj = await ctx.api('post', `/incentive/calculations/${batchId}/adjust`).send({ lines: [{ id: nb.id, adjustments: 250, reason: 'Spot bonus' }] });
+    const adjust = (body) => ctx.api('post', `/incentive/calculations/${batchId}/adjust`).send({ lines: [{ id: nb.id, adjustments: 250 }], ...body });
+    expect((await adjust({ reason: 'Spot bonus' })).status).toBe(400);
+    expect((await adjust({ reasonCode: 'IAD-OTHER' })).status).toBe(400);
+    const adj = await adjust({ reasonCode: 'IAD-OTHER', note: 'Spot bonus' });
+    expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ adjustmentReasonCode: 'IAD-OTHER', adjustmentReason: 'Other: Spot bonus' });
     expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ finalAmount: 1250, status: 'Adjusted' });
     expect(adj.body.data.totalAmount).toBe(1250);
   });
@@ -121,11 +134,19 @@ describe('agent views and reports', () => {
     expect((await ctx.api('get', '/incentive/agent-programs')).body.data.length).toBeGreaterThanOrEqual(6);
     const t = await ctx.api('get', '/incentive/reports/templates');
     expect(t.body.data).toHaveLength(5);
-    const g = await ctx.api('post', '/incentive/reports/generate').send({ templateId: t.body.data[0].id, parameters: { period: '2026-07' }, format: 'Excel' });
+    const details = t.body.data.find((x) => x.code === 'IRT-002');
+    const g = await ctx.api('post', '/incentive/reports/generate').send({ templateId: details.id, parameters: { period: '2026-07' }, format: 'Excel' });
     expect(g.status).toBe(201);
-    expect(g.body.data.rowCount).toBe(5);
+    expect(g.body.data).toMatchObject({ rowCount: 5, format: 'Excel' });
+    // the payout summary totals the paid incentives by period, program and branch
+    const summary = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-001', parameters: { period: '2026-07' }, format: 'PDF' });
+    expect(summary.body.data).toMatchObject({ rowCount: 0, format: 'PDF' });
+    const paid = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-001', parameters: { period: '2026-06' }, format: 'PDF' });
+    expect(paid.body.data.rowCount).toBeGreaterThan(0);
+    expect(paid.body.data.rowCount).toBeLessThan(5);
+    expect((await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-004', format: 'Excel' })).status).toBe(400);
     const top = await ctx.api('post', '/incentive/reports/generate').send({ templateId: 'IRT-004', parameters: { 'Top N': 2 } });
     expect(top.body.data.rowCount).toBe(2);
-    expect((await ctx.api('get', '/incentive/reports')).body.data).toHaveLength(2);
+    expect((await ctx.api('get', '/incentive/reports')).body.data).toHaveLength(4);
   });
 });
