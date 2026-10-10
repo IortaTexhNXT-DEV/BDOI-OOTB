@@ -7,6 +7,7 @@ import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { assertVisible, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 import { syncAutoTasksQuietly } from '../my-work/tasks.js';
+import { usersWithPermission } from '../claims/util.js';
 import * as an from './analytics.js';
 
 /**
@@ -18,6 +19,9 @@ const { router, define } = moduleRouter('Renewals workspace', '/renewals');
 const read = [requireAuth, requirePermission('read:renewals')];
 const write = [requireAuth, requirePermission('write:renewals')];
 const approve = [requireAuth, requirePermission('write:renewals'), requirePermission('approve:renewals')];
+/** Dispositions of the renewal owner's unit (reassign, not for renewal): assign:renewals. */
+const assign = [requireAuth, requirePermission('write:renewals'), requirePermission('assign:renewals')];
+const reasonSchema = z.object({ reasonCode: z.string().min(1).max(40), note: z.string().max(2000).optional().nullable() });
 const noteSchema = z.object({ note: z.string().max(2000).optional(), reason: z.string().max(2000).optional() }).passthrough();
 const queueItem = { id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', product: 'Motor Vehicle Insurance', insurer: 'MAPFRE Insurance Corporation', expiryDate: '2026-10-30', daysToExpiry: 32, currentPremium: 18500, renewalPremium: 21450.5, premiumVariancePct: 15.95, status: 'Quote Sent', statusCode: 'quoted', retentionRisk: 'Medium', riskScore: 35, noticeStage: 1, nextNotice: { stage: 2, code: 'second', label: 'Second Notice' }, assignedAgent: 'Ana Reyes', renewalAttempts: 1 };
 
@@ -67,22 +71,22 @@ define({
     scoreBreakdown: [{ code: 'claims', factor: 'Claims History', value: '2 claims in the current term', weight: 25, points: 25 }, { code: 'unpaid', factor: 'Unpaid Premium', value: null, weight: 20, points: 0 }],
     recommendedActions: ['Review the claims record with the insurer', 'Prepare an alternative quote'], nextAction: { kind: 'task', taskId: 'tsk_1', title: 'Call the client', dueDate: '2026-10-12', assignee: 'Ana Reyes' },
     lastContactDate: null, assignedAgent: 'Ana Reyes', assignedAgentId: 'usr_1' }] },
-  handler: async (_req, res) => ok(res, await an.atRisk()),
+  handler: async (req, res) => ok(res, await an.atRisk(await withScope(req))),
 });
 define({
   method: 'GET', path: '/negotiations', summary: 'Renewals under negotiation with their contact timeline', screen: 'Operations > Renewals > Negotiations', middleware: read,
   response: { success: true, data: [{ negotiationId: 'RN-2026-00001', policyNumber: 'POL-2025-00012', clientName: 'Maria Santos', currentStage: 'Pending Approval', timeline: [{ date: '2026-09-20T02:00:00Z', type: 'Meeting', method: 'Face-to-face', description: 'Discussed terms', outcome: 'Client asked for 5% discount' }] }] },
-  handler: async (_req, res) => ok(res, await an.negotiations()),
+  handler: async (req, res) => ok(res, await an.negotiations(await withScope(req))),
 });
 define({
   method: 'GET', path: '/approvals', summary: 'Renewal terms awaiting checker approval', screen: 'Operations > Renewals > Negotiations (approval queue)', middleware: read,
   response: { success: true, data: [{ approvalId: 'rnw_1', type: 'Renewal Terms', policyNumber: 'POL-2025-00012', clientName: 'Maria Santos', requestedBy: 'Ana Reyes', details: { standardPremium: 18500, requestedPremium: 21450.5, variancePercent: 15.95 } }] },
-  handler: async (_req, res) => ok(res, await an.pendingApprovals()),
+  handler: async (req, res) => ok(res, await an.pendingApprovals(await withScope(req))),
 });
 define({
   method: 'GET', path: '/lapsed', summary: 'Lapsed renewals with win-back attempts and reinstatement eligibility', screen: 'Operations > Renewals > Lapse Management', middleware: read,
   response: { success: true, data: [{ policyNumber: 'POL-2025-00007', insuredName: 'Tech Solutions Ltd', lapseDate: '2026-09-01', daysLapsed: 27, premiumLost: 85000, lapseReason: 'Customer No Longer Needs Coverage: sold the vehicle', lapseReasonCode: 'LAP-COV', reinstatementEligible: true, winBackAttempts: [] }] },
-  handler: async (_req, res) => ok(res, await an.lapsed()),
+  handler: async (req, res) => ok(res, await an.lapsed(await withScope(req))),
 });
 define({
   method: 'GET', path: '/performance', summary: 'Retention KPIs: renewal rate, premium retention, cycle time, by product, by agent, monthly trend', screen: 'Operations > Renewals > Performance; Retention Analytics',
@@ -105,6 +109,11 @@ define({
 define({
   method: 'GET', path: '/campaigns/:id', summary: 'One win-back campaign', screen: 'Operations > Renewals > Lapse Management', middleware: read, response: { success: true, data: { campaignId: 'WB-2026-00001' } },
   handler: async (req, res) => { const c = await an.getCampaign(req.params.id); if (!c) throw notFound('Campaign not found'); ok(res, c); },
+});
+define({
+  method: 'GET', path: '/assignees', summary: 'Active users a renewal can be reassigned to (holders of write:renewals)', screen: 'Operations > Renewals > Renewal Queue > Reassign',
+  middleware: assign, response: { success: true, data: [{ id: 'usr_1', name: 'Ana Reyes' }] },
+  handler: async (_req, res) => ok(res, (await usersWithPermission('write:renewals')).map((u) => ({ id: u.id, name: u.display_name }))),
 });
 define({
   method: 'GET', path: '/:id', summary: 'Renewal with quotes, notices and activity timeline', screen: 'Operations > Renewals > Renewal Queue > View', middleware: read,
@@ -192,7 +201,21 @@ define({
   }, 'Renewal lapsed'),
 });
 define({
-  method: 'POST', path: '/:id/reinstate', summary: 'Reinstate a lapsed renewal within the reinstatement window', screen: 'Operations > Renewals > Lapse Management',
+  method: 'POST', path: '/:id/reassign', summary: 'Reassign an open renewal to another user with a reason (Reason Codes, context renewal_reassign) and remark; the new owner is notified',
+  screen: 'Operations > Renewals > Renewal Queue > Reassign', middleware: [...assign, validate(reasonSchema.extend({ toUserId: z.string().min(1).max(60) }))],
+  request: { toUserId: 'usr_2', reasonCode: 'RRA-WORKLOAD', note: 'Ana is on leave until 20/10/2026' },
+  response: { success: true, data: { ...queueItem, assignedAgent: 'Carlo Mendoza' } },
+  handler: command('reassign', (req) => svc.reassignRenewal(req.params.id, req.user, req.body), 'Renewal reassigned'),
+});
+define({
+  method: 'POST', path: '/:id/not-for-renewal', summary: 'Mark an open renewal Not for renewal with a reason (Reason Codes, context non_renewal) and remark',
+  screen: 'Operations > Renewals > Renewal Queue > Not for renewal', middleware: [...assign, validate(reasonSchema)],
+  request: { reasonCode: 'NFR-LOANCLOSED', note: 'Loan fully paid; client insures elsewhere' },
+  response: { success: true, data: { ...queueItem, status: 'Not for renewal', statusCode: 'not-renewed' } },
+  handler: command('not-for-renewal', (req) => svc.markNotForRenewal(req.params.id, req.user, req.body), 'Marked not for renewal'),
+});
+define({
+  method: 'POST', path: '/:id/reinstate', summary: 'Reinstate a lapsed renewal, or one marked not for renewal, within the reinstatement window', screen: 'Operations > Renewals > Lapse Management',
   middleware: [...write, validate(noteSchema)], request: { note: 'Client accepted win-back offer' }, response: { success: true, data: { ...queueItem, status: 'Pending', statusCode: 'pipeline' } },
   handler: command('reinstate', (req) => svc.reinstateRenewal(req.params.id, req.user, req.body.note), 'Renewal reinstated'),
 });

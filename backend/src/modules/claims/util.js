@@ -1,9 +1,12 @@
 /** Small helpers shared by the claims and renewals modules. */
 import fs from 'node:fs';
 import path from 'node:path';
-import { HttpError } from '../../lib/errors.js';
-import { many, query } from '../../db/pool.js';
+import { HttpError, forbidden } from '../../lib/errors.js';
+import { many, pool, query } from '../../db/pool.js';
 import { ADMIN_ROLES } from '../../lib/auth.js';
+import { getSetting } from '../../lib/settings.js';
+import { DEFAULT_FORMAT, formatDate } from '../../lib/pdf/format.js';
+import { assertAuthority, effectiveAuthority } from '../access-control/service.js';
 import { detectType } from '../uploads/fileTypes.js';
 import { newKey, resolveKey } from '../uploads/storage.js';
 
@@ -41,3 +44,25 @@ export const usersWithRole = (role) => many(`SELECT u.id, u.display_name, u.emai
 export const usersWithPermission = (permission) => many(`SELECT u.id, u.display_name, u.email FROM users u WHERE u.status = 'active'
   AND EXISTS (SELECT 1 FROM user_effective_roles(u.id) er JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id WHERE p.code = $1)
   AND NOT EXISTS (SELECT 1 FROM user_effective_roles(u.id) er WHERE er.code = ANY($2)) ORDER BY u.created_at`, [permission, ADMIN_ROLES]);
+
+/** A date as the screens show it (general.date_format, dd/mm/yyyy for TISPH), for messages. */
+export async function shownDate(iso) {
+  return formatDate(iso, { ...DEFAULT_FORMAT, dateFormat: (await getSetting('general.date_format', DEFAULT_FORMAT.dateFormat)) || DEFAULT_FORMAT.dateFormat });
+}
+
+/**
+ * Refuse an approval above the approver's Authority Matrix limit of `type`. With `requireLimit` (the module's
+ * <module>.require_authority_limit setting) an approver without a limit of that type is refused whatever
+ * access.authority_without_limit says; otherwise the access rule decides (assertAuthority).
+ */
+export async function assertApprovalLimit(user, type, amount, { requireLimit = false } = {}) {
+  if (!requireLimit || !(await getSetting('access.authority_enforced', true))) return assertAuthority(pool, user, type, amount);
+  const a = await effectiveAuthority(pool, user.id, type, null, { requireLimit: true });
+  const label = (await many('SELECT name FROM authority_transaction_types WHERE code = $1', [type]))[0]?.name || type;
+  const peso = (v) => `PHP ${Number(v).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (!a.found) throw forbidden(`You have no approval authority for ${label}. Ask an administrator to set a limit in the Authority Matrix.`);
+  if (!a.unlimited && Number(amount) > a.limit) {
+    throw forbidden(`${label} of ${peso(amount)} is above your approval authority of ${peso(a.limit)} (${a.source}). It needs an approver with a higher limit.`);
+  }
+  return a;
+}
