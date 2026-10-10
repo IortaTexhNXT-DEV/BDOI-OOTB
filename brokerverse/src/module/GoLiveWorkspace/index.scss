@@ -1,0 +1,202 @@
+// Data Migration & Go-Live workspace (Master > System Configuration)
+
+.go-live {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__fact {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+
+  &__tabs .p-tabmenu-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  &__body,
+  &__stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  &__columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+
+    @media (max-width: 960px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__phases {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__phase {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 8.5rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+
+    &--good {
+      border-color: var(--green-300);
+    }
+
+    &--warning {
+      border-color: var(--blue-300);
+    }
+  }
+
+  &__phase-name {
+    font-weight: 600;
+  }
+
+  &__clickable {
+    cursor: pointer;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+
+    &--end {
+      justify-content: flex-end;
+    }
+  }
+
+  &__back {
+    align-self: flex-start;
+    margin-bottom: 0.25rem;
+    padding-left: 0;
+  }
+
+  &__progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  &__record-tabs .p-tabview-panels {
+    padding: 1rem 0 0;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+
+    .bv-field-label {
+      margin-top: 0.5rem;
+    }
+
+    &--grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 1rem;
+
+      @media (max-width: 640px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  }
+
+  &__form-full {
+    grid-column: 1 / -1;
+  }
+
+  &__radio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__approver {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__subject {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__figure,
+  &__amount-input input {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  &__mono input,
+  &__mono {
+    font-family: var(--font-family-monospace, monospace);
+  }
+
+  &__error {
+    margin: 0.5rem 0 0;
+    color: var(--red-600);
+  }
+
+  &__muted {
+    color: var(--text-color-secondary);
+  }
+
+  &__chips {
+    display: inline-flex;
+    gap: 0.375rem;
+  }
+
+  &__countdown,
+  &__pending {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+  }
+
+  &__pending {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  &__result {
+    margin-top: 1rem;
+  }
+
+  &__result-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+}

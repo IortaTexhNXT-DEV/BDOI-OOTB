@@ -52,14 +52,21 @@ const ACTION_KEYS = {
   collect: "collect", collection: "collect",
   status: "status", "status-change": "status",
   note: "note", call: "call", email: "email", commitment: "commitment",
+  // Data Migration & Go-Live: loads, undo, reconciliation, checklist, Go / No-Go and the go-live lock
+  validate: "validate", load: "load", "migrate-create": "migrate", "migrate-update": "update", "migrate-undo": "undo", interrupted: "fail",
+  "resolve-duplicate": "resolve", "undo-request": "undoRequest", "undo-approve": "approve", "undo-reject": "reject", "undo-withdraw": "withdraw",
+  request: "request", relock: "relock", "refused-locked": "refused", "download-file": "export", "evidence-pack": "export",
+  "legacy-update": "update", "cutover-date": "update", criterion: "update", explain: "explain", accept: "accept", sign: "signOff",
+  start: "start", done: "complete", block: "block", skip: "skip", waive: "waive", "open-voting": "openVoting", vote: "vote", go: "approve", "no-go": "reject",
   // lead assignment history (Operations > Sales & Marketing > Lead Assignment)
   auto: "assignAuto", queued: "assignQueued", manual: "assignManual", bulk: "assignBulk", taken: "assignTaken",
 };
 
 const TONES = {
-  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect"],
-  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch"],
+  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect", "load", "migrate", "accept"],
+  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch", "undo", "refused", "block"],
   status: ["submit", "send", "acknowledge", "process", "assign", "reassign", "delegate", "escalate", "close", "reopen", "status", "signOff",
+    "validate", "undoRequest", "request", "relock", "explain", "start", "skip", "waive", "openVoting", "vote",
     "assignAuto", "assignQueued", "assignManual", "assignBulk", "assignTaken"],
 };
 
