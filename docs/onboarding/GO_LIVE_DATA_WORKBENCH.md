@@ -38,9 +38,12 @@ objects named (with the Instructions, Lists and Control sheets). The current dat
 ## Upload, validate, fix, load
 
 1. **Upload and validate** (`POST /api/data-load/batches`, multipart `file` and `kit`). The workbook becomes a load
-   batch (`data_load_batches`, its rows in `data_load_rows`). Validation is a dry run: every sheet runs through its
-   importer in load order inside **one database transaction that is rolled back**. Cross-sheet references therefore
-   validate as they will load: a policy may refer to a client and an insurer added by the same workbook.
+   batch (`data_load_batches`, its rows in `data_load_rows`); the file is kept as uploaded, with its SHA-256. Validation
+   is a dry run: every sheet runs through its importer in load order inside **one database transaction that is rolled
+   back**. Cross-sheet references therefore validate as they will load: a policy may refer to a client and an insurer
+   added by the same workbook. Validation, load and undo run as **background jobs**: the request answers 202 with the
+   batch (status `validating`) and its job, and the screen follows `GET /api/data-load/batches/:id` (progress: the sheet,
+   rows done and total; the place in the queue, "Queued behind MIG-000012").
 2. **Result of each row**: **New** (the key is not stored: the row creates a record), **Changed** (the key is stored
    with other values: the changed columns, old -> new), **Unchanged** (equal to the stored record), **Duplicate** (the
    row would create a record that matches another one by a duplicate check, below: loadable only once resolved) or
@@ -57,15 +60,31 @@ objects named (with the Instructions, Lists and Control sheets). The current dat
    **Errors** column. Correct those rows and upload the file again (or the whole corrected workbook). For a
    sheet that failed as a whole the workbook has all its rows (it is uploaded again as a whole): the real errors on
    their rows, the sheet message on the first row (`Whole sheet: ...`), an empty Errors cell on the held rows.
-4. **Load** (`POST /api/data-load/batches/:id/load`): allowed when the latest validation has no error and no
+4. **Submit** (`POST /api/data-load/batches/:id/submit`): allowed when the latest validation has no error and no
    unresolved duplicate, the cutover date and the value maps have not changed since (otherwise "validate again"), or with
-   *Load valid rows only* (`validRowsOnly: true`; the screen ticks it by default for the configuration workbook and
-   not for the migration workbook). The load runs in one transaction; if a row fails now because the data changed
-   since the validation, nothing is saved and the errors are recorded. The load is written to the audit trail and the
-   administrator is notified. After a load of the valid rows only, the rows left out keep their errors: the batch still
-   lists them and **Download errors** still gives them, to fix and upload again.
-5. **History** (`GET /api/data-load/batches`): load number, status `validated`, `failed` or `loaded`, who uploaded and
-   loaded, when, counts; open a batch to see its result again. Every batch has a **load number** that never changes and
+   *Load valid rows only* (`validRowsOnly: true`). The approvers (`approve:data-load`) are notified and see the load in
+   My Work. The submitter may **withdraw** it.
+5. **Approve or reject** (`POST /api/data-load/batches/:id/approve`, `/reject`): by a holder of `approve:data-load` who
+   is neither the uploader, the submitter nor a user who resolved one of its duplicates (403 otherwise; this rule does
+   not depend on `finance.maker_checker_enabled`). What is approved is the batch as validated: the approval is refused
+   when the stored file is not the file validated (SHA-256), or the value maps or the cutover date changed since
+   ("validate again"). Approve starts the load as a job with the approver as the user who loads (202). A load waiting
+   longer than `migration.approval_expiry_hours` (72) expires. Reject takes a reason of the Reason Codes master (context
+   *data_load_reject*: Wrong file, Control totals differ, Duplicates not resolved, Not authorised, Other) and remarks.
+   A rejected, withdrawn, expired or failed load is validated again before it is submitted again.
+6. **Load**: one transaction; if a row fails now because the data changed since the validation, nothing is saved and
+   the errors are recorded. A load that stops (deployment, restart) saves nothing either: the batch shows *Interrupted:
+   nothing was saved* (status failed; validate, submit and approve again). The load is written to the audit trail and the
+   submitter is notified. Two approvals of the same load start it once (the second gets 409 "Load MIG-000012 is already
+   running"). After a load of the valid rows only, the rows left out keep their errors: the batch still lists them and
+   **Download errors** still gives them, to fix and upload again. The direct load in the request
+   (`POST /api/data-load/batches/:id/load`, new users' temporary passwords returned once) is refused while
+   `migration.load_approval_required` is on, and always in production and pre-production: it is the path of the
+   rehearsal (`npm run rehearsal:golive`) on a test environment.
+7. **History** (`GET /api/data-load/batches?kit=&status=&runId=&from=&to=`): load number, status (`validating`,
+   `validated`, `failed`, `pending-approval`, `rejected`, `withdrawn`, `expired`, `running`, `loaded`, `undo-pending`,
+   `undoing`, `undone`), who uploaded, submitted, approved, loaded and undid it, when, counts and timings; open a batch
+   to see its result again. Every batch has a **load number** that never changes and
    is never reused: `MIG-000012` for the migration workbook, `CFG-000045` for the configuration workbook
    (`data_load_batches.load_number`, migration `0440_migration_origin.sql`). A migration upload may name its **legacy
    system** (field `legacySystem`, e.g. "TISPH Excel"); without it the setting `migration.legacy_system_name` applies.
@@ -120,7 +139,8 @@ Unchanged.
 Configuration moves Dev -> SIT -> UAT -> Pre-Prod -> Production with the same workbook: download **Current data** in
 the source environment and upload it into the target. Rows equal to the target are skipped, differences update it,
 missing records are created. Exported settings are those of Master > Configuration (editable, not owned by another
-screen, not under the second-user approval of Account Determination); `golive.locked` is never exported or loaded.
+screen, not under the second-user approval of Account Determination); the cutover date, the go-live lock and the
+settings of the Go-Live tab are never exported or loaded.
 
 ## Compare environments
 
@@ -155,7 +175,6 @@ compared (noted on the sheet). The verdict is **Mirrored** when no row differs a
 
 | Field | Why it may differ |
 |---|---|
-| `golive.cutover_date` | each environment (rehearsal, go-live) has its own cutover date |
 | Settings holding a URL or host (a key part `url`, `uri`, `host`, `hostname`, `domain`, `endpoint`, `callback`, `webhook`, `origin`: `general.frontend_url`, `policy.payment_gateway_url`) | every environment has its own addresses |
 | E-mail sender settings (`notification.from_address`, keys ending `from_address`, `from_name`, `from_email`, `reply_to`, `mail_from`, `sender…`, `smtp…`) | test environments send from their own address |
 | Payment gateway modes (`payments.gateway…`, keys with `sandbox`, `live_mode`, `test_mode`, `gateway…mode`) | gateways run in sandbox outside Production; the gateways and their credentials are on Master > Finance > Payment Gateways, not in the workbook |
@@ -164,7 +183,8 @@ compared (noted on the sheet). The verdict is **Mirrored** when no row differs a
 | Numbering: Next Number | counters move with each environment's business. Switch on **Include numbering counters** (`includeNumbering=true`) to compare them as ordinary fields |
 | Any column whose key ends in `url`, `uri`, `host`, `hostname`, `endpoint`, `webhook`, `callback` | addresses |
 
-`golive.locked` and secrets are never exported, so never compared.
+The go-live settings (cutover date, lock) and secrets are never exported, so never compared: each environment sets its
+own cutover date on the Go-Live tab.
 
 **On screen.** Choose *File vs this environment* or *File A vs file B*, the file(s) and *Include numbering counters*,
 then **Compare only**. The result shows the verdict, counts (identical, different, only in the file, only here,
@@ -240,10 +260,40 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
   (Lines of Business sheet or Master > Line of Business); a rate on an unknown line would never apply. The Commission
   Rate Matrix API (`POST` / `PUT /api/commission-rates`, the screen) applies the same rule: 400 with the field
   `lineOfBusiness` when the code is not in the master (checked on add and when the code changes).
-- **Cutover date.** `golive.cutover_date` (Settings sheet of the configuration workbook, or Master > Configuration) is
-  the first day of live transactions. The migration workbook is refused until it is set.
-- **Go-live lock.** Once `golive.locked` is on (Master > Configuration), the migration workbook is refused (upload,
-  validation and load). The configuration workbook stays available for new masters.
+- **Cutover date.** The first day of live transactions, set on *Data Migration & Go-Live > Go-Live*
+  (`PUT /api/data-load/golive/cutover-date`, audited). The migration workbook is refused until it is set. It cannot
+  change once go-live is locked, nor while a migration load is loaded or in progress (undo it first). `PUT /settings`,
+  Master > Configuration and the Settings sheet refuse it, like the go-live lock and the settings
+  `migration.load_approval_required`, `migration.*_include_migrated` and `migration.sap_gl_include_opening`, which an
+  approver changes on the Go-Live tab (`PUT /api/data-load/golive/settings`).
+- **Undo of a load.** A loaded migration load is undone before the go-live lock: requested with a reason
+  (`POST /api/data-load/batches/:id/undo-request`, `write:data-load`), approved by another user (`/undo-approve`,
+  `approve:data-load`; also `/undo-reject`, `/undo-withdraw`). It runs as a job in one transaction, the objects in
+  reverse load order: what the load created is removed, the records it changed get their earlier values back, the
+  opening balances it replaced are restored. It is refused while business entered since or a later load depends on
+  its records: receipts, credits or collection actions on its open items, deposited cheques, endorsements, claims,
+  renewals, documents, a CTPL authentication sent to the LTO, the policies, open items or cheques of a later load on its
+  records, a later load that changed the same records or replaced its opening balances
+  (`GET /api/data-load/batches/:id/dependents`, and `/dependents/workbook`). Undo the later load first. The check runs
+  again inside the undo with the records locked. Number counters are not wound back. A configuration load is corrected
+  by a new load.
+- **Go-live lock.** Requested on the Go-Live tab by a holder of `write:data-load` and approved by another user with
+  `approve:data-load` (`POST /api/data-load/golive/lock-requests`, `.../:id/approve`, `/reject`, `/withdraw`). It needs
+  the Go decision of the production run, its reconciliation signed, its restore point recorded and no load waiting for
+  approval, running or being undone. Once locked, every migration import answers 409 "Go-live is locked: migration
+  imports are closed (locked on dd/mm/yyyy)", recorded in the audit trail: the migration workbook (upload, validation,
+  duplicates, submit, approval, load), the undo of a load, the policies go-live upload
+  (`POST /api/policies/bulk-upload`, `mode=go-live`), a file of the ordinary policy upload with rows issued before the
+  cutover date (legacy business is loaded by the migration workbook), the open items import
+  (`POST /api/receipts/opening-items/import`) and the opening balances import and validation
+  (`POST /api/period-end/opening-balances/import`, `/validate`). Before the lock these three single-object imports also
+  need `write:data-load`. The configuration workbook stays available for new masters; the transaction reset refuses
+  to run.
+- **Unlock.** The same two steps with the imports it reopens (migration workbook, policies go-live upload, open items
+  import, opening balances import) and its hours (at most `migration.unlock_max_hours`, 4). Only the named imports
+  reopen; the undo of a load and the reset stay refused. It relocks by itself when its hours run out (scheduled job
+  *Go-live relock*, every 5 minutes). After `migration.unlock_window_days` (7) from the lock an unlock needs the
+  reference of a steering committee decision.
 
 ### Migration rules
 
@@ -485,16 +535,22 @@ documents of the old system.
 { rollback })` the helpers `query`, `one`, `many` and `pool.query` run on the transaction's client, and
 `withTransaction` opens a `SAVEPOINT` on it instead of a new connection (sibling savepoints are serialised so they nest
 correctly). Outside an ambient transaction nothing changes. Each row of a workbook runs in its own savepoint, so a
-failing row is undone alone and the next rows carry on. A transaction-level advisory lock serialises loads.
+failing row is undone alone and the next rows carry on. A transaction-level advisory lock serialises validations,
+loads and undos; a job waiting for it shows the load it waits behind. The job's transaction has the statement and idle
+limits of `migration.job_statement_timeout_minutes` (60), so a stuck statement cannot hold the lock. The scheduled job
+*Data load sweep* (every 5 minutes, and at start-up) marks a load whose job stopped, or wrote no progress for
+`migration.job_stale_minutes` (15), as interrupted; a data load job is never run twice.
 `getSetting` reads through the transaction and bypasses the settings cache inside it; the settings and letterhead
 caches are cleared after every dry run and load. Sequence counters advanced during a dry run are rolled back with it.
 
 Code: `backend/src/modules/data-load` (`registry.js`: the objects of both kits, their dependencies and load order;
 `configuration.js`, `migration.js`, `products.js`: the sheets; `workbook.js`: templates, reading, errors and
 reconciliation workbooks; `service.js`: batches, dry run, result of each row, duplicates and resolutions, load,
-per-record audit, review; `duplicates.js`: the duplicate checks; `maps.js`: value maps; `naming.js`: the document file
+per-record audit, review; `jobs.js`: the jobs and the sweep; `approval.js`: approval of loads and undo; `undo.js`: undo
+and its dependents; `golive.js`: cutover date, lock and unlock; `duplicates.js`: the duplicate checks; `maps.js`: value maps; `naming.js`: the document file
 naming check; `numbering.js`: the collision check), `backend/src/lib/origin.js` (origin filter, block and read-only
 rule). Module description: `backend/src/modules/data-load/README.md`. Tests: `backend/test/go-live-workbench.test.js`,
 `go-live-roundtrip.test.js`, `migration-registry.test.js`, `migration-origin.test.js`, `migration-audit.test.js`,
 `migration-numbers.test.js`, `migration-review.test.js`, `migration-duplicates.test.js`, `migration-amounts.test.js`,
-`migration-pdc.test.js`.
+`migration-pdc.test.js`, `migration-jobs.test.js`, `migration-approval.test.js`, `migration-undo.test.js`,
+`migration-lock.test.js`.

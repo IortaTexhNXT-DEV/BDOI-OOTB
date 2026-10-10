@@ -24,7 +24,8 @@ user stays exactly as configured**. This page explains the recommended practice 
 3. **After the reset**: document numbering restarts (at the next numbers the Numbering sheet set), the accounting is
    empty (section 2), then load the go-live
    migration (`GO_LIVE_DATA_SETUP.md`: open items, in-force policies, opening balances) and switch on the go-live lock.
-4. **Switch on `golive.locked`** (Master > Configuration > Go-live, "Go-live lock") as soon as the migration is loaded.
+4. **Lock go-live** (Master > System Configuration > Data Migration & Go-Live > Go-Live: requested by one user,
+   approved by another) as soon as the migration is loaded, reconciled and the Go decision taken.
    From then on the reset refuses to run: the database holds the live book.
 
 ## 2. What the reset removes and keeps
@@ -148,13 +149,13 @@ later or leave them to the storage lifecycle.
 
 ## 4. The go-live lock
 
-The setting `golive.locked` ("Go-live lock", group Go-live of Master > Configuration, area Data Retention, Privacy & Uploads; created off by migration 0243) blocks the reset
-when it is on. Switch it on once the go-live data is loaded.
+The setting `golive.locked` ("Go-live lock", created off by migration 0243) blocks the reset when it is on. Two users
+switch it on on Data Migration & Go-Live > Go-Live once the go-live data is loaded; Master > Configuration and
+`PUT /settings` refuse it, and no screen switches it off (an unlock reopens named imports for a few hours only).
 
 If a database that is locked really has to be reset (for example a Pre-Prod copy of Production restored for a new test
-cycle), a System Administrator switches the lock off in Master > Configuration > Go-live. The change is recorded in the
-audit trail with the user and time. Never switch it off on the live Production database: the reset removes the live
-book. There is no option of the command that bypasses the lock.
+cycle), the database administrator switches the setting off in that copy's database and records it in the change log
+of the environment. Never switch it off on the live Production database: the reset removes the live book. There is no option of the command that bypasses the lock.
 
 ## 5. Related
 

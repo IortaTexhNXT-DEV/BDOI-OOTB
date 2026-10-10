@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1291 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1310 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -38545,12 +38545,12 @@
       "name": "Go-Live Data Workbench",
       "item": [
         {
-          "name": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)",
+          "name": "Load history: load number, kit, run, file, legacy system, counts per result, status, uploaded / submitted / approved / loaded / undone by and at, timings; filters kit, status (comma list), runId, from, to (created); paging",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/data-load/batches?kit=migration&page=1&perPage=20",
+              "raw": "{{baseUrl}}/data-load/batches?kit=migration&status=loaded,undone&runId=3&from=2026-10-01&to=2026-10-31&page=1&perPage=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -38564,6 +38564,22 @@
                   "value": "migration"
                 },
                 {
+                  "key": "status",
+                  "value": "loaded,undone"
+                },
+                {
+                  "key": "runId",
+                  "value": "3"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                },
+                {
                   "key": "page",
                   "value": "1"
                 },
@@ -38573,7 +38589,7 @@
                 }
               ]
             },
-            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
+            "description": "Load history: load number, kit, run, file, legacy system, counts per result, status, uploaded / submitted / approved / loaded / undone by and at, timings; filters kit, status (comma list), runId, from, to (created); paging\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -38582,7 +38598,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/data-load/batches?kit=migration&page=1&perPage=20",
+                  "raw": "{{baseUrl}}/data-load/batches?kit=migration&status=loaded,undone&runId=3&from=2026-10-01&to=2026-10-31&page=1&perPage=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -38596,6 +38612,22 @@
                       "value": "migration"
                     },
                     {
+                      "key": "status",
+                      "value": "loaded,undone"
+                    },
+                    {
+                      "key": "runId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    },
+                    {
                       "key": "page",
                       "value": "1"
                     },
@@ -38605,7 +38637,7 @@
                     }
                   ]
                 },
-                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
+                "description": "Load history: load number, kit, run, file, legacy system, counts per result, status, uploaded / submitted / approved / loaded / undone by and at, timings; filters kit, status (comma list), runId, from, to (created); paging\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -38622,7 +38654,7 @@
           ]
         },
         {
-          "name": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",
+          "name": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id",
           "request": {
             "method": "POST",
             "header": [
@@ -38641,7 +38673,7 @@
                 "batches"
               ]
             },
-            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+            "description": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Upload\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
@@ -38673,7 +38705,7 @@
                     "batches"
                   ]
                 },
-                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+                "description": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Upload\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
@@ -38694,12 +38726,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validating MIG-000007\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"validating\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\",\n      \"progress\": {\n        \"stage\": \"running\",\n        \"step\": \"validate\",\n        \"sheet\": \"Policies - Motor\",\n        \"done\": 1500,\n        \"total\": 4800,\n        \"behind\": null,\n        \"at\": \"2026-10-28T09:01:10Z\"\n      }\n    },\n    \"job\": {\n      \"id\": \"412\",\n      \"jobId\": \"412\",\n      \"queue\": \"data-load\",\n      \"type\": \"data-load.validate\",\n      \"status\": \"waiting\",\n      \"progress\": {\n        \"total\": 480,\n        \"processed\": 0,\n        \"succeeded\": 0,\n        \"failed\": 0\n      }\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "One batch: result per sheet and the errors (sheet, row, column, message)",
+          "name": "One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total) and its place in the queue",
           "request": {
             "method": "GET",
             "header": [],
@@ -38721,7 +38753,7 @@
                 }
               ]
             },
-            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
+            "description": "One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total) and its place in the queue\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -38747,7 +38779,7 @@
                     }
                   ]
                 },
-                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
+                "description": "One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total) and its place in the queue\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -38759,7 +38791,210 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"running\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\",\n      \"progress\": {\n        \"stage\": \"running\",\n        \"step\": \"load\",\n        \"sheet\": \"Policies - Motor\",\n        \"done\": 1500,\n        \"total\": 4800,\n        \"behind\": null,\n        \"at\": \"2026-10-28T09:01:10Z\"\n      }\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1,\n    \"queue\": {\n      \"jobStatus\": \"processing\",\n      \"ahead\": 0,\n      \"behind\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a load (approve:data-load; never its uploader, submitter or a user who resolved one of its duplicates): the load runs as a job with the approver as the executing user, all or nothing; 202 with the job. Refused when the file, the value maps or the cutover date changed since the validation (validate again), after the approval expiry, and when the load is already running or loaded (409)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a load (approve:data-load; never its uploader, submitter or a user who resolved one of its duplicates): the load runs as a job with the approver as the executing user, all or nothing; 202 with the job. Refused when the file, the value maps or the cutover date changed since the validation (validate again), after the approval expiry, and when the load is already running or loaded (409)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Approve\n\nAccess: approve:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a load (approve:data-load; never its uploader, submitter or a user who resolved one of its duplicates): the load runs as a job with the approver as the executing user, all or nothing; 202 with the job. Refused when the file, the value maps or the cutover date changed since the validation (validate again), after the approval expiry, and when the load is already running or loaded (409)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Approve\n\nAccess: approve:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"MIG-000007 approved: loading\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"running\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\",\n      \"decision\": \"approved\"\n    },\n    \"job\": {\n      \"id\": \"412\",\n      \"jobId\": \"412\",\n      \"queue\": \"data-load\",\n      \"type\": \"data-load.load\",\n      \"status\": \"waiting\",\n      \"progress\": {\n        \"total\": 480,\n        \"processed\": 0,\n        \"succeeded\": 0,\n        \"failed\": 0\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What stops the undo of a migration load: business entered since on its records (receipts, credits, collection actions, deposited cheques, endorsements, claims, renewals, documents, CTPL authentication sent to the LTO) and later loads that refer to or changed its records",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/dependents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "dependents"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "What stops the undo of a migration load: business entered since on its records (receipts, credits, collection actions, deposited cheques, endorsements, claims, renewals, documents, CTPL authentication sent to the LTO) and later loads that refer to or changed its records\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/dependents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "dependents"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "What stops the undo of a migration load: business entered since on its records (receipts, credits, collection actions, deposited cheques, endorsements, claims, renewals, documents, CTPL authentication sent to the LTO) and later loads that refer to or changed its records\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"object\": \"policy\",\n      \"key\": \"PC-MLY-2026-000101\",\n      \"dependent\": \"Receipts\",\n      \"count\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "The records that stop the undo of a load (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/dependents/workbook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "dependents",
+                "workbook"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The records that stop the undo of a load (XLSX)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Download\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/dependents/workbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "dependents",
+                    "workbook"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The records that stop the undo of a load (XLSX)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Download\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -38882,7 +39117,7 @@
                 }
               ]
             },
-            "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+            "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Download errors\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -38909,7 +39144,7 @@
                     }
                   ]
                 },
-                "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+                "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Download errors\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -38926,7 +39161,74 @@
           ]
         },
         {
-          "name": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)",
+          "name": "The workbook of a load as it was uploaded (personal data in clear): write:data-load and view:pii; each download is recorded in the audit trail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "file"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The workbook of a load as it was uploaded (personal data in clear): write:data-load and view:pii; each download is recorded in the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Uploaded file\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/file",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "file"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The workbook of a load as it was uploaded (personal data in clear): write:data-load and view:pii; each download is recorded in the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Uploaded file\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Load a validated batch at once, in the request (validRowsOnly: skip the rows in error), only where no approval is required (migration.load_approval_required off, outside production and pre-production: the rehearsal); 409 otherwise. New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes",
           "request": {
             "method": "POST",
             "header": [
@@ -38954,7 +39256,7 @@
                 }
               ]
             },
-            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+            "description": "Load a validated batch at once, in the request (validRowsOnly: skip the rows in error), only where no approval is required (migration.load_approval_required off, outside production and pre-production: the rehearsal); 409 otherwise. New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -38995,7 +39297,7 @@
                     }
                   ]
                 },
-                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+                "description": "Load a validated batch at once, in the request (validRowsOnly: skip the rows in error), only where no approval is required (migration.load_approval_required off, outside production and pre-production: the rehearsal); 409 otherwise. New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -39044,7 +39346,7 @@
                 }
               ]
             },
-            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reconciliation\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39071,7 +39373,7 @@
                     }
                   ]
                 },
-                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reconciliation\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -39088,7 +39390,102 @@
           ]
         },
         {
-          "name": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again",
+          "name": "Reject a load waiting for approval with a reason of the Reason Codes master (context data_load_reject) and remarks (a note when the reason needs one); not by its makers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a load waiting for approval with a reason of the Reason Codes master (context data_load_reject) and remarks (a note when the reason needs one); not by its makers\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reject\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DLR-TOTALS\",\n  \"remarks\": \"Gross premium of Motor differs from the legacy listing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject a load waiting for approval with a reason of the Reason Codes master (context data_load_reject) and remarks (a note when the reason needs one); not by its makers\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reject\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"DLR-TOTALS\",\n  \"remarks\": \"Gross premium of Motor differs from the legacy listing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"MIG-000007 rejected\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"rejected\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\",\n    \"decision\": \"rejected\",\n    \"decisionReasonCode\": \"DLR-TOTALS\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again (a job, 202)",
           "request": {
             "method": "POST",
             "header": [
@@ -39116,7 +39513,7 @@
                 }
               ]
             },
-            "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
+            "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again (a job, 202)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rows\": [\n    9013\n  ],\n  \"resolution\": \"use-existing\",\n  \"targetCode\": \"C-000881\",\n  \"reason\": \"Same client as in BrokerVerse (TIN verified)\"\n}",
@@ -39157,7 +39554,7 @@
                     }
                   ]
                 },
-                "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
+                "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again (a job, 202)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"rows\": [\n    9013\n  ],\n  \"resolution\": \"use-existing\",\n  \"targetCode\": \"C-000881\",\n  \"reason\": \"Same client as in BrokerVerse (TIN verified)\"\n}",
@@ -39178,7 +39575,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Resolved 1 row(s)\",\n  \"data\": {\n    \"resolved\": 1,\n    \"maps\": 1,\n    \"rows\": [\n      9013\n    ],\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Resolved 1 row(s)\",\n  \"data\": {\n    \"resolved\": 1,\n    \"maps\": 1,\n    \"rows\": [\n      9013\n    ],\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"validating\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"job\": {\n      \"id\": \"412\",\n      \"jobId\": \"412\",\n      \"queue\": \"data-load\",\n      \"type\": \"data-load.validate\",\n      \"status\": \"waiting\",\n      \"progress\": {\n        \"total\": 480,\n        \"processed\": 0,\n        \"succeeded\": 0,\n        \"failed\": 0\n      }\n    }\n  }\n}"
             }
           ]
         },
@@ -39294,7 +39691,426 @@
           ]
         },
         {
-          "name": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date",
+          "name": "Submit a validated load for approval by a second user (validRowsOnly: a load with rows in error, its valid rows only); refused with rows in error, unresolved duplicates, value maps or cutover date changed since the validation, or a stored file that is not the file validated",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a validated load for approval by a second user (validRowsOnly: a load with rows in error, its valid rows only); refused with rows in error, unresolved duplicates, value maps or cutover date changed since the validation, or a stored file that is not the file validated\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Submit\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"validRowsOnly\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a validated load for approval by a second user (validRowsOnly: a load with rows in error, its valid rows only); refused with rows in error, unresolved duplicates, value maps or cutover date changed since the validation, or a stored file that is not the file validated\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Submit\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"validRowsOnly\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"MIG-000007 submitted for approval\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"pending-approval\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\",\n    \"submittedBy\": \"Andrea Lim\",\n    \"submittedAt\": \"2026-10-28T09:10:00Z\",\n    \"expiresAt\": \"2026-10-31T09:10:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve the undo of a load (approve:data-load, not its requester): the undo runs as a job in one transaction, the objects in reverse load order (records removed, changed records and opening balances restored); 202 with the job",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/undo-approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "undo-approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve the undo of a load (approve:data-load, not its requester): the undo runs as a job in one transaction, the objects in reverse load order (records removed, changed records and opening balances restored); 202 with the job\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Approve\n\nAccess: approve:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/undo-approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "undo-approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve the undo of a load (approve:data-load, not its requester): the undo runs as a job in one transaction, the objects in reverse load order (records removed, changed records and opening balances restored); 202 with the job\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Approve\n\nAccess: approve:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Undo of MIG-000007 approved: undoing\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"undoing\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"job\": {\n      \"id\": \"412\",\n      \"jobId\": \"412\",\n      \"queue\": \"data-load\",\n      \"type\": \"data-load.undo\",\n      \"status\": \"waiting\",\n      \"progress\": {\n        \"total\": 480,\n        \"processed\": 0,\n        \"succeeded\": 0,\n        \"failed\": 0\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject the undo of a load with remarks (not its requester): the load stays",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/undo-reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "undo-reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject the undo of a load with remarks (not its requester): the load stays\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Reject\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Correct the two policies with a new load instead\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/undo-reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "undo-reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject the undo of a load with remarks (not its requester): the load stays\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Reject\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Correct the two policies with a new load instead\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Undo of MIG-000007 rejected\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"loaded\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the undo of a loaded migration load, with a reason; refused after the go-live lock and while records depend on it (business entered since, later loads)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/undo-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "undo-request"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Request the undo of a loaded migration load, with a reason; refused after the go-live lock and while records depend on it (business entered since, later loads)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong legacy extract loaded in Mock 2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/undo-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "undo-request"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request the undo of a loaded migration load, with a reason; refused after the go-live lock and while records depend on it (business entered since, later loads)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong legacy extract loaded in Mock 2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Undo of MIG-000007 requested\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"undo-pending\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\",\n    \"undoReason\": \"Wrong legacy extract loaded in Mock 2\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw an undo request (its requester)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/undo-withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "undo-withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw an undo request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Withdraw\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/undo-withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "undo-withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw an undo request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Withdraw\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Undo of MIG-000007 withdrawn\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"loaded\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Validate a load again (dry run, as a job), e.g. after a change of the value maps or of the cutover date, or to resume a load that failed, was rejected, withdrawn or expired; 202 with the job",
           "request": {
             "method": "POST",
             "header": [],
@@ -39317,7 +40133,7 @@
                 }
               ]
             },
-            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
+            "description": "Validate a load again (dry run, as a job), e.g. after a change of the value maps or of the cutover date, or to resume a load that failed, was rejected, withdrawn or expired; 202 with the job\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Validate again\n\nAccess: write:data-load"
           },
           "response": [
             {
@@ -39344,7 +40160,7 @@
                     }
                   ]
                 },
-                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
+                "description": "Validate a load again (dry run, as a job), e.g. after a change of the value maps or of the cutover date, or to resume a load that failed, was rejected, withdrawn or expired; 202 with the job\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Validate again\n\nAccess: write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -39356,7 +40172,74 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validating MIG-000007\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"validating\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"job\": {\n      \"id\": \"412\",\n      \"jobId\": \"412\",\n      \"queue\": \"data-load\",\n      \"type\": \"data-load.validate\",\n      \"status\": \"waiting\",\n      \"progress\": {\n        \"total\": 480,\n        \"processed\": 0,\n        \"succeeded\": 0,\n        \"failed\": 0\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a load waiting for approval (its submitter or uploader)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a load waiting for approval (its submitter or uploader)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Withdraw\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a load waiting for approval (its submitter or uploader)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Withdraw\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"MIG-000007 withdrawn\",\n  \"data\": {\n    \"id\": 7,\n    \"loadNumber\": \"MIG-000007\",\n    \"kit\": \"migration\",\n    \"legacySystem\": \"TISPH Excel\",\n    \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n    \"status\": \"withdrawn\",\n    \"cutoverDate\": \"2026-11-01\",\n    \"rowsRead\": 480,\n    \"rowsValid\": 477,\n    \"rowsError\": 2,\n    \"rowsNew\": 470,\n    \"rowsChanged\": 4,\n    \"rowsUnchanged\": 3,\n    \"rowsDuplicate\": 1,\n    \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n    \"validateMs\": 5400,\n    \"loadMs\": null,\n    \"sameFileAs\": null,\n    \"sheets\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"name\": \"Policies - Motor\",\n        \"read\": 120,\n        \"valid\": 117,\n        \"errors\": 2,\n        \"held\": 0,\n        \"created\": 110,\n        \"updated\": 4,\n        \"unchanged\": 3,\n        \"proposed\": 0,\n        \"ignored\": 0,\n        \"skipped\": 0,\n        \"duplicate\": 1,\n        \"message\": null\n      }\n    ],\n    \"loadedCounts\": null,\n    \"reconciliation\": null,\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"validatedAt\": \"2026-10-28T09:00:05Z\"\n  }\n}"
             }
           ]
         },
@@ -39567,7 +40450,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kit\": \"configuration\",\n    \"mode\": \"environment\",\n    \"fileName\": \"GoLive_Configuration_Workbook_2026-10-28.xlsx\",\n    \"fileBName\": null,\n    \"environment\": \"Production\",\n    \"options\": {\n      \"includeNumbering\": false\n    },\n    \"verdict\": \"differences\",\n    \"verdictText\": \"Differences found\",\n    \"labels\": {\n      \"file\": \"File\",\n      \"here\": \"This environment (Production)\"\n    },\n    \"totals\": {\n      \"inFile\": 412,\n      \"here\": 413,\n      \"identical\": 409,\n      \"different\": 1,\n      \"onlyInFile\": 1,\n      \"onlyHere\": 2,\n      \"environmentSpecific\": 2\n    },\n    \"sheets\": [\n      {\n        \"sheet\": \"users\",\n        \"name\": \"Users\",\n        \"inFile\": 12,\n        \"here\": 13,\n        \"identical\": 10,\n        \"different\": 1,\n        \"onlyInFile\": 0,\n        \"onlyHere\": 1,\n        \"environmentSpecific\": 0,\n        \"notes\": []\n      }\n    ],\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"environmentSpecific\": [\n      {\n        \"sheet\": \"settings\",\n        \"sheetName\": \"Settings\",\n        \"key\": \"golive.cutover_date\",\n        \"column\": \"value\",\n        \"header\": \"Value\",\n        \"file\": \"\",\n        \"here\": \"2026-11-01\",\n        \"rule\": \"cutover-date\",\n        \"reason\": \"Each environment has its own cutover date\"\n      }\n    ],\n    \"rules\": [\n      {\n        \"id\": \"cutover-date\",\n        \"sheet\": \"settings\",\n        \"label\": \"Cutover date (golive.cutover_date)\",\n        \"reason\": \"Each environment has its own cutover date\",\n        \"applied\": true\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kit\": \"configuration\",\n    \"mode\": \"environment\",\n    \"fileName\": \"GoLive_Configuration_Workbook_2026-10-28.xlsx\",\n    \"fileBName\": null,\n    \"environment\": \"Production\",\n    \"options\": {\n      \"includeNumbering\": false\n    },\n    \"verdict\": \"differences\",\n    \"verdictText\": \"Differences found\",\n    \"labels\": {\n      \"file\": \"File\",\n      \"here\": \"This environment (Production)\"\n    },\n    \"totals\": {\n      \"inFile\": 412,\n      \"here\": 413,\n      \"identical\": 409,\n      \"different\": 1,\n      \"onlyInFile\": 1,\n      \"onlyHere\": 2,\n      \"environmentSpecific\": 2\n    },\n    \"sheets\": [\n      {\n        \"sheet\": \"users\",\n        \"name\": \"Users\",\n        \"inFile\": 12,\n        \"here\": 13,\n        \"identical\": 10,\n        \"different\": 1,\n        \"onlyInFile\": 0,\n        \"onlyHere\": 1,\n        \"environmentSpecific\": 0,\n        \"notes\": []\n      }\n    ],\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"environmentSpecific\": [\n      {\n        \"sheet\": \"settings\",\n        \"sheetName\": \"Settings\",\n        \"key\": \"general.frontend_url\",\n        \"column\": \"value\",\n        \"header\": \"Value\",\n        \"file\": \"https://uat.broker.example\",\n        \"here\": \"https://brokerverse.tisph.example\",\n        \"rule\": \"urls-hosts\",\n        \"reason\": \"Every environment has its own addresses\"\n      }\n    ],\n    \"rules\": [\n      {\n        \"id\": \"urls-hosts\",\n        \"sheet\": \"settings\",\n        \"label\": \"Settings holding a URL or host (e.g. general.frontend_url)\",\n        \"reason\": \"Every environment has its own addresses\",\n        \"applied\": true\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -39894,6 +40777,590 @@
               ],
               "cookie": [],
               "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Go-Live tab: cutover date, go-live lock (when, by which request), the unlock in force (imports reopened, until when), the request waiting, the conditions of the lock and the settings of the workspace",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive"
+              ]
+            },
+            "description": "Go-Live tab: cutover date, go-live lock (when, by which request), the unlock in force (imports reopened, until when), the request waiting, the conditions of the lock and the settings of the workspace\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive"
+                  ]
+                },
+                "description": "Go-Live tab: cutover date, go-live lock (when, by which request), the unlock in force (imports reopened, until when), the request waiting, the conditions of the lock and the settings of the workspace\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the cutover date (first day of live transactions); refused once go-live is locked and while a migration load is loaded or in progress (undo it first)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/cutover-date",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "cutover-date"
+              ]
+            },
+            "description": "Set the cutover date (first day of live transactions); refused once go-live is locked and while a migration load is loaded or in progress (undo it first)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Cutover date\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cutoverDate\": \"2026-11-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/cutover-date",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "cutover-date"
+                  ]
+                },
+                "description": "Set the cutover date (first day of live transactions); refused once go-live is locked and while a migration load is loaded or in progress (undo it first)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Cutover date\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cutoverDate\": \"2026-11-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Cutover date saved\",\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Requests to lock go-live or to lift the lock for named imports, newest first (filter status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/lock-requests?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "lock-requests"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Requests to lock go-live or to lift the lock for named imports, newest first (filter status)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/lock-requests?status=pending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "lock-requests"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    }
+                  ]
+                },
+                "description": "Requests to lock go-live or to lift the lock for named imports, newest first (filter status)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the go-live lock (needs the Go decision of the production run, its reconciliation signed, its restore point and no load in progress) or an unlock (scope: imports to reopen of migration, policies-go-live, opening-items, opening-balances; hours up to migration.unlock_max_hours; decisionRef: steering committee decision, required after migration.unlock_window_days); approved by another user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/lock-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "lock-requests"
+              ]
+            },
+            "description": "Request the go-live lock (needs the Go decision of the production run, its reconciliation signed, its restore point and no load in progress) or an unlock (scope: imports to reopen of migration, policies-go-live, opening-items, opening-balances; hours up to migration.unlock_max_hours; decisionRef: steering committee decision, required after migration.unlock_window_days); approved by another user\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Lock / Unlock\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"unlock\",\n  \"reason\": \"Late legacy claim found on day 2\",\n  \"scope\": [\n    \"migration\"\n  ],\n  \"hours\": 4,\n  \"decisionRef\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/lock-requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "lock-requests"
+                  ]
+                },
+                "description": "Request the go-live lock (needs the Go decision of the production run, its reconciliation signed, its restore point and no load in progress) or an unlock (scope: imports to reopen of migration, policies-go-live, opening-items, opening-balances; hours up to migration.unlock_max_hours; decisionRef: steering committee decision, required after migration.unlock_window_days); approved by another user\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Lock / Unlock\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"unlock\",\n  \"reason\": \"Late legacy claim found on day 2\",\n  \"scope\": [\n    \"migration\"\n  ],\n  \"hours\": 4,\n  \"decisionRef\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock requested\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"pending\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "lock-requests",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "lock-requests",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock approved\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"approved\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": \"2026-11-03T06:05:00Z\",\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject a lock or unlock request with remarks (not its requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "lock-requests",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a lock or unlock request with remarks (not its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Reject\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Fix forward with a correcting journal instead\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "lock-requests",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject a lock or unlock request with remarks (not its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Reject\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Fix forward with a correcting journal instead\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock rejected\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"rejected\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a lock or unlock request (its requester)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "lock-requests",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a lock or unlock request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/lock-requests/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "lock-requests",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a lock or unlock request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock withdrawn\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"withdrawn\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/golive/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "golive",
+                "settings"
+              ]
+            },
+            "description": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loadApprovalRequired\": true,\n  \"kpiIncludeMigrated\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/golive/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "golive",
+                    "settings"
+                  ]
+                },
+                "description": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"loadApprovalRequired\": true,\n  \"kpiIncludeMigrated\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Settings saved\",\n  \"data\": {\n    \"loadApprovalRequired\": true,\n    \"kpiIncludeMigrated\": false,\n    \"commissionIncludeMigrated\": false,\n    \"incentiveIncludeMigrated\": false,\n    \"sapGlIncludeOpening\": false\n  }\n}"
             }
           ]
         },
@@ -60042,7 +61509,7 @@
           ]
         },
         {
-          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it",
+          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)",
           "request": {
             "method": "POST",
             "header": [
@@ -60062,7 +61529,7 @@
                 "import"
               ]
             },
-            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -60095,7 +61562,7 @@
                     "import"
                   ]
                 },
-                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -60172,7 +61639,7 @@
           ]
         },
         {
-          "name": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace",
+          "name": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace. Also needs write:data-load; refused once go-live is locked (409)",
           "request": {
             "method": "POST",
             "header": [
@@ -60192,7 +61659,7 @@
                 "validate"
               ]
             },
-            "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+            "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -60225,7 +61692,7 @@
                     "validate"
                   ]
                 },
-                "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+                "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -66232,7 +67699,7 @@
           ]
         },
         {
-          "name": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission",
+          "name": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook",
           "request": {
             "method": "POST",
             "header": [
@@ -66251,7 +67718,7 @@
                 "bulk-upload"
               ]
             },
-            "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
+            "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file\"",
@@ -66283,7 +67750,7 @@
                     "bulk-upload"
                   ]
                 },
-                "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
+                "description": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook\n\nFront-end touchpoint: Operations > Policy > Bulk Upload\n\nAccess: write:policies",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file\"",
@@ -81730,7 +83197,7 @@
           ]
         },
         {
-          "name": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped",
+          "name": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped. Also needs write:data-load; refused once go-live is locked (409)",
           "request": {
             "method": "POST",
             "header": [
@@ -81750,7 +83217,7 @@
                 "import"
               ]
             },
-            "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts",
+            "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Open_Items_Upload_Template.xlsx\"\n}",
@@ -81783,7 +83250,7 @@
                     "import"
                   ]
                 },
-                "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts",
+                "description": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped. Also needs write:data-load; refused once go-live is locked (409)\n\nFront-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Open_Items_Upload_Template.xlsx\"\n}",

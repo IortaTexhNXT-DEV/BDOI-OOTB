@@ -94,6 +94,14 @@ minimal, clearly-correct front-end fix.
   duplicate rules of the object (`duplicates.js`); see the module README. A table that keeps uploaded rows with personal
   identifiers in JSON gets the `pii_protect_columns('json:<column>')` trigger and its `PII_STORAGE` entry, as
   `data_load_rows` does (migration 0441).
+- Long imports run as jobs, never in the request (the proxy cuts a request at 60 seconds): register the job type on the
+  job queue (`renewals/queue.js` `registerJobType`, `requeue: false` when a second run must never happen), move the
+  record with a compare-and-set of its status before the job starts (`data-load/service.js` `moveBatch`), answer 202
+  with the job and write the progress outside the job's transaction (`outsideTransaction` of `db/pool.js`). A job that
+  stops leaves its record in a state a sweep can see (`data-load/jobs.js` `sweep`).
+- Any route that loads legacy business (go-live, opening, migrated data) calls `assertMigrationOpen(kind)` or uses the
+  `migrationImportOpen(kind)` middleware (`src/lib/goLiveLock.js`); `test/migration-lock.test.js` lists every such route
+  as guarded or exempt with the reason, so a new import route must be classified there.
 - Every mutation calls `audit(req, {...})` from `src/lib/audit.js`; several entries of one request (one per record of a
   data load) go in one insert with `auditMany(req, entries)`. Workflow events that someone must act on
   create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go

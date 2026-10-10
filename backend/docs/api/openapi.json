@@ -63836,11 +63836,11 @@
     "/data-load/batches": {
       "get": {
         "operationId": "getDataLoadBatches",
-        "summary": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)",
+        "summary": "Load history: load number, kit, run, file, legacy system, counts per result, status, uploaded / submitted / approved / loaded / undone by and at, timings; filters kit, status (comma list), runId, from, to (created); paging",
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "kit",
@@ -63850,6 +63850,42 @@
               "type": "string"
             },
             "example": "migration"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "loaded,undone"
+          },
+          {
+            "name": "runId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
           },
           {
             "name": "page",
@@ -64077,7 +64113,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > History",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -64085,11 +64121,11 @@
       },
       "post": {
         "operationId": "postDataLoadBatches",
-        "summary": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",
+        "summary": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id",
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Upload\n\nAccess: write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -64219,28 +64255,66 @@
                             },
                             "validatedAt": {
                               "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "stage": {
+                                  "type": "string"
+                                },
+                                "step": {
+                                  "type": "string"
+                                },
+                                "sheet": {
+                                  "type": "string"
+                                },
+                                "done": {
+                                  "type": "integer"
+                                },
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "behind": {},
+                                "at": {
+                                  "type": "string"
+                                }
+                              }
                             }
                           }
                         },
-                        "errors": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "sheet": {
-                                "type": "string"
-                              },
-                              "sheetName": {
-                                "type": "string"
-                              },
-                              "row": {
-                                "type": "integer"
-                              },
-                              "column": {
-                                "type": "string"
-                              },
-                              "message": {
-                                "type": "string"
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "jobId": {
+                              "type": "string"
+                            },
+                            "queue": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "processed": {
+                                  "type": "integer"
+                                },
+                                "succeeded": {
+                                  "type": "integer"
+                                },
+                                "failed": {
+                                  "type": "integer"
+                                }
                               }
                             }
                           }
@@ -64251,7 +64325,7 @@
                 },
                 "example": {
                   "success": true,
-                  "message": "Validated: 2 row(s) with errors",
+                  "message": "Validating MIG-000007",
                   "data": {
                     "batch": {
                       "id": 7,
@@ -64259,7 +64333,7 @@
                       "kit": "migration",
                       "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
-                      "status": "failed",
+                      "status": "validating",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
                       "rowsValid": 477,
@@ -64294,17 +64368,30 @@
                       "reconciliation": null,
                       "createdBy": "BrokerVerse Administrator",
                       "createdAt": "2026-10-28T09:00:00Z",
-                      "validatedAt": "2026-10-28T09:00:05Z"
-                    },
-                    "errors": [
-                      {
-                        "sheet": "policies-motor",
-                        "sheetName": "Policies - Motor",
-                        "row": 14,
-                        "column": "Issue Date",
-                        "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
+                      "validatedAt": "2026-10-28T09:00:05Z",
+                      "progress": {
+                        "stage": "running",
+                        "step": "validate",
+                        "sheet": "Policies - Motor",
+                        "done": 1500,
+                        "total": 4800,
+                        "behind": null,
+                        "at": "2026-10-28T09:01:10Z"
                       }
-                    ]
+                    },
+                    "job": {
+                      "id": "412",
+                      "jobId": "412",
+                      "queue": "data-load",
+                      "type": "data-load.validate",
+                      "status": "waiting",
+                      "progress": {
+                        "total": 480,
+                        "processed": 0,
+                        "succeeded": 0,
+                        "failed": 0
+                      }
+                    }
                   }
                 }
               }
@@ -64320,7 +64407,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Upload and validate",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Upload",
         "x-permissions": [
           "write:data-load"
         ],
@@ -64340,11 +64427,11 @@
     "/data-load/batches/{id}": {
       "get": {
         "operationId": "getDataLoadBatchesId",
-        "summary": "One batch: result per sheet and the errors (sheet, row, column, message)",
+        "summary": "One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total) and its place in the queue",
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -64480,6 +64567,30 @@
                             },
                             "validatedAt": {
                               "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "stage": {
+                                  "type": "string"
+                                },
+                                "step": {
+                                  "type": "string"
+                                },
+                                "sheet": {
+                                  "type": "string"
+                                },
+                                "done": {
+                                  "type": "integer"
+                                },
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "behind": {},
+                                "at": {
+                                  "type": "string"
+                                }
+                              }
                             }
                           }
                         },
@@ -64508,6 +64619,18 @@
                         },
                         "totalErrors": {
                           "type": "integer"
+                        },
+                        "queue": {
+                          "type": "object",
+                          "properties": {
+                            "jobStatus": {
+                              "type": "string"
+                            },
+                            "ahead": {
+                              "type": "integer"
+                            },
+                            "behind": {}
+                          }
                         }
                       }
                     }
@@ -64522,7 +64645,7 @@
                       "kit": "migration",
                       "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
-                      "status": "failed",
+                      "status": "running",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
                       "rowsValid": 477,
@@ -64557,7 +64680,16 @@
                       "reconciliation": null,
                       "createdBy": "BrokerVerse Administrator",
                       "createdAt": "2026-10-28T09:00:00Z",
-                      "validatedAt": "2026-10-28T09:00:05Z"
+                      "validatedAt": "2026-10-28T09:00:05Z",
+                      "progress": {
+                        "stage": "running",
+                        "step": "load",
+                        "sheet": "Policies - Motor",
+                        "done": 1500,
+                        "total": 4800,
+                        "behind": null,
+                        "at": "2026-10-28T09:01:10Z"
+                      }
                     },
                     "errors": [
                       {
@@ -64568,7 +64700,12 @@
                         "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
                       }
                     ],
-                    "totalErrors": 1
+                    "totalErrors": 1,
+                    "queue": {
+                      "jobStatus": "processing",
+                      "ahead": 0,
+                      "behind": null
+                    }
                   }
                 }
               }
@@ -64584,7 +64721,411 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Validation result",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/approve": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdApprove",
+        "summary": "Approve a load (approve:data-load; never its uploader, submitter or a user who resolved one of its duplicates): the load runs as a job with the approver as the executing user, all or nothing; 202 with the job. Refused when the file, the value maps or the cutover date changed since the validation (validate again), after the approval expiry, and when the load is already running or loaded (409)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Approve\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "loadNumber": {
+                              "type": "string"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "held": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
+                                    "type": "integer"
+                                  },
+                                  "message": {}
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            },
+                            "decision": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "jobId": {
+                              "type": "string"
+                            },
+                            "queue": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "processed": {
+                                  "type": "integer"
+                                },
+                                "succeeded": {
+                                  "type": "integer"
+                                },
+                                "failed": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "MIG-000007 approved: loading",
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "loadNumber": "MIG-000007",
+                      "kit": "migration",
+                      "legacySystem": "TISPH Excel",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "running",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 477,
+                      "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
+                      "sheets": [
+                        {
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
+                          "read": 120,
+                          "valid": 117,
+                          "errors": 2,
+                          "held": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
+                          "proposed": 0,
+                          "ignored": 0,
+                          "skipped": 0,
+                          "duplicate": 1,
+                          "message": null
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z",
+                      "decision": "approved"
+                    },
+                    "job": {
+                      "id": "412",
+                      "jobId": "412",
+                      "queue": "data-load",
+                      "type": "data-load.load",
+                      "status": "waiting",
+                      "progress": {
+                        "total": 480,
+                        "processed": 0,
+                        "succeeded": 0,
+                        "failed": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Approve",
+        "x-permissions": [
+          "approve:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/dependents": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdDependents",
+        "summary": "What stops the undo of a migration load: business entered since on its records (receipts, credits, collection actions, deposited cheques, endorsements, claims, renewals, documents, CTPL authentication sent to the LTO) and later loads that refer to or changed its records",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "dependent": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "object": "policy",
+                      "key": "PC-MLY-2026-000101",
+                      "dependent": "Receipts",
+                      "count": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/dependents/workbook": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdDependentsWorkbook",
+        "summary": "The records that stop the undo of a load (XLSX)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Download\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Download",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -64807,7 +65348,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Download errors\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -64840,9 +65381,55 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Download errors",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Download errors",
         "x-permissions": [
           "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/file": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdFile",
+        "summary": "The workbook of a load as it was uploaded (personal data in clear): write:data-load and view:pii; each download is recorded in the audit trail",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Uploaded file\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Uploaded file",
+        "x-permissions": [
           "write:data-load"
         ]
       }
@@ -64850,7 +65437,7 @@
     "/data-load/batches/{id}/load": {
       "post": {
         "operationId": "postDataLoadBatchesIdLoad",
-        "summary": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)",
+        "summary": "Load a validated batch at once, in the request (validRowsOnly: skip the rows in error), only where no approval is required (migration.load_approval_required off, outside production and pre-production: the rehearsal); 409 otherwise. New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes",
         "tags": [
           "Go-Live Data Workbench"
         ],
@@ -65119,7 +65706,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reconciliation\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -65152,17 +65739,261 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > History > Reconciliation",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reconciliation",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
         ]
       }
     },
+    "/data-load/batches/{id}/reject": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdReject",
+        "summary": "Reject a load waiting for approval with a reason of the Reason Codes master (context data_load_reject) and remarks (a note when the reason needs one); not by its makers",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reject\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        },
+                        "decision": {
+                          "type": "string"
+                        },
+                        "decisionReasonCode": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "MIG-000007 rejected",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "rejected",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z",
+                    "decision": "rejected",
+                    "decisionReasonCode": "DLR-TOTALS"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Reject",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "DLR-TOTALS",
+                "remarks": "Gross premium of Motor differs from the legacy listing"
+              }
+            }
+          }
+        }
+      }
+    },
     "/data-load/batches/{id}/resolutions": {
       "post": {
         "operationId": "postDataLoadBatchesIdResolutions",
-        "summary": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again",
+        "summary": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again (a job, 202)",
         "tags": [
           "Go-Live Data Workbench"
         ],
@@ -65320,9 +66151,42 @@
                             }
                           }
                         },
-                        "errors": {
-                          "type": "array",
-                          "items": {}
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "jobId": {
+                              "type": "string"
+                            },
+                            "queue": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "processed": {
+                                  "type": "integer"
+                                },
+                                "succeeded": {
+                                  "type": "integer"
+                                },
+                                "failed": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -65343,7 +66207,7 @@
                       "kit": "migration",
                       "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
-                      "status": "failed",
+                      "status": "validating",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
                       "rowsValid": 477,
@@ -65380,7 +66244,19 @@
                       "createdAt": "2026-10-28T09:00:00Z",
                       "validatedAt": "2026-10-28T09:00:05Z"
                     },
-                    "errors": []
+                    "job": {
+                      "id": "412",
+                      "jobId": "412",
+                      "queue": "data-load",
+                      "type": "data-load.validate",
+                      "status": "waiting",
+                      "progress": {
+                        "total": 480,
+                        "processed": 0,
+                        "succeeded": 0,
+                        "failed": 0
+                      }
+                    }
                   }
                 }
               }
@@ -65656,14 +66532,14 @@
         ]
       }
     },
-    "/data-load/batches/{id}/validate": {
+    "/data-load/batches/{id}/submit": {
       "post": {
-        "operationId": "postDataLoadBatchesIdValidate",
-        "summary": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date",
+        "operationId": "postDataLoadBatchesIdSubmit",
+        "summary": "Submit a validated load for approval by a second user (validRowsOnly: a load with rows in error, its valid rows only); refused with rows in error, unresolved duplicates, value maps or cutover date changed since the validation, or a stored file that is not the file validated",
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Submit\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -65684,6 +66560,253 @@
                   "properties": {
                     "success": {
                       "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        },
+                        "submittedAt": {
+                          "type": "string"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "MIG-000007 submitted for approval",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "pending-approval",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z",
+                    "submittedBy": "Andrea Lim",
+                    "submittedAt": "2026-10-28T09:10:00Z",
+                    "expiresAt": "2026-10-31T09:10:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Submit",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "validRowsOnly": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "validRowsOnly": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}/undo-approve": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdUndoApprove",
+        "summary": "Approve the undo of a load (approve:data-load, not its requester): the undo runs as a job in one transaction, the objects in reverse load order (records removed, changed records and opening balances restored); 202 with the job",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Approve\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
                     },
                     "data": {
                       "type": "object",
@@ -65802,25 +66925,39 @@
                             }
                           }
                         },
-                        "errors": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "sheet": {
-                                "type": "string"
-                              },
-                              "sheetName": {
-                                "type": "string"
-                              },
-                              "row": {
-                                "type": "integer"
-                              },
-                              "column": {
-                                "type": "string"
-                              },
-                              "message": {
-                                "type": "string"
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "jobId": {
+                              "type": "string"
+                            },
+                            "queue": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "processed": {
+                                  "type": "integer"
+                                },
+                                "succeeded": {
+                                  "type": "integer"
+                                },
+                                "failed": {
+                                  "type": "integer"
+                                }
                               }
                             }
                           }
@@ -65831,6 +66968,7 @@
                 },
                 "example": {
                   "success": true,
+                  "message": "Undo of MIG-000007 approved: undoing",
                   "data": {
                     "batch": {
                       "id": 7,
@@ -65838,7 +66976,7 @@
                       "kit": "migration",
                       "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
-                      "status": "failed",
+                      "status": "undoing",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
                       "rowsValid": 477,
@@ -65875,15 +67013,19 @@
                       "createdAt": "2026-10-28T09:00:00Z",
                       "validatedAt": "2026-10-28T09:00:05Z"
                     },
-                    "errors": [
-                      {
-                        "sheet": "policies-motor",
-                        "sheetName": "Policies - Motor",
-                        "row": 14,
-                        "column": "Issue Date",
-                        "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
+                    "job": {
+                      "id": "412",
+                      "jobId": "412",
+                      "queue": "data-load",
+                      "type": "data-load.undo",
+                      "status": "waiting",
+                      "progress": {
+                        "total": 480,
+                        "processed": 0,
+                        "succeeded": 0,
+                        "failed": 0
                       }
-                    ]
+                    }
                   }
                 }
               }
@@ -65899,7 +67041,1174 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Validation result",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Approve",
+        "x-permissions": [
+          "approve:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/undo-reject": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdUndoReject",
+        "summary": "Reject the undo of a load with remarks (not its requester): the load stays",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Reject\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Undo of MIG-000007 rejected",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "loaded",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Reject",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Correct the two policies with a new load instead"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}/undo-request": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdUndoRequest",
+        "summary": "Request the undo of a loaded migration load, with a reason; refused after the go-live lock and while records depend on it (business entered since, later loads)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        },
+                        "undoReason": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Undo of MIG-000007 requested",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "undo-pending",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z",
+                    "undoReason": "Wrong legacy extract loaded in Mock 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Wrong legacy extract loaded in Mock 2"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}/undo-withdraw": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdUndoWithdraw",
+        "summary": "Withdraw an undo request (its requester)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Withdraw\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Undo of MIG-000007 withdrawn",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "loaded",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Undo > Withdraw",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/validate": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdValidate",
+        "summary": "Validate a load again (dry run, as a job), e.g. after a change of the value maps or of the cutover date, or to resume a load that failed, was rejected, withdrawn or expired; 202 with the job",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Validate again\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "loadNumber": {
+                              "type": "string"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "held": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
+                                    "type": "integer"
+                                  },
+                                  "message": {}
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "jobId": {
+                              "type": "string"
+                            },
+                            "queue": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "progress": {
+                              "type": "object",
+                              "properties": {
+                                "total": {
+                                  "type": "integer"
+                                },
+                                "processed": {
+                                  "type": "integer"
+                                },
+                                "succeeded": {
+                                  "type": "integer"
+                                },
+                                "failed": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Validating MIG-000007",
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "loadNumber": "MIG-000007",
+                      "kit": "migration",
+                      "legacySystem": "TISPH Excel",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "validating",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 477,
+                      "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
+                      "sheets": [
+                        {
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
+                          "read": 120,
+                          "valid": 117,
+                          "errors": 2,
+                          "held": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
+                          "proposed": 0,
+                          "ignored": 0,
+                          "skipped": 0,
+                          "duplicate": 1,
+                          "message": null
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "job": {
+                      "id": "412",
+                      "jobId": "412",
+                      "queue": "data-load",
+                      "type": "data-load.validate",
+                      "status": "waiting",
+                      "progress": {
+                        "total": 480,
+                        "processed": 0,
+                        "succeeded": 0,
+                        "failed": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Validate again",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/withdraw": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdWithdraw",
+        "summary": "Withdraw a load waiting for approval (its submitter or uploader)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Load > Withdraw\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "loadNumber": {
+                          "type": "string"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "legacySystem": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "rowsRead": {
+                          "type": "integer"
+                        },
+                        "rowsValid": {
+                          "type": "integer"
+                        },
+                        "rowsError": {
+                          "type": "integer"
+                        },
+                        "rowsNew": {
+                          "type": "integer"
+                        },
+                        "rowsChanged": {
+                          "type": "integer"
+                        },
+                        "rowsUnchanged": {
+                          "type": "integer"
+                        },
+                        "rowsDuplicate": {
+                          "type": "integer"
+                        },
+                        "fileSha256": {
+                          "type": "string"
+                        },
+                        "validateMs": {
+                          "type": "integer"
+                        },
+                        "loadMs": {},
+                        "sameFileAs": {},
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "read": {
+                                "type": "integer"
+                              },
+                              "valid": {
+                                "type": "integer"
+                              },
+                              "errors": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              },
+                              "updated": {
+                                "type": "integer"
+                              },
+                              "unchanged": {
+                                "type": "integer"
+                              },
+                              "proposed": {
+                                "type": "integer"
+                              },
+                              "ignored": {
+                                "type": "integer"
+                              },
+                              "skipped": {
+                                "type": "integer"
+                              },
+                              "duplicate": {
+                                "type": "integer"
+                              },
+                              "message": {}
+                            }
+                          }
+                        },
+                        "loadedCounts": {},
+                        "reconciliation": {},
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "validatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "MIG-000007 withdrawn",
+                  "data": {
+                    "id": 7,
+                    "loadNumber": "MIG-000007",
+                    "kit": "migration",
+                    "legacySystem": "TISPH Excel",
+                    "fileName": "GoLive_Migration_Workbook.xlsx",
+                    "status": "withdrawn",
+                    "cutoverDate": "2026-11-01",
+                    "rowsRead": 480,
+                    "rowsValid": 477,
+                    "rowsError": 2,
+                    "rowsNew": 470,
+                    "rowsChanged": 4,
+                    "rowsUnchanged": 3,
+                    "rowsDuplicate": 1,
+                    "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                    "validateMs": 5400,
+                    "loadMs": null,
+                    "sameFileAs": null,
+                    "sheets": [
+                      {
+                        "sheet": "policies-motor",
+                        "name": "Policies - Motor",
+                        "read": 120,
+                        "valid": 117,
+                        "errors": 2,
+                        "held": 0,
+                        "created": 110,
+                        "updated": 4,
+                        "unchanged": 3,
+                        "proposed": 0,
+                        "ignored": 0,
+                        "skipped": 0,
+                        "duplicate": 1,
+                        "message": null
+                      }
+                    ],
+                    "loadedCounts": null,
+                    "reconciliation": null,
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "validatedAt": "2026-10-28T09:00:05Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Load > Withdraw",
         "x-permissions": [
           "write:data-load"
         ]
@@ -66619,21 +68928,21 @@
                       {
                         "sheet": "settings",
                         "sheetName": "Settings",
-                        "key": "golive.cutover_date",
+                        "key": "general.frontend_url",
                         "column": "value",
                         "header": "Value",
-                        "file": "",
-                        "here": "2026-11-01",
-                        "rule": "cutover-date",
-                        "reason": "Each environment has its own cutover date"
+                        "file": "https://uat.broker.example",
+                        "here": "https://brokerverse.tisph.example",
+                        "rule": "urls-hosts",
+                        "reason": "Every environment has its own addresses"
                       }
                     ],
                     "rules": [
                       {
-                        "id": "cutover-date",
+                        "id": "urls-hosts",
                         "sheet": "settings",
-                        "label": "Cutover date (golive.cutover_date)",
-                        "reason": "Each environment has its own cutover date",
+                        "label": "Settings holding a URL or host (e.g. general.frontend_url)",
+                        "reason": "Every environment has its own addresses",
                         "applied": true
                       }
                     ]
@@ -67111,6 +69420,1254 @@
           "read:data-load",
           "write:data-load"
         ]
+      }
+    },
+    "/data-load/golive": {
+      "get": {
+        "operationId": "getDataLoadGolive",
+        "summary": "Go-Live tab: cutover date, go-live lock (when, by which request), the unlock in force (imports reopened, until when), the request waiting, the conditions of the lock and the settings of the workspace",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "lockedAt": {
+                          "type": "string"
+                        },
+                        "lockRequestId": {
+                          "type": "integer"
+                        },
+                        "unlock": {},
+                        "unlockWindowEndsAt": {
+                          "type": "string"
+                        },
+                        "unlockMaxHours": {
+                          "type": "integer"
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "action": {
+                              "type": "string"
+                            },
+                            "actionLabel": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "decisionRef": {},
+                            "scope": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "scopeLabels": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "hours": {
+                              "type": "integer"
+                            },
+                            "expiresAt": {},
+                            "relockedAt": {},
+                            "decisionId": {},
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "decidedBy": {},
+                            "decidedAt": {},
+                            "decisionRemarks": {}
+                          }
+                        },
+                        "conditions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "met": {
+                                "type": "boolean"
+                              },
+                              "detail": {}
+                            }
+                          }
+                        },
+                        "scopes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "settings": {
+                          "type": "object",
+                          "properties": {
+                            "loadApprovalRequired": {
+                              "type": "boolean"
+                            },
+                            "kpiIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "commissionIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "incentiveIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "sapGlIncludeOpening": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "cutoverDate": "2026-11-01",
+                    "locked": true,
+                    "lockedAt": "2026-11-01T14:00:00Z",
+                    "lockRequestId": 2,
+                    "unlock": null,
+                    "unlockWindowEndsAt": "2026-11-08T14:00:00Z",
+                    "unlockMaxHours": 4,
+                    "pendingRequest": {
+                      "id": 3,
+                      "action": "unlock",
+                      "actionLabel": "Go-live unlock",
+                      "status": "pending",
+                      "reason": "Late legacy claim found on day 2",
+                      "decisionRef": null,
+                      "scope": [
+                        "migration"
+                      ],
+                      "scopeLabels": [
+                        "Migration workbook"
+                      ],
+                      "hours": 4,
+                      "expiresAt": null,
+                      "relockedAt": null,
+                      "decisionId": null,
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-03T02:00:00Z",
+                      "decidedBy": null,
+                      "decidedAt": null,
+                      "decisionRemarks": null
+                    },
+                    "conditions": [
+                      {
+                        "code": "go-decision",
+                        "label": "Go decision of the production run",
+                        "met": true,
+                        "detail": null
+                      }
+                    ],
+                    "scopes": [
+                      {
+                        "key": "migration",
+                        "label": "Migration workbook"
+                      }
+                    ],
+                    "settings": {
+                      "loadApprovalRequired": true,
+                      "kpiIncludeMigrated": false,
+                      "commissionIncludeMigrated": false,
+                      "incentiveIncludeMigrated": false,
+                      "sapGlIncludeOpening": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/golive/cutover-date": {
+      "put": {
+        "operationId": "putDataLoadGoliveCutoverDate",
+        "summary": "Set the cutover date (first day of live transactions); refused once go-live is locked and while a migration load is loaded or in progress (undo it first)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Cutover date\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "lockedAt": {
+                          "type": "string"
+                        },
+                        "lockRequestId": {
+                          "type": "integer"
+                        },
+                        "unlock": {},
+                        "unlockWindowEndsAt": {
+                          "type": "string"
+                        },
+                        "unlockMaxHours": {
+                          "type": "integer"
+                        },
+                        "pendingRequest": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "action": {
+                              "type": "string"
+                            },
+                            "actionLabel": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "decisionRef": {},
+                            "scope": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "scopeLabels": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "hours": {
+                              "type": "integer"
+                            },
+                            "expiresAt": {},
+                            "relockedAt": {},
+                            "decisionId": {},
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "decidedBy": {},
+                            "decidedAt": {},
+                            "decisionRemarks": {}
+                          }
+                        },
+                        "conditions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "met": {
+                                "type": "boolean"
+                              },
+                              "detail": {}
+                            }
+                          }
+                        },
+                        "scopes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "settings": {
+                          "type": "object",
+                          "properties": {
+                            "loadApprovalRequired": {
+                              "type": "boolean"
+                            },
+                            "kpiIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "commissionIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "incentiveIncludeMigrated": {
+                              "type": "boolean"
+                            },
+                            "sapGlIncludeOpening": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Cutover date saved",
+                  "data": {
+                    "cutoverDate": "2026-11-01",
+                    "locked": true,
+                    "lockedAt": "2026-11-01T14:00:00Z",
+                    "lockRequestId": 2,
+                    "unlock": null,
+                    "unlockWindowEndsAt": "2026-11-08T14:00:00Z",
+                    "unlockMaxHours": 4,
+                    "pendingRequest": {
+                      "id": 3,
+                      "action": "unlock",
+                      "actionLabel": "Go-live unlock",
+                      "status": "pending",
+                      "reason": "Late legacy claim found on day 2",
+                      "decisionRef": null,
+                      "scope": [
+                        "migration"
+                      ],
+                      "scopeLabels": [
+                        "Migration workbook"
+                      ],
+                      "hours": 4,
+                      "expiresAt": null,
+                      "relockedAt": null,
+                      "decisionId": null,
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-03T02:00:00Z",
+                      "decidedBy": null,
+                      "decidedAt": null,
+                      "decisionRemarks": null
+                    },
+                    "conditions": [
+                      {
+                        "code": "go-decision",
+                        "label": "Go decision of the production run",
+                        "met": true,
+                        "detail": null
+                      }
+                    ],
+                    "scopes": [
+                      {
+                        "key": "migration",
+                        "label": "Migration workbook"
+                      }
+                    ],
+                    "settings": {
+                      "loadApprovalRequired": true,
+                      "kpiIncludeMigrated": false,
+                      "commissionIncludeMigrated": false,
+                      "incentiveIncludeMigrated": false,
+                      "sapGlIncludeOpening": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Cutover date",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cutoverDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "cutoverDate": "2026-11-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/golive/lock-requests": {
+      "get": {
+        "operationId": "getDataLoadGoliveLockRequests",
+        "summary": "Requests to lock go-live or to lift the lock for named imports, newest first (filter status)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "actionLabel": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "decisionRef": {},
+                          "scope": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "scopeLabels": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "hours": {
+                            "type": "integer"
+                          },
+                          "expiresAt": {},
+                          "relockedAt": {},
+                          "decisionId": {},
+                          "requestedBy": {
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "type": "string"
+                          },
+                          "decidedBy": {},
+                          "decidedAt": {},
+                          "decisionRemarks": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 3,
+                      "action": "unlock",
+                      "actionLabel": "Go-live unlock",
+                      "status": "pending",
+                      "reason": "Late legacy claim found on day 2",
+                      "decisionRef": null,
+                      "scope": [
+                        "migration"
+                      ],
+                      "scopeLabels": [
+                        "Migration workbook"
+                      ],
+                      "hours": 4,
+                      "expiresAt": null,
+                      "relockedAt": null,
+                      "decisionId": null,
+                      "requestedBy": "Andrea Lim",
+                      "requestedAt": "2026-11-03T02:00:00Z",
+                      "decidedBy": null,
+                      "decidedAt": null,
+                      "decisionRemarks": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadGoliveLockRequests",
+        "summary": "Request the go-live lock (needs the Go decision of the production run, its reconciliation signed, its restore point and no load in progress) or an unlock (scope: imports to reopen of migration, policies-go-live, opening-items, opening-balances; hours up to migration.unlock_max_hours; decisionRef: steering committee decision, required after migration.unlock_window_days); approved by another user",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Lock / Unlock\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "actionLabel": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "decisionRef": {},
+                        "scope": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "scopeLabels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "hours": {
+                          "type": "integer"
+                        },
+                        "expiresAt": {},
+                        "relockedAt": {},
+                        "decisionId": {},
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "decidedBy": {},
+                        "decidedAt": {},
+                        "decisionRemarks": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Go-live unlock requested",
+                  "data": {
+                    "id": 3,
+                    "action": "unlock",
+                    "actionLabel": "Go-live unlock",
+                    "status": "pending",
+                    "reason": "Late legacy claim found on day 2",
+                    "decisionRef": null,
+                    "scope": [
+                      "migration"
+                    ],
+                    "scopeLabels": [
+                      "Migration workbook"
+                    ],
+                    "hours": 4,
+                    "expiresAt": null,
+                    "relockedAt": null,
+                    "decisionId": null,
+                    "requestedBy": "Andrea Lim",
+                    "requestedAt": "2026-11-03T02:00:00Z",
+                    "decidedBy": null,
+                    "decidedAt": null,
+                    "decisionRemarks": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Lock / Unlock",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "hours": {
+                    "type": "integer"
+                  },
+                  "decisionRef": {}
+                }
+              },
+              "example": {
+                "action": "unlock",
+                "reason": "Late legacy claim found on day 2",
+                "scope": [
+                  "migration"
+                ],
+                "hours": 4,
+                "decisionRef": null
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/golive/lock-requests/{id}/approve": {
+      "post": {
+        "operationId": "postDataLoadGoliveLockRequestsIdApprove",
+        "summary": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "actionLabel": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "decisionRef": {},
+                        "scope": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "scopeLabels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "hours": {
+                          "type": "integer"
+                        },
+                        "expiresAt": {
+                          "type": "string"
+                        },
+                        "relockedAt": {},
+                        "decisionId": {},
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "decidedBy": {},
+                        "decidedAt": {},
+                        "decisionRemarks": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Go-live unlock approved",
+                  "data": {
+                    "id": 3,
+                    "action": "unlock",
+                    "actionLabel": "Go-live unlock",
+                    "status": "approved",
+                    "reason": "Late legacy claim found on day 2",
+                    "decisionRef": null,
+                    "scope": [
+                      "migration"
+                    ],
+                    "scopeLabels": [
+                      "Migration workbook"
+                    ],
+                    "hours": 4,
+                    "expiresAt": "2026-11-03T06:05:00Z",
+                    "relockedAt": null,
+                    "decisionId": null,
+                    "requestedBy": "Andrea Lim",
+                    "requestedAt": "2026-11-03T02:00:00Z",
+                    "decidedBy": null,
+                    "decidedAt": null,
+                    "decisionRemarks": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve",
+        "x-permissions": [
+          "approve:data-load"
+        ]
+      }
+    },
+    "/data-load/golive/lock-requests/{id}/reject": {
+      "post": {
+        "operationId": "postDataLoadGoliveLockRequestsIdReject",
+        "summary": "Reject a lock or unlock request with remarks (not its requester)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Reject\n\nAccess: approve:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "actionLabel": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "decisionRef": {},
+                        "scope": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "scopeLabels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "hours": {
+                          "type": "integer"
+                        },
+                        "expiresAt": {},
+                        "relockedAt": {},
+                        "decisionId": {},
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "decidedBy": {},
+                        "decidedAt": {},
+                        "decisionRemarks": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Go-live unlock rejected",
+                  "data": {
+                    "id": 3,
+                    "action": "unlock",
+                    "actionLabel": "Go-live unlock",
+                    "status": "rejected",
+                    "reason": "Late legacy claim found on day 2",
+                    "decisionRef": null,
+                    "scope": [
+                      "migration"
+                    ],
+                    "scopeLabels": [
+                      "Migration workbook"
+                    ],
+                    "hours": 4,
+                    "expiresAt": null,
+                    "relockedAt": null,
+                    "decisionId": null,
+                    "requestedBy": "Andrea Lim",
+                    "requestedAt": "2026-11-03T02:00:00Z",
+                    "decidedBy": null,
+                    "decidedAt": null,
+                    "decisionRemarks": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Reject",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Fix forward with a correcting journal instead"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/golive/lock-requests/{id}/withdraw": {
+      "post": {
+        "operationId": "postDataLoadGoliveLockRequestsIdWithdraw",
+        "summary": "Withdraw a lock or unlock request (its requester)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "actionLabel": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "decisionRef": {},
+                        "scope": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "scopeLabels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "hours": {
+                          "type": "integer"
+                        },
+                        "expiresAt": {},
+                        "relockedAt": {},
+                        "decisionId": {},
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "decidedBy": {},
+                        "decidedAt": {},
+                        "decisionRemarks": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Go-live unlock withdrawn",
+                  "data": {
+                    "id": 3,
+                    "action": "unlock",
+                    "actionLabel": "Go-live unlock",
+                    "status": "withdrawn",
+                    "reason": "Late legacy claim found on day 2",
+                    "decisionRef": null,
+                    "scope": [
+                      "migration"
+                    ],
+                    "scopeLabels": [
+                      "Migration workbook"
+                    ],
+                    "hours": 4,
+                    "expiresAt": null,
+                    "relockedAt": null,
+                    "decisionId": null,
+                    "requestedBy": "Andrea Lim",
+                    "requestedAt": "2026-11-03T02:00:00Z",
+                    "decidedBy": null,
+                    "decidedAt": null,
+                    "decisionRemarks": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/golive/settings": {
+      "put": {
+        "operationId": "putDataLoadGoliveSettings",
+        "summary": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "loadApprovalRequired": {
+                          "type": "boolean"
+                        },
+                        "kpiIncludeMigrated": {
+                          "type": "boolean"
+                        },
+                        "commissionIncludeMigrated": {
+                          "type": "boolean"
+                        },
+                        "incentiveIncludeMigrated": {
+                          "type": "boolean"
+                        },
+                        "sapGlIncludeOpening": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Settings saved",
+                  "data": {
+                    "loadApprovalRequired": true,
+                    "kpiIncludeMigrated": false,
+                    "commissionIncludeMigrated": false,
+                    "incentiveIncludeMigrated": false,
+                    "sapGlIncludeOpening": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings",
+        "x-permissions": [
+          "approve:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "loadApprovalRequired": {
+                    "type": "boolean"
+                  },
+                  "kpiIncludeMigrated": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "loadApprovalRequired": true,
+                "kpiIncludeMigrated": false
+              }
+            }
+          }
+        }
       }
     },
     "/data-load/kits": {
@@ -100641,11 +104198,11 @@
     "/period-end/opening-balances/import": {
       "post": {
         "operationId": "postPeriodEndOpeningBalancesImport",
-        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it",
+        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)",
         "tags": [
           "Period End"
         ],
-        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -100733,7 +104290,8 @@
         },
         "x-screen": "Accounts > Period End > Period Management > Import opening balances",
         "x-permissions": [
-          "write:period-end"
+          "write:period-end",
+          "write:data-load"
         ],
         "requestBody": {
           "required": true,
@@ -100797,11 +104355,11 @@
     "/period-end/opening-balances/validate": {
       "post": {
         "operationId": "postPeriodEndOpeningBalancesValidate",
-        "summary": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace",
+        "summary": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace. Also needs write:data-load; refused once go-live is locked (409)",
         "tags": [
           "Period End"
         ],
-        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end, write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -100944,7 +104502,8 @@
         },
         "x-screen": "Accounts > Period End > Period Management > Import opening balances",
         "x-permissions": [
-          "write:period-end"
+          "write:period-end",
+          "write:data-load"
         ],
         "requestBody": {
           "required": true,
@@ -110991,7 +114550,7 @@
     "/policies/bulk-upload": {
       "post": {
         "operationId": "postPoliciesBulkUpload",
-        "summary": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission",
+        "summary": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook",
         "tags": [
           "Policies"
         ],
@@ -134896,11 +138455,11 @@
     "/receipts/opening-items/import": {
       "post": {
         "operationId": "postReceiptsOpeningItemsImport",
-        "summary": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped",
+        "summary": "Go-live: load unpaid premium bills of the old system (multipart \"file\" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped. Also needs write:data-load; refused once go-live is locked (409)",
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts",
+        "description": "Front-end touchpoint: Accounts > Collections > Import open items\n\nAccess: write:receipts, write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -134965,7 +138524,8 @@
         },
         "x-screen": "Accounts > Collections > Import open items",
         "x-permissions": [
-          "write:receipts"
+          "write:receipts",
+          "write:data-load"
         ],
         "requestBody": {
           "required": true,
