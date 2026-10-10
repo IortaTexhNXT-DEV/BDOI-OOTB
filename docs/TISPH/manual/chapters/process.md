@@ -1,8 +1,8 @@
 <!--
 Owner: see WRITER_GUIDE.md. One section per step of the TISPH business process, in order. Each names who does the
 step ({{roles:...}} placeholders, never typed role names) and links to the screen sections.
-Screens to refresh (redesign in another stream, described as on this build): process-remittance (remittance screens),
-process-placement (Check against slip dialog), process-policy (endorsement dialog).
+Screens to refresh (redesign in another stream, described as on this build): process-placement (Check against slip
+dialog), process-policy (endorsement dialog).
 -->
 # The TISPH process end to end {#the-business-process-end-to-end}
 
@@ -35,7 +35,7 @@ From the booking onwards both policies follow the same steps.
 | Check of the e-policy | {{roles:approve:policies}} | [Placement Slips](#placement-slips) | **Checked against slip** |
 | Booking | {{roles:write:policies}} | [Placement Slips](#placement-slips) | Policy, bill, journal and commission; **Insurer issued (Booked)** |
 | Collection | {{roles:write:receipts}} | [Receipts](#verify-payments-and-post-official-receipts), [Post-Dated Cheques](#post-dated-cheques) | Official receipt; policy payment **Completed** |
-| Remittance | {{roles:write:remittance}} | [Remittance to insurers](#remittance-to-insurers) | Remittance approved and paid to the insurer |
+| Remittance | {{roles:write:remittance}} | [Remittance to insurers](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
 | Commission | {{roles:write:commission}} | [Commission to agents and referrers](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
 | Endorsement | {{roles:write:endorsements}} | [Policies](#policies) | Policy changed; additional premium billed |
 | Claim | {{roles:write:claims}} | [The claims list](#the-claims-list) | Claim **Pending** to **Closed** |
@@ -339,32 +339,33 @@ Premium warranty extensions, instalment plans and client credit limits are handl
 
 ## Remittance to the insurers {#process-remittance}
 
-Remittances to the insurers are prepared by {{roles:write:remittance}}, and approved by another user of these roles.
-See [Remittance to insurers](#remittance-to-insurers).
-
-<!-- Screens to refresh: the remittance screens are being redesigned in another stream; this section describes the
-screens of this build. -->
+Remittances to the insurers are prepared and submitted by {{roles:write:remittance}}, and approved by
+{{roles:approve:remittance}} within their approval limit, never by the user who prepared or submitted them. See
+[Remittance to insurers](#remittance-to-insurers).
 
 TISPH collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
 the premium collected, less the commission and the output VAT on it, plus the withholding tax the insurer deducts
 from the commission. For an insurer and product remitted gross, the whole premium is remitted and the commission is
-billed to the insurer separately on Direct Bill Processing.
+billed to the insurer separately on [Insurer billing](#direct-bill-commission-debit-notes).
 
-1. Remittances are prepared from the policies with collected premium, per insurer: by the remittance schedules on
-   {{menu:/finance/remittance/automated/execute}} (insurer, cut-off and run date per schedule), or from an uploaded
-   list on {{menu:/finance/remittance/bulkprocessing}}.
-2. Choose {{menu:/finance/remittance/tracking/status}}, open the remittance (**Draft**) and check its policies and
-   amounts.
-3. Select **Process**. The remittance is submitted for approval.
-4. The approver decides on {{menu:/finance/remittance/approval}}; the approver must be another user than the maker.
-   A remittance needs one, two or three approvals according to its amount (see
-   [Approvals and maker-checker](#statuses-approvals-and-maker-checker)).
-5. The approved remittance raises the insurer payment voucher on
-   [Disbursement](#disbursement-payment-vouchers-and-cheques). The cheque approval posts the payment journal; a
-   transfer is sent through [Bank payment files](#bank-payment-files).
-6. The remittance advice is printed from Tracking (print icon) on the TISPH letterhead and sent to the insurer.
+1. Every Monday at 06:15 the weekly run creates the draft remittances of the policies paid in the Monday to Friday
+   before, one per insurer and product line ([Setup: remittance schedules](#remittance-schedules)). An off-cycle
+   remittance is created from a list of policies with
+   [Import policy list](#remittance-import-policy-list).
+2. Choose {{menu:/finance/remittance/remittances}}. On **My work**, check each draft (policies and amounts), tick it and
+   select **Submit for approval (n)**.
+3. The approver decides on {{menu:/finance/remittance/approvals}}: **Approve**, or **Reject** with a reason, which
+   returns the remittance to its maker as **Returned**.
+4. The approved remittance is settled on {{menu:/finance/remittance/settlement/process}}. The approved settlement
+   raises the insurer's payment voucher on [Disbursement](#disbursement-payment-vouchers-and-cheques) and the
+   remittance shows **Settled (voucher raised)**.
+5. The voucher is paid from [Insurer payments](#insurer-payments): by a bank payment batch on
+   [Bank payment files](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
+   remittance reaches the step **Paid**.
+6. The remittance schedule (XLSX and PDF) and, once the voucher is raised, the remittance advice are downloaded from
+   the remittance and sent to the insurer.
 
-![Accounts > Remittance > Tracking, with the remittances per insurer](images/process/remittance-tracking.png)
+![Accounts > Remittance > Remittances of TIS Finance & General Accounting: the drafts to submit, the next run and Automation Off](images/process/remittances.png)
 
 Each month the insurers' statements are matched with TISPH's records on
 [Insurer statement reconciliation](#insurer-statement-reconciliation); the reconciliation and its adjustments are

@@ -12,10 +12,12 @@ Screens to refresh (redesign in another stream, described as on this build): tis
 
 The TIS General Manager oversees the business of Toyota Insurance Services Philippines. You hold every approval of
 the front office: the check of the insurers' e-policies against the placement slips, the renewal terms, the return
-premiums and cancellations, and the claim decisions and settlement approvals. You approve supplier invoices, follow
-the business on the dashboards and reports, and review who has access to what.
+premiums and cancellations, and the claim decisions and settlement approvals. You approve supplier invoices and the
+remittances to the insurers above the limit of TIS Finance & General Accounting, follow the business on the dashboards
+and reports, and review who has access to what.
 
-You read the accounting (receipts, remittances, journals, period end, tax) without changing it, and you read users,
+Apart from the remittance approvals, you read the accounting (receipts, remittances, journals, period end, tax)
+without changing it, and you read users,
 roles, access, the Authority Matrix, segregation of duties and the audit trail without changing them: those are kept
 by TIS Finance & General Accounting and TIS IT AppSupport / Admin. You never decide a record you entered yourself.
 
@@ -31,6 +33,7 @@ by TIS Finance & General Accounting and TIS IT AppSupport / Admin. You never dec
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips](#placement-slips) |
 | Approve or return renewal terms and complete return premiums | As needed | [Negotiations](#negotiations), [Policy](#policies) |
 | Approve or reject supplier invoices | As notified | [Payables](#accounts-payable) |
+| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals](#remittance-approvals) |
 | Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard](#dashboard), [Claims Dashboard](#claims-dashboard), [Processing Dashboard](#processing-dashboard), [Sales Dashboard](#sales-dashboard) |
 | Review the month's financial reports after the month-end close | Monthly | [All Reports](#reports-catalogue) |
 | Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix](#user-access-matrix), [Segregation of Duties](#segregation-of-duties) |

@@ -99,7 +99,7 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 **Lead Sources** lists where prospects come from (for example Walk-In, Referral, Agent, Bundling, Promo, Used-Cars - SCR, Used-Cars - UCFP), with the **Channel Type**, the **Linked Office (branch code)** and the **Sort Order**. The source is chosen on the prospect.
 
-**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals and the accounting reversals. **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
+**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
 
 ![Master > Insurance > Reason Codes](images/screens-master/reason-codes.png)
 

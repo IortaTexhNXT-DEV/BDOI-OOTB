@@ -1,9 +1,6 @@
 <!--
 Owner: see WRITER_GUIDE.md. Generated facts come from generated/roles/tis-finance.md (npm run manual:role-facts in backend/);
 never edit them here. Written from the local TISPH build as manual.finance.
-Screens to refresh: "Prepare and approve a remittance to an insurer" (tis-finance-and-general-accounting-remittance)
-describes the remittance screens of this build, which are being redesigned in another stream (Tracking, Approval
-Workflow and their pop-ups).
 -->
 # TIS Finance & General Accounting {#tis-finance-and-general-accounting}
 
@@ -34,7 +31,7 @@ create the journals, and with the TIS General Manager and the unit heads, who al
 | Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files](#bank-payment-files) |
 | Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables](#accounts-payable), [BIR Form 2307 for suppliers](#bir-form-2307-for-suppliers) |
 | Enter, correct or reverse journal vouchers | As needed | [Journal Voucher](#journal-vouchers) |
-| Prepare the remittances to the insurers and decide those of another user | On each remittance schedule | [Remittance](#remittance-to-insurers) |
+| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance](#remittance-to-insurers) |
 | Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts](#commission-to-agents-and-referrers) |
 | Keep the petty cash funds and replenish them | Daily; when a fund runs low | [Petty Cash](#petty-cash) |
 | Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation](#bank-reconciliation) |
@@ -51,9 +48,9 @@ create the journals, and with the TIS General Manager and the unit heads, who al
 ### Start the day from My Work {#tis-finance-and-general-accounting-my-work}
 
 1. Choose **My Work**. The tiles show what is overdue, due today and due in the next seven days.
-2. Select **Approvals** in the list on the left. The list shows each item waiting for your decision: electronic
-   transfers, insurer remittances, remittance adjustments, cheque releases, journal vouchers and petty cash requests,
-   with the amount and the due date.
+2. Select **Approvals** in the list on the left. The list shows each item waiting for your decision: insurer
+   remittances, remittance adjustments, cheque releases, journal vouchers and petty cash requests, with the amount and
+   the due date.
 3. Select the arrow in **Actions** to open the item on its own screen, check it and approve or reject it there.
 
 Items you entered yourself are not listed for your approval: they wait for another user of your role.
@@ -121,7 +118,7 @@ A journal approved after the cut-off is in the next day's file. See [SAP GL expo
 6. When the cheque is printed, select it and select **Print**, then **Print cheque**. The cheque is **Printed** and the
    voucher **Paid**. This cannot be undone.
 
-Payment vouchers are also raised by the system: an approved remittance raises the insurer's voucher, and a commission
+Payment vouchers are also raised by the system: an approved remittance settlement raises the insurer's voucher, and a commission
 payout raises the referrer's voucher. A voucher paid by bank transfer goes into a batch of
 {{menu:/accounts/bank-payment-files}} (**New batch**): the batch is approved, its file is uploaded to the bank portal
 and the bank's results post each payment. See
@@ -146,19 +143,19 @@ Follow the open invoices on {{menu:/accounts/payables/ageing}}. See [Accounts pa
 
 ### Prepare and approve a remittance to an insurer {#tis-finance-and-general-accounting-remittance}
 
-<!-- Screens to refresh: the remittance screens of this build; they are being redesigned in another stream. -->
+1. Choose {{menu:/finance/remittance/remittances}}. **My work** lists the drafts to submit, from the weekly run or
+   from [Import policy list](#remittance-import-policy-list).
+2. Open a draft, check its policies and amounts, and select **Submit for approval**. The remittance is **Pending
+   approval**.
+3. To decide the remittances of another user, choose {{menu:/finance/remittance/approvals}}. **Awaiting my decision**
+   lists what you may decide within your limit (PHP 1,000,000.00 as delivered). Select the reference, check the review
+   panel and select **Approve**, or **Reject** with a reason from the list.
+4. Settle the approved remittances on {{menu:/finance/remittance/settlement/process}} and submit the settlement for
+   approval. The approved settlement raises the insurer's payment voucher on Disbursement.
+5. Pay the voucher from {{menu:/finance/remittance/payments}}: in a bank payment batch, or by cheque on Disbursement.
 
-1. Choose {{menu:/finance/remittance/tracking/status}}. The list shows each remittance with its insurer, number of
-   policies, gross amount, commission, net amount and status.
-2. Open a **Draft** remittance, check its policies and amounts and select **Process**. The remittance is
-   **Pending Approval**.
-3. The approver chooses {{menu:/finance/remittance/approval}}, selects the remittance in **Pending approvals**, chooses
-   **Approve** or **Reject** in **Approval details** and selects **Submit**.
-
-The approver is another user of TIS Finance & General Accounting or of CCD-Recon (Reconciliation and Reversals),
-within the remittance limit of the [Authority Matrix](#authority-matrix). The approved remittance raises the insurer's
-payment voucher on Disbursement. Electronic transfers and remittance adjustments are approved on the same screen. See
-[Remittance to insurers](#remittance-to-insurers) and [Remittance to the insurers](#process-remittance).
+You cannot approve a remittance you prepared or submitted. A remittance above your limit waits for the TIS General
+Manager. See [Remittance to insurers](#remittance-to-insurers) and [Remittance to the insurers](#process-remittance).
 
 ### Pay the commission of agents and referrers {#tis-finance-and-general-accounting-commission}
 

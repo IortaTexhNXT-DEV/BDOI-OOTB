@@ -134,7 +134,7 @@ describe("TISPH roles (RBAC v4): menus", () => {
       const withIt = TIS_ROLES.filter((role) => filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts")?.submenu.some((s) => s.name === "Insurer Reconciliation"));
       expect(withIt).toEqual([]);
       expect(helpSectionFor("/finance/remittance/reconciliation/insurer-statements").id).toBe("insurer-statement-reconciliation");
-      expect(helpSectionFor("/finance/remittance/setup/schedules").id).toBe("remittance-to-insurers");
+      expect(helpSectionFor("/finance/remittance/setup/schedules").id).toBe("remittance-schedules");
     });
   });
 

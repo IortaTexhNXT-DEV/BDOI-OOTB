@@ -1,8 +1,5 @@
 <!--
 Owner: see WRITER_GUIDE.md. Screen reference: one section per screen of the Accounts menu, in menu order.
-Screens to refresh (redesign in another stream, described as on this build): remittance-to-insurers and
-direct-bill-commission-debit-notes (remittance screens), verify-payments-and-post-official-receipts and
-post-dated-cheques (pop-ups), disbursement-payment-vouchers-and-cheques and bank-payment-files (payment pop-ups).
 -->
 # Screen reference: Accounts {#screens-accounts}
 
@@ -76,7 +73,7 @@ Accounts > Post-Dated Cheques is the register of cheques received from clients b
 
 {{screen:/accounts/post-dated-cheques}}
 
-The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheque register** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
+The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheques** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
 
 To register a cheque, select **Register cheque**:
 
@@ -100,7 +97,7 @@ The cheque is **On Hand**. Nothing is posted until it is deposited. The actions 
 
 A cheque that bounces is recorded as bounced with the reason: its receipt is cancelled, the journal reversed and the bill is open again.
 
-![Register cheque](images/screens-accounts/register-cheque.png)
+![Register cheque with the bill, drawee bank, cheque number, date, amount and vault entered](images/role-tis-ccd-pdu/register-cheque.png)
 
 ![Deposit a post-dated cheque: the official receipt is posted to the bank account chosen](images/screens-accounts/deposit-cheque.png)
 
@@ -222,76 +219,208 @@ Bank Payment Files pays approved payment vouchers through the bank's upload file
 
 The batch is approved by another user, the file is downloaded for the bank portal, and the bank's result file is loaded back: each payment it confirms is posted and its voucher becomes **Paid**; a rejected payment returns to the vouchers waiting for payment.
 
+**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments](#insurer-payments) with the same batch dialog.
+
 
 ## Remittance to insurers {#remittance-to-insurers}
 
-For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its share. The remittances are prepared and approved by {{roles:write:remittance}}.
+For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its
+share. Remittances are prepared and submitted by {{roles:write:remittance}}; they are approved by
+{{roles:approve:remittance}}, never by the user who prepared or submitted them.
 
-{{screen:/finance/remittance/automated/execute}}
+The Remittance menu has eight entries. Each role sees the entries of its work; a role that only reads an entry sees
+**View only** at the top of the page and no tick boxes or action buttons.
 
-{{screen:/finance/remittance/tracking/status}}
+| Entry | What it is for |
+|---|---|
+| [Remittances](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
+| [Approvals](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
+| [Insurer payments](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
+| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation](#insurer-statement-reconciliation) |
+| [Exceptions](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
+| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes](#direct-bill-commission-debit-notes) |
+| [Setup](#remittance-schedules) | The schedules of the weekly remittance runs |
+| [Settlement](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
 
-{{screen:/finance/remittance/statements/generate}}
+A remittance (REM-YYYY-NNNNN) covers one insurer and product line for a coverage week. Its status is **Draft** until
+submitted, **Pending approval** until an approver decides, then **Approved**, or **Returned** to its maker when
+rejected. **Settled (voucher raised)** means the insurer's payment voucher exists; the step **Paid** of the remittance
+shows when the voucher is paid.
 
-{{screen:/finance/remittance/settlement/process}}
+### Remittances {#remittances-worklist}
 
-{{screen:/finance/remittance/reconciliation}}
+{{screen:/finance/remittance/remittances}}
 
-{{screen:/finance/remittance/bulkprocessing}}
+The chips at the top show the next weekly run and whether **Automation** (the daily remittance job) is **On** or
+**Off**. The cards **To submit**, **Awaiting approval**, **Approved, not paid** and **Overdue to insurer** count the
+remittances of the list as filtered; select a card to list them. The tabs are **My work** (the drafts and returned
+remittances to submit), **Drafts**, **In approval**, **In payment** and **All**. Filter by coverage week, insurer,
+product line and source (**Weekly run**, **Run now**, **Import**), or search a REM, policy or OR number.
 
-{{screen:/finance/remittance/scheduling}}
+Each row shows **Remittance no** with the coverage week, **Insurer** and product line, **Policies**, **Due to insurer**
+with the due date (red with **Overdue** when past), **Status** and **Next step**: for a remittance pending approval,
+the approvers it waits on. **Columns** adds Source, Voucher no, Paid on, Bank ref, Submitted by and Created on. The
+total of the list is under **Due to insurer**.
 
-{{screen:/finance/remittance/electronictransfer}}
+To submit remittances for approval:
 
-{{screen:/finance/remittance/approval}}
+1. Choose {{menu:/finance/remittance/remittances}}. Open **My work** or **Drafts**.
+2. Tick the drafts and select **Submit for approval (n)**, or choose **Submit for approval** in the row menu.
+3. Check the total in the confirmation and select **Submit n remittances**. Each row then says **Submitted**, or why
+   it was not submitted (for example, another user submitted it a moment before).
+
+The row menu also offers **View**, the remittance schedule (XLSX and PDF), the remittance advice once the voucher is
+raised, and **Open voucher**. The menu at the top right holds **Run now**, **Run history**, **Import history** and
+**Export XLSX**.
+
+### Import policy list {#remittance-import-policy-list}
+
+An off-cycle remittance (opening remittances at go-live, a catch-up, an insurer's list, a correction) is created from
+a list of policies. The file names the policies and the insurer; the system computes every amount from the
+collections. **Import policy list** replaces the bulk upload of remittances with typed amounts.
+
+1. On {{menu:/finance/remittance/remittances}}, select **Import policy list**.
+2. Select **Download template** and fill in the **Data** sheet: **Policy No** and **Insurer Code** are required;
+   **Product Line**, **Expected Due to Insurer**, **Insurer Reference** and **Remark** are optional.
+3. Choose the **Purpose** from the list, type a **Note** if needed, and choose the file (.xlsx or .csv, at most
+   10 MB and 5,000 rows).
+4. Select **Validate**. Nothing is created yet. The preview shows each row with its result (**Ready**, **Ready ·
+   Variance**, **Already on REM**, **Not found**, **Not issued**, **Insurer differs**, **Product line differs**,
+   **Direct bill**, **Duplicate in file**) and the remittances to create per insurer and product line.
+   **Download error report** lists every row with its result and message.
+5. Select **Create n draft remittances** and confirm. One draft is created per insurer and product line from the
+   ready rows, marked **Off-cycle** with the purpose. Submit the drafts for approval as above.
+
+**Expected Due to Insurer** is only compared with the amount computed: a difference above PHP 1.00 is shown as a
+variance. The same file cannot be imported twice, and a validated file not created within 7 days is discarded.
+**Import history** (menu at the top right) lists the imports with their results.
+
+![Import policy list with Download template, Purpose, Note and File](images/screens-accounts/import-policy-list.png)
+
+### The remittance page {#remittance-record}
+
+Select a remittance number to open its page. The header shows the number, status, insurer, product line, basis,
+coverage week, due date and source, and the steps **Created**, **Submitted**, **Approved** (or **Returned**),
+**Voucher raised** and **Paid**, each with its date and user. Under the header one line says what comes next, or why
+you cannot act and who can.
+
+The buttons follow the status and your role: **Submit for approval** for a draft or returned remittance, **Approve**
+and **Reject** for an approver who may decide it, **Remind approver** for the user who submitted it. The tabs are
+**Lines** (the policies with their totals), **Payment** (the voucher, its payment and value date), **Documents** (the
+remittance schedule in XLSX and PDF and, once the voucher is raised, the remittance advice) and **Activity** (the
+decisions and the activity log, with **Download log (XLSX)**).
+
+![A remittance pending approval, seen by the user who submitted it: the steps, Remind approver and the users who can decide](images/screens-accounts/remittance-record.png)
+
+### Approvals {#remittance-approvals}
+
+{{screen:/finance/remittance/approvals}}
+
+The chips at the top say what you may decide, for example **Remittance up to PHP 1,000,000.00**, or **View only**.
+As delivered, TIS Finance & General Accounting approves remittances up to PHP 1,000,000.00 and the TIS General
+Manager without limit (see the [Authority Matrix](#authority-matrix)). A user without a remittance limit cannot
+approve or reject. An absent approver is covered by a [Delegation](#delegations).
+
+The cards count **Awaiting my decision**, **Past SLA**, **Submitted by me** and **Decided by me today**. The tabs are
+**Awaiting my decision**, **Submitted by me** (with the approvers each item waits on, and **Remind approver** in the row
+menu), **All pending** (with **Can I decide?**) and **Decided** (the last 30 days).
+
+To decide a remittance:
+
+1. Choose {{menu:/finance/remittance/approvals}}, or open the approval from **My Work** or its notification.
+2. Select the reference. The review panel shows the remittance and its totals, the previous remittance of the insurer
+   with the change in per cent, the checks at submission, the lines, the open exceptions and the activity.
+3. Select **Approve** and confirm, or **Reject**, choose the reason from the list and confirm. A rejected remittance
+   returns to its maker as **Returned**.
+
+Several items can be approved together: tick them and select **Approve selected (n)**; each is decided on its own and
+its result is listed. There is no rejection of several items at once. When you may not decide an item, the panel
+says why (you submitted it, it is above your limit, or another user decided it) and shows no buttons.
+
+![Review approval of a remittance with the approver's limit, Reject and Approve](images/screens-accounts/remittance-approval-review.png)
+
+### Insurer payments {#insurer-payments}
+
+{{screen:/finance/remittance/payments}}
+
+**Insurer payments** lists the payment vouchers of the approved remittances with their bank payment batch or cheque
+and the bank's result. It posts nothing itself: batches are approved and released on
+[Bank payment files](#bank-payment-files), cheques on [Disbursement](#disbursement-payment-vouchers-and-cheques).
+
+The cards and tabs are **To pay**, **In payment**, **Paid** (this week on the card), **Failed** and **All**. Each row
+shows the voucher, the insurer with its bank account masked, the amount, method, batch, paid on and the **Next step**
+(for example **Submit voucher (Disbursement)**). The row menu starts with **View payment**, then **Open remittance**,
+**Open batch**, **Pay by cheque**, **Re-batch** (a failed payment) and **Download advice (PDF)** (a paid one).
+
+To pay insurers by bank file, tick the vouchers to pay (an approved voucher with the insurer's bank account on file)
+and select **Create Metrobank batch (n)**. The batch dialog of Bank Payment Files opens with those vouchers and the
+Metrobank layout; check the value date and select **Create batch with n payments**, then submit the batch on
+[Bank payment files](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
+step and cannot be ticked.
+
+![Accounts > Remittance > Insurer payments with the vouchers to pay](images/screens-accounts/insurer-payments.png)
+
+### Exceptions {#remittance-exceptions}
 
 {{screen:/finance/remittance/exceptions}}
 
-{{screen:/finance/remittance/agencybill}}
+**Exceptions** lists the differences found on remittances (for example **Amount Mismatch**, **Duplicate Entry**,
+**Missing Document**, **Date Discrepancy**) with their severity, amount, age, the user assigned and the status. The
+cards **Unresolved**, **In progress**, **Escalated** and **Resolved today** filter the list. The row menu offers
+**View**, **Start** (you take it on), **Escalate** (with a reason from the list) and **Resolve** (with the resolution,
+the amount if any and a note).
 
-{{screen:/finance/remittance/adjustments}}
+### Setup: remittance schedules {#remittance-schedules}
 
-{{screen:/finance/remittance/notifications}}
+{{screen:/finance/remittance/setup/schedules}}
 
-{{screen:/finance/remittance/history}}
+The weekly schedule **TIS-WEEKLY** runs every Monday at 06:15 for every active insurer and creates one draft per
+insurer and product line for the policies of the Monday to Friday before. The **Automation** chip shows whether the
+daily remittance job is on; it is **Off** until TISPH switches it on.
 
-{{screen:/finance/remittance/analytics}}
+The row menu offers **View** (the schedule, its latest runs and its activity log) and, to TIS Finance & General
+Accounting: **Edit**, **Preview run** (what a run would create, without creating anything),
+**Run now** and **Pause** or **Resume**. **Run now** asks for the off-cycle reason and shows per insurer what will be
+created; nothing is created until you select **Create n draft remittances**. A week that has been run cannot be run
+again: a later catch-up goes through [Import policy list](#remittance-import-policy-list).
 
-A remittance (REM-YYYY-NNNNN) groups the collected premiums of one insurer; it is **Draft** until submitted, **Pending Approval** until the approvals it needs are given by users other than the preparer (see [Approvals and maker-checker](#statuses-approvals-and-maker-checker)), then **Approved**, and **Completed** once paid.
+![Accounts > Remittance > Setup with the weekly schedule and Automation Off](images/screens-accounts/remittance-schedules.png)
 
-| Screen | What it is for |
-|---|---|
-| **Automated Processing** | The scheduled remittances of each insurer for the current date, with the policies and estimated amount. Select the remittances, choose the **Processing Date** and options, **Validate** and **Process Selected**, or **Schedule for Later**. |
-| **Tracking** | Every remittance with **Remittance No**, **Date**, **Insurer Code**, **Insurer Name**, **Policies**, **Gross Amount**, **Commission**, **Net Amount** and **Status**, filtered by number, insurer, date and status. The row actions open, submit and print the remittance and its advice to the insurer. |
-| **Statements** | The remittance statement for one or more insurers and a period, in three steps: **Selection**, **Preview**, **Generate**. |
-| **Settlement** | An insurer settlement: choose the insurer and period, **Add policies** (or **Import**) and **Calculate** the premium, commission, tax and net settlement; **Save draft** or **Submit for approval**. |
-| **Reconciliation** | Matching of the bank transactions of the remittances with the remittances recorded: **Auto Match**, **Match Selected** or **Force Match**, with the **Exceptions** and **History**. |
-| **Bulk Processing** | Remittances from a file in four steps: **Upload File**, **Validate**, **Process**, **Complete** (**Download template** first). |
-| **Scheduling** | The remittance schedules: the insurers to remit, the cut-off, the frequency and the next run. **New schedule** and **Run now**. |
-| **Electronic Transfer** | The transfers to insurers by PESONet, InstaPay, RTGS or wire, with their approval and status. |
-| **Approval Workflow** | The remittances, transfers and adjustments waiting for approval, with the SLA. Approve or reject each one; the limits come from the [Authority Matrix](#authority-matrix) and cover for an absent approver from [Delegations](#delegations). |
-| **Exception Management** | The exceptions found (amount mismatch, duplicate entry, missing document, date discrepancy), assigned to a user and resolved. |
-| **Agency Bill Processing** | The bills of the agencies for a period: **Load agencies**, check the totals, **Validate** and **Process bills**. |
-| **Adjustments** | Premium or commission adjustments of a remittance (**New Adjustment**), approved by another user. |
-| **Notifications** | The messages sent to insurers about remittances, and their templates. |
-| **History** | Every remittance transaction with its versions and audit trail; **Export History**. |
-| **Analytics** | Settlement efficiency, payment success rate, average processing time and exception rate against their targets, with the trends. |
+### Settlement {#remittance-settlement}
 
-![Accounts > Remittance > Tracking](images/screens-accounts/remittance-tracking.png)
+{{screen:/finance/remittance/settlement/process}}
+
+An approved remittance is settled with the insurer, and the approved settlement raises the insurer's payment voucher.
+
+1. Choose {{menu:/finance/remittance/settlement/process}}.
+2. Choose the **Insurer code** and the period, then select **Add policies** (or **Import**).
+3. Select **Calculate**: total premium less commission and tax, plus or minus adjustments, gives the
+   **Net Settlement**.
+4. Select **Submit for approval**, or **Save draft**.
+
+Another user approves the settlement on [Approvals](#remittance-approvals). The system then raises the payment voucher
+for the net amount on [Disbursement](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
+(voucher raised)**. The voucher is paid through [Insurer payments](#insurer-payments).
+
+For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium
+already remitted) is netted against its next remittance.
 
 See [Remittance to the insurers](#process-remittance) for the order of the steps at TISPH.
 
 ## Direct bill: commission debit notes {#direct-bill-commission-debit-notes}
 
-{{screen:/finance/remittance/directbill}}
+{{screen:/finance/remittance/billing}}
 
 For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
 
-1. **Raise Debit Note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
-2. **Debit Notes**: the debit notes issued, with their balance; record the insurer's payment against them.
-3. **Billing Mode**: whether each insurer's policies are broker-billed or direct-billed.
+1. **Raise debit note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
+2. **Debit notes**: the debit notes issued, with their balance; record the insurer's payment against them.
+3. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
 
-![Accounts > Remittance > Direct Bill Processing](images/screens-accounts/direct-bill.png)
+A debit note is approved by another user than the one who raised or submitted it; that user reads why instead of
+**Approve** and **Reject**. **Reject** and **Cancel debit note** ask for the reason from the list.
+
+![Accounts > Remittance > Insurer billing on the tab Raise debit note](images/screens-accounts/insurer-billing.png)
 
 ## Journal vouchers {#journal-vouchers}
 
@@ -407,7 +536,7 @@ The five reports (**Reconciliation Statement Report**, **Outstanding Cheques**, 
 
 ## Insurer statement reconciliation {#insurer-statement-reconciliation}
 
-{{screen:/accounts/insurer-reconciliation/statements}}
+{{screen:/finance/remittance/reconciliation/insurer-statements}}
 
 An insurer's statement (for example a premium remittance confirmation) is matched with what TISPH recorded. The list shows **Number**, **Insurer**, **Statement type**, **Insurer reference**, **Period**, **Lines**, **Matched**, **Gross premium**, **Commission** and **Status**.
 

@@ -1,10 +1,8 @@
 <!--
 Owner: see WRITER_GUIDE.md. Generated facts come from generated/roles/tis-ccd-recon.md (npm run manual:role-facts in backend/);
 never edit them here. Written from the local TISPH build as manual.ccd-recon.
-Screens to refresh (redesign in another stream, described as on this build): ccd-recon-reconciliation-and-reversals-my-work
-(remittance approvals listed in My Work: remittance stream), ccd-recon-reconciliation-and-reversals-returned-cheque and
-ccd-recon-reconciliation-and-reversals-bank-adjustments (Create adjustment dialog), ccd-recon-reconciliation-and-reversals-insurer
-(Import statement dialog and the decision dialogs).
+Screens to refresh (redesign in another stream, described as on this build): ccd-recon-reconciliation-and-reversals-returned-cheque
+and ccd-recon-reconciliation-and-reversals-bank-adjustments (Create adjustment dialog).
 -->
 # CCD-Recon (Reconciliation and Reversals) {#ccd-recon-reconciliation-and-reversals}
 
@@ -17,7 +15,7 @@ bank. You import the bank statements, match them with the receipts and payments 
 yet booked, reverse the receipts of cheques returned by the bank and prepare the monthly bank reconciliation. You also
 reconcile the insurers' statements of account with the remittances and approve the insurer statement reconciliations
 prepared by another user. With TIS Finance & General Accounting you prepare the remittances to the insurers and
-approve those prepared by the other user.
+submit them for approval; TIS Finance & General Accounting and the TIS General Manager approve them.
 
 You work with CCD-BP / QRPh (Receipting), CCD-PDU (Post-Dated Cheques) and CCD-PDC / CCD-ADA, whose receipts you
 match and reverse; the receipting roles do not reverse their own receipts. TIS Finance & General Accounting approves
@@ -40,7 +38,9 @@ your bank reconciliations and the bank adjustments that need approval.
 | Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation](#bank-reconciliation) |
 | Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements](#insurer-statement-reconciliation) |
 | Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements](#insurer-statement-reconciliation) |
-| Prepare the remittances to the insurers, and approve those prepared by another user | As scheduled per insurer | [Remittance](#remittance-to-insurers) |
+| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances](#remittances-worklist) |
+| Follow the remittances you submitted until they are approved | Daily | [Approvals](#remittance-approvals) |
+| Follow up the remittance exceptions assigned to you | Daily | [Exceptions](#remittance-exceptions) |
 | Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation](#bank-reconciliation), [All Reports](#reports-catalogue) |
 
 ## Procedures {#ccd-recon-reconciliation-and-reversals-procedures}
@@ -53,10 +53,8 @@ your bank reconciliations and the bank adjustments that need approval.
    "Confirm the payment promised". Work them as in
    [Follow up an overdue premium](#ccd-bp-qrph-receipting-follow-up).
 3. Under **Approvals**, select the arrow of an insurer statement reconciliation to open it and decide it.
-4. **Approvals** also lists the remittances to insurers, their electronic transfers and their adjustments waiting for
-   approval (**Approve or reject**). The arrow opens {{menu:/finance/remittance/approval}}: follow
-   [Approve a remittance](#ccd-recon-reconciliation-and-reversals-remittance-approve). A remittance you prepared
-   yourself is approved by another user.
+4. The remittances you submitted are followed on {{menu:/finance/remittance/approvals}}, under **Submitted by me**:
+   see [Follow a remittance you submitted](#ccd-recon-reconciliation-and-reversals-remittance-approve).
 
 ![My Work of CCD-Recon (Reconciliation and Reversals): collection follow-ups and approvals](images/role-tis-ccd-recon/my-work.png)
 
@@ -151,7 +149,7 @@ approver.
 
 ### Reconcile an insurer's statement of account {#ccd-recon-reconciliation-and-reversals-insurer}
 
-1. Choose {{menu:/accounts/insurer-reconciliation/statements}} and select **Import statement**.
+1. Choose {{menu:/finance/remittance/reconciliation/insurer-statements}} and select **Import statement**.
 2. Select the **Insurer** and the **Statement type**: **Premium remittance confirmation** (the premium the insurer
    received from the broker) or **Commission statement** (the commission the insurer recognises on direct-bill
    business).
@@ -170,7 +168,7 @@ approver.
 
 ### Approve an insurer statement reconciliation {#ccd-recon-reconciliation-and-reversals-insurer-approve}
 
-1. Open the statement **Pending approval** from **Approvals** in My Work or from Insurer Statements.
+1. Open the statement **Pending approval** from **Approvals** in My Work or from Remittance > Reconciliation.
 2. Check the matched lines, the differences and their resolutions.
 3. Select **Approve** (with optional remarks) and confirm with **Approve reconciliation**: the adjustment journals
    are posted and the reconciliation is locked. Or select **Reject**, type the reason and confirm with **Reject
@@ -181,25 +179,27 @@ approves it. See [Insurer statement reconciliation](#insurer-statement-reconcili
 
 ### Prepare a remittance to an insurer {#ccd-recon-reconciliation-and-reversals-remittance}
 
-1. Choose {{menu:/finance/remittance/tracking/status}} and open the remittance of the insurer (**Draft**), prepared
-   by the remittance schedule or from an uploaded list (see [Remittance to the insurers](#process-remittance)).
-2. Check its policies, the gross premium, the commission and the net amount against the collections.
-3. Select **Process**. The remittance is submitted for approval and the other approvers are notified.
+1. Choose {{menu:/finance/remittance/remittances}}. **My work** lists the drafts to submit: those of the weekly run
+   and those created from a list of policies with
+   [Import policy list](#remittance-import-policy-list).
+2. Select the remittance number to open it. On **Lines**, check its policies, the total premium, the commission, the
+   tax and the amount due to the insurer against the collections.
+3. Select **Submit for approval** and confirm. To submit several drafts at once, tick them on **My work** and select
+   **Submit for approval (n)**.
 
-You cannot approve a remittance you prepared: another CCD-Recon (Reconciliation and Reversals) or TIS Finance &
-General Accounting user approves it.
+The remittance is **Pending approval**. The users who can approve its amount are notified; you cannot approve a
+remittance yourself.
 
-### Approve a remittance {#ccd-recon-reconciliation-and-reversals-remittance-approve}
+### Follow a remittance you submitted {#ccd-recon-reconciliation-and-reversals-remittance-approve}
 
-1. Choose {{menu:/finance/remittance/approval}}, or select the arrow of the remittance under **Approvals** in My
-   Work. **Pending approvals** lists the remittances, electronic transfers and adjustments waiting, with the amount,
-   the user who initiated them, the **SLA** and the approval **Level**.
-2. Select **View** in the row to check the record.
-3. Select **Approve**, or **Reject** with the reason. A remittance that needs more than one approval (see
-   [Approvals and maker-checker](#statuses-approvals-and-maker-checker)) goes to the next level, decided by another
-   user.
+1. Choose {{menu:/finance/remittance/approvals}}. The chip **View only** shows that you do not decide remittances.
+   **Submitted by me** lists what you submitted, with the approvers each one waits on and its **SLA**.
+2. If an approval is late, select **Remind approver** in the row menu (or on the remittance page). A reminder can be
+   sent again after a few hours; the menu shows when.
+3. A rejected remittance returns to **My work** as **Returned**. Read the reason on its **Activity** tab before you
+   submit it again.
 
-![Accounts > Remittance > Approval Workflow of CCD-Recon (Reconciliation and Reversals): a transfer, a remittance and an adjustment waiting](images/role-tis-ccd-recon/remittance-approval.png)
+![Accounts > Remittance > Approvals of CCD-Recon (Reconciliation and Reversals): a remittance submitted, waiting for its approvers](images/role-tis-ccd-recon/remittance-approvals.png)
 
 ### Collections, receipts and claim settlement funds {#ccd-recon-reconciliation-and-reversals-other}
 
