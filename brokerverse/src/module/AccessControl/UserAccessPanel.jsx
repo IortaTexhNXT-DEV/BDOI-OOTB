@@ -6,11 +6,12 @@ import { Sidebar } from "primereact/sidebar";
 import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { limitValue } from "./authorityFormat";
 import { DELEGATION_WORDS } from "./delegations";
-import { ConflictChip, EmptyState, LoadError, StatusTag, dateTime, shortDate, useAccessNames, useLabels } from "./common";
+import { ConflictChip, EmptyState, LoadError, dateTime, severityOf, shortDate, useAccessNames, useLabels } from "./common";
 
 const ROLE_PERMISSIONS = "/master/generals/usermanagement/role-permissions";
 const DELEGATIONS = "/master/generals/usermanagement/delegations";
@@ -52,7 +53,7 @@ const UserAccessPanel = ({ userId, technical = false, onHide }) => {
       {shown ? (
         <div className="access-panel__body">
           <div className="access-panel__facts">
-            <StatusTag status={u.status} label={statusWords[u.status] || u.status} />
+            <StatusChip code={u.status} severity={severityOf(u.status)} label={statusWords[u.status] || u.status} />
             <KeyValueGrid columns={2} items={[
               { key: "username", label: k("uam.username", "Username"), value: u.username },
               { key: "department", label: k("colDepartment", "Department"), value: u.department || u.hrDepartment || null },

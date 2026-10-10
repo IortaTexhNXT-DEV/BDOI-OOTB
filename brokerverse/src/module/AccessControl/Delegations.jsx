@@ -10,6 +10,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { hasPermission } from "../../utils/canOpen";
@@ -17,7 +18,8 @@ import DelegationPanel from "./DelegationPanel";
 import { useChangeActions } from "./AccessChanges";
 import { DELEGATION_WORDS, VIEWS, filterDelegations, inView, viewCounts } from "./delegations";
 import {
-  EmptyState, LoadError, StatusTag, TechnicalSwitch, TwoLines, download, shortDate, useDepartmentOptions, useDirectory, useLabels, useQueryState, useTechnicalNames,
+  EmptyState, LoadError, TechnicalSwitch, TwoLines, download, severityOf, shortDate, useDepartmentOptions, useDirectory, useLabels, useQueryState,
+  useTechnicalNames,
 } from "./common";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -142,7 +144,7 @@ const Delegations = () => {
             <TwoLines main={`${shortDate(d.dateFrom)} – ${shortDate(d.dateTo)}`} sub={[k("delegation.days", "{{count}} days", { count: d.days }), d.reason].filter(Boolean).join(" · ")} />
           )} />
           <Column header={k("colStatus", "Status")} body={(d) => (
-            <TwoLines main={<StatusTag status={d.status} label={status(d.status)} />}
+            <TwoLines main={<StatusChip code={d.status} severity={severityOf(d.status)} label={status(d.status)} />}
               sub={d.approvedBy ? k("authority.approvedByName", "Approved by {{name}}", { name: d.approvedBy }) : k("delegation.requestedByName", "Requested by {{name}}", { name: d.requestedBy || "" })} />
           )} />
           <Column header="" className="bv-actions" body={(d) => (

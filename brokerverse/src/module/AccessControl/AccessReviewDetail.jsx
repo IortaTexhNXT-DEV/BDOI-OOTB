@@ -11,6 +11,7 @@ import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
 import StatCards from "../../components/StatCards";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../utility/dialogs";
@@ -18,7 +19,7 @@ import { PendingBlock } from "./AccessChanges";
 import ReviewDecisionPanel from "./ReviewDecisionPanel";
 import { OTHER, OUTCOMES, OUTCOME_WORDS, STATUS_WORDS, filterItems, keepable, nextToReview, sortItems } from "./accessReviews";
 import {
-  EmptyState, LoadError, StatusTag, TechnicalSwitch, TwoLines, dateTime, download, shortDate, useAccessNames, useLabels, useQueryState, useTechnicalNames,
+  EmptyState, LoadError, TechnicalSwitch, TwoLines, dateTime, download, severityOf, shortDate, useAccessNames, useLabels, useQueryState, useTechnicalNames,
 } from "./common";
 
 const REVIEWS = "/master/generals/usermanagement/access-reviews";
@@ -112,8 +113,8 @@ const AccessReviewDetail = ({ id, directory, onBack }) => {
   ) : null;
 
   const removalCell = (i) => {
-    if (i.removalState === "applied") return <TwoLines main={<StatusTag status="closed" label={k("review.appliedShort", "Applied {{date}}", { date: shortDate(i.appliedAt) })} />} sub={i.applyNote} />;
-    if (i.removalState === "waiting") return <StatusTag status="pending" label={review.approval ? k("review.waitingSignoff", "Waiting for sign-off") : k("review.notApplied", "Not applied")} />;
+    if (i.removalState === "applied") return <TwoLines main={<StatusChip code="closed" severity={severityOf("closed")} label={k("review.appliedShort", "Applied {{date}}", { date: shortDate(i.appliedAt) })} />} sub={i.applyNote} />;
+    if (i.removalState === "waiting") return <StatusChip code="pending" severity={severityOf("pending")} label={review.approval ? k("review.waitingSignoff", "Waiting for sign-off") : k("review.notApplied", "Not applied")} />;
     return null;
   };
   const outcomeCell = (i) => (
@@ -142,7 +143,7 @@ const AccessReviewDetail = ({ id, directory, onBack }) => {
         help={review.approval ? k("review.detailHelp", "Decide each user; removals wait for sign-off by another administrator.")
           : k("review.detailHelpNoApproval", "Decide each user; removals apply when they are decided.")} />
       <div className="access-review-facts">
-        <StatusTag status={review.status} label={k(`review.status.${review.status}`, STATUS_WORDS[review.status])} />
+        <StatusChip code={review.status} severity={severityOf(review.status)} label={k(`review.status.${review.status}`, STATUS_WORDS[review.status])} />
         {review.overdue ? <Tag severity="danger" value={k("review.overdue", "Overdue")} /> : null}
         <span className="rp-muted">{review.scopeText} · {k("review.startedBy", "Started by {{name}} on {{date}}", { name: review.createdBy, date: dateTime(review.createdAt) })}</span>
         {review.signedOffBy ? <span className="rp-muted">{k("review.signedOff", "Signed off by {{name}} on {{date}}", { name: review.signedOffBy, date: dateTime(review.signedOffAt) })}</span> : null}

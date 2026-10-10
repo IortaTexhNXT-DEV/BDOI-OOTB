@@ -237,29 +237,7 @@
 }
 
 .af-facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 24px;
   margin: 12px 0;
-
-  // label above its value, both in the size of the card text
-  .af-fact {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-
-  dt {
-    color: $color-text-muted;
-    font-size: 0.8125rem;
-  }
-
-  dd {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.4;
-  }
 }
 
 .af-link {
@@ -443,10 +421,6 @@
 
   .af-toolbar .af-jump {
     display: inline-flex;
-  }
-
-  .af-facts {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 

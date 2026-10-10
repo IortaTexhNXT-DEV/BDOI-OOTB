@@ -789,19 +789,7 @@
   padding: 4px 0;
 
   .rp-change__facts {
-    display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    gap: 4px 16px;
     margin: 0;
-    font-size: 13px;
-
-    dt {
-      color: $color-text-muted;
-    }
-
-    dd {
-      margin: 0;
-    }
   }
 
   .rp-change__sod h4 {
@@ -1493,48 +1481,6 @@
   .p-sidebar-close:focus:not(:focus-visible) {
     outline: none;
     box-shadow: none;
-  }
-}
-
-// Authority Matrix > Upload
-.am-upload {
-  .am-upload__title {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .am-upload__steps {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin: 0;
-    padding-left: 20px;
-
-    li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px 16px;
-    }
-  }
-
-  .am-upload__button {
-    flex: 0 0 auto;
-    max-width: 100%;
-    white-space: nowrap;
-
-    .p-button-label {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .am-upload__message {
-    width: 100%;
-    margin-top: 16px;
-    justify-content: flex-start;
   }
 }
 

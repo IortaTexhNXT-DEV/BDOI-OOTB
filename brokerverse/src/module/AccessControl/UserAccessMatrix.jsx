@@ -11,6 +11,7 @@ import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
 import StatCards from "../../components/StatCards";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import authService from "../../services/authService";
@@ -19,8 +20,8 @@ import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs
 import UserAccessPanel from "./UserAccessPanel";
 import { FLAGS, STATUSES, filterUsers, matrixStats } from "./userAccess";
 import {
-  BaseRolesCheck, ConflictChip, EmptyState, LoadError, StatusTag, TechnicalSwitch, TwoLines, dateTime, download, useBaseRoles, useDepartmentOptions, useLabels,
-  useQueryState, useRoleOptions, useTechnicalNames,
+  BaseRolesCheck, ConflictChip, EmptyState, LoadError, TechnicalSwitch, TwoLines, dateTime, download, useBaseRoles, useDepartmentOptions, useLabels,
+  severityOf, useQueryState, useRoleOptions, useTechnicalNames,
 } from "./common";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -164,7 +165,7 @@ const UserAccessMatrix = () => {
           <Column header={k("colDepartment", "Department")} sortable sortField="department" body={(u) => u.department || u.hrDepartment || <span className="rp-muted">—</span>} />
           <Column header={k("colRoles", "Roles")} body={rolesCell} style={{ minWidth: "16rem" }} />
           <Column header={k("colBranch", "Branch")} sortable sortField="branchName" body={(u) => u.branchName || u.branch || "—"} />
-          <Column header={k("colStatus", "Status")} sortable sortField="status" body={(u) => <StatusTag status={u.status} label={statusWords[u.status] || u.status} />} />
+          <Column header={k("colStatus", "Status")} sortable sortField="status" body={(u) => <StatusChip code={u.status} severity={severityOf(u.status)} label={statusWords[u.status] || u.status} />} />
           <Column header={k("colLastSignIn", "Last sign-in")} sortable sortField="daysSinceLogin" body={signInCell} />
           <Column header={k("uam.colTwoStep", "Two-step")} body={(u) => (
             <span className="access-flag">

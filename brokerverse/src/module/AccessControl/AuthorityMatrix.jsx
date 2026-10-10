@@ -8,7 +8,9 @@ import { Message } from "primereact/message";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Skeleton } from "primereact/skeleton";
 import { TabPanel, TabView } from "primereact/tabview";
+import ImportDialog from "../../components/ImportDialog";
 import LoadingBar from "../../components/LoadingBar";
+import PageActions from "../../components/PageActions";
 import PageHeader from "../../components/PageHeader";
 import { mayViewTechnical } from "../../components/TechnicalDetails";
 import { useStableLoad } from "../../hooks/useStableLoad";
@@ -20,7 +22,6 @@ import AuthorityLimitPanel from "./AuthorityLimitPanel";
 import AuthorityPendingTab from "./AuthorityPendingTab";
 import AuthorityPersonalTab from "./AuthorityPersonalTab";
 import AuthorityHistoryTab from "./AuthorityHistoryTab";
-import AuthorityUploadDialog from "./AuthorityUploadDialog";
 import AuthorityUploadReview from "./AuthorityUploadReview";
 import { BASE_ROLES_KEY, TECHNICAL_NAMES_KEY, readPreference, useLabels, writePreference } from "./common";
 import "../Administration/index.scss";
@@ -61,8 +62,8 @@ const AuthorityMatrix = () => {
   const loader = useCallback(() => accessControlService.authorityMatrix(), []);
   const { data, loading, refreshing, error, reload } = useStableLoad(loader);
   const edit = !!data?.abilities?.edit;
-  const uploadTarget = useMemo(() => accessControlService.authorityUploadTarget(k("authority.uploadTarget", "Authority limits"),
-    { base: filters.base, unchecked: filters.unchecked, all: filters.scope === "all" }), [k, filters.base, filters.unchecked, filters.scope]);
+  const uploadTargets = useMemo(() => [accessControlService.authorityUploadTarget(k("authority.uploadTarget", "Authority limits"),
+    { base: filters.base, unchecked: filters.unchecked, all: filters.scope === "all" })], [k, filters.base, filters.unchecked, filters.scope]);
 
   const go = (patch) => setParams((current) => {
     const next = new URLSearchParams(current);
@@ -99,13 +100,14 @@ const AuthorityMatrix = () => {
 
   const actions = (
     <>
-      {edit ? <Button label={k("authority.uploadAction", "Upload")} icon="pi pi-upload" outlined onClick={() => setImporting(true)} disabled={!data} /> : null}
-      <Button label={k("authority.download", "Download")} icon="pi pi-download" outlined onClick={(e) => downloads.current?.toggle(e)} disabled={!data}
-        aria-haspopup="menu" />
-      <Menu ref={downloads} popup model={[
-        { label: k("authority.downloadMatrix", "Authority matrix (Excel)"), icon: "pi pi-file-excel", command: () => download(accessControlService.downloadAuthorityMatrix) },
-        { label: k("authority.downloadHistory", "Change history (Excel)"), icon: "pi pi-history", command: () => download(accessControlService.downloadLimitHistory) },
-      ]} />
+      <PageActions onUpload={edit && data ? () => setImporting(true) : null} uploadLabel={k("authority.uploadAction", "Upload")}>
+        <Button label={k("authority.download", "Download")} icon="pi pi-download" outlined onClick={(e) => downloads.current?.toggle(e)} disabled={!data}
+          aria-haspopup="menu" />
+        <Menu ref={downloads} popup model={[
+          { label: k("authority.downloadMatrix", "Authority matrix (Excel)"), icon: "pi pi-file-excel", command: () => download(accessControlService.downloadAuthorityMatrix) },
+          { label: k("authority.downloadHistory", "Change history (Excel)"), icon: "pi pi-history", command: () => download(accessControlService.downloadLimitHistory) },
+        ]} />
+      </PageActions>
       {mayTechnical ? (
         <>
           <Button icon="pi pi-ellipsis-v" text rounded aria-label={k("rolePermissions.moreOptions", "More options")} onClick={(e) => more.current?.toggle(e)} />
@@ -164,7 +166,9 @@ const AuthorityMatrix = () => {
         {body}
       </div>
       <AuthorityLimitPanel target={panel} data={data} technical={technical} onHide={() => setPanel(null)} onDone={reload} />
-      <AuthorityUploadDialog visible={importing} target={uploadTarget} onHide={() => setImporting(false)} onChecked={uploaded} />
+      <ImportDialog visible={importing} onHide={() => setImporting(false)} title={k("authority.uploadTitle", "Upload approval limits")} targets={uploadTargets}
+        help={k("authority.uploadHelp", "The template is the matrix as it is today. Change the limits you want to change, keep the other rows as they are and upload the file: every row is checked before anything is sent for approval.")}
+        loadLabel={k("authority.checkFile", "Check the file")} onDone={uploaded} />
       <AuthorityUploadReview result={review} onHide={() => setReview(null)} onSubmitted={submitted} />
     </div>
   );

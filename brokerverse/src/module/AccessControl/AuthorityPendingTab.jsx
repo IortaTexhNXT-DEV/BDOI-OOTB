@@ -5,8 +5,8 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
-import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { confirmAction, notifyError, notifySuccess, promptText } from "../../utility/dialogs";
@@ -14,7 +14,6 @@ import { limitValue } from "./authorityFormat";
 import { dateTime, shortDate, useLabels } from "./common";
 
 const STATUSES = ["pending", "approved", "rejected", "withdrawn", "all"];
-const STATUS_SEVERITY = { pending: "warning", approved: "success", rejected: "danger", withdrawn: null };
 
 /**
  * Approve, reject (reason required) and withdraw a change of the matrix (a configuration change, CFG-n) or a proposal
@@ -185,7 +184,7 @@ const AuthorityPendingTab = ({ data, focus, onChanged }) => {
           <span className="rp-cell-stack"><span>{r.requestedBy}</span><span className="rp-muted">{dateTime(r.requestedAt)}</span></span>
         )} />
         {status !== "pending" ? (
-          <Column header={k("colStatus", "Status")} body={(r) => <Tag value={options.find((o) => o.value === r.status)?.label || r.status} severity={STATUS_SEVERITY[r.status]} />} />
+          <Column header={k("colStatus", "Status")} body={(r) => <StatusChip code={r.status} label={options.find((o) => o.value === r.status)?.label || r.status} />} />
         ) : null}
         <Column header="" className="bv-actions" body={(r) => (r.status === "pending" ? (
           <span className="rp-actions">

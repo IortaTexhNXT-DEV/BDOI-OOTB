@@ -4,7 +4,7 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
+import StatusChip from "../../components/StatusChip";
 import { limitValue } from "./authorityFormat";
 import { shortDate, useLabels } from "./common";
 
@@ -12,10 +12,10 @@ import { shortDate, useLabels } from "./common";
 export const LimitChip = ({ item }) => {
   const k = useLabels();
   if (item.pending) {
-    return <Tag severity="warning" value={item.pending.removes ? k("authority.removalPending", "Removal pending") : k("authority.pending", "Pending")} />;
+    return <StatusChip code="pending" label={item.pending.removes ? k("authority.removalPending", "Removal pending") : k("authority.pending", "Pending")} />;
   }
-  if (item.scheduled) return <Tag severity="info" value={k("authority.fromDate", "From {{date}}", { date: shortDate(item.scheduled.effectiveFrom) })} />;
-  if (item.set) return <Tag severity="success" value={k("inEffect", "In effect")} />;
+  if (item.scheduled) return <StatusChip code="scheduled" label={k("authority.fromDate", "From {{date}}", { date: shortDate(item.scheduled.effectiveFrom) })} />;
+  if (item.set) return <StatusChip code="in-effect" severity="success" label={k("inEffect", "In effect")} />;
   return null;
 };
 

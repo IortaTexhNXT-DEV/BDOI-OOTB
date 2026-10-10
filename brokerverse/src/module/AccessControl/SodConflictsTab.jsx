@@ -11,10 +11,11 @@ import { Menu } from "primereact/menu";
 import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
 import accessControlService from "../../services/accessControlService";
 import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
 import { DEFAULT_STATES, STATES, STATE_WORDS, filterConflicts } from "./sod";
-import { EmptyState, LoadError, StatusTag, TwoLines, shortDate, useDepartmentOptions, useLabels, useQueryState } from "./common";
+import { EmptyState, LoadError, TwoLines, severityOf, shortDate, useDepartmentOptions, useLabels, useQueryState } from "./common";
 
 const UAM = "/master/generals/usermanagement/access-matrix";
 const list = (v) => String(v || "").split(",").map((x) => x.trim()).filter(Boolean);
@@ -60,11 +61,11 @@ const SodConflictsTab = ({ state, rules, directory, technical, onException, onCh
   const stateCell = (c) => {
     const label = words(c.state);
     if (c.state === "accepted") {
-      return <TwoLines main={<StatusTag status="accepted" label={k("sod.acceptedUntil", "Accepted until {{date}}", { date: shortDate(c.exception.validUntil) })} />}
+      return <TwoLines main={<StatusChip code="accepted" severity={severityOf("accepted")} label={k("sod.acceptedUntil", "Accepted until {{date}}", { date: shortDate(c.exception.validUntil) })} />}
         sub={c.exception.reason} />;
     }
-    if (c.state === "expired") return <TwoLines main={<StatusTag status="expired" label={label} />} sub={k("sod.expiredOn", "Ended {{date}}", { date: shortDate(c.exception.validUntil) })} />;
-    return <TwoLines main={<StatusTag status={c.state} label={label} />} sub={c.change ? c.change.ref : null} />;
+    if (c.state === "expired") return <TwoLines main={<StatusChip code="expired" severity={severityOf("expired")} label={label} />} sub={k("sod.expiredOn", "Ended {{date}}", { date: shortDate(c.exception.validUntil) })} />;
+    return <TwoLines main={<StatusChip code={c.state} severity={severityOf(c.state)} label={label} />} sub={c.change ? c.change.ref : null} />;
   };
 
   return (

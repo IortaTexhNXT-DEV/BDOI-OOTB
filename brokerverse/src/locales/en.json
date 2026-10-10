@@ -9607,14 +9607,7 @@
       "management": "Management"
     },
     "authority": {
-      "colProblem": "Problem",
-      "colRow": "Row",
       "checkFile": "Check the file",
-      "chooseFile": "Choose file",
-      "downloadTemplate": "Download template",
-      "uploadStep2": "Choose the changed file (.xlsx or .csv)",
-      "uploadStep1": "Download the matrix as it is",
-      "uploadHelpLabel": "About the upload",
       "uploadHelp": "The template is the matrix as it is today. Change the limits you want to change, keep the other rows as they are and upload the file: every row is checked before anything is sent for approval.",
       "addPersonal": "Add personal limit",
       "allDepartments": "All departments",

@@ -6,13 +6,14 @@ import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
 import ProgressMeter from "../../components/ProgressMeter";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { hasPermission } from "../../utils/canOpen";
 import AccessReviewDetail from "./AccessReviewDetail";
 import ReviewStartPanel from "./ReviewStartPanel";
 import { STATUS_WORDS } from "./accessReviews";
-import { EmptyState, LoadError, StatusTag, TwoLines, dateTime, download, shortDate, useDirectory, useLabels, useQueryState } from "./common";
+import { EmptyState, LoadError, TwoLines, dateTime, download, severityOf, shortDate, useDirectory, useLabels, useQueryState } from "./common";
 import "../Administration/index.scss";
 import "./index.scss";
 
@@ -35,10 +36,10 @@ const AccessReviews = () => {
   if (reviewId) return <AccessReviewDetail id={reviewId} directory={directory} onBack={() => set({ review: null, q: null, dept: null, outcome: null, todo: null })} />;
 
   const status = (r) => {
-    if (r.status === "closed") return <TwoLines main={<StatusTag status="closed" label={k("review.status.closed", STATUS_WORDS.closed)} />} sub={shortDate(r.closedAt)} />;
+    if (r.status === "closed") return <TwoLines main={<StatusChip code="closed" severity={severityOf("closed")} label={k("review.status.closed", STATUS_WORDS.closed)} />} sub={shortDate(r.closedAt)} />;
     return (
       <span className="access-chips">
-        <StatusTag status={r.status} label={k(`review.status.${r.status}`, STATUS_WORDS[r.status])} />
+        <StatusChip code={r.status} severity={severityOf(r.status)} label={k(`review.status.${r.status}`, STATUS_WORDS[r.status])} />
         {r.overdue ? <Tag severity="danger" value={k("review.overdue", "Overdue")} /> : null}
       </span>
     );

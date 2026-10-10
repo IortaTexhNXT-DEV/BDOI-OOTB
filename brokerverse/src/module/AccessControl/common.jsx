@@ -211,10 +211,8 @@ export const STATUS_SEVERITY = {
   open: "warning", accepted: null, expired: "warning", closed: "success", active: "success", inactive: null, locked: "danger",
 };
 
-/** A status chip with its words. */
-export const StatusTag = ({ status, label }) => <Tag value={label} severity={STATUS_SEVERITY[status] || undefined} className={STATUS_SEVERITY[status] ? "" : "rp-tag-muted"} />;
-
-StatusTag.propTypes = { status: PropTypes.string, label: PropTypes.node };
+/** Severity of the StatusChip of a status of these screens (neutral when none). */
+export const severityOf = (status) => STATUS_SEVERITY[status] || "secondary";
 
 /** The chip of one conflict: Block or Warn while open, neutral when accepted, waiting for approval. */
 export const ConflictChip = ({ conflict }) => {

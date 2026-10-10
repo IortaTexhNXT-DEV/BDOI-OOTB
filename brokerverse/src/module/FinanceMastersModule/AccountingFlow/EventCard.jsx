@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 import TechnicalDetails from "../../../components/TechnicalDetails";
 import { canOpen } from "../../../utils/canOpen";
 import { formatDate } from "../../../utility/dateFormat";
@@ -53,15 +54,6 @@ const Chips = ({ event: e, mayApprove }) => {
 Chips.propTypes = { event: PropTypes.object.isRequired, mayApprove: PropTypes.bool };
 
 /** A fact of the card: label and value (definition list). */
-const Fact = ({ label, children }) => (
-  <div className="af-fact">
-    <dt>{label}</dt>
-    <dd>{children}</dd>
-  </div>
-);
-
-Fact.propTypes = { label: PropTypes.string.isRequired, children: PropTypes.node };
-
 /**
  * One business event of the accounting reference: header with its chips and actions, the facts (when, where, approval
  * before posting, approval limit, last posted), the entries table, the worked example on demand and, for finance
@@ -92,18 +84,15 @@ const EventCard = ({ event: e, where, mayEditRules, mayApprove, highlighted }) =
           </div>
         </div>
       </header>
-      <dl className="af-facts">
-        <Fact label={t("accountingFlow.facts.when")}>{e.when}</Fact>
-        <Fact label={t("accountingFlow.facts.where")}>{screenLink ? <Link to={e.screen} className="af-link">{where}</Link> : where}</Fact>
-        <Fact label={t("accountingFlow.facts.approval")}>{e.approval}</Fact>
-        {e.authority ? (
-          <Fact label={t("accountingFlow.facts.limit")}>
-            {canOpen(AUTHORITY_MATRIX) ? <Link to={AUTHORITY_MATRIX} className="af-link">{t("accountingFlow.facts.limitText", { name: e.authority.name })}</Link>
-              : t("accountingFlow.facts.limitText", { name: e.authority.name })}
-          </Fact>
-        ) : null}
-        {!e.fixed ? <Fact label={t("accountingFlow.facts.lastPosted")}>{e.lastPosted ? formatDate(e.lastPosted) : t("accountingFlow.facts.notPosted")}</Fact> : null}
-      </dl>
+      <KeyValueGrid columns={2} className="af-facts" items={[
+        { label: t("accountingFlow.facts.when"), value: e.when },
+        { label: t("accountingFlow.facts.where"), value: screenLink ? <Link to={e.screen} className="af-link">{where}</Link> : where },
+        { label: t("accountingFlow.facts.approval"), value: e.approval },
+        { label: t("accountingFlow.facts.limit"), hidden: !e.authority, value: e.authority ? (canOpen(AUTHORITY_MATRIX)
+          ? <Link to={AUTHORITY_MATRIX} className="af-link">{t("accountingFlow.facts.limitText", { name: e.authority.name })}</Link>
+          : t("accountingFlow.facts.limitText", { name: e.authority.name })) : null },
+        { label: t("accountingFlow.facts.lastPosted"), hidden: !!e.fixed, value: e.lastPosted ? formatDate(e.lastPosted) : t("accountingFlow.facts.notPosted") },
+      ]} />
       <EntriesTable event={e} />
       {example ? <ExamplePanel eventCode={e.eventCode} coInsurable={(e.lines || []).some((l) => l.perParticipant)} /> : null}
       <TechnicalDetails permission="write:posting-rules" blocks={technicalBlocks(e, t)} className="af-card__technical" />

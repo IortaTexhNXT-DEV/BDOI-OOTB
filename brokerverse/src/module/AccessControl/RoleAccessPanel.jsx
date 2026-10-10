@@ -9,6 +9,7 @@ import { Dialog } from "primereact/dialog";
 import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
+import StatusChip from "../../components/StatusChip";
 import accessControlService from "../../services/accessControlService";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import { canOpen } from "../../utils/canOpen";
@@ -124,8 +125,7 @@ const RoleAccessPanel = ({ role, idx, roleByCode, technical, approval, editing, 
               </button>
             )
             : <span>{k("rolePermissions.usersCount", "{{count}} users", { count: role.users.active })}</span>}
-          <Tag value={role.status === "active" ? k("rolePermissions.active", "Active") : k("rolePermissions.inactiveChip", "Inactive")} severity={role.status === "active" ? "success" : null}
-            className={role.status === "active" ? "" : "rp-tag-muted"} />
+          <StatusChip code={role.status} label={role.status === "active" ? k("rolePermissions.active", "Active") : k("rolePermissions.inactiveChip", "Inactive")} />
           {role.inherits.map((c) => (
             <button key={c} type="button" className="rp-linkbtn" onClick={() => onSelectRole(c)}>{k("rolePermissions.includes", "Includes {{role}}", { role: roleName(c) })}</button>
           ))}

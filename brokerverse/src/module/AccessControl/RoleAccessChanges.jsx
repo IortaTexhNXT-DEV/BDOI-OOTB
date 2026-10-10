@@ -8,12 +8,13 @@ import { Message } from "primereact/message";
 import { Tag } from "primereact/tag";
 import accessControlService from "../../services/accessControlService";
 import { useStableLoad } from "../../hooks/useStableLoad";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
 import { confirmAction, notifyError, notifySuccess, promptText } from "../../utility/dialogs";
 import { dateTime, useAccessNames, useLabels } from "./common";
 
 const STATUSES = ["pending", "approved", "rejected", "withdrawn", "all"];
-const STATUS_SEVERITY = { pending: "warning", approved: "success", rejected: "danger", withdrawn: null };
 
 /** "+2 −1": what a change adds and removes. */
 export const changeCounts = (change) => `+${change.payload?.grant?.length || 0} −${change.payload?.revoke?.length || 0}`;
@@ -106,18 +107,12 @@ export const ChangeDetails = ({ change, idx }) => {
           </li>
         )) : change.summary.map((line) => <li key={line}>{line}</li>)}
       </ul>
-      <dl className="rp-change__facts">
-        <dt>{k("rolePermissions.reason", "Reason")}</dt>
-        <dd>{change.payload?.reason || change.changeNote || "—"}</dd>
-        <dt>{k("rolePermissions.requested", "Requested")}</dt>
-        <dd>{k("rolePermissions.requestedBy", "{{who}}, {{when}}", { who: change.requestedBy, when: dateTime(change.requestedAt) })}</dd>
-        {change.decidedAt ? (
-          <>
-            <dt>{k("rolePermissions.decided", "Decided")}</dt>
-            <dd>{k("rolePermissions.requestedBy", "{{who}}, {{when}}", { who: change.decidedBy, when: dateTime(change.decidedAt) })}{change.decisionRemarks ? ` · ${change.decisionRemarks}` : ""}</dd>
-          </>
-        ) : null}
-      </dl>
+      <KeyValueGrid columns={3} className="rp-change__facts" items={[
+        { label: k("rolePermissions.reason", "Reason"), value: change.payload?.reason || change.changeNote },
+        { label: k("rolePermissions.requested", "Requested"), value: k("rolePermissions.requestedBy", "{{who}}, {{when}}", { who: change.requestedBy, when: dateTime(change.requestedAt) }) },
+        { label: k("rolePermissions.decided", "Decided"), hidden: !change.decidedAt,
+          value: `${k("rolePermissions.requestedBy", "{{who}}, {{when}}", { who: change.decidedBy, when: dateTime(change.decidedAt) })}${change.decisionRemarks ? ` · ${change.decisionRemarks}` : ""}` },
+      ]} />
       {warnings.length ? (
         <div className="rp-change__sod">
           <h4>{k("rolePermissions.sodTitle", "Segregation of duties")}</h4>
@@ -194,7 +189,7 @@ const RoleAccessChanges = ({ idx, focus, technical, onOpenRole, onChanged }) => 
           <span className="rp-cell-stack"><span>{c.requestedBy}</span><span className="rp-muted">{dateTime(c.requestedAt)}</span></span>
         )} />
         {status !== "pending" ? (
-          <Column header={k("rolePermissions.colStatus", "Status")} body={(c) => <Tag value={options.find((o) => o.value === c.status)?.label || c.status} severity={STATUS_SEVERITY[c.status]} />} />
+          <Column header={k("rolePermissions.colStatus", "Status")} body={(c) => <StatusChip code={c.status} label={options.find((o) => o.value === c.status)?.label || c.status} />} />
         ) : null}
         <Column header="" className="bv-actions" body={(c) => (c.status === "pending" ? <ChangeActions change={c} actions={actions} compact /> : null)} />
       </DataTable>

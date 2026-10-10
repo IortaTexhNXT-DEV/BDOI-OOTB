@@ -8,6 +8,7 @@ import DateField from "../../components/DateField";
 import FieldError from "../../components/FieldError";
 import KeyValueGrid from "../../components/KeyValueGrid";
 import ReasonPicker, { reasonPayload, reasonProblem } from "../../components/ReasonPicker";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import authService from "../../services/authService";
@@ -15,7 +16,7 @@ import { notifyError, notifySuccess } from "../../utility/dialogs";
 import { PendingBlock } from "./AccessChanges";
 import { limitValue } from "./authorityFormat";
 import { DELEGATION_WORDS, addDays, approverGroups, coverGroups, delegationProblems, periodDays } from "./delegations";
-import { BaseRolesCheck, StatusTag, dateTime, shortDate, useBaseRoles, useLabels } from "./common";
+import { BaseRolesCheck, dateTime, severityOf, shortDate, useBaseRoles, useLabels } from "./common";
 
 const EMPTY = { delegatorId: null, delegateId: null, transactionTypes: [], dateFrom: null, dateTo: null };
 
@@ -279,7 +280,7 @@ const DelegationPanel = ({ target, onHide, onDone }) => {
       ) : null}
       {row ? (
         <div className="am-panel__body">
-          <StatusTag status={row.status} label={status(row.status)} />
+          <StatusChip code={row.status} severity={severityOf(row.status)} label={status(row.status)} />
           {row.change && row.status === "pending" ? <PendingBlock change={row.change} onDone={async () => { await onDone?.(); onHide(); }} /> : null}
           <KeyValueGrid columns={2} items={[
             { key: "away", label: k("colDelegator", "Approver away"), value: [row.delegatorName, row.delegatorDepartment].filter(Boolean).join(" · ") },

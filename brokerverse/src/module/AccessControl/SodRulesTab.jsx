@@ -6,8 +6,9 @@ import { DataTable } from "primereact/datatable";
 import { Menu } from "primereact/menu";
 import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
 import { visibleRules } from "./sod";
-import { BaseRolesCheck, EmptyState, LoadError, StatusTag, TwoLines, dateTime, useLabels } from "./common";
+import { BaseRolesCheck, EmptyState, LoadError, TwoLines, dateTime, severityOf, useLabels } from "./common";
 
 const SHOWN = 3;
 
@@ -74,8 +75,8 @@ const SodRulesTab = ({ state, base, onBase, technical, onEdit, onUsers }) => {
         <Column header={k("sod.colUsers", "Users")} body={(r) => (r.users ? <Button label={String(r.users)} link className="rp-linkbtn" onClick={() => onUsers(r)}
           aria-label={k("sod.usersOf", "Users breaking {{rule}}", { rule: r.name })} /> : <span className="rp-muted">0</span>)} className="am-num-col" />
         <Column header={k("colStatus", "Status")} body={(r) => (
-          <TwoLines main={r.change ? <StatusTag status="pending" label={k("changes.waiting", "Waiting for approval")} />
-            : <StatusTag status={r.active ? "active" : "inactive"} label={r.active ? k("on", "On") : k("off", "Off")} />}
+          <TwoLines main={r.change ? <StatusChip code="pending" severity={severityOf("pending")} label={k("changes.waiting", "Waiting for approval")} />
+            : <StatusChip code={r.active ? "active" : "inactive"} severity={severityOf(r.active ? "active" : "inactive")} label={r.active ? k("on", "On") : k("off", "Off")} />}
           sub={r.change ? r.change.ref : r.updatedBy ? `${r.updatedBy} · ${dateTime(r.updatedAt)}` : null} />
         )} />
         {edit ? (

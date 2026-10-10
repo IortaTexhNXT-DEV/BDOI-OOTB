@@ -18,9 +18,9 @@ const uploadResult = {
   changes: [{ row: 2, transactionType: "journal_voucher", transactionName: "Journal voucher approval", measure: "amount", roleCode: "tis-finance", who: "TIS Finance",
     maxAmount: 2500000, unlimited: false, effectiveFrom: "2026-10-10", referenceNo: "BR-2026-020", referenceDate: "2026-10-01", before: { set: true, maxAmount: 1000000 } }],
 };
-jest.mock("./AuthorityUploadDialog", () => ({
+jest.mock("../../components/ImportDialog", () => ({
   __esModule: true,
-  default: ({ visible, onChecked }) => (visible ? <button type="button" onClick={() => onChecked(uploadResult)}>finish upload</button> : null),
+  default: ({ visible, onDone }) => (visible ? <button type="button" onClick={() => onDone(uploadResult)}>finish upload</button> : null),
 }));
 
 // the first render of a suite loads the PrimeReact styles, which takes a few seconds on a loaded machine

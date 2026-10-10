@@ -5,10 +5,11 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { SelectButton } from "primereact/selectbutton";
 import LoadingBar from "../../components/LoadingBar";
+import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
 import { confirmAction, notifyError, notifySuccess, promptText } from "../../utility/dialogs";
-import { EmptyState, LoadError, StatusTag, TwoLines, dateTime, useLabels } from "./common";
+import { EmptyState, LoadError, TwoLines, dateTime, severityOf, useLabels } from "./common";
 
 /**
  * Approve, reject (remarks required, the requester sees them) and withdraw a change of access waiting for approval,
@@ -139,7 +140,7 @@ const AccessChanges = ({ kinds, focus = null, onChanged, emptyText }) => {
         <Column header={k("changes.colRequested", "Requested by")} body={(c) => <TwoLines main={c.requestedBy} sub={dateTime(c.requestedAt)} />} />
         {status !== "pending" ? (
           <Column header={k("colStatus", "Status")} body={(c) => (
-            <TwoLines main={<StatusTag status={c.status} label={words[c.status] || c.status} />}
+            <TwoLines main={<StatusChip code={c.status} severity={severityOf(c.status)} label={words[c.status] || c.status} />}
               sub={[c.decidedBy ? `${c.decidedBy} · ${dateTime(c.decidedAt)}` : null, c.decisionRemarks].filter(Boolean).join(" · ") || null} />
           )} />
         ) : null}
