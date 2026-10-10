@@ -7127,7 +7127,6 @@
     "committed": "Committed",
     "escalated": "Escalated",
     "sendPaymentRemindersNow": "Send Payment Reminders Now",
-    "title": "Collections",
     "kpiOutstanding": "Outstanding",
     "kpiItems": "{{count}} items",
     "kpiItems_one": "{{count}} item",
@@ -12642,7 +12641,6 @@
         "action": "Process again"
       }
     },
-    "layoutChannels": "Channels",
     "editLayout": "Edit bank file layout: {{name}}",
     "editTemplate": "Edit message template: {{name}}",
     "credentialSet": "Set on the server",

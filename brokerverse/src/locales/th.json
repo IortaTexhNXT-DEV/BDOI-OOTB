@@ -6929,7 +6929,6 @@
     "partiallyPaid": "ชำระบางส่วน",
     "committed": "ยืนยันแล้ว",
     "escalated": "ยกระดับ",
-    "title": "การเก็บเงิน",
     "kpiOutstanding": "ยอดค้างชำระ",
     "kpiItems": "{{count}} รายการ",
     "kpiItems_one": "{{count}} รายการ",
@@ -8965,7 +8964,6 @@
         "action": "ประมวลผลอีกครั้ง"
       }
     },
-    "layoutChannels": "ช่องทาง",
     "editLayout": "แก้ไขรูปแบบไฟล์ธนาคาร: {{name}}",
     "editTemplate": "แก้ไขแม่แบบข้อความ: {{name}}",
     "credentialSet": "ตั้งค่าบนเซิร์ฟเวอร์แล้ว",

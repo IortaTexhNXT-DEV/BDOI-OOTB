@@ -103,8 +103,8 @@ const PolicyCancellation = () => {
         { label: t("opsAcc.cancellation.reason"), value: reason?.name || b.reason },
         { label: t("opsAcc.cancellation.method"), value: t(`opsAcc.cancellation.methods.${quote.method}`) },
         { label: t("opsAcc.cancellation.type"), value: t(`opsAcc.cancellation.types.${b.cancellationType}`) },
-        { label: t("opsAcc.cancellation.grossReturn"), value: quote.grossReturn, type: "amount", emphasis: true },
-        { label: t("opsAcc.cancellation.commission"), value: quote.commissionReversed, type: "amount" },
+        { label: t("opsAcc.cancellation.refundClient"), value: quote.grossReturn, type: "amount", emphasis: true },
+        { label: t("opsAcc.cancellation.dueFromInsurer"), value: quote.insurerReturn, type: "amount" },
       ],
       confirmLabel: t("opsAcc.cancellation.create"),
       onConfirm: async () => {
