@@ -9,17 +9,19 @@ themselves are in `src/modules/users/router.js`.
 | File | What it does |
 |---|---|
 | `router.js` | Routes of the screens, with the audit entries and the approval notifications. |
-| `service.js` | Authority matrix and the check used by the approval steps (`assertAuthority`), delegations, segregation-of-duties rules (`sodConflicts`, `assertSod` used by the user form), the user and role matrices, access reviews, dormant accounts. |
+| `service.js` | Authority limits (propose, decide, withdraw, `applyLimit` with effective dating) and the check used by the approval steps (`assertAuthority`), delegations, segregation-of-duties rules (`sodConflicts`, `assertSod` used by the user form), the user and role matrices, access reviews, dormant accounts. |
 | `catalogue.js` | The access catalogue: every permission code in business words (area of the menu, module, level, what it allows). |
 | `roles.js` | Role directory: department, summary and order of each role, the base platform roles, full-access roles. |
 | `roleAccess.js` | Role Permissions: the overview, the check of a change of a role's access, the request, applying it, the export for audit. |
+| `authority.js` | Authority Matrix: the registry of the approval steps (`AUTHORITY_STEPS`), the matrix by department, changes of limits through the configuration approval (kind `authority-limits`), the upload template and its check, the exports for audit. |
 | `changes.js` | Changes of access waiting for approval (maker-checker) on the configuration approval table. |
 
 ## Main tables
 
 `roles`, `permissions`, `role_permissions` (users module), `sod_rules`, `authority_transaction_types`,
 `authority_limits`, `user_delegations`, `access_reviews`, `access_review_items`, and `accounting_config_changes`
-(kind `role-access`) for the changes of a role's access.
+(kinds `role-access` and `authority-limits`) for the changes waiting for approval. Uploaded Authority Matrix files are
+kept in `documents` (category `authority-matrix`, linked to their change).
 
 ## Access catalogue
 
@@ -69,6 +71,48 @@ access: the System Administrator role and every role that includes it (SUPERID).
 - My Work lists the waiting changes to the holders of `approve:access-control` (not the requester), linked to
   `role-permissions?view=pending&change=<id>`; the posting rule approvals leave them alone.
 
+## Authority Matrix
+
+- Reading (`GET /access-control/authority-matrix`): the active transaction types down, with `checked` and `step` from
+  `AUTHORITY_STEPS` (the approval steps that call `assertAuthority`; a test fails when a caller's type is missing);
+  the active roles across with their department (role directory), `platform` and `approves` (the types whose step
+  the role reaches with its permissions, included roles counted; for the underwriting referral only the authority
+  roles of the active acceptance rules). Each cell: the limit in effect today (with its reference, approver and the
+  change it came from), `scheduled` (a later limit, the current one then shows `endsOn`) and `pending` (the change
+  waiting for approval, `CFG-n`, or an API proposal `AL-n`, with `canDecide` / `canWithdraw` for the signed-in user).
+  `userLimits`: the personal limits in the same shape. `withoutLimit`: the rule for a cell without a limit.
+- Changing (`POST /access-control/authority-changes`, `write:access-control`): one or more lines (role or person,
+  type, limit / no limit / removal, effective date today or later, authority reference and its date while
+  `access.authority_reference_required` is on, remarks). A wrong line, a line that changes nothing, a repeated cell
+  or a cell with a change already waiting refuses the whole change. One line: target `<type>|role:<code>` (or
+  `user:<id>`); an upload: target `upload` (one upload waits at a time). Approved or rejected (reason required) with
+  `POST /changes/:id/decision` by another holder of `approve:access-control`; nobody approves a change of his or her
+  own personal limit. Approving applies every line in one transaction.
+- Effective dating (`applyLimit`, also for the API proposals): from the later of the effective date and today; rows
+  of the same cell that would start on or after it are retired ("Superseded before taking effect"); the row in effect
+  ends the day before (retired at once when that day has passed). Readers decide "in effect" by the dates.
+- `DELETE /authority-limits/:id`: a proposal waiting for approval is withdrawn (proposer or approver); a limit in
+  effect gets a removal proposal (the reference in the body), applied once approved.
+- Upload: `GET /authority-matrix/template` (Data sheet prefilled with the matrix, drop-down lists, Instructions;
+  `?base=1`, `unchecked=1`, `all=1`) and `POST /authority-matrix/uploads` (the upload target of the shared import
+  dialog). The whole file is checked and nothing is saved: unknown or ambiguous names, Limit with No limit = Yes,
+  percent over 100, more than 2 decimals, past effective date, missing reference, the same cell twice, an emptied
+  limit (a limit is removed on the screen), a cell with a change waiting (unless the file holds the waiting value).
+  Rows equal to the limit in effect or scheduled are unchanged. Without errors the file is stored and the changes
+  come back for review; the screen then sends them with the file key to `POST /authority-changes`.
+- Exports: `GET /authority-matrix?format=xlsx|csv` (every active role and type, base platform roles flagged) and
+  `GET /authority-limits?status=all&format=xlsx|csv` (every limit row with its status in words), audited as `export`.
+- My Work lists the waiting changes (`Authority matrix change`, `CFG-n`) and the API proposals (`AL-n`) to the
+  approvers, linked to `authority-matrix?tab=pending`.
+
+### "Not set" at approval time
+
+A cell without a limit row is "Not set". When none of the approver's roles has a limit in effect for the type, there
+is no personal limit and no delegation applies, `access.authority_without_limit` decides: `allow` (delivered) lets the
+approval through with no amount check, `refuse` refuses it. Under `allow` a role without limits is unrestricted, and
+gaining a role or a delegation with a limit lowers a user's authority to that limit. This is unchanged; the screen
+states it in the cell tooltip and the toolbar chip.
+
 ## Segregation of duties
 
 Two kinds of rule (migration 0393): `roles` (two roles one person may not hold together) and `access` (two sets of
@@ -80,14 +124,16 @@ access of a role changes. The default access rules (seed `91_role_access.sql`) w
 ## Changes of access (maker-checker)
 
 `changes.js` keeps the changes in `accounting_config_changes`; a kind registers its handler with
-`registerAccessKind(kind, { label, link, describe, assertDecider, apply })` (`role-access` in `roleAccess.js`). The
+`registerAccessKind(kind, { label, link, describe, assertDecider, apply, requested, applied })` (`role-access` in
+`roleAccess.js`, `authority-limits` in `authority.js`). The
 kinds `delegation`, `sod-rule`, `sod-exception` and `access-review` are allowed by the table (migration 0392) for the
 other screens of this menu. `posting-rules/service.js` only lists and decides its own kinds.
 
 ## Key settings
 
 `access.change_approval`, `access.sod_enforced`, `access.role_groups`, `access.platform_roles`,
-`access.authority_enforced`, `access.authority_without_limit`, `access.dormant_days`.
+`access.authority_enforced`, `access.authority_without_limit`, `access.authority_reference_required`, `access.dormant_days`,
+`limits.bulk_upload_max_rows` (rows of an upload).
 
 ## Debugging
 
@@ -96,3 +142,6 @@ other screens of this menu. `posting-rules/service.js` only lists and decides it
   the selection. `POST /access-control/role-access/check` gives the same answer.
 - Users of a changed role are asked to sign in again: their access token carries the permissions; the change renewed
   their sessions.
+- A limit approved today still shows the old value: its effective date is later; the cell shows the scheduled change.
+- An upload says a row "has a change waiting for approval": decide or withdraw that change first, or put its value in
+  the file.

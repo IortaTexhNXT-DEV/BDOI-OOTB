@@ -33,7 +33,7 @@ describe('authority matrix', () => {
   });
 
   it('a new limit applies only after another administrator approves it', async () => {
-    const proposed = await ctx.api('post', '/access-control/authority-limits').send({ transactionType: 'write_off', roleCode: 'accounting', maxAmount: 2500, remarks: 'Raised for small differences' });
+    const proposed = await ctx.api('post', '/access-control/authority-limits').send({ transactionType: 'write_off', roleCode: 'accounting', maxAmount: 2500, referenceNo: 'BR-2026-014', referenceDate: '2026-01-15', remarks: 'Raised for small differences' });
     expect(proposed.status).toBe(201);
     expect(proposed.body.data.status).toBe('pending');
     expect((await ctx.api('post', `/access-control/authority-limits/${proposed.body.data.id}/decision`).send({ decision: 'approve' })).status).toBe(403);

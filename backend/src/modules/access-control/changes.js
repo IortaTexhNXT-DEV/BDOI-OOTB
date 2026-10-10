@@ -8,7 +8,8 @@
  * a small team: the change is then applied at once by the module that requests it.
  *
  * Each kind registers its handler (registerAccessKind): label, screen link, business summary, the extra checks on the
- * person deciding and what approving it applies. Kinds: role-access (roleAccess.js).
+ * person deciding, what approving it applies and, optionally, the words of its notifications. Kinds: role-access
+ * (roleAccess.js), authority-limits (authority.js).
  */
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -21,7 +22,8 @@ export const APPROVER = 'approve:access-control';
 
 /**
  * handler: { label, link(change) -> screen path, describe(db, row) -> { targetLabel, summary: [lines] },
- * assertDecider(db, row, user) (throws when this user may not decide it), apply(db, row, user) -> result }
+ * assertDecider(db, row, user) (throws when this user may not decide it), apply(db, row, user) -> result,
+ * requested(change, user) -> text of the approval request, applied(change) -> what approving it did }
  */
 export function registerAccessKind(kind, handler) {
   KINDS.set(kind, handler);
@@ -111,8 +113,12 @@ export async function decideAccessChange(db, id, { decision, remarks }, user) {
 
 /** "Role access change CFG-12 awaiting approval" to the users who may approve it (after the request has committed). */
 export const askAccessApproval = (c, user) => notifyApprovers({ audience: APPROVER, document: `${c.kindLabel} change`, number: c.ref, by: user.username,
-  message: `${user.username} requested a change of the access of ${c.targetLabel}: ${c.summary.join('; ')}${c.changeNote ? ` (${c.changeNote})` : ''}`,
+  message: KINDS.get(c.kind)?.requested?.(c, user)
+    || `${user.username} requested a change of the access of ${c.targetLabel}: ${c.summary.join('; ')}${c.changeNote ? ` (${c.changeNote})` : ''}`,
   link: c.link, entity: 'accounting_config_change', entityId: c.id });
+
+/** What approving a change did, for the requester and the screen: "the access of TIS Finance is changed". */
+export const appliedText = (c) => KINDS.get(c.kind)?.applied?.(c) || `the access of ${c.targetLabel} is changed`;
 
 /** Withdraw a waiting change: the requester, or a user who may approve it. */
 export async function withdrawAccessChange(db, id, user) {

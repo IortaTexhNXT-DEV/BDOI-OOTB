@@ -270,9 +270,10 @@ async function approvals(ctx) {
     }
   }
   if (ctx.can('approve:access-control') && await has('authority_limits')) {
-    out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(al.role_code, u.display_name, '')",
-      due_date: due('al.requested_at'), status: 'al.status', link: "'/master/generals/usermanagement/authority-matrix'", amount: 'al.max_amount', created_at: 'al.requested_at' })}
+    out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(r.name, al.role_code, u.display_name, '')",
+      due_date: due('al.requested_at'), status: 'al.status', link: "'/master/generals/usermanagement/authority-matrix?tab=pending'", amount: 'al.max_amount', created_at: 'al.requested_at' })}
       FROM authority_limits al LEFT JOIN authority_transaction_types t ON t.code = al.transaction_type LEFT JOIN users u ON u.id = al.user_id
+      LEFT JOIN roles r ON r.code = al.role_code
       WHERE al.status = 'pending' AND ${notMine(ctx, 'al.requested_by')}`);
   }
   if (ctx.can('approve:posting-rules') && await has('accounting_config_changes')) {
@@ -280,11 +281,14 @@ async function approvals(ctx) {
       due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/finance/configuration-approvals'", created_at: 'cc.requested_at' })}
       FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = ANY(${ctx.P(Object.keys(CHANGE_LABELS))}) AND ${notMine(ctx, 'cc.requested_by')}`);
   }
-  // changes of access (role access) are approved on their own screen with approve:access-control
+  // changes of access (role access, authority limits) are approved on their own screens with approve:access-control
   if (ctx.can(ACCESS_APPROVER) && await has('accounting_config_changes')) {
     out.push(`SELECT ${select({ ...base, kind: "'Role access change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(r.name, cc.target)",
       due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/role-permissions?view=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
       FROM accounting_config_changes cc LEFT JOIN roles r ON r.code = cc.target WHERE cc.status = 'pending' AND cc.kind = 'role-access' AND ${notMine(ctx, 'cc.requested_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Authority matrix change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(cc.payload->>'title', cc.target)",
+      due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/authority-matrix?tab=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = 'authority-limits' AND ${notMine(ctx, 'cc.requested_by')}`);
   }
   if (ctx.can('approve:period-end') && await has('period_close_runs')) {
     out.push(`SELECT ${select({ ...base, kind: "'Month-end close'", id: 'pr.id', ref: 'pr.run_number', title: "'Close of period ' || pr.period", due_date: due('COALESCE(pr.submitted_at, pr.created_at)'),

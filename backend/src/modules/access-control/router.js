@@ -1,19 +1,22 @@
 /**
- * Access control (Master > User Management): user access matrix, role permissions (with changes of a role's access
- * through approval, roleAccess.js and changes.js), authority matrix with maker-checker approval of limits, delegation of
- * authority, segregation-of-duties rules, access reviews, and ending a user's sessions. Rules and their use by the
- * approval steps: service.js.
+ * Access control (Master > Users and Access): user access matrix, role permissions (with changes of a role's access
+ * through approval, roleAccess.js and changes.js), authority matrix (authority.js: limits, their changes through the
+ * same approval, the upload template and the exports), delegation of authority, segregation-of-duties rules, access
+ * reviews, and ending a user's sessions. Rules and their use by the approval steps: service.js.
  * Permissions: read:access-control (System Administrator, Accounting Manager read), write:access-control and
  * approve:access-control (System Administrator; the approver of a limit or of a change of access is not the one who
  * proposed it); a change of a role's access is requested with write:roles.
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { sendTable } from '../documents/tabular.js';
+import { mapColumns, parseUploadedRows, sendTable, uploadFile } from '../documents/tabular.js';
+import { storeFile } from '../uploads/storage.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { getSetting } from '../../lib/settings.js';
 import { toCsv } from '../../lib/csv.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { printContext } from '../documents/pdf.js';
@@ -24,13 +27,14 @@ import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
 import * as roleAccess from './roleAccess.js';
 import * as changes from './changes.js';
+import * as authority from './authority.js';
 
 const { router, define } = moduleRouter('Access Control', '/access-control');
 const read = [requireAuth, requirePermission('read:access-control')];
 const write = [requireAuth, requirePermission('write:access-control')];
 const approve = [requireAuth, requirePermission('approve:access-control')];
 const roleWrite = [requireAuth, requirePermission('write:roles')];
-const S = 'Master > User Management';
+const S = 'Master > Users and Access';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const format = (q) => (String(q.format || '').toLowerCase() === 'csv' ? 'csv' : 'xlsx');
 
@@ -136,9 +140,9 @@ define({
     await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: req.body.decision, after: c });
     if (r.result?.audit) await audit(req, r.result.audit);
     await notifyDecision({ userId: c.requestedById, decidedBy: req.user.id, document: `${c.kindLabel} change`, number: c.ref, approved, by: req.user.username,
-      reason: approved ? null : c.decisionRemarks, message: approved ? `The access of ${c.targetLabel} is changed, approved by ${req.user.username}` : null,
+      reason: approved ? null : c.decisionRemarks, message: approved ? `${changes.appliedText(c)}, approved by ${req.user.username}`.replace(/^./, (x) => x.toUpperCase()) : null,
       link: c.link, entity: 'accounting_config_change', entityId: c.id });
-    ok(res, c, approved ? `Change ${c.ref} approved; the access of ${c.targetLabel} is changed` : `Change ${c.ref} rejected`);
+    ok(res, c, approved ? `Change ${c.ref} approved; ${changes.appliedText(c)}` : `Change ${c.ref} rejected`);
   },
 });
 define({
@@ -152,6 +156,45 @@ define({
 });
 
 // ---------- authority matrix ----------
+const limitBody = { maxAmount: z.number().min(0).nullable().optional(), unlimited: z.boolean().optional(), effectiveFrom: date.optional(),
+  referenceNo: z.string().max(60).optional(), referenceDate: date.optional(), remarks: z.string().max(500).optional() };
+// lines are checked by authority.proposeChange, which names the wrong line and field
+const lineSchema = z.object({ transactionType: z.string().max(60), roleCode: z.string().max(80).nullable().optional(), userId: z.string().max(80).nullable().optional(),
+  removes: z.boolean().optional(), maxAmount: z.number().nullable().optional(), unlimited: z.boolean().optional(), effectiveFrom: z.string().max(20).nullable().optional(),
+  referenceNo: z.string().max(200).nullable().optional(), referenceDate: z.string().max(20).nullable().optional(), remarks: z.string().max(2000).nullable().optional() });
+const cellExample = { limitId: 41, maxAmount: 1000000, unlimited: false, set: true, effectiveFrom: '2026-10-01', endsOn: null, referenceNo: 'BR-2026-014', referenceDate: '2026-09-25',
+  approvedBy: 'IT administrator', scheduled: null, pending: null };
+const authorityChange = { id: 31, ref: 'CFG-31', kind: 'authority-limits', kindLabel: 'Authority matrix', target: 'journal_voucher|role:tis-finance',
+  targetLabel: 'Journal voucher approval · TIS Finance & General Accounting', summary: ['Journal voucher approval · TIS Finance & General Accounting: Not set → PHP 1,000,000.00 from 2026-10-10 (BR-2026-014)'],
+  status: 'pending', canDecide: false, canWithdraw: true, link: `${AUTHORITY}?tab=pending&change=31` };
+const yes = (v) => ['1', 'true', 'yes'].includes(String(v || '').toLowerCase());
+
+/** The authority reference is asked on every change made through the API while access.authority_reference_required is on. */
+async function assertReference(b) {
+  if (!(await getSetting('access.authority_reference_required', true))) return;
+  const errors = [];
+  if (!String(b.referenceNo || '').trim()) errors.push({ path: 'referenceNo', message: 'Enter the authority reference (for example the board resolution number)' });
+  if (!b.referenceDate) errors.push({ path: 'referenceDate', message: 'Enter the date of the authority reference' });
+  if (errors.length) throw badRequest('Validation failed', errors);
+}
+
+/** Excel download with the letterhead and an "as at" line on the first sheet (CSV: the first sheet only). */
+async function sendSheets(res, { title, fileBase, sheets, format: fmt }) {
+  const name = `${fileBase}-${(await today()).replace(/-/g, '')}`;
+  if (fmt === 'csv') {
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${name}.csv"`);
+    return res.send(toCsv(sheets[0].columns, sheets[0].rows));
+  }
+  const ctx = await printContext();
+  const banner = [ctx.letterhead?.name, title, `As at ${ctx.generatedAt} · exported by ${ctx.generatedBy}`].filter(Boolean);
+  const buf = writeXlsx({ title, brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${name}.xlsx"`);
+  return res.send(buf);
+}
+const columnsOf = (header) => header.map((h) => ({ header: h, width: Math.max(12, Math.min(40, h.length + 6)) }));
+
 define({
   method: 'GET', path: '/transaction-types', summary: 'Transaction types of the authority matrix', screen: `${S} > Authority Matrix`, middleware: read,
   response: { success: true, data: [{ code: 'payment_voucher', name: 'Payment voucher and cheque release', measure: 'amount', active: true }] },
@@ -168,32 +211,98 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/authority-matrix', summary: 'Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits',
-  screen: `${S} > Authority Matrix`, middleware: read,
-  response: { success: true, data: { roles: [], rows: [{ code: 'journal_voucher', cells: { accounting: { maxAmount: 500000, set: true, pending: null } } }], userLimits: [], withoutLimit: 'allow' } },
-  handler: async (_req, res) => ok(res, await svc.authorityMatrix(pool)),
+  method: 'GET', path: '/authority-matrix', summary: 'Approval limits: transaction types down (with the approval step that checks each), the roles across by department with the types they can approve, each limit in effect, scheduled and waiting for approval, the personal limits and the rule for a cell without a limit (?format=xlsx|csv: every role and type for audit)',
+  screen: `${S} > Authority Matrix`, middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: { asOf: '2026-10-10', withoutLimit: 'allow', referenceRequired: true, departments: [{ name: 'Finance and Accounting', order: 4 }],
+    roles: [{ code: 'tis-finance', name: 'TIS Finance & General Accounting', department: 'Finance and Accounting', platform: false, fullAccess: false, approves: ['payment_voucher', 'journal_voucher'] }],
+    rows: [{ code: 'journal_voucher', name: 'Journal voucher approval', measure: 'amount', checked: true, step: 'Accounts > Journal Vouchers > Approve', cells: { 'tis-finance': cellExample } }],
+    userLimits: [], pendingCount: 0, abilities: { edit: true, approve: true } } },
+  handler: async (req, res) => {
+    if (!req.query.format) return ok(res, await authority.authorityMatrix(pool, req.user));
+    const rows = await authority.authorityMatrixRows(pool, req.user);
+    await audit(req, { entity: 'authority_limit', entityId: 'matrix', action: 'export', after: { rows: rows.length, format: format(req.query) } });
+    return sendSheets(res, { title: 'Authority matrix', fileBase: 'authority-matrix', format: format(req.query),
+      sheets: [{ name: 'Authority matrix', columns: columnsOf(authority.AUTHORITY_MATRIX_HEADER), rows }] });
+  },
 });
 define({
-  method: 'GET', path: '/authority-limits', summary: 'Authority limits with their history (filter by status / transaction type)', screen: `${S} > Authority Matrix`, middleware: read,
-  query: { status: 'pending', transactionType: 'payment_voucher' }, response: { success: true, data: [] },
-  handler: async (req, res) => ok(res, await svc.listLimits(pool, { status: req.query.status || null, transactionType: req.query.transactionType || null })),
+  method: 'GET', path: '/authority-limits', summary: 'Authority limits with their history, newest first (?status=pending|active|rejected|retired|withdrawn|all, transactionType; ?format=xlsx|csv: the change history for audit)',
+  screen: `${S} > Authority Matrix`, middleware: read, query: { status: 'all', transactionType: 'payment_voucher' },
+  response: { success: true, data: [{ id: 41, transactionType: 'journal_voucher', roleCode: 'tis-finance', maxAmount: 1000000, status: 'active', statusLabel: 'In effect', referenceNo: 'BR-2026-014', changeId: 31 }] },
+  handler: async (req, res) => {
+    const status = req.query.status || null;
+    if (!req.query.format && status && status !== 'all') return ok(res, await svc.listLimits(pool, { status, transactionType: req.query.transactionType || null }));
+    const list = await authority.limitHistory(pool, { transactionType: req.query.transactionType || null });
+    if (!req.query.format) return ok(res, list);
+    await audit(req, { entity: 'authority_limit', entityId: 'history', action: 'export', after: { rows: list.length, format: format(req.query) } });
+    return sendSheets(res, { title: 'Authority limits: change history', fileBase: 'authority-limit-history', format: format(req.query),
+      sheets: [{ name: 'Change history', columns: columnsOf(authority.LIMIT_HISTORY_HEADER), rows: authority.limitHistoryRows(list) }] });
+  },
 });
 define({
-  method: 'POST', path: '/authority-limits', summary: 'Propose a limit for a role or a user; it applies once another administrator approves it', screen: `${S} > Authority Matrix`,
-  middleware: [...write, validate(z.object({ transactionType: z.string(), roleCode: z.string().optional(), userId: z.string().optional(), maxAmount: z.number().min(0).nullable().optional(),
-    unlimited: z.boolean().optional(), effectiveFrom: date.optional(), remarks: z.string().max(500).optional() }))],
-  request: { transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1000000, remarks: 'Per the board resolution on signing authority' },
+  method: 'POST', path: '/authority-changes', summary: 'Propose a change of the Authority Matrix: one or more limits of roles or people (set, no limit, removal), each with its effective date (today or later) and authority reference; it applies once another administrator approves it',
+  screen: `${S} > Authority Matrix`,
+  middleware: [...write, validate(z.object({ lines: z.array(lineSchema).min(1).max(2000), remarks: z.string().max(1000).optional(),
+    file: z.object({ key: z.string().max(500), name: z.string().max(260).optional() }).nullable().optional(), rowsRead: z.number().int().min(0).optional(), unchanged: z.number().int().min(0).optional() }))],
+  request: { lines: [{ transactionType: 'journal_voucher', roleCode: 'tis-finance', maxAmount: 1000000, effectiveFrom: '2026-10-10', referenceNo: 'BR-2026-014', referenceDate: '2026-09-25' }] },
+  response: { success: true, data: authorityChange },
+  handler: async (req, res) => {
+    const c = await withTransaction((db) => authority.proposeChange(db, req.body, req.user));
+    await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: 'request', after: c });
+    await changes.askAccessApproval(c, req.user);
+    created(res, c, `Change ${c.ref} sent for approval; it applies once another administrator approves it`);
+  },
+});
+define({
+  method: 'GET', path: '/authority-matrix/template', summary: 'Upload template of the Authority Matrix (XLSX): the matrix as it is, one row per transaction and role, with drop-down lists and the rules (?base=1 base platform roles, unchecked=1 transactions no approval step checks, all=1 every role)',
+  screen: `${S} > Authority Matrix > Upload > Download template`, middleware: read, query: { base: 0, unchecked: 0, all: 0 }, response: '(xlsx file)',
+  handler: async (req, res) => {
+    const sheets = await authority.templateSheets(pool, req.user, { base: yes(req.query.base), unchecked: yes(req.query.unchecked), all: yes(req.query.all) });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="authority-matrix-upload.xlsx"');
+    res.send(writeXlsx({ title: 'Authority matrix upload', sheets }));
+  },
+});
+define({
+  method: 'POST', path: '/authority-matrix/uploads', summary: 'Check a filled Authority Matrix template (multipart "file", XLSX or CSV) without changing anything: every row is checked first; without errors the file is kept and the changes are returned for review, then sent for approval together (POST /authority-changes)',
+  screen: `${S} > Authority Matrix > Upload`, middleware: [...write, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, message: 'Checked 24 rows: 3 changes ready to review, 21 unchanged.', data: { rowsRead: 24, updated: 3, created: 0, unchanged: 21, errors: [],
+    changes: [{ row: 5, transactionType: 'journal_voucher', roleCode: 'tis-finance', maxAmount: 1000000, effectiveFrom: '2026-10-10', referenceNo: 'BR-2026-014' }],
+    file: { key: 'authority-matrix/1760000000000-ab12-authority.xlsx', name: 'authority.xlsx' } } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file);
+    const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+    if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+    const r = await authority.checkUpload(pool, rows.map((row) => mapColumns(row, authority.AUTHORITY_UPLOAD_COLUMNS)), req.user);
+    const checked = `Checked ${r.rowsRead} row${r.rowsRead === 1 ? '' : 's'}`;
+    if (r.errors.length) {
+      return ok(res, { ...r, created: 0, updated: 0, file: null }, `${checked}: ${r.errors.length} error${r.errors.length === 1 ? '' : 's'}. Nothing was saved.`);
+    }
+    if (!r.changes.length) return ok(res, { ...r, created: 0, updated: 0, file: null }, `${checked}: no change, the file matches the matrix.`);
+    const stored = await storeFile(req.file, { folder: authority.UPLOAD_FOLDER, userId: req.user.id });
+    await audit(req, { entity: 'authority_limit', entityId: 'upload', action: 'upload-check', after: { file: stored.fileName, rows: r.rowsRead, changes: r.changes.length } });
+    return ok(res, { ...r, created: 0, updated: r.changes.length, file: { key: stored.key, name: stored.fileName } },
+      `${checked}: ${r.changes.length} change${r.changes.length === 1 ? '' : 's'} ready to review, ${r.unchanged} unchanged.`);
+  },
+});
+define({
+  method: 'POST', path: '/authority-limits', summary: 'Propose a limit for a role or a user (API and go-live workbook); it applies once another administrator approves it, from its effective date (today or later)',
+  screen: `${S} > Authority Matrix`,
+  middleware: [...write, validate(z.object({ transactionType: z.string(), roleCode: z.string().optional(), userId: z.string().optional(), ...limitBody }))],
+  request: { transactionType: 'payment_voucher', roleCode: 'tis-finance', maxAmount: 1000000, referenceNo: 'BR-2026-014', referenceDate: '2026-09-25' },
   response: { success: true, data: { id: 1, status: 'pending' } },
   handler: async (req, res) => {
+    await assertReference(req.body);
     const r = await withTransaction((db) => svc.proposeLimit(db, req.body, req.user));
     await audit(req, { entity: 'authority_limit', entityId: String(r.id), action: 'propose', after: r });
     await notifyApprovers({ audience: 'approve:access-control', document: 'Authority limit', number: limitNumber(r), by: req.user.username,
-      message: `${req.user.username} proposed ${await limitText(r)}${r.remarks ? ` (${r.remarks})` : ''}`, link: AUTHORITY, entity: 'authority_limit', entityId: r.id });
+      message: `${req.user.username} proposed ${await limitText(r)}${r.remarks ? ` (${r.remarks})` : ''}${r.referenceNo ? `, authority reference ${r.referenceNo}` : ''}`, link: AUTHORITY,
+      entity: 'authority_limit', entityId: r.id });
     created(res, r, 'Limit proposed; it applies once another administrator approves it');
   },
 });
 define({
-  method: 'POST', path: '/authority-limits/:id/decision', summary: 'Approve or reject a proposed limit (not by the person who proposed it)', screen: `${S} > Authority Matrix`,
+  method: 'POST', path: '/authority-limits/:id/decision', summary: 'Approve (in effect from its effective date) or reject (note required) a proposed limit; never by the person who proposed it', screen: `${S} > Authority Matrix`,
   middleware: [...approve, validate(z.object({ decision: z.enum(['approve', 'reject']), note: z.string().max(500).optional() }))],
   request: { decision: 'approve' }, response: { success: true, data: { id: 1, status: 'active' } },
   handler: async (req, res) => {
@@ -201,18 +310,32 @@ define({
     await audit(req, { entity: 'authority_limit', entityId: req.params.id, action: req.body.decision, after: r });
     const approved = req.body.decision === 'approve';
     await notifyDecision({ userId: r.requestedById, decidedBy: req.user.id, document: 'Authority limit', number: limitNumber(r), approved, by: req.user.username,
-      reason: approved ? null : req.body.note || null, message: approved ? `${await limitText(r)}, approved by ${req.user.username} and in effect` : null,
+      reason: approved ? null : req.body.note || null, message: approved ? `${await limitText(r)}, approved by ${req.user.username}, in effect from ${r.effectiveFrom}` : null,
       link: AUTHORITY, entity: 'authority_limit', entityId: r.id });
-    ok(res, r, req.body.decision === 'approve' ? 'Limit approved and in effect' : 'Limit rejected');
+    ok(res, r, approved ? `Limit approved; in effect from ${r.effectiveFrom}` : 'Limit rejected');
   },
 });
 define({
-  method: 'DELETE', path: '/authority-limits/:id', summary: 'Withdraw an active limit', screen: `${S} > Authority Matrix`, middleware: approve,
-  response: { success: true, data: { id: 1, status: 'retired' } },
+  method: 'DELETE', path: '/authority-limits/:id', summary: 'A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it',
+  screen: `${S} > Authority Matrix`, middleware: [requireAuth, requirePermission('write:access-control', 'approve:access-control')],
+  request: { referenceNo: 'BR-2026-020', referenceDate: '2026-10-05', remarks: 'Role merged into Finance' },
+  response: { success: true, data: { id: 1, status: 'withdrawn' } },
   handler: async (req, res) => {
-    const r = await svc.retireLimit(pool, req.params.id, req.user);
-    await audit(req, { entity: 'authority_limit', entityId: req.params.id, action: 'withdraw', after: r });
-    ok(res, r, 'Limit withdrawn');
+    const l = await svc.getLimit(pool, req.params.id);
+    if (!l) throw notFound('Authority limit not found');
+    if (l.status === 'pending') {
+      const r = await withTransaction((db) => svc.withdrawLimit(db, req.params.id, req.user));
+      await audit(req, { entity: 'authority_limit', entityId: req.params.id, action: 'withdraw', after: r });
+      return ok(res, r, 'Proposal withdrawn');
+    }
+    if (l.status !== 'active') throw conflict(`This limit is ${l.status}`);
+    if (!hasPermission(req.user, 'write:access-control')) throw forbidden('Requires permission: write:access-control');
+    const b = req.body || {};
+    const c = await withTransaction((db) => authority.proposeChange(db, { lines: [{ transactionType: l.transactionType, roleCode: l.roleCode, userId: l.userId, removes: true,
+      referenceNo: b.referenceNo, referenceDate: b.referenceDate, remarks: b.remarks }] }, req.user));
+    await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: 'request', after: c });
+    await changes.askAccessApproval(c, req.user);
+    return created(res, c, `Removal ${c.ref} sent for approval; the limit stays in effect until another administrator approves it`);
   },
 });
 define({

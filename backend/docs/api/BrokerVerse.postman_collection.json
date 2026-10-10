@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1221 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1224 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -130,6 +130,83 @@
       "name": "Access Control",
       "item": [
         {
+          "name": "Propose a change of the Authority Matrix: one or more limits of roles or people (set, no limit, removal), each with its effective date (today or later) and authority reference; it applies once another administrator approves it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-changes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-changes"
+              ]
+            },
+            "description": "Propose a change of the Authority Matrix: one or more limits of roles or people (set, no limit, removal), each with its effective date (today or later) and authority reference; it applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    {\n      \"transactionType\": \"journal_voucher\",\n      \"roleCode\": \"tis-finance\",\n      \"maxAmount\": 1000000,\n      \"effectiveFrom\": \"2026-10-10\",\n      \"referenceNo\": \"BR-2026-014\",\n      \"referenceDate\": \"2026-09-25\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-changes"
+                  ]
+                },
+                "description": "Propose a change of the Authority Matrix: one or more limits of roles or people (set, no limit, removal), each with its effective date (today or later) and authority reference; it applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lines\": [\n    {\n      \"transactionType\": \"journal_voucher\",\n      \"roleCode\": \"tis-finance\",\n      \"maxAmount\": 1000000,\n      \"effectiveFrom\": \"2026-10-10\",\n      \"referenceNo\": \"BR-2026-014\",\n      \"referenceDate\": \"2026-09-25\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 31,\n    \"ref\": \"CFG-31\",\n    \"kind\": \"authority-limits\",\n    \"kindLabel\": \"Authority matrix\",\n    \"target\": \"journal_voucher|role:tis-finance\",\n    \"targetLabel\": \"Journal voucher approval · TIS Finance & General Accounting\",\n    \"summary\": [\n      \"Journal voucher approval · TIS Finance & General Accounting: Not set → PHP 1,000,000.00 from 2026-10-10 (BR-2026-014)\"\n    ],\n    \"status\": \"pending\",\n    \"canDecide\": false,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/authority-matrix?tab=pending&change=31\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it",
           "request": {
             "method": "GET",
@@ -158,7 +235,7 @@
                 }
               ]
             },
-            "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: Any authenticated user"
+            "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -190,7 +267,7 @@
                     }
                   ]
                 },
-                "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: Any authenticated user"
+                "description": "The approval authority of a user (default: the signed-in user) for a transaction type, and whether an amount is within it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -207,12 +284,12 @@
           ]
         },
         {
-          "name": "Authority limits with their history (filter by status / transaction type)",
+          "name": "Authority limits with their history, newest first (?status=pending|active|rejected|retired|withdrawn|all, transactionType; ?format=xlsx|csv: the change history for audit)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/access-control/authority-limits?status=pending&transactionType=payment_voucher",
+              "raw": "{{baseUrl}}/access-control/authority-limits?status=all&transactionType=payment_voucher",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -223,7 +300,7 @@
               "query": [
                 {
                   "key": "status",
-                  "value": "pending"
+                  "value": "all"
                 },
                 {
                   "key": "transactionType",
@@ -231,7 +308,7 @@
                 }
               ]
             },
-            "description": "Authority limits with their history (filter by status / transaction type)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+            "description": "Authority limits with their history, newest first (?status=pending|active|rejected|retired|withdrawn|all, transactionType; ?format=xlsx|csv: the change history for audit)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -240,7 +317,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/access-control/authority-limits?status=pending&transactionType=payment_voucher",
+                  "raw": "{{baseUrl}}/access-control/authority-limits?status=all&transactionType=payment_voucher",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -251,7 +328,7 @@
                   "query": [
                     {
                       "key": "status",
-                      "value": "pending"
+                      "value": "all"
                     },
                     {
                       "key": "transactionType",
@@ -259,7 +336,7 @@
                     }
                   ]
                 },
-                "description": "Authority limits with their history (filter by status / transaction type)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+                "description": "Authority limits with their history, newest first (?status=pending|active|rejected|retired|withdrawn|all, transactionType; ?format=xlsx|csv: the change history for audit)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -271,12 +348,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 41,\n      \"transactionType\": \"journal_voucher\",\n      \"roleCode\": \"tis-finance\",\n      \"maxAmount\": 1000000,\n      \"status\": \"active\",\n      \"statusLabel\": \"In effect\",\n      \"referenceNo\": \"BR-2026-014\",\n      \"changeId\": 31\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Propose a limit for a role or a user; it applies once another administrator approves it",
+          "name": "Propose a limit for a role or a user (API and go-live workbook); it applies once another administrator approves it, from its effective date (today or later)",
           "request": {
             "method": "POST",
             "header": [
@@ -295,10 +372,10 @@
                 "authority-limits"
               ]
             },
-            "description": "Propose a limit for a role or a user; it applies once another administrator approves it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+            "description": "Propose a limit for a role or a user (API and go-live workbook); it applies once another administrator approves it, from its effective date (today or later)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"accounting\",\n  \"maxAmount\": 1000000,\n  \"remarks\": \"Per the board resolution on signing authority\"\n}",
+              "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"tis-finance\",\n  \"maxAmount\": 1000000,\n  \"referenceNo\": \"BR-2026-014\",\n  \"referenceDate\": \"2026-09-25\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -327,10 +404,10 @@
                     "authority-limits"
                   ]
                 },
-                "description": "Propose a limit for a role or a user; it applies once another administrator approves it\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+                "description": "Propose a limit for a role or a user (API and go-live workbook); it applies once another administrator approves it, from its effective date (today or later)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"accounting\",\n  \"maxAmount\": 1000000,\n  \"remarks\": \"Per the board resolution on signing authority\"\n}",
+                  "raw": "{\n  \"transactionType\": \"payment_voucher\",\n  \"roleCode\": \"tis-finance\",\n  \"maxAmount\": 1000000,\n  \"referenceNo\": \"BR-2026-014\",\n  \"referenceDate\": \"2026-09-25\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -353,10 +430,15 @@
           ]
         },
         {
-          "name": "Withdraw an active limit",
+          "name": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/access-control/authority-limits/:id",
               "host": [
@@ -375,14 +457,28 @@
                 }
               ]
             },
-            "description": "Withdraw an active limit\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control"
+            "description": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referenceNo\": \"BR-2026-020\",\n  \"referenceDate\": \"2026-10-05\",\n  \"remarks\": \"Role merged into Finance\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [
             {
               "name": "Example response",
               "originalRequest": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/access-control/authority-limits/:id",
                   "host": [
@@ -401,7 +497,16 @@
                     }
                   ]
                 },
-                "description": "Withdraw an active limit\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control"
+                "description": "A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control, approve:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"referenceNo\": \"BR-2026-020\",\n  \"referenceDate\": \"2026-10-05\",\n  \"remarks\": \"Role merged into Finance\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "status": "OK",
               "code": 200,
@@ -413,12 +518,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"retired\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"withdrawn\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Approve or reject a proposed limit (not by the person who proposed it)",
+          "name": "Approve (in effect from its effective date) or reject (note required) a proposed limit; never by the person who proposed it",
           "request": {
             "method": "POST",
             "header": [
@@ -446,7 +551,7 @@
                 }
               ]
             },
-            "description": "Approve or reject a proposed limit (not by the person who proposed it)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+            "description": "Approve (in effect from its effective date) or reject (note required) a proposed limit; never by the person who proposed it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: approve:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\"\n}",
@@ -487,7 +592,7 @@
                     }
                   ]
                 },
-                "description": "Approve or reject a proposed limit (not by the person who proposed it)\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: approve:access-control",
+                "description": "Approve (in effect from its effective date) or reject (note required) a proposed limit; never by the person who proposed it\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: approve:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\"\n}",
@@ -513,21 +618,27 @@
           ]
         },
         {
-          "name": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits",
+          "name": "Approval limits: transaction types down (with the approval step that checks each), the roles across by department with the types they can approve, each limit in effect, scheduled and waiting for approval, the personal limits and the rule for a cell without a limit (?format=xlsx|csv: every role and type for audit)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/access-control/authority-matrix",
+              "raw": "{{baseUrl}}/access-control/authority-matrix?format=xlsx",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "access-control",
                 "authority-matrix"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
               ]
             },
-            "description": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+            "description": "Approval limits: transaction types down (with the approval step that checks each), the roles across by department with the types they can approve, each limit in effect, scheduled and waiting for approval, the personal limits and the rule for a cell without a limit (?format=xlsx|csv: every role and type for audit)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -536,16 +647,22 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/access-control/authority-matrix",
+                  "raw": "{{baseUrl}}/access-control/authority-matrix?format=xlsx",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "access-control",
                     "authority-matrix"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
                   ]
                 },
-                "description": "Approval limits: transaction types down, roles across, with changes waiting for approval and the user-specific limits\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+                "description": "Approval limits: transaction types down (with the approval step that checks each), the roles across by department with the types they can approve, each limit in effect, scheduled and waiting for approval, the personal limits and the rule for a cell without a limit (?format=xlsx|csv: every role and type for audit)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -557,7 +674,165 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [],\n    \"rows\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"cells\": {\n          \"accounting\": {\n            \"maxAmount\": 500000,\n            \"set\": true,\n            \"pending\": null\n          }\n        }\n      }\n    ],\n    \"userLimits\": [],\n    \"withoutLimit\": \"allow\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-10\",\n    \"withoutLimit\": \"allow\",\n    \"referenceRequired\": true,\n    \"departments\": [\n      {\n        \"name\": \"Finance and Accounting\",\n        \"order\": 4\n      }\n    ],\n    \"roles\": [\n      {\n        \"code\": \"tis-finance\",\n        \"name\": \"TIS Finance & General Accounting\",\n        \"department\": \"Finance and Accounting\",\n        \"platform\": false,\n        \"fullAccess\": false,\n        \"approves\": [\n          \"payment_voucher\",\n          \"journal_voucher\"\n        ]\n      }\n    ],\n    \"rows\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"measure\": \"amount\",\n        \"checked\": true,\n        \"step\": \"Accounts > Journal Vouchers > Approve\",\n        \"cells\": {\n          \"tis-finance\": {\n            \"limitId\": 41,\n            \"maxAmount\": 1000000,\n            \"unlimited\": false,\n            \"set\": true,\n            \"effectiveFrom\": \"2026-10-01\",\n            \"endsOn\": null,\n            \"referenceNo\": \"BR-2026-014\",\n            \"referenceDate\": \"2026-09-25\",\n            \"approvedBy\": \"IT administrator\",\n            \"scheduled\": null,\n            \"pending\": null\n          }\n        }\n      }\n    ],\n    \"userLimits\": [],\n    \"pendingCount\": 0,\n    \"abilities\": {\n      \"edit\": true,\n      \"approve\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload template of the Authority Matrix (XLSX): the matrix as it is, one row per transaction and role, with drop-down lists and the rules (?base=1 base platform roles, unchecked=1 transactions no approval step checks, all=1 every role)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-matrix/template?base=0&unchecked=0&all=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-matrix",
+                "template"
+              ],
+              "query": [
+                {
+                  "key": "base",
+                  "value": "0"
+                },
+                {
+                  "key": "unchecked",
+                  "value": "0"
+                },
+                {
+                  "key": "all",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Upload template of the Authority Matrix (XLSX): the matrix as it is, one row per transaction and role, with drop-down lists and the rules (?base=1 base platform roles, unchecked=1 transactions no approval step checks, all=1 every role)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix > Upload > Download template\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-matrix/template?base=0&unchecked=0&all=0",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-matrix",
+                    "template"
+                  ],
+                  "query": [
+                    {
+                      "key": "base",
+                      "value": "0"
+                    },
+                    {
+                      "key": "unchecked",
+                      "value": "0"
+                    },
+                    {
+                      "key": "all",
+                      "value": "0"
+                    }
+                  ]
+                },
+                "description": "Upload template of the Authority Matrix (XLSX): the matrix as it is, one row per transaction and role, with drop-down lists and the rules (?base=1 base platform roles, unchecked=1 transactions no approval step checks, all=1 every role)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix > Upload > Download template\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Check a filled Authority Matrix template (multipart \"file\", XLSX or CSV) without changing anything: every row is checked first; without errors the file is kept and the changes are returned for review, then sent for approval together (POST /authority-changes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/authority-matrix/uploads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "authority-matrix",
+                "uploads"
+              ]
+            },
+            "description": "Check a filled Authority Matrix template (multipart \"file\", XLSX or CSV) without changing anything: every row is checked first; without errors the file is kept and the changes are returned for review, then sent for approval together (POST /authority-changes)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix > Upload\n\nAccess: write:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/authority-matrix/uploads",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "authority-matrix",
+                    "uploads"
+                  ]
+                },
+                "description": "Check a filled Authority Matrix template (multipart \"file\", XLSX or CSV) without changing anything: every row is checked first; without errors the file is kept and the changes are returned for review, then sent for approval together (POST /authority-changes)\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix > Upload\n\nAccess: write:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checked 24 rows: 3 changes ready to review, 21 unchanged.\",\n  \"data\": {\n    \"rowsRead\": 24,\n    \"updated\": 3,\n    \"created\": 0,\n    \"unchanged\": 21,\n    \"errors\": [],\n    \"changes\": [\n      {\n        \"row\": 5,\n        \"transactionType\": \"journal_voucher\",\n        \"roleCode\": \"tis-finance\",\n        \"maxAmount\": 1000000,\n        \"effectiveFrom\": \"2026-10-10\",\n        \"referenceNo\": \"BR-2026-014\"\n      }\n    ],\n    \"file\": {\n      \"key\": \"authority-matrix/1760000000000-ab12-authority.xlsx\",\n      \"name\": \"authority.xlsx\"\n    }\n  }\n}"
             }
           ]
         },
@@ -586,7 +861,7 @@
                 }
               ]
             },
-            "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+            "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -614,7 +889,7 @@
                     }
                   ]
                 },
-                "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+                "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -653,7 +928,7 @@
                 }
               ]
             },
-            "description": "One change of access\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+            "description": "One change of access\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -679,7 +954,7 @@
                     }
                   ]
                 },
-                "description": "One change of access\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+                "description": "One change of access\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -724,7 +999,7 @@
                 }
               ]
             },
-            "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: approve:access-control",
+            "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: approve:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\"\n}",
@@ -765,7 +1040,7 @@
                     }
                   ]
                 },
-                "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: approve:access-control",
+                "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: approve:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\"\n}",
@@ -814,7 +1089,7 @@
                 }
               ]
             },
-            "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+            "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
           },
           "response": [
             {
@@ -841,7 +1116,7 @@
                     }
                   ]
                 },
-                "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+                "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -872,7 +1147,7 @@
                 "delegations"
               ]
             },
-            "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: read:access-control"
+            "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -890,7 +1165,7 @@
                     "delegations"
                   ]
                 },
-                "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: read:access-control"
+                "description": "Delegations of authority (?active=true for current and future ones)\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -926,7 +1201,7 @@
                 "delegations"
               ]
             },
-            "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+            "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
@@ -958,7 +1233,7 @@
                     "delegations"
                   ]
                 },
-                "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control",
+                "description": "Delegate approval authority for a period (leave, travel); empty transaction types = all\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"delegatorId\": \"usr_1\",\n  \"delegateId\": \"usr_2\",\n  \"transactionTypes\": [\n    \"payment_voucher\"\n  ],\n  \"dateFrom\": \"2026-10-01\",\n  \"dateTo\": \"2026-10-10\",\n  \"reason\": \"Annual leave\"\n}",
@@ -1007,7 +1282,7 @@
                 }
               ]
             },
-            "description": "End a delegation early\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control"
+            "description": "End a delegation early\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control"
           },
           "response": [
             {
@@ -1034,7 +1309,7 @@
                     }
                   ]
                 },
-                "description": "End a delegation early\n\nFront-end touchpoint: Master > User Management > Delegations\n\nAccess: write:access-control"
+                "description": "End a delegation early\n\nFront-end touchpoint: Master > Users and Access > Delegations\n\nAccess: write:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1065,7 +1340,7 @@
                 "reviews"
               ]
             },
-            "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+            "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1083,7 +1358,7 @@
                     "reviews"
                   ]
                 },
-                "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+                "description": "Access reviews (recertification campaigns) with progress\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1119,7 +1394,7 @@
                 "reviews"
               ]
             },
-            "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+            "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
@@ -1151,7 +1426,7 @@
                     "reviews"
                   ]
                 },
-                "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+                "description": "Start an access review of every active user\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Q4 2026 access review\",\n  \"dueDate\": \"2026-12-15\"\n}",
@@ -1199,7 +1474,7 @@
                 }
               ]
             },
-            "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+            "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1225,7 +1500,7 @@
                     }
                   ]
                 },
-                "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: read:access-control"
+                "description": "One access review with every user and decision (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1265,7 +1540,7 @@
                 }
               ]
             },
-            "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control"
+            "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
           },
           "response": [
             {
@@ -1292,7 +1567,7 @@
                     }
                   ]
                 },
-                "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control"
+                "description": "Close a review once every user has been decided\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1343,7 +1618,7 @@
                 }
               ]
             },
-            "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+            "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"keep\"\n}",
@@ -1390,7 +1665,7 @@
                     }
                   ]
                 },
-                "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > User Management > Access Reviews\n\nAccess: write:access-control",
+                "description": "Keep or revoke one user's access (revoke deactivates the account and signs it out)\n\nFront-end touchpoint: Master > Users and Access > Access Reviews\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"keep\"\n}",
@@ -1430,7 +1705,7 @@
                 "role-access"
               ]
             },
-            "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+            "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1448,7 +1723,7 @@
                     "role-access"
                   ]
                 },
-                "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+                "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1493,7 +1768,7 @@
                 }
               ]
             },
-            "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+            "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": [\n    \"write:fixed-assets\"\n  ],\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Bank reconciliation approval moves to Finance\"\n}",
@@ -1534,7 +1809,7 @@
                     }
                   ]
                 },
-                "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+                "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": [\n    \"write:fixed-assets\"\n  ],\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Bank reconciliation approval moves to Finance\"\n}",
@@ -1580,7 +1855,7 @@
                 "check"
               ]
             },
-            "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+            "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"role\": \"tis-finance\",\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": []\n}",
@@ -1613,7 +1888,7 @@
                     "check"
                   ]
                 },
-                "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+                "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: write:roles",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"role\": \"tis-finance\",\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": []\n}",
@@ -1668,7 +1943,7 @@
                 }
               ]
             },
-            "description": "Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+            "description": "Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
           },
           "response": []
         },
@@ -1687,7 +1962,7 @@
                 "role-matrix"
               ]
             },
-            "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+            "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1705,7 +1980,7 @@
                     "role-matrix"
                   ]
                 },
-                "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+                "description": "Permissions down, roles across: what each role may do (inherited roles listed per role)\n\nFront-end touchpoint: Master > Users and Access > Role Permissions\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1741,7 +2016,7 @@
                 "sod-check"
               ]
             },
-            "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users, read:access-control",
+            "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
@@ -1773,7 +2048,7 @@
                     "sod-check"
                   ]
                 },
-                "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users, read:access-control",
+                "description": "Rules a set of roles would break (used by the user form before saving)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users, read:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"roles\": [\n    \"processing\",\n    \"accounting\"\n  ]\n}",
@@ -1813,7 +2088,7 @@
                 "sod-rules"
               ]
             },
-            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1831,7 +2106,7 @@
                     "sod-rules"
                   ]
                 },
-                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1867,7 +2142,7 @@
                 "sod-rules"
               ]
             },
-            "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+            "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
@@ -1899,7 +2174,7 @@
                     "sod-rules"
                   ]
                 },
-                "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+                "description": "Add a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"code\": \"SOD-OPS-ACCT\",\n  \"name\": \"Servicing and payment\",\n  \"roleA\": \"operations\",\n  \"roleB\": \"accounting\",\n  \"action\": \"warn\"\n}",
@@ -1952,7 +2227,7 @@
                 }
               ]
             },
-            "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+            "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
@@ -1992,7 +2267,7 @@
                     }
                   ]
                 },
-                "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control",
+                "description": "Change a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Sales and collection\",\n  \"roleA\": \"sales\",\n  \"roleB\": \"accounting\",\n  \"action\": \"block\"\n}",
@@ -2040,7 +2315,7 @@
                 }
               ]
             },
-            "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control"
+            "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
           },
           "response": [
             {
@@ -2066,7 +2341,7 @@
                     }
                   ]
                 },
-                "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: write:access-control"
+                "description": "Switch off a segregation-of-duties rule\n\nFront-end touchpoint: Master > Users and Access > Segregation of Duties\n\nAccess: write:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -2097,7 +2372,7 @@
                 "transaction-types"
               ]
             },
-            "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+            "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -2115,7 +2390,7 @@
                     "transaction-types"
                   ]
                 },
-                "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: read:access-control"
+                "description": "Transaction types of the authority matrix\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -2159,7 +2434,7 @@
                 }
               ]
             },
-            "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+            "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Cheque release\"\n}",
@@ -2199,7 +2474,7 @@
                     }
                   ]
                 },
-                "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > User Management > Authority Matrix\n\nAccess: write:access-control",
+                "description": "Rename, describe or switch off a transaction type\n\nFront-end touchpoint: Master > Users and Access > Authority Matrix\n\nAccess: write:access-control",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Cheque release\"\n}",
@@ -2249,7 +2524,7 @@
                 }
               ]
             },
-            "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > User Access Matrix\n\nAccess: read:access-control"
+            "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -2277,7 +2552,7 @@
                     }
                   ]
                 },
-                "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > User Management > User Access Matrix\n\nAccess: read:access-control"
+                "description": "Every user with roles, branch, status, last sign-in, two-factor, password age and segregation-of-duties conflicts (?format=xlsx|csv to download)\n\nFront-end touchpoint: Master > Users and Access > User Access Matrix\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -2317,7 +2592,7 @@
                 }
               ]
             },
-            "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users"
+            "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
           },
           "response": [
             {
@@ -2344,7 +2619,7 @@
                     }
                   ]
                 },
-                "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > User Management > User\n\nAccess: write:users"
+                "description": "End every session of a user (lost device, suspected misuse, role change)\n\nFront-end touchpoint: Master > Users and Access > User\n\nAccess: write:users"
               },
               "status": "OK",
               "code": 200,
