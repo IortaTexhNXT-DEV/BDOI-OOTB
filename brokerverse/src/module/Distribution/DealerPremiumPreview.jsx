@@ -108,28 +108,33 @@ const DealerPremiumPreview = ({ programme, onHide, toast }) => {
     return l.name;
   };
   const basis = result?.basis;
-  const basisLine = basis ? [
-    t("distribution.mp.basis.sumInsured", "Sum insured {{amount}}", { amount: amount(basis.sumInsured) }),
-    t("distribution.mp.basis.od", "Own damage / theft {{rate}}", { rate: rate(basis.ownDamageRate) }),
-    basis.actsOfNatureRate ? t("distribution.mp.basis.aon", "Acts of nature {{rate}}", { rate: rate(basis.actsOfNatureRate) }) : null,
-    basis.vehicleTypeLabel,
-    basis.lgtRate !== null ? t("distribution.mp.basis.lgt", "LGT {{rate}} {{place}}", { rate: rate(basis.lgtRate), place: basis.lgu ? basis.lgu.name : t("distribution.mp.basis.standard", "(standard rate)") }) : null,
-    t("distribution.mp.basis.programme", "Programme {{code}}", { code: basis.programmeCode }),
-    basis.insurerName,
-  ].filter(Boolean).join(" · ") : "";
+  // the basis as a short key/value row: sum insured, rates, vehicle class, LGT, programme, insurer
+  const basisItems = basis ? [
+    { key: "si", label: t("distribution.mp.basis.sumInsured", "Sum insured"), value: amount(basis.sumInsured) },
+    { key: "rates", label: t("distribution.mp.basis.rates", "Rates"), value: [
+      t("distribution.mp.basis.od", "Own damage / theft {{rate}}", { rate: rate(basis.ownDamageRate) }),
+      basis.actsOfNatureRate ? t("distribution.mp.basis.aon", "Acts of nature {{rate}}", { rate: rate(basis.actsOfNatureRate) }) : null,
+    ].filter(Boolean).join(" · ") },
+    basis.vehicleTypeLabel ? { key: "class", label: t("distribution.mp.basis.vehicleClass", "Vehicle class"), value: basis.vehicleTypeLabel } : null,
+    basis.lgtRate !== null ? { key: "lgt", label: t("distribution.mp.basis.lgtLabel", "LGT"),
+      value: t("distribution.mp.basis.lgt", "{{rate}} {{place}}", { rate: rate(basis.lgtRate), place: basis.lgu ? basis.lgu.name : t("distribution.mp.basis.standard", "(standard rate)") }) } : null,
+    { key: "programme", label: t("distribution.mp.basis.programme", "Programme"), value: basis.programmeCode },
+    basis.insurerName ? { key: "insurer", label: t("distribution.mp.basis.insurer", "Insurer"), value: basis.insurerName } : null,
+  ].filter(Boolean) : [];
 
   const footer = (
     <ColumnGroup>
       <Row>
-        <Column footer={t("distribution.mp.gross", "Total")} colSpan={3} />
-        <Column footer={result ? amount(result.grossPremium) : ""} footerClassName="bv-num" />
+        <Column footer={t("distribution.mp.gross", "Total")} />
+        <Column colSpan={2} footerClassName="dist-premium-preview__wide" />
+        <Column footer={result ? amount(result.grossPremium) : ""} footerClassName="bv-num dist-premium-preview__wide" />
         <Column footer={result ? amount(result.payer) : ""} footerClassName="bv-num" />
         <Column footer={result ? amount(result.buyer) : ""} footerClassName="bv-num" />
       </Row>
     </ColumnGroup>
   );
 
-  const header = programme ? `${t("distribution.mp.preview", "Premium preview")} · ${programme.code}` : "";
+  const header = programme ? <>{t("distribution.mp.preview", "Premium preview")} · <span className="white-space-nowrap">{programme.code}</span></> : "";
   return (
     <DetailDialog visible={!!programme} onHide={onHide} size="lg" header={header}
       footer={<Button type="button" label={t("detailView.close", "Close")} outlined onClick={onHide} />}>
@@ -172,14 +177,28 @@ const DealerPremiumPreview = ({ programme, onHide, toast }) => {
               ]} />
               <DataTable value={rows} dataKey="code" size="small" className="dist-premium-preview__table mt-3" footerColumnGroup={footer}
                 rowClassName={(l) => ({ "dist-premium-preview__subtotal": l.kind === "net" })}>
-                <Column header={t("distribution.mp.line", "Cover / charge")} body={lineName} />
-                <Column header={t("distribution.mp.lineBase", "On")} body={(l) => (l.base ? amount(l.base) : "")} className="bv-num" headerClassName="bv-num" />
-                <Column header={t("distribution.mp.lineRate", "Rate")} body={(l) => rate(l.rate)} className="bv-num" headerClassName="bv-num" />
-                <Column header={t("distribution.mp.lineAmount", "Amount")} body={(l) => amount(l.amount)} className="bv-num" headerClassName="bv-num" />
+                <Column header={t("distribution.mp.line", "Cover / charge")} body={(l) => (
+                  <>
+                    <span>{lineName(l)}</span>
+                    {l.rate !== null && l.rate !== undefined && l.base ? (
+                      <span className="dist-premium-preview__line-basis">{t("distribution.mp.rateOf", "{{rate}} of {{base}}", { rate: rate(l.rate), base: amount(l.base) })}</span>
+                    ) : null}
+                  </>
+                )} />
+                <Column header={t("distribution.mp.lineBase", "On")} body={(l) => (l.base ? amount(l.base) : "")} className="bv-num dist-premium-preview__wide" headerClassName="bv-num dist-premium-preview__wide" />
+                <Column header={t("distribution.mp.lineRate", "Rate")} body={(l) => rate(l.rate)} className="bv-num dist-premium-preview__wide" headerClassName="bv-num dist-premium-preview__wide" />
+                <Column header={t("distribution.mp.lineAmount", "Amount")} body={(l) => amount(l.amount)} className="bv-num dist-premium-preview__wide" headerClassName="bv-num dist-premium-preview__wide" />
                 <Column header={result.payerType ? payerLabel : t("distribution.mp.payerShare", "Dealer / bank")} body={(l) => amount(l.payer)} className="bv-num" headerClassName="bv-num" />
                 <Column header={t("distribution.mp.buyerShare", "Buyer")} body={(l) => amount(l.buyer)} className="bv-num" headerClassName="bv-num" />
               </DataTable>
-              <p className="dist-premium-preview__basis">{basisLine}</p>
+              <dl className="dist-premium-preview__basis" aria-label={t("distribution.mp.basis.title", "Priced on")}>
+                {basisItems.map((b) => (
+                  <div key={b.key} className="dist-premium-preview__basis-item">
+                    <dt>{b.label}</dt>
+                    <dd>{b.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           ) : null}
         </div>

@@ -12784,15 +12784,21 @@
       "ctplYears_other": "CTPL ({{count}} years)",
       "adjustment": "Rating adjustment",
       "basis": {
-        "sumInsured": "Sum insured {{amount}}",
+        "title": "Priced on",
+        "sumInsured": "Sum insured",
+        "rates": "Rates",
         "od": "Own damage / theft {{rate}}",
         "aon": "Acts of nature {{rate}}",
-        "lgt": "LGT {{rate}} {{place}}",
+        "vehicleClass": "Vehicle class",
+        "lgtLabel": "LGT",
+        "lgt": "{{rate}} {{place}}",
         "standard": "(standard rate)",
-        "programme": "Programme {{code}}"
+        "programme": "Programme",
+        "insurer": "Insurer"
       },
       "dealerBank": "Dealer / financing bank",
-      "uploadedBy": "Uploaded by"
+      "uploadedBy": "Uploaded by",
+      "rateOf": "{{rate}} of {{base}}"
     },
     "ch": {
       "confirmDelete": "Remove the channel {{name}}? A channel with business is made inactive instead.",

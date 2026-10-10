@@ -74,7 +74,12 @@ describe("Dealer Programmes", () => {
     expect(within(net).getAllByText(/29,000\.00|14,500\.00/)).toHaveLength(3);
     expect(within(dialog).getByText("Dealer pays")).toBeInTheDocument();
     expect(within(dialog).getAllByText(/18,991\.45/).length).toBeGreaterThanOrEqual(2);
-    expect(within(dialog).getByText(/Sum insured .*1,000,000\.00 · Own damage \/ theft 2\.00% · Acts of nature 0\.50% · Private cars · LGT 0\.75% \(standard rate\) · Programme TAL-CASH-2026/)).toBeInTheDocument();
+    for (const [label, value] of [["Sum insured", /^₱\s?1,000,000\.00$/], ["Rates", "Own damage / theft 2.00% · Acts of nature 0.50%"], ["Vehicle class", "Private cars"],
+      ["LGT", "0.75% (standard rate)"], ["Programme", "TAL-CASH-2026"], ["Insurer", "AXA"]]) {
+      const term = within(dialog).getAllByRole("term").find((d) => d.textContent === label);
+      expect(term).toBeDefined();
+      expect(within(dialog).getAllByRole("definition").some((d) => (typeof value === "string" ? d.textContent === value : value.test(d.textContent)))).toBe(true);
+    }
   });
 
   it("computes again on Enter and keeps the last result while computing", async () => {

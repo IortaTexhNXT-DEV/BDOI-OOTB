@@ -177,17 +177,67 @@
 }
 
 .dist-premium-preview__result {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   transition: opacity 0.15s ease-in-out;
 
   &.is-busy {
     opacity: 0.6;
   }
+
+  @media (max-width: 640px) {
+    .bv-kv--cols-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+    }
+
+    // who pays gets its own row: the terms are longer than half the pop-up
+    .bv-kv__item:last-child {
+      grid-column: 1 / -1;
+    }
+  }
 }
 
-.dist-premium-preview__table {
-  .p-datatable-tfoot > tr > td {
-    font-weight: 600;
+// compact rows so the whole breakdown fits the pop-up at a laptop height (above the shared dialog table padding)
+.p-dialog .dist-premium-preview {
+  .p-datatable.dist-premium-preview__table {
+    // the theme's compact table density
+    --bv-cell-pad-y: 6px;
+    --bv-row-height: 34px;
+
+    .p-datatable-tfoot > tr > td {
+      font-weight: 600;
+    }
+
+    .bv-num {
+      white-space: nowrap;
+    }
+
+    // on a phone the base and rate go under the line name and the table keeps who pays what (the total is above it)
+    @media (max-width: 640px) {
+      font-size: 13px;
+
+      .dist-premium-preview__wide {
+        display: none;
+      }
+
+      // the shared dialog table pads 14px a side with !important; a phone needs the room for the amounts
+      .p-datatable-thead > tr > th,
+      .p-datatable-tbody > tr > td,
+      .p-datatable-tfoot > tr > td {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+      }
+    }
+  }
+}
+
+.dist-premium-preview__line-basis {
+  display: none;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #4d5761);
+
+  @media (max-width: 640px) {
+    display: block;
   }
 }
 
@@ -197,9 +247,54 @@
 }
 
 .dist-premium-preview__basis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
   margin: 0.75rem 0 0;
   font-size: 0.8125rem;
-  color: #4d5761;
+  line-height: 1.4;
+
+  dt {
+    flex: none;
+    font-weight: 600;
+    color: var(--color-text-muted, #4d5761);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-heading, #111927);
+  }
+}
+
+.dist-premium-preview__basis-item {
+  display: flex;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+// on a phone the tables get the card's width and keep one line a cell (they scroll sideways, actions stay in view)
+@media (max-width: 640px) {
+  .pe-card.dist-programmes-card {
+    padding: 12px;
+
+    .p-tabview-panels {
+      padding: 12px 0 0;
+    }
+
+    // the tabs stay on one line (the ink bar sits under a wrapped second line otherwise) and scroll if they must
+    .p-tabview-nav {
+      flex-wrap: nowrap;
+
+      li .p-tabview-nav-link {
+        padding: 12px;
+        white-space: nowrap;
+      }
+    }
+
+    .p-datatable-tbody > tr > td {
+      white-space: nowrap;
+    }
+  }
 }
 
 .dist-rates {

@@ -124,7 +124,7 @@ const DealerProgrammes = () => {
         help={t("distribution.mp.subtitle", "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.")}>
         {write ? <Button label={t("distribution.mp.add", "Add programme")} icon="pi pi-plus" onClick={() => setForm({ ...EMPTY })} /> : null}
       </PageHeader>
-      <div className="pe-card">
+      <div className="pe-card dist-programmes-card">
         <TabView>
           <TabPanel header={t("distribution.mp.programmes", "Programmes")}>
             <DataTable value={programmes} dataKey="id" size="small" stripedRows emptyMessage={t("distribution.common.none", "Nothing to show")}>
