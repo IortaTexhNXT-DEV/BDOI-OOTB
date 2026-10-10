@@ -63,6 +63,19 @@ const SapGlExport = () => {
   };
   // a setting named in a warning ("(sap_gl.account_pattern)") is configuration detail, not something to act on here
   const warningText = (w) => String(w).replace(/\s*\([a-z_]+(\.[a-z_]+)+\)/g, "");
+  // a warning that lists many accounts names the first ones and how many more; the whole list is in the hover text
+  const warningShort = (w) => {
+    const text = warningText(w);
+    const [, head, list] = /^([^:]+):\s*(.+)$/.exec(text) || [];
+    const items = list ? list.split(/,\s*/) : [];
+    return items.length > 3 ? `${head}: ${t("sapGl.andMore", { list: items.slice(0, 3).join(", "), count: items.length - 3 })}` : text;
+  };
+  const notes = (r) => {
+    if (r.error) return r.error;
+    const warnings = r.warnings || [];
+    if (!warnings.length) return "-";
+    return <span title={warnings.map(warningText).join("\n")}>{warnings.map(warningShort).join("; ")}</span>;
+  };
   const download = (r, kind) => {
     const f = r.files.find((x) => x.kind === kind);
     service.downloadSapGlFile(r.id, kind, f?.fileName).catch((e) => showError(toast, e));
@@ -91,11 +104,11 @@ const SapGlExport = () => {
           <Column header={t("sapGl.debit")} body={(r) => money(r.totalDebit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.credit")} body={(r) => money(r.totalCredit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.trigger")} body={(r) => <div><div>{t(`sapGl.triggers.${r.trigger}`)}</div><div className="pe-muted">{r.createdBy || ""}</div></div>} />
-          <Column header={t("sapGl.notes")} body={(r) => (r.error || (r.warnings || []).map(warningText).join("; ") || "-")} />
-          <Column header={t("sapGl.files")} body={(r) => (r.files.length ? (
-            <div className="flex gap-1">
+          <Column header={t("sapGl.notes")} body={notes} style={{ maxWidth: "18rem" }} />
+          <Column header={t("sapGl.files")} style={{ minWidth: "16rem" }} body={(r) => (r.files.length ? (
+            <div className="flex flex-column align-items-start gap-1">
               {r.files.map((f) => (
-                <Button key={f.kind} icon="pi pi-download" label={f.fileName} text size="small" onClick={() => download(r, f.kind)} />
+                <Button key={f.kind} icon="pi pi-download" label={f.fileName} text size="small" className="white-space-nowrap" onClick={() => download(r, f.kind)} />
               ))}
             </div>
           ) : "-")} />

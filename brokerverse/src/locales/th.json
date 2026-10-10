@@ -7245,7 +7245,8 @@
       "regenerateTitle": "สร้างไฟล์ SAP GL ใหม่",
       "regenerateMessage": "ไฟล์ของวันนี้จะถูกเขียนใหม่เป็นอีกครั้งหนึ่ง และ SAP จะรับไฟล์ใหม่",
       "regenerateAction": "สร้างไฟล์ใหม่"
-    }
+    },
+    "andMore": "{{list}} และอีก {{count}} รายการ"
   },
   "directBillBasis": {
     "label": "ค่าคอมมิชชันของ",

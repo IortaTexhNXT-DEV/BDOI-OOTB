@@ -12925,7 +12925,8 @@
       "regenerateTitle": "Re-generate the SAP GL files",
       "regenerateMessage": "The files of this day are written again as a new run; SAP picks up the new files.",
       "regenerateAction": "Re-generate files"
-    }
+    },
+    "andMore": "{{list}} and {{count}} more"
   },
   "directBillBasis": {
     "label": "Commission of",
