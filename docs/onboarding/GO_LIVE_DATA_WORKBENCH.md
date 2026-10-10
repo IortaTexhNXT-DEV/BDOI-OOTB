@@ -1,7 +1,7 @@
-# Go-Live Data Workbench
+# Data Migration & Go-Live
 
-For the System Administrator and the migration lead. The workbench (**Master > Go-Live Data Load**) loads a broker's
-go-live data with two Excel workbooks instead of one upload per object:
+For the System Administrator and the migration lead. The workspace (**Master > System Configuration > Data Migration &
+Go-Live**) loads a broker's go-live data with two Excel workbooks instead of one upload per object:
 
 | Kit | Workbook | Content |
 |---|---|---|
@@ -11,6 +11,31 @@ go-live data with two Excel workbooks instead of one upload per object:
 The step-by-step set-up and the controls around the migration are in `GO_LIVE_DATA_SETUP.md` and the TISPH Data
 Migration and Cutover Plan (`docs/TISPH/pack/TISPH_Data_Migration_and_Cutover.docx`); the workbench replaces the
 one-off uploads they list for these objects (the single uploads stay available).
+
+## The workspace
+
+Eight tabs, each with its own address under `/master/configuration/go-live`, so a link (a notification, My Work) opens
+the tab or the record directly:
+
+| Tab | Address | What it holds |
+|---|---|---|
+| Overview | `/master/configuration/go-live` | The phases (Templates, Mock 1, Mock 2, Dress rehearsal, Cutover, Go-live, Hypercare), loads by status, rows loaded, the reconciliation, open defects of severity 1 and 2, the checklist progress and the Go / No-Go of the current run; the latest loads and what waits for the user (approvals, votes, checklist steps) |
+| Templates | `/templates` | Each kit in load order with its keys and dependencies, the policy templates per product, a download per kit and per object (blank or current data), the value maps (add, edit, remove, download, upload) and the document file naming convention with the name checker |
+| Loads | `/loads`, `/loads/:id` | The load history with filters (workbook, run, status, dates) and **Upload Workbook** (workbook, run, legacy system, file): the upload validates and opens the load. The load page shows the progress of its job while it validates, loads or undoes (refreshed every 3 seconds, also after the page is opened again), the place in the queue and a warning when the file is the file of another load; its actions follow its status (Validate Again, Download Errors, Submit for Approval, Withdraw Load, Approve / Reject Load, Reconcile Run) and the tabs Summary, Rows (old -> new), Duplicates (resolution with a reason), Approval (activity log) and Undo (dependents check, request, decision) |
+| Reconciliation | `/reconciliation`, `/reconciliation/:id` | Lines by object with the legacy figures (entered or uploaded), checks and sub-ledger tie-outs (their GL accounts and tolerance kept by an approver), the difference list (Explain, Accept), the sign-off slots and the report (PDF, Excel, the signed PDF) |
+| Mock Runs | `/runs`, `/runs/:id` | Runs with their timings, loads, results, defects, evidence and report; the personal data used (a production extract needs the DPO approval reference); the evidence pack download and the record of its fingerprint and archive reference |
+| Cutover | `/cutover` | The checklist of the production run (or of the run chosen) by phase: owner, planned and actual times, status, evidence and notes; Start, Mark Done (evidence or a note; the restore point on CO-3), Block, Skip, Edit Step |
+| Go-Live | `/decision` | The cutover date, the Go / No-Go of the production run (criteria, waivers, approvers, votes), the go-live lock and the scoped, time-boxed unlock with the time left before it relocks, the history of the requests, and the SAP opening file when BrokerVerse sends it |
+| Hypercare | `/hypercare` | After the lock: business issued since go-live, migrated open items collected and their age, renewals and endorsements and claims of migrated policies, edits to migrated records by day, the daily checks, imports refused while locked and the unlocks, open defects of the production run |
+
+What a user sees follows the permissions: a holder of `read:data-load` only (the TIS Audit role) opens every tab and
+download without one action button; the actions of `write:data-load` and `approve:data-load` appear to their holders.
+A decision that a user may not take is shown disabled with the reason (the maker of a load, of an undo request, of a
+lock request or of the SAP opening file request; a user who loaded the loads of a reconciliation; a user who signed
+another slot); the server refuses it in the same way. Every irreversible step asks for a confirmation that names it
+(*Load MIG-000012 now: 1,207 records*, *Remove 1,204 records of MIG-000012*). The menu entry is given to the System
+Administrator, TIS IT AppSupport / Admin, TIS Finance & General Accounting, TIS Operations Unit Head, TIS General
+Manager and TIS Audit.
 
 ## Workbook layout
 
@@ -29,7 +54,7 @@ comes from the user's permissions.
 - Row 2: a sample row (amber, italic). A row whose first cell starts with `SAMPLE` is never loaded.
 - Data from row 3. Cells are formatted as text so Excel keeps codes and dates as typed. Dates `YYYY-MM-DD`.
 
-Download from the screen (**Download Template**: *Blank template* or *Current data*) or
+Download from the Templates tab (**Download Blank**, or *Current Data* from its menu; per object the two buttons of its row) or
 `GET /api/data-load/kits/:kit/template[?prefill=true][&objects=policies-motor,open-items]`: the whole kit or only the
 objects named (with the Instructions, Lists and Control sheets). The current data is masked for a user without
 `view:pii`. The blank workbooks are also generated offline into `docs/package/05_Delivery/Upload_Templates` by
