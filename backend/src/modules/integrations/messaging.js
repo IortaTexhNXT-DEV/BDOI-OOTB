@@ -199,10 +199,11 @@ export async function smsPaymentReminders() {
 export async function claimStatusChanged(claim, status, statusLabel) {
   const statuses = await getSetting('messaging.claim_update_statuses', []);
   if (!Array.isArray(statuses) || !statuses.includes(status)) return null;
-  const c = await one('SELECT c.id, c.claim_number, COALESCE(c.client_id, p.client_id) AS client_id, p.policy_number FROM claims c JOIN policies p ON p.id = c.policy_id WHERE c.id = $1', [claim.id]);
+  const c = await one(`SELECT c.id, c.claim_number, COALESCE(c.client_id, p.client_id) AS client_id, p.policy_number, COALESCE(c.rejected_reason, c.cancelled_reason) AS reason
+    FROM claims c JOIN policies p ON p.id = c.policy_id WHERE c.id = $1`, [claim.id]);
   if (!c?.client_id) return null;
   return queueClientMessage(null, { event: 'claim_update', clientId: c.client_id, entity: 'claim', entityId: c.id, idempotencyKey: `sms:claim:${c.id}:${status}`,
-    vars: { claimNumber: c.claim_number, claimStatus: statusLabel || status, policyNumber: c.policy_number } });
+    vars: { claimNumber: c.claim_number, claimStatus: statusLabel || status, policyNumber: c.policy_number, reason: ['rejected', 'cancelled'].includes(status) ? c.reason || '' : '' } });
 }
 
 /** Variables for an ad hoc message about a policy or a claim of the client. */

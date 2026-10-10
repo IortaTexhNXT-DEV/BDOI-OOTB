@@ -12,6 +12,10 @@ import { newKey, resolveKey } from '../uploads/storage.js';
 
 export const unprocessable = (message, details) => new HttpError(422, message, details);
 
+/** Parties and methods of the claim communication log. */
+export const COMM_PARTIES = { insurer: 'Insurer', client: 'Client', adjuster: 'Adjuster', 'repair-shop': 'Repair shop', other: 'Other' };
+export const COMM_METHODS = ['Email', 'Phone', 'Letter', 'Meeting', 'SMS'];
+
 /** Parse a JSON string field sent through multipart/form-data (objects pass through). */
 export function parseJsonField(v, fallback = {}) {
   if (v === undefined || v === null || v === '') return fallback;

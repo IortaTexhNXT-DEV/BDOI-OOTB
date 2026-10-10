@@ -123,6 +123,8 @@ export async function eisOutbox() {
 export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
 export { pdcDepositDue } from '../modules/pdc/jobs.js';
 export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
+/** End-of-day claim service levels: FNOL not submitted to the insurer, authorisation code overdue, follow-ups past their date. */
+export const claimServiceLevels = async () => (await import('../modules/claims/insurer.js')).serviceLevels();
 // Distribution and reporting: prospects not worked in time go to the reassignment queue (lead assignment), scheduled
 // marketing campaigns are sent, the BI extract is written to the storage folder (all disabled until switched on)
 export { leadAssignmentSla } from '../modules/leads/assignment.js';

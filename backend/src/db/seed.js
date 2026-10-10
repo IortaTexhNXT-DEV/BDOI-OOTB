@@ -64,7 +64,9 @@ const ROLE_PERMS = {
     'pii:view',
     // remittance approvals of another user's remittances, settlements, adjustments and transfers, within the Authority
     // Matrix limit (migration 0400); the Accounting Manager has it through Accounting
-    'remittance:approve'],
+    'remittance:approve',
+    // claim settlement funds received from insurers (migration 0502)
+    'claim-funds:write'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and
@@ -72,7 +74,9 @@ const ROLE_PERMS = {
   // and posting rule / account determination changes: propose (write) and approve another user's change (migration 0174).
   'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve',
     // supplier invoices approved by a second user (migration 0298)
-    'payables:approve'],
+    'payables:approve',
+    // reversal of claim settlement cash recorded in error (migration 0502)
+    'claim-cash:reverse'],
 };
 // Distribution, programmes and products (permissions of migrations 0300 to 0308): lead assignment rules and queue,
 // distribution channels, brand-new vehicle programmes, fleet schedules, marine open covers, marketing campaigns.
@@ -117,15 +121,16 @@ Object.assign(ROLE_PERMS, {
   'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
   'tis-ccd-pdu': [...TIS_CCD],
   'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read'],
-  'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read'],
+  // claim settlement funds from insurers with Receipting and Reconciliation; reversals with Reconciliation (migration 0502)
+  'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read', 'claim-funds:write'],
   // insurer statement reconciliation is prepared under write:remittance (see the role guide)
-  'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read'],
+  'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read', 'claim-funds:write', 'claim-cash:reverse'],
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
   'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
     'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
     'period-end', 'period-end:approve', 'bank-reconciliation', 'bank-reconciliation:approve', 'posting-rules:write', 'posting-rules:approve', 'credit-control:approve',
     // the proposed remittance approvers with the General Manager (migration 0400), until TISPH names them
-    'remittance:approve'],
+    'remittance:approve', 'claim-cash:reverse'],
   'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
     'integrations', 'schedules', 'audit:read'],

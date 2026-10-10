@@ -53,17 +53,11 @@ UPDATE app_settings SET value = value || '{"not-renewed": "Not for renewal"}'::j
  WHERE key = 'renewals.status_labels' AND NOT (value ? 'not-renewed');
 
 -- ---------------------------------------------------------------- TISPH approval limits
--- Renewal terms and claim settlements are approved within an Authority Matrix limit (migrations 0500 and 0503). Proposed
+-- Renewal terms and claim settlements are approved within an Authority Matrix limit (migrations 0500 and 0502). Proposed
 -- limits until TISPH names its signing authority: renewal terms (gross renewal premium) Sales Officer PHP 250,000.00,
 -- Sales Unit Head and Operations Unit Head PHP 1,000,000.00, General Manager without limit; claim settlements Operations
--- Unit Head PHP 500,000.00, General Manager without limit. An approver needs a limit (require_authority_limit). Only
--- where the TISPH roles exist; a setting is changed only while nobody has changed it, a limit added only where the role
--- has none for the type.
-UPDATE app_settings s
-   SET value = 'true'::jsonb, updated_at = now()
- WHERE s.key IN ('renewals.require_authority_limit', 'claims.require_authority_limit') AND s.updated_by IS NULL AND s.value = 'false'::jsonb
-   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-ops-unit-head');
-
+-- Unit Head PHP 500,000.00, General Manager without limit. Only where the TISPH roles exist; a limit is added only where
+-- the role has none for the type.
 INSERT INTO authority_limits(transaction_type, role_code, max_amount, status, remarks, decided_at, decision_note)
 SELECT v.type, v.role, v.amount, 'active', 'Proposed approver until TISPH names its signing authority', now(), 'TISPH default'
 FROM (VALUES ('renewal_terms', 'tis-sales-officer', 250000::numeric), ('renewal_terms', 'tis-sales-unit-head', 1000000),
@@ -72,3 +66,41 @@ FROM (VALUES ('renewal_terms', 'tis-sales-officer', 250000::numeric), ('renewal_
 WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)
   AND EXISTS (SELECT 1 FROM authority_transaction_types t WHERE t.code = v.type)
   AND NOT EXISTS (SELECT 1 FROM authority_limits l WHERE l.transaction_type = v.type AND l.role_code = v.role);
+
+-- ---------------------------------------------------------------- claim letters
+-- The acknowledgement letter lists the documents the claimant still has to send (TIS-BRD-CLAIM-03), and a death claim
+-- is acknowledged with the empathy letter (TIS-BRD-PJRN-08). Only while the templates are the reference ones.
+UPDATE app_settings SET value = jsonb_set(value, '{Claims Acknowledgement Letter}', (value->'Claims Acknowledgement Letter') || '["Documents to send us: {{documentChecklist}}"]'::jsonb), updated_at = now()
+ WHERE key = 'claims.documents' AND updated_by IS NULL AND jsonb_typeof(value->'Claims Acknowledgement Letter') = 'array'
+   AND position('documentChecklist' IN (value->'Claims Acknowledgement Letter')::text) = 0;
+UPDATE app_settings SET value = value || jsonb_build_object('Claims Empathy Letter', jsonb_build_array(
+    'Please accept our deepest sympathy on the passing of {{insuredName}}.',
+    'We have received the notice of claim {{claimNumber}} under policy {{policyNumber}} and will see the claim through with {{insurerName}} on your behalf.',
+    'Date of death: {{lossDate}}',
+    'Documents to send us: {{documentChecklist}}',
+    'Our claims team will contact you within {{slaDays}} days.')), updated_at = now()
+ WHERE key = 'claims.documents' AND jsonb_typeof(value) = 'object' AND NOT value ? 'Claims Empathy Letter';
+
+-- Status labels and open statuses of the claim statuses added by migrations 0502 and 0503.
+UPDATE app_settings SET value = value || '{"partially-settled": "Partially Settled", "cancelled": "Cancelled"}'::jsonb, updated_at = now()
+ WHERE key = 'claims.status_labels' AND NOT (value ? 'partially-settled');
+UPDATE app_settings SET value = value || '["partially-settled"]'::jsonb, updated_at = now()
+ WHERE key = 'claims.open_statuses' AND jsonb_typeof(value) = 'array' AND NOT (value ? 'partially-settled');
+
+-- ---------------------------------------------------------------- TISPH claims
+-- New claims go to the Operations Associates and Officers (fewest open claims first); the follow-up days of an unsettled
+-- claim follow Pre-BSM M15 (partial loss 30, motor total loss 60, personal accident 30, fire, marine and engineering 90,
+-- liability 60, Credit Life 60 from the death verification, CTPL the next day); Credit Life claims are death benefit
+-- claims; a claim on a policy with premium outstanding is registered with the outstanding premium shown (CLAIM-02); a
+-- claimant is paid from the funds received from the insurer. Only where the TISPH roles exist and while nobody has
+-- changed the setting.
+UPDATE app_settings s
+   SET value = v.value, updated_at = now()
+  FROM (VALUES ('claims.assignment_roles', '["claims"]'::jsonb, '["tis-ops-associate", "tis-ops-officer"]'::jsonb),
+               ('claims.followup_days', '{"default": 20}'::jsonb,
+                '{"default": 20, "MOTOR:partial": 30, "MOTOR:total": 60, "CTPL": 1, "ACCIDENT": 30, "FIRE": 90, "MARINE": 90, "ENGINEERING": 90, "CASUALTY": 60, "LIFE": 60}'::jsonb),
+               ('claims.death_benefit_products', '[]'::jsonb, '["CL-COMP", "CL-VOL"]'::jsonb),
+               ('claims.block_unpaid_premium', 'true'::jsonb, 'false'::jsonb),
+               ('claims.pay_claimant_from_funds', 'false'::jsonb, 'true'::jsonb)) AS v(key, reference, value)
+ WHERE s.key = v.key AND s.updated_by IS NULL AND s.value = v.reference
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-ops-associate');

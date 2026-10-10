@@ -321,7 +321,7 @@ export async function syncAutoTasks({ db = pool } = {}) {
         'claim:' || cl.id || ':' || cl.due_date, 'claim', cl.id, ${at('cl.due_date')}, 'system'
       FROM claims cl LEFT JOIN policies p ON p.id = cl.policy_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
       JOIN users hu ON hu.id = cl.handler_user_id AND hu.status = 'active'
-      WHERE cl.due_date IS NOT NULL AND cl.due_date >= $1::date AND cl.status IN ('registered', 'in-review', 'approved')
+      WHERE cl.due_date IS NOT NULL AND cl.due_date >= $1::date AND cl.status IN ('registered', 'in-review', 'approved', 'partially-settled')
       ON CONFLICT (source_key) DO NOTHING`);
   }
   // follow-ups whose record is closed, or replaced by a later follow-up date
@@ -331,7 +331,7 @@ export async function syncAutoTasks({ db = pool } = {}) {
          OR t.source_key <> (SELECT 'collection_action:' || max(a2.id) FROM collection_actions a2 WHERE a2.collection_id = t.entity_id AND a2.commitment_date IS NOT NULL)))
       OR (t.source = 'renewal' AND (EXISTS (SELECT 1 FROM renewals r WHERE r.id = t.entity_id AND r.status NOT IN ('pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'))
          OR (t.source_key LIKE 'renewal_activity:%' AND t.source_key <> (SELECT 'renewal_activity:' || max(r2.id) FROM renewal_activities r2 WHERE r2.renewal_id = t.entity_id AND r2.follow_up_date IS NOT NULL))))
-      OR (t.source = 'claim' AND EXISTS (SELECT 1 FROM claims cl WHERE cl.id = t.entity_id AND (cl.status NOT IN ('registered', 'in-review', 'approved') OR t.source_key <> 'claim:' || cl.id || ':' || COALESCE(cl.due_date::text, ''))))
+      OR (t.source = 'claim' AND EXISTS (SELECT 1 FROM claims cl WHERE cl.id = t.entity_id AND (cl.status NOT IN ('registered', 'in-review', 'approved', 'partially-settled') OR t.source_key <> 'claim:' || cl.id || ':' || COALESCE(cl.due_date::text, ''))))
     )`);
   return { created, closed: closed.rowCount };
 }

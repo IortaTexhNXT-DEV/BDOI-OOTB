@@ -75,12 +75,13 @@ export async function releaseFormPdf(db, claimRef) {
   const company = await companyName();
   const claimant = pos.claimant || c.client_name || c.insured_name || '';
   const amount = pos.settlementAmount;
-  const pays = pos.movements.filter((m) => m.kind === 'paid-to-claimant');
+  const pays = pos.movements.filter((m) => m.kind === 'paid-to-claimant' && !m.reversed);
+  const extent = c.status === 'partially-settled' ? 'in partial settlement' : 'in full and final settlement';
   return { fileName: `release-${pos.claimNumber}.pdf`, pdf: await renderPdf({
     title: 'Release and Quitclaim', number: pos.claimNumber, dateLine: `Date ${formatDate(new Date(), fmt)}`,
     meta: [['Claim no.', pos.claimNumber], ['Policy no.', pos.policyNumber], ['Insurer', c.insurer_name || '']].filter(([, v]) => v),
     sections: [
-      { text: `KNOW ALL MEN BY THESE PRESENTS: I/We, ${claimant}, acknowledge receipt from ${c.insurer_name || 'the insurer'}, through ${company}, of the sum of ${fmt.currency} ${formatAmount(amount, fmt.decimals)} (${amountInWords(amount, fmt.currency)}) in full and final settlement of claim ${pos.claimNumber} under policy ${pos.policyNumber} for the loss of ${formatDate(c.loss_date, fmt)}.` },
+      { text: `KNOW ALL MEN BY THESE PRESENTS: I/We, ${claimant}, acknowledge receipt from ${c.insurer_name || 'the insurer'}, through ${company}, of the sum of ${fmt.currency} ${formatAmount(amount, fmt.decimals)} (${amountInWords(amount, fmt.currency)}) ${extent} of claim ${pos.claimNumber} under policy ${pos.policyNumber} for the loss of ${formatDate(c.loss_date, fmt)}.` },
       { text: `In consideration of this payment I/we release and forever discharge the insurer and ${company} from all claims, demands and actions arising from the said loss, and subrogate the insurer to all my/our rights of recovery against any third party to the extent of the amount paid.` },
       ...(pays.length ? [{ heading: 'Payments', table: { columns: [{ key: 'voucher', label: 'Voucher' }, { key: 'date', label: 'Date', type: 'date' }, { key: 'mode', label: 'Mode' },
         { key: 'reference', label: 'Reference' }, { key: 'amount', label: 'Amount', type: 'amount' }],

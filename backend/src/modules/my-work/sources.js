@@ -225,11 +225,11 @@ function claims(ctx) {
     id: 'cl.id', ref: 'cl.claim_number', title: "COALESCE(p.policy_number, '') || COALESCE(' - ' || cl.loss_type, '')", client_name: CLIENT('c'),
     due_date: 'cl.due_date', status: 'cl.status', priority: prio('cl.priority'),
     next_action: `CASE cl.status WHEN 'registered' THEN 'Review the claim and notify the insurer' WHEN 'in-review' THEN 'Follow up the insurer and adjuster'
-      WHEN 'approved' THEN 'Record the settlement' ELSE 'Awaiting settlement approval' END`,
+      WHEN 'approved' THEN 'Record the settlement' WHEN 'partially-settled' THEN 'Complete the settlement' ELSE 'Awaiting settlement approval' END`,
     owner_id: 'cl.handler_user_id', queue, link: "'/agent/claimdetail/' || cl.id", amount: 'COALESCE(cl.approved_amount, cl.estimate_amount)', created_at: 'cl.created_at',
     reassign: "CASE WHEN cl.status IN ('registered', 'in-review') THEN 'claim' END",
   })} FROM claims cl LEFT JOIN policies p ON p.id = cl.policy_id LEFT JOIN clients c ON c.id = COALESCE(cl.client_id, p.client_id)
-  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval') AND ${rec(ctx, 'claim', 'cl')}`;
+  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval', 'partially-settled') AND ${rec(ctx, 'claim', 'cl')}`;
 }
 
 /** Approval queues (maker-checker) the user can decide. */

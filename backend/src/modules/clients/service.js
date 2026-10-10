@@ -58,7 +58,7 @@ export async function getClient(id) {
 }
 
 /** Claim statuses of a claim still being worked (not settled, closed or rejected). */
-const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved'];
+const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved', 'partially-settled'];
 
 /**
  * Figures of the client view (Operations > Clients > client): policies in force and their premium, open claims, open
