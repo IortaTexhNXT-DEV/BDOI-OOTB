@@ -10244,7 +10244,8 @@
         "message": "The incoming message below is processed again.",
         "action": "Process again"
       }
-    }
+    },
+    "layoutChannels": "Channels"
   },
   "onboarding": {
     "title": "Onboard client",
@@ -10526,7 +10527,7 @@
     },
     "masters": {
       "add": "Add",
-      "new": "New {{name}}",
+      "new": "New record: {{name}}",
       "edit": "Edit {{name}}",
       "saved": "{{name}} saved",
       "shortPeriod": {
@@ -10583,7 +10584,9 @@
         "title": "Reason Codes",
         "section": "Insurance Management",
         "intro": "Coded reasons of a declined or dropped quotation, a claim repudiation, a renewal lapse, a refund, an adjustment or business that did not materialise. Cancellation and write-off reasons have their own masters."
-      }
+      },
+      "anyValue": "All",
+      "list": "Master"
     },
     "instalments": {
       "issueInvoices": "Issue instalment invoices",
@@ -10981,9 +10984,9 @@
         "post": "Post depreciation"
       },
       "master": {
-        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateTitle": "Deactivate {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
-        "activateTitle": "Activate {{name}} record",
+        "activateTitle": "Activate {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
     }
@@ -11947,8 +11950,15 @@
       "department": "Department",
       "account-category": "Account category",
       "currency": "Currency",
-      "transaction-code": "Transaction code"
-    }
+      "transaction-code": "Transaction code",
+      "remittance-setup": "Remittance setup"
+    },
+    "username": "User name",
+    "roles": "Roles",
+    "currencies": "Currencies",
+    "rate": "Rate",
+    "effectiveFrom": "Effective from",
+    "effectiveTo": "Effective to"
   },
   "schedules": {
     "title": "Schedules",

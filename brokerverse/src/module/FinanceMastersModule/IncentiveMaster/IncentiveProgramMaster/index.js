@@ -314,6 +314,7 @@ const IncentiveProgramMaster = () => {
           tooltip={k("edit")} aria-label={k("edit")}
         />
         <ToggleButton
+          id={`incentive-program-${rowData.id}`}
           isChecked={rowData.status === "Active"}
           onChange={() => handleStatusChange(rowData)}
         />

@@ -5789,7 +5789,10 @@
         "title": "รหัสเหตุผล",
         "section": "การจัดการประกันภัย",
         "intro": "รหัสเหตุผลของใบเสนอราคาที่ถูกปฏิเสธหรือยกเลิก การปฏิเสธสินไหม การหมดอายุของการต่ออายุ การคืนเงิน การปรับปรุง และธุรกิจที่ไม่เกิดขึ้น เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
-      }
+      },
+      "new": "รายการใหม่: {{name}}",
+      "anyValue": "ทั้งหมด",
+      "list": "ข้อมูลหลัก"
     },
     "confirmations": {
       "activity": "Activity",
@@ -5856,9 +5859,9 @@
         "post": "Post depreciation"
       },
       "master": {
-        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateTitle": "ปิดใช้งาน {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
-        "activateTitle": "Activate {{name}} record",
+        "activateTitle": "เปิดใช้งาน {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
     }
@@ -5988,8 +5991,15 @@
       "department": "แผนก",
       "account-category": "หมวดบัญชี",
       "currency": "สกุลเงิน",
-      "transaction-code": "รหัสรายการ"
-    }
+      "transaction-code": "รหัสรายการ",
+      "remittance-setup": "การตั้งค่าการนำส่ง"
+    },
+    "username": "ชื่อผู้ใช้",
+    "roles": "บทบาท",
+    "currencies": "สกุลเงิน",
+    "rate": "อัตรา",
+    "effectiveFrom": "มีผลตั้งแต่",
+    "effectiveTo": "มีผลถึง"
   },
   "security": {
     "user": "ผู้ใช้",
@@ -6128,7 +6138,8 @@
         "message": "ข้อความขาเข้าด้านล่างจะถูกประมวลผลอีกครั้ง",
         "action": "ประมวลผลอีกครั้ง"
       }
-    }
+    },
+    "layoutChannels": "ช่องทาง"
   },
   "schedules": {
     "title": "กำหนดการ",
