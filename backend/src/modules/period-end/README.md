@@ -18,6 +18,7 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 | `checks.js` | The automatic checklist items (one function per checklist code of type auto). |
 | `tieout.js` | Checklist item `subledger_tieout`: premium receivable, commission receivable and due to insurers sub-ledgers against their GL control accounts, with the manual journals on an account that does not tie out. |
 | `yearend.js` | Year-end close (`YEC-` numbers): closing entries in period 13, opening balances, locking the year, reversal. |
+| `statements.js` | Financial statements screen: the income statement, balance sheet and trial balance of the report catalogue laid out in sections, statement groups, lines and totals (all-zero lines left out), the date range of each column, the card figures, the period choice (fiscal years and periods) and the Excel sheet / PDF of a statement. |
 | `tax.js` | Tax codes master and BIR Form 2307 (issued and received). |
 | `jobs.js` | Scheduled jobs: month-end reminder, recurring journals, accrual reversal, period auto soft-close. All four are disabled by default. |
 
@@ -34,6 +35,15 @@ deferral, FX revaluation, checklist), sign the manual checklist items, submit. W
 `accounting.period_close_requires_approval` is on, a second user with `approve:period-end` approves and the period
 becomes closed; otherwise the submit closes it. Executing again first reverses the run's own previous journals, so a
 rerun gives the same ledger as one run.
+
+Financial statements (`GET /period-end/statements/periods`, `/statements/:type`, `/statements/:type/export`): the
+screen picks a fiscal year, a period and a view (month, quarter to the period, year to date, custom range; the balance
+sheet is as of the period end or a date). The numbers come from the catalogue reports `income-statement`,
+`balance-sheet` and `trial-balance-ocm` (`reports/periodEndQueries.js`), so Reports > Financial Reports shows the same
+figures. Amounts keep their natural sign: an expense credited in the period (a clawback, the reversal of an earlier
+month's journal) is negative and printed in parentheses. The balance sheet starts from the opening balances of the
+fiscal year (year-end carry-forward or go-live load) like the trial balance. An account line opens its general ledger
+(`/statements/gl-detail?Account=`). Export (Excel, PDF) and print are audited (`financial_statement`, `export`).
 
 Year-end close: needs all twelve periods closed and period 13 open. It posts the closing entries in period 13 (income
 and expense to Current Year P/L, then to Retained Earnings), writes the balance-sheet balances of the year end to
@@ -58,3 +68,7 @@ are on Master > Schedules.
 - Recurring journals did not post: the `recurring-journals` job is disabled by default. Check Master > Schedules and
   `job_runs` for the job, then `recurring_journal_runs` for the template.
 - Year-end reversal refused: the first period of the next year is already closed. Reopen it first.
+- A negative expense line on the income statement is a credit in the range (commission clawback, a reversal dated in
+  this period of an earlier journal). Open the line: the general ledger shows the journal.
+- Balance sheet out of balance: compare with `GET /period-end/statements/trial-balance` for the same date (closing
+  debits = credits); a fiscal year whose opening balances do not balance (`/opening-balances`) is the usual cause.

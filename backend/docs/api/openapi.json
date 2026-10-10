@@ -92070,7 +92070,7 @@
     "/period-end/statements/{type}": {
       "get": {
         "operationId": "getPeriodEndStatementsType",
-        "summary": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue",
+        "summary": "Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)",
         "tags": [
           "Period End"
         ],
@@ -92091,7 +92091,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "2026-01-01"
+            "example": "2026-10-01"
           },
           {
             "name": "ToDate",
@@ -92100,7 +92100,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "2026-09-30"
+            "example": "2026-10-31"
           }
         ],
         "responses": {
@@ -92144,6 +92144,134 @@
                               "type": "integer"
                             }
                           }
+                        },
+                        "statement": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            },
+                            "measures": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "from": {
+                                    "type": "string"
+                                  },
+                                  "to": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "sections": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "key": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "groups": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "label": {
+                                          "type": "string"
+                                        },
+                                        "lines": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "object",
+                                            "properties": {
+                                              "accountCode": {
+                                                "type": "string"
+                                              },
+                                              "accountName": {
+                                                "type": "string"
+                                              },
+                                              "values": {
+                                                "type": "object",
+                                                "properties": {
+                                                  "currentPeriod": {
+                                                    "type": "number"
+                                                  }
+                                                }
+                                              },
+                                              "drill": {
+                                                "type": "boolean"
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "total": {
+                                          "type": "object",
+                                          "properties": {
+                                            "currentPeriod": {
+                                              "type": "number"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "result": {
+                              "type": "object",
+                              "properties": {
+                                "key": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "values": {
+                                  "type": "object",
+                                  "properties": {
+                                    "currentPeriod": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "cards": {
+                              "type": "object",
+                              "properties": {
+                                "totalIncome": {
+                                  "type": "number"
+                                },
+                                "totalExpense": {
+                                  "type": "number"
+                                },
+                                "netIncome": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -92162,6 +92290,56 @@
                     ],
                     "summary": {
                       "netIncome": 120000
+                    },
+                    "statement": {
+                      "type": "income-statement",
+                      "title": "Income Statement",
+                      "from": "2026-10-01",
+                      "to": "2026-10-31",
+                      "measures": [
+                        {
+                          "key": "currentPeriod",
+                          "label": "This period",
+                          "from": "2026-10-01",
+                          "to": "2026-10-31"
+                        }
+                      ],
+                      "sections": [
+                        {
+                          "key": "income",
+                          "label": "Income",
+                          "groups": [
+                            {
+                              "label": "Revenue",
+                              "lines": [
+                                {
+                                  "accountCode": "3201001",
+                                  "accountName": "Brokerage Commission Income",
+                                  "values": {
+                                    "currentPeriod": 183803.75
+                                  },
+                                  "drill": true
+                                }
+                              ],
+                              "total": {
+                                "currentPeriod": 183803.75
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "result": {
+                        "key": "netIncome",
+                        "label": "Net income (loss)",
+                        "values": {
+                          "currentPeriod": 120000
+                        }
+                      },
+                      "cards": {
+                        "totalIncome": 183803.75,
+                        "totalExpense": 63803.75,
+                        "netIncome": 120000
+                      }
                     }
                   }
                 }
@@ -92170,6 +92348,210 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Financial Statements",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers",
+          "read:reports"
+        ]
+      }
+    },
+    "/period-end/statements/{type}/export": {
+      "get": {
+        "operationId": "getPeriodEndStatementsTypeExport",
+        "summary": "Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Financial Statements > Export, Print\n\nAccess: read:period-end, read:journal-vouchers, read:reports",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "ToDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pdf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(application/pdf | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Financial Statements > Export, Print",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers",
+          "read:reports"
+        ]
+      }
+    },
+    "/period-end/statements/periods": {
+      "get": {
+        "operationId": "getPeriodEndStatementsPeriods",
+        "summary": "Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "today": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "fiscalYear": {
+                              "type": "string"
+                            },
+                            "period": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "fiscalYears": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "startDate": {
+                                "type": "string"
+                              },
+                              "endDate": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "periods": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "period": {
+                                      "type": "string"
+                                    },
+                                    "periodNo": {
+                                      "type": "integer"
+                                    },
+                                    "startDate": {
+                                      "type": "string"
+                                    },
+                                    "endDate": {
+                                      "type": "string"
+                                    },
+                                    "status": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "today": "2026-10-09",
+                    "current": {
+                      "fiscalYear": "FY2027",
+                      "period": "2026-10"
+                    },
+                    "fiscalYears": [
+                      {
+                        "code": "FY2027",
+                        "startDate": "2026-04-01",
+                        "endDate": "2027-03-31",
+                        "status": "open",
+                        "periods": [
+                          {
+                            "period": "2026-10",
+                            "periodNo": 7,
+                            "startDate": "2026-10-01",
+                            "endDate": "2026-10-31",
+                            "status": "open"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

@@ -8181,6 +8181,119 @@
     "daysOverdue": "Days overdue",
     "amountDue": "Amount due"
   },
+  "financialStatements": {
+    "title": "Financial Statements",
+    "help": "Statements from posted journals for a fiscal period or a date range. Select an account to see its postings.",
+    "statement": {
+      "income-statement": "Income Statement",
+      "balance-sheet": "Balance Sheet",
+      "trial-balance": "Trial Balance"
+    },
+    "fiscalYear": "Fiscal year",
+    "period": "Period",
+    "view": "View",
+    "views": {
+      "month": "Month",
+      "quarter": "Quarter",
+      "ytd": "Year to date",
+      "custom": "Custom range",
+      "periodEnd": "Period end",
+      "customDate": "Custom date"
+    },
+    "from": "From",
+    "to": "To",
+    "asOf": "As of",
+    "label": {
+      "quarter": "Quarter {{quarter}}, {{fiscalYear}}",
+      "ytd": "Year to date, {{fiscalYear}}",
+      "asOf": "As of {{date}}"
+    },
+    "amountsIn": "Amounts in {{currency}}",
+    "refresh": "Refresh",
+    "export": "Export",
+    "excel": "Excel workbook",
+    "pdf": "PDF document",
+    "print": "Print",
+    "account": "Account",
+    "measure": {
+      "currentPeriod": "This period",
+      "yearToDate": "Year to date",
+      "priorPeriod": "Same period last year",
+      "priorYearToDate": "Last year to date",
+      "balance": "As of",
+      "priorYearEnd": "Previous year end"
+    },
+    "tb": {
+      "opening": "Opening",
+      "movement": "Movement",
+      "closing": "Closing",
+      "debit": "Debit",
+      "credit": "Credit"
+    },
+    "section": {
+      "income": "Income",
+      "expense": "Expenses",
+      "asset": "Assets",
+      "liability": "Liabilities",
+      "equity": "Equity"
+    },
+    "total": "Total {{label}}",
+    "result": {
+      "netIncome": "Net income (loss)",
+      "liabilitiesAndEquity": "Total liabilities and equity",
+      "total": "Total"
+    },
+    "earnings": {
+      "CYE": "Current year earnings",
+      "PYE": "Earnings of prior years not yet closed"
+    },
+    "noLines": "No postings in this period",
+    "cards": {
+      "totalIncome": "Total income",
+      "totalExpense": "Total expenses",
+      "netIncome": "Net income",
+      "netLoss": "Net loss",
+      "netIncomeYtd": "Net income, year to date",
+      "netLossYtd": "Net loss, year to date",
+      "totalAssets": "Total assets",
+      "totalLiabilities": "Total liabilities",
+      "totalEquity": "Total equity",
+      "withEarnings": "With current year earnings",
+      "balanceCheck": "Balance check",
+      "totalDebit": "Total debits",
+      "totalCredit": "Total credits",
+      "difference": "Difference",
+      "closingAt": "Closing balances at {{date}}"
+    },
+    "status": {
+      "balanced": "Balanced",
+      "outOfBalance": "Out of balance"
+    },
+    "errors": {
+      "required": "Enter the date",
+      "range": "The to date is before the from date"
+    },
+    "ledger": {
+      "title": "General ledger",
+      "account": "Account",
+      "period": "Period",
+      "opening": "Opening balance",
+      "debits": "Debits",
+      "credits": "Credits",
+      "closing": "Closing balance",
+      "date": "Date",
+      "journal": "Journal",
+      "description": "Description",
+      "source": "Source",
+      "debit": "Debit",
+      "credit": "Credit",
+      "balance": "Balance",
+      "close": "Close",
+      "dr": "Dr",
+      "cr": "Cr",
+      "none": "No postings in this period"
+    }
+  },
   "packagedProducts": {
     "active": "Active",
     "inactive": "Inactive",
