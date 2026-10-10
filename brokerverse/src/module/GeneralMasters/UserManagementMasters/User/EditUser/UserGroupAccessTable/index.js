@@ -13,7 +13,7 @@ import KeyValueGrid from "../../../../../../components/KeyValueGrid";
 import InputField from "../../../../../../components/InputField";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
-import SvgEyeIcon from "../../../../../../assets/icons/SvgEyeIcon";
+import RowActions from "../../../../../../components/RowActions";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAdditionalRoleViewMiddleWare,
@@ -121,16 +121,7 @@ const UserGroupAccess = () => {
     justifyContent: "center",
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} viewLabel={t("common.view")} />;
 
   const handleView = (rowData) => {
     dispatch(getAdditionalRoleViewMiddleWare(rowData));

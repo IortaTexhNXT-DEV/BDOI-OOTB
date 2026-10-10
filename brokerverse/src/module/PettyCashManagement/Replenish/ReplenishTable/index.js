@@ -5,9 +5,8 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
+import RowActions from "../../../../components/RowActions";
 import "./index.scss";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
@@ -86,16 +85,7 @@ const PettyCashReplenishTable = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} />;
 
   const handleView = (rowData) => {
     dispatch(getViewReplenishMiddleware(rowData));

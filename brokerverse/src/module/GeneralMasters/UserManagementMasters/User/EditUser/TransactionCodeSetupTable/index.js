@@ -14,7 +14,7 @@ import { useFormik } from "formik";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
 import { useDispatch, useSelector } from "react-redux";
-import SvgEyeIcon from "../../../../../../assets/icons/SvgEyeIcon";
+import RowActions from "../../../../../../components/RowActions";
 import { getViewMainBranchUser, postViewMainBranchUser } from "../../store/userMiddleware";
 
 const TransactionCodeSetupTable = ({ action }) => {
@@ -150,16 +150,7 @@ const TransactionCodeSetupTable = ({ action }) => {
     justifyContent: "center",
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div >
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} viewLabel={t("common.view")} />;
 
   return (
     <div className="transactioncode__master__table_view">
