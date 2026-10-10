@@ -71,6 +71,8 @@ beforeAll(async () => {
   await withProducts();
   sales = await persona('p.sales', ['sales']);
   uw = await persona('p.uw', ['processing']);
+  // the chain itself, for risks of any size: the checker's policy issue limit is covered by test/placement-moves.test.js
+  await q("UPDATE authority_limits SET max_amount = NULL WHERE transaction_type = 'policy_issue' AND role_code = 'processing'");
   ic = Object.fromEntries((await q('SELECT code, id FROM insurance_companies')).map((r) => [r.code, r.id]));
 });
 afterAll(async () => { await pool.end(); });

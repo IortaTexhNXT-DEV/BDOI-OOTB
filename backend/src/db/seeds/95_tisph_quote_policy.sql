@@ -153,3 +153,19 @@ UPDATE app_settings SET value = 'false'::jsonb, updated_at = now()
 UPDATE app_settings SET value = value || $j${"CL-COMP": {"brokerSlip": "skip", "quotationSlip": "skip", "placementSlip": "required", "directPolicy": "skip"},
   "CL-VOL": {"brokerSlip": "skip", "quotationSlip": "required", "placementSlip": "required", "directPolicy": "skip"}}$j$::jsonb, updated_at = now()
  WHERE key = 'placement.journey' AND updated_by IS NULL AND NOT (value ? 'CL-COMP');
+
+-- ---------------------------------------------------------------- approval limits of the TISPH approvers (ISSUE-04, SEC-01)
+-- Proposed limits until TISPH confirms its signing authority (Master > User Management > Authority Matrix): the check of
+-- an e-policy (policy issue, sum insured), the return premium of an endorsement or cancellation and the underwriting
+-- referral (sum insured), in PHP; the quotation discount in percent; NULL = no limit. A role / type pair that already
+-- has a limit in any state is left alone.
+INSERT INTO authority_limits(transaction_type, role_code, max_amount, status, remarks, decided_at, decision_note)
+SELECT v.type, v.role, v.amount, 'active', 'Proposed TISPH limit, to be confirmed', now(), 'TISPH proposal'
+FROM (VALUES
+ ('policy_issue', 'tis-sales-officer', 3000000::numeric), ('policy_issue', 'tis-sales-unit-head', 10000000), ('policy_issue', 'tis-ops-unit-head', 10000000), ('policy_issue', 'tis-general-manager', NULL),
+ ('return_premium', 'tis-sales-officer', 50000), ('return_premium', 'tis-sales-unit-head', 250000), ('return_premium', 'tis-ops-unit-head', 250000), ('return_premium', 'tis-general-manager', NULL),
+ ('underwriting_referral', 'tis-sales-officer', 3000000), ('underwriting_referral', 'tis-sales-unit-head', 10000000), ('underwriting_referral', 'tis-ops-unit-head', 10000000), ('underwriting_referral', 'tis-general-manager', NULL),
+ ('quotation_discount', 'tis-sales-officer', 10), ('quotation_discount', 'tis-sales-unit-head', 15), ('quotation_discount', 'tis-ops-unit-head', 15), ('quotation_discount', 'tis-general-manager', 25)
+) AS v(type, role, amount)
+WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)
+  AND NOT EXISTS (SELECT 1 FROM authority_limits l WHERE l.transaction_type = v.type AND l.role_code = v.role);

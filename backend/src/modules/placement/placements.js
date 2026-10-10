@@ -560,7 +560,7 @@ export async function recordEpolicy(id, body, user) {
 
 /**
  * Decision on the check against the slip (maker-checker: never the user who recorded the e-policy, when
- * placement.check_maker_checker is on). confirm: the e-policy matches -> Checked. accept: differences accepted with a
+ * placement.check_maker_checker is on; confirm and accept within the checker's policy_issue authority limit). confirm: the e-policy matches -> Checked. accept: differences accepted with a
  * reason by an approver (write:policies) -> Checked. return: the e-policy goes back to the insurer with the differences
  * (e-mail to the lead insurer) and the placement waits for a corrected e-policy (Acknowledged).
  */
@@ -576,6 +576,11 @@ export async function checkPlacement(id, { decision, reason = null }, user) {
   }
   if (decision === 'accept' && !hasPermission(user, 'write:policies')) throw forbidden('Accepting an e-policy that differs from the slip needs an approver with policy issuance rights (write:policies)');
   if (decision !== 'confirm' && !String(reason || '').trim()) throw badRequest('A reason is required', [{ path: 'reason', message: 'Give the reason' }]);
+  // the check clears the policy for issuance: within the checker's Policy issue limit of the Authority Matrix (sum insured)
+  if (decision !== 'return') {
+    const { assertAuthority } = await import('../access-control/service.js');
+    await withTransaction((db) => assertAuthority(db, user, 'policy_issue', num(p.sum_insured)));
+  }
   const status = decision === 'return' ? 'acknowledged' : 'checked';
   const recorded = { confirm: 'confirmed', accept: 'accepted', return: 'returned' }[decision];
   await query(`UPDATE placements SET status = $2, check_status = $3, check_result = $4, check_decision = $5, check_reason = $6, checked_at = now(), checked_by = $7,

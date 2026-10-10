@@ -217,6 +217,10 @@ The check is made by {{roles:approve:policies}}, a user other than the one who u
 
 After **Confirm check** or **Accept differences** the status is **Checked against slip**.
 
+**Confirm check** and **Accept differences** are within your approval limit for policy issue (Master > User
+Management > Authority Matrix), compared with the sum insured of the slip. Above your limit the check is refused: a
+user with a higher limit checks it. **Return to insurer** has no limit.
+
 ![Check against slip: every item of the e-policy matches the placement slip](images/process/placement-check-dialog.png)
 
 ## Policy, billing and endorsements {#process-policy}

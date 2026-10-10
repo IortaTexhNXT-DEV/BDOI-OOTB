@@ -40,14 +40,28 @@ describe('placement moves carry a remark (ISSUE-04)', () => {
   });
 });
 
+describe('the check against the slip is within the checker\'s policy issue limit (ISSUE-04, SEC-01)', () => {
+  it('a Sales Officer (proposed limit PHP 3,000,000) cannot clear a PHP 5,000,000 risk; the General Manager can', async () => {
+    const limits = await q("SELECT role_code, max_amount FROM authority_limits WHERE transaction_type = 'policy_issue' AND role_code LIKE 'tis-%' ORDER BY role_code");
+    expect(limits).toEqual(expect.arrayContaining([{ role_code: 'tis-sales-officer', max_amount: 3000000 }, { role_code: 'tis-general-manager', max_amount: null }]));
+    await q("UPDATE placements SET sum_insured = 5000000 WHERE id = 'plc_sample_18'");
+    const r = await officer('post', '/placements/plc_sample_18/check').send({ decision: 'accept', reason: 'Insurer rounding accepted' });
+    expect(r.status).toBe(403);
+    expect(r.body.message).toContain('approval authority');
+    const gm = (await persona('m.gm', ['tis-general-manager'])).api;
+    const ok = await gm('post', '/placements/plc_sample_18/check').send({ decision: 'accept', reason: 'Insurer rounding accepted' });
+    expect(ok.status).toBe(200);
+  });
+});
+
 describe('cancelling a placement slip the insurer holds (FR-SIS-024)', () => {
   it('needs a reason, and an approver other than the raiser', async () => {
     expect((await officer('post', '/placements/plc_sample_17/cancel').send({})).status).toBe(400);
     const maker = await associate('post', '/placements/plc_sample_17/cancel').send({ reason: 'Client withdrew' });
     expect(maker.status).toBe(403);
     expect(maker.body.message).toContain('an approver');
-    await q('UPDATE placements SET created_by = $2 WHERE id = $1', ['plc_sample_18', associateId]);
-    expect((await ctx.api('post', '/placements/plc_sample_18/cancel').send({ reason: 'Wrong vehicle' })).status).toBe(200);
+    await q('UPDATE placements SET created_by = $2 WHERE id = $1', ['plc_sample_19', associateId]);
+    expect((await ctx.api('post', '/placements/plc_sample_19/cancel').send({ reason: 'Wrong vehicle' })).status).toBe(200);
   });
 
   it('an approver cancels it and each insurer holding it is told', async () => {
