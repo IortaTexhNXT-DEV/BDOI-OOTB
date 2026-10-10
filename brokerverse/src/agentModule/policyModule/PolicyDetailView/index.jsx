@@ -26,7 +26,6 @@ import { BASE_URL } from "../../../utility/constant";
 import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import "./index.scss";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
 import { printPdf } from "../../../components/Print";
@@ -207,6 +206,12 @@ const SidebarSection = ({ title, icon, actions, children, className }) => (
     <div className="section-content">{children}</div>
   </div>
 );
+
+// a field with no value (blank, N/A or a zero amount) is left out of a detail grid rather than shown as a long list
+// of N/A; an item marked `always` (a total) is kept
+const isBlankValue = (v, empty) =>
+  v === null || v === undefined || v === "" || v === "N/A" || v === empty || /^[^\d-]*0(\.0+)?$/.test(String(v).replace(/,/g, "").trim());
+const recordedItems = (items, empty) => (items || []).filter((item) => item.always || !isBlankValue(item.value, empty));
 
 const InfoGrid = ({ items, layout = "auto" }) => {
   if (!items || items.length === 0) {
@@ -996,7 +1001,10 @@ const PolicyDetailView = () => {
     quotation?.firePremiumDetails ||
     quotation?.firePremium ||
     {};
-  const fireSumInsured = firePremiumDetails?.sumInsured || {};
+  const recorded = (items) => recordedItems(items, t("policyDetail.nA"));
+  const fireSumInsured = Object.keys(firePremiumDetails?.sumInsured || {}).length
+    ? firePremiumDetails.sumInsured
+    : fireRiskDetails?.sumInsured || {};
   const fireCoverBreakup = firePremiumDetails?.coverBreakup || [];
   const endorsements = Array.isArray(rawPolicyData?.endorsements)
     ? rawPolicyData.endorsements.filter(Boolean)
@@ -1126,9 +1134,6 @@ const PolicyDetailView = () => {
             ? firePremiumDetails.totalPremium
             : quotation.grossPremium)
       ),
-      helper: premiumBreakdown?._calculated
-        ? t("policyDetail.calculatedFromGross")
-        : undefined,
       tone: "success",
     },
     {
@@ -1442,9 +1447,13 @@ const PolicyDetailView = () => {
       key: "totalSumInsured",
       label: t("policyDetail.totalSumInsured"),
       value: formatCurrency(
-        rawPolicyData?.totalCoverage || quotation.totalSumInsured
+        rawPolicyData?.totalCoverage ||
+          quotation.totalSumInsured ||
+          rawPolicyData?.totalSumInsured ||
+          rawPolicyData?.sumInsured
       ),
       emphasis: true,
+      always: true,
     },
   ];
 
@@ -1472,7 +1481,6 @@ const PolicyDetailView = () => {
       amount: formatCurrency(
         premiumBreakdown?.netPremium || quotation.netPremium
       ),
-      annotate: Boolean(premiumBreakdown?._calculated),
     },
     {
       key: "dst",
@@ -1480,7 +1488,6 @@ const PolicyDetailView = () => {
       amount: formatCurrency(
         premiumBreakdown?.documentaryStampTax || quotation.documentaryStampTax
       ),
-      annotate: Boolean(premiumBreakdown?._calculated),
     },
     {
       key: "vat",
@@ -1488,7 +1495,6 @@ const PolicyDetailView = () => {
       amount: formatCurrency(
         premiumBreakdown?.valueAddedTax || quotation.valueAddedTax
       ),
-      annotate: Boolean(premiumBreakdown?._calculated),
     },
     {
       key: "lgt",
@@ -1496,7 +1502,6 @@ const PolicyDetailView = () => {
       amount: formatCurrency(
         premiumBreakdown?.localGovernmentTax || quotation.localGovernmentTax
       ),
-      annotate: Boolean(premiumBreakdown?._calculated),
     },
     {
       key: "others",
@@ -1780,8 +1785,11 @@ const PolicyDetailView = () => {
 
               {isMotorLOB && (
                 <SectionCard title={t("policyDetail.vehicleDetails")}>
-                  <InfoGrid items={vehiclePrimaryItems} />
-                  <InfoGrid items={vehicleIdentifierItems} />
+                  {recorded([...vehiclePrimaryItems, ...vehicleIdentifierItems]).length ? (
+                    <InfoGrid items={recorded([...vehiclePrimaryItems, ...vehicleIdentifierItems])} />
+                  ) : (
+                    <div className="info-empty">{t("policyDetail.noVehicleDetails")}</div>
+                  )}
                   {vehicleImages.length > 0 && (
                     <div className="media-block">
                       <div className="media-block-header">
@@ -1867,39 +1875,15 @@ const PolicyDetailView = () => {
                   <SectionCard title={t("policyDetail.sumInsuredAndCoverage")}>
                     <InfoGrid
                       items={[
-                        {
-                          key: "building",
-                          label: t("policyDetail.building"),
-                          value: (fireSumInsured.Building ?? 0).toLocaleString(numberLocale()),
-                        },
-                        {
-                          key: "plantAndMachinery",
-                          label: t("policyDetail.plantAndMachinery"),
-                          value: (
-                            fireSumInsured.PlantAndMachinery ?? 0
-                          ).toLocaleString(numberLocale()),
-                        },
-                        {
-                          key: "otherContents",
-                          label: t("policyDetail.otherContents"),
-                          value: (fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale()),
-                        },
-                        {
-                          key: "grossProfit",
-                          label: t("policyDetail.grossProfit"),
-                          value: (fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale()),
-                        },
-                        {
-                          key: "wages",
-                          label: t("policyDetail.wages"),
-                          value: (fireSumInsured.Wages ?? 0).toLocaleString(numberLocale()),
-                        },
-                        {
-                          key: "lossOfRent",
-                          label: t("policyDetail.lossOfRent"),
-                          value: (fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale()),
-                        },
-                      ]}
+                        ["building", "Building"],
+                        ["plantAndMachinery", "PlantAndMachinery"],
+                        ["otherContents", "OtherContents"],
+                        ["grossProfit", "GrossProfit"],
+                        ["wages", "Wages"],
+                        ["lossOfRent", "LossOfRent"],
+                      ]
+                        .filter(([, field]) => Number(fireSumInsured[field]) > 0)
+                        .map(([key, field]) => ({ key, label: t(`policyDetail.${key}`), value: formatCurrency(fireSumInsured[field]) }))}
                     />
                     {fireCoverBreakup.length > 0 && (
                       <div className="accessory-block">
@@ -1923,7 +1907,7 @@ const PolicyDetailView = () => {
 
               {isMotorLOB && (
                 <SectionCard title={t("policyDetail.coverageDetails")}>
-                  <InfoGrid items={coverageItems} />
+                  <InfoGrid items={recorded(coverageItems)} />
                 </SectionCard>
               )}
 
@@ -1944,12 +1928,7 @@ const PolicyDetailView = () => {
                         }`}
                         key={item.key}
                       >
-                        <span className="breakdown-label">
-                          {item.label}
-                          {item.annotate ? (
-                            <sup className="breakdown-annotation">*</sup>
-                          ) : null}
-                        </span>
+                        <span className="breakdown-label">{item.label}</span>
                         <span
                           className={`breakdown-amount${
                             item.isTotal ? " is-total" : ""

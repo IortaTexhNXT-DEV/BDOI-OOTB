@@ -3321,7 +3321,8 @@
     "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง",
     "print": "Print",
     "close": "Close",
-    "download": "Download"
+    "download": "Download",
+    "noVehicleDetails": "ยังไม่มีการบันทึกรายละเอียดรถยนต์"
   },
   "uploadPolicy": {
     "title": "ลีด",
@@ -4617,7 +4618,9 @@
     "scheduleSection": "หมวด / รายการ / ภัย",
     "scheduleSumInsured": "ทุนประกัน",
     "schedulePremium": "เบี้ยประกัน",
-    "fst": "ภาษีบริการดับเพลิง"
+    "fst": "ภาษีบริการดับเพลิง",
+    "viewPolicy": "ดูกรมธรรม์",
+    "completePolicy": "ดำเนินการกรมธรรม์ให้เสร็จ"
   },
   "policyList": {
     "title": "กรมธรรม์",

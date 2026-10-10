@@ -3862,7 +3862,8 @@
     "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
     "print": "Print",
     "close": "Close",
-    "download": "Download"
+    "download": "Download",
+    "noVehicleDetails": "No vehicle details recorded"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -5479,7 +5480,7 @@
     "share": "Share",
     "proceedToPolicy": "Proceed to Policy",
     "checkingPolicy": "Checking policy...",
-    "waitingForPolicy": "Waiting for Policy",
+    "waitingForPolicy": "Waiting for policy",
     "sendForCustomerApproval": "Send for Customer Approval",
     "waitingForCustomerApproval": "Waiting for customer approval",
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
@@ -5490,7 +5491,9 @@
     "scheduleSection": "Section / item / perils",
     "scheduleSumInsured": "Sum insured",
     "schedulePremium": "Premium",
-    "fst": "Fire service tax"
+    "fst": "Fire service tax",
+    "viewPolicy": "View policy",
+    "completePolicy": "Complete policy"
   },
   "policyList": {
     "title": "Policies",

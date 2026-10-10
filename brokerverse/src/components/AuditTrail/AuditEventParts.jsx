@@ -25,13 +25,21 @@ export const UserText = ({ user }) => (
 UserText.propTypes = { user: PropTypes.shape({ displayName: PropTypes.string, roles: PropTypes.arrayOf(PropTypes.string) }) };
 UserText.defaultProps = { user: null };
 
-/** "Screen: Operations > Claims > Request approval" with its icon; the API path is kept for the tooltip. */
+/**
+ * Where a change came from, when that is not the application's own screens (the usual case, not labelled): a
+ * scheduled job, the API, an upload or the portal. The menu path of a screen repeats the action and is not shown.
+ */
+export const sourceLabel = (source) => {
+  if (!source || source.channel === "application") return null;
+  if (source.channel === "screen") return source.name ? null : source.label || null;
+  return source.label || null;
+};
+
 export const SourceText = ({ source }) => {
-  if (!source) return null;
-  const screen = source.channel === "screen" && source.name;
-  const text = screen ? source.name : source.label;
+  const text = sourceLabel(source);
+  if (!text) return null;
   return (
-    <span className="bv-audit-source" title={source.name ? `${source.label}: ${source.name}` : source.label}>
+    <span className="bv-audit-source">
       <i className={SOURCE_ICON[source.channel] || "pi pi-desktop"} aria-hidden="true" />
       {text}
     </span>
@@ -44,7 +52,7 @@ SourceText.defaultProps = { source: null };
 export const EventMeta = ({ event }) => (
   <div className="bv-audit-event__meta">
     <UserText user={event.user} />
-    <span className="bv-audit-sep" aria-hidden="true">·</span>
+    {sourceLabel(event.source) ? <span className="bv-audit-sep" aria-hidden="true">·</span> : null}
     <SourceText source={event.source} />
   </div>
 );

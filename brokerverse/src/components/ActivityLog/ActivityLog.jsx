@@ -74,10 +74,12 @@ const Value = ({ value, masked }) => {
 Value.propTypes = { value: PropTypes.any, masked: PropTypes.bool };
 Value.defaultProps = { value: null, masked: false };
 
-// an action taken on the application's own screens is the usual case and is not labelled
+// an action taken on the application's own screens is the usual case and is not labelled; the menu path of the
+// screen repeats the action already named in the title, so only another channel (job, API, upload, portal) is shown
 const sourceText = (source) => {
   if (!source || source.channel === "application") return null;
-  return source.channel === "screen" && source.name ? source.name : source.label || source.name || null;
+  if (source.channel === "screen") return source.name ? null : source.label || null;
+  return source.label || null;
 };
 
 const ActivityEntry = ({ entry, expanded }) => {

@@ -34,7 +34,7 @@ const QuotationTable = () => {
     const productType = rawData?.productType || rawData?.ProductType || rowData?.PolicyType;
     const navState = { quotationData: rawData, quotationId, fromListing: true, action: "edit" };
     if (productType && isFireLob(productType)) {
-      navigate("/agent/quotedetailview", { state: navState });
+      navigate(`/agent/quotedetailview/${quotationId}`, { state: navState });
       return;
     }
     dispatch(loadQuotationForEdit(rawData));
@@ -42,7 +42,7 @@ const QuotationTable = () => {
   };
 
   const handleViewDetail = (rowData) => {
-    navigate("/agent/quotedetailview", { state: { quotationData: rowData.rawData, quotationId: rowData.id, fromListing: true } });
+    navigate(`/agent/quotedetailview/${rowData.id}`, { state: { quotationData: rowData.rawData, quotationId: rowData.id, fromListing: true } });
   };
 
   const actions = (rowData) => {

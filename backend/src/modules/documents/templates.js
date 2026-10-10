@@ -434,16 +434,30 @@ export async function endorsementDoc(e, row = {}) {
   const skip = new Set(['summary', 'completionDetails', 'documentKey', 'documentUrl', 'endorsementTypeIds', 'id', 'endorsementId', 'policyId', 'clientId', 'receivableId', 'remarks']);
   const scalar = (v) => v !== null && v !== undefined && typeof v !== 'object' && String(v).trim() !== '';
   const changes = Object.entries(row.changes || {}).filter(([k]) => !skip.has(k));
+  // stored values are printed as words: a code (FULL, short-period) as a phrase, a date as a date, an amount as money and
+  // a yes/no as Yes or No; a "changed" flag only marks that the group was edited and is not a fact of the endorsement
+  const shown = (k, v) => scalar(v) && !(typeof v === 'boolean' && /^(changed|is_?changed|has_?changes?)$/i.test(k));
+  const words = (k, v) => {
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (typeof v === 'number' && /(premium|amount|tax|refund|charge|fee|vat|dst|lgt)/i.test(k)) return f.ccy(v);
+    const text = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2}(T|$)/.test(text)) return f.date(text);
+    if (/^[A-Z][A-Z_-]{3,}$/.test(text) || /^[a-z]+([_-][a-z]+)+$/.test(text)) {
+      const phrase = text.replace(/[_-]+/g, ' ').toLowerCase();
+      return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    }
+    return v;
+  };
   const groups = changes.filter(([, v]) => v && typeof v === 'object' && !Array.isArray(v))
-    .map(([k, v]) => ({ heading: humanize(k), rows: kv(Object.entries(v).filter(([, x]) => scalar(x)).map(([a, x]) => [humanize(a), x])).slice(0, 40) }))
+    .map(([k, v]) => ({ heading: humanize(k), rows: kv(Object.entries(v).filter(([a, x]) => shown(a, x)).map(([a, x]) => [humanize(a), words(a, x)])).slice(0, 40) }))
     .filter((g) => g.rows.length);
-  const loose = kv(changes.filter(([, v]) => scalar(v)).map(([k, v]) => [humanize(k), v])).slice(0, 30);
+  const loose = kv(changes.filter(([k, v]) => shown(k, v)).map(([k, v]) => [humanize(k), words(k, v)])).slice(0, 30);
   const sig = await signatures(h, 'endorsement', { status: row.status || e.status, date: e.completedAt || e.effectiveDate || e.createdAt, issuedBy: row.created_by },
     { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
   return { ...h, watermark: sig.watermark,
     meta: kv([['Policy no.', e.policyNumber], ['Insured', e.insuredName || e.clientName], ['Customer code', e.clientCode],
       ['Endorsement type', humanize(String(e.endorsementType || '').replace(/,/g, ', '))], ['Effective date', f.date(e.effectiveDate)], ['Policy expiry', f.date(e.policyExpiry)],
-      ['Status', e.status], ['Premium change', num(e.premiumDelta) ? f.ccy(e.premiumDelta) : 'None'], ['Cancellation', e.isCancelPolicy ? humanize(e.cancellationType || 'yes') : '']]),
+      ['Status', e.status], ['Premium change', num(e.premiumDelta) ? f.ccy(e.premiumDelta) : 'None'], ['Cancellation', e.isCancelPolicy ? words('cancellationType', e.cancellationType || 'Yes') : '']]),
     sections: [...(loose.length ? [{ heading: 'Changes', rows: loose }] : []), ...groups,
       { heading: 'Declaration', text: 'All other terms, conditions and warranties of the policy remain unchanged. This endorsement forms part of the policy.' },
       ...(present(e.remarks) ? [{ heading: 'Remarks', text: e.remarks }] : []), sig.section] };

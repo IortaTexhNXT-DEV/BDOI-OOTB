@@ -50,7 +50,7 @@ describe("ActivityLog", () => {
     expect(within(items[0]).getByText("Finance Manager")).toBeInTheDocument();
     expect(within(items[1]).getByText("Submitted")).toBeInTheDocument();
     expect(within(items[1]).getByText("10/10/2026 09:03")).toBeInTheDocument();
-    expect(within(items[1]).getByText("Accounts > Remittance > Tracking")).toBeInTheDocument();
+    expect(within(items[1]).queryByText("Accounts > Remittance > Tracking")).toBeNull();
     expect(screen.queryByText(/^submit/)).toBeNull();
   });
 

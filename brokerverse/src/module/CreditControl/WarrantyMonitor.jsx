@@ -15,7 +15,7 @@ import ApprovalActions from "../../components/ApprovalActions";
 import DetailDialog from "../../components/DetailDialog";
 import DetailHeader from "../../components/DetailHeader";
 import DetailSection from "../../components/DetailSection";
-import KeyValueGrid from "../../components/KeyValueGrid";
+import { formatValue, NUMERIC_TYPES } from "../../components/KeyValueGrid/formatValue";
 import { ActivityLog, fromWarrantyActions, humanize } from "../../components/ActivityLog";
 import { CcTag, PageHeader, date, isoOf, money, showError, showSuccess } from "./common";
 import "./warrantyMonitor.scss";
@@ -161,13 +161,16 @@ const WarrantyMonitor = () => {
         </div>
         <DataTable value={data?.rows || []} dataKey="policyId" loading={loading} size="small" stripedRows paginator rows={20} emptyMessage={t("creditControl.none")}>
           <Column field="policyNumber" header={t("creditControl.policyNumber")} />
-          <Column field="clientName" header={t("creditControl.client")} />
-          <Column field="insurerName" header={t("creditControl.insurer")} />
-          <Column header={t("creditControl.inception")} body={(r) => date(r.inceptionDate)} />
-          <Column header={t("creditControl.deadline")} body={(r) => <span>{date(r.deadline)}{r.extendedTo ? ` (${t("creditControl.extended")})` : ""}</span>} />
+          {/* the insurer sits under the client and the inception under the deadline, so the list fits beside its
+              pinned actions and the status is never covered */}
+          <Column header={t("creditControl.client")} body={(r) => <span>{r.clientName}<span className="bv-cell-sub">{r.insurerName}</span></span>} />
+          <Column header={t("creditControl.deadline")} body={(r) => (
+            <span className="nowrap">{date(r.deadline)}{r.extendedTo ? ` (${t("creditControl.extended")})` : ""}
+              <span className="bv-cell-sub">{t("creditControl.inception")} {date(r.inceptionDate)}</span></span>
+          )} />
           <Column header={t("creditControl.daysPast")} body={(r) => (r.daysPastDeadline ? r.daysPastDeadline : `-${r.daysToDeadline}`)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("creditControl.premiumDue")} body={(r) => money(r.premiumDue)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("creditControl.statusLabel")} style={{ minWidth: "12rem" }} bodyClassName="cc-status-col" body={(r) => (
+          <Column header={t("creditControl.statusLabel")} style={{ minWidth: "13rem" }} bodyClassName="cc-status-col" body={(r) => (
             <div className="cc-status-cell">
               <span className="flex align-items-center gap-1 flex-wrap"><CcTag status={r.status} />{r.pendingExtension && <CcTag status="pending" />}</span>
               {r.onInstalmentPlan && <span className="bv-cell-sub nowrap">{t("creditControl.onPlan")}</span>}
@@ -187,23 +190,33 @@ const WarrantyMonitor = () => {
         </DataTable>
       </div>
 
-      {/* centred like the reminder and cancellation confirms of the same row */}
-      <Dialog className="pe-dialog bv-centered" header={extension ? `${t("creditControl.requestExtension")} · ${extension.row.policyNumber}` : ""} visible={!!extension} style={{ width: "min(520px, 96vw)" }} onHide={() => setExtension(null)}
-        footer={<div><Button label={t("creditControl.cancel")} outlined onClick={() => setExtension(null)} /><Button label={t("creditControl.requestExtension")} icon="pi pi-calendar-plus" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
+      {/* laid out as the reminder and cancellation confirms of the same row: the same policy facts in the label/value
+          table, then the two fields the request needs */}
+      <Dialog className="bv-centered bv-confirm bv-confirm--neutral" visible={!!extension} style={{ width: "34rem" }} breakpoints={{ "640px": "calc(100vw - 32px)" }}
+        onHide={() => setExtension(null)} draggable={false} resizable={false}
+        header={<span className="bv-confirm__title"><i className="bv-confirm__icon pi pi-calendar-plus" aria-hidden="true" /><span>{t("creditControl.requestExtension")}</span></span>}
+        footer={<><Button label={t("creditControl.cancel")} text className="bv-confirm__cancel" onClick={() => setExtension(null)} />
+          <Button label={t("creditControl.requestExtension")} className="bv-confirm__accept" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></>}>
         {extension && (
-          <div className="grid">
-            <div className="col-12">
-              <KeyValueGrid columns={1} items={[
-                { label: t("creditControl.client"), value: extension.row.clientName },
-                { label: t("creditControl.currentDeadline"), value: extension.row.deadline, type: "date" },
-                { label: t("creditControl.premiumDue"), value: extension.row.premiumDue, type: "amount" },
-                { label: t("creditControl.daysPast"), value: extension.row.daysPastDeadline, type: "number" },
-              ]} />
+          <div className="bv-confirm__body">
+            <table className="bv-confirm__facts">
+              <tbody>
+                {policyFacts(extension.row).filter((f) => !f.hidden).map((f) => (
+                  <tr key={f.label} className={f.emphasis ? "bv-confirm__fact--total" : undefined}>
+                    <th scope="row">{f.label}</th>
+                    <td className={NUMERIC_TYPES.has(f.type) ? "bv-confirm__num" : undefined}>{formatValue(f.value, f)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="bv-confirm__field">
+              <label htmlFor="cc-ext-deadline">{t("creditControl.requestedDeadline")}<span className="bv-confirm__required" aria-hidden="true"> *</span></label>
+              <Calendar inputId="cc-ext-deadline" value={extension.requestedDeadline} minDate={new Date(`${extension.row.deadline}T00:00:00`)} onChange={(e) => setExtension({ ...extension, requestedDeadline: e.value })} showIcon />
             </div>
-            <div className="col-12"><label htmlFor="cc-ext-deadline">{t("creditControl.requestedDeadline")} *</label>
-              <Calendar inputId="cc-ext-deadline" value={extension.requestedDeadline} minDate={new Date(`${extension.row.deadline}T00:00:00`)} onChange={(e) => setExtension({ ...extension, requestedDeadline: e.value })} showIcon className="w-full" /></div>
-            <div className="col-12"><label htmlFor="cc-ext-reason">{t("creditControl.reason")} *</label>
-              <InputTextarea id="cc-ext-reason" value={extension.reason} rows={3} onChange={(e) => setExtension({ ...extension, reason: e.target.value })} className="w-full" /></div>
+            <div className="bv-confirm__field">
+              <label htmlFor="cc-ext-reason">{t("creditControl.reason")}<span className="bv-confirm__required" aria-hidden="true"> *</span></label>
+              <InputTextarea id="cc-ext-reason" value={extension.reason} rows={3} autoResize onChange={(e) => setExtension({ ...extension, reason: e.target.value })} />
+            </div>
           </div>
         )}
       </Dialog>

@@ -41,8 +41,17 @@
     display: flex;
     align-items: flex-start;
 
-    h2 {
+    .placement-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
       margin: 0 0 0.2rem;
+      .placement-status { font-size: 0.85rem; padding: 0.35rem 0.75rem; }
+    }
+
+    h2 {
+      margin: 0;
       font-size: 1.45rem;
       font-weight: 600;
       color: $color-heading;
@@ -263,7 +272,7 @@
 
   .journey-step {
     flex: 1 1 0;
-    min-width: 10.5rem;
+    min-width: 7.5rem;
     display: flex;
     align-items: flex-start;
     gap: 0;
@@ -303,6 +312,7 @@
   .done .journey-marker { background: $color-success; border-color: $color-success; color: $color-surface; }
   .current .journey-marker { background: $color-surface; border-color: $brand-blue; color: $brand-blue; }
   .skipped .journey-marker { border-style: dashed; }
+  .stopped .journey-marker { background: $color-danger; border-color: $color-danger; color: $color-surface; }
 
   .journey-body {
     display: flex;
@@ -313,9 +323,13 @@
     padding: 0 0.5rem 0 0.6rem;
   }
 
-  // one line per label and reference, so the steps keep one height; the full text is in the title
+  // the label wraps onto a second line so every step stays readable and all of them fit the card;
+  // the reference keeps one line with the full text in its title
   .journey-body { min-width: 0; }
-  .journey-label,
+  .journey-label {
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
   .journey-ref {
     white-space: nowrap;
     overflow: hidden;

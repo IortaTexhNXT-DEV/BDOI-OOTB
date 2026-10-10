@@ -626,7 +626,7 @@ const OrderSummary = ({ action, flow }) => {
           const quotationIdToUse =
             result.payload?.quotationId || existingQuotationId;
 
-          navigate("/agent/quotedetailview", {
+          navigate(quotationIdToUse ? `/agent/quotedetailview/${quotationIdToUse}` : "/agent/quotedetailview", {
             state: {
               quotationData: result.payload,
               quotationId: quotationIdToUse,

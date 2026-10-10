@@ -34,8 +34,22 @@
     display: flex;
     padding: 0 1.5rem;
   }
+  // label/value pairs sit in columns of a readable width instead of stretching across the card
   .sub_title {
     margin: 16px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+    column-gap: 2rem;
+    > :not(.quote_details) {
+      grid-column: 1 / -1;
+    }
+    > .quote_details {
+      border-bottom: 1px solid var(--surface-border);
+    }
+    > .quote_details:has(.gross_text) {
+      grid-column: 1 / -1;
+      border-bottom: none;
+    }
   }
   .policy_text {
     color: #111927;

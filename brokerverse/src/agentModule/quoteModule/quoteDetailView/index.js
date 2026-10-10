@@ -149,7 +149,18 @@ const QuoteDetailView = ({ action }) => {
       sectionCode: key, sectionLabel: t(`endorsementSummary.${key.charAt(0).toLowerCase()}${key.slice(1)}`, { defaultValue: key.replace(/([a-z])([A-Z])/g, "$1 $2") }),
       sectionSumInsured: Number(si), sectionPremium: quotationData?.firePremiumDetails?.rate ? (Number(si) * Number(quotationData.firePremiumDetails.rate)) / 100 : null, items: [],
     }));
-  const fireSumInsured = firePremiumDetails?.sumInsured || {};
+  // the sums insured are kept with the risk details on most quotations; only the items insured are listed
+  const fireSumInsured = Object.keys(firePremiumDetails?.sumInsured || {}).length
+    ? firePremiumDetails.sumInsured
+    : quotationData?.fireRiskDetails?.sumInsured || {};
+  const fireSumInsuredRows = [
+    ["Building", "quoteDetailView.building"],
+    ["PlantAndMachinery", "quoteDetailView.plantAndMachinery"],
+    ["OtherContents", "quoteDetailView.otherContents"],
+    ["GrossProfit", "quoteDetailView.grossProfit"],
+    ["Wages", "quoteDetailView.wages"],
+    ["LossOfRent", "quoteDetailView.lossOfRent"],
+  ].map(([key, labelKey]) => [key, labelKey, Number(fireSumInsured[key]) || 0]).filter(([, , amount]) => amount > 0);
   const fireCoverBreakup = firePremiumDetails?.coverBreakup || [];
 
   // Calculate premium breakdown from coverage details
@@ -175,13 +186,14 @@ const QuoteDetailView = ({ action }) => {
 
     // Fire LOB: Use firePremiumDetails
     if (isFireLOB && firePremiumDetails) {
-      const total = firePremiumDetails.totalPremium ?? 0;
+      // the stored quotation figures (net, taxes, gross) are the ones the list and the printed quotation show
+      const total = firePremiumDetails.totalPremium ?? quotationData.grossPremium ?? firePremiumDetails.totalCoverPremium ?? 0;
       return {
-        netPremium: firePremiumDetails.totalCoverPremium ?? total,
-        documentaryStampTax: "0.00",
-        valueAddedTax: "0.00",
-        localGovernmentTax: "0.00",
-        accountPremiumOthers: "0.00",
+        netPremium: firePremiumDetails.totalCoverPremium ?? quotationData.netPremium ?? total,
+        documentaryStampTax: quotationData.documentaryStampTax || "0.00",
+        valueAddedTax: quotationData.valueAddedTax || "0.00",
+        localGovernmentTax: quotationData.localGovernmentTax || "0.00",
+        accountPremiumOthers: quotationData.accountPremiumOthers || "0.00",
         discount: firePremiumDetails.totalDiscount ?? "0.00",
         grossPremium: total,
       };
@@ -234,6 +246,8 @@ const QuoteDetailView = ({ action }) => {
       };
     }
   );
+
+  const relatedPolicyIssued = Boolean(relatedPolicy?.policyData?.policyNumber) && !["Draft", "Submitted"].includes(relatedPolicy?.policyData?.status || relatedPolicy?.policyData?.policyStatus);
 
   const fetchRelatedPolicy = async (quoteIdFromData) => {
     if (!quoteIdFromData) {
@@ -856,45 +870,17 @@ const QuoteDetailView = ({ action }) => {
                     <label className="alpha_text">{fireRiskDetails.fireProtection || "N/A"}</label>
                   </div>
                 </div>
-                <div className="sub_title">
-                  <label className="policy_text">{t("quoteDetailView.sumInsured")}</label>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.building")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
-                    </label>
+                {fireSumInsuredRows.length > 0 && (
+                  <div className="sub_title">
+                    <label className="policy_text">{t("quoteDetailView.sumInsured")}</label>
+                    {fireSumInsuredRows.map(([key, labelKey, amount]) => (
+                      <div key={key} className="quote_details">
+                        <label className="insurance_text">{t(labelKey)}</label>
+                        <label className="alpha_text">{formatCurrency(amount)}</label>
+                      </div>
+                    ))}
                   </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.wages")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                </div>
+                )}
                 {fireCoverBreakup.length > 0 && (
                   <div className="sub_title">
                     <label className="policy_text">{t("quoteDetailView.coverageAndPremium")}</label>
@@ -1160,6 +1146,17 @@ const QuoteDetailView = ({ action }) => {
                       </label>
                     </div>
                   )}
+                  {[
+                    ["valueAddedTax", t("quoteDetailView.vat")],
+                    ["documentaryStampTax", t("quoteDetailView.dst")],
+                    ["localGovernmentTax", t("quoteDetailView.lgt")],
+                    ["fireServiceTax", t("quoteDetailView.fst", "Fire service tax")],
+                  ].filter(([key]) => Number(quotationData?.[key]) > 0).map(([key, label]) => (
+                    <div className="quote_details" key={key}>
+                      <label className="insurance_text">{label}</label>
+                      <label className="alpha_text">{formatCurrency(quotationData[key])}</label>
+                    </div>
+                  ))}
                   <div className="quote_details">
                     <label className="gross_text">{t("quoteDetailView.grossPremium")}</label>
                     <label className="gross_count">
@@ -1245,12 +1242,20 @@ const QuoteDetailView = ({ action }) => {
             </Button>
           ) : null}
 
-          {quotationData?.quotationStatus ===
-            QuotationStatus.CONVERTED_TO_POLICY &&
-            relatedPolicy?.paymentStatus !== "Completed" && (
+          {quotationData?.quotationStatus === QuotationStatus.CONVERTED_TO_POLICY && (
+            // an issued policy is opened; one still being completed goes back to its approval step
+            relatedPolicy?.policyId && (relatedPolicyIssued || relatedPolicy.paymentStatus === "Completed") ? (
+              <Button
+                label={t("quoteDetailView.viewPolicy")}
+                icon="pi pi-external-link"
+                onClick={() => navigate(`/agent/policydetail/${relatedPolicy.policyId}`)}
+              />
+            ) : (
               <Button
                 label={
-                  checkingPolicy ? t("quoteDetailView.checkingPolicy") : t("quoteDetailView.waitingForPolicy")
+                  checkingPolicy
+                    ? t("quoteDetailView.checkingPolicy")
+                    : relatedPolicy?.policyId ? t("quoteDetailView.completePolicy") : t("quoteDetailView.waitingForPolicy")
                 }
                 disabled={checkingPolicy || !relatedPolicy?.policyId}
                 onClick={() => {
@@ -1276,7 +1281,8 @@ const QuoteDetailView = ({ action }) => {
               >
                 <SvgRightarrow />
               </Button>
-            )}
+            )
+          )}
 
           {/* Status-based action buttons - Hide when CustomerAccepted or Approved since main Proceed button is shown */}
           {quotationData?.quotationStatus !== "CustomerAccepted" &&
@@ -1311,11 +1317,9 @@ const QuoteDetailView = ({ action }) => {
             )}
         </div>
       )}
-      {/* the sales activities and the audit trail of the quotation are sections of the page, not thin tabs */}
+      {/* the sales activities (their own titled card) and the audit trail of the quotation are sections of the page */}
       {(quotationData?.quotationId || quotationIdFromParams) && (
-        <DetailSection title={t("salesActivities.title")} className="mt-4">
-          <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
-        </DetailSection>
+        <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
       )}
       <DetailSection title={t("quoteDetailView.auditTrail")} className="mt-4">
         <QuotationAuditTrail quotationId={quotationData?.quotationId || quotationIdFromParams} />

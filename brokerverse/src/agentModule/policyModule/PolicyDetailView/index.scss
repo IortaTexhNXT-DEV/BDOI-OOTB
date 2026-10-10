@@ -465,10 +465,11 @@ $tablet-md: 1024px;
         border-bottom: none;
       }
 
+      // the total keeps the label and amount edges of the rows above it
       &.is-total {
-        background: var(--color-surface-muted);
-        border-radius: 10px;
-        padding: 0.9rem 1rem;
+        border-top: 2px solid var(--color-border);
+        border-bottom: none;
+        padding: 0.9rem 0;
         margin-top: 0.25rem;
       }
     }
@@ -480,11 +481,6 @@ $tablet-md: 1024px;
       display: flex;
       align-items: center;
       gap: 0.35rem;
-    }
-
-    .breakdown-annotation {
-      color: var(--bv-primary);
-      font-size: 0.75rem;
     }
 
     .breakdown-amount {

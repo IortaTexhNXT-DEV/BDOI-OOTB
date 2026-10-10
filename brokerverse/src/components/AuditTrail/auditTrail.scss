@@ -12,15 +12,20 @@
   white-space: nowrap;
 }
 
+// the refresh button sits at the right of the first day heading, not on a row of its own
 .bv-audit-timeline {
   font-family: $font-body;
   color: $color-text;
+  position: relative;
 
   &__bar {
+    position: absolute;
+    top: -4px;
+    right: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
+    gap: 8px;
+    z-index: 1;
   }
 }
 
