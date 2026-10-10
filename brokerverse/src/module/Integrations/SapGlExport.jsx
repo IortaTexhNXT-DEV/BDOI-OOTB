@@ -5,13 +5,13 @@ import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { Message } from "primereact/message";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
 import { PageHeader, date, dateTime, isoDay, money, showError, showSuccess } from "./common";
 import { openConfirm } from "../../components/ConfirmDialog";
+import TechnicalDetails from "../../components/TechnicalDetails";
 import { calendarDateFormat, formatDate } from "../../utility/dateFormat";
 
 const STATUSES = ["done", "empty", "failed", "running"];
@@ -20,7 +20,8 @@ const SEVERITY = { done: "success", empty: "secondary", failed: "danger", runnin
 /**
  * Accounts > SAP GL Export (TIS-BRD-INTG-04): the daily SAP GL header and line files written at the cut-off by the job
  * sap-gl-export, run now or re-generated for a day, and downloaded as written. The folder, cut-off and record layout
- * are settings (Master > Configuration, group integrations).
+ * are settings (Master > Configuration, group integrations); the folder and cut-off show to the administrator under
+ * Technical details.
  */
 const SapGlExport = () => {
   const { t } = useTranslation();
@@ -43,7 +44,6 @@ const SapGlExport = () => {
       message: t(earlier.length ? "sapGl.confirm.regenerateMessage" : "sapGl.confirm.runMessage"),
       facts: [
         { label: t("sapGl.exportDate"), value: iso, type: "date" },
-        { label: t("sapGl.folder"), value: settings?.exportDir || settings?.folder, hidden: !settings },
         { label: t("sapGl.cutOff"), value: settings?.cutOff, hidden: !settings },
         { label: t("sapGl.previousRuns"), value: earlier.length, type: "number", decimals: 0, hidden: !earlier.length },
         { label: t("sapGl.lastJournals"), value: earlier[0] ? `${earlier[0].journalCount} / ${earlier[0].lineCount}` : null, hidden: !earlier.length },
@@ -83,13 +83,12 @@ const SapGlExport = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("sidebar.Accounts")} section={t("sidebar.Accounts")} title={t("sapGl.title")} subtitle={t("sapGl.intro")}>
+      <PageHeader home={t("sidebar.Accounts")} title={t("sapGl.title")}>
         <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat={calendarDateFormat()} maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
         <Button icon="pi pi-play" label={t("sapGl.runNow")} loading={busy} disabled={!day} onClick={run} />
       </PageHeader>
       {settings && (
-        <Message severity="info" className="w-full mb-2"
-          text={t("sapGl.settingsLine", { folder: settings.exportDir || settings.folder, cutOff: settings.cutOff, format: settings.layout?.format || "-" })} />
+        <TechnicalDetails className="mb-2" blocks={[{ label: t("sapGl.folder"), text: settings.exportDir || settings.folder }, { label: t("sapGl.cutOff"), text: settings.cutOff }]} />
       )}
       <div className="pe-card">
         <div className="pe-filters mb-2">

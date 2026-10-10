@@ -25,7 +25,9 @@ describe("SAP GL export", () => {
     expect(await screen.findByText("ARLITISPH20261008.txt")).toBeInTheDocument();
     // the setting key in the warning is not shown to the user
     expect(screen.getByText("Accounts outside the SAP chart: 1202001")).toBeInTheDocument();
-    expect(await screen.findByText(/sap-outbound/)).toBeInTheDocument();
+    // the folder is configuration: not on the screen of a user who is not an administrator
+    expect(screen.queryByText(/sap-outbound/)).toBeNull();
+    expect(screen.queryByText(/pick-up folder/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /Run now/ }));
     // the run is confirmed first: nothing is written until the user says so
     fireEvent.click(await screen.findByRole("button", { name: "Write files" }));
@@ -33,5 +35,16 @@ describe("SAP GL export", () => {
     expect(service.runSapGl.mock.calls[0][0]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     fireEvent.click(screen.getByText("ARHDTISPH20261008.txt"));
     expect(service.downloadSapGlFile).toHaveBeenCalledWith(7, "header", "ARHDTISPH20261008.txt");
+  });
+
+  it("shows the folder and cut-off to the administrator under Technical details", async () => {
+    window.localStorage.setItem("USER_ROLES", JSON.stringify(["system-admin"]));
+    service.sapGlRuns.mockResolvedValue({ rows: [], total: 0 });
+    service.sapGlSettings.mockResolvedValue({ folder: "sap-outbound", exportDir: null, cutOff: "23:59", layout: { format: "delimited" } });
+    render(<MemoryRouter><SapGlExport /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "Technical details" }));
+    expect(screen.getByText("sap-outbound").tagName).toBe("PRE");
+    expect(screen.getByLabelText("Cut-off")).toHaveTextContent("23:59");
+    window.localStorage.clear();
   });
 });

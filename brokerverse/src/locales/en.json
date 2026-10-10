@@ -12886,7 +12886,6 @@
   },
   "sapGl": {
     "title": "SAP GL Export",
-    "intro": "The daily SAP GL header and line files: the entries posted since the previous cut-off, written to the SAP pick-up folder at the cut-off. Run now or re-generate a day; every run keeps its files.",
     "runNow": "Run now / re-generate",
     "exportDate": "Day",
     "runNo": "Run {{n}}",
@@ -12900,7 +12899,6 @@
     "notes": "Warnings",
     "files": "Files",
     "noRuns": "No SAP GL file written yet",
-    "settingsLine": "Folder {{folder}} · cut-off {{cutOff}} · {{format}} layout",
     "statuses": {
       "done": "Written",
       "empty": "Nothing posted",
