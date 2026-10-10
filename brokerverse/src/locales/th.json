@@ -5826,6 +5826,20 @@
     },
     "cancel": {
       "message": "The placement slip is cancelled. The insurers are not told automatically."
+    },
+    "send": {
+      "title": "ส่งใบวางประกัน {{number}} ให้บริษัทประกัน",
+      "resendTitle": "ส่งใบวางประกัน {{number}} อีกครั้ง",
+      "message_one": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกันด้านล่างพร้อมใบวางประกัน",
+      "message_other": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกัน {{count}} แห่งด้านล่าง พร้อมใบวางประกันของแต่ละแห่ง",
+      "leadInsurer": "ผู้รับประกันหลัก",
+      "coInsurer": "ผู้ร่วมรับประกัน"
+    },
+    "compare": {
+      "leadIs": "ผู้รับประกันหลัก: {{lead}}"
+    },
+    "addInsurer": {
+      "invited": "บริษัทประกันที่เชิญแล้ว"
     }
   },
   "salesMarketing": {
@@ -5965,6 +5979,10 @@
         "activateTitle": "เปิดใช้งาน {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
+    },
+    "cancellation": {
+      "confirmTitle": "สร้างสลักหลังยกเลิกกรมธรรม์ {{number}}",
+      "confirmMessage": "ระบบจะสร้างสลักหลังยกเลิกฉบับร่างพร้อมเบี้ยคืนด้านล่าง และส่งให้บริษัทประกันจากหน้าสรุป"
     }
   },
   "numberingMasters": {

@@ -196,8 +196,8 @@ export const JourneyTimeline = ({ steps }) => {
           <li key={s.key} className={`journey-step ${state}`}>
             <span className="journey-marker">{s.done ? <i className="pi pi-check" /> : i + 1}</span>
             <div className="journey-body">
-              <div className="journey-label">{t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}</div>
-              {s.reference ? (to ? <button type="button" className="journey-link" onClick={() => navigate(to)}>{s.reference}</button> : <span className="journey-ref">{s.reference}</span>)
+              <div className="journey-label" title={t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}>{t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}</div>
+              {s.reference ? (to ? <button type="button" className="journey-link" onClick={() => navigate(to)}>{s.reference}</button> : <span className="journey-ref" title={s.reference}>{s.reference}</span>)
                 : <span className="journey-ref muted">{s.mode && s.mode !== "required" && !s.done ? t(`placement.journey.mode.${s.mode}`) : s.done ? formatDate(s.at) : "-"}</span>}
             </div>
           </li>
@@ -313,8 +313,9 @@ export const PageHeader = ({ title, subtitle, children, onBack }) => (
   </div>
 );
 
-export const Field = ({ label, children }) => (
-  <div className="placement-field">
+/** A label and its value on one line; `wide` puts a long text (remarks, a reason) under its label across the grid. */
+export const Field = ({ label, children, wide = false }) => (
+  <div className={wide ? "placement-field placement-field--wide" : "placement-field"}>
     <span className="placement-field-label">{label}</span>
     <span className="placement-field-value">{children ?? "-"}</span>
   </div>
