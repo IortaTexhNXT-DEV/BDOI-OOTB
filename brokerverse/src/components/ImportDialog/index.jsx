@@ -50,15 +50,21 @@ const ErrorTable = ({ errors }) => {
 
 /**
  * Spreadsheet import dialog shared by the master screens, the chart of accounts, the bulk uploads and the go-live
- * imports. The steps sit in one aligned grid: the sheet to upload into (when there are several), the template, the
- * go-live date (`goLiveDate`) and the file (name, size and a remove button once chosen).
+ * imports. The steps sit in one aligned grid: the sheet to upload into (when there are several), the template (when the
+ * target has one), the go-live date (`goLiveDate`), the screen's own fields (`steps`) and the file (name, size and a
+ * remove button once chosen).
  *
- * targets: [{ label, templatePath, uploadPath, validatePath? }]. With a validatePath the dialog validates first (the
+ * targets: [{ label, templatePath?, uploadPath, validatePath? }]. With a validatePath the dialog validates first (the
  * summary from `previewFacts(result)` and the errors with row and column, nothing saved), then loads the file after the
  * confirmation that `confirmLoad(result)` describes (ConfirmDialog props). note / help: one sentence behind the help
- * icon of the title. onDone(result) is called after an upload that saved at least one row.
+ * icon of the title. steps: [{ id, label, required, control }] fields of the screen sent with the file as `fields`
+ * (`fieldsReady` false keeps the upload disabled). onDone(result) is called after an upload that saved at least one
+ * row; onUploaded(result) after every upload the API accepted (an upload that starts a job and saves nothing yet).
  */
-const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate = false, onDone, previewFacts, confirmLoad, loadLabel }) => {
+const ImportDialog = ({
+  visible, onHide, title, targets, note, help, goLiveDate = false, onDone, onUploaded, previewFacts, confirmLoad, loadLabel, steps = [], fields: extraFields = null,
+  fieldsReady = true, accept = ".xlsx,.csv", fileTypes,
+}) => {
   const { t } = useTranslation();
   const [target, setTarget] = useState(targets?.[0] || null);
   const [file, setFile] = useState(null);
@@ -80,7 +86,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
   }, [visible, targets]);
 
   const validates = !!target?.validatePath;
-  const fields = () => (goLiveDate ? { goLiveDate: date } : {});
+  const fields = () => ({ ...(goLiveDate ? { goLiveDate: date } : {}), ...(extraFields || {}) });
   const changed = () => { setResult(null); setPreview(null); setError(null); };
 
   const download = async () => {
@@ -113,6 +119,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
       const r = await importService.upload(target.uploadPath, file, fields());
       setResult(r);
       setPreview(null);
+      if (onUploaded) onUploaded(r);
       if (onDone && (r.created || r.updated || r.accounts)) onDone(r);
     } catch (e) {
       setError(failure(e));
@@ -127,7 +134,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
     else load().catch(() => {});
   };
 
-  const ready = !!(target && file && (!goLiveDate || ISO_DATE.test(date)));
+  const ready = !!(target && file && fieldsReady && (!goLiveDate || ISO_DATE.test(date)));
   const loadReady = ready && (!validates || preview?.valid === true);
   const tip = help || note;
   const defaultFacts = (r) => [
@@ -167,12 +174,14 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
               </div>
             </div>
           )}
-          <div className="import-dialog__step">
-            <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.template")}</span>
-            <div className="import-dialog__control">
-              <Button type="button" label={t("importDialog.downloadTemplate")} icon="pi pi-download" outlined size="small" className="import-dialog__button" onClick={download} disabled={!target} />
+          {(!target || target.templatePath) && (
+            <div className="import-dialog__step">
+              <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.template")}</span>
+              <div className="import-dialog__control">
+                <Button type="button" label={t("importDialog.downloadTemplate")} icon="pi pi-download" outlined size="small" className="import-dialog__button" onClick={download} disabled={!target} />
+              </div>
             </div>
-          </div>
+          )}
           {goLiveDate && (
             <div className="import-dialog__step">
               <label htmlFor="import-go-live" className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.goLiveDate")}</label>
@@ -181,10 +190,18 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
               </div>
             </div>
           )}
+          {steps.map((s) => (
+            <div key={s.id} className="import-dialog__step">
+              <label htmlFor={s.id} className="import-dialog__label">
+                <span className="import-dialog__no">{number()}</span>{s.label}{s.required ? <span className="required-marker">*</span> : null}
+              </label>
+              <div className="import-dialog__control">{s.control}</div>
+            </div>
+          ))}
           <div className="import-dialog__step">
             <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.file")}</span>
             <div className="import-dialog__control">
-              <input ref={input} type="file" accept=".xlsx,.csv" hidden data-testid="import-file"
+              <input ref={input} type="file" accept={accept} hidden data-testid="import-file"
                 onChange={(e) => { setFile(e.target.files?.[0] || null); changed(); e.target.value = ""; }} />
               {file ? (
                 <span className="import-dialog__file">
@@ -197,7 +214,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
               ) : (
                 <>
                   <Button type="button" label={t("importDialog.chooseFile")} icon="pi pi-paperclip" outlined size="small" className="import-dialog__button" onClick={() => input.current?.click()} />
-                  <span className="import-dialog__hint">{t("importDialog.fileTypes")}</span>
+                  <span className="import-dialog__hint">{fileTypes || t("importDialog.fileTypes")}</span>
                 </>
               )}
             </div>
@@ -239,6 +256,16 @@ ImportDialog.propTypes = {
   onHide: PropTypes.func.isRequired,
   title: PropTypes.node,
   targets: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string, templatePath: PropTypes.string, uploadPath: PropTypes.string, validatePath: PropTypes.string })),
+  /** fields of the screen: [{ id (of the control), label, required, control }] */
+  steps: PropTypes.arrayOf(PropTypes.shape({ id: PropTypes.string.isRequired, label: PropTypes.node.isRequired, required: PropTypes.bool, control: PropTypes.node })),
+  /** form fields sent with the file */
+  fields: PropTypes.object,
+  /** false while a required field of the screen is empty */
+  fieldsReady: PropTypes.bool,
+  onUploaded: PropTypes.func,
+  /** file types offered by the file picker (".xlsx,.csv") and their hint */
+  accept: PropTypes.string,
+  fileTypes: PropTypes.string,
   note: PropTypes.node,
   help: PropTypes.node,
   goLiveDate: PropTypes.bool,
