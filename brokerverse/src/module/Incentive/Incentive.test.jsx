@@ -74,7 +74,7 @@ describe("calculation batch details", () => {
     render(<BatchDetailDialog batchId="CALC-2026-00007" onHide={() => {}} onChanged={() => {}} />);
     expect(await screen.findByRole("button", { name: "Approve batch" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Reject" })).toBeDisabled();
-    expect(screen.getByText("You ran or submitted this batch. A different user must approve or reject it.")).toBeInTheDocument();
+    expect(screen.getByText("You ran, adjusted or submitted this batch. A different user must approve or reject it.")).toBeInTheDocument();
   });
 
   it("disables the decision without the approval permission", async () => {
@@ -112,11 +112,11 @@ describe("My Programs", () => {
     tiers: [{ level: "0-10 policies", type: "Fixed Amount", value: 500, maxPayout: 5000, basis: "perUnit" }], nextTier: null,
   };
 
-  it("shows a count target as a count, an ended program with its end date, and no empty chart", async () => {
+  it("shows a count target as a count, an ended program with the status chip, and no empty chart", async () => {
     signIn({ userId: "usr_a", username: "a.agent" }, ["read:profile"]);
     incentiveService.myPrograms.mockResolvedValue({ agentId: "usr_a", assignedPrograms: [program], activity: [] });
     render(<MyPrograms />);
-    expect(await screen.findByText("Ended 30/09/2026")).toBeInTheDocument();
+    expect(await screen.findByText("Ended")).toBeInTheDocument();
     expect(screen.getByText("20")).toBeInTheDocument();
     expect(screen.queryByText("₱20.00")).toBeNull();
     expect(screen.queryByTestId("chart")).toBeNull();
@@ -134,7 +134,9 @@ describe("My Programs", () => {
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).queryByRole("tab")).toBeNull();
     expect(within(dialog).getByRole("heading", { name: "Tiers" })).toBeInTheDocument();
-    expect(within(dialog).getByText("7 more to reach 11-20 policies")).toBeInTheDocument();
+    expect(within(dialog).getByText("11-20 policies")).toBeInTheDocument();
+    expect(within(dialog).getByText("Still needed")).toBeInTheDocument();
+    expect(within(dialog).getByText("12")).toBeInTheDocument();
     expect(within(dialog).queryByText(/Based on current achievement/)).toBeNull();
   });
 

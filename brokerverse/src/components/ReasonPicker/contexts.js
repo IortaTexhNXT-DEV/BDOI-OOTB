@@ -4,7 +4,7 @@
  */
 export const REASON_CONTEXTS = [
   "decline", "repudiation", "lapse", "refund", "adjustment", "non-materialise", "reassignment",
-  "period_close", "period_reopen", "year_end_reverse", "cas_print_void", "cas_document_change", "incentive_batch_reject",
+  "period_close", "period_reopen", "year_end_reverse", "cas_print_void", "cas_document_change", "incentive_batch_reject", "incentive_adjustment",
   "sales_invoice_cancel", "invoice_payment_cancel",
 ];
 

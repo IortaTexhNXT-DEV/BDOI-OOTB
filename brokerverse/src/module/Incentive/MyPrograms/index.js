@@ -14,6 +14,7 @@ import FieldError from "../../../components/FieldError";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import LoadingBar from "../../../components/LoadingBar";
 import StatCards from "../../../components/StatCards";
+import StatusChip from "../../../components/StatusChip";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import incentiveService from "../../../services/incentiveService";
 import { useChartTheme } from "../../../theme/chartTheme";
@@ -36,25 +37,25 @@ export const tierPayout = (tier, t) => {
   return tier.maxPayout ? t("incentive.mine.payMaximum", { payout: base, max: formatCurrency(tier.maxPayout) }) : base;
 };
 
-/** Days left of a running program, or the day an ended one ended (neutral either way). */
-const programState = (p, t) => (p.ended ? t("incentive.mine.ended", { date: formatDate(p.endDate) }) : t("incentive.mine.daysLeft", { count: p.daysRemaining }));
+/** Status of a program for the agent: running, or ended (with the shared status chip). */
+const ProgramStatus = ({ program }) => {
+  const { t } = useTranslation();
+  return <StatusChip code={program.ended ? "completed" : "active"} label={t(program.ended ? "incentive.mine.statusEnded" : "incentive.mine.statusRunning")} />;
+};
+ProgramStatus.propTypes = { program: PropTypes.shape({ ended: PropTypes.bool }).isRequired };
+
+/** Days left in the current calculation period (the period the row shows), or "-" once the program ended. */
+const daysLeft = (p) => (p.ended ? "-" : Number(p.periodDaysRemaining ?? p.daysRemaining ?? 0).toLocaleString());
 
 /** One program in one view: its facts, its tiers and the agent's performance in the current calculation period. */
 const ProgramDialog = ({ program, onHide }) => {
   const { t } = useTranslation();
   if (!program) return null;
   const p = program;
-  const next = p.nextTier
-    ? t("incentive.mine.nextTierNeeded", { needed: formatMeasure(p.nextTier.needed, p.metric), tier: p.nextTier.level })
-    : (p.tiers || []).length ? t("incentive.mine.topTier") : null;
+  const top = !p.nextTier && (p.tiers || []).length;
   return (
     <DetailDialog visible onHide={onHide} header={t("incentive.mine.programTitle")} size="lg">
-      <DetailHeader title={p.programName} status={p.programStatus} subtitle={p.programCode}
-        meta={[
-          { label: t("incentive.mine.measure"), value: p.targetMetric },
-          { label: t("incentive.mine.programPeriod"), value: `${formatDate(p.startDate)} - ${formatDate(p.endDate)}` },
-          { label: t("incentive.mine.status"), value: programState(p, t) },
-        ]} />
+      <DetailHeader title={p.programName} status={p.programStatus} subtitle={p.programCode} />
       <DetailSection title={t("incentive.mine.program")}>
         <KeyValueGrid columns={3} items={[
           { label: t("incentive.mine.code"), value: p.programCode },
@@ -62,6 +63,7 @@ const ProgramDialog = ({ program, onHide }) => {
           { label: t("incentive.mine.measure"), value: p.targetMetric },
           { label: t("incentive.mine.programPeriod"), value: `${formatDate(p.startDate)} - ${formatDate(p.endDate)}` },
           { label: t("incentive.mine.currentPeriod"), value: `${formatDate(p.periodFrom)} - ${formatDate(p.periodTo)}` },
+          { label: t("incentive.mine.daysLeft"), value: daysLeft(p) },
           { label: t("incentive.mine.frequency"), value: p.calculationFrequency },
           { label: t("incentive.mine.eligibility"), value: p.applicableTo },
           { label: t("incentive.mine.programType"), value: p.programType },
@@ -81,7 +83,8 @@ const ProgramDialog = ({ program, onHide }) => {
           { label: t("incentive.mine.achievement"), value: p.achievementPercent, type: "percent" },
           { label: t("incentive.mine.currentTier"), value: p.tier },
           { label: t("incentive.mine.estimatedPayout"), value: p.potentialEarning, type: "amount" },
-          { label: t("incentive.mine.nextTier"), value: next },
+          { label: t("incentive.mine.nextTier"), value: top ? t("incentive.mine.topTier") : p.nextTier?.level },
+          { label: t("incentive.mine.stillNeeded"), value: p.nextTier ? formatMeasure(p.nextTier.needed, p.metric) : null, hidden: !p.nextTier },
         ]} />
       </DetailSection>
     </DetailDialog>
@@ -145,13 +148,14 @@ const MyPrograms = () => {
         { key: "average", label: t("incentive.mine.averageAchievement"), value: ready ? formatPercent(average) : null },
       ]} />
 
-      <div className="inc-grid">
+      <div className="inc-stack">
         <DetailSection title={t("incentive.mine.programsTitle")} className="bv-loading-host" flush>
           <LoadingBar active={refreshing} />
           <DataTable value={programs} dataKey="programId" loading={loading} size="small" className="inc-table" emptyMessage={t("incentive.mine.noPrograms")}
             onRowClick={(e) => setSelected(e.data)} rowClassName={() => "inc-row-link"}>
-            <Column header={t("incentive.mine.program")} body={(p) => <span>{p.programName}<span className="inc-muted"> {p.programCode}</span></span>} />
-            <Column header={t("incentive.mine.period")} body={(p) => `${formatDate(p.periodFrom)} - ${formatDate(p.periodTo)}`} />
+            <Column header={t("incentive.mine.program")} style={{ minWidth: "16rem" }} body={(p) => <span>{p.programName}<span className="inc-muted"> {p.programCode}</span></span>} />
+            <Column header={t("incentive.mine.period")} bodyClassName="inc-nowrap" body={(p) => `${formatDate(p.periodFrom)} - ${formatDate(p.periodTo)}`} />
+            <Column header={t("incentive.mine.daysLeft")} body={daysLeft} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.target")} body={(p) => formatMeasure(p.target, p.metric)} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.achieved")} body={(p) => formatMeasure(p.achieved, p.metric)} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.achievement")} body={(p) => (
@@ -161,7 +165,7 @@ const MyPrograms = () => {
               </div>
             )} />
             <Column header={t("incentive.mine.estimatedPayout")} body={(p) => formatCurrency(p.potentialEarning)} className="inc-num" headerClassName="inc-num" />
-            <Column header={t("incentive.mine.status")} body={(p) => <span className="inc-muted-text">{programState(p, t)}</span>} />
+            <Column header={t("incentive.mine.status")} body={(p) => <ProgramStatus program={p} />} />
             <Column header={t("incentive.batch.actions")} body={(p) => (
               <Button type="button" icon="pi pi-eye" text rounded aria-label={t("incentive.viewDetails")} tooltip={t("incentive.viewDetails")}
                 onClick={(e) => { e.stopPropagation(); setSelected(p); }} />

@@ -1511,7 +1511,6 @@
       "noBatches": "ไม่มีชุดการคำนวณ",
       "submitForApproval": "ส่งเพื่ออนุมัติ",
       "submitTitle": "ส่งชุดการคำนวณเพื่ออนุมัติ",
-      "submitMessage": "ชุดการคำนวณจะถูกส่งให้ผู้อนุมัติและไม่สามารถปรับปรุงได้อีก",
       "submitted": "ส่ง {{batchId}} เพื่ออนุมัติแล้ว",
       "reject": "ปฏิเสธ",
       "rejectBatch": "ปฏิเสธชุดการคำนวณ",
@@ -1519,8 +1518,6 @@
       "rejected": "ปฏิเสธ {{batchId}} แล้ว",
       "approveBatch": "อนุมัติชุดการคำนวณ",
       "approveTitle": "อนุมัติชุดการคำนวณ",
-      "approveMessage": "อนุมัติค่าตอบแทนจูงใจของชุดการคำนวณนี้",
-      "approveNote": "ค่าตอบแทนจะถูกตั้งค้างจ่ายในบัญชีและสามารถจ่ายชุดการคำนวณได้",
       "remarks": "หมายเหตุ",
       "approved": "อนุมัติ {{batchId}} แล้ว",
       "markPaid": "บันทึกว่าจ่ายแล้ว",
@@ -1530,11 +1527,12 @@
       "adjust": "ปรับปรุง",
       "adjustTitle": "ปรับปรุงรายการของตัวแทน",
       "adjustmentReason": "เหตุผล",
-      "adjustmentReasonRequired": "ระบุเหตุผลของการปรับปรุง",
       "saveAdjustment": "บันทึกการปรับปรุง",
       "adjusted": "ปรับปรุงรายการของ {{name}} แล้ว",
       "noApprovePermission": "การอนุมัติชุดการคำนวณต้องมีสิทธิ์อนุมัติค่าตอบแทนจูงใจ",
-      "ownBatch": "คุณเป็นผู้คำนวณหรือผู้ส่งชุดนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ"
+      "ownBatch": "คุณเป็นผู้คำนวณ ปรับปรุง หรือส่งชุดนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
+      "emptyBatch": "ไม่มีรายการของตัวแทน: ไม่มีสิ่งที่ต้องส่งอนุมัติ",
+      "adjustedBy": "ปรับปรุงโดย"
     },
     "board": {
       "pending": "รออนุมัติ",
@@ -1563,10 +1561,11 @@
       "programs": "โปรแกรม",
       "from": "ตั้งแต่",
       "to": "ถึง",
-      "noPrograms": "ไม่มีโปรแกรมที่ใช้งานอยู่ใน {{period}}",
+      "noPrograms": "ไม่มีโครงการที่ใช้งานซึ่งงวดการคำนวณสิ้นสุดใน {{period}}",
       "run": "เริ่มคำนวณ",
       "doneTitle": "คำนวณเสร็จแล้ว",
-      "done": "{{batchId}}: ตัวแทน {{agents}} ราย, {{amount}}"
+      "done": "{{batchId}}: ตัวแทน {{agents}} ราย, {{amount}}",
+      "calculationPeriod": "งวดการคำนวณ"
     },
     "mine": {
       "title": "โปรแกรมค่าตอบแทนจูงใจของฉัน",
@@ -1582,9 +1581,6 @@
       "achieved": "ผลงาน",
       "achievement": "ความสำเร็จ",
       "status": "สถานะ",
-      "daysLeft_one": "เหลือ {{count}} วัน",
-      "daysLeft_other": "เหลือ {{count}} วัน",
-      "ended": "สิ้นสุด {{date}}",
       "noPrograms": "ไม่มีโปรแกรมค่าตอบแทนจูงใจ",
       "chartTitle": "ความสำเร็จตามโปรแกรม",
       "noAchievement": "ยังไม่มีผลงานในงวดปัจจุบัน",
@@ -1616,12 +1612,15 @@
       "performance": "ผลงานของฉัน",
       "currentTier": "ระดับปัจจุบัน",
       "nextTier": "ระดับถัดไป",
-      "nextTierNeeded": "ต้องการอีก {{needed}} เพื่อถึง {{tier}}",
       "topTier": "ถึงระดับสูงสุดแล้ว",
       "payPercentAchieved": "{{rate}} ของเบี้ยประกันที่ทำได้",
       "payPercentTarget": "{{rate}} ของเป้าหมาย",
       "payPerPolicy": "{{amount}} ต่อกรมธรรม์",
-      "payMaximum": "{{payout}} สูงสุด {{max}}"
+      "payMaximum": "{{payout}} สูงสุด {{max}}",
+      "daysLeft": "จำนวนวันที่เหลือ",
+      "statusRunning": "กำลังดำเนินการ",
+      "statusEnded": "สิ้นสุดแล้ว",
+      "stillNeeded": "ยังต้องการอีก"
     },
     "stmt": {
       "agent": "ตัวแทน",
@@ -6419,7 +6418,8 @@
       "cas_document_change": "การแก้ไขเอกสาร CAS",
       "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ",
       "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
-      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี"
+      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี",
+      "incentive_adjustment": "การปรับปรุงรายการค่าตอบแทนจูงใจ"
     }
   },
   "birTax": {

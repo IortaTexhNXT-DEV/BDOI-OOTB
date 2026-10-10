@@ -1935,7 +1935,6 @@
       "noBatches": "No calculation batches.",
       "submitForApproval": "Submit for approval",
       "submitTitle": "Submit batch for approval",
-      "submitMessage": "The batch is sent to the approvers and can no longer be adjusted.",
       "submitted": "{{batchId}} submitted for approval",
       "reject": "Reject",
       "rejectBatch": "Reject batch",
@@ -1943,8 +1942,6 @@
       "rejected": "{{batchId}} rejected",
       "approveBatch": "Approve batch",
       "approveTitle": "Approve calculation batch",
-      "approveMessage": "Approve the incentives of this batch.",
-      "approveNote": "The incentives are accrued in the books and the batch can be paid.",
       "remarks": "Remarks",
       "approved": "{{batchId}} approved",
       "markPaid": "Mark as paid",
@@ -1954,11 +1951,12 @@
       "adjust": "Adjust",
       "adjustTitle": "Adjust agent line",
       "adjustmentReason": "Reason",
-      "adjustmentReasonRequired": "Enter the reason for the adjustment.",
       "saveAdjustment": "Save adjustment",
       "adjusted": "Line of {{name}} adjusted",
       "noApprovePermission": "Approving incentive batches needs the incentive approval permission.",
-      "ownBatch": "You ran or submitted this batch. A different user must approve or reject it."
+      "ownBatch": "You ran, adjusted or submitted this batch. A different user must approve or reject it.",
+      "emptyBatch": "No agent lines: nothing to submit for approval.",
+      "adjustedBy": "Adjusted by"
     },
     "board": {
       "pending": "Pending approval",
@@ -1987,10 +1985,11 @@
       "programs": "Programs",
       "from": "From",
       "to": "To",
-      "noPrograms": "No active program runs in {{period}}.",
+      "noPrograms": "No active program has a calculation period ending in {{period}}.",
       "run": "Run calculation",
       "doneTitle": "Calculation complete",
-      "done": "{{batchId}}: {{agents}} agents, {{amount}}"
+      "done": "{{batchId}}: {{agents}} agents, {{amount}}",
+      "calculationPeriod": "Calculation period"
     },
     "mine": {
       "title": "My Incentive Programs",
@@ -2006,9 +2005,6 @@
       "achieved": "Achieved",
       "achievement": "Achievement",
       "status": "Status",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left",
-      "ended": "Ended {{date}}",
       "noPrograms": "No incentive programs.",
       "chartTitle": "Achievement by program",
       "noAchievement": "No achievement recorded yet in the current periods.",
@@ -2040,12 +2036,15 @@
       "performance": "My performance",
       "currentTier": "Current tier",
       "nextTier": "Next tier",
-      "nextTierNeeded": "{{needed}} more to reach {{tier}}",
       "topTier": "Highest tier reached",
       "payPercentAchieved": "{{rate}} of premium achieved",
       "payPercentTarget": "{{rate}} of target",
       "payPerPolicy": "{{amount}} per policy",
-      "payMaximum": "{{payout}}, maximum {{max}}"
+      "payMaximum": "{{payout}}, maximum {{max}}",
+      "daysLeft": "Days left",
+      "statusRunning": "Running",
+      "statusEnded": "Ended",
+      "stillNeeded": "Still needed"
     },
     "stmt": {
       "agent": "Agent",
@@ -7582,7 +7581,8 @@
       "cas_document_change": "CAS document change",
       "incentive_batch_reject": "Incentive batch rejection",
       "sales_invoice_cancel": "Sales invoice cancellation",
-      "invoice_payment_cancel": "Invoice payment cancellation"
+      "invoice_payment_cancel": "Invoice payment cancellation",
+      "incentive_adjustment": "Incentive line adjustment"
     }
   },
   "birTax": {
