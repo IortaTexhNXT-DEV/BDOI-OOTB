@@ -34,6 +34,31 @@ export async function goLiveState() {
   return { cutoverDate: isDate(cutover) ? cutover : null, locked: (await getSetting('golive.locked', false)) === true };
 }
 
+/**
+ * Settings of the Data Migration & Go-Live workspace (migration 0440), as the workspace reads them: legacy system
+ * name, approval of loads, duplicate checks, migrated business in the figures, the go-live lock windows, the job
+ * limits, the document types of the file naming convention and the evidence retention.
+ */
+export async function workspaceSettings() {
+  return {
+    legacySystemName: await legacySystemName(),
+    loadApprovalRequired: (await getSetting('migration.load_approval_required', true)) !== false,
+    duplicateRules: await getSetting('migration.duplicate_rules', []),
+    kpiIncludeMigrated: (await getSetting('migration.kpi_include_migrated', false)) === true,
+    commissionIncludeMigrated: (await getSetting('migration.commission_include_migrated', false)) === true,
+    incentiveIncludeMigrated: (await getSetting('migration.incentive_include_migrated', false)) === true,
+    sapGlIncludeOpening: (await getSetting('migration.sap_gl_include_opening', false)) === true,
+    dashboardDefaultOrigin: (await getSetting('dashboard.default_origin', 'issued')) === 'all' ? 'all' : 'issued',
+    unlockWindowDays: Number(await getSetting('migration.unlock_window_days', 7)),
+    unlockMaxHours: Number(await getSetting('migration.unlock_max_hours', 4)),
+    approvalExpiryHours: Number(await getSetting('migration.approval_expiry_hours', 72)),
+    jobStaleMinutes: Number(await getSetting('migration.job_stale_minutes', 15)),
+    jobStatementTimeoutMinutes: Number(await getSetting('migration.job_statement_timeout_minutes', 60)),
+    documentTypes: await getSetting('migration.document_types', []),
+    evidenceRetentionYears: Number(await getSetting('migration.evidence_retention_years', 10)),
+  };
+}
+
 /** Kit catalogue for the screen: sheets with their columns and keys. */
 export async function kits() {
   const out = [];
@@ -43,7 +68,7 @@ export async function kits() {
       keyDefaults: s.keyDefaults || {},
       columns: s.columns.map((c) => ({ key: c.key, header: c.header, required: !!c.required, format: c.format || null, list: c.list || null, type: c.type || 'text' })) })) });
   }
-  return { kits: out, ...(await goLiveState()) };
+  return { kits: out, ...(await goLiveState()), settings: await workspaceSettings() };
 }
 
 /** Template of a kit: blank, or (prefill) with the current data of this environment. */

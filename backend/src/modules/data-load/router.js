@@ -42,9 +42,10 @@ const batchExample = { id: 7, loadNumber: 'MIG-000007', kit: 'migration', legacy
 const errorExample = { sheet: 'policies', sheetName: 'Policies', row: 14, column: 'Issue Date', message: 'Issue Date 2026-11-02 is on or after the cutover date 2026-11-01' };
 
 define({
-  method: 'GET', path: '/kits', summary: 'The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock',
+  method: 'GET', path: '/kits', summary: 'The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace',
   screen: SCREEN, middleware: canRead,
-  response: { success: true, data: { kits: [{ kit: 'configuration', title: 'Go-live configuration workbook', sheets: [{ key: 'users', name: 'Users', keyColumns: ['username'], columns: [] }] }], cutoverDate: '2026-11-01', locked: false } },
+  response: { success: true, data: { kits: [{ kit: 'configuration', title: 'Go-live configuration workbook', sheets: [{ key: 'users', name: 'Users', keyColumns: ['username'], columns: [] }] }], cutoverDate: '2026-11-01', locked: false,
+    settings: { legacySystemName: 'Legacy', loadApprovalRequired: true, dashboardDefaultOrigin: 'issued', unlockWindowDays: 7, unlockMaxHours: 4 } } },
   handler: async (_req, res) => ok(res, await svc.kits()),
 });
 define({
