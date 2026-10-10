@@ -27,7 +27,6 @@ import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorseme
 import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { notifyError } from "../../../utility/dialogs";
@@ -1009,11 +1008,7 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.totalSumInsured")}</label>
                     <label className="alpha_text">
-                      {quotationData?.totalSumInsured
-                        ? `${parseFloat(
-                            quotationData.totalSumInsured
-                          ).toLocaleString(numberLocale())}.00`
-                        : "N/A"}
+                      {quotationData?.totalSumInsured ? formatCurrency(quotationData.totalSumInsured) : "—"}
                     </label>
                   </div>
                   {/* Priced covers of the quote: the detail showed the sum insured, CTPL and APPA only */}
