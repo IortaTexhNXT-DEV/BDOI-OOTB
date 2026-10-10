@@ -1927,8 +1927,8 @@ e-policy to the client. The placement slip becomes **Insurer issued (Booked)**. 
 
 #### Issue a cover note or authenticate a CTPL certificate {#tis-operations-associate-cover-notes}
 1. Choose Operations > Cover Notes and select **Issue cover note**.
-2. Select the quotation or the placement slip in the list. The list offers the accepted and approved quotations and
-   the placement slips already with the insurer.
+2. Select the placement slip in the list. The list offers the placement slips the insurer has acknowledged; a
+   quotation takes no cover note.
 3. Enter **Cover from** and **Cover period (days)**, and the **Insurer binder reference** and **Special conditions**
    where the insurer gave them.
 4. Select **Issue cover note**. The cover note is **Active** until the insurer's policy is booked, which ends it, or
@@ -5272,12 +5272,12 @@ The authentication is requested from the provider (**Requested**). The provider'
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
-A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from an accepted quotation or from a placement slip sent to the insurer or later. It is superseded when the policy is booked and expires after its end date.
+A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from a placement slip once the insurer has acknowledged it (acknowledged, e-policy received or checked), never from a quotation: the insurer then holds the order. It is superseded when the policy is booked and expires after its end date.
 
 The cards count the cover notes **Active** and **Expiring within 7 days**, and show those where you must **Follow up the insurer's policy**. The list shows **Cover note / insured**, **Insurer**, **Quotation / placement**, **Cover period**, **Premium**, **Status** and **Policy**.
 
 1. Select **Issue cover note**.
-2. Search and select the quotation or placement slip.
+2. Search and select the placement slip.
 3. Enter **Cover from**, **Cover period (days)** (the default applies if left empty), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. Print it or e-mail it to the client.
 

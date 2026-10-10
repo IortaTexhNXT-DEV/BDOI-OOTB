@@ -81,3 +81,16 @@ describe('cancelling a placement slip the insurer holds (FR-SIS-024)', () => {
     expect((await q("SELECT count(*)::int AS n FROM email_outbox WHERE template = 'placement_cancelled' AND entity_id = 'plc_sample_11'"))[0].n).toBe(0);
   });
 });
+
+describe('cover notes once the insurer holds the order (ISSUE-01)', () => {
+  it('none from a quotation or a slip the insurer has not acknowledged; one from an acknowledged slip', async () => {
+    const fromQuote = await associate('post', '/cover-notes').send({ quoteId: 'qt_sls_18' });
+    expect(fromQuote.status).toBe(409);
+    expect(fromQuote.body.message).toContain('once the insurer holds the order');
+    const sent = await associate('post', '/cover-notes').send({ placementId: 'plc_sample_91' });
+    expect(sent.status).toBe(409);
+    expect(sent.body.message).toContain('acknowledged or epolicy_received or checked');
+    const ok = await associate('post', '/cover-notes').send({ placementId: 'plc_sample_18', insurerReference: 'MAA-BND-2026-0018' });
+    expect(ok.status).toBe(201);
+  });
+});

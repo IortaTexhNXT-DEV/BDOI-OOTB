@@ -94,8 +94,8 @@ e-policy to the client. The placement slip becomes **Insurer issued (Booked)**. 
 ### Issue a cover note or authenticate a CTPL certificate {#tis-operations-associate-cover-notes}
 
 1. Choose {{menu:/operations/cover-notes}} and select **Issue cover note**.
-2. Select the quotation or the placement slip in the list. The list offers the accepted and approved quotations and
-   the placement slips already with the insurer.
+2. Select the placement slip in the list. The list offers the placement slips the insurer has acknowledged; a
+   quotation takes no cover note.
 3. Enter **Cover from** and **Cover period (days)**, and the **Insurer binder reference** and **Special conditions**
    where the insurer gave them.
 4. Select **Issue cover note**. The cover note is **Active** until the insurer's policy is booked, which ends it, or

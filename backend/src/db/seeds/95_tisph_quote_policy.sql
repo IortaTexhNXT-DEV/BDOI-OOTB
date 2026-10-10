@@ -207,3 +207,11 @@ INSERT INTO discount_caps(product_id, channel_type, min_pct, max_pct, lowest_od,
 SELECT p.id, v.type, v.min, v.max, v.lowest, DATE '2026-01-01', 'approved', 'Proposed TISPH cap, to be confirmed', 'seed', now(), 'TISPH proposal'
 FROM products p, (VALUES ('financing_bank', 0, 25, 1.40), ('dealer', 0, 20, 1.50), ('direct', 0, 25, 1.40), ('agent', 0, 15, 1.60)) AS v(type, min, max, lowest)
 WHERE p.code = 'MOTOR' AND NOT EXISTS (SELECT 1 FROM discount_caps c WHERE c.product_id = p.id AND c.channel_type = v.type);
+
+-- ---------------------------------------------------------------- cover notes once the insurer holds the order (ISSUE-01)
+-- Proposal (DECISIONS D-QP-18): a cover note evidences cover only once the insurer has acknowledged the placement slip;
+-- none from a quotation. Only while the platform values are unchanged.
+UPDATE app_settings SET value = '[]'::jsonb, updated_at = now()
+ WHERE key = 'cover_note.quote_statuses' AND updated_by IS NULL AND value = '["accepted","approved","submitted"]'::jsonb;
+UPDATE app_settings SET value = '["acknowledged","epolicy_received","checked"]'::jsonb, updated_at = now()
+ WHERE key = 'cover_note.placement_statuses' AND updated_by IS NULL AND value = '["sent","acknowledged","epolicy_received","checked"]'::jsonb;

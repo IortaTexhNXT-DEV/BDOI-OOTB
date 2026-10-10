@@ -577,12 +577,12 @@ The authentication is requested from the provider (**Requested**). The provider'
 
 {{screen:/operations/cover-notes}}
 
-A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from an accepted quotation or from a placement slip sent to the insurer or later. It is superseded when the policy is booked and expires after its end date.
+A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from a placement slip once the insurer has acknowledged it (acknowledged, e-policy received or checked), never from a quotation: the insurer then holds the order. It is superseded when the policy is booked and expires after its end date.
 
 The cards count the cover notes **Active** and **Expiring within 7 days**, and show those where you must **Follow up the insurer's policy**. The list shows **Cover note / insured**, **Insurer**, **Quotation / placement**, **Cover period**, **Premium**, **Status** and **Policy**.
 
 1. Select **Issue cover note**.
-2. Search and select the quotation or placement slip.
+2. Search and select the placement slip.
 3. Enter **Cover from**, **Cover period (days)** (the default applies if left empty), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. Print it or e-mail it to the client.
 

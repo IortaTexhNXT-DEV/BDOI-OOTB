@@ -33,6 +33,9 @@ beforeAll(async () => {
   // the broker cancellation rules (short-period scale for the insured, commission taken back); TISPH's pro-rata without
   // commission reversal (CANC-03) is covered by test/endorsement-workflow.test.js
   await query("UPDATE app_settings SET value = 'true' WHERE key IN ('endorsements.short_period_for_insured', 'endorsements.cancellation_reverses_commission')");
+  // the broker cover notes from an accepted quotation; TISPH's cover notes only once the insurer holds the order
+  // (ISSUE-01) are covered by test/placement-moves.test.js
+  await query(`UPDATE app_settings SET value = '["accepted","approved","submitted"]' WHERE key = 'cover_note.quote_statuses'`);
   clearSettingsCache();
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
   await ctx.api('post', '/users').send({ username: 'ops.manager', password: 'Welcome@123', displayName: 'AP manager', roles: ['accounting-manager'], email: 'ops.manager@example.ph' });
