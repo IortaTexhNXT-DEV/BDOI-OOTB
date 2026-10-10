@@ -288,7 +288,7 @@ describe('the review panel and the inbox figures', () => {
     expect(s.lines).toEqual([expect.objectContaining({ policyNo: 'EXT-RAP-P2', premium: 12000, dueToInsurer: 11000 })]);
     expect(s.previous).toMatchObject({ remittanceNo: first.reference, amount: 10000, changePercent: 10 });
     expect(s.checks.find((c) => c.code === 'content-unchanged')).toMatchObject({ result: 'pass' });
-    expect(s.checks.find((c) => c.code === 'period-open').label).toMatch(/^Period [A-Z][a-z]{2} \d{4} open$/);
+    expect(s.checks.find((c) => c.code === 'period-open').label).toMatch(/^Accounting period [A-Z][a-z]{2} \d{4}$/);
     expect(s.activity.map((e) => e.actionCode)).toEqual(['create', 'submit']);
     expect((await people.cruz('get', `/remittance/approvals/remittance:${a.id}`)).body.data.id).toBe(a.id);
     expect((await people.cruz('get', '/remittance/approvals/999999')).status).toBe(404);

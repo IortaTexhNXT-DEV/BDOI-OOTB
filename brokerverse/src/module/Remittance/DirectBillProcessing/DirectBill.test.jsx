@@ -43,7 +43,7 @@ describe("Insurer billing", () => {
 
   it("the maker of a note pending approval reads why instead of Approve and Reject", async () => {
     show();
-    fireEvent.click(screen.getByRole("tab", { name: "Debit notes" }));
+    fireEvent.click(screen.getByText("Debit notes"));
     expect(await screen.findByText(MAKER.blockedReason)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Actions for DN-2026-00004" }));
     const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map((m) => m.textContent);

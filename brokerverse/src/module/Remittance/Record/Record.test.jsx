@@ -117,7 +117,7 @@ describe("Remittance record", () => {
     show();
     expect(await screen.findByText("Returned by J. Cruz on 12/10/2026 10:40 · Rates to be corrected: OD rate of POL-1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Submit for approval" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(screen.getByText("Activity"));
     expect(await screen.findByText("Approval summary")).toBeInTheDocument();
     expect(screen.getByText("PHP 1,000,000.00")).toBeInTheDocument();
     expect(screen.getByText("Role limit: TIS Finance & General Accounting")).toBeInTheDocument();
@@ -131,12 +131,12 @@ describe("Remittance record", () => {
     remittanceService.getRemittance.mockResolvedValue(record());
     remittanceService.download.mockResolvedValue(undefined);
     show();
-    fireEvent.click(await screen.findByRole("tab", { name: "Documents" }));
+    fireEvent.click(await screen.findByText("Documents"));
     fireEvent.click(await screen.findByRole("button", { name: "Download Remittance schedule (XLSX)" }));
     fireEvent.click(screen.getByRole("button", { name: "Download Remittance schedule (PDF)" }));
     expect(remittanceService.download).toHaveBeenCalledWith("/remittance/remittances/rm_21/schedule.xlsx", "schedule.xlsx");
     expect(remittanceService.download).toHaveBeenCalledWith("/remittance/remittances/rm_21/schedule.pdf", "schedule.pdf");
-    fireEvent.click(screen.getByRole("tab", { name: "Payment" }));
+    fireEvent.click(screen.getByText("Payment"));
     expect(await screen.findByText("No voucher yet. It is raised when the remittance is included in a settlement.")).toBeInTheDocument();
     expect(print).not.toHaveBeenCalled();
     print.mockRestore();

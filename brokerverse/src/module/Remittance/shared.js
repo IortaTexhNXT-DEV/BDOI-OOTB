@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiRequest, masterService } from "../../services/remittanceService";
-import { calendarDateFormat, formatDate as formatConfiguredDate } from "../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
 import { codeAmount } from "../../components/DecisionBar";
 
 /** Accounts > Remittance routes (R1). */
@@ -46,6 +46,20 @@ export const statusChip = (code, label) => ({ code: code || null, label: label |
 
 /** "PHP 409,141.43" (two decimals, thousands separators, a minus sign for negatives); "" when empty. */
 export const money = (value) => codeAmount(value, "PHP");
+
+/** "Oct 2026" for an accounting period "2026-10"; the value itself when it is not one. */
+export const periodText = (period) => {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(period || ""));
+  if (!m) return period || null;
+  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 1)).toLocaleString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+};
+
+/** The folded activity of a panel: "3 entries · latest 10/10/2026 10:32", or "No activity yet". */
+export const activitySummary = (t, entries) => {
+  const list = entries || [];
+  if (!list.length) return t("remittance.review.noActivity");
+  return t("remittance.review.activityCount", { count: list.length, at: formatInstant(list[list.length - 1]?.at, { empty: "" }) });
+};
 
 /**
  * Segment, filters and page of a list kept in the address (?segment=drafts&insurerId=3&page=2), so a link or a reload

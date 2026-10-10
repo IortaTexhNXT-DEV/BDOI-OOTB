@@ -13,7 +13,8 @@ import { REMITTANCE_ROUTES } from "../shared";
  */
 const RunStrip = ({ strip, schedules, canWrite, onRunHistory }) => {
   const { t } = useTranslation();
-  if (!strip) return null;
+  // the strip keeps its line while the summary loads, so the cards and the table below do not move
+  if (!strip) return <div className="rm-strip" aria-hidden="true" />;
   const { lastRun, nextRun, automation } = strip;
   const schedule = lastRun ? (schedules || []).find((s) => s.code === lastRun.scheduleCode) || null : null;
   const openHistory = schedule ? () => onRunHistory(schedule) : undefined;

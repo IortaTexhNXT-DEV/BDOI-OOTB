@@ -5,7 +5,6 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Skeleton } from "primereact/skeleton";
-import { TabMenu } from "primereact/tabmenu";
 import PageHeader from "../../../components/PageHeader";
 import TechnicalDetails from "../../../components/TechnicalDetails";
 import LoadingBar from "../../../components/LoadingBar";
@@ -38,7 +37,7 @@ const Covers = ({ schedule }) => {
   if (!(covers.insurers || []).length) return <span>{label}</span>;
   return (
     <>
-      <Button type="button" label={label} link size="small" className="rm-covers" aria-haspopup="dialog" onClick={(e) => panel.current?.toggle(e)} />
+      <Button type="button" label={label} link className="rm-covers rm-link rm-inline-link" aria-haspopup="dialog" onClick={(e) => panel.current?.toggle(e)} />
       <OverlayPanel ref={panel} aria-label={t("remittance.schedules.columns.covers")}>
         <ul className="rm-covers__list">{covers.insurers.map((i) => <li key={i.id}>{i.name}</li>)}</ul>
       </OverlayPanel>
@@ -116,7 +115,6 @@ const Schedules = () => {
     <div className="rm-page">
       <PageHeader title={t("remittance.setup.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
         trail={[t("remittance.setup.title")]} help={t("remittance.setup.help")} actions={actions} />
-      <TabMenu model={[{ label: t("remittance.setup.tabs.schedules") }]} activeIndex={0} className="rm-tabs" />
 
       <div className="rm-strip">
         {automation ? <AutomationChip automation={automation} /> : null}
@@ -139,19 +137,33 @@ const Schedules = () => {
           <LoadingBar active={refreshing} />
           {loading && !data ? <Skeleton height="10rem" /> : (
             <DataTable value={schedules} dataKey="id" size="small" scrollable className="rm-table" emptyMessage={empty}>
-              <Column header={t("remittance.schedules.columns.code")} body={(s) => <span className="rm-ref">{s.code}</span>} frozen style={{ minWidth: "8rem" }} />
-              <Column header={t("remittance.schedules.columns.name")} field="name" />
-              <Column header={t("remittance.schedules.columns.kind")} body={(s) => t(`remittance.schedules.kinds.${s.kind}`, { defaultValue: s.kind })} />
-              <Column header={t("remittance.schedules.columns.covers")} body={(s) => <Covers schedule={s} />} />
-              <Column header={t("remittance.schedules.columns.groupBy")} body={(s) => t(`remittance.schedules.groupByOptions.${s.groupBy}`, { defaultValue: s.groupBy })} />
-              <Column header={t("remittance.schedules.columns.window")} body={(s) => (s.paymentWindow === "Cut-off days"
-                ? t("remittance.schedules.cutOff", { count: s.cutOffDays ?? 0 }) : t(`remittance.schedules.windows.${s.paymentWindow}`, { defaultValue: s.paymentWindow }))} />
-              <Column header={t("remittance.schedules.columns.runs")} field="runs" />
-              <Column header={t("remittance.schedules.columns.nextRun")} body={(s) => <span className="rm-nowrap">{s.nextRunText || "-"}</span>} />
-              <Column header={t("remittance.schedules.columns.lastRun")} body={(s) => <span className="rm-nowrap">{s.lastRun?.text || "-"}</span>} />
-              <Column header={t("remittance.schedules.columns.lastResult")} body={(s) => lastResultText(s.lastRun, t)} />
-              <Column header={t("remittance.schedules.columns.status")} body={(s) => <StatusChip {...statusChip(String(s.status).toLowerCase(), statusText(s))} />}
-                style={{ minWidth: "7rem" }} />
+              <Column header={t("remittance.schedules.columns.schedule")} frozen style={{ minWidth: "12rem" }} body={(s) => (
+                <span className="rm-cell-stack">
+                  <span className="rm-ref">{s.name}</span>
+                  <span className="rm-muted">{[s.code, t(`remittance.schedules.kinds.${s.kind}`, { defaultValue: s.kind })].filter(Boolean).join(" · ")}</span>
+                </span>
+              )} />
+              <Column header={t("remittance.schedules.columns.covers")} body={(s) => <Covers schedule={s} />} className="rm-col-wrap" />
+              <Column header={t("remittance.schedules.columns.window")} className="rm-col-wrap" body={(s) => (
+                <span className="rm-cell-stack">
+                  <span>{s.paymentWindow === "Cut-off days" ? t("remittance.schedules.cutOff", { count: s.cutOffDays ?? 0 })
+                    : t(`remittance.schedules.windows.${s.paymentWindow}`, { defaultValue: s.paymentWindow })}</span>
+                  <span className="rm-muted">{t(`remittance.schedules.groupByOptions.${s.groupBy}`, { defaultValue: s.groupBy })}</span>
+                </span>
+              )} />
+              <Column header={t("remittance.schedules.columns.runs")} body={(s) => (
+                <span className="rm-cell-stack">
+                  <span>{s.runs || "-"}</span>
+                  {s.nextRunText ? <span className="rm-muted">{t("remittance.schedules.nextRunAt", { at: s.nextRunText })}</span> : null}
+                </span>
+              )} />
+              <Column header={t("remittance.schedules.columns.lastRun")} className="rm-col-next" body={(s) => (s.lastRun ? (
+                <span className="rm-cell-stack">
+                  <span>{s.lastRun.text}</span>
+                  <span className="rm-muted">{lastResultText(s.lastRun, t)}</span>
+                </span>
+              ) : "—")} />
+              <Column header={t("remittance.schedules.columns.status")} body={(s) => <StatusChip {...statusChip(String(s.status).toLowerCase(), statusText(s))} />} />
               <Column header={<span className="p-sr-only">{t("remittance.schedules.columns.actions")}</span>} align="center" style={{ width: "3.5rem" }}
                 body={(s) => <RowActions label={t("remittance.schedules.actionsFor", { code: s.code })} actions={s.actions} labelOf={actionLabel} onAction={act(s)} />} />
             </DataTable>

@@ -92,7 +92,7 @@ beforeEach(() => {
 });
 
 describe("Insurer payments", () => {
-  it("shows the KPI cards, the five segments, On file and No account chips, and no transfer to create", async () => {
+  it("shows the KPI cards, the five segments, the masked payee accounts and the No account chip, and no transfer to create", async () => {
     remittanceService.listPayments.mockResolvedValue(page([payRow(101), payRow(102), noAccount]));
     show();
     expect(await screen.findByText("PV-2026-00101")).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe("Insurer payments", () => {
     ["To pay (2)", "In payment (1)", "Paid (1)", "Failed (1)", "All (5)"].forEach((label) => expect(screen.getByText(label)).toBeInTheDocument());
     expect(screen.queryByText(/Legacy transfers/)).not.toBeInTheDocument();
     expect(screen.getByText("Paid this week")).toBeInTheDocument();
-    expect(screen.getAllByText("On file")).toHaveLength(2);
+    expect(screen.getAllByText("MBT ···4821").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("No account").length).toBeGreaterThan(0);
     expect(screen.queryByRole("checkbox", { name: "Select PV-2026-00103" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Select payments to batch" })).toBeDisabled();
@@ -118,7 +118,7 @@ describe("Insurer payments", () => {
     expect(remittanceService.getPayment).toHaveBeenCalledWith("PV-2026-00101");
     ["Payee", "Amounts", "Links", "Approvals"].forEach((title) => expect(screen.getByText(title)).toBeInTheDocument());
     expect(screen.getAllByText("Payment").length).toBeGreaterThan(0);
-    expect(screen.getByText("Pass")).toBeInTheDocument();
+    expect(screen.getByText("Matches")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

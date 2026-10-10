@@ -84,7 +84,7 @@ const RunNowDialog = ({ visible, onHide, schedules, scheduleId, mode, onDone }) 
 
   const footer = (
     <>
-      <Button type="button" label={t("remittance.common.close")} text onClick={onHide} disabled={busy} />
+      <Button type="button" label={running && !result ? t("remittance.common.cancel") : t("remittance.common.close")} text onClick={onHide} disabled={busy} />
       {running && !result ? (
         <Button type="button" label={t("remittance.runNow.create", { count: drafts })} onClick={run} loading={busy} disabled={!preview || !!block || busy} />
       ) : null}
@@ -166,6 +166,7 @@ const RunNowDialog = ({ visible, onHide, schedules, scheduleId, mode, onDone }) 
                   body={(r) => <StatusChip code={r.result?.code} label={r.result?.label} severity={RESULT_SEVERITY[r.result?.code]} />} />
               </DataTable>
             )}
+            {totals?.nothingToRemit ? <p className="rm-muted rm-run-now__nothing">{t("remittance.runNow.nothingToRemit", { count: totals.nothingToRemit })}</p> : null}
             {running && block ? <p className="rm-run-now__block" role="status">{block}</p> : null}
             {error ? <p className="rm-run-now__error" role="alert">{error}</p> : null}
           </>

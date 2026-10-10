@@ -282,8 +282,8 @@ async function checksOf(a, s, ctx) {
   const period = ctx.onDate.slice(0, 7);
   const month = new Date(`${period}-01T00:00:00Z`).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
   const p = await one('SELECT status FROM accounting_periods WHERE period = $1', [period]).catch(() => null);
-  out.push({ code: 'period-open', label: `Period ${month} open`, result: !p ? 'info' : p.status === 'open' ? 'pass' : 'fail',
-    detail: !p ? 'Not set up in the accounting calendar' : p.status === 'open' ? null : `Period ${month} is ${String(p.status).replace('_', '-')}` });
+  out.push({ code: 'period-open', label: `Accounting period ${month}`, result: !p ? 'info' : p.status === 'open' ? 'pass' : 'fail',
+    detail: !p ? 'Not in the accounting calendar' : p.status === 'open' ? 'Open' : `${String(p.status).charAt(0).toUpperCase()}${String(p.status).slice(1).replace('_', '-')}` });
   return out;
 }
 

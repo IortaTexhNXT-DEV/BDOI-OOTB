@@ -79,7 +79,8 @@ describe("Import policy list", () => {
     fireEvent.click(screen.getByRole("button", { name: "Purpose" }));
     choose(fileOf("opening.xlsx", 12 * MB));
     expect(await screen.findByRole("alert")).toHaveTextContent("Choose an .xlsx or .csv file of at most 10 MB.");
-    expect(screen.getByRole("button", { name: "Validate" })).toBeDisabled();
+    // Validate stays available and says what is missing instead of sending the file
+    fireEvent.click(screen.getByRole("button", { name: "Validate" }));
     choose(fileOf("opening.pdf", 1000));
     expect(screen.getByRole("alert")).toHaveTextContent("Choose an .xlsx or .csv file of at most 10 MB.");
     expect(remittanceService.validateImport).not.toHaveBeenCalled();

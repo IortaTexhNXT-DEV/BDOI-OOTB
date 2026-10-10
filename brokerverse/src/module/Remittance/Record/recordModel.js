@@ -29,7 +29,9 @@ export const lifecycleSteps = (r, t) => {
     { key: "submitted", label: t("remittance.record.steps.submitted"), state: code === "rejected" ? "done" : state(1), date: r.submittedAt || undefined,
       person: r.submittedAt ? r.submittedBy?.name || undefined : undefined },
     decisionStep,
-    { key: "voucher", label: t("remittance.record.steps.voucher"), state: state(3), date: at >= 3 ? r.settledAt || undefined : undefined, person: r.voucher?.number || undefined },
+    // a remittance settled in an earlier release without a voucher has not reached this step
+    { key: "voucher", label: t("remittance.record.steps.voucher"), state: at >= 3 && !r.voucher ? "pending" : state(3), date: at >= 3 && r.voucher ? r.settledAt || undefined : undefined,
+      person: r.voucher?.number || undefined },
     { key: "paid", label: t("remittance.record.steps.paid"), state: paid ? "done" : state(4), date: r.paidOn || undefined },
   ];
 };
@@ -68,7 +70,7 @@ export const bannerOf = (r, t) => {
       return { kind: "text", text: t("remittance.record.banner.decide", { limit: decision.myLimit === null || decision.myLimit === undefined ? t("remittance.record.banner.noLimit") : money(decision.myLimit),
         amount: money(decision.amount) }) };
     }
-    return r.nextStep?.label ? { kind: "text", text: r.nextStep.label } : null;
+    return r.nextStep?.label ? { kind: "text", text: t("remittance.record.banner.next", { step: r.nextStep.label }) } : null;
   }
   if (code === "rejected") {
     const back = r.returned || {};
@@ -80,5 +82,5 @@ export const bannerOf = (r, t) => {
   }
   if (code === "settled" && r.paidOn) return { kind: "text", text: t("remittance.record.banner.paid", { at: formatInstant(r.paidOn) }) };
   if (code === "cancelled") return null;
-  return r.nextStep?.label ? { kind: "text", text: r.nextStep.label } : null;
+  return r.nextStep?.label ? { kind: "text", text: t("remittance.record.banner.next", { step: r.nextStep.label }) } : null;
 };

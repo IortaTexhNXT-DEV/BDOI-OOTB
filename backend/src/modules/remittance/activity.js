@@ -195,7 +195,8 @@ export async function remittanceActivity(remittanceId, { viewer = null } = {}) {
   });
   const others = [...voucherEntries(pay.vouchers, fmt), ...(await emailEntries(remittanceId, fmt))].map((e) => ({ action: e.actionCode, by: e.user.username, notes: e.remarks, ...e }));
   const all = [...audited, ...fromHistory, ...others].sort((a, b) => new Date(a.at) - new Date(b.at));
-  return collapseDuplicates(all);
+  // the screen an action was taken on is a menu path: the log names jobs and e-mails only
+  return collapseDuplicates(all).map((e) => (e.source?.channel === 'screen' ? { ...e, source: null } : e));
 }
 
 export const ACTIVITY_HEADER = ['Date', 'Time', 'User', 'Role', 'Action', 'Status', 'Remarks', 'Details'];

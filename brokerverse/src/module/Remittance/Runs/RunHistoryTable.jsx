@@ -17,9 +17,10 @@ const num = (value) => <span className="rm-num">{value ?? 0}</span>;
 /**
  * The runs of a schedule, newest first (GET /remittance/schedules/:id/runs): started, trigger (Job, or Run now · user),
  * reason, window, the counts, the drafts created (links to their records), the result and its message. Paged by the
- * server; `perPage` 5 gives the latest runs of a View panel.
+ * server; `perPage` 5 gives the latest runs of a View panel, `compact` its five columns (started, trigger, window, created,
+ * result) for the 640px panel.
  */
-const RunHistoryTable = ({ scheduleId, perPage, paginate }) => {
+const RunHistoryTable = ({ scheduleId, perPage, paginate, compact }) => {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const loader = useCallback(() => remittanceService.scheduleRuns(scheduleId, { page, perPage }), [scheduleId, page, perPage]);
@@ -45,21 +46,21 @@ const RunHistoryTable = ({ scheduleId, perPage, paginate }) => {
   return (
     <div className="bv-loading-host">
       <LoadingBar active={refreshing} />
-      <DataTable value={rows} dataKey="id" size="small" loading={loading} scrollable className="rm-table" emptyMessage={t("remittance.runHistory.empty")}
+      <DataTable value={rows} dataKey="id" size="small" loading={loading} scrollable className="rm-table" emptyMessage={<div className="rm-empty">{t("remittance.runHistory.empty")}</div>}
         lazy paginator={paginate && (data?.total || 0) > perPage} rows={perPage} totalRecords={data?.total || 0} first={(page - 1) * perPage}
         onPage={(e) => setPage(e.page + 1)}>
         <Column header={t("remittance.runHistory.started")} body={(r) => <span className="rm-nowrap">{r.startedText}</span>} />
         <Column header={t("remittance.runHistory.trigger")} body={(r) => r.trigger?.label} />
-        <Column header={t("remittance.runHistory.reason")} body={(r) => r.reason?.text || "-"} />
+        {compact ? null : <Column header={t("remittance.runHistory.reason")} body={(r) => r.reason?.text || "-"} />}
         <Column header={t("remittance.runHistory.window")} body={(r) => <span className="rm-nowrap">{r.window?.text}</span>} />
-        <Column header={t("remittance.runHistory.scanned")} body={(r) => num(r.counts?.scanned)} align="right" />
-        <Column header={t("remittance.runHistory.ready")} body={(r) => num(r.counts?.ready)} align="right" />
-        <Column header={t("remittance.runHistory.held")} body={(r) => num(r.counts?.held)} align="right" />
-        <Column header={t("remittance.runHistory.exceptions")} body={(r) => num(r.counts?.exceptions)} align="right" />
+        {compact ? null : <Column header={t("remittance.runHistory.scanned")} body={(r) => num(r.counts?.scanned)} align="right" />}
+        {compact ? null : <Column header={t("remittance.runHistory.ready")} body={(r) => num(r.counts?.ready)} align="right" />}
+        {compact ? null : <Column header={t("remittance.runHistory.held")} body={(r) => num(r.counts?.held)} align="right" />}
+        {compact ? null : <Column header={t("remittance.runHistory.exceptions")} body={(r) => num(r.counts?.exceptions)} align="right" />}
         <Column header={t("remittance.runHistory.created")} body={created} align="right" />
-        <Column header={t("remittance.runHistory.dueToInsurer")} body={(r) => <span className="rm-num">{money(r.dueToInsurer)}</span>} align="right" />
+        {compact ? null : <Column header={t("remittance.runHistory.dueToInsurer")} body={(r) => <span className="rm-num">{money(r.dueToInsurer)}</span>} align="right" />}
         <Column header={t("remittance.runHistory.result")} body={(r) => <StatusChip {...statusChip(r.result?.code, r.result?.label)} />} style={{ minWidth: "8rem" }} />
-        <Column header={t("remittance.runHistory.message")} body={(r) => r.message || "-"} />
+        {compact ? null : <Column header={t("remittance.runHistory.message")} body={(r) => r.message || "-"} />}
       </DataTable>
     </div>
   );
@@ -69,8 +70,9 @@ RunHistoryTable.propTypes = {
   scheduleId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   perPage: PropTypes.number,
   paginate: PropTypes.bool,
+  compact: PropTypes.bool,
 };
 
-RunHistoryTable.defaultProps = { scheduleId: null, perPage: 20, paginate: true };
+RunHistoryTable.defaultProps = { scheduleId: null, perPage: 20, paginate: true, compact: false };
 
 export default RunHistoryTable;

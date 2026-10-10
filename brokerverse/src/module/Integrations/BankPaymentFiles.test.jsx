@@ -22,7 +22,10 @@ const open = (batch) => {
   render(<MemoryRouter initialEntries={[`/accounts/bank-payment-files?batch=${batch.id}`]}><BankPaymentFiles /></MemoryRouter>);
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  localStorage.removeItem("USER_PERMISSIONS");
+});
 
 describe("Bank Payment Files decision block", () => {
   it("?batch= opens the batch; the batch maker reads why instead of Approve and Reject", async () => {
@@ -37,6 +40,17 @@ describe("Bank Payment Files decision block", () => {
     open({ ...BATCH, decision: { canDecide: false, blockedCode: "VOUCHER_MAKER", blockedReason: "You prepared payment voucher PV-2026-00102 in this batch. Another user must approve it." } });
     expect(await screen.findByText(/You prepared payment voucher PV-2026-00102/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();
+  });
+
+  it("a reader of the batches sees no workflow step, and the payee's account by its last four digits", async () => {
+    localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:disbursements"]));
+    open({ ...BATCH, decision: { canDecide: false, blockedCode: "NO_PERMISSION", blockedReason: "You can view payment batches but not approve them." },
+      lines: [{ id: 1, seq: 1, voucherNumber: "PV-2026-00013", payeeName: "Pioneer", accountName: "Pioneer", bankCode: "BPI", accountNumber: "3081-9988-01", amount: 89026, status: "pending" }] });
+    expect(await screen.findByText("BPI ···8801")).toBeInTheDocument();
+    expect(screen.queryByText(/3081-9988-01/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Cancel batch" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "New batch" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("PHP 89,026.00").length).toBeGreaterThan(0);
   });
 
   it("a user who may decide gets Approve and Reject", async () => {

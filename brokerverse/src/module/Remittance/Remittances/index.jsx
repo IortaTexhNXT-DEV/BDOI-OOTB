@@ -183,14 +183,22 @@ const Remittances = () => {
     if (r.flags?.offCycle) {
       return <span title={r.offCycleReason?.text || undefined}><StatusChip label={t("remittance.flags.offCycle")} severity="info" /></span>;
     }
-    return <span className="rm-nowrap">{weekText(r.coverageWeek) || "-"}</span>;
+    return <span className="rm-nowrap rm-muted">{weekText(r.coverageWeek) || "-"}</span>;
   };
+  // the coverage week under the reference, the due date under the amount and the product line under the insurer keep
+  // the Next step column on screen at a laptop width
+  const insurer = (r) => (
+    <span className="rm-cell-stack">
+      <span>{r.insurer?.shortName || "-"}</span>
+      {r.productLine ? <span className="rm-muted">{r.productLine}</span> : null}
+    </span>
+  );
   const policies = (r) => (
     <span className="rm-num">{r.heldCount ? t("remittance.list.policiesHeld", { count: r.policyCount, held: r.heldCount }) : r.policyCount}</span>
   );
   const dueDate = (r) => (r.overdue
     ? <span className="rm-nowrap rm-overdue">{t("remittance.list.overdueOn", { date: formatDate(r.dueDate) })}</span>
-    : <span className="rm-nowrap">{formatDate(r.dueDate) || "-"}</span>);
+    : <span className="rm-nowrap rm-muted">{r.dueDate ? t("remittance.list.dueOn", { date: formatDate(r.dueDate) }) : "-"}</span>);
   const status = (r) => (
     <span className="rm-status-cell">
       <StatusChip {...statusChip(r.status, r.statusLabel)} />
@@ -283,18 +291,16 @@ const Remittances = () => {
             onPage={(e) => update({ page: String(e.page + 1) })} sortField={sort.sortField} sortOrder={sort.sortOrder}
             onSort={(e) => update({ sort: sortParam(e.sortField, e.sortOrder) })}>
             {selectColumn}
-            <Column header={t("remittance.list.columns.remittanceNo")} sortable sortField="remittanceNo" frozen style={{ minWidth: "11rem" }}
-              body={(r) => <Link to={r.link} className="rm-ref">{r.remittanceNo}</Link>} footer={t("remittance.list.total", { count: data?.totals?.count ?? 0 })} />
-            <Column header={t("remittance.list.columns.insurer")} sortable sortField="insurer" body={(r) => r.insurer?.shortName || "-"} />
-            <Column header={t("remittance.list.columns.productLine")} body={(r) => r.productLine || "-"} />
-            <Column header={t("remittance.list.columns.basis")} body={(r) => r.basisLabel || "-"} />
-            <Column header={t("remittance.list.columns.coverageWeek")} sortable sortField="week" body={coverage} />
+            <Column header={t("remittance.list.columns.remittanceNo")} sortable sortField="remittanceNo" frozen style={{ minWidth: "9.5rem" }}
+              body={(r) => <span className="rm-cell-stack"><Link to={r.link} className="rm-ref">{r.remittanceNo}</Link>{coverage(r)}</span>} footer={t("remittance.list.total", { count: data?.totals?.count ?? 0 })} />
+            <Column header={t("remittance.list.columns.insurer")} sortable sortField="insurer" body={insurer} />
+            {show("basis") ? <Column header={t("remittance.list.columns.basis")} body={(r) => r.basisLabel || "-"} /> : null}
             <Column header={t("remittance.list.columns.policies")} sortable sortField="policies" body={policies} align="right" />
             <Column header={t("remittance.list.columns.dueToInsurer")} sortable sortField="dueToInsurer" align="right"
-              body={(r) => <span className="rm-num">{money(r.dueToInsurer)}</span>} footer={data ? <span className="rm-num">{money(data.totals?.dueToInsurer)}</span> : null} />
-            <Column header={t("remittance.list.columns.dueDate")} sortable sortField="dueDate" body={dueDate} />
-            <Column header={t("remittance.list.columns.status")} sortable sortField="status" body={status} style={{ minWidth: "10rem" }} />
-            <Column header={t("remittance.list.columns.nextStep")} body={nextStep} style={{ minWidth: "14rem" }} />
+              body={(r) => <span className="rm-cell-stack rm-cell-stack--end"><span className="rm-num">{money(r.dueToInsurer)}</span>{dueDate(r)}</span>}
+              footer={data ? <span className="rm-num">{money(data.totals?.dueToInsurer)}</span> : null} />
+            <Column header={t("remittance.list.columns.status")} sortable sortField="status" body={status} />
+            <Column header={t("remittance.list.columns.nextStep")} body={nextStep} className="rm-col-next" />
             {show("source") ? <Column header={t("remittance.list.columns.source")} body={(r) => r.source?.label || "-"} /> : null}
             {show("voucherNo") ? <Column header={t("remittance.list.columns.voucherNo")} body={(r) => r.voucher?.number || "-"} /> : null}
             {show("paidOn") ? <Column header={t("remittance.list.columns.paidOn")} body={(r) => dayOf(r.paidOn)} /> : null}

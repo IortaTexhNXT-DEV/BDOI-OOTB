@@ -35,7 +35,7 @@ const RowActions = ({ actions, onAction, label, labelOf, className }) => {
   const focusItem = (index) => {
     const nodes = itemNodes();
     if (!nodes.length) return;
-    nodes[(index + nodes.length) % nodes.length].focus();
+    nodes[(index + nodes.length) % nodes.length].focus({ preventScroll: true });
   };
 
   const close = useCallback((refocus = true) => {
@@ -49,7 +49,7 @@ const RowActions = ({ actions, onAction, label, labelOf, className }) => {
   };
 
   useLayoutEffect(() => {
-    if (open) menu.current?.querySelector("[role='menuitem']")?.focus();
+    if (open) menu.current?.querySelector("[role='menuitem']")?.focus({ preventScroll: true });
   }, [open]);
 
   useEffect(() => {
@@ -58,13 +58,20 @@ const RowActions = ({ actions, onAction, label, labelOf, className }) => {
       if (!menu.current?.contains(e.target) && !trigger.current?.contains(e.target)) close(false);
     };
     const away = () => close(false);
+    // a scroll (of the page or of the table bringing the trigger into view) moves the menu with its trigger; it closes
+    // only once the trigger has left the window
+    const follow = () => {
+      const r = trigger.current?.getBoundingClientRect();
+      if (!r || r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth) close(false);
+      else setPosition({ top: r.bottom + 4, right: Math.max(8, window.innerWidth - r.right) });
+    };
     document.addEventListener("mousedown", outside);
     window.addEventListener("resize", away);
-    window.addEventListener("scroll", away, true);
+    window.addEventListener("scroll", follow, true);
     return () => {
       document.removeEventListener("mousedown", outside);
       window.removeEventListener("resize", away);
-      window.removeEventListener("scroll", away, true);
+      window.removeEventListener("scroll", follow, true);
     };
   }, [open, close]);
 

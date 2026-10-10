@@ -1646,7 +1646,8 @@
         "submittedBy": "Submitted by",
         "createdOn": "Created on",
         "actions": "Actions"
-      }
+      },
+      "dueOn": "Due {{date}}"
     },
     "import": {
       "title": "Import policy list",
@@ -1709,7 +1710,8 @@
         "policies": "Policies",
         "dueToInsurer": "Due to insurer",
         "varianceRows": "Variance rows"
-      }
+      },
+      "fileRequired": "Choose the file to import."
     },
     "importHistory": {
       "title": "Import history",
@@ -1732,7 +1734,8 @@
         "view": "View result",
         "errors": "Download error report",
         "file": "Download file"
-      }
+      },
+      "filePurpose": "File and purpose"
     },
     "addExceptionType": "Add Exception Type",
     "addRule": "Add Rule",
@@ -1884,7 +1887,8 @@
         "status": "Status",
         "actions": "Actions",
         "frequency": "Frequency",
-        "timeZone": "Time zone"
+        "timeZone": "Time zone",
+        "schedule": "Schedule"
       },
       "actions": {
         "view": "View",
@@ -1934,7 +1938,8 @@
         "create": "Create schedule",
         "required": "Enter the name",
         "monday": "The next run of a weekly schedule is a Monday"
-      }
+      },
+      "nextRunAt": "Next {{at}}"
     },
     "runHistory": {
       "title": "Run history · {{code}}",
@@ -1970,7 +1975,7 @@
       "rejectVerb": "Reject and return to maker",
       "rejected": "Remittance returned to the maker.",
       "theMaker": "the maker",
-      "reference": "Remittance",
+      "reference": "Reference",
       "amount": "Amount",
       "reason": "Reason"
     },
@@ -2031,7 +2036,9 @@
         "reason": "Reason",
         "limitAtDecision": "Limit at decision",
         "decidedOn": "Decided on",
-        "actions": "Actions"
+        "actions": "Actions",
+        "submitted": "Submitted",
+        "submittedSla": "Submitted · SLA"
       },
       "outcomes": {
         "Approved": "Approved",
@@ -2069,7 +2076,9 @@
         "all": "Nothing is pending approval.",
         "decided": "No decisions in the last 30 days."
       },
-      "loadError": "The approvals could not be loaded."
+      "loadError": "The approvals could not be loaded.",
+      "total_one": "Total ({{count}} item)",
+      "total_other": "Total ({{count}} items)"
     },
     "review": {
       "title": "Review approval",
@@ -2101,7 +2110,12 @@
       "activity": "Activity",
       "showActivity": "Show activity",
       "hideActivity": "Hide activity",
-      "activityCount": "{{count}} entries · latest {{at}}"
+      "noActivity": "No activity yet",
+      "activityCount_one": "1 entry · latest {{at}}",
+      "activityCount_other": "{{count}} entries · latest {{at}}",
+      "type": "Type",
+      "amount": "Amount",
+      "description": "Description"
     },
     "record": {
       "title": "Remittance",
@@ -2137,7 +2151,8 @@
         "decide": "Awaiting your decision · Your limit {{limit}} · This item {{amount}}",
         "noLimit": "no limit",
         "returned": "Returned by {{name}} on {{at}}",
-        "paid": "Paid on {{at}}"
+        "paid": "Paid on {{at}}",
+        "next": "Next step: {{step}}"
       },
       "stale": "{{message}} Reload to see the current version.",
       "reload": "Reload",
@@ -2189,7 +2204,9 @@
         "empty": "No lines.",
         "actions": "Actions",
         "actionsFor": "Actions for {{policy}}",
-        "viewPolicy": "View policy"
+        "viewPolicy": "View policy",
+        "policyClient": "Policy and client",
+        "productEffective": "Product and effective date"
       },
       "payment": {
         "none": "No voucher yet. It is raised when the remittance is included in a settlement.",
@@ -2216,10 +2233,9 @@
         "summary": "Approval summary",
         "authority": "Authority",
         "level": "Level",
-        "content": "Content version",
-        "version": "v{{version}}",
-        "unchanged": "v{{version}} · unchanged since submission",
-        "changed": "v{{version}} · changed since submission (v{{submitted}})",
+        "content": "Content",
+        "unchanged": "Unchanged since submission",
+        "changed": "Changed after submission",
         "decision": "Decision",
         "decisions": {
           "Pending": "Pending",
@@ -2298,7 +2314,8 @@
         "bankRef": "Bank ref",
         "paidOn": "Paid on",
         "nextStep": "Next step",
-        "actions": "Actions"
+        "actions": "Actions",
+        "insurerPayee": "Insurer and payee account"
       },
       "actions": {
         "view": "View payment",
@@ -2340,7 +2357,7 @@
         "refundCredits": "Refund credits netted",
         "voucherAmount": "Voucher amount",
         "bankAmount": "Bank amount",
-        "check": "Check",
+        "check": "Amount check",
         "links": "Links",
         "remittance": "Remittance",
         "schedule": "Schedule",
@@ -2361,7 +2378,11 @@
         "resultImported": "Result imported by",
         "activity": "Activity",
         "openRemittance": "Open remittance",
-        "openBatch": "Open batch"
+        "openBatch": "Open batch",
+        "checkResult": {
+          "pass": "Matches",
+          "difference": "Difference"
+        }
       },
       "legacy": {
         "title": "Legacy transfer",
@@ -2395,7 +2416,9 @@
           "approvedBy": "Approved by",
           "journal": "Journal (JV)",
           "reversal": "Reversal"
-        }
+        },
+        "notPosted": "Not posted at approval",
+        "notApproved": "Not approved"
       }
     },
     "exceptions": {
@@ -2464,8 +2487,17 @@
         "difference": "Difference",
         "description": "Description",
         "escalation": "Escalation reason",
-        "resolution": "Resolution"
-      }
+        "resolution": "Resolution",
+        "typeReference": "Type and remittance"
+      },
+      "statuses": {
+        "open": "Open",
+        "inProgress": "In progress",
+        "escalated": "Escalated",
+        "resolved": "Resolved"
+      },
+      "startTitle": "Start {{reference}}",
+      "startMessage": "{{reference}} is assigned to you and moves to In progress."
     },
     "settlementScreen": {
       "submitTitle": "Submit settlement {{reference}} for approval",
@@ -2479,7 +2511,14 @@
       "insurer": "Insurer",
       "policies": "Policies",
       "removeTitle": "Remove {{policy}} from the settlement",
-      "remove": "Remove"
+      "remove": "Remove",
+      "title": "Settlement",
+      "help": "Settle approved remittances with an insurer for a period; the approved settlement raises the payment voucher in Disbursement.",
+      "tabs": {
+        "adjustments": "Adjustments",
+        "payment": "Payment",
+        "workflow": "Workflow"
+      }
     },
     "billing": {
       "title": "Insurer billing",
@@ -2535,7 +2574,48 @@
       "collectFacts": "Balance {{balance}} · EWT {{rate}}% of the commission",
       "void": "Void",
       "voidTitle": "Void payment {{reference}}",
-      "voidReason": "Reason"
+      "voidReason": "Reason",
+      "fields": {
+        "insurer": "Insurer",
+        "chooseInsurer": "Choose an insurer",
+        "issuedFrom": "Issued from",
+        "issuedTo": "Issued to",
+        "line": "Line of business",
+        "allLines": "All lines",
+        "status": "Status",
+        "allInsurers": "All insurers"
+      },
+      "loadPolicies": "Load policies",
+      "emptyPolicies": "Choose an insurer and a period, then load the direct-bill policies to bill.",
+      "saveDraft": "Save draft",
+      "raiseAndSubmit": "Raise debit note and submit for approval",
+      "refresh": "Refresh",
+      "emptyNotes": "No commission debit notes.",
+      "changeMode": "Change billing mode",
+      "columns": {
+        "policyNo": "Policy no",
+        "reference": "Reference",
+        "insured": "Insured",
+        "product": "Product",
+        "line": "Line",
+        "issued": "Issued",
+        "grossPremium": "Gross premium",
+        "rate": "Rate",
+        "commission": "Commission",
+        "vat": "VAT",
+        "totalDue": "Total due",
+        "ewt": "EWT",
+        "clientPaid": "Client paid insurer",
+        "bookedIn": "Booked in",
+        "debitNote": "Debit note",
+        "date": "Date",
+        "insurer": "Insurer",
+        "policies": "Policies",
+        "collected": "Collected",
+        "balance": "Balance",
+        "due": "Due",
+        "status": "Status"
+      }
     },
     "runNow": {
       "title": "Run now",
@@ -2561,8 +2641,10 @@
       "result": "Run result",
       "paused": "{{code}} is paused. Resume it to run it.",
       "nothing": "Nothing to remit in this window.",
-      "noInsurers": "No insurer to remit.",
-      "loadError": "Could not compute the preview."
+      "noInsurers": "Nothing to remit in this window.",
+      "loadError": "Could not compute the preview.",
+      "nothingToRemit_one": "{{count}} insurer has nothing to remit.",
+      "nothingToRemit_other": "{{count}} insurers have nothing to remit."
     }
   },
   "incentive": {

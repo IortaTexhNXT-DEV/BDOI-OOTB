@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Skeleton } from "primereact/skeleton";
-import { TabPanel, TabView } from "primereact/tabview";
+import { TabMenu } from "primereact/tabmenu";
 import { Toast } from "primereact/toast";
 import PageHeader from "../../../components/PageHeader";
 import DetailHeader from "../../../components/DetailHeader";
@@ -64,7 +64,7 @@ const RemittanceRecord = () => {
   };
 
   const header = (
-    <PageHeader title={r?.remittanceNo || t("remittance.record.title")} home={t("remittance.common.accounts")}
+    <PageHeader title={t("remittance.record.title")} home={t("remittance.common.accounts")}
       section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
       trail={[{ label: t("remittance.record.remittances"), to: REMITTANCE_ROUTES.remittances }, r?.remittanceNo || t("remittance.record.title")]}
       onBack={() => navigate(REMITTANCE_ROUTES.remittances)} />
@@ -254,12 +254,15 @@ const RemittanceRecord = () => {
 
       <div className="rm-card rm-record__totals"><KeyValueGrid columns={4} items={totals} /></div>
 
-      <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)} className="rm-record__tabs">
-        <TabPanel header={t("remittance.record.tabs.lines", { count: (r.lines || []).length })}><LinesTab record={r} /></TabPanel>
-        <TabPanel header={t("remittance.record.tabs.payment")}><PaymentTab record={r} /></TabPanel>
-        <TabPanel header={t("remittance.record.tabs.documents")}><DocumentsTab record={r} /></TabPanel>
-        <TabPanel header={t("remittance.record.tabs.activity")}><ActivityTab record={r} /></TabPanel>
-      </TabView>
+      {/* the same tab bar as the lists' segments (one style of tabs in the module) */}
+      <TabMenu model={[t("remittance.record.tabs.lines", { count: (r.lines || []).length }), t("remittance.record.tabs.payment"), t("remittance.record.tabs.documents"),
+        t("remittance.record.tabs.activity")].map((label) => ({ label }))} activeIndex={tab} onTabChange={(e) => setTab(e.index)} className="rm-tabs" />
+      <div className="rm-card rm-record__tab">
+        {tab === 0 ? <LinesTab record={r} /> : null}
+        {tab === 1 ? <PaymentTab record={r} /> : null}
+        {tab === 2 ? <DocumentsTab record={r} /> : null}
+        {tab === 3 ? <ActivityTab record={r} /> : null}
+      </div>
 
       <RejectDialog approval={rejecting} onHide={afterReject} />
     </div>

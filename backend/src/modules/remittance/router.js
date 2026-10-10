@@ -505,7 +505,7 @@ define({
     lines: [{ policyNo: 'POL-2026-95021', client: 'J. Santos', premium: 64159.68, dueToInsurer: 40857.86 }], lineCount: 12,
     previous: { id: 'rm_17', remittanceNo: 'REM-2026-00017', amount: 371210, changePercent: 10.22 },
     checks: [{ code: 'content-unchanged', label: 'Content unchanged since submission', result: 'pass', detail: 'v3 · unchanged since submission' },
-      { code: 'period-open', label: 'Period Oct 2026 open', result: 'pass', detail: null }],
+      { code: 'period-open', label: 'Accounting period Oct 2026', result: 'pass', detail: 'Open' }],
     exceptions: { count: 0, items: [] }, activity: [activity] } },
   handler: async (req, res) => ok(res, await approvals.approvalSummary(req.params.id, req.user)),
 });

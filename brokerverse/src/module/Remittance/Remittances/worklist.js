@@ -12,7 +12,7 @@ export const PRODUCT_LINES = ["Motor", "Personal Accident", "Credit Life", "Mari
 export const SOURCES = ["weekly-run", "run-now", "import"];
 export const STATUSES = ["draft", "rejected", "for-approval", "approved", "settled", "cancelled"];
 /** Columns the chooser adds to the table (the export always has them). */
-export const HIDDEN_COLUMNS = ["source", "voucherNo", "paidOn", "bankRef", "submittedBy", "createdOn"];
+export const HIDDEN_COLUMNS = ["basis", "source", "voucherNo", "paidOn", "bankRef", "submittedBy", "createdOn"];
 export const PER_PAGE = 50;
 
 /** My work for a user who prepares remittances, All for everyone else. */

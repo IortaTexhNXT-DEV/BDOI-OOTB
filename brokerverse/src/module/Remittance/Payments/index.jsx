@@ -127,12 +127,9 @@ const Payments = () => {
   const open = batchable(rows);
   const allTicked = open.length > 0 && open.every(ticked);
   const selectColumn = readOnly || legacy ? null : (
-    <Column frozen style={{ width: "6.5rem" }}
+    <Column frozen style={{ width: "3rem" }}
       header={open.length ? <Checkbox checked={allTicked} onChange={(e) => setSelection(e.checked ? open : [])} aria-label={t("remittance.payments.selectAll")} /> : null}
-      body={(r) => {
-        if (r.selectable) return <Checkbox checked={ticked(r)} onChange={(e) => tick(r, e.checked)} aria-label={t("remittance.payments.select", { voucher: r.voucherNo })} />;
-        return r.payee?.chip?.code === "none" ? <StatusChip label={r.payee.chip.label} severity="secondary" /> : null;
-      }} />
+      body={(r) => (r.selectable ? <Checkbox checked={ticked(r)} onChange={(e) => tick(r, e.checked)} aria-label={t("remittance.payments.select", { voucher: r.voucherNo })} /> : null)} />
   );
 
   const rowActions = (row) => (row.actions || []).filter((a) => !a.link || a.code === "view" || a.code === "open-remittance" || canOpen(a.link.split("?")[0]));
@@ -144,12 +141,41 @@ const Payments = () => {
     else if (action.link) navigate(action.link);
   };
 
-  const payeeCell = (r) => (
-    <span className="rm-payee">
-      {r.payee?.label ? <span className="rm-nowrap">{r.payee.label}</span> : null}
-      {r.payee?.chip ? <StatusChip label={r.payee.chip.label} severity="secondary" /> : null}
+  // two lines per cell (voucher and remittance, insurer and payee account, method and value date, batch and its
+  // status, paid on and bank reference) keep Next step on screen at a laptop width
+  const voucherCell = (r) => (
+    <span className="rm-cell-stack">
+      <Button type="button" link className="rm-ref rm-link" label={r.voucherNo} onClick={() => update({ payment: r.voucherNo, page: state.page })} />
+      {r.remittance ? <Link to={r.remittance.link} className="rm-ref rm-muted">{r.remittance.remittanceNo}</Link> : null}
     </span>
   );
+  const payeeCell = (r) => (
+    <span className="rm-cell-stack">
+      <span>{r.insurer?.shortName || "-"}</span>
+      <span className="rm-payee rm-muted">
+        {r.payee?.label ? <span className="rm-nowrap">{[r.payee.bank?.code || r.payee.bank?.name, r.payee.accountMasked].filter(Boolean).join(" ")}</span> : null}
+        {r.payee?.chip?.code === "none" ? <StatusChip label={r.payee.chip.label} severity="secondary" /> : null}
+      </span>
+    </span>
+  );
+  const methodCell = (r) => (
+    <span className="rm-cell-stack">
+      <span>{r.method?.label || "-"}</span>
+      {r.valueDate ? <span className="rm-muted">{formatDate(r.valueDate)}</span> : null}
+    </span>
+  );
+  const batchCell = (r) => (r.batch ? (
+    <span className="rm-cell-stack">
+      <AppLink to={r.batch.link}>{r.batch.number}</AppLink>
+      <StatusChip code={r.batch.status} label={r.batch.statusLabel} severity={severityOf(r.batch.status)} />
+    </span>
+  ) : "-");
+  const paidCell = (r) => (r.paidOn ? (
+    <span className="rm-cell-stack">
+      <span>{formatDate(r.paidOn)}</span>
+      {r.bankReference ? <span className="rm-muted">{r.bankReference}</span> : null}
+    </span>
+  ) : "-");
   const nextStep = (r) => (
     <span className="rm-next-step">
       <span>{r.nextStep?.label || "-"}</span>
@@ -176,22 +202,15 @@ const Payments = () => {
         lazy paginator={(data?.total || 0) > PER_PAGE} rows={PER_PAGE} first={(page - 1) * PER_PAGE} totalRecords={data?.total || 0}
         onPage={(e) => update({ page: String(e.page + 1) })}>
         {selectColumn}
-        <Column header={t("remittance.payments.columns.voucherNo")} frozen style={{ minWidth: "10rem" }}
-          body={(r) => <Button type="button" link className="rm-ref rm-link" label={r.voucherNo} onClick={() => update({ payment: r.voucherNo, page: state.page })} />}
+        <Column header={t("remittance.payments.columns.voucherNo")} frozen style={{ minWidth: "9.5rem" }} body={voucherCell}
           footer={t("remittance.payments.total", { count: data?.totals?.count ?? 0 })} />
-        <Column header={t("remittance.payments.columns.remittance")} body={(r) => (r.remittance ? <Link to={r.remittance.link} className="rm-ref">{r.remittance.remittanceNo}</Link> : "-")} />
-        <Column header={t("remittance.payments.columns.insurer")} body={(r) => r.insurer?.shortName || "-"} />
+        <Column header={t("remittance.payments.columns.insurerPayee")} body={payeeCell} />
         <Column header={t("remittance.payments.columns.amount")} align="right" body={(r) => <span className="rm-num">{money(r.amount)}</span>}
           footer={data ? <span className="rm-num">{money(data.totals?.amount)}</span> : null} />
-        <Column header={t("remittance.payments.columns.payeeAccount")} body={payeeCell} style={{ minWidth: "14rem" }} />
-        <Column header={t("remittance.payments.columns.method")} body={(r) => r.method?.label || "-"} />
-        <Column header={t("remittance.payments.columns.batch")} body={(r) => (r.batch ? <AppLink to={r.batch.link}>{r.batch.number}</AppLink> : "-")} />
-        <Column header={t("remittance.payments.columns.batchStatus")} style={{ minWidth: "9rem" }}
-          body={(r) => (r.batch ? <StatusChip code={r.batch.status} label={r.batch.statusLabel} severity={severityOf(r.batch.status)} /> : "-")} />
-        <Column header={t("remittance.payments.columns.valueDate")} body={(r) => <span className="rm-nowrap">{formatDate(r.valueDate) || "-"}</span>} />
-        <Column header={t("remittance.payments.columns.bankRef")} body={(r) => r.bankReference || "-"} />
-        <Column header={t("remittance.payments.columns.paidOn")} body={(r) => <span className="rm-nowrap">{formatDate(r.paidOn) || "-"}</span>} />
-        <Column header={t("remittance.payments.columns.nextStep")} body={nextStep} style={{ minWidth: "14rem" }} />
+        <Column header={t("remittance.payments.columns.method")} body={methodCell} />
+        <Column header={t("remittance.payments.columns.batch")} body={batchCell} />
+        <Column header={t("remittance.payments.columns.paidOn")} body={paidCell} />
+        <Column header={t("remittance.payments.columns.nextStep")} body={nextStep} className="rm-col-next" />
         <Column header={<span className="p-sr-only">{t("remittance.payments.columns.actions")}</span>} align="center" style={{ width: "3.5rem" }}
           body={(r) => <RowActions label={t("remittance.payments.actionsFor", { voucher: r.voucherNo })} actions={rowActions(r)} labelOf={actionLabel} onAction={onRowAction(r)} />} />
       </DataTable>

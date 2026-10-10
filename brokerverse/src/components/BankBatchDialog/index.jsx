@@ -10,7 +10,8 @@
  * With `preselectedIds` the dialog lists those vouchers only, all included (a voucher can still be left out); a voucher
  * that can no longer go on a batch is counted, not listed. The layout of `bankCode` (or `layoutCode`) is chosen first,
  * and the debit account of the same bank. The value date is today or later, on a working day. A refusal of the server
- * stays in the dialog.
+ * stays in the dialog. Payee accounts show their last four digits; the warning on a starter layout is for the users who
+ * maintain the layouts.
  */
 import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
@@ -24,13 +25,22 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import DateField from "../DateField";
-import { formatValue } from "../KeyValueGrid/formatValue";
+import { codeAmount } from "../DecisionBar";
+import { canOpen } from "../../utils/canOpen";
 import service from "../../services/integrationsService";
 import { formatDate, instantParts } from "../../utility/dateFormat";
 import "./bankBatchDialog.scss";
 
 const CHANNELS = ["bulk_credit", "instapay", "pesonet"];
-const amount = (v) => formatValue(v, { type: "amount" });
+const amount = (v) => codeAmount(v, "PHP");
+
+/** "BPI ···8801": the bank and the last four digits of the payee's account. */
+const maskedAccount = (bankCode, number) => {
+  const digits = String(number || "").replace(/\D/g, "");
+  return [bankCode, digits ? `···${digits.slice(-4)}` : null].filter(Boolean).join(" ");
+};
+
+const LAYOUTS = "/master/finance/bank-file-layouts";
 const same = (a, b) => String(a || "").toUpperCase() === String(b || "").toUpperCase();
 
 /** Today in the business time zone (YYYY-MM-DD). */
@@ -142,7 +152,7 @@ const BankBatchDialog = ({ visible, onHide, onCreated, preselectedIds, payeeType
       {preset ? null : <div className="bv-bank-batch__muted">{t(`integrations.payeeTypes.${v.payeeType}`, { defaultValue: v.payeeType })}</div>}
     </div>
   );
-  const accountCell = (v) => (v.ready ? `${v.bankCode} ${v.accountNumber}` : <span className="bv-bank-batch__no-account">{t("bankBatchDialog.noAccount")}</span>);
+  const accountCell = (v) => (v.ready ? maskedAccount(v.bankCode, v.accountNumber) : <span className="bv-bank-batch__no-account">{t("bankBatchDialog.noAccount")}</span>);
 
   return (
     <Dialog className="bv-bank-batch" header={header || t("bankBatchDialog.title")} visible={visible} style={{ width: "min(1000px, 98vw)" }} onHide={onHide} footer={footer}>
@@ -170,7 +180,7 @@ const BankBatchDialog = ({ visible, onHide, onCreated, preselectedIds, payeeType
           {dateProblem ? <small id="bank-batch-value-date-problem" className="bv-bank-batch__problem">{t(`bankBatchDialog.valueDateProblem.${dateProblem}`)}</small> : null}
         </div>
       </div>
-      {layout?.isExample ? <Message severity="warn" className="w-full bv-bank-batch__starter" text={t("integrations.exampleLayout")} /> : null}
+      {layout?.isExample && canOpen(LAYOUTS) ? <Message severity="warn" className="w-full bv-bank-batch__starter" text={t("integrations.exampleLayout")} /> : null}
 
       <h3 className="bv-bank-batch__title">{preset ? t("bankBatchDialog.included") : t("bankBatchDialog.vouchers")}</h3>
       {missing > 0 ? <p className="bv-bank-batch__missing" role="status">{t("bankBatchDialog.notEligible", { count: missing })}</p> : null}

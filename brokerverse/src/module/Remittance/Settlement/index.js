@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
+import { TabMenu } from "primereact/tabmenu";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -11,15 +11,15 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
 import { Timeline } from "primereact/timeline";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import remittanceService from "../../../services/remittanceService";
-import { calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
-import SvgDot from "../../../assets/icons/SvgDot";
+import { REMITTANCE_ROUTES, calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
+import PageHeader from "../../../components/PageHeader";
+import "../remittance.scss";
 import "./index.scss";
 
 const initialSettlement = () => ({
@@ -102,13 +102,7 @@ const SettlementProcessing = () => {
     { label: "Adjustment", value: "Adjustment" }
   ];
 
-  const items = [
-    { label: t("remittance.finance"), url: "#" },
-    { label: t("remittance.remittance"), url: "#" },
-    { label: t("remittance.settlement"), url: "#" }
-  ];
 
-  const home = { icon: <SvgDot />, url: "#" };
 
   const calculateSummary = () => {
     const totalPremium = policies.reduce((acc, p) => acc + Number(p.premium || 0), 0);
@@ -345,11 +339,11 @@ const SettlementProcessing = () => {
   );
 
   return (
-    <div className="container__settlement__processing__master">
+    <div className="container__settlement__processing__master rm-page">
         <Toast ref={toast} />
+        <PageHeader title={t("remittance.settlementScreen.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
+          trail={[t("remittance.settlementScreen.title")]} help={t("remittance.settlementScreen.help")} />
         <div className="top__container">
-          <h1 className="page__title">{t("remittance.insurerSettlement")}</h1>
-          <BreadCrumb model={items} home={home} />
 
           <div className="header-content">
             <div className="header-info">
@@ -386,8 +380,9 @@ const SettlementProcessing = () => {
         <div className="content-container">
           <div className="content-section">
           <Card>
-            <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-              <TabPanel header={t("remittance.settlementDetails")}>
+            <TabMenu model={[t("remittance.settlementDetails"), t("remittance.settlementScreen.tabs.adjustments"), t("remittance.settlementScreen.tabs.payment"),
+              t("remittance.settlementScreen.tabs.workflow")].map((label) => ({ label }))} activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)} className="rm-tabs" />
+            {activeIndex === 0 ? (
                 <div className="tab-content">
                   <div className="section-title">{t("remittance.insurerInformation")}</div>
                   {insurerCredits?.openBalance > 0 && (
@@ -481,9 +476,9 @@ const SettlementProcessing = () => {
                     <Column body={actionBodyTemplate} style={{ width: '5%' }} />
                   </DataTable>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Adjustments">
+            {activeIndex === 1 ? (
                 <div className="tab-content">
                   <div className="section-title">Adjustment Details</div>
                   <div className="form-grid two-column">
@@ -552,9 +547,9 @@ const SettlementProcessing = () => {
                     />
                   </div>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Payment">
+            {activeIndex === 2 ? (
                 <div className="tab-content">
                   <div className="section-title">Payment Information</div>
                   <div className="form-grid two-column">
@@ -602,9 +597,9 @@ const SettlementProcessing = () => {
                     </div>
                   </div>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Workflow">
+            {activeIndex === 3 ? (
                 <div className="tab-content">
                   <div className="section-title">Approval Workflow</div>
                   <Timeline value={workflowHistory}
@@ -649,8 +644,7 @@ const SettlementProcessing = () => {
                     )}
                   </div>
                 </div>
-              </TabPanel>
-            </TabView>
+            ) : null}
           </Card>
 
           <Card className="summary-card" title="Settlement Summary">

@@ -21765,9 +21765,9 @@
       },
       {
         ""code"": ""period-open"",
-        ""label"": ""Period Oct 2026 open"",
+        ""label"": ""Accounting period Oct 2026"",
         ""result"": ""pass"",
-        ""detail"": null
+        ""detail"": ""Open""
       }
     ],
     ""exceptions"": {

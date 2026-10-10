@@ -20,9 +20,20 @@ import EligibilityNote from "../../components/EligibilityNote";
 import BankBatchDialog from "../../components/BankBatchDialog";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { ActivityLog, fromLifecycle } from "../../components/ActivityLog";
-import { IntTag, PageHeader, SEVERITY, date, dateTime, money, showError, showSuccess } from "./common";
+import { codeAmount } from "../../components/DecisionBar";
+import { hasPermission } from "../../utils/canOpen";
+import { IntTag, PageHeader, SEVERITY, date, dateTime, showError, showSuccess } from "./common";
 
 const STATUSES = ["draft", "for-approval", "approved", "file-generated", "sent", "completed", "cancelled"];
+
+/** "PHP 89,026.00", as the remittance and payment screens write amounts. */
+const money = (value) => codeAmount(value, "PHP");
+
+/** "BPI ···8801": the payee's bank and the last four digits of the account; the full number stays in Insurer payments. */
+const maskedAccount = (bankCode, accountNumber) => {
+  const digits = String(accountNumber || "").replace(/\D/g, "");
+  return [bankCode, digits ? `···${digits.slice(-4)}` : null].filter(Boolean).join(" ");
+};
 
 const LIFECYCLE = [
   { action: "create", at: "createdAt", by: "createdBy" },
@@ -75,7 +86,7 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
     { label: t("integrations.channel"), value: t(`integrations.channelTypes.${b.channel}`) },
     { label: t("integrations.valueDate"), value: b.valueDate, type: "date" },
     { label: t("integrations.payments"), value: b.lineCount, type: "number" },
-    { label: t("integrations.totalAmount"), value: b.totalAmount, type: "amount", emphasis: true },
+    { label: t("integrations.totalAmount"), value: money(b.totalAmount), emphasis: true },
   ];
 
   // a workflow step: confirmed with the batch's figures, run inside the dialog (errors stay there)
@@ -100,10 +111,12 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
   if (!batchId) return null;
   const s = b?.status;
   const decision = b?.decision || null;
+  // the workflow steps need write:disbursements on the server: a reader sees the batch only
+  const canWrite = hasPermission("write:disbursements");
 
   const actions = b ? (
     <>
-      {s === "draft" && <Button label={t("integrations.submit")} icon="pi pi-send" onClick={() => step("submit", () => service.submitBatch(b.id))} />}
+      {canWrite && s === "draft" && <Button label={t("integrations.submit")} icon="pi pi-send" onClick={() => step("submit", () => service.submitBatch(b.id))} />}
       {s === "for-approval" && decision?.canDecide ? (
         <span className="bv-int-approval">
           <Button label={t("integrations.reject")} icon="pi pi-undo" outlined severity="danger"
@@ -111,21 +124,21 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
           <Button label={t("integrations.approve")} icon="pi pi-check" onClick={() => step("approve", () => service.approveBatch(b.id))} />
         </span>
       ) : null}
-      {["approved", "file-generated", "sent"].includes(s) && !b.paidCount && !b.rejectedCount && (
+      {canWrite && ["approved", "file-generated", "sent"].includes(s) && !b.paidCount && !b.rejectedCount && (
         <Button label={b.fileName ? t("integrations.rewriteFile") : t("integrations.writeFile")} icon="pi pi-file"
           onClick={() => step(b.fileName ? "rewrite" : "generate", () => service.generateBatchFile(b.id), { severity: b.fileName ? "warning" : "neutral" })} />
       )}
       {b.fileName && <Button label={t("integrations.downloadFile")} icon="pi pi-download" outlined onClick={() => service.downloadBatchFile(b.id, b.fileName).catch((e) => showError(toast, e))} />}
-      {s === "file-generated" && <Button label={t("integrations.markUploaded")} icon="pi pi-cloud-upload" outlined onClick={() => step("sent", () => service.markBatchSent(b.id))} />}
-      {["file-generated", "sent"].includes(s) && (
+      {canWrite && s === "file-generated" && <Button label={t("integrations.markUploaded")} icon="pi pi-cloud-upload" outlined onClick={() => step("sent", () => service.markBatchSent(b.id))} />}
+      {canWrite && ["file-generated", "sent"].includes(s) && (
         <>
           <input ref={fileInput} type="file" accept=".csv,.txt,text/plain" style={{ display: "none" }} aria-label={t("integrations.importStatus")}
             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) run("status", () => service.importStatusFile(b.id, f)); }} />
           <Button label={t("integrations.importStatus")} icon="pi pi-upload" outlined loading={busy === "status"} onClick={() => fileInput.current?.click()} />
         </>
       )}
-      {!["completed", "cancelled"].includes(s) && !b.paidCount && (
-        <Button label={t("integrations.cancelBatch")} icon="pi pi-times" text severity="danger"
+      {canWrite && !["completed", "cancelled"].includes(s) && !b.paidCount && (
+        <Button label={t("integrations.cancelBatch")} outlined severity="danger"
           onClick={() => step("cancel", (text) => service.cancelBatch(b.id, text), { severity: "danger", reason: true })} />
       )}
     </>
@@ -143,7 +156,7 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
               { label: t("integrations.channel"), value: t(`integrations.channelTypes.${b.channel}`) },
               { label: t("integrations.valueDate"), value: b.valueDate, type: "date" },
               { label: t("integrations.payments"), value: b.lineCount, type: "number" },
-              { label: t("integrations.totalAmount"), value: b.totalAmount, type: "amount" },
+              { label: t("integrations.totalAmount"), value: money(b.totalAmount) },
             ]}
           />
           <div className="bv-int-actions">{actions}</div>
@@ -170,13 +183,13 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
               <Column field="seq" header="#" />
               <Column field="voucherNumber" header={t("integrations.voucher")} />
               <Column header={t("integrations.payee")} body={(l) => <div><div>{l.payeeName}</div><div className="pe-muted">{l.accountName}</div></div>} />
-              <Column header={t("integrations.payeeAccount")} body={(l) => `${l.bankCode} ${l.accountNumber}`} />
+              <Column header={t("integrations.payeeAccount")} body={(l) => maskedAccount(l.bankCode, l.accountNumber)} />
               <Column header={t("integrations.amount")} body={(l) => money(l.amount)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("integrations.status.label")} body={(l) => <IntTag status={l.status} />} />
               <Column header={t("integrations.bankReference")} body={(l) => l.bankReference || l.reason || "-"} />
               <Column header={t("integrations.journal")} body={(l) => l.journalNumber || "-"} />
               <Column header={t("integrations.resultAt")} body={(l) => (l.resultAt ? `${dateTime(l.resultAt)} (${t(`integrations.sourceType.${l.resultSource}`)})` : "-")} />
-              <Column header="" body={(l) => (l.status === "pending" && ["file-generated", "sent"].includes(s) ? (
+              <Column header="" body={(l) => (canWrite && l.status === "pending" && ["file-generated", "sent"].includes(s) ? (
                 <Button icon="pi pi-check-square" text rounded size="small" aria-label={t("integrations.recordResult")} tooltip={t("integrations.recordResult")} tooltipOptions={{ position: "top" }}
                   onClick={() => setResult({ lineId: l.id, voucher: l.voucherNumber, status: "paid", bankReference: "", reason: "" })} />
               ) : null)} />
@@ -232,8 +245,8 @@ const BankPaymentFiles = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("sidebar.Accounts")} section={t("sidebar.Disbursement")} title={t("integrations.batchesTitle")} subtitle={t("integrations.batchesIntro")}>
-        <Button icon="pi pi-plus" label={t("integrations.newBatch")} onClick={() => setCreating(true)} />
+      <PageHeader home={t("sidebar.Accounts")} section={t("sidebar.Disbursement")} title={t("integrations.batchesTitle")}>
+        {hasPermission("write:disbursements") ? <Button icon="pi pi-plus" label={t("integrations.newBatch")} onClick={() => setCreating(true)} /> : null}
       </PageHeader>
       <div className="pe-card">
         <div className="pe-filters mb-2">

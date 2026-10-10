@@ -2,7 +2,9 @@
  * Footer of an approval panel or record: Approve (primary), Reject (outlined danger) and the user's authority in one
  * line, "Your limit PHP 1,000,000.00 · This item PHP 409,141.43". When the server says the user cannot decide
  * (decision.canDecide false) the buttons are not shown at all; the EligibilityNote says why and who can. Native
- * buttons in reading order, so both are reached with Tab and pressed with Enter or Space.
+ * buttons in reading order, so both are reached with Tab and pressed with Enter or Space. With canReject the note keeps
+ * a Reject button: the server lets the user return what they may not approve (above their limit, changed since its
+ * submission).
  *
  *   <DecisionBar decision={approval.decision} onApprove={approve} onReject={() => setRejecting(true)} />
  */
@@ -20,7 +22,7 @@ export const codeAmount = (value, currency = "PHP") => {
   return text ? `${currency} ${text}` : "";
 };
 
-const DecisionBar = ({ decision, onApprove, onReject, approveLabel, rejectLabel, busy, currency, className }) => {
+const DecisionBar = ({ decision, onApprove, onReject, approveLabel, rejectLabel, busy, currency, className, canReject }) => {
   const { t } = useTranslation();
   const d = decision || {};
   const classes = ["bv-decision-bar", className].filter(Boolean).join(" ");
@@ -28,6 +30,11 @@ const DecisionBar = ({ decision, onApprove, onReject, approveLabel, rejectLabel,
     return (
       <div className={`${classes} bv-decision-bar--note`}>
         <EligibilityNote reason={d.blockedReason} approvers={d.eligibleApprovers} />
+        {canReject ? (
+          <span className="bv-decision-bar__buttons">
+            <Button type="button" label={rejectLabel || t("decisionBar.reject")} outlined severity="danger" onClick={onReject} disabled={!!busy} />
+          </span>
+        ) : null}
       </div>
     );
   }
@@ -66,8 +73,10 @@ DecisionBar.propTypes = {
   busy: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   currency: PropTypes.string,
   className: PropTypes.string,
+  /** the user may reject although not approve (the reject action the server allows) */
+  canReject: PropTypes.bool,
 };
 
-DecisionBar.defaultProps = { decision: null, approveLabel: null, rejectLabel: null, busy: false, currency: "PHP", className: null };
+DecisionBar.defaultProps = { decision: null, approveLabel: null, rejectLabel: null, busy: false, currency: "PHP", className: null, canReject: false };
 
 export default DecisionBar;

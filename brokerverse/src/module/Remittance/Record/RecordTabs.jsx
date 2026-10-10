@@ -42,17 +42,25 @@ export const LinesTab = ({ record }) => {
   const actions = (l) => (l.policyId && canOpen(policyPath(l.policyId)) ? [{ code: "view-policy", label: t("remittance.record.lines.viewPolicy"), allowed: true }] : []);
   return (
     <DataTable value={lines} dataKey="id" size="small" scrollable className="rm-table" emptyMessage={t("remittance.record.lines.empty")}>
-      <Column header={t("remittance.record.lines.policyNo")} body={(l) => <span className="rm-ref">{l.policyNo}</span>} frozen footer={t("remittance.record.lines.total")} />
-      <Column header={t("remittance.record.lines.client")} body={(l) => l.insuredName || "-"} />
-      <Column header={t("remittance.record.lines.product")} body={(l) => l.product || "-"} />
-      <Column header={t("remittance.record.lines.effective")} body={(l) => (l.effectiveDate ? formatDate(l.effectiveDate) : "-")} />
+      <Column header={t("remittance.record.lines.policyClient")} frozen footer={t("remittance.record.lines.total")} body={(l) => (
+        <span className="rm-cell-stack">
+          <span className="rm-ref">{l.policyNo}</span>
+          {l.insuredName ? <span className="rm-muted">{l.insuredName}</span> : null}
+        </span>
+      )} />
+      <Column header={t("remittance.record.lines.productEffective")} body={(l) => (
+        <span className="rm-cell-stack">
+          <span>{l.product || "-"}</span>
+          {l.effectiveDate ? <span className="rm-muted">{formatDate(l.effectiveDate)}</span> : null}
+        </span>
+      )} />
       <Column header={t("remittance.record.lines.premium")} body={(l) => num(l.premium)} align="right" footer={footer("premium")} />
       <Column header={t("remittance.record.lines.commission")} body={(l) => num(l.commission)} align="right" footer={footer("commission")} />
       <Column header={t("remittance.record.lines.tax")} body={(l) => num(l.tax)} align="right" footer={footer("tax")} />
       <Column header={t("remittance.record.lines.due")} body={(l) => num(l.netAmount)} align="right" footer={footer("netAmount")} />
       {imported ? <Column header={t("remittance.record.lines.expected")} body={(l) => (l.expectedDue === null || l.expectedDue === undefined ? "-" : num(l.expectedDue))} align="right" /> : null}
       {imported ? <Column header={t("remittance.record.lines.variance")} body={(l) => (l.variance ? <span className="rm-num rm-variance">{money(l.variance)}</span> : "-")} align="right" /> : null}
-      <Column header={t("remittance.record.lines.status")} style={{ minWidth: "7rem" }}
+      <Column header={t("remittance.record.lines.status")}
         body={(l) => <StatusChip label={t(`remittance.record.lines.statuses.${String(l.status || "Active").toLowerCase()}`, { defaultValue: l.status })} severity="secondary" />} />
       <Column header={<span className="p-sr-only">{t("remittance.record.lines.actions")}</span>} align="center" style={{ width: "3.5rem" }}
         body={(l) => <RowActions label={t("remittance.record.lines.actionsFor", { policy: l.policyNo })} actions={actions(l)} onAction={() => navigate(policyPath(l.policyId))} />} />
@@ -71,6 +79,7 @@ export const PaymentTab = ({ record }) => {
   ) : p.voucher?.number;
   return (
     <>
+      {p.amountDifference ? <p className="rm-banner rm-banner--warning" role="status">{p.amountDifference.text}</p> : null}
       <DetailSection title={t("remittance.record.payment.voucher")}>
         <KeyValueGrid columns={4} items={[
           { label: t("remittance.record.payment.voucherNo"), value: voucherNo },
@@ -119,12 +128,10 @@ export const DocumentsTab = ({ record }) => {
   );
 };
 
-/** "v3 · unchanged since submission" or "v4 · changed since submission (v3)". */
+/** While pending: "Unchanged since submission" or "Changed after submission"; null once decided. */
 const contentText = (a, t) => {
-  if (!a || a.contentVersion === null || a.contentVersion === undefined) return null;
-  if (a.contentUnchanged === null || a.contentUnchanged === undefined) return t("remittance.record.activity.version", { version: a.contentVersion });
-  return a.contentUnchanged ? t("remittance.record.activity.unchanged", { version: a.contentVersion })
-    : t("remittance.record.activity.changed", { version: a.contentVersion, submitted: a.submittedVersion });
+  if (!a || a.contentUnchanged === null || a.contentUnchanged === undefined) return null;
+  return a.contentUnchanged ? t("remittance.record.activity.unchanged") : t("remittance.record.activity.changed");
 };
 
 export const ActivityTab = ({ record }) => {
@@ -140,7 +147,7 @@ export const ActivityTab = ({ record }) => {
           <KeyValueGrid columns={4} items={[
             { label: t("remittance.record.activity.authority"), value: `${a.authorityType} · ${money(a.amount)}` },
             { label: t("remittance.record.activity.level"), value: a.level?.label },
-            { label: t("remittance.record.activity.content"), value: contentText(a, t) },
+            { label: t("remittance.record.activity.content"), value: contentText(a, t), hidden: !contentText(a, t) },
             { label: t("remittance.record.activity.decision"), value: decisionText },
             { label: t("remittance.record.activity.decidedBy"), value: o?.by?.name },
             { label: t("remittance.record.activity.decidedOn"), value: o?.decidedAt, type: "datetime" },

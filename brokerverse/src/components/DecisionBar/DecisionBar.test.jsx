@@ -39,6 +39,16 @@ describe("DecisionBar", () => {
     expect(screen.getByRole("note")).toHaveTextContent("Can decide: J. Cruz");
   });
 
+  it("keeps Reject beside the reason when the user may return what they may not approve", () => {
+    const onReject = jest.fn();
+    render(<DecisionBar decision={{ canDecide: false, blockedCode: "CONTENT_CHANGED", blockedReason: "This remittance changed after it was submitted." }}
+      canReject onApprove={jest.fn()} onReject={onReject} />);
+    expect(screen.getByRole("note")).toHaveTextContent("This remittance changed after it was submitted.");
+    expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
+    userEvent.click(screen.getByRole("button", { name: "Reject" }));
+    expect(onReject).toHaveBeenCalledTimes(1);
+  });
+
   it("says when the user decides without a limit", () => {
     render(<DecisionBar decision={{ canDecide: true, myLimit: null, amount: 1200 }} onApprove={jest.fn()} onReject={jest.fn()} />);
     expect(screen.getByRole("group")).toHaveTextContent("No approval limit");

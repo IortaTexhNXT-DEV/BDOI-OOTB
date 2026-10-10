@@ -72,13 +72,13 @@ describe("Setup > Schedules", () => {
     remittanceService.listSchedules.mockResolvedValue({ automation: automation({ cron: "15 6 * * *", jobCode: "remittance-schedules", link: "/master/configuration/schedules" }), schedules: [weekly()] });
     adminService.updateSchedule.mockResolvedValue({});
     show();
-    expect(await screen.findByText("TIS-WEEKLY")).toBeInTheDocument();
+    expect(await screen.findByText("Weekly remittance")).toBeInTheDocument();
     const chip = screen.getByRole("button", { name: "Automation: Off" });
     expect(chip).toHaveClass("bv-config-status--danger");
     expect(chip).toHaveTextContent("AutomationOff");
     expect(screen.getByText("Checked daily 06:15 (Asia/Manila)")).toBeInTheDocument();
     expect(screen.getByText("6 created · 3 held · 1 exception(s)")).toBeInTheDocument();
-    expect(screen.getByText("Mon 19/10/2026 06:15")).toBeInTheDocument();
+    expect(screen.getByText("Next Mon 19/10/2026 06:15")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Technical details/ }));
     expect(screen.getByText("15 6 * * *")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
@@ -93,7 +93,7 @@ describe("Setup > Schedules", () => {
     as(["tis-general-manager"], ["read:remittance"]);
     remittanceService.listSchedules.mockResolvedValue({ automation: automation(), schedules: [weekly([{ code: "view", label: "View", allowed: true }])] });
     const { container } = show();
-    expect(await screen.findByText("TIS-WEEKLY")).toBeInTheDocument();
+    expect(await screen.findByText("Weekly remittance")).toBeInTheDocument();
     expect(screen.getByText("View only")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Turn on" })).toBeNull();
     expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();

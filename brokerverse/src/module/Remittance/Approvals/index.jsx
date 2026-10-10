@@ -160,10 +160,26 @@ const Approvals = () => {
   const onRowAction = (row) => (action) => (action.code === "remind" ? remind(row) : open(row));
   const actionLabel = (a) => t(`remittance.inbox.actions.${a.code}`, { defaultValue: a.label });
 
+  // type, product line and the submitter sit under the reference, insurer and name, so Next step stays on screen
   const reference = (row) => (
-    <Button type="button" label={row.reference} link className="rm-ref rm-link" onClick={() => open(row)} aria-label={t("remittance.inbox.openReview", { reference: row.reference })} />
+    <span className="rm-cell-stack">
+      <Button type="button" label={row.reference} link className="rm-ref rm-link" onClick={() => open(row)} aria-label={t("remittance.inbox.openReview", { reference: row.reference })} />
+      <span className="rm-muted">{row.typeLabel}</span>
+    </span>
   );
-  const sla = (row) => (row.sla ? <StatusChip label={row.sla.label} severity={row.sla.overdue ? "danger" : "secondary"} /> : null);
+  const insurer = (row) => (
+    <span className="rm-cell-stack">
+      <span>{row.insurer?.name || "-"}</span>
+      {row.productLine ? <span className="rm-muted">{row.productLine}</span> : null}
+    </span>
+  );
+  const submitted = (row) => (
+    <span className="rm-cell-stack">
+      <span>{row.submittedBy?.name || "-"}</span>
+      <span className="rm-muted">{formatInstant(row.submittedAt)}</span>
+      {row.sla ? <StatusChip label={row.sla.label} severity={row.sla.overdue ? "danger" : "secondary"} /> : null}
+    </span>
+  );
   const amount = (row) => <span className="rm-num">{money(row.amount)}</span>;
 
   const empty = () => {
@@ -191,11 +207,10 @@ const Approvals = () => {
       <PageHeader title={t("remittance.inbox.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
         trail={[t("remittance.inbox.title")]} help={t("remittance.inbox.help")} actions={headerActions} />
 
-      {chips.length ? (
-        <div className="rm-strip" aria-label={t("remittance.inbox.authority.label")}>
-          {chips.map((c) => <StatusChip key={c.key} label={c.label} severity="secondary" />)}
-        </div>
-      ) : null}
+      {/* the authority line is there from the first paint, so the cards and the table do not move when it fills */}
+      <div className="rm-strip" aria-label={t("remittance.inbox.authority.label")}>
+        {chips.map((c) => <StatusChip key={c.key} label={c.label} severity="secondary" />)}
+      </div>
 
       <StatCards items={cards} />
       <TabMenu model={segments.map((s) => ({ label: s.label, command: () => setView(s.key) }))} activeIndex={activeIndex} className="rm-tabs" />
@@ -243,17 +258,13 @@ const Approvals = () => {
             selectionMode={selecting ? "checkbox" : null} selection={selection} onSelectionChange={(e) => setSelection((e.value || []).filter((r) => r.decision?.canDecide))}
             isDataSelectable={(e) => !!e.data?.decision?.canDecide}>
             {selecting ? <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} frozen /> : null}
-            <Column header={t("remittance.inbox.columns.reference")} body={reference} frozen style={{ minWidth: "11rem" }} />
-            <Column header={t("remittance.inbox.columns.type")} field="typeLabel" />
-            {!decided ? <Column header={t("remittance.inbox.columns.insurer")} body={(r) => r.insurer?.name || "-"} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.productLine")} body={(r) => r.productLine || "-"} /> : null}
+            <Column header={t("remittance.inbox.columns.reference")} body={reference} frozen style={{ minWidth: "10rem" }}
+              footer={data ? t("remittance.inbox.total", { count: data.total ?? rows.length }) : null} />
+            <Column header={t("remittance.inbox.columns.insurer")} body={insurer} className="rm-col-wrap" />
             <Column header={t("remittance.inbox.columns.amount")} body={amount} align="right" footer={data ? <span className="rm-num">{money(data.totals?.amount)}</span> : null} />
-            {!decided ? <Column header={t("remittance.inbox.columns.submittedBy")} body={(r) => r.submittedBy?.name || "-"} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.submittedOn")} body={(r) => formatInstant(r.submittedAt)} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.sla")} body={sla} style={{ minWidth: "7rem" }} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.level")} body={(r) => r.level?.label} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.canDecide")} body={(r) => canDecideText(r.decision, t)} /> : null}
-            {!decided ? <Column header={t("remittance.inbox.columns.nextStep")} body={(r) => r.nextStep?.label || "-"} /> : null}
+            {!decided ? <Column header={t("remittance.inbox.columns.submittedSla")} body={submitted} /> : null}
+            {!decided ? <Column header={t("remittance.inbox.columns.canDecide")} body={(r) => canDecideText(r.decision, t)} className="rm-col-wrap" /> : null}
+            {!decided ? <Column header={t("remittance.inbox.columns.nextStep")} body={(r) => r.nextStep?.label || "-"} className="rm-col-next" /> : null}
             {decided ? <Column header={t("remittance.inbox.columns.decision")} body={(r) => <StatusChip code={r.status} label={t(`remittance.inbox.outcomes.${r.status}`, { defaultValue: r.status })} />} /> : null}
             {decided ? <Column header={t("remittance.inbox.columns.by")} body={(r) => r.outcome?.by?.name || "-"} /> : null}
             {decided ? <Column header={t("remittance.inbox.columns.reason")} body={(r) => r.outcome?.reason || "-"} /> : null}

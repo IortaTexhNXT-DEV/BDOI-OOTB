@@ -15,7 +15,7 @@ import { useStableLoad } from "../../../hooks/useStableLoad";
 import { canOpen } from "../../../utils/canOpen";
 import { remittanceService } from "../../../services/remittanceService";
 import { formatInstant } from "../../../utility/dateFormat";
-import { money } from "../shared";
+import { activitySummary, money } from "../shared";
 import { severityOf, timelineSteps } from "./paymentsModel";
 
 /** A link inside the app when the user's menu reaches it, else the text. */
@@ -67,13 +67,13 @@ const PaymentPanel = ({ voucherId, onHide }) => {
   const accountValue = payee.accountMasked ? (
     <span className="rm-payment__account">
       <span>{account ? account.accountNumber : payee.accountMasked}</span>
-      {payee.canReveal && !account ? <Button type="button" link size="small" label={t("remittance.payments.panel.showFull")} onClick={reveal} /> : null}
+      {payee.canReveal && !account ? <Button type="button" link size="small" className="rm-link rm-inline-link" label={t("remittance.payments.panel.showFull")} onClick={reveal} /> : null}
     </span>
   ) : <StatusChip label={payee.chip?.label} severity="secondary" />;
 
   const check = amounts.check ? (
     <span className="rm-payment__check">
-      <StatusChip label={amounts.check.label} severity={amounts.check.code === "pass" ? "success" : "danger"} />
+      <StatusChip label={t(`remittance.payments.panel.checkResult.${amounts.check.code}`, { defaultValue: amounts.check.label })} severity={amounts.check.code === "pass" ? "success" : "danger"} />
       {amounts.check.code !== "pass" && amounts.check.difference ? <span className="rm-num">{money(amounts.check.difference)}</span> : null}
     </span>
   ) : null;
@@ -118,6 +118,7 @@ const PaymentPanel = ({ voucherId, onHide }) => {
           <>
             {header}
             {revealError ? <p className="rm-review__message rm-review__message--race" role="alert">{revealError}</p> : null}
+            {p.amountDifference ? <p className="rm-banner rm-banner--warning" role="status">{p.amountDifference.text}</p> : null}
             <DetailSection title={t("remittance.payments.panel.payee")}>
               <KeyValueGrid columns={2} items={[
                 { label: t("remittance.payments.panel.insurer"), value: p.insurer?.name },
@@ -140,11 +141,11 @@ const PaymentPanel = ({ voucherId, onHide }) => {
             </DetailSection>
             <DetailSection title={t("remittance.payments.panel.amounts")}>
               <KeyValueGrid columns={2} items={[
-                { label: t("remittance.payments.panel.dueToInsurer"), value: amounts.dueToInsurer === null ? null : money(amounts.dueToInsurer) },
+                { label: t("remittance.payments.panel.dueToInsurer"), value: money(amounts.dueToInsurer), hidden: amounts.dueToInsurer === null || amounts.dueToInsurer === undefined },
                 { label: t("remittance.payments.panel.refundCredits"), value: money(amounts.refundCredits) },
                 { label: t("remittance.payments.panel.voucherAmount"), value: money(amounts.voucherAmount) },
                 { label: t("remittance.payments.panel.bankAmount"), value: amounts.bankAmount === null ? null : money(amounts.bankAmount) },
-                { label: t("remittance.payments.panel.check"), value: check },
+                { label: t("remittance.payments.panel.check"), value: check, hidden: amounts.dueToInsurer === null || amounts.dueToInsurer === undefined },
               ]} />
             </DetailSection>
             <DetailSection title={t("remittance.payments.panel.links")}>
@@ -170,7 +171,7 @@ const PaymentPanel = ({ voucherId, onHide }) => {
             </DetailSection>
             <DetailSection title={t("remittance.payments.panel.approvals")}>
               <KeyValueGrid columns={2} items={[
-                { label: t("remittance.payments.panel.remittanceApproved"), value: remittanceApprovals.length ? <span className="rm-payment__links">{remittanceApprovals}</span> : null, span: "full" },
+                { label: t("remittance.payments.panel.remittanceApproved"), value: <span className="rm-payment__links">{remittanceApprovals}</span>, span: "full", hidden: !remittanceApprovals.length },
                 { label: t("remittance.payments.panel.voucherMaker"), value: personText(approvals.voucherMaker) },
                 { label: t("remittance.payments.panel.batchCreated"), value: personText(approvals.batchCreatedBy) },
                 { label: t("remittance.payments.panel.batchApproved"), value: personText(approvals.batchApprovedBy) },
@@ -183,7 +184,7 @@ const PaymentPanel = ({ voucherId, onHide }) => {
               actions={<Button type="button" label={activityOpen ? t("remittance.review.hideActivity") : t("remittance.review.showActivity")} link size="small"
                 aria-expanded={activityOpen} onClick={() => setActivityOpen((v) => !v)} />}>
               {activityOpen ? <ActivityLog entries={fromRemittanceActivity(p.activity || [])} /> : (
-                <p className="rm-review__line">{t("remittance.review.activityCount", { count: (p.activity || []).length, at: formatInstant(p.activity?.at(-1)?.at, { empty: "" }) })}</p>
+                <p className="rm-review__line">{activitySummary(t, p.activity)}</p>
               )}
             </DetailSection>
           </>

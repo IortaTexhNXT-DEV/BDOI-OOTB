@@ -21,8 +21,8 @@ export const scheduleFacts = (s, t) => [
     ? t("remittance.schedules.cutOff", { count: s.cutOffDays ?? 0 }) : t(`remittance.schedules.windows.${s.paymentWindow}`, { defaultValue: s.paymentWindow }) },
   { label: t("remittance.schedules.columns.groupBy"), value: t(`remittance.schedules.groupByOptions.${s.groupBy}`, { defaultValue: s.groupBy }) },
   { label: t("remittance.schedules.columns.runs"), value: s.runs },
-  { label: t("remittance.schedules.columns.nextRun"), value: s.nextRunText || "-" },
-  { label: t("remittance.schedules.columns.lastRun"), value: s.lastRun?.text || "-" },
+  { label: t("remittance.schedules.columns.nextRun"), value: s.nextRunText || null },
+  { label: t("remittance.schedules.columns.lastRun"), value: s.lastRun?.text || null },
   { label: t("remittance.schedules.columns.timeZone"), value: s.timeZone },
 ];
 
@@ -43,7 +43,7 @@ const ScheduleView = ({ visible, onHide, schedule, onRunHistory }) => {
       </DetailSection>
       <DetailSection title={t("remittance.schedules.latestRuns")}
         actions={<Button type="button" label={t("remittance.schedules.runHistory")} text size="small" onClick={() => onRunHistory(schedule)} />}>
-        <RunHistoryTable scheduleId={schedule.id} perPage={5} paginate={false} />
+        <RunHistoryTable scheduleId={schedule.id} perPage={5} paginate={false} compact />
       </DetailSection>
       <DetailSection title={t("remittance.schedules.activity")}>
         <ActivityLog entries={fromRemittanceActivity(data || [])} loading={loading} error={error} onRetry={reload} />

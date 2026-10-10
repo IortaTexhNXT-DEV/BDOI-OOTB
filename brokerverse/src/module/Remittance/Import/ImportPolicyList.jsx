@@ -26,8 +26,9 @@ import "../remittance.scss";
 const TEMPLATE = "Remittance_Policy_List_Template.xlsx";
 
 /**
- * Import policy list (dialog, 1100px; Remittances ?import=new, or ?import=<id> for an import of the history): off-cycle
- * draft remittances from a list of policies. The file selects the policies; every amount is the system's.
+ * Import policy list (dialog, 720px to choose the file, 1100px for the result; Remittances ?import=new, or ?import=<id>
+ * for an import of the history): off-cycle draft remittances from a list of policies. The file selects the policies;
+ * every amount is the system's.
  *
  * Choose: Download template, the purpose (a remittance_off_cycle reason, the off-cycle reason of the drafts) and the
  * file, checked in the browser against the server's limits before anything is sent; Validate keeps the file and a
@@ -110,6 +111,7 @@ const ImportPolicyList = ({ importId, onHide, onOpen, onChanged, onGoToDrafts })
 
   const validate = async () => {
     setTried(true);
+    if (!file) setFileError(t("remittance.import.fileRequired"));
     if (reasonProblem(purpose) || !file) return;
     setBusy("validate");
     setError(null);
@@ -190,7 +192,7 @@ const ImportPolicyList = ({ importId, onHide, onOpen, onChanged, onGoToDrafts })
     <div className="rm-import__footer">
       <Button type="button" label={t("remittance.common.close")} text onClick={onHide} disabled={!!busy} />
       {!preview && !loadFailed ? (
-        <Button type="button" label={t("remittance.import.validate")} onClick={validate} loading={busy === "validate"} disabled={!purpose?.reasonCode || !file || !!busy} />
+        <Button type="button" label={t("remittance.import.validate")} onClick={validate} loading={busy === "validate"} disabled={!!busy} />
       ) : null}
       {committable ? <Button type="button" label={t("remittance.import.discard")} outlined onClick={discard} loading={busy === "discard"} disabled={!!busy} /> : null}
       {committable ? (
@@ -285,7 +287,7 @@ const ImportPolicyList = ({ importId, onHide, onOpen, onChanged, onGoToDrafts })
 
   return (
     <Dialog visible={visible} onHide={busy ? () => {} : onHide} header={t("remittance.import.title")} footer={footer} modal draggable={false} resizable={false}
-      style={{ width: "1100px" }} breakpoints={{ "1140px": "100vw" }} className="rm-panel rm-import">
+      style={{ width: preview ? "1100px" : "720px" }} breakpoints={{ "1140px": "100vw" }} className="rm-panel rm-import">
       <div className="rm-import__body">
         {result}
         {!preview && importId === "new" ? choosing : null}

@@ -13,7 +13,7 @@ import { ActivityLog, fromRemittanceActivity } from "../../../components/Activit
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import { remittanceService } from "../../../services/remittanceService";
 import { formatInstant } from "../../../utility/dateFormat";
-import { money } from "../shared";
+import { activitySummary, money } from "../shared";
 import { severityOf } from "./paymentsModel";
 
 /** The reversal of a transfer's journal: its JV, or a "Not reversed" chip in the danger colour. */
@@ -86,15 +86,15 @@ const TransferPanel = ({ transferId, onHide }) => {
             </DetailSection>
             <DetailSection title={t("remittance.payments.legacy.journal")}>
               <KeyValueGrid columns={2} items={[
-                { label: t("remittance.payments.legacy.journalPosted"), value: x.journal?.number },
-                { label: t("remittance.payments.legacy.reversal"), value: x.journal ? <ReversalCell reversal={x.reversal} /> : null },
+                { label: t("remittance.payments.legacy.journalPosted"), value: x.journal?.number || (x.approvedBy ? t("remittance.payments.legacy.notPosted") : t("remittance.payments.legacy.notApproved")) },
+                { label: t("remittance.payments.legacy.reversal"), value: <ReversalCell reversal={x.reversal} />, hidden: !x.journal },
               ]} />
             </DetailSection>
             <DetailSection title={t("remittance.payments.panel.activity")}
               actions={<Button type="button" label={activityOpen ? t("remittance.review.hideActivity") : t("remittance.review.showActivity")} link size="small"
                 aria-expanded={activityOpen} onClick={() => setActivityOpen((v) => !v)} />}>
               {activityOpen ? <ActivityLog entries={fromRemittanceActivity(x.activity || [])} /> : (
-                <p className="rm-review__line">{t("remittance.review.activityCount", { count: (x.activity || []).length, at: formatInstant(x.activity?.at(-1)?.at, { empty: "" }) })}</p>
+                <p className="rm-review__line">{activitySummary(t, x.activity)}</p>
               )}
             </DetailSection>
           </>

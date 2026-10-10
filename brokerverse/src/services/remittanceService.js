@@ -101,7 +101,6 @@ export const remittanceService = {
   setScheduleStatus: (scheduleId, status) => patch(`${R}/schedules/${id(scheduleId)}/status`, { status }),
   // Run now: an off-cycle run with a remittance_off_cycle reason ({ reasonCode, note }); the envelope carries MSG-RMT-008
   runSchedule: (scheduleId, reason) => apiRequest("POST", `${R}/schedules/${id(scheduleId)}/run`, { body: reason || {} }),
-  getSchedule: (scheduleId) => get(`${R}/schedules/${id(scheduleId)}`),
   scheduleRuns: (scheduleId, params) => apiRequest("GET", `${R}/schedules/${id(scheduleId)}/runs`, { params }),
   scheduleActivity: (scheduleId) => get(`${R}/schedules/${id(scheduleId)}/activity`),
   previewRun: (scheduleId) => post(`${R}/schedules/${id(scheduleId)}/preview`),
@@ -117,10 +116,7 @@ export const remittanceService = {
   exportRegisterPath: (params = {}) => `${R}/remittances/export.xlsx${toQuery(params)}`,
   // items: [{ id, version }]; per-item results
   submitRemittances: (items) => post(`${R}/remittances/submit`, { items }),
-  remittanceActivity: (remId) => get(`${R}/remittances/${id(remId)}/activity`),
   remittanceActivityPath: (remId) => `${R}/remittances/${id(remId)}/activity?format=xlsx`,
-  schedulePath: (remId, ext = "xlsx") => `${R}/remittances/${id(remId)}/schedule.${ext}`,
-  advicePath: (remId) => `${R}/remittances/${id(remId)}/advice.pdf`,
   approvalInbox: (params) => apiRequest("GET", `${R}/approvals`, { params: { view: "mine", ...params } }),
   getApproval: (approvalId) => get(`${R}/approvals/${id(approvalId)}`),
   approvalExportPath: (params = {}) => `${R}/approvals/export.xlsx${toQuery(params)}`,
@@ -153,8 +149,6 @@ export const remittanceService = {
   importFilePath: (importId) => `${R}/imports/${id(importId)}/file`,
   commitImport: (importId, version) => apiRequest("POST", `${R}/imports/${id(importId)}/commit`, { body: { version } }),
   discardImport: (importId) => post(`${R}/imports/${id(importId)}/discard`),
-  myExceptions: (params) => apiRequest("GET", `${R}/exceptions`, { params: { assignedTo: "me", ...params } }),
-  myDebitNotes: (params) => apiRequest("GET", `${R}/direct-bill`, { params: { attention: "mine", ...params } }),
 
   // Remittance Master (configuration records live in /masters/<type>)
   masterOverview: (params) => get(`${R}/masters`, params),

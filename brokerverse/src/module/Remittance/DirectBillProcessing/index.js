@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -11,7 +10,7 @@ import { Column } from "primereact/column";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { TabView, TabPanel } from "primereact/tabview";
+import { TabMenu } from "primereact/tabmenu";
 import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
@@ -28,7 +27,7 @@ import { openConfirm } from "../../../components/ConfirmDialog";
 import { printPdf } from "../../../components/Print";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
-import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, money as codeMoney, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 import ClientPaymentDialog, { PAYMENT_SEVERITY } from "./ClientPaymentDialog";
 
@@ -68,7 +67,8 @@ export const noteActions = (row) => {
  */
 const DirectBillProcessing = () => {
   const { t } = useTranslation();
-  const { formatCurrency } = useFormatCurrency();
+  // amounts read "PHP 1,234.56" as on every remittance screen
+  const formatCurrency = codeMoney;
   const toast = useRef(null);
   const [params, setParams] = useSearchParams();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -367,58 +367,59 @@ const DirectBillProcessing = () => {
       ) : null}
       <StatCards items={[
         ["unbilled", summary?.unbilled], ["outstanding", summary?.billedOutstanding], ["overdue", summary?.overdue], ["receivable", summary?.total],
-      ].map(([key, value]) => ({ key, label: t(`remittance.billing.kpis.${key}`), value: summary ? formatCurrency(value || 0) : null }))} />
+      ].map(([key, value]) => ({ key, label: t(`remittance.billing.kpis.${key}`), value: summary ? codeMoney(value || 0) : null }))} />
 
+      <TabMenu model={["raise", "notes", "mode"].map((key) => ({ label: t(`remittance.billing.tabs.${key}`) }))} activeIndex={activeIndex}
+        onTabChange={(e) => setActiveIndex(e.index)} className="rm-tabs" />
       <Card>
-        <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-          <TabPanel header={t("remittance.billing.tabs.raise")}>
+        {activeIndex === 0 ? (
+          <div>
             <div className="filter-section mb-3">
               <div className="grid">
-                <div className="col-12 md:col-2">
-                  <label>Insurer *</label>
-                  <Dropdown value={insurer} options={insurerOptions} onChange={(e) => setInsurer(e.value)} placeholder="Select insurer" filter className="w-full" />
+                <div className="col-12 md:col-3">
+                  <label className="bv-field-label">{t("remittance.billing.fields.insurer")}<span className="required-marker">*</span></label>
+                  <Dropdown value={insurer} options={insurerOptions} onChange={(e) => setInsurer(e.value)} placeholder={t("remittance.billing.fields.chooseInsurer")} filter className="w-full" />
                 </div>
                 <div className="col-12 md:col-2">
-                  <label>Issued from</label>
+                  <label className="bv-field-label">{t("remittance.billing.fields.issuedFrom")}</label>
                   <Calendar value={periodFrom} onChange={(e) => setPeriodFrom(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                 </div>
                 <div className="col-12 md:col-2">
-                  <label>Issued to</label>
+                  <label className="bv-field-label">{t("remittance.billing.fields.issuedTo")}</label>
                   <Calendar value={periodTo} onChange={(e) => setPeriodTo(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                 </div>
                 <div className="col-12 md:col-2">
-                  <label>{t("directBillBasis.label")}</label>
+                  <label className="bv-field-label">{t("directBillBasis.label")}</label>
                   <Dropdown value={basis} options={["direct", "gross"].map((b) => ({ label: t(`directBillBasis.${b}`), value: b }))}
                     onChange={(e) => { setBasis(e.value); setItems([]); setSelected([]); setItemsSummary(null); }} className="w-full" />
                 </div>
-                <div className="col-12 md:col-2">
-                  <label>Line of business</label>
-                  <MultiSelect value={productLines} options={lineOptions} onChange={(e) => setProductLines(e.value)} placeholder="All lines" className="w-full" />
+                <div className="col-12 md:col-3">
+                  <label className="bv-field-label">{t("remittance.billing.fields.line")}</label>
+                  <MultiSelect value={productLines} options={lineOptions} onChange={(e) => setProductLines(e.value)} placeholder={t("remittance.billing.fields.allLines")} className="w-full" />
                 </div>
-                <div className="col-12 md:col-2">
-                  <label>&nbsp;</label>
-                  <Button label="Load policies" icon="pi pi-search" outlined className="w-full" onClick={loadItems} loading={loadingItems} />
+                <div className="col-12 flex justify-content-end">
+                  <Button label={t("remittance.billing.loadPolicies")} outlined className="rm-nowrap" onClick={loadItems} loading={loadingItems} />
                 </div>
               </div>
             </div>
 
             <DataTable value={items} selection={selected} onSelectionChange={(e) => setSelected(e.value)} dataKey="id" className="policy-grid" loading={loadingItems}
-              emptyMessage="Select an insurer and period, then load the direct-bill policies to bill" scrollable stripedRows size="small">
+              emptyMessage={t("remittance.billing.emptyPolicies")} scrollable stripedRows size="small">
               <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-              <Column field="policyNo" header="Policy No" />
-              <Column field="reference" header="Reference" body={(r) => (r.reference && r.reference !== r.policyNo ? r.reference : "-")} />
-              <Column field="insuredName" header="Insured Name" />
-              <Column field="product" header="Product" />
-              <Column field="lineOfBusiness" header="Line" />
-              <Column field="bookedOn" body={dateBody("bookedOn")} header="Issued" />
-              <Column field="grossPremium" header="Gross Premium" body={money("grossPremium")} className="text-right" />
-              <Column field="commissionRate" header="Rate" body={(r) => (r.commissionRate == null ? "-" : `${Number(r.commissionRate).toFixed(2)}%`)} className="text-right" />
-              <Column field="commission" header="Commission" body={money("commission")} className="text-right" />
-              <Column field="vat" header="VAT" body={money("vat")} className="text-right" />
-              <Column field="totalDue" header="Total Due" body={(r) => <strong>{formatCurrency(r.totalDue)}</strong>} className="text-right" />
-              <Column field="expectedEwt" header="EWT" body={money("expectedEwt")} className="text-right" />
-              <Column field="clientPaymentStatus" header="Client paid insurer" body={clientPaymentBody} style={{ minWidth: "11rem" }} />
-              <Column field="bookingJournal" header="Booked in" />
+              <Column field="policyNo" header={t("remittance.billing.columns.policyNo")} />
+              <Column field="reference" header={t("remittance.billing.columns.reference")} body={(r) => (r.reference && r.reference !== r.policyNo ? r.reference : "-")} />
+              <Column field="insuredName" header={t("remittance.billing.columns.insured")} />
+              <Column field="product" header={t("remittance.billing.columns.product")} />
+              <Column field="lineOfBusiness" header={t("remittance.billing.columns.line")} />
+              <Column field="bookedOn" body={dateBody("bookedOn")} header={t("remittance.billing.columns.issued")} />
+              <Column field="grossPremium" header={t("remittance.billing.columns.grossPremium")} body={money("grossPremium")} className="text-right" />
+              <Column field="commissionRate" header={t("remittance.billing.columns.rate")} body={(r) => (r.commissionRate == null ? "-" : `${Number(r.commissionRate).toFixed(2)}%`)} className="text-right" />
+              <Column field="commission" header={t("remittance.billing.columns.commission")} body={money("commission")} className="text-right" />
+              <Column field="vat" header={t("remittance.billing.columns.vat")} body={money("vat")} className="text-right" />
+              <Column field="totalDue" header={t("remittance.billing.columns.totalDue")} body={(r) => <strong>{formatCurrency(r.totalDue)}</strong>} className="text-right" />
+              <Column field="expectedEwt" header={t("remittance.billing.columns.ewt")} body={money("expectedEwt")} className="text-right" />
+              <Column field="clientPaymentStatus" header={t("remittance.billing.columns.clientPaid")} body={clientPaymentBody} style={{ minWidth: "11rem" }} />
+              <Column field="bookingJournal" header={t("remittance.billing.columns.bookedIn")} />
             </DataTable>
 
             {items.length > 0 && (
@@ -459,48 +460,52 @@ const DirectBillProcessing = () => {
                   </div>
                 </div>
                 <div className="action-buttons mt-3">
-                  <Button label="Save draft" icon="pi pi-save" outlined className="mr-2" onClick={() => raise(false)} disabled={saving || !selected.length} />
-                  <Button label="Raise debit note and submit for approval" icon="pi pi-check" onClick={() => raise(true)} loading={saving} disabled={!selected.length} />
+                  <Button label={t("remittance.billing.saveDraft")} outlined className="mr-2" onClick={() => raise(false)} disabled={saving || !selected.length} />
+                  <Button label={t("remittance.billing.raiseAndSubmit")} onClick={() => raise(true)} loading={saving} disabled={!selected.length} />
                 </div>
               </>
             )}
-          </TabPanel>
+          </div>
+        ) : null}
 
-          <TabPanel header={t("remittance.billing.tabs.notes")}>
+        {activeIndex === 1 ? (
+          <div>
             <div className="filter-section mb-3">
               <div className="grid">
                 <div className="col-12 md:col-3">
-                  <label>Status</label>
+                  <label className="bv-field-label">{t("remittance.billing.fields.status")}</label>
                   <Dropdown value={statusFilter} options={STATUS_FILTERS} onChange={(e) => setStatusFilter(e.value)} className="w-full" />
                 </div>
                 <div className="col-12 md:col-3">
-                  <label>Insurer</label>
-                  <Dropdown value={noteInsurer} options={insurerOptions} onChange={(e) => setNoteInsurer(e.value)} placeholder="All insurers" showClear filter className="w-full" />
+                  <label className="bv-field-label">{t("remittance.billing.fields.insurer")}</label>
+                  <Dropdown value={noteInsurer} options={insurerOptions} onChange={(e) => setNoteInsurer(e.value)} placeholder={t("remittance.billing.fields.allInsurers")} showClear filter className="w-full" />
                 </div>
                 <div className="col-12 md:col-6 flex align-items-end justify-content-end gap-2">
-                  <Button label="Refresh" icon="pi pi-refresh" outlined onClick={loadNotes} />
+                  <Button label={t("remittance.billing.refresh")} outlined onClick={loadNotes} />
                 </div>
               </div>
             </div>
             <DataTable value={notes} dataKey="id" loading={loadingNotes} paginator rows={20} stripedRows size="small" scrollable
-              emptyMessage="No commission debit notes" footer={notesSummary ? `${notesTotal} debit note(s) · total ${formatCurrency(notesSummary.amount)} · outstanding ${formatCurrency(notesSummary.outstanding)}` : null}>
-              <Column field="dnNumber" header="Debit Note" body={(r) => <div><div>{r.dnNumber}</div><div className="text-sm text-500">{t(`directBillBasis.document.${r.basis || "direct"}`)}</div></div>} />
-              <Column field="dnDate" body={dateBody("dnDate")} header="Date" />
-              <Column field="insurerName" header="Insurer" />
-              <Column field="policyCount" header="Policies" />
-              <Column field="commission" header="Commission" body={money("commission")} className="text-right" />
-              <Column field="vat" header="VAT" body={money("vat")} className="text-right" />
-              <Column field="amount" header="Total Due" body={money("amount")} className="text-right" />
-              <Column field="collectedAmount" header="Collected" body={money("collectedAmount")} className="text-right" />
-              <Column field="balance" header="Balance" body={(r) => <strong>{formatCurrency(r.balance)}</strong>} className="text-right" />
-              <Column field="dueDate" body={dateBody("dueDate")} header="Due" />
-              <Column field="status" header="Status" body={noteStatus} style={{ minWidth: "10rem" }} />
+              emptyMessage={t("remittance.billing.emptyNotes")} footer={notesSummary ? `${notesTotal} debit note(s) · total ${formatCurrency(notesSummary.amount)} · outstanding ${formatCurrency(notesSummary.outstanding)}` : null}>
+              <Column field="dnNumber" header={t("remittance.billing.columns.debitNote")} body={(r) => <div><div>{r.dnNumber}</div><div className="text-sm text-500">{t(`directBillBasis.document.${r.basis || "direct"}`)}</div></div>} />
+              <Column field="dnDate" body={dateBody("dnDate")} header={t("remittance.billing.columns.date")} />
+              <Column field="insurerName" header={t("remittance.billing.columns.insurer")} />
+              <Column field="policyCount" header={t("remittance.billing.columns.policies")} />
+              <Column field="commission" header={t("remittance.billing.columns.commission")} body={money("commission")} className="text-right" />
+              <Column field="vat" header={t("remittance.billing.columns.vat")} body={money("vat")} className="text-right" />
+              <Column field="amount" header={t("remittance.billing.columns.totalDue")} body={money("amount")} className="text-right" />
+              <Column field="collectedAmount" header={t("remittance.billing.columns.collected")} body={money("collectedAmount")} className="text-right" />
+              <Column field="balance" header={t("remittance.billing.columns.balance")} body={(r) => <strong>{formatCurrency(r.balance)}</strong>} className="text-right" />
+              <Column field="dueDate" body={dateBody("dueDate")} header={t("remittance.billing.columns.due")} />
+              <Column field="status" header={t("remittance.billing.columns.status")} body={noteStatus} style={{ minWidth: "10rem" }} />
               <Column header={<span className="p-sr-only">{t("remittance.billing.actionsHeader")}</span>} align="center" style={{ width: "3.5rem" }}
                 body={(r) => <RowActions label={t("remittance.billing.actionsFor", { reference: r.dnNumber })} actions={noteActions(r)} labelOf={noteActionLabel} onAction={onNoteAction(r)} />} />
             </DataTable>
-          </TabPanel>
+          </div>
+        ) : null}
 
-          <TabPanel header={t("remittance.billing.tabs.mode")}>
+        {activeIndex === 2 ? (
+          <div>
             <div className="grid">
               <div className="col-12 md:col-4">
                 <label>Policy number *</label>
@@ -522,14 +527,14 @@ const DirectBillProcessing = () => {
                 <InputText value={modeForm.reason} onChange={(e) => setModeForm({ ...modeForm, reason: e.target.value })} className="w-full" />
               </div>
             </div>
-            <Button label="Change billing mode" icon="pi pi-sync" outlined className="mt-2" onClick={changeMode} />
+            <Button label={t("remittance.billing.changeMode")} outlined className="mt-2" onClick={changeMode} />
             {modeResult && (
               <Message className="w-full justify-content-start mt-3" severity="info"
                 text={`${modeResult.policyNumber}: ${modeResult.before} → ${modeResult.billingModeLabel}${modeResult.billingMode === "direct"
                   ? ` · commission due from the insurer ${formatCurrency(modeResult.directBill?.commissionDue || 0)}` : ` · bill ${modeResult.billNumber || "-"}`}`} />
             )}
-          </TabPanel>
-        </TabView>
+          </div>
+        ) : null}
       </Card>
 
       <Dialog className="direct-bill-dialog" header={viewNote ? `${viewNote.dnNumber} · ${viewNote.insurerName}` : ""} visible={!!viewNote} style={{ width: "min(1100px, 95vw)" }} onHide={closeView}>
