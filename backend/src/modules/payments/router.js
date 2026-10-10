@@ -157,9 +157,9 @@ pcr.define({
         COALESCE(au.display_name, au.username) AS approved_by_name
       FROM petty_cash_disbursements x JOIN petty_cash_funds f ON f.id = x.fund_id LEFT JOIN petty_cash_requests r ON r.id = x.request_id
       LEFT JOIN users cu ON cu.id = x.created_by LEFT JOIN users au ON au.id = r.approved_by WHERE x.id = $1`, [d.id])).rows[0] || {};
-    const doc = await pettyCashVoucherDoc({ ...d, fundDescription: extra.fund_description, requesterName: extra.requester_name, createdByName: extra.created_by_name,
-      approvedByName: extra.approved_by_name });
-    sendPdf(res, buildPdf(doc), `petty-cash-voucher-${d.transactionNumber || d.id}.pdf`, req.query.download ? 'attachment' : 'inline');
+    const pdf = buildPdf(await pettyCashVoucherDoc({ ...d, fundDescription: extra.fund_description, requesterName: extra.requester_name,
+      createdByName: extra.created_by_name, approvedByName: extra.approved_by_name }));
+    sendPdf(res, pdf, `petty-cash-voucher-${d.transactionNumber || d.id}.pdf`, req.query.download ? 'attachment' : 'inline');
   },
 });
 for (const kind of ['disbursements', 'receipts', 'replenishments']) {

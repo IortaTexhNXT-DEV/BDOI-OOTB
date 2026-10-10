@@ -88,7 +88,8 @@ describe('payment voucher and cheque', () => {
     expect(sub.status).toBe(200);
     const [n] = await approvalRequests('disbursement', d.disbursementId);
     expect(n).toMatchObject({ audience: 'write:disbursements', link: `/accounts/paymentvoucher/detailview/${d.disbursementId}`, title: `Payment voucher ${d.voucherNumber} awaiting approval` });
-    expect(n.message).toMatch(/fin\.maker submitted .*5,000\.00/);
+    // the maker by display name, the amount formatted
+    expect(n.message).toMatch(/maker user submitted .*5,000\.00/);
     expect(await personal(ctx.userIds.checker, 'disbursement', d.disbursementId)).toHaveLength(0);
 
     expect((await checker('put', `/disbursements/${d.disbursementId}`).send({ status: 'draft', reason: 'Wrong payee' })).status).toBe(200);
