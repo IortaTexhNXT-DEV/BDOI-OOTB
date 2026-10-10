@@ -9743,7 +9743,6 @@
       "debit": "Debit",
       "credit": "Credit",
       "balance": "Balance",
-      "close": "Close",
       "dr": "Dr",
       "cr": "Cr",
       "none": "No postings in this period"

@@ -229,39 +229,3 @@
     font-style: italic;
   }
 }
-
-.fs-ledger {
-  .fs-facts {
-    display: grid;
-    grid-template-columns: minmax(14rem, 2fr) repeat(5, minmax(7.5rem, 1fr));
-    gap: 12px 20px;
-    margin: 0 0 16px;
-
-    @media (max-width: 900px) {
-      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-    }
-
-    div {
-      min-width: 0;
-    }
-
-    @media (max-width: 900px) {
-      .fs-fact--wide {
-        grid-column: 1 / -1;
-      }
-    }
-
-    dt {
-      font-size: 12px;
-      font-weight: 600;
-      color: $color-text-muted;
-    }
-
-    dd {
-      margin: 2px 0 0;
-      color: $color-heading;
-      font-variant-numeric: tabular-nums;
-      overflow-wrap: anywhere;
-    }
-  }
-}

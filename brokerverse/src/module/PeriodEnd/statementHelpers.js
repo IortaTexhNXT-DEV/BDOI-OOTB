@@ -105,26 +105,3 @@ export const saveBlob = (blob, fileName) => {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
-
-/** Open the browser's print dialog for a PDF without leaving the page (a hidden frame); a new tab when that is blocked. */
-export const printBlob = (blob) => {
-  const url = URL.createObjectURL(blob);
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  frame.title = "print";
-  Object.assign(frame.style, { position: "fixed", right: "0", bottom: "0", width: "0", height: "0", border: "0" });
-  frame.onload = () => {
-    try {
-      frame.contentWindow.focus();
-      frame.contentWindow.print();
-    } catch {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-  };
-  frame.src = url;
-  document.body.appendChild(frame);
-  setTimeout(() => {
-    frame.remove();
-    URL.revokeObjectURL(url);
-  }, 120000);
-};

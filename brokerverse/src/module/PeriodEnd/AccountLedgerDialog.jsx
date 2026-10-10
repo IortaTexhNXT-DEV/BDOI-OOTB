@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import LoadingBar from "../../components/LoadingBar";
 import useStableLoad from "../../hooks/useStableLoad";
 import periodEndService from "../../services/periodEndService";
@@ -28,22 +28,17 @@ const AccountLedgerDialog = ({ account, from, to, onHide }) => {
   const opening = rows.filter((r) => !r.journalNumber).reduce((s, r) => s + Number(r.openingBalance || 0), 0);
   const side = { dr: t("financialStatements.ledger.dr"), cr: t("financialStatements.ledger.cr") };
   const facts = [
-    [t("financialStatements.ledger.account"), `${account.accountCode} ${account.accountName}`],
-    [t("financialStatements.ledger.period"), `${date(from)} – ${date(to)}`],
-    [t("financialStatements.ledger.opening"), data ? sidedAmount(opening, side) : "-"],
-    [t("financialStatements.ledger.debits"), data ? money(sum(postings, "debit")) : "-"],
-    [t("financialStatements.ledger.credits"), data ? money(sum(postings, "credit")) : "-"],
-    [t("financialStatements.ledger.closing"), data ? sidedAmount(data.summary?.closingBalance, side) : "-"],
+    { label: t("financialStatements.ledger.account"), value: `${account.accountCode} ${account.accountName}`, span: 2 },
+    { label: t("financialStatements.ledger.period"), value: `${date(from)} – ${date(to)}` },
+    { label: t("financialStatements.ledger.opening"), value: data ? sidedAmount(opening, side) : null },
+    { label: t("financialStatements.ledger.debits"), value: data ? money(sum(postings, "debit")) : null },
+    { label: t("financialStatements.ledger.credits"), value: data ? money(sum(postings, "credit")) : null },
+    { label: t("financialStatements.ledger.closing"), value: data ? sidedAmount(data.summary?.closingBalance, side) : null },
   ];
   const open = (r) => setJournal({ journalNumber: r.journalNumber, date: r.date, period: r.period, description: r.description });
   return (
-    <Dialog header={t("financialStatements.ledger.title")} visible onHide={onHide} className="pe-dialog fs-ledger" style={{ width: "min(1080px, 96vw)" }}
-      footer={<Button label={t("financialStatements.ledger.close")} outlined onClick={onHide} />}>
-      <dl className="fs-facts">
-        {facts.map(([label, value], i) => (
-          <div key={label} className={i === 0 ? "fs-fact--wide" : undefined}><dt>{label}</dt><dd>{value}</dd></div>
-        ))}
-      </dl>
+    <DetailDialog visible onHide={onHide} header={t("financialStatements.ledger.title")} size="xl" className="fs-ledger">
+      <KeyValueGrid columns={4} items={facts} className="mb-3" />
       {error && <div className="pe-error" role="alert">{error}</div>}
       <div className="bv-loading-host">
         <LoadingBar active={refreshing} />
@@ -59,7 +54,7 @@ const AccountLedgerDialog = ({ account, from, to, onHide }) => {
         </DataTable>
       </div>
       <JournalDialog journal={journal} onHide={() => setJournal(null)} />
-    </Dialog>
+    </DetailDialog>
   );
 };
 

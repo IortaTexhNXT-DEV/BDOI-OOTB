@@ -8,6 +8,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import DateField from "../../components/DateField";
+import { printPdf } from "../../components/Print";
 import LoadingBar from "../../components/LoadingBar";
 import StatCards from "../../components/StatCards";
 import useStableLoad from "../../hooks/useStableLoad";
@@ -15,7 +16,7 @@ import periodEndService from "../../services/periodEndService";
 import { getDisplayCurrencyConfig } from "../../utility/currencyConverter";
 import AccountLedgerDialog from "./AccountLedgerDialog";
 import { PageHeader, StatusTag, date, showError } from "./common";
-import { DATE_VIEWS, RANGE_VIEWS, defaultChoice, fiscalYearOf, monthName, monthsText, printBlob, rangeOf, saveBlob, statementAmount } from "./statementHelpers";
+import { DATE_VIEWS, RANGE_VIEWS, defaultChoice, fiscalYearOf, monthName, monthsText, rangeOf, saveBlob, statementAmount } from "./statementHelpers";
 import "./FinancialStatements.scss";
 
 const TYPES = ["income-statement", "balance-sheet", "trial-balance"];
@@ -181,12 +182,18 @@ const FinancialStatements = () => {
   const file = async (format, deliver) => {
     setBusy(format);
     try {
-      deliver(await periodEndService.statementFile(type, params, format === "print" ? "pdf" : format));
+      deliver(await periodEndService.statementFile(type, params, format));
     } catch (e) {
       showError(toast, e);
     } finally {
       setBusy(null);
     }
+  };
+  const print = () => {
+    setBusy("print");
+    printPdf(() => periodEndService.statementFile(type, params, "pdf").then((f) => f.blob), { fileName: `${type}.pdf` })
+      .catch((e) => showError(toast, e))
+      .finally(() => setBusy(null));
   };
   const exportItems = [
     { label: t("financialStatements.excel"), icon: "pi pi-file-excel", command: () => file("xlsx", (f) => saveBlob(f.blob, f.fileName)) },
@@ -200,7 +207,7 @@ const FinancialStatements = () => {
         <Menu model={exportItems} popup ref={exportMenu} id="fs-export-menu" />
         <Button label={t("financialStatements.export")} icon="pi pi-download" outlined disabled={!params} loading={busy === "xlsx" || busy === "pdf"}
           onClick={(e) => exportMenu.current.toggle(e)} aria-haspopup aria-controls="fs-export-menu" />
-        <Button label={t("financialStatements.print")} icon="pi pi-print" outlined disabled={!params} loading={busy === "print"} onClick={() => file("print", (f) => printBlob(f.blob))} />
+        <Button label={t("financialStatements.print")} icon="pi pi-print" outlined disabled={!params} loading={busy === "print"} onClick={print} />
       </PageHeader>
 
       <TabView className="bv-tabbar fs-tabs" activeIndex={TYPES.indexOf(type)} onTabChange={(e) => setType(TYPES[e.index])}>
