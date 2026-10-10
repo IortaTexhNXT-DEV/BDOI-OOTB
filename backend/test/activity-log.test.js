@@ -126,17 +126,28 @@ describe('record history from the record itself', () => {
     await q(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, created_by) VALUES ('cl_lc1', 'CL-LC-0001', 'Lc Client', 'Lc', 'Client', $1)`, [admin]);
     await q(`INSERT INTO policies(id, policy_number, client_id, status, inception_date, expiry_date, premium_total, created_by, created_at)
       VALUES ('pol_lc1', 'POL-LC-0001', 'cl_lc1', 'active', current_date, current_date + 365, 1000, $1, now() - interval '1 day')`, [admin]);
-    await q(`INSERT INTO quotes(id, quote_number, client_id, status, premium_total, valid_until, created_by, created_at, updated_at, approval_sent_at)
-      VALUES ('qt_lc1', 'QT-LC-0001', 'cl_lc1', 'rejected', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', now() - interval '2 days'),
-             ('qt_lc2', 'QT-LC-0002', 'cl_lc1', 'converted', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', NULL)`, [admin]);
+    const salesId = (await q("SELECT id FROM users WHERE username = 'al.sales'")).rows[0].id;
+    await q(`INSERT INTO quotes(id, quote_number, client_id, status, premium_total, valid_until, created_by, created_at, updated_at, approval_sent_at, updated_by, remarks)
+      VALUES ('qt_lc1', 'QT-LC-0001', 'cl_lc1', 'rejected', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', now() - interval '2 days', $2,
+        'Client renewed with its incumbent insurer'),
+             ('qt_lc2', 'QT-LC-0002', 'cl_lc1', 'converted', 1000, current_date + 30, $1, now() - interval '3 days', now() - interval '1 day', NULL, NULL, NULL)`, [admin, salesId]);
     await q("UPDATE quotes SET policy_id = 'pol_lc1' WHERE id = 'qt_lc2'");
     await q(`INSERT INTO journal_vouchers(id, jv_number, jv_date, description, status, total_debit, total_credit, created_by, created_at, posted_by, posted_at)
       VALUES ('jv_lc1', 'JV-LC-0001', current_date, 'Accrual', 'posted', 10, 10, $1, now(), $1, now())`, [admin]);
 
     const rejected = (await ctx.api('get', '/audit/records/quotation/QT-LC-0001')).body.data;
     expect(rejected.map((e) => e.title)).toEqual(['Quotation rejected', 'Quotation sent for approval', 'Quotation created']);
-    expect(rejected[0].changes).toEqual([expect.objectContaining({ label: 'Quotation status', to: 'Rejected' })]);
+    // who rejected it, the status it left and the reason given
+    expect(rejected[0].changes).toEqual([expect.objectContaining({ label: 'Quotation status', from: 'Pending customer', to: 'Rejected' })]);
+    expect(rejected[0]).toMatchObject({ note: 'Client renewed with its incumbent insurer', user: { displayName: 'Alvin Sales' } });
+    expect(rejected[0].user.roles.length).toBeGreaterThan(0);
     expect(rejected[0].source.channel).toBe('application');
+
+    // a rejection the trail already holds as a status change is not told twice
+    await q(`INSERT INTO audit_log(user_id, entity, entity_id, action, before_data, after_data) VALUES ($1, 'quotation', 'qt_lc1', 'status',
+      '{"quotationStatus":"PendingCustomer"}', '{"quotationStatus":"Rejected","reason":"Declined"}')`, [salesId]);
+    const told = (await ctx.api('get', '/audit/records/quotation/QT-LC-0001')).body.data;
+    expect(told.filter((e) => e.changes.some((c) => c.to === 'Rejected'))).toHaveLength(1);
 
     const converted = (await ctx.api('get', '/audit/records/quotation/qt_lc2')).body.data;
     expect(converted[0]).toMatchObject({ title: 'Quotation converted to a policy', user: { displayName: 'BrokerVerse Administrator' } });

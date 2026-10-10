@@ -37,14 +37,19 @@ export async function recordId(entity, ref) {
  * their screens wrote the audit trail (sample data, go-live loads, older releases) still show how they got to where
  * they are; a step is only taken from the record when the trail has no entry for it. Time and user are columns of
  * the record (t) or a sub-query on it; extra.when limits a step to records in that state (a rejection only kept in
- * the status), extra.after is the change the step made (status reached, number of the record it created).
+ * the status), extra.before / extra.after are the values before and after the step (status left and reached, number of the record
+ * it created, remarks given).
  */
+// the status a rejected quotation was in, from the steps it had reached (customer accepted, approved, sent for approval)
+const QUOTE_STATUS_BEFORE_REJECT = `CASE WHEN t.customer_accepted_at IS NOT NULL THEN 'CustomerAccepted' WHEN t.approved_at IS NOT NULL THEN 'Approved'
+  WHEN t.approval_sent_at IS NOT NULL THEN 'PendingCustomer' ELSE 'Draft' END`;
 const POLICY_OF_QUOTE = (col) => `(SELECT p.${col} FROM policies p WHERE p.id = t.policy_id)`;
 const LIFECYCLE = {
   lead: ['leads', [['create', 'created_at', 'created_by'], ['assign', 'assigned_at', null]]],
   quotation: ['quotes', [['create', 'created_at', 'created_by'], ['send-for-approval', 'approval_sent_at', 'COALESCE(t.agent_user_id, t.created_by)'],
     ['approve', 'approved_at', 'approved_by'], ['customer-accept', 'customer_accepted_at', "'customer:' || t.id"], ['submit', 'submitted_to_insurer_at', 'submitted_by'],
-    ['reject', 't.updated_at', 't.updated_by', { when: "t.status = 'rejected'", after: { quotationStatus: "'Rejected'" } }],
+    ['reject', 't.updated_at', 't.updated_by', { when: "t.status = 'rejected'", before: { quotationStatus: QUOTE_STATUS_BEFORE_REJECT },
+      after: { quotationStatus: "'Rejected'", remarks: 't.remarks' } }],
     ['convert-to-policy', POLICY_OF_QUOTE('created_at'), POLICY_OF_QUOTE('created_by'),
       { when: 't.policy_id IS NOT NULL', after: { quotationStatus: "'ConvertedToPolicy'", policyNumber: POLICY_OF_QUOTE('policy_number') } }]]],
   policy: ['policies', [['create', 'created_at', 'created_by', { after: { policyNumber: 't.policy_number', policyStatus: 't.status' } }],
@@ -78,20 +83,24 @@ async function lifecycleRows(entity, id, stored) {
   if (!table) return [];
   const cols = steps.flatMap(([, at, by, extra = {}], i) => [
     `${sqlOf(at)} AS s${i}_at`, by ? `${sqlOf(by)} AS s${i}_by` : null, extra.when ? `(${extra.when}) AS s${i}_when` : null,
+    ...Object.values(extra.before || {}).map((expr, j) => `${expr} AS s${i}_b${j}`),
     ...Object.values(extra.after || {}).map((expr, j) => `${expr} AS s${i}_a${j}`)].filter(Boolean));
   const rec = await one(`SELECT ${cols.join(', ')} FROM ${table} t WHERE t.id::text = $1`, [id]).catch(() => null);
   if (!rec) return [];
   const told = (action) => stored.some((r) => (SAME_STEP[action] || new RegExp(`^${action}(-|$)`)).test(String(r.action || '')));
+  // a status the trail already shows reached (a rejection recorded as a status change) is not told again
+  const reached = (after) => Object.entries(after || {}).some(([k, v]) => /status$/i.test(k) && stored.some((r) => r.after_data?.[k] === v));
+  const values = (extra, i, kind) => (extra[kind === 'b' ? 'before' : 'after']
+    ? Object.fromEntries(Object.keys(extra[kind === 'b' ? 'before' : 'after']).map((k, j) => [k, rec[`s${i}_${kind}${j}`]]).filter(([, v]) => v != null)) : null);
   // a user column holds a user id or a username (or customer:<id> for the customer's own answer); anything else (a
   // load script's tag) reads as the system
   const names = steps.map((s, i) => rec[`s${i}_by`]).filter((v) => v && !/^(usr_|customer:)/.test(v));
   const known = names.length ? new Set((await many('SELECT username FROM users WHERE username = ANY($1::text[])', [names])).map((u) => u.username)) : new Set();
   return steps.map(([action, , , extra = {}], i) => ({ action, extra, i })).filter(({ action, extra, i }) => rec[`s${i}_at`]
-    && (!extra.when || rec[`s${i}_when`]) && !told(action)).map(({ action, extra, i }) => {
+    && (!extra.when || rec[`s${i}_when`]) && !told(action) && !reached(values(extra, i, 'a'))).map(({ action, extra, i }) => {
     const who = rec[`s${i}_by`] && (/^(usr_|customer:)/.test(rec[`s${i}_by`]) || known.has(rec[`s${i}_by`])) ? rec[`s${i}_by`] : null;
-    const after = extra.after ? Object.fromEntries(Object.keys(extra.after).map((k, j) => [k, rec[`s${i}_a${j}`]]).filter(([, v]) => v != null)) : null;
     return { id: `${action}-${id}`, at: rec[`s${i}_at`], user_id: who && /^usr_/.test(who) ? who : null, username: who && !/^usr_/.test(who) ? who : null,
-      entity, entity_id: id, action, before_data: null, after_data: after, source: { channel: 'record' }, step: i };
+      entity, entity_id: id, action, before_data: values(extra, i, 'b'), after_data: values(extra, i, 'a'), source: { channel: 'record' }, step: i };
   });
 }
 
