@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import EndorsementWorkflowPanel from "./EndorsementWorkflowPanel";
@@ -48,6 +48,6 @@ describe("endorsement approval and insurer steps", () => {
       premiumChange: { prorata: { unexpiredDays: 182, termDays: 365, annualNetDelta: 3500 } } }));
     wrap();
     expect(await screen.findByRole("button", { name: "Book endorsement" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText("182 of 365 days")).toBeInTheDocument());
+    expect(await screen.findByText("182 of 365 days")).toBeInTheDocument();
   });
 });

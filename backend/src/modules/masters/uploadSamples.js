@@ -267,6 +267,13 @@ export const MASTER_TEMPLATES = [
     samples: [{ code: 'TOTAL_LOSS', name: 'Total loss of the insured property', initiatedBy: 'insurer', method: 'pro-rata', description: 'Cover ends with a total loss' }],
   },
   {
+    type: 'endorsement-type', menu: 'Master > Insurance Management > Endorsement Types',
+    notes: ['The endorsement types of the TISPH panel (M12). An endorsement names one or more types; the section groups them on the printed endorsement.'],
+    formats: { financial: 'Yes when the type changes the premium or the sum insured', premiumImpact: 'Yes when the type is priced (additional or return premium)',
+      lines: 'Lines of business it applies to (MOTOR, ACCIDENT, LIFE ...; several separated by ,) or * for every line', section: 'insured, vehicle, cover, period, cancellation or other' },
+    samples: [{ code: 'CPLT', name: 'Change of Plate Number', financial: 'No', premiumImpact: 'No', lines: 'MOTOR', section: 'vehicle', sortOrder: '110' }],
+  },
+  {
     type: 'claim-document-requirement', menu: 'Master > Insurance Management > Claim Document Checklist',
     formats: { lineOfBusiness: 'Line of business code as on the policy (MOTOR, FIRE ...) or * for every line', claimType: 'Claim type or cause of loss as on the claim, or words of the cause of loss (Theft, Third Party, Collision ...; several separated by ;) or * for every claim',
       required: 'Yes when the claim cannot go to the insurer without it' },
