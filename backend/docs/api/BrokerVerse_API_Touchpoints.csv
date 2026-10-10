@@ -22176,8 +22176,9 @@
     ""currency"": ""PHP""
   }
 }"
-1092,Remittance,POST,/api/remittance/direct-bill/:id/cancel,Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
-  ""reason"": ""Raised to the wrong insurer""
+1092,Remittance,POST,/api/remittance/direct-bill/:id/cancel,"Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+  ""reasonCode"": ""BCN-INSURER"",
+  ""note"": ""Raised to the wrong insurer""
 }","{
   ""success"": true,
   ""data"": {
@@ -22272,8 +22273,9 @@
   }
 }"
 1095,Remittance,GET,/api/remittance/direct-bill/:id/pdf,"Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)",Accounts > Remittance > Direct Bill Processing > Debit Notes > Print,Bearer JWT,"read:remittance, write:remittance",Query: ?download=1,application/pdf
-1096,Remittance,POST,/api/remittance/direct-bill/:id/reject,Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
-  ""reason"": ""Wrong period""
+1096,Remittance,POST,/api/remittance/direct-bill/:id/reject,"Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{
+  ""reasonCode"": ""BRJ-AMOUNT"",
+  ""note"": ""Wrong period""
 }","{
   ""success"": true,
   ""data"": {

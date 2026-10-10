@@ -371,16 +371,16 @@ define({
 for (const action of ['approve', 'reject']) {
   define({
     method: 'POST', path: `/direct-bill/:id/${action}`,
-    summary: `${action === 'approve' ? 'Approve (opens it for sending and collection)' : 'Reject (reason required; its commission becomes unbilled again)'} a debit note; maker-checker: not the maker`,
-    screen: S('Direct Bill Processing > Debit Notes'), middleware: write, request: action === 'approve' ? { remarks: 'Checked against the placements' } : { reason: 'Wrong period' },
+    summary: `${action === 'approve' ? 'Approve (opens it for sending and collection)' : 'Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again)'} a debit note; maker-checker: not the maker`,
+    screen: S('Direct Bill Processing > Debit Notes'), middleware: write, request: action === 'approve' ? { remarks: 'Checked against the placements' } : { reasonCode: 'BRJ-AMOUNT', note: 'Wrong period' },
     response: { success: true, data: { ...dnExample, status: action === 'approve' ? 'Open' : 'Rejected' } },
     handler: async (req, res) => ok(res, (await logged('commission_debit_note', action, (r) => directBill.decideDebitNote(r.params.id, action, r.body || {}, r.user))(req, res)).after,
       `Debit note ${action === 'approve' ? 'approved' : 'rejected'}`),
   });
 }
 define({
-  method: 'POST', path: '/direct-bill/:id/cancel', summary: 'Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
-  request: { reason: 'Raised to the wrong insurer' }, response: { success: true, data: { ...dnExample, status: 'Cancelled' } },
+  method: 'POST', path: '/direct-bill/:id/cancel', summary: 'Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
+  request: { reasonCode: 'BCN-INSURER', note: 'Raised to the wrong insurer' }, response: { success: true, data: { ...dnExample, status: 'Cancelled' } },
   handler: async (req, res) => ok(res, (await logged('commission_debit_note', 'cancel', (r) => directBill.cancelDebitNote(r.params.id, r.body || {}, r.user))(req, res)).after, 'Debit note cancelled'),
 });
 define({

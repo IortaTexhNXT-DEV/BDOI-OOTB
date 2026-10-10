@@ -147,8 +147,11 @@ describe('commission debit note', () => {
     expect(listed.decision.blockedCode).toBe('MAKER');
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${raised.body.data.id}/approve`).send({})).status).toBe(403);
     expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({})).status).toBe(400);
-    const rej = await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reason: 'Wrong period' });
-    expect(rej.body.data).toMatchObject({ statusCode: 'rejected', rejectionReason: 'Wrong period' });
+    // a coded reason must be one of billing_reject, with the note it asks for
+    expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'RRJ-AMOUNT' })).status).toBe(400);
+    expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'BRJ-OTHER' })).status).toBe(400);
+    const rej = await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'BRJ-AMOUNT', note: 'Wrong period' });
+    expect(rej.body.data).toMatchObject({ statusCode: 'rejected', rejectionReason: 'Amount to be corrected: Wrong period' });
     expect((await ctx.as('maker')('get', '/remittance/direct-bill/policies?insurerCode=FPG')).body.data.some((x) => x.id === item.id)).toBe(true);
     // raise again as a draft, submit, approve
     const again = await ctx.as('maker')('post', '/remittance/direct-bill').send({ insurerCode: 'FPG', itemIds: [item.id], dnDate: '2026-02-01' });

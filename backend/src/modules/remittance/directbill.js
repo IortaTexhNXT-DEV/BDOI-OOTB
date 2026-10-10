@@ -46,6 +46,7 @@ import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays } from '../../lib/dates.js';
 import { assertClientPaid, clientPaymentStatus } from './clientPayments.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
@@ -472,6 +473,15 @@ export async function submitDebitNote(id, user) {
 }
 
 /**
+ * The reason text of a rejection or cancellation: a reason of `context` (Reason Codes master, with the note it asks
+ * for) when reasonCode is given, else the free text of earlier screens.
+ */
+async function reasonOf(body, context) {
+  if (body?.reasonCode) return (await requiredReason(pool, context, { reasonCode: body.reasonCode, note: body.note })).text;
+  return body?.reason ?? body?.remarks ?? body?.comments ?? null;
+}
+
+/**
  * Can `user` approve or reject debit note `dn` (debitNoteOut)? The rules of decideDebitNote as a code and the sentence
  * the screen shows instead of Approve and Reject: { canDecide, blockedCode, blockedReason }. Read only; decideDebitNote
  * enforces them. Codes: WRONG_STATUS (not pending approval), NO_PERMISSION, MAKER (raised it), SUBMITTER.
@@ -493,7 +503,7 @@ export const withDecision = async (dn, user) => ({ ...dn, decision: await debitN
 /** Maker-checker decision: approve (-> Open, ready to send and collect) or reject (items released). */
 export async function decideDebitNote(id, action, body, user) {
   const before = await getDebitNote(id);
-  const reason = body?.reason ?? body?.remarks ?? body?.comments ?? null;
+  const reason = action === 'reject' ? await reasonOf(body, 'billing_reject') : body?.remarks ?? body?.comments ?? body?.reason ?? null;
   if (action === 'reject' && !String(reason || '').trim()) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
@@ -530,7 +540,7 @@ async function postBillingStatement(db, d, user) {
 /** Cancel a draft / pending note, or an open one with no collection; its items become unbilled again (an approved billing statement's journal is reversed). */
 export async function cancelDebitNote(id, body, user) {
   const before = await getDebitNote(id);
-  const reason = body?.reason ?? body?.remarks ?? null;
+  const reason = await reasonOf(body, 'billing_cancel');
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
     if (!['draft', 'for-approval', 'open'].includes(d.status)) throw conflict(`Debit note ${d.dn_number} is ${DN_STATUS_LABELS[d.status]}; it cannot be cancelled`);

@@ -80741,7 +80741,7 @@
           ]
         },
         {
-          "name": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again",
+          "name": "Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again",
           "request": {
             "method": "POST",
             "header": [
@@ -80769,10 +80769,10 @@
                 }
               ]
             },
-            "description": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+            "description": "Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Raised to the wrong insurer\"\n}",
+              "raw": "{\n  \"reasonCode\": \"BCN-INSURER\",\n  \"note\": \"Raised to the wrong insurer\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -80810,10 +80810,10 @@
                     }
                   ]
                 },
-                "description": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+                "description": "Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Raised to the wrong insurer\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"BCN-INSURER\",\n  \"note\": \"Raised to the wrong insurer\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -81119,7 +81119,7 @@
           ]
         },
         {
-          "name": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
+          "name": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
           "request": {
             "method": "POST",
             "header": [
@@ -81147,10 +81147,10 @@
                 }
               ]
             },
-            "description": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+            "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Wrong period\"\n}",
+              "raw": "{\n  \"reasonCode\": \"BRJ-AMOUNT\",\n  \"note\": \"Wrong period\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81188,10 +81188,10 @@
                     }
                   ]
                 },
-                "description": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+                "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Wrong period\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"BRJ-AMOUNT\",\n  \"note\": \"Wrong period\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

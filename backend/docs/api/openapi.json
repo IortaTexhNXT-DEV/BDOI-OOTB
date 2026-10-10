@@ -132013,7 +132013,7 @@
     "/remittance/direct-bill/{id}/cancel": {
       "post": {
         "operationId": "postRemittanceDirectBillIdCancel",
-        "summary": "Cancel a debit note without collections (reason required once approved); its commission becomes unbilled again",
+        "summary": "Cancel a debit note without collections (a billing_cancel reasonCode with its note, or a reason; required once approved); its commission becomes unbilled again",
         "tags": [
           "Remittance"
         ],
@@ -132163,13 +132163,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Raised to the wrong insurer"
+                "reasonCode": "BCN-INSURER",
+                "note": "Raised to the wrong insurer"
               }
             }
           }
@@ -132606,7 +132610,7 @@
     "/remittance/direct-bill/{id}/reject": {
       "post": {
         "operationId": "postRemittanceDirectBillIdReject",
-        "summary": "Reject (reason required; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
+        "summary": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
         "tags": [
           "Remittance"
         ],
@@ -132756,13 +132760,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Wrong period"
+                "reasonCode": "BRJ-AMOUNT",
+                "note": "Wrong period"
               }
             }
           }
