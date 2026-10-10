@@ -17,6 +17,8 @@ import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import KeyValueGrid from "../../../components/KeyValueGrid";
+import StatusChip from "../../../components/StatusChip";
+import { statusLabel } from "../../../utils/statusSeverity";
 import { PageHeader } from "../../../module/PeriodEnd/common";
 import logger from "../../../utility/logger";
 import { ActivityLog, fromCollectionActions } from "../../../components/ActivityLog";
@@ -118,6 +120,7 @@ const CollectionDetail = () => {
   }
 
   const client = collection.client || {};
+  const statusText = (status) => (status ? t(`collectionsList.${status.charAt(0).toLowerCase()}${status.slice(1)}`, statusLabel(status)) : null);
   const parseShare = (value) => {
     const parsed = parseFloat(String(value ?? "").replace(/[^0-9.]/g, ""));
     return Number.isFinite(parsed) ? parsed : 0;
@@ -253,8 +256,9 @@ const CollectionDetail = () => {
           { label: t("collectionDetail.policyNumber"), value: collection.policyNumber },
           { label: t("collectionDetail.dueDate"), value: formatDate(collection.dueDate) },
           { label: t("collectionDetail.daysPastDue"), value: <span className="highlight-danger">{collection.daysPastDue} {t("collectionDetail.days")}</span> },
-          { label: t("collectionDetail.status"), value: <span className={`status-badge status-${String(collection.collectionStatus || "").toLowerCase()}`}>{collection.collectionStatus}</span> },
-          { label: t("collectionDetail.overdueLevel"), value: <span className={`level-badge level-${collection.overdueLevel}`}>{t("collectionDetail.level")} {collection.overdueLevel}</span> },
+          { label: t("collectionDetail.status"), value: <StatusChip code={collection.collectionStatus} label={statusText(collection.collectionStatus)} /> },
+          { label: t("collectionDetail.overdueLevel"), value: collection.overdueLevel
+            ? <StatusChip label={`${t("collectionDetail.level")} ${collection.overdueLevel}`} severity={Number(collection.overdueLevel) >= 3 ? "danger" : "warning"} /> : null },
         ]} />
       </Card>
 
