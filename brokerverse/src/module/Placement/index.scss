@@ -1,11 +1,12 @@
 // Placement journey screens: broker slips, placement slips, record e-policy.
+@import "../../theme/bdoi/tokens";
 .hidden-file { display: none; }
 
 // dialogs are rendered outside the page container
 .placement-dialog label {
   display: block;
   margin-bottom: 0.4rem;
-  color: #4b5563;
+  color: $color-text;
   font-weight: 500;
   font-size: 0.875rem;
 }
@@ -15,14 +16,14 @@
   label {
     display: block;
     margin-bottom: 0.4rem;
-    color: #4b5563;
+    color: $color-text;
     font-weight: 500;
     font-size: 0.875rem;
   }
 
-  .muted { color: #6b7280; }
+  .muted { color: $color-text-muted; }
   .small { font-size: 0.78rem; }
-  .hint { display: block; margin-top: 0.35rem; color: #6b7280; font-size: 0.78rem; }
+  .hint { display: block; margin-top: 0.35rem; color: $color-text-muted; font-size: 0.78rem; }
   .num { text-align: right; white-space: nowrap; }
   .center { text-align: center; }
 
@@ -44,12 +45,12 @@
       margin: 0 0 0.2rem;
       font-size: 1.45rem;
       font-weight: 600;
-      color: #1f2937;
+      color: $color-heading;
     }
 
     .subtitle {
       margin: 0;
-      color: #6b7280;
+      color: $color-text-muted;
       font-size: 0.9rem;
       max-width: 60rem;
     }
@@ -66,17 +67,17 @@
 }
 
 .placement-card {
-  background: var(--surface-card, #ffffff);
-  border: 1px solid #e5e7eb;
+  background: $color-surface;
+  border: 1px solid $color-border;
   border-radius: 10px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  box-shadow: $shadow-sm;
 
   .section-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #111827;
+    color: $color-heading;
     margin: 1.25rem 0 0.75rem;
     display: flex;
     align-items: center;
@@ -106,31 +107,31 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: $color-surface;
+    border: 1px solid $color-border;
     border-radius: 8px;
     padding: 0.75rem 1rem;
     cursor: pointer;
     text-align: left;
     font: inherit;
 
-    &.active { background: var(--primary-color-light, #eef5ff); border-color: var(--primary-color, #0072d8); }
-    .kpi-value { font-size: 1.5rem; font-weight: 700; color: #111827; }
-    .kpi-label { font-size: 0.8rem; color: #6b7280; }
+    &.active { background: $brand-blue-050; border-color: $brand-blue; }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; color: $color-heading; }
+    .kpi-label { font-size: 0.8rem; color: $color-text-muted; }
   }
 }
 
 .placement-grid {
   .p-datatable-thead > tr > th {
-    background: #f8f9fb;
-    color: #374151;
+    background: $color-surface-muted;
+    color: $color-text;
     font-weight: 600;
     font-size: 0.85rem;
   }
 
   .num { text-align: right; }
   tr.clickable { cursor: pointer; }
-  .doc-number { font-weight: 600; color: var(--primary-color, #0072d8); white-space: nowrap; }
+  .doc-number { font-weight: 600; color: $brand-blue; white-space: nowrap; }
   .nowrap, .placement-status { white-space: nowrap; }
 }
 
@@ -170,12 +171,12 @@
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 600;
-  background: #eef2ff;
-  color: #4338ca;
+  background: $brand-blue-050;
+  color: $brand-navy;
   vertical-align: middle;
 }
 
-.co-chip { background: #ecfdf5; color: #047857; }
+.co-chip { background: $color-success-050; color: $color-success; }
 
 .participant-table {
   width: 100%;
@@ -184,28 +185,28 @@
 
   th {
     text-align: left;
-    background: #f8f9fb;
-    color: #374151;
+    background: $color-surface-muted;
+    color: $color-text;
     font-weight: 600;
     padding: 0.55rem 0.6rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid $color-border;
     white-space: nowrap;
   }
 
   td {
     padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid #f1f2f4;
+    border-bottom: 1px solid $color-border;
     vertical-align: middle;
   }
 
   th.num, td.num { text-align: right; }
   th.center, td.center { text-align: center; }
-  tr.lead-row td { background: #f5f9ff; }
-  tr.best-row td { background: #f0fdf4; }
+  tr.lead-row td { background: $brand-blue-050; }
+  tr.best-row td { background: $color-success-050; }
   tfoot td { border-bottom: none; padding-top: 0.6rem; }
   .actions-cell { white-space: nowrap; text-align: right; }
-  .total-ok { color: #15803d; font-weight: 600; }
-  .total-bad { color: #b91c1c; font-weight: 600; }
+  .total-ok { color: $color-success; font-weight: 600; }
+  .total-bad { color: $color-danger; font-weight: 600; }
 }
 
 .table-scroll { overflow-x: auto; }
@@ -224,7 +225,7 @@
 }
 
 .participant-table.readonly td:first-child { min-width: 12rem; }
-.participant-table.readonly .participant-role { display: block; color: #6b7280; font-size: 12px; }
+.participant-table.readonly .participant-role { display: block; color: $color-text-muted; font-size: 12px; }
 
 // the row actions stay in view when the table scrolls sideways on narrower screens
 .participant-table.readonly {
@@ -234,12 +235,12 @@
     position: sticky;
     right: 0;
     width: 1%;
-    background: #fff;
-    box-shadow: inset 1px 0 0 #e5e7eb;
+    background: $color-surface;
+    box-shadow: inset 1px 0 0 $color-border;
   }
 
-  th:last-child:empty { position: sticky; right: 0; background: #f8f9fb; }
-  tr.lead-row .actions-cell { background: #f5f9ff; }
+  th:last-child:empty { position: sticky; right: 0; background: $color-surface-muted; }
+  tr.lead-row .actions-cell { background: $brand-blue-050; }
 }
 
 .journey-timeline {
@@ -266,10 +267,10 @@
       left: 2.2rem;
       right: 0.4rem;
       height: 2px;
-      background: #e5e7eb;
+      background: $color-border;
     }
 
-    &.done:not(:last-child)::after { background: #16a34a; }
+    &.done:not(:last-child)::after { background: $color-success; }
   }
 
   .journey-marker {
@@ -282,29 +283,29 @@
     justify-content: center;
     font-weight: 700;
     font-size: 0.8rem;
-    background: #f3f4f6;
-    color: #6b7280;
-    border: 2px solid #e5e7eb;
+    background: $color-surface-muted;
+    color: $color-text-muted;
+    border: 2px solid $color-border;
     position: relative;
     z-index: 1;
   }
 
-  .done .journey-marker { background: #16a34a; border-color: #16a34a; color: #ffffff; }
-  .current .journey-marker { background: #ffffff; border-color: var(--primary-color, #0072d8); color: var(--primary-color, #0072d8); }
+  .done .journey-marker { background: $color-success; border-color: $color-success; color: $color-surface; }
+  .current .journey-marker { background: $color-surface; border-color: $brand-blue; color: $brand-blue; }
   .skipped .journey-marker { border-style: dashed; }
 
   .journey-body {
     display: flex;
     flex-direction: column;
-    background: var(--surface-card, #ffffff);
+    background: $color-surface;
     position: relative;
     z-index: 1;
     padding: 0 0.5rem 0 0.6rem;
   }
 
-  .journey-label { font-weight: 600; font-size: 0.85rem; color: #111827; }
-  .journey-ref { font-size: 0.8rem; color: #374151; }
-  .journey-ref.muted { color: #9ca3af; }
+  .journey-label { font-weight: 600; font-size: 0.85rem; color: $color-heading; }
+  .journey-ref { font-size: 0.8rem; color: $color-text; }
+  .journey-ref.muted { color: $color-placeholder; }
 
   .journey-link {
     background: none;
@@ -312,7 +313,7 @@
     padding: 0;
     font: inherit;
     font-size: 0.8rem;
-    color: var(--primary-color, #0072d8);
+    color: $brand-blue;
     cursor: pointer;
     text-align: left;
 
@@ -320,7 +321,7 @@
   }
 }
 
-.side-summary .placement-field { padding: 0.35rem 0; border-bottom: 1px dashed #eef0f3; }
+.side-summary .placement-field { padding: 0.35rem 0; border-bottom: 1px dashed $color-border; }
 
 .placement-field {
   display: flex;
@@ -328,8 +329,8 @@
   gap: 0.75rem;
   font-size: 0.875rem;
 
-  .placement-field-label { color: #6b7280; }
-  .placement-field-value { color: #111827; text-align: right; }
+  .placement-field-label { color: $color-text-muted; }
+  .placement-field-value { color: $color-heading; text-align: right; }
 }
 
 .field-grid {
@@ -337,7 +338,7 @@
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: 0.5rem 1.5rem;
 
-  .placement-field { border-bottom: 1px dashed #eef0f3; padding: 0.35rem 0; }
+  .placement-field { border-bottom: 1px dashed $color-border; padding: 0.35rem 0; }
 }
 
 .compare-summary {
@@ -346,7 +347,7 @@
   flex-wrap: wrap;
   margin-bottom: 0.75rem;
   font-size: 0.9rem;
-  color: #374151;
+  color: $color-text;
 }
 
 .form-actions {
@@ -364,15 +365,15 @@
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
-  background: #f8f9fb;
-  border: 1px solid #eef0f3;
+  background: $color-surface-muted;
+  border: 1px solid $color-border;
   border-radius: 8px;
   padding: 0.6rem 0.9rem;
   margin-top: 0.75rem;
   font-size: 0.875rem;
 }
 
-.risk-details-editor .risk-key { font-weight: 500; color: #374151; }
+.risk-details-editor .risk-key { font-weight: 500; color: $color-text; }
 
 // Check against slip: the slip and the e-policy side by side, differences highlighted
 .check-status {
@@ -383,23 +384,23 @@
   font-weight: 600;
   vertical-align: middle;
 
-  &.match { background: #ecfdf3; color: #067647; }
-  &.mismatch { background: #fef3f2; color: #b42318; }
-  &.captured, &.carried { background: #eff8ff; color: #175cd3; }
-  &.not-given { background: #f2f4f7; color: #475467; }
+  &.match { background: $color-success-050; color: $color-success; }
+  &.mismatch { background: $color-danger-050; color: $color-danger; }
+  &.captured, &.carried { background: $brand-blue-050; color: $brand-blue; }
+  &.not-given { background: $color-surface-muted; color: $color-text-muted; }
 }
-.slip-comparison tr.check-mismatch td { background: #fff6f5; }
-.slip-comparison tr.check-mismatch td:first-child { box-shadow: inset 3px 0 0 #d92d20; }
-.empty-note { padding: 1rem; color: #6b7280; }
+.slip-comparison tr.check-mismatch td { background: $color-danger-050; }
+.slip-comparison tr.check-mismatch td:first-child { box-shadow: inset 3px 0 0 $color-danger; }
+.empty-note { padding: 1rem; color: $color-text-muted; }
 .attachment-line { display: flex; align-items: center; gap: 0.5rem; }
 
 // Journey panel on the quotation detail (Quotation Slip)
 .quote-journey-panel {
-  border: 1px solid #e5e7eb;
+  border: 1px solid $color-border;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   margin: 0.75rem 0 1rem;
-  background: #fbfcfe;
+  background: $color-surface-muted;
 
   .quote-journey-head {
     display: flex;
@@ -408,14 +409,29 @@
     flex-wrap: wrap;
     margin-bottom: 0.6rem;
 
-    .journey-title { font-weight: 600; font-size: 0.95rem; color: #111827; }
-    .journey-note { font-size: 0.8rem; color: #b45309; }
+    .journey-title { font-weight: 600; font-size: 0.95rem; color: $color-heading; }
+    .journey-note { font-size: 0.8rem; color: $color-warning; }
   }
 
-  .journey-timeline .journey-body { background: #fbfcfe; }
+  .journey-timeline .journey-body { background: $color-surface-muted; }
 }
 
 @media (max-width: 768px) {
   .placement-page { padding: 0.75rem; }
   .placement-card .toolbar .search input { width: 100%; }
+}
+
+.placement-maker-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: auto;
+  color: $color-text-muted;
+  font-size: 0.85rem;
+}
+
+.placement-consequence {
+  margin: 0.75rem 0 0;
+  color: $color-text-muted;
+  font-size: 0.875rem;
 }

@@ -902,7 +902,7 @@ $tablet-md: 1024px;
   }
 
   .p-dialog-content {
-    height: 85vh !important;
+    height: 78vh !important;
     min-height: 520px !important;
     padding: 0 !important;
     overflow: hidden;
@@ -916,5 +916,16 @@ $tablet-md: 1024px;
     min-height: 480px !important;
     border: none;
     flex: 1;
+  }
+}
+
+.document-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+
+  a.p-button {
+    text-decoration: none;
   }
 }

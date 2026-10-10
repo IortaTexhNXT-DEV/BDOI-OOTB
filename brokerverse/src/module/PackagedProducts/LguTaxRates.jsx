@@ -12,7 +12,8 @@ import { MultiSelect } from "primereact/multiselect";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import packagesService from "../../services/packagesService";
-import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
+import { notifyError, notifySuccess } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { formatDate } from "../../utility/dateFormat";
 import { PageHeader } from "../Placement/shared";
 import { ChargesBreakdown, PRODUCT_LINES, RULE_KINDS, RULE_METHODS, TAX_REGIMES, todayIso, usePackageOptions, lguOptions } from "./common";
@@ -65,8 +66,23 @@ const LguTaxRates = () => {
     }
   };
   const removeLgu = async (row) => {
-    if (!(await confirmAction(k("deleteLgu", { name: row.name }), { danger: true }))) return;
-    packagesService.deleteLguRate(row.id).then(load).catch((e) => notifyError(e.message));
+    const done = await openConfirm({
+      title: k("deleteLguTitle"),
+      severity: "danger",
+      message: k("deleteLguMessage"),
+      facts: [
+        { label: k("code"), value: row.code },
+        { label: k("lguName"), value: row.name },
+        { label: k("province"), value: row.province },
+        { label: k("rate"), value: row.rate, type: "percent" },
+        { label: k("effectiveFrom"), value: row.effectiveFrom, type: "date" },
+      ],
+      confirmLabel: k("deleteLguTitle"),
+      onConfirm: () => packagesService.deleteLguRate(row.id),
+    });
+    if (!done) return;
+    notifySuccess(k("lguDeleted"));
+    load();
   };
   const saveRule = async () => {
     const body = { ...rule, effectiveTo: rule.effectiveTo || null, remarks: rule.remarks || null, lines: rule.lines?.length ? rule.lines : null, regimes: rule.regimes?.length ? rule.regimes : null };
@@ -85,13 +101,27 @@ const LguTaxRates = () => {
     }
   };
   const removeRule = async (row) => {
-    if (!(await confirmAction(k("deleteRule", { name: row.name }), { danger: true }))) return;
-    packagesService.deleteChargeRule(row.code).then(load).catch((e) => notifyError(e.message));
+    const done = await openConfirm({
+      title: k("deleteRuleTitle"),
+      severity: "danger",
+      message: k("deleteRuleMessage"),
+      facts: [
+        { label: k("code"), value: row.code },
+        { label: k("ruleName"), value: row.name },
+        { label: k("kind"), value: t(`packagedProducts.kinds.${row.kind}`, { defaultValue: row.kind }) },
+        { label: k("amount"), value: howMuch(row) },
+      ],
+      confirmLabel: k("deleteRuleTitle"),
+      onConfirm: () => packagesService.deleteChargeRule(row.code),
+    });
+    if (!done) return;
+    notifySuccess(k("ruleDeleted"));
+    load();
   };
   const runCalc = () => packagesService.calculateCharges({ premium: calc.premium || 0, productId: calc.productId, lguCode: calc.lguCode }).then(setResult).catch((e) => notifyError(e.message));
 
   const opt = (list, prefix) => list.map((v) => ({ label: t(`${prefix}.${v}`, { defaultValue: v }), value: v }));
-  const active = (r) => <Tag value={r.active ? t("packagedProducts.active") : t("packagedProducts.inactive")} severity={r.active ? "success" : "danger"} />;
+  const active = (r) => <Tag value={r.active ? t("packagedProducts.active") : t("packagedProducts.inactive")} severity={r.active ? "success" : "secondary"} />;
   const howMuch = (r) => (r.method === "per_unit" ? k("perUnit", { amount: r.unitAmount, size: r.unitSize }) : r.method === "flat" ? k("flat", { amount: r.unitAmount }) : `${r.rate}%`);
 
   return (

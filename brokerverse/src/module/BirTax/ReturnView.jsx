@@ -9,10 +9,15 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import birTaxService from "../../services/birTaxService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { printPdf } from "../../components/Print";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, ScheduleTable, date, money, showError, showSuccess } from "./common";
+import { dateTime } from "../PeriodEnd/common";
 
 const periodParams = (r) => ({ year: r.period.year, quarter: r.period.quarter || undefined, month: r.period.month || undefined });
+const queryOf = (params) => new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null)).toString();
 
 /** Record (or correct) the filing of a return: date filed, references, amount paid, penalties. */
 const FilingDialog = ({ ret, filing, amended, onHide, onSaved, toast }) => {
@@ -59,20 +64,28 @@ const FilingDialog = ({ ret, filing, amended, onHide, onSaved, toast }) => {
 const ReturnView = ({ ret, onChanged, toast }) => {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState(null);
-  const [cancelling, setCancelling] = useState(null);
-  const [reason, setReason] = useState("");
   if (!ret) return null;
   const params = periodParams(ret);
   const run = async (fn) => { try { await fn(); } catch (e) { showError(toast, e); } };
-  const cancelFiling = async () => {
-    try {
-      await birTaxService.cancelFiling(cancelling.id, reason);
-      setCancelling(null);
-      setReason("");
-      onChanged();
-    } catch (e) {
-      showError(toast, e);
-    }
+  const print = () => printPdf(`/bir/returns/${encodeURIComponent(ret.form)}/pdf?${queryOf(params)}`, { fileName: `BIR-${ret.form}-${ret.period.label}.pdf` })
+    .catch((e) => showError(toast, e));
+  const cancelFiling = async (filing) => {
+    const reason = await openConfirm({
+      title: t("birTax.confirmations.cancelFilingTitle", { form: ret.form }),
+      severity: "danger",
+      message: t("birTax.cancelFilingNote"),
+      facts: [
+        { label: t("birTax.confirmations.form"), value: `${ret.form} · ${ret.period.label}` },
+        { label: t("birTax.dateFiled"), value: filing.dateFiled, type: "date" },
+        { label: t("birTax.filingReference"), value: filing.filingReference },
+        { label: t("birTax.amountPaid"), value: filing.amountPaid, type: "amount" },
+      ],
+      input: { type: "textarea", label: t("birTax.reason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("birTax.cancelFiling"),
+      cancelLabel: t("birTax.confirmations.keepFiling"),
+      onConfirm: (value) => birTaxService.cancelFiling(filing.id, value),
+    });
+    if (reason !== null) onChanged();
   };
   const rec = ret.reconciliation;
   return (
@@ -83,7 +96,7 @@ const ReturnView = ({ ret, onChanged, toast }) => {
           <div className="pe-muted">{ret.period.label} ({date(ret.period.from)} to {date(ret.period.to)}) · {t("birTax.formVersion")} {ret.formVersion}</div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button icon="pi pi-print" outlined label={t("birTax.print")} onClick={() => run(() => birTaxService.returnPdf(ret.form, params))} />
+          <Button icon="pi pi-print" outlined label={t("birTax.print")} onClick={print} />
           <Button icon="pi pi-file-excel" outlined label={t("birTax.excel")} onClick={() => run(() => birTaxService.returnXlsx(ret.form, params))} />
           {!ret.filing && <Button icon="pi pi-check-square" label={t("birTax.recordFiling")} onClick={() => setDialog({ amended: false })} />}
           {ret.filing && <Button icon="pi pi-pencil" outlined label={t("birTax.editFiling")} onClick={() => setDialog({ amended: false, filing: ret.filing })} />}
@@ -92,9 +105,7 @@ const ReturnView = ({ ret, onChanged, toast }) => {
       </div>
 
       <h4>{t("birTax.part1")}</h4>
-      <div className="grid">
-        {ret.header.map(([k, v]) => <div key={k} className="col-12 md:col-6"><span className="pe-muted">{k}: </span><strong>{v || "-"}</strong></div>)}
-      </div>
+      <KeyValueGrid columns={2} items={ret.header.map(([k, v]) => ({ key: k, label: k, value: v }))} />
 
       <h4>{t("birTax.part2")}</h4>
       <DataTable value={ret.items} size="small" stripedRows dataKey="label">
@@ -136,16 +147,14 @@ const ReturnView = ({ ret, onChanged, toast }) => {
         <Column field="paymentChannel" header={t("birTax.paymentChannel")} />
         <Column header={t("birTax.amended")} body={(r) => (r.amended ? t("birTax.yes") : "")} />
         <Column header={t("birTax.statusLabel")} body={(r) => <BirTag status={r.status} />} />
-        <Column body={(r) => r.status === "filed" && <Button icon="pi pi-times" text size="small" severity="danger" aria-label={t("birTax.cancelFiling")} tooltip={t("birTax.cancelFiling")} onClick={() => setCancelling(r)} />} />
+        <Column header={t("birTax.confirmations.recordedOn")} body={(r) => dateTime(r.createdAt)} />
+        <Column header={t("periodEnd.remarks")} body={(r) => (r.status === "cancelled" && r.cancelReason
+          ? <span>{t("birTax.confirmations.cancelledOn", { date: dateTime(r.cancelledAt) })}: {r.cancelReason}</span>
+          : r.remarks)} />
+        <Column body={(r) => r.status === "filed" && <Button icon="pi pi-times" text size="small" severity="danger" aria-label={t("birTax.cancelFiling")} tooltip={t("birTax.cancelFiling")} onClick={() => cancelFiling(r)} />} />
       </DataTable>
 
       {dialog && <FilingDialog ret={ret} filing={dialog.filing} amended={dialog.amended} toast={toast} onHide={() => setDialog(null)} onSaved={() => { setDialog(null); onChanged(); }} />}
-      <Dialog className="pe-dialog" visible={!!cancelling} header={t("birTax.cancelFiling")} style={{ width: "min(520px, 95vw)" }} onHide={() => setCancelling(null)}
-        footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setCancelling(null)} /><Button label={t("birTax.cancelFiling")} severity="danger" onClick={cancelFiling} disabled={reason.trim().length < 3} /></div>}>
-        <label>{t("birTax.reason")} *</label>
-        <InputTextarea value={reason} rows={3} onChange={(e) => setReason(e.target.value)} className="w-full" />
-        <p className="pe-muted">{t("birTax.cancelFilingNote")}</p>
-      </Dialog>
     </div>
   );
 };

@@ -6,14 +6,16 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Skeleton } from 'primereact/skeleton';
 import { Message } from 'primereact/message';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from 'primereact/toast';
 import { getLeadByIdMiddleware, deleteLeadMiddleware } from '../Store/leadMiddleware';
 import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorsementCategories';
-import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
+import { formatDate as formatConfiguredDate, formatInstant } from '../../../utility/dateFormat';
 import ActivityPanel from '../../../components/SalesActivities/ActivityPanel';
 import { RFQ_PATH, isUntagged, rfqState } from '../../../module/Sales/salesProducts';
 import TagProductDialog from '../leadListing/TagProductDialog';
+import confirmDeleteProspect from '../confirmDeleteProspect';
+import DetailSection from '../../../components/DetailSection';
+import { RecordActivityLog } from '../../../components/ActivityLog';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -41,40 +43,19 @@ const LeadDetail = () => {
     navigate(`/agent/leadedit/${leadId}`);
   };
 
-  const handleDelete = () => {
-    confirmDialog({
-      message: t('leadDetail.confirmDelete'),
-      header: t('leadDetail.deleteConfirmation'),
-      icon: 'pi pi-exclamation-triangle',
-      accept: async () => {
-        try {
-          const result = await dispatch(deleteLeadMiddleware(leadId));
-          if (result.type.endsWith('/fulfilled')) {
-            toast.current.show({
-              severity: 'success',
-              summary: t('common.success'),
-              detail: t('leadDetail.deletedSuccess'),
-              life: 3000
-            });
-            navigate('/agent/leadlisting');
-          } else {
-            toast.current.show({
-              severity: 'error',
-              summary: t('common.error'),
-              detail: result.payload || t('leadDetail.failedToDelete'),
-              life: 3000
-            });
-          }
-        } catch (error) {
-          toast.current.show({
-            severity: 'error',
-            summary: t('common.error'),
-            detail: t('leadDetail.unexpectedError'),
-            life: 3000
-          });
-        }
-      }
+  const handleDelete = async () => {
+    const deleted = await confirmDeleteProspect({ leadId, ...currentLeadDetails }, async () => {
+      const result = await dispatch(deleteLeadMiddleware(leadId));
+      if (!result.type.endsWith('/fulfilled')) throw new Error(result.payload || t('leadDetail.failedToDelete'));
+    }, t);
+    if (!deleted) return;
+    toast.current.show({
+      severity: 'success',
+      summary: t('common.success'),
+      detail: t('leadDetail.deletedSuccess'),
+      life: 3000
     });
+    navigate('/agent/leadlisting');
   };
 
   const handleBack = () => {
@@ -157,7 +138,6 @@ const LeadDetail = () => {
   return (
     <div className="lead-detail-container">
       <Toast ref={toast} />
-      <ConfirmDialog />
       <TagProductDialog lead={currentLeadDetails} visible={Boolean(tagging)} forQuote={tagging === 'quote'} onHide={() => setTagging(null)} onTagged={handleTagged} />
       
       <div className="header">
@@ -316,11 +296,11 @@ const LeadDetail = () => {
               <h3>{t('leadDetail.systemInformation')}</h3>
               <div className="detail-row">
                 <span className="label">{t('leadDetail.createdDate')}</span>
-                <span className="value">{formatDate(currentLeadDetails.createdAt)}</span>
+                <span className="value">{formatInstant(currentLeadDetails.createdAt, { empty: t('policyDetail.nA') })}</span>
               </div>
               <div className="detail-row">
                 <span className="label">{t('leadDetail.lastUpdated')}</span>
-                <span className="value">{formatDate(currentLeadDetails.updatedAt)}</span>
+                <span className="value">{formatInstant(currentLeadDetails.updatedAt, { empty: t('policyDetail.nA') })}</span>
               </div>
               <div className="detail-row">
                 <span className="label">{t('leadDetail.numberOfQuotes')}</span>
@@ -331,6 +311,12 @@ const LeadDetail = () => {
 
         <div className="col-12">
           <ActivityPanel entity="lead" recordId={String(currentLeadDetails.leadId || leadId)} />
+        </div>
+
+        <div className="col-12">
+          <DetailSection title={t('leadDetail.history')}>
+            <RecordActivityLog entity="lead" recordId={currentLeadDetails.leadId || leadId} />
+          </DetailSection>
         </div>
       </div>
     </div>

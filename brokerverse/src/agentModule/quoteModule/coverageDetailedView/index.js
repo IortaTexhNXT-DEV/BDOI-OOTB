@@ -15,7 +15,8 @@ import systemSettingsService from "../../../services/systemSettingsService";
 import { RadioButton } from "primereact/radiobutton";
 import policyService from "../../../services/policyService";
 import s3Service from "../../../services/s3Service";
-import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../../components/DetailDialog";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 import placementService from "../../../services/placementService";
 import logger from "../../../utility/logger";
 
@@ -167,6 +168,7 @@ const CoverageDetailedView = () => {
   // Placement journey (placement.journey): a line that requires a Placement Slip places the risk with the insurer(s)
   // first; optional lets the user choose; skip converts the quotation directly as before.
   const [journeyChoice, setJourneyChoice] = useState(false);
+  const [journeyRoute, setJourneyRoute] = useState("placement");
 
   const createPlacementSlip = async () => {
     setJourneyChoice(false);
@@ -197,6 +199,7 @@ const CoverageDetailedView = () => {
     const mode = q.isRenewal ? "skip" : journey?.placementSlip || "skip";
     if (mode === "required") return createPlacementSlip();
     if (mode === "optional") {
+      setJourneyRoute("placement");
       setJourneyChoice(true);
       return undefined;
     }
@@ -1054,15 +1057,32 @@ const CoverageDetailedView = () => {
           loading={isProcessing}
         />
       </div>
-      <Dialog header={t("placement.quoteJourney.title")} visible={journeyChoice} onHide={() => setJourneyChoice(false)} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }}>
-        <p>{t("placement.quoteJourney.question")}</p>
-        <div className="flex flex-column gap-2">
-          <Button label={t("placement.quoteJourney.placement")} icon="pi pi-briefcase" onClick={createPlacementSlip} />
-          <small className="text-500">{t("placement.quoteJourney.placementHint")}</small>
-          <Button label={t("placement.quoteJourney.direct")} icon="pi pi-verified" severity="secondary" outlined onClick={convertDirectly} className="mt-2" />
-          <small className="text-500">{t("placement.quoteJourney.directHint")}</small>
-        </div>
-      </Dialog>
+      <DetailDialog header={t("placement.quoteJourney.title")} visible={journeyChoice} onHide={() => setJourneyChoice(false)} size="md"
+        footer={(
+          <>
+            <Button label={t("coverageDetailsReview.cancel")} text onClick={() => setJourneyChoice(false)} />
+            <Button label={t(journeyRoute === "placement" ? "coverageDetailsReview.createPlacementSlip" : "coverageDetailsReview.issuePolicy")}
+              icon={journeyRoute === "placement" ? "pi pi-briefcase" : "pi pi-verified"} onClick={journeyRoute === "placement" ? createPlacementSlip : convertDirectly} />
+          </>
+        )}>
+        <KeyValueGrid columns={3} className="mb-3" items={[
+          { label: t("coverageDetailsReview.quotation"), value: quotData?.quotationNumber },
+          { label: t("coverageDetailsReview.insurer"), value: quotData?.insuranceCompanyName },
+          { label: t("coverageDetailsReview.grossPremium"), value: quotationData?.grossPremium, type: "amount", currency: quotationData?.currency },
+        ]} />
+        <fieldset className="journey-route">
+          <legend>{t("placement.quoteJourney.question")}</legend>
+          {[["placement", "placementHint"], ["direct", "directHint"]].map(([route, hint]) => (
+            <div key={route} className="journey-route__option">
+              <RadioButton inputId={`journey-${route}`} name="journey-route" value={route} checked={journeyRoute === route} onChange={(e) => setJourneyRoute(e.value)} />
+              <label htmlFor={`journey-${route}`}>
+                <span className="journey-route__label">{t(`placement.quoteJourney.${route}`)}</span>
+                <span className="journey-route__hint">{t(`placement.quoteJourney.${hint}`)}</span>
+              </label>
+            </div>
+          ))}
+        </fieldset>
+      </DetailDialog>
     </div>
   );
 };

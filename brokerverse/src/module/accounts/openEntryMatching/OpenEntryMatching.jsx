@@ -15,6 +15,7 @@ import accountingService from "../../../services/accountingService";
 import postingRulesService from "../../../services/postingRulesService";
 import useOpenItemAccounts from "./useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const OpenEntryMatching = () => {
@@ -94,6 +95,25 @@ const OpenEntryMatching = () => {
       notifyWarn(t("validation.selectOneDebitOneCredit"));
       return;
     }
+
+    const total = (rows) => rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+    const pairs = Math.min(selectedDebits.length, selectedCredits.length);
+    const debitTotal = total(selectedDebits);
+    const creditTotal = total(selectedCredits);
+    const confirmed = await openConfirm({
+      title: t("accounts.openEntryDialogs.matchTitle"),
+      message: t("accounts.openEntryDialogs.matchMessage", { count: pairs }),
+      facts: [
+        { label: t("accounts.openEntryDialogs.debitsSelected"), value: selectedDebits.length, type: "number" },
+        { label: t("accounts.openEntryDialogs.debitTotal"), value: debitTotal, type: "amount" },
+        { label: t("accounts.openEntryDialogs.creditsSelected"), value: selectedCredits.length, type: "number" },
+        { label: t("accounts.openEntryDialogs.creditTotal"), value: creditTotal, type: "amount" },
+        { label: t("accounts.openEntryDialogs.difference"), value: Math.round((debitTotal - creditTotal) * 100) / 100, type: "amount", emphasis: true },
+        { label: t("accounts.openEntryDialogs.writeOffAmount"), value: footerData.writeOffAmount, type: "amount", hidden: !footerData.writeOffAmount },
+      ],
+      confirmLabel: t("accounts.openEntryDialogs.matchEntries", { count: pairs }),
+    });
+    if (!confirmed) return;
 
     setLoading(true);
     try {

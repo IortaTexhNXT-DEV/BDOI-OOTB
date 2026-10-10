@@ -11,7 +11,8 @@ import { InputSwitch } from "primereact/inputswitch";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import packagesService from "../../services/packagesService";
-import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
+import { notifyError, notifySuccess } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { formatDate } from "../../utility/dateFormat";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { PageHeader } from "../Placement/shared";
@@ -69,8 +70,23 @@ const InsurerRateTables = () => {
     }
   };
   const remove = async (r) => {
-    if (!(await confirmAction(k("deleteConfirm", { insurer: r.insurerName, product: r.productName }), { danger: true }))) return;
-    packagesService.deleteRateTable(r.id).then(load).catch((e) => notifyError(e.message));
+    const done = await openConfirm({
+      title: k("deleteTitle"),
+      severity: "danger",
+      message: k("deleteMessage"),
+      facts: [
+        { label: k("product"), value: r.productName },
+        { label: k("insurer"), value: r.insurerName },
+        { label: k("basis"), value: basisLabel(r.rateBasis) },
+        { label: k("rate"), value: rateText(r) },
+        { label: k("effective"), value: `${formatDate(r.effectiveFrom)} - ${r.effectiveTo ? formatDate(r.effectiveTo) : k("open")}` },
+      ],
+      confirmLabel: k("deleteTitle"),
+      onConfirm: () => packagesService.deleteRateTable(r.id),
+    });
+    if (!done) return;
+    notifySuccess(k("deleted"));
+    load();
   };
   const set = (patch) => setEdit((e) => ({ ...e, ...patch }));
 
@@ -93,7 +109,7 @@ const InsurerRateTables = () => {
         <Column header={k("benefits")} body={(r) => (r.keyBenefits || []).length} className="num" headerClassName="num" />
         <Column header={k("commission")} body={(r) => (r.commissionRate === null ? k("matrix") : `${Math.round(r.commissionRate * 10000) / 100}%`)} />
         <Column header={k("effective")} body={(r) => `${formatDate(r.effectiveFrom)} - ${r.effectiveTo ? formatDate(r.effectiveTo) : k("open")}`} />
-        <Column header={t("packagedProducts.active")} body={(r) => <Tag value={r.active ? t("packagedProducts.active") : t("packagedProducts.inactive")} severity={r.active ? "success" : "danger"} />} />
+        <Column header={t("packagedProducts.active")} body={(r) => <Tag value={r.active ? t("packagedProducts.active") : t("packagedProducts.inactive")} severity={r.active ? "success" : "secondary"} />} />
         <Column body={(r) => (
           <div className="admin__actions">
             <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", deductible: r.deductible || "",

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
@@ -12,8 +13,11 @@ import LineDetailDrawer from "./LineDetailDrawer";
 import "./style.scss";
 import logger from "../../../utility/logger";
 import { DetailPageSkeleton } from "../../../components/Skeletons";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import StatusChip from "../../../components/StatusChip";
 
 const ReferrerAccountDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -55,13 +59,27 @@ const ReferrerAccountDetail = () => {
       const res = await fn(id);
       setDetail(res?.data || res);
     } catch (err) {
-      showError(err, "Action failed");
+      showError(err, t("commissionLine.actionFailed"));
     } finally {
       setActionLoading(false);
     }
   };
 
+  // the bulk actions of the page, confirmed with the number of lines and their net amount
+  const confirmBulk = (name, count, amount) =>
+    openConfirm({
+      title: t(`commissionLine.bulk.${name}Title`, { name: detail?.referrer?.name }),
+      message: t(`commissionLine.bulk.${name}Message`),
+      facts: [
+        { label: t("commissionLine.referrer"), value: detail?.referrer?.name },
+        { label: t("commissionLine.bulk.lines"), value: count, type: "number" },
+        { label: t("commissionLine.netPayable"), value: amount, type: "amount", emphasis: true, hidden: amount === undefined },
+      ],
+      confirmLabel: t(`commissionLine.bulk.${name}`, { count }),
+    });
+
   const handleGeneratePayout = async () => {
+    if (!(await confirmBulk("payout", detail.actions.generatePayoutCount, detail.currentCycle?.totalNet))) return;
     setActionLoading(true);
     try {
       const res = await CommissionService.generatePayout(id);
@@ -75,7 +93,7 @@ const ReferrerAccountDetail = () => {
         },
       });
     } catch (err) {
-      showError(err, "Generate payout failed");
+      showError(err, t("commissionLine.bulk.payoutFailed"));
     } finally {
       setActionLoading(false);
     }
@@ -120,7 +138,7 @@ const ReferrerAccountDetail = () => {
         if (refreshed) setSelectedLine(refreshed);
       }
     } catch (err) {
-      showError(err, "Failed to update WHT setting");
+      showError(err, t("commissionLine.whtFailed"));
     } finally {
       setActionLoading(false);
     }
@@ -137,31 +155,25 @@ const ReferrerAccountDetail = () => {
     <span className="net-amt">{formatAmount(row.net)}</span>
   );
 
-  const statusBody = (row) => {
-    if (row.status === "Accrued") {
-      return <span className="status-pill accrued">Accrued</span>;
-    }
-    if (row.status === "Paid") {
-      return <span className="status-pill paid">Paid</span>;
-    }
-    return <span className="status-text">{row.status}</span>;
-  };
+  const statusBody = (row) => (
+    <StatusChip code={String(row.status || "").toLowerCase()} label={t(`commissionLine.statuses.${row.status}`, { defaultValue: row.status })} />
+  );
 
   const renderLinesTable = (lines, { clickable = false } = {}) => (
     <DataTable
       value={lines || []}
-      emptyMessage="No lines"
+      emptyMessage={t("commissionLine.noLines")}
       className="cycle-table"
       rowClassName={() => (clickable ? "clickable-row" : "")}
       onRowClick={clickable ? (e) => openLineDrawer(e.data) : undefined}
     >
-      <Column field="policyNo" header="POLICY" />
-      <Column field="productInsurer" header="Product / insurer" />
-      <Column field="cycle" header="CYCLE" />
-      <Column field="comsub" header="COMSUB" body={comsubBody} />
-      <Column field="wht" header="WHT" body={(r) => formatAmount(r.wht)} />
-      <Column field="net" header="NET" body={netBody} />
-      <Column field="status" header="STATUS" body={statusBody} />
+      <Column field="policyNo" header={t("commissionLine.policy")} />
+      <Column field="productInsurer" header={t("commissionLine.productInsurer")} />
+      <Column field="cycle" header={t("commissionLine.cycle")} />
+      <Column field="comsub" header={t("commissionLine.comsub")} body={comsubBody} />
+      <Column field="wht" header={t("commissionLine.wht")} body={(r) => formatAmount(r.wht)} />
+      <Column field="net" header={t("commissionLine.netPayable")} body={netBody} />
+      <Column field="status" header={t("commissionLine.status")} body={statusBody} />
     </DataTable>
   );
 
@@ -177,11 +189,13 @@ const ReferrerAccountDetail = () => {
     return (
       <div className="referrer-detail-page">
         <Button
-          label="← Referrers"
-          className="p-button-outlined back-btn"
+          label={t("commissionLine.backToReferrers")}
+          icon="pi pi-arrow-left"
+          outlined
+          className="back-btn"
           onClick={() => navigate("/commission/referrer-accounts")}
         />
-        <p className="loading-msg">Referrer not found.</p>
+        <p className="loading-msg">{t("commissionLine.notFound")}</p>
       </div>
     );
   }
@@ -200,27 +214,23 @@ const ReferrerAccountDetail = () => {
     <div className="referrer-detail-page">
       <Toast ref={toast} />
       <Button
-        label="← Referrers"
-        className="p-button-outlined back-btn"
+        label={t("commissionLine.backToReferrers")}
+        icon="pi pi-arrow-left"
+        outlined
+        className="back-btn"
         onClick={() => navigate("/commission/referrer-accounts")}
       />
 
       <div className="identity">
         <div className="badges">
-          <span
-            className={`status-badge ${
-              referrer.status === "Active" ? "active" : "on-hold"
-            }`}
-          >
-            {referrer.status}
-          </span>
+          <StatusChip code={String(referrer.status || "").toLowerCase()} label={referrer.status} />
           <span className="type-badge">{typeLevel}</span>
         </div>
         <h1>{referrer.name}</h1>
         <p className="meta">
-          WHT: {referrer.whtType || "—"} · Bank:{" "}
-          {referrer.bankAccount || "Not on file"} ·{" "}
-          {referrer.policiesCount} policies on the book
+          {t("commissionLine.wht")}: {referrer.whtType || "—"} · {t("commissionLine.bank")}:{" "}
+          {referrer.bankAccount || t("commissionLine.notOnFile")} ·{" "}
+          {t("commissionLine.policiesOnBook", { count: referrer.policiesCount })}
         </p>
         <label className="wht-toggle">
           <Checkbox
@@ -229,10 +239,7 @@ const ReferrerAccountDetail = () => {
             disabled={actionLoading}
             onChange={(e) => handleWhtToggle(e.checked)}
           />
-          <span>Apply WHT{whtRateLabel ? ` (${whtRateLabel})` : ""}</span>
-          <span className="wht-hint">
-            Deselect when withholding tax does not apply to this referrer
-          </span>
+          <span>{t("commissionLine.applyWht")}{whtRateLabel ? ` (${whtRateLabel})` : ""}</span>
         </label>
         {payoutBlocked && (
           <Message
@@ -246,16 +253,16 @@ const ReferrerAccountDetail = () => {
       <div className="summary-row">
         <div className="summary-card">
           <span className="label">
-            Due this cycle ({summary.cycleLabel})
+            {t("commissionLine.dueThisCycle", { cycle: summary.cycleLabel })}
           </span>
           <span className="value due">{formatAmount(summary.dueThisCycle)}</span>
         </div>
         <div className="summary-card">
-          <span className="label">Upcoming (future)</span>
+          <span className="label">{t("commissionLine.upcoming")}</span>
           <span className="value">{formatAmount(summary.upcoming)}</span>
         </div>
         <div className="summary-card">
-          <span className="label">Paid to date</span>
+          <span className="label">{t("commissionLine.paidToDate")}</span>
           <span className="value paid">{formatAmount(summary.paidToDate)}</span>
         </div>
       </div>
@@ -263,20 +270,22 @@ const ReferrerAccountDetail = () => {
       <section className="cycle-section current">
         <div className="section-head">
           <h2>
-            Current cycle: {currentCycle.label} (due now) ·{" "}
+            {t("commissionLine.currentCycle", { cycle: currentCycle.label })} ·{" "}
             {formatAmount(currentCycle.totalNet)}
           </h2>
           <div className="actions">
             <Button
-              label={`Approve ${actions.approveCount}`}
+              label={t("commissionLine.bulk.approve", { count: actions.approveCount })}
               className="p-button-sm p-button-outlined approve-btn"
               disabled={!actions.approveCount || actionLoading || Boolean(payoutBlocked)}
               tooltip={payoutBlocked || undefined}
               tooltipOptions={{ showOnDisabled: true }}
-              onClick={() => runAction(CommissionService.approveLines)}
+              onClick={async () => {
+                if (await confirmBulk("approve", actions.approveCount)) runAction(CommissionService.approveLines);
+              }}
             />
             <Button
-              label={`Generate payout (${actions.generatePayoutCount})`}
+              label={t("commissionLine.bulk.payout", { count: actions.generatePayoutCount })}
               className="p-button-sm payout-btn"
               disabled={!actions.generatePayoutCount || actionLoading || Boolean(payoutBlocked)}
               tooltip={payoutBlocked || undefined}
@@ -291,14 +300,16 @@ const ReferrerAccountDetail = () => {
       <section className="cycle-section future">
         <div className="section-head">
           <h2>
-            Future cycles (accrued, not yet payable) ·{" "}
+            {t("commissionLine.futureCycles")} ·{" "}
             {formatAmount(futureCycles.totalNet)}
           </h2>
           <Button
-            label={`Mark eligible (${actions.markEligibleCount})`}
+            label={t("commissionLine.bulk.eligible", { count: actions.markEligibleCount })}
             className="p-button-outlined p-button-sm mark-btn"
             disabled={!actions.markEligibleCount || actionLoading}
-            onClick={() => runAction(CommissionService.markEligible)}
+            onClick={async () => {
+              if (await confirmBulk("eligible", actions.markEligibleCount)) runAction(CommissionService.markEligible);
+            }}
           />
         </div>
         {renderLinesTable(futureCycles.lines, { clickable: true })}
@@ -306,20 +317,14 @@ const ReferrerAccountDetail = () => {
 
       <section className="cycle-section past">
         <div className="section-head">
-          <h2>Past (paid history) · {formatAmount(past.totalNet)}</h2>
+          <h2>{t("commissionLine.past")} · {formatAmount(past.totalNet)}</h2>
         </div>
         {past.lines?.length ? (
           renderLinesTable(past.lines, { clickable: true })
         ) : (
-          <p className="empty-past">No past payouts.</p>
+          <p className="empty-past">{t("commissionLine.noPast")}</p>
         )}
       </section>
-
-      <p className="footer-note">
-        Each row is a policy at its own comsub rate — click a row to open the
-        line. &apos;Due this cycle&apos; = Eligible + Approved; future = Accrued
-        (awaits customer payment).
-      </p>
 
       <LineDetailDrawer
         visible={drawerVisible}
@@ -332,7 +337,7 @@ const ReferrerAccountDetail = () => {
         whtApplicable={Boolean(referrer.whtApplicable)}
         line={selectedLine}
         onUpdated={handleLineUpdated}
-        onError={(err) => showError(err, "Line action failed")}
+        onError={(err) => showError(err, t("commissionLine.actionFailed"))}
       />
     </div>
   );

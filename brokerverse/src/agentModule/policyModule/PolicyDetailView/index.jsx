@@ -29,6 +29,36 @@ import "./index.scss";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import { printPdf } from "../../../components/Print";
+
+/**
+ * Open a PDF that still has to be fetched in a new tab. The tab is opened at the click, before the fetch, so that the
+ * browser does not block it as a pop-up; it is closed again when the document cannot be loaded.
+ * @param {function(): Promise<Blob>} load
+ */
+const openPdfInTab = async (load) => {
+  const tab = window.open("", "_blank");
+  try {
+    const blob = await load();
+    const url = window.URL.createObjectURL(blob);
+    if (tab && !tab.closed) {
+      tab.opener = null;
+      tab.location.href = url;
+    } else {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "document.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    if (tab) tab.close();
+    throw e;
+  }
+};
+
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -554,29 +584,13 @@ const PolicyDetailView = () => {
     }
     setInsurancePlacingSlipLoading(true);
     try {
-      const response = await fetch(
-        `${BASE_URL}/policies/${policyId}/documents/insurance-placing-slip-fire`,
-        {
-          method: "GET",
-          headers: {
-            ...authService.getAuthHeader(),
-          },
+      await openPdfInTab(async () => {
+        const response = await fetch(`${BASE_URL}${placingSlipPath()}`, { method: "GET", headers: { ...authService.getAuthHeader() } });
+        if (!response.ok) {
+          const body = await response.json().catch(() => null);
+          throw new Error(body?.message || t("policyDetail.failedToLoadPlacingSlip"));
         }
-      );
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(
-          errText || `Failed to load document (${response.status})`
-        );
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener,noreferrer");
-      toast.current?.show({
-        severity: "success",
-        summary: t("policyDetail.documentOpened"),
-        detail: t("policyDetail.insurancePlacingSlipOpened"),
-        life: 3000,
+        return response.blob();
       });
     } catch (err) {
       logger.error("Insurance Placing Slip fetch error:", err);
@@ -589,6 +603,14 @@ const PolicyDetailView = () => {
     } finally {
       setInsurancePlacingSlipLoading(false);
     }
+  };
+
+  const closeDocumentPreview = () => {
+    if (documentPreviewUrl?.startsWith?.("blob:")) {
+      window.URL.revokeObjectURL(documentPreviewUrl);
+    }
+    setDocumentPreviewUrl(null);
+    setShowDocumentDialog(false);
   };
 
   const handlePolicyDocumentPreview = async () => {
@@ -638,6 +660,16 @@ const PolicyDetailView = () => {
     }
   };
 
+  const policySchedulePath = () => `/document-templates/${isFireLOB ? "policy-schedule-fire" : "policy-schedule"}/${encodeURIComponent(policyId)}`;
+  const placingSlipPath = () => `/policies/${encodeURIComponent(policyId)}/documents/insurance-placing-slip-fire`;
+  const printDocument = (path, fileName) => printPdf(path, { fileName }).catch((err) => toast.current?.show({
+    severity: "error",
+    summary: t("policyDetail.failedToLoad"),
+    detail: err?.message || t("policyDetail.failedToLoadPolicyDocument"),
+    life: 5000,
+  }));
+  const printPolicyDocument = () => printDocument(policySchedulePath(), `policy-${policyDetails?.policyNumber || policyId}.pdf`);
+
   const handlePolicyDocumentOpen = async () => {
     if (!policyId) {
       toast.current?.show({
@@ -650,27 +682,11 @@ const PolicyDetailView = () => {
     }
     setPolicyScheduleLoading(true);
     try {
-      const result = await documentTemplateService.fetchPolicyScheduleBlob(
-        policyId,
-        { isFire: isFireLOB }
-      );
-      if (result.success && result.blob) {
-        const url = window.URL.createObjectURL(result.blob);
-        window.open(url, "_blank", "noopener,noreferrer");
-        toast.current?.show({
-          severity: "success",
-          summary: t("policyDetail.documentOpened"),
-          detail: t("policyDetail.documentOpenedInNewTab"),
-          life: 3000,
-        });
-      } else {
-        toast.current?.show({
-          severity: "error",
-          summary: t("policyDetail.failedToLoad"),
-          detail: result.error || t("policyDetail.failedToLoadPolicyDocument"),
-          life: 3000,
-        });
-      }
+      await openPdfInTab(async () => {
+        const result = await documentTemplateService.fetchPolicyScheduleBlob(policyId, { isFire: isFireLOB });
+        if (!result.success || !result.blob) throw new Error(result.error || t("policyDetail.failedToLoadPolicyDocument"));
+        return result.blob;
+      });
     } catch (err) {
       logger.error("Policy document open error:", err);
       toast.current?.show({
@@ -2204,6 +2220,12 @@ const PolicyDetailView = () => {
                         loading={policyScheduleLoading}
                         disabled={policyScheduleLoading}
                       />
+                      <Button
+                        label={t("policyDetail.print")}
+                        icon="pi pi-print"
+                        className="p-button-text"
+                        onClick={printPolicyDocument}
+                      />
                     </div>
                   </div>
                   {isFireLOB && (
@@ -2225,6 +2247,12 @@ const PolicyDetailView = () => {
                           loading={insurancePlacingSlipLoading}
                           disabled={insurancePlacingSlipLoading}
                         />
+                        <Button
+                          label={t("policyDetail.print")}
+                          icon="pi pi-print"
+                          className="p-button-text"
+                          onClick={() => printDocument(placingSlipPath(), `placing-slip-${policyDetails?.policyNumber || policyId}.pdf`)}
+                        />
                       </div>
                     </div>
                   )}
@@ -2242,14 +2270,19 @@ const PolicyDetailView = () => {
       <Dialog
         header={t("policyDetail.documentPreview")}
         visible={showDocumentDialog}
-        className="document-preview-dialog"
-        onHide={() => {
-          if (documentPreviewUrl?.startsWith?.("blob:")) {
-            window.URL.revokeObjectURL(documentPreviewUrl);
-          }
-          setDocumentPreviewUrl(null);
-          setShowDocumentDialog(false);
-        }}
+        className="document-preview-dialog bv-centered"
+        onHide={closeDocumentPreview}
+        footer={(
+          <div className="document-preview-actions">
+            <Button label={t("policyDetail.close")} text onClick={closeDocumentPreview} />
+            {documentPreviewUrl && (
+              <a className="p-button p-component p-button-outlined" href={documentPreviewUrl} download={`policy-${policyDetails?.policyNumber || policyId}.pdf`}>
+                <i className="pi pi-download mr-2" aria-hidden="true" />{t("policyDetail.download")}
+              </a>
+            )}
+            <Button label={t("policyDetail.print")} icon="pi pi-print" onClick={printPolicyDocument} />
+          </div>
+        )}
       >
         {documentPreviewUrl ? (
           <iframe

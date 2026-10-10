@@ -14,8 +14,9 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
-import { statusSeverity } from "../../../utils/statusSeverity";
+import StatusChip from "../../../components/StatusChip";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import { printPdf } from "../../../components/Print";
 import { useSelector } from "react-redux";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
@@ -231,7 +232,7 @@ function Bankdetailselection() {
 
   const home = { label: t("paymentVoucher.accounts") };
 
-  const statusBodyTemplate = (rowData) => <Tag value={rowData.status} severity={statusSeverity(rowData.status)} />;
+  const statusBodyTemplate = (rowData) => <StatusChip label={rowData.status} />;
   useEffect(() => {
     if (actionToast != null) {
       toastRef.current.showToast();
@@ -240,19 +241,56 @@ function Bankdetailselection() {
 
   const openVoucherPrint = async (printDisbursementId) => {
     const id = printDisbursementId || currentDisbursementId || agentDisbursementId;
-    const result = await disbursementService.printDisbursement(id);
-    if (result.success && result.data?.url) {
-      window.open(result.data.url, "_blank", "noopener");
-      return;
+    try {
+      await printPdf(async () => {
+        const result = await disbursementService.printDisbursement(id);
+        if (!result.success) throw new Error(result.error);
+        const response = await fetch(result.data.url);
+        if (!response.ok) throw new Error(t("print.failed"));
+        return response.blob();
+      }, { fileName: `${id}.pdf` });
+    } catch (error) {
+      toastRef.current?.showToast({
+        severity: "error",
+        summary: t("common.error"),
+        detail: error.message,
+      });
     }
-    toastRef.current?.showToast({
-      severity: "error",
-      summary: t("common.error"),
-      detail: result.error,
+  };
+
+  // what the button does to the selected cheque (or the agent payout), confirmed before it runs
+  const confirmAction = () => {
+    const payee = disbursementDataFromState?.PayeeName || disbursementDataFromState?.payeeName;
+    if (isAgentPayee) {
+      const lineIds = (commissionLineIdsFromState?.length ? commissionLineIdsFromState : selectedCommissionLineIds) || [];
+      return openConfirm({
+        title: t("paymentVoucher.confirm.payoutTitle"),
+        message: t("paymentVoucher.confirm.payoutMessage"),
+        facts: [
+          { label: t("paymentVoucher.payeeName", "Payee"), value: payee },
+          { label: t("paymentVoucher.confirm.commissionLines"), value: lineIds.length, type: "number" },
+        ],
+        confirmLabel: t("paymentVoucher.confirm.payout"),
+      });
+    }
+    const row = selectedProducts?.rawData || {};
+    const printing = row.status === "Approved";
+    return openConfirm({
+      title: t(printing ? "paymentVoucher.confirm.printTitle" : "paymentVoucher.confirm.approveTitle", { number: row.instrumentNo || "" }),
+      severity: printing ? "warning" : "neutral",
+      message: t(printing ? "paymentVoucher.confirm.printMessage" : "paymentVoucher.confirm.approveMessage"),
+      facts: [
+        { label: t("paymentVoucher.payeeName", "Payee"), value: payee || row.customerName },
+        { label: t("paymentVoucher.instrumentNo"), value: row.instrumentNo },
+        { label: t("paymentVoucher.instrumentDate"), value: row.instrumentDate, type: "date" },
+        { label: t("paymentVoucher.totalAmount"), value: printing ? row.totaleAmount : totalAmount || row.totaleAmount, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t(printing ? "paymentVoucher.confirm.print" : "paymentVoucher.confirm.approve"),
     });
   };
 
   const handlePatchAction = async () => {
+    if ((isAgentPayee || selectedProducts?.rawData) && !(await confirmAction())) return;
     // Agent/Referrer: approve marks commission lines Paid with voucher number (net of WHT)
     if (isAgentPayee) {
       const lineIds =

@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Tag } from "primereact/tag";
 import { BASE_URL } from "../../../utility/constant";
 import authService from "../../../services/authService";
 import { notifyError, notifySuccess } from "../../../utility/dialogs";
+import DetailDialog from "../../../components/DetailDialog";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import StatusChip from "../../../components/StatusChip";
 import "./UnderwritingReferralPanel.scss";
 
 /** Roles of the signed-in user (stored at sign-in). */
@@ -34,7 +36,8 @@ const decide = async (quotationId, body) => {
   return json.data;
 };
 
-const SEVERITY = { pending: "warning", approved: "success", declined: "danger" };
+/** A reason as the rule gives it ("RULE_CODE: message"), without its code. */
+const reasonText = (reason) => String(reason).replace(/^[A-Z0-9_-]+:\s*/, "");
 
 /**
  * Underwriting outcome of a quotation from the product's acceptance rules: a pending referral (with Approve / Decline
@@ -51,10 +54,15 @@ const UnderwritingReferralPanel = ({ quotation, onDecided }) => {
   const loadings = (uw?.results || []).filter((r) => r.outcome === "loaded");
   if (!referral && !loadings.length) return null;
 
+  const open = (next) => {
+    setRemarks("");
+    setReference("");
+    setDecision(next);
+  };
   const submit = async () => {
     setBusy(true);
     try {
-      await decide(quotation.quotationId, { decision, remarks: remarks || null, insurerReference: reference || null });
+      await decide(quotation.quotationId, { decision, remarks: remarks.trim() || null, insurerReference: reference.trim() || null });
       notifySuccess(t(decision === "approve" ? "underwritingReferral.approved" : "underwritingReferral.declined"));
       setDecision(null);
       onDecided?.();
@@ -65,54 +73,57 @@ const UnderwritingReferralPanel = ({ quotation, onDecided }) => {
     }
   };
 
+  const reasons = (referral?.reasons || referral?.ruleCodes || []).map(reasonText);
+  const reasonList = reasons.length ? <ul className="uw-referral__reasons">{reasons.map((r) => <li key={r}>{r}</li>)}</ul> : null;
+  const decided = referral && referral.status !== "pending";
+  const approving = decision === "approve";
+
   return (
-    <section className="uw-referral" aria-label={t("underwritingReferral.title")}>
-      {referral && (
-        <div className="uw-referral__row">
-          <div>
-            <strong>{t("underwritingReferral.title")}</strong>{" "}
-            <Tag value={t(`underwritingReferral.status.${referral.status}`)} severity={SEVERITY[referral.status] || "info"} />
-            <ul className="uw-referral__reasons">
-              {(referral.reasons || referral.ruleCodes || []).map((r) => <li key={r}>{r}</li>)}
-            </ul>
-            {referral.status === "pending" && (
-              <small>{t("underwritingReferral.awaiting", { roles: (referral.authorityRoleNames || referral.authorityRoles || []).join(" / ") })}</small>
-            )}
-            {referral.status !== "pending" && (
-              <small>
-                {t("underwritingReferral.decidedBy", { user: referral.decidedBy || "" })}
-                {referral.insurerReference ? ` · ${t("underwritingReferral.insurerReference")}: ${referral.insurerReference}` : ""}
-                {referral.remarks ? ` · ${referral.remarks}` : ""}
-              </small>
-            )}
-          </div>
-          {referral.status === "pending" && mayDecide(referral) && (
-            <div className="uw-referral__actions">
-              <Button label={t("underwritingReferral.approve")} icon="pi pi-check" onClick={() => setDecision("approve")} />
-              <Button label={t("underwritingReferral.decline")} icon="pi pi-times" className="p-button-outlined p-button-danger" onClick={() => setDecision("decline")} />
-            </div>
-          )}
-        </div>
-      )}
-      {loadings.length > 0 && (
-        <p className="uw-referral__loadings">
-          {t("underwritingReferral.loadings")}: {loadings.map((l) => `${l.ruleName} (+${l.loadingPercent}%)`).join(", ")}
-        </p>
-      )}
-      <Dialog header={t(decision === "approve" ? "underwritingReferral.approveTitle" : "underwritingReferral.declineTitle")} visible={Boolean(decision)} onHide={() => setDecision(null)} style={{ width: "32rem" }} breakpoints={{ "640px": "95vw" }}>
+    <DetailSection className="uw-referral" title={t("underwritingReferral.title")}
+      actions={referral?.status === "pending" && mayDecide(referral) ? (
+        <>
+          <Button label={t("underwritingReferral.decline")} icon="pi pi-times" severity="danger" outlined size="small" onClick={() => open("decline")} />
+          <Button label={t("underwritingReferral.approve")} icon="pi pi-check" size="small" onClick={() => open("approve")} />
+        </>
+      ) : null}>
+      <KeyValueGrid columns={4} items={[
+        { label: t("underwritingReferral.statusLabel"), value: referral ? <StatusChip code={referral.status} label={t(`underwritingReferral.status.${referral.status}`)} /> : null, hidden: !referral },
+        { label: t("underwritingReferral.requestedAt"), value: referral?.requestedAt, type: "datetime", hidden: !referral?.requestedAt },
+        { label: t("underwritingReferral.authority"), value: (referral?.authorityRoleNames || referral?.authorityRoles || []).join(" / "), hidden: !referral },
+        { label: t("underwritingReferral.sumInsured"), value: quotation.totalSumInsured, type: "amount", currency: quotation.currency, hidden: !referral },
+        { label: t("underwritingReferral.decidedByLabel"), value: referral?.decidedByName || referral?.decidedBy, hidden: !decided },
+        { label: t("underwritingReferral.decidedAt"), value: referral?.decidedAt, type: "datetime", hidden: !decided },
+        { label: t("underwritingReferral.insurerReference"), value: referral?.insurerReference, hidden: !decided },
+        { label: t("underwritingReferral.remarks"), value: referral?.remarks, span: "full", hidden: !decided },
+        { label: t("underwritingReferral.reasons"), value: reasonList, span: "full", hidden: !reasonList },
+        { label: t("underwritingReferral.loadings"), value: loadings.map((l) => `${l.ruleName} (+${l.loadingPercent}%)`).join(", "), span: "full", hidden: !loadings.length },
+      ]} />
+      <DetailDialog visible={Boolean(decision)} onHide={() => setDecision(null)} size="md"
+        header={t(approving ? "underwritingReferral.approveTitle" : "underwritingReferral.declineTitle")}
+        footer={(
+          <>
+            <Button type="button" label={t("underwritingReferral.cancel")} text disabled={busy} onClick={() => setDecision(null)} />
+            <Button type="button" label={t(approving ? "underwritingReferral.approve" : "underwritingReferral.decline")} severity={approving ? undefined : "danger"}
+              loading={busy} disabled={!approving && !remarks.trim()} onClick={submit} />
+          </>
+        )}>
+        <KeyValueGrid columns={2} className="mb-3" items={[
+          { label: t("underwritingReferral.quotation"), value: quotation.quotationNumber },
+          { label: t("underwritingReferral.sumInsured"), value: quotation.totalSumInsured, type: "amount", currency: quotation.currency },
+          { label: t("underwritingReferral.reasons"), value: reasonList, span: "full", hidden: !reasonList },
+        ]} />
         <div className="p-fluid">
           <div className="field">
-            <label htmlFor="uw-remarks">{t("underwritingReferral.remarks")}{decision === "decline" ? " *" : ""}</label>
-            <InputTextarea id="uw-remarks" rows={3} value={remarks} onChange={(e) => setRemarks(e.target.value)} />
+            <label htmlFor="uw-remarks">{t("underwritingReferral.remarks")}{approving ? "" : " *"}</label>
+            <InputTextarea id="uw-remarks" rows={3} value={remarks} autoResize onChange={(e) => setRemarks(e.target.value)} />
           </div>
-          <div className="field">
+          <div className="field mb-0">
             <label htmlFor="uw-ref">{t("underwritingReferral.insurerReference")}</label>
             <InputText id="uw-ref" value={reference} onChange={(e) => setReference(e.target.value)} />
           </div>
-          <Button label={t("common.confirm")} onClick={submit} loading={busy} disabled={decision === "decline" && !remarks.trim()} />
         </div>
-      </Dialog>
-    </section>
+      </DetailDialog>
+    </DetailSection>
   );
 };
 

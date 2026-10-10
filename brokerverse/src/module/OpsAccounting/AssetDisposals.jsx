@@ -13,6 +13,8 @@ import { SelectButton } from "primereact/selectbutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { printPdf } from "../../components/Print";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 
 /**
@@ -51,7 +53,7 @@ export const DisposeAssetDialog = ({ asset, onHide, onDisposed }) => {
   const valid = sale ? form.proceeds > 0 && form.buyerName.trim() : form.reason.trim().length >= 3;
 
   return (
-    <Dialog className="pe-dialog" header={asset ? t("assetDisposal.disposeOf", { asset: `${asset.assetNumber} · ${asset.name}` }) : ""} visible={!!asset} style={{ width: "min(820px, 96vw)" }} onHide={onHide}
+    <Dialog className="pe-dialog bv-centered" header={asset ? t("assetDisposal.disposeOf", { asset: `${asset.assetNumber} · ${asset.name}` }) : ""} visible={!!asset} style={{ width: "min(820px, 96vw)" }} onHide={onHide}
       footer={<div><Button label={t("opsAcc.cancel")} text onClick={onHide} /><Button label={t("assetDisposal.post")} icon="pi pi-check" disabled={!valid || !!preview?.unpostedPeriods?.length} loading={saving} onClick={save} /></div>}>
       <Toast ref={toast} />
       <div className="grid">
@@ -116,8 +118,6 @@ export const AssetDisposals = () => {
   const [disposalType, setDisposalType] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [cancelling, setCancelling] = useState(null);
-  const [reason, setReason] = useState("");
   const params = { from: isoOf(from), to: isoOf(to), disposalType: disposalType || undefined, status: "all" };
   const key = JSON.stringify(params);
   const load = useCallback(async () => {
@@ -131,16 +131,28 @@ export const AssetDisposals = () => {
     }
   }, [key]);
   useEffect(() => { load(); }, [load]);
-  const cancel = async () => {
-    try {
-      const d = await service.cancelDisposal(cancelling.id, reason);
-      showSuccess(toast, t("assetDisposal.cancelled", { number: d.disposalNumber }));
-      setCancelling(null);
-      setReason("");
-      load();
-    } catch (e) {
-      showError(toast, e);
-    }
+  const cancel = async (r) => {
+    let d;
+    const reason = await openConfirm({
+      title: t("assetDisposal.cancelOf", { number: r.disposalNumber }),
+      severity: "danger",
+      message: t("assetDisposal.cancelNote"),
+      facts: [
+        { label: t("opsAcc.fa.name"), value: `${r.assetNumber} · ${r.assetName}` },
+        { label: t("assetDisposal.type"), value: t(`assetDisposal.types.${r.disposalType}`) },
+        { label: t("assetDisposal.date"), value: r.disposalDate, type: "date" },
+        { label: t("opsAcc.journal"), value: r.journalNumber },
+        { label: t("opsAcc.fa.bookValue"), value: r.bookValue, type: "amount" },
+        { label: t("assetDisposal.proceeds"), value: r.proceeds, type: "amount", emphasis: true },
+      ],
+      input: { type: "text", label: t("assetDisposal.reason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("assetDisposal.cancel"),
+      cancelLabel: t("opsAcc.confirmations.keepDisposal"),
+      onConfirm: async (value) => { d = await service.cancelDisposal(r.id, value); },
+    });
+    if (reason === null) return;
+    showSuccess(toast, t("assetDisposal.cancelled", { number: d.disposalNumber }));
+    load();
   };
   const s = data?.summary || {};
   return (
@@ -181,21 +193,15 @@ export const AssetDisposals = () => {
           <Column body={(r) => (
             <div className="flex gap-1">
               <Button icon="pi pi-print" text rounded size="small" aria-label={t("assetDisposal.voucher")} tooltip={t("assetDisposal.voucher")} tooltipOptions={{ position: "top" }}
-                onClick={() => service.printDisposal(r.id).catch((e) => showError(toast, e))} />
+                onClick={() => printPdf(`/fixed-assets/disposals/${encodeURIComponent(r.id)}/pdf`, { fileName: `${r.disposalNumber}.pdf` }).catch((e) => showError(toast, e))} />
               {r.status === "posted" && (
                 <Button icon="pi pi-times" text rounded size="small" severity="secondary" aria-label={t("assetDisposal.cancel")} tooltip={t("assetDisposal.cancel")}
-                  tooltipOptions={{ position: "top" }} onClick={() => setCancelling(r)} />
+                  tooltipOptions={{ position: "top" }} onClick={() => cancel(r)} />
               )}
             </div>
           )} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={cancelling ? t("assetDisposal.cancelOf", { number: cancelling.disposalNumber }) : ""} visible={!!cancelling} style={{ width: "min(520px, 96vw)" }}
-        onHide={() => setCancelling(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setCancelling(null)} /><Button label={t("assetDisposal.cancel")} severity="danger" disabled={reason.trim().length < 3} onClick={cancel} /></div>}>
-        <p className="mt-0">{t("assetDisposal.cancelNote")}</p>
-        <InputText value={reason} onChange={(e) => setReason(e.target.value)} className="w-full" maxLength={500} placeholder={t("assetDisposal.reason")} aria-label={t("assetDisposal.reason")} />
-      </Dialog>
     </div>
   );
 };

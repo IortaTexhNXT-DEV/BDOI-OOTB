@@ -11,10 +11,10 @@ import { Message } from "primereact/message";
 import { Tag } from "primereact/tag";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import policyService from "../../services/policyService";
-import documentTemplateService from "../../services/documentTemplateService";
 import S3FileUpload from "../S3FileUpload";
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../ConfirmDialog";
+import { printPdf } from "../Print";
 import DateField from "../DateField";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -131,39 +131,65 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
     loadSummary();
   };
 
+  // the payment being verified, as the confirmation shows it
+  const captureFacts = (c) => [
+    { label: t("paymentCapture.mode"), value: c.paymentModeLabel },
+    { label: t("paymentCapture.reference"), value: c.referenceNo },
+    { label: t("paymentCapture.paymentDate"), value: c.paymentDate, type: "date" },
+    { label: t("paymentCapture.bill"), value: c.billNumber, hidden: !c.billNumber },
+    { label: t("paymentCapture.acknowledgement"), value: c.arNumber, hidden: !c.arNumber },
+    { label: t("paymentCapture.submittedBy"), value: c.submittedBy, hidden: !c.submittedBy },
+    { label: t("paymentCapture.amount"), value: c.amount, type: "amount", emphasis: true },
+  ];
+
+  // the API answers { success, error } instead of throwing: an error is thrown here so the dialog shows it
+  const orThrow = (r) => {
+    if (!r.success) throw new Error(r.error);
+    return r;
+  };
+
   const handleConfirm = async (capture) => {
-    setSaving(true);
-    const r = await policyService.confirmPolicyPayment(policyId, capture.id);
-    setSaving(false);
-    if (!r.success) {
-      showToast("error", "Could not confirm the payment", r.error, 7000);
-      return;
-    }
-    showToast("success", "Payment confirmed", r.message);
+    let r;
+    const confirmed = await openConfirm({
+      title: t("paymentCapture.confirmTitle"),
+      message: t("paymentCapture.confirmMessage"),
+      facts: captureFacts(capture),
+      note: t("paymentCapture.confirmNote"),
+      confirmLabel: t("paymentCapture.confirmAction"),
+      onConfirm: async () => {
+        r = orThrow(await policyService.confirmPolicyPayment(policyId, capture.id));
+      },
+    });
+    if (!confirmed) return;
+    showToast("success", t("paymentCapture.confirmed"), r.message);
     loadSummary();
   };
 
   const handleReject = async (capture) => {
-    // eslint-disable-next-line no-alert
-    const reason = await promptText("Reason for rejecting this payment (e.g. no matching credit in the bank statement)");
-    if (!reason || reason.trim().length < 3) return;
-    setSaving(true);
-    const r = await policyService.rejectPolicyPayment(policyId, capture.id, reason.trim());
-    setSaving(false);
-    if (!r.success) {
-      showToast("error", "Could not reject the payment", r.error);
-      return;
-    }
-    showToast("info", "Payment rejected", r.message);
+    let r;
+    const reason = await openConfirm({
+      title: t("paymentCapture.rejectTitle"),
+      severity: "danger",
+      message: t("paymentCapture.rejectMessage"),
+      facts: captureFacts(capture),
+      input: { type: "textarea", label: t("paymentCapture.rejectReason"), placeholder: t("paymentCapture.rejectReasonHint"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("paymentCapture.rejectAction"),
+      onConfirm: async (text) => {
+        r = orThrow(await policyService.rejectPolicyPayment(policyId, capture.id, text));
+      },
+    });
+    if (reason === null) return;
+    showToast("info", t("paymentCapture.rejected"), r.message);
     loadSummary();
   };
 
+  // the receipt's PDF, printed (or opened for printing where the browser cannot print it in a frame)
   const [printing, setPrinting] = useState(null);
-  const print = async (key, run) => {
+  const print = (key, path, fileName) => {
     setPrinting(key);
-    const r = await run();
-    setPrinting(null);
-    if (!r?.success) showToast("error", "Could not print the receipt", r?.error);
+    printPdf(path, { fileName })
+      .catch((e) => showToast("error", t("paymentCapture.printFailed"), e?.message))
+      .finally(() => setPrinting(null));
   };
 
   const openGateway = () => {
@@ -341,9 +367,9 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                     size="small"
                     text
                     icon="pi pi-print"
-                    label="Acknowledgement receipt"
+                    label={t("paymentCapture.acknowledgementReceipt")}
                     loading={printing === `ar-${c.id}`}
-                    onClick={() => print(`ar-${c.id}`, () => documentTemplateService.getAcknowledgementReceiptPdf(c.id, c.arNumber))}
+                    onClick={() => print(`ar-${c.id}`, `/document-templates/acknowledgement-receipt/${encodeURIComponent(c.id)}`, `acknowledgement-receipt-${c.arNumber || c.id}.pdf`)}
                   />
                 )}
                 {c.receiptId && (
@@ -351,15 +377,15 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                     size="small"
                     text
                     icon="pi pi-print"
-                    label="Official receipt"
+                    label={t("paymentCapture.officialReceipt")}
                     loading={printing === `or-${c.id}`}
-                    onClick={() => print(`or-${c.id}`, () => documentTemplateService.getReceiptPdf(c.receiptId, { fileName: `official-receipt-${c.receiptNumber || c.receiptId}.pdf` }))}
+                    onClick={() => print(`or-${c.id}`, `/document-templates/receipt/${encodeURIComponent(c.receiptId)}`, `official-receipt-${c.receiptNumber || c.receiptId}.pdf`)}
                   />
                 )}
                 {summary.canConfirm && c.status === "submitted" && (
                   <>
-                    <Button size="small" label="Confirm" icon="pi pi-check" onClick={() => handleConfirm(c)} disabled={saving} />
-                    <Button size="small" label="Reject" icon="pi pi-times" severity="danger" text onClick={() => handleReject(c)} disabled={saving} />
+                    <Button size="small" label={t("paymentCapture.confirmAction")} icon="pi pi-check" onClick={() => handleConfirm(c)} disabled={saving} />
+                    <Button size="small" label={t("paymentCapture.rejectAction")} icon="pi pi-times" severity="danger" text onClick={() => handleReject(c)} disabled={saving} />
                   </>
                 )}
               </div>

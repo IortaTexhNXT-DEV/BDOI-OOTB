@@ -9,7 +9,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import productConfiguratorService from "../../../services/productConfiguratorService";
 import { statusLabel } from "../../../utils/statusSeverity";
-import { ConfiguratorPage, HistoryDialog, RowActions, StatusTag, STATUS_OPTIONS, pagingFor } from "../shared/ConfiguratorPage";
+import { ConfiguratorPage, HistoryDialog, RowActions, StatusTag, STATUS_OPTIONS, confirmStatusChange, pagingFor } from "../shared/ConfiguratorPage";
 import "./RiskMapping.scss";
 
 /**
@@ -55,13 +55,17 @@ const RiskMappingList = () => {
     : <span className="pc-muted">{t("productRiskMapping.referenceOnly")}</span>);
 
   const toggle = async (row) => {
-    try {
-      await productConfiguratorService.updateRiskMapping(row.id, { status: row.status === "Active" ? "Inactive" : "Active" });
-      toast.current?.show({ severity: "success", summary: t("productRiskMapping.success"), detail: t("productRiskMapping.updated") });
-      loadData();
-    } catch (error) {
-      toast.current?.show({ severity: "error", summary: t("productRiskMapping.error"), detail: error.message });
-    }
+    const deactivate = row.status === "Active";
+    const done = await confirmStatusChange({
+      deactivate,
+      kindLabel: t("productConfigurator.kinds.risk-mapping"),
+      record: { code: row.productCode, name: row.productName },
+      t,
+      run: () => productConfiguratorService.updateRiskMapping(row.id, { status: deactivate ? "Inactive" : "Active" }),
+    });
+    if (!done) return;
+    toast.current?.show({ severity: "success", summary: t("productRiskMapping.success"), detail: t("productRiskMapping.updated") });
+    loadData();
   };
 
   return (

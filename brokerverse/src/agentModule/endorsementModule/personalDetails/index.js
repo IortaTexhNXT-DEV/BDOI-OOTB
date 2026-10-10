@@ -679,7 +679,7 @@ const PersonalDetails = () => {
         <div className="customer__info__title">
           {t("endorsement.endorsementRequest")}
           {(endorsementTypeSet.has("5") || endorsementTypeSet.has("fire_cancel")) && (
-            <span className="text-red-500">{" - "}{t("endorsement.cancelPolicy")}</span>
+            <span className="endorsement-cancel-label">{" - "}{t("endorsement.cancelPolicy")}</span>
           )}
         </div>
         {(endorsementTypeSet.has("1") || endorsementTypeSet.has("5")) && (

@@ -3,20 +3,14 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
-import InputField from "../../../components/InputField";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Dialog } from "primereact/dialog";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Dropdown } from "primereact/dropdown";
 import { useDispatch } from "react-redux";
-import {
-  patchpaymentVocherInvoiceListMiddleware,
-} from "../store/paymentVocherMiddleware";
-import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
@@ -32,9 +26,7 @@ function SpecificVoucher() {
   const { formatCurrency } = useFormatCurrency();
   const location = useLocation();
   const { disbursementData: disbursementDataFromState } = location.state || {};
-  const [visible, setVisible] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [EditID] = useState(null);
   const [loading, setLoading] = useState(true);
   const [disbursementData, setDisbursementData] = useState(null);
   const [invoiceListData, setInvoiceListData] = useState([]);
@@ -260,48 +252,6 @@ function SpecificVoucher() {
     fetchDisbursementDetails();
   }, [disbursementId, dispatch, payeeTypeFromState, referrerIdFromState]);
 
-  useEffect(() => {
-    if (EditID != null) {
-      setFormikValues();
-    }
-  }, [EditID]);
-  const setFormikValues = () => {
-    const targetInvoice = invoiceListData.find((item) => item.id === EditID);
-    const fcAmount = targetInvoice?.fcamount;
-    const discount = targetInvoice?.discount;
-    const vat = targetInvoice?.vat;
-    const wht = targetInvoice?.wht;
-    const updatedValues = {
-      fcAmount: `${fcAmount}`,
-      discount: `${discount}`,
-      vat: `${vat}`,
-      wht: `${wht}`,
-    };
-    formik.setValues({ ...formik.values, ...updatedValues });
-  };
-
-  const initialValues = {
-    fcAmount: "",
-    discount: "",
-    vat: "",
-    wht: "",
-  };
-  const handleSubmit = (values) => {
-    setSelectedProducts([]);
-    const valueWithId = {
-      ...values,
-      id: EditID,
-    };
-    dispatch(patchpaymentVocherInvoiceListMiddleware(valueWithId));
-    toastRef.current.showToast();
-    setVisible(false);
-  };
-
-  const formik = useFormik({
-    initialValues: initialValues,
-    onSubmit: handleSubmit,
-  });
-
   const navigate = useNavigate();
   const items = [
     {
@@ -490,76 +440,6 @@ function SpecificVoucher() {
           disabled={selectedProducts.length === 0}
         />
       </div>
-
-      <Dialog
-        header={t("paymentVoucher.invoiceDetails")}
-        visible={visible}
-        className="dialog_fields"
-        onHide={() => setVisible(false)}
-      >
-        <div class="grid">
-          <div class="sm-col-12  md:col-6 lg-col-6">
-            <InputField
-              disabled={true}
-              classNames="field__container"
-              label={t("paymentVoucher.policy")}
-              value="Motor"
-            />
-          </div>
-          <div class="sm-col-12  md:col-6 lg-col-6">
-            <InputField
-              disabled={true}
-              classNames="field__container"
-              label={t("paymentVoucher.outstanding")}
-              value="4000.00"
-            />
-          </div>
-        </div>
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-6">
-            <InputField
-              classNames="field__container"
-              label={t("paymentVoucher.fcAmount")}
-              value={formik.values.fcAmount}
-              onChange={formik.handleChange("fcAmount")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-6">
-            <InputField
-              classNames="field__container"
-              label={t("paymentVoucher.excessDiscounts")}
-              value={formik.values.discount}
-              onChange={formik.handleChange("discount")}
-            />
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-6">
-            <InputField
-              classNames="field__container"
-              label={t("paymentVoucher.vatPercent")}
-              value={formik.values.vat}
-              onChange={formik.handleChange("vat")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-6">
-            <InputField
-              classNames="field__container"
-              label={t("paymentVoucher.whtPercent")}
-              value={formik.values.wht}
-              onChange={formik.handleChange("wht")}
-            />
-          </div>
-        </div>
-        <div className="update_btn">
-          <Button
-            label={t("paymentVoucher.update")}
-            className="update_btnlabel"
-            onClick={formik.handleSubmit}
-          />
-        </div>
-      </Dialog>
     </div>
   );
 }

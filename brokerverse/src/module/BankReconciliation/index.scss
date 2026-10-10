@@ -105,8 +105,8 @@
   bottom: 0;
   z-index: 3;
   margin-top: 1rem;
-  background: #111927;
-  color: #fff;
+  background: var(--color-heading, #111927);
+  color: var(--color-surface, #fff);
   border-radius: 12px;
   padding: 0.75rem 1.25rem;
   display: flex;
@@ -133,6 +133,12 @@
 
   .br-sel-diff-ok {
     color: #75e0a7;
+  }
+
+  // Clear sits on the dark bar: it takes the bar's text colour
+  .p-button.br-selection-clear,
+  .p-button.br-selection-clear:enabled:hover {
+    color: inherit;
   }
 }
 

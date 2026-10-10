@@ -30,6 +30,8 @@ import {
 } from "../../../utility/toastUtils";
 import disbursementService from "../../../services/disbursementService";
 import documentTemplateService from "../../../services/documentTemplateService";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import { printPdf } from "../../../components/Print";
 import { getUserData } from "../../../utility/tokenManager";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
@@ -281,6 +283,11 @@ function PolicyReceipts() {
     setVisiblePopup(false);
   };
 
+  const closePolicyDetails = () => {
+    setVisiblePopup(false);
+    setEditedData(null);
+  };
+
   const formik = useFormik({
     initialValues,
 
@@ -303,6 +310,20 @@ function PolicyReceipts() {
       showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
       return;
     }
+
+    const amountApplied = selectedRows.reduce((sum, row) => sum + (parseFloat(row.paid || "0") || 0), 0);
+    const confirmed = await openConfirm({
+      title: t("accounts.receiptDialogs.approveTitle"),
+      message: t("accounts.receiptDialogs.approveMessage", { count: selectedRows.length }),
+      facts: [
+        { label: t("accounts.addReceipts.receiptNumber"), value: customerData.receiptNumber },
+        { label: t("accounts.addReceipts.customerName"), value: customerData.customerName },
+        { label: t("accounts.policies"), value: selectedRows.map((row) => row.policies).filter(Boolean).join(", ") },
+        { label: t("accounts.receiptDialogs.amountApplied"), value: amountApplied, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("accounts.receiptDialogs.approveReceipt"),
+    });
+    if (!confirmed) return;
 
     // Capture pendingTotals BEFORE approval (before state changes)
     // After approval, selectedRows become "Paid" and pendingTotals will be recalculated without them
@@ -535,78 +556,33 @@ function PolicyReceipts() {
     }
   };
 
-  const handlePrintAll = async () => {
-    if (!customerData.receiptId) {
-      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
-      return;
-    }
-
-    try {
-      setPrintLoading(true);
-      showSuccessMessage(t("accounts.addReceiptEdit.generatingPdf"), t("common.success"));
-
-      const result = await documentTemplateService.getReceiptPdf(
-        customerData.receiptId,
-        {
-          fileName: `receipt-${customerData.receiptNumber || customerData.receiptId}.pdf`,
-        }
-      );
-
-      if (!result.success) {
-        throw new Error(result.error || t("accounts.addReceiptEdit.failedToPrintReceipt"));
-      }
-
-      showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
-    } catch (error) {
-      showErrorMessage(
-        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
-        t("common.error")
-      );
-    } finally {
-      setPrintLoading(false);
-    }
+  // prints the official receipt (the whole receipt or the lines chosen) from the server PDF
+  const printReceipt = (lineIds, fileName) => {
+    setPrintLoading(true);
+    printPdf(documentTemplateService.receiptPdfPath(customerData.receiptId, { lineIds }), { fileName })
+      .catch((error) => showErrorMessage(error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"), t("common.error")))
+      .finally(() => setPrintLoading(false));
   };
 
-  const handlePrintSelected = async () => {
+  const handlePrintAll = () => {
     if (!customerData.receiptId) {
       showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
       return;
     }
+    printReceipt([], `receipt-${customerData.receiptNumber || customerData.receiptId}.pdf`);
+  };
 
+  const handlePrintSelected = () => {
+    if (!customerData.receiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
+      return;
+    }
     if (!selectedRows || selectedRows.length === 0) {
       showErrorMessage(t("accounts.addReceiptEdit.selectOneToPrint"));
       return;
     }
-
-    try {
-      setPrintLoading(true);
-      showSuccessMessage(t("accounts.addReceiptEdit.generatingPdf"), t("common.success"));
-
-      const lineIds = selectedRows
-        .map((row) => row.receiptListId || row.id)
-        .filter(Boolean);
-
-      const result = await documentTemplateService.getReceiptPdf(
-        customerData.receiptId,
-        {
-          lineIds,
-          fileName: `receipt-${customerData.receiptNumber || customerData.receiptId}-selected.pdf`,
-        }
-      );
-
-      if (!result.success) {
-        throw new Error(result.error || t("accounts.addReceiptEdit.failedToPrintReceipt"));
-      }
-
-      showSuccessMessage(t("accounts.addReceiptEdit.pdfDownloadedSuccess"), t("common.success"));
-    } catch (error) {
-      showErrorMessage(
-        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
-        t("common.error")
-      );
-    } finally {
-      setPrintLoading(false);
-    }
+    const lineIds = selectedRows.map((row) => row.receiptListId || row.id).filter(Boolean);
+    printReceipt(lineIds, `receipt-${customerData.receiptNumber || customerData.receiptId}-selected.pdf`);
   };
   const template2 = {
     layout:
@@ -1108,14 +1084,18 @@ function PolicyReceipts() {
         <Dialog
           header={t("accounts.addReceiptEdit.policyDetails")}
           visible={visiblePopup}
-          className="dialog_fields"
-          onHide={() => {
-            setVisiblePopup(false);
-            setEditedData(null);
-          }}
+          className="dialog_fields bv-centered"
+          style={{ width: "min(720px, 95vw)" }}
+          onHide={closePolicyDetails}
+          footer={
+            <div className="flex justify-content-end gap-2">
+              <Button type="button" label={t("accounts.addReceipts.cancel")} text onClick={closePolicyDetails} />
+              <Button type="button" label={t("accounts.addReceiptEdit.update")} onClick={formik.handleSubmit} />
+            </div>
+          }
         >
-          <div class="grid">
-            <div class="sm-col-12  md:col-6 lg-col-6">
+          <div className="grid">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.policy}
                 onChange={formik.handleChange("policy")}
@@ -1126,7 +1106,7 @@ function PolicyReceipts() {
                 disabled={true}
               />
             </div>
-            <div class="sm-col-12  md:col-6 lg-col-6">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.lcAmount}
                 onChange={formik.handleChange("lcAmount")}
@@ -1138,8 +1118,8 @@ function PolicyReceipts() {
               />
             </div>
           </div>
-          <div class="grid">
-            <div class="col-12 md:col-6 lg:col-6">
+          <div className="grid">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.paid}
                 onChange={(e) => {
@@ -1170,7 +1150,7 @@ function PolicyReceipts() {
                 disabled={false}
               />
             </div>
-            <div class="col-12 md:col-6 lg:col-6">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.unPaid}
                 onChange={formik.handleChange("unPaid")}
@@ -1182,8 +1162,8 @@ function PolicyReceipts() {
               />
             </div>
           </div>
-          <div class="grid">
-            <div class="col-12 md:col-6 lg:col-6">
+          <div className="grid">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.discounts}
                 onChange={formik.handleChange("discounts")}
@@ -1193,7 +1173,7 @@ function PolicyReceipts() {
                 placeholder={t("accounts.journalVoucherDetails.enter")}
               />
             </div>
-            <div class="col-12 md:col-6 lg:col-6">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.dst}
                 onChange={formik.handleChange("dst")}
@@ -1205,8 +1185,8 @@ function PolicyReceipts() {
               />
             </div>
           </div>
-          <div class="grid">
-            <div class="col-12 md:col-6 lg:col-6">
+          <div className="grid">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.lgt}
                 onChange={formik.handleChange("lgt")}
@@ -1217,7 +1197,7 @@ function PolicyReceipts() {
                 placeholder={t("accounts.journalVoucherDetails.enter")}
               />
             </div>
-            <div class="col-12 md:col-6 lg:col-6">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.vat}
                 onChange={formik.handleChange("vat")}
@@ -1229,8 +1209,8 @@ function PolicyReceipts() {
               />
             </div>
           </div>
-          <div class="grid">
-            <div class="col-12 md:col-6 lg:col-6">
+          <div className="grid">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.other}
                 onChange={formik.handleChange("other")}
@@ -1241,7 +1221,7 @@ function PolicyReceipts() {
                 placeholder={t("accounts.journalVoucherDetails.enter")}
               />
             </div>
-            <div class="col-12 md:col-6 lg:col-6">
+            <div className="col-12 md:col-6">
               <InputField
                 value={formik.values.fcAmount}
                 onChange={formik.handleChange("fcAmount")}
@@ -1252,15 +1232,7 @@ function PolicyReceipts() {
               />
             </div>
           </div>
-
-          <div className="update_btn">
-            <Button
-              label={t("accounts.addReceiptEdit.update")}
-              className="update_btnlabel"
-              onClick={formik.handleSubmit}
-            />
-          </div>
-        </Dialog>{" "}
+        </Dialog>
       </div>
     </div>
   );

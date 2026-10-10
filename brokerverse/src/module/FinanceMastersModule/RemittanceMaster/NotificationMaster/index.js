@@ -9,7 +9,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox } from "primereact/checkbox";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { MultiSelect } from "primereact/multiselect";
 import { InputNumber } from "primereact/inputnumber";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
@@ -19,8 +18,12 @@ import remittanceService, { masterService } from "../../../../services/remittanc
 import authService from "../../../../services/authService";
 import { showError, showSuccess } from "../../../Remittance/shared";
 import { MASTER_HOME, saveRecord } from "../masterRecord";
+import { openConfirm } from "../../../../components/ConfirmDialog";
+import DetailDialog from "../../../../components/DetailDialog";
+import DetailHeader from "../../../../components/DetailHeader";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
 import "./index.scss";
-import { confirmAction } from "../../../../utility/dialogs";
 
 const TYPE = "remittance-notification-template";
 const toRow = (template) => ({
@@ -55,6 +58,7 @@ const NotificationMaster = () => {
   const { mode } = useParams();
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
+  const n = (key, opts) => t(`remittanceMasters.notifications.${key}`, opts);
 
   // Notification templates are records of the remittance-notification-template master
   const [notificationTemplates, setNotificationTemplates] = useState([]);
@@ -80,14 +84,22 @@ const NotificationMaster = () => {
   };
 
   const deleteTemplate = async (row) => {
-    if (!(await confirmAction(`Delete template ${row.templateName}?`, { danger: true }))) return;
-    try {
-      await masterService.remove(TYPE, row.id);
-      showSuccess(toast, `${row.templateName} deleted`);
-      loadTemplates();
-    } catch (error) {
-      showError(toast, error);
-    }
+    const deleted = await openConfirm({
+      title: n("deleteTitle"),
+      severity: "danger",
+      message: n("deleteMessage"),
+      facts: [
+        { label: n("templateName"), value: row.templateName },
+        { label: n("eventType"), value: row.eventType },
+        { label: n("channel"), value: row.channel },
+      ],
+      note: n("deleteNote"),
+      confirmLabel: n("deleteAction"),
+      onConfirm: () => masterService.remove(TYPE, row.id),
+    });
+    if (!deleted) return;
+    showSuccess(toast, n("deleted", { name: row.templateName }));
+    loadTemplates();
   };
 
   const editTemplate = (row) => {
@@ -151,6 +163,7 @@ const NotificationMaster = () => {
   const [showRuleDialog, setShowRuleDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedRule, setSelectedRule] = useState(null);
+  const [viewedTemplate, setViewedTemplate] = useState(null);
 
   const eventTypeOptions = [
     { label: "Payment Overdue", value: "Payment Overdue" },
@@ -179,14 +192,6 @@ const NotificationMaster = () => {
   ];
 
 
-  const frequencyOptions = [
-    { label: "Immediate", value: "Immediate" },
-    { label: "Hourly", value: "Hourly" },
-    { label: "Daily", value: "Daily" },
-    { label: "Weekly", value: "Weekly" },
-    { label: "Monthly", value: "Monthly" }
-  ];
-
   const priorityBodyTemplate = (rowData) => {
     const getSeverity = (priority) => {
       switch (priority) {
@@ -210,25 +215,22 @@ const NotificationMaster = () => {
         <Button
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
-          tooltip="View"
-          onClick={() => {
-            setSelectedTemplate(rowData);
-            setShowTemplateDialog(true);
-          }} aria-label="View"
+          tooltip={n("view")}
+          onClick={() => setViewedTemplate(rowData)} aria-label={n("view")}
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
-              onClick={() => editTemplate(rowData)} aria-label="Edit"
+              tooltip={n("edit")}
+              onClick={() => editTemplate(rowData)} aria-label={n("edit")}
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete"
-              onClick={() => deleteTemplate(rowData)} aria-label="Delete"
+              tooltip={n("delete")}
+              onClick={() => deleteTemplate(rowData)} aria-label={n("delete")}
             />
           </>
         )}
@@ -236,35 +238,19 @@ const NotificationMaster = () => {
     );
   };
 
-  const ruleActionsTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon="pi pi-eye"
-          className="p-button-rounded p-button-text"
-          tooltip="View"
-          onClick={() => {
-            setSelectedRule(rowData);
-            setShowRuleDialog(true);
-          }} aria-label="View"
-        />
-        {!isViewMode && (
-          <>
-            <Button
-              icon="pi pi-pencil"
-              className="p-button-rounded p-button-text"
-              tooltip="Edit" aria-label="Edit"
-            />
-            <Button
-              icon="pi pi-trash"
-              className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete" aria-label="Delete"
-            />
-          </>
-        )}
-      </div>
-    );
-  };
+  const ruleActionsTemplate = (rowData) => (
+    <div className="action-buttons">
+      <Button
+        icon="pi pi-eye"
+        className="p-button-rounded p-button-text"
+        tooltip={n("view")}
+        onClick={() => {
+          setSelectedRule(rowData);
+          setShowRuleDialog(true);
+        }} aria-label={n("view")}
+      />
+    </div>
+  );
 
   const handleSave = () => navigate(MASTER_HOME);
 
@@ -280,33 +266,12 @@ const NotificationMaster = () => {
         onClick={() => setShowTemplateDialog(false)}
         className="p-button-text"
       />
-      {!isViewMode && (
-        <Button
-          label={t("financeMasters.save")}
-          icon="pi pi-check"
-          onClick={saveTemplate}
-          autoFocus
-        />
-      )}
-    </div>
-  );
-
-  const ruleDialogFooter = (
-    <div>
       <Button
-        label={t("common.close")}
-        icon="pi pi-times"
-        onClick={() => setShowRuleDialog(false)}
-        className="p-button-text"
+        label={t("financeMasters.save")}
+        icon="pi pi-check"
+        onClick={saveTemplate}
+        autoFocus
       />
-      {!isViewMode && (
-        <Button
-          label={t("financeMasters.save")}
-          icon="pi pi-check"
-          onClick={() => setShowRuleDialog(false)}
-          autoFocus
-        />
-      )}
     </div>
   );
 
@@ -347,24 +312,6 @@ const NotificationMaster = () => {
 
           <TabPanel header="Notification Rules">
             <div className="rules-section">
-              {!isViewMode && (
-                <div className="toolbar mb-3">
-                  <Button
-                    label={t("remittance.addRule")}
-                    icon="pi pi-plus"
-                    className="p-button-primary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'info',
-                        summary: 'Info',
-                        detail: 'Add Rule dialog would open here',
-                        life: 3000
-                      });
-                    }}
-                  />
-                </div>
-              )}
-
               <DataTable value={notificationRules} stripedRows>
                 <Column field="ruleName" header="Rule Name" style={{ width: '25%' }} />
                 <Column field="condition" header="Condition" style={{ width: '30%' }} />
@@ -535,9 +482,10 @@ const NotificationMaster = () => {
       </Card>
 
       <Dialog
-        header="Notification Template Details"
+        header={selectedTemplate?.id ? n("editTitle") : n("addTitle")}
         visible={showTemplateDialog}
-        style={{ width: '60vw' }}
+        style={{ width: "48rem" }}
+        breakpoints={{ "960px": "94vw" }}
         footer={templateDialogFooter}
         onHide={() => setShowTemplateDialog(false)}
       >
@@ -545,49 +493,49 @@ const NotificationMaster = () => {
           <div className="template-details">
             <div className="p-fluid formgrid grid">
               <div className="p-field field col-12 md:col-6">
-                <label>Template Name</label>
-                <InputText value={selectedTemplate.templateName} onChange={(e) => setTemplateField("templateName", e.target.value)} disabled={isViewMode} />
+                <label htmlFor="ntf-name">{n("templateName")}</label>
+                <InputText id="ntf-name" value={selectedTemplate.templateName} onChange={(e) => setTemplateField("templateName", e.target.value)} />
               </div>
               <div className="p-field field col-12 md:col-6">
-                <label>Event Type</label>
+                <label htmlFor="ntf-event">{n("eventType")}</label>
                 <Dropdown
+                  inputId="ntf-event"
                   value={selectedTemplate.eventType}
                   options={eventTypeOptions}
                   onChange={(e) => setTemplateField("eventType", e.value)}
                   editable
-                  disabled={isViewMode}
                 />
               </div>
               <div className="p-field field col-12 md:col-6">
-                <label>Recipient Type</label>
+                <label htmlFor="ntf-recipient">{n("recipient")}</label>
                 <Dropdown
+                  inputId="ntf-recipient"
                   value={selectedTemplate.recipientType}
                   options={recipientTypeOptions}
                   onChange={(e) => setTemplateField("recipientType", e.value)}
-                  disabled={isViewMode}
                 />
               </div>
               <div className="p-field field col-12 md:col-6">
-                <label>Channel</label>
+                <label htmlFor="ntf-channel">{n("channel")}</label>
                 <Dropdown
+                  inputId="ntf-channel"
                   value={selectedTemplate.channel}
                   options={channelOptions}
                   onChange={(e) => setTemplateField("channel", e.value)}
-                  disabled={isViewMode}
                 />
               </div>
               <div className="p-field field col-12">
-                <label>Subject</label>
-                <InputText value={selectedTemplate.subject} onChange={(e) => setTemplateField("subject", e.target.value)} disabled={isViewMode} />
+                <label htmlFor="ntf-subject">{n("subject")}</label>
+                <InputText id="ntf-subject" value={selectedTemplate.subject} onChange={(e) => setTemplateField("subject", e.target.value)} />
               </div>
               <div className="p-field field col-12">
-                <label>Message Template</label>
+                <label htmlFor="ntf-body">{n("message")}</label>
                 <InputTextarea
+                  id="ntf-body"
                   rows={5}
                   value={selectedTemplate.body}
                   onChange={(e) => setTemplateField("body", e.target.value)}
                   placeholder={t("remittance.placeholderTemplateMessage")}
-                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -595,49 +543,45 @@ const NotificationMaster = () => {
         )}
       </Dialog>
 
-      <Dialog
-        header="Notification Rule Details"
-        visible={showRuleDialog}
-        style={{ width: '60vw' }}
-        footer={ruleDialogFooter}
-        onHide={() => setShowRuleDialog(false)}
-      >
-        {selectedRule && (
-          <div className="rule-details">
-            <div className="p-fluid formgrid grid">
-              <div className="p-field field col-12">
-                <label>Rule Name</label>
-                <InputText value={selectedRule.ruleName} disabled={isViewMode} />
-              </div>
-              <div className="p-field field col-12">
-                <label>Condition</label>
-                <InputText value={selectedRule.condition} disabled={isViewMode} />
-              </div>
-              <div className="p-field field col-12 md:col-6">
-                <label>Frequency</label>
-                <Dropdown
-                  value={selectedRule.frequency}
-                  options={frequencyOptions}
-                  disabled={isViewMode}
-                />
-              </div>
-              <div className="p-field field col-12 md:col-6">
-                <label>Escalation Level</label>
-                <InputNumber value={selectedRule.escalationLevel} disabled={isViewMode} />
-              </div>
-              <div className="p-field field col-12">
-                <label>Recipients</label>
-                <MultiSelect
-                  value={selectedRule.recipients}
-                  options={recipientTypeOptions}
-                  display="chip"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </Dialog>
+      {viewedTemplate ? (
+        <DetailDialog visible onHide={() => setViewedTemplate(null)} header={n("templateTitle")} size="md">
+          <DetailHeader
+            title={viewedTemplate.templateName || viewedTemplate.code}
+            subtitle={viewedTemplate.code}
+            status={{ code: viewedTemplate.active ? "active" : "inactive", label: viewedTemplate.active ? n("active") : n("inactive") }}
+          />
+          <DetailSection title={n("delivery")}>
+            <KeyValueGrid columns={3} items={[
+              { label: n("eventType"), value: viewedTemplate.eventType },
+              { label: n("recipient"), value: recipientTypeOptions.find((o) => o.value === viewedTemplate.recipientType)?.label || viewedTemplate.recipientType },
+              { label: n("channel"), value: viewedTemplate.channel },
+              { label: n("priority"), value: viewedTemplate.priority },
+              { label: n("autoSend"), value: viewedTemplate.autoSend, type: "boolean" },
+            ]} />
+          </DetailSection>
+          <DetailSection title={n("message")}>
+            <KeyValueGrid columns={2} items={[
+              { label: n("subject"), value: viewedTemplate.subject, span: "full" },
+              { label: n("body"), value: viewedTemplate.body ? <span className="notification-master__body">{viewedTemplate.body}</span> : null, span: "full" },
+            ]} />
+          </DetailSection>
+        </DetailDialog>
+      ) : null}
+
+      {showRuleDialog && selectedRule ? (
+        <DetailDialog visible onHide={() => setShowRuleDialog(false)} header={n("ruleTitle")} size="md">
+          <DetailHeader
+            title={selectedRule.ruleName}
+            status={{ code: selectedRule.active ? "active" : "inactive", label: selectedRule.active ? n("active") : n("inactive") }}
+          />
+          <KeyValueGrid columns={2} items={[
+            { label: n("condition"), value: selectedRule.condition, span: "full" },
+            { label: n("frequency"), value: selectedRule.frequency },
+            { label: n("escalationLevel"), value: selectedRule.escalationLevel, type: "number" },
+            { label: n("recipients"), value: (selectedRule.recipients || []).join(", "), span: "full" },
+          ]} />
+        </DetailDialog>
+      ) : null}
     </div>
   );
 };

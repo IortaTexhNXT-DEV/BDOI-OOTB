@@ -13,7 +13,7 @@ import service from "../../services/distributionService";
 import userService from "../../services/userService";
 import { hasPermission } from "../../utils/canOpen";
 import { ADMIN_ROLES, getUserRoles } from "../../utils/menuPermissions";
-import { confirmAction } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { Field, PageHeader, StatusTag, date, dateTime, money, num, showError, showSuccess } from "./common";
 
 const ROLES = ["sales", "processing", "operations", "claims", "accounting", "accounting-manager"];
@@ -116,15 +116,24 @@ const ReportBuilder = () => {
     setTab(0);
   };
   const remove = async (r) => {
-    if (!(await confirmAction(t("distribution.rb.deleteConfirm", "Delete the saved report {{name}}?", { name: r.name })))) return;
-    try {
-      const out = await service.deleteSavedReport(r.id);
-      showSuccess(toast, out.message);
-      if (def.id === r.id) setDef(EMPTY);
-      loadSaved();
-    } catch (e) {
-      showError(toast, e);
-    }
+    let out = null;
+    const done = await openConfirm({
+      title: t("distribution.rb.deleteTitle", "Delete saved report"),
+      severity: "danger",
+      message: t("distribution.rb.deleteMessage", "The saved report is deleted for everyone it is shared with. Files already exported are kept."),
+      facts: [
+        { label: t("distribution.common.name", "Name"), value: r.name },
+        { label: t("distribution.rb.dataset", "Dataset"), value: datasets.find((d) => d.key === r.dataset)?.label || r.dataset },
+        { label: t("distribution.rb.owner", "Owner"), value: r.ownerName },
+        { label: t("distribution.rb.lastRun", "Last run"), value: r.lastRunAt, type: "datetime" },
+      ],
+      confirmLabel: t("distribution.rb.deleteTitle", "Delete saved report"),
+      onConfirm: async () => { out = await service.deleteSavedReport(r.id); },
+    });
+    if (!done) return;
+    showSuccess(toast, out?.message);
+    if (def.id === r.id) setDef(EMPTY);
+    loadSaved();
   };
   const runExtract = async () => {
     try {

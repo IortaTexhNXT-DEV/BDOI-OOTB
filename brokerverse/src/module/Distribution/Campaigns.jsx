@@ -13,7 +13,11 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
-import { confirmAction } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
 import { lobChoices, useProductLines } from "../Sales/salesProducts";
 
@@ -83,14 +87,41 @@ const Campaigns = () => {
   const saveCampaign = () => act(() => (campaign.id
     ? service.updateCampaign(campaign.id, { name: campaign.name, segmentId: campaign.segmentId, templateId: campaign.templateId, notes: campaign.notes || null })
     : service.createCampaign({ name: campaign.name, segmentId: campaign.segmentId, templateId: campaign.templateId, notes: campaign.notes || null })), () => setCampaign(null));
+  const campaignFacts = (row) => [
+    { label: t("distribution.cp.number", "Campaign"), value: row.campaignNumber },
+    { label: t("distribution.common.name", "Name"), value: row.name },
+    { label: t("distribution.cp.segment", "Segment"), value: row.segmentName },
+    { label: t("distribution.cp.template", "Template"), value: row.templateName },
+  ];
+  // the action runs in the confirmation (a failure stays there); the list is reloaded after it
+  const confirmAct = async (options, fn) => {
+    let result = null;
+    if (!(await openConfirm({ ...options, onConfirm: async () => { result = await fn(); } }))) return;
+    if (result?.message) showSuccess(toast, result.message);
+    load();
+  };
   const send = async (row) => {
-    if (!(await confirmAction(t("distribution.cp.sendConfirm", "Send {{name}} now? Its e-mails are queued to the outbox for every consenting recipient.", { name: row.name })))) return;
-    act(() => service.sendCampaign(row.id));
+    const criteria = segments.find((s) => s.id === row.segmentId)?.criteria;
+    const audience = criteria ? await service.previewSegment(cleanCriteria(criteria)).then((r) => r.data).catch(() => null) : null;
+    confirmAct({
+      title: t("distribution.cp.sendTitle", "Send campaign"),
+      message: t("distribution.cp.sendMessage", "The e-mails are queued to the outbox for every recipient who agreed to receive offers."),
+      facts: [
+        ...campaignFacts(row),
+        { label: t("distribution.cp.matching", "Matching"), value: audience?.total, type: "number", hidden: !audience },
+        { label: t("distribution.cp.reachable", "Reachable (consent and e-mail)"), value: audience?.eligible, type: "number", emphasis: true, hidden: !audience },
+      ],
+      confirmLabel: t("distribution.cp.sendAction", "Send campaign"),
+    }, () => service.sendCampaign(row.id));
   };
-  const cancel = async (row) => {
-    if (!(await confirmAction(t("distribution.cp.cancelConfirm", "Cancel {{name}}?", { name: row.name })))) return;
-    act(() => service.cancelCampaign(row.id));
-  };
+  const cancel = (row) => confirmAct({
+    title: t("distribution.cp.cancelCampaign", "Cancel campaign"),
+    severity: "danger",
+    message: t("distribution.cp.cancelMessage", "The campaign is not sent. A cancelled campaign cannot be scheduled again."),
+    facts: [...campaignFacts(row), { label: t("distribution.cp.when", "Scheduled / sent"), value: row.scheduledAt, type: "datetime", hidden: !row.scheduledAt }],
+    confirmLabel: t("distribution.cp.cancelCampaign", "Cancel campaign"),
+    cancelLabel: t("distribution.common.back", "Back"),
+  }, () => service.cancelCampaign(row.id));
   const openResults = async (row) => {
     try {
       setResults(await service.campaignResults(row.id));
@@ -280,31 +311,50 @@ const Campaigns = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={templatePreview ? `${templatePreview.name}: ${templatePreview.subject}` : ""} visible={!!templatePreview} style={{ width: "min(760px, 96vw)" }} onHide={() => setTemplatePreview(null)}>
-        {templatePreview && <iframe title={t("distribution.cp.preview", "Preview")} sandbox="" srcDoc={templatePreview.html} className="dist-mail-preview" />}
-      </Dialog>
-
-      <Dialog className="pe-dialog" header={results ? `${results.campaign.campaignNumber} · ${results.campaign.name}` : ""} visible={!!results} style={{ width: "min(1000px, 96vw)" }} onHide={() => setResults(null)}>
-        {results && (
-          <div>
-            <div className="pe-kpis">
-              {["recipients", "sent", "queued", "failed", "excluded", "optedOut", "quoted", "insured"].map((k) => (
-                <div className="pe-kpi" key={k}><div className="pe-kpi-label">{t(`distribution.cp.totals.${k}`, k)}</div><div className="pe-kpi-value">{results.totals[k]}</div></div>
-              ))}
-            </div>
-            <p className="pe-muted">{t("distribution.cp.window", "Quoted and insured count the quotations and policies of recipients within {{days}} days of sending.", { days: results.conversionWindowDays })}</p>
-            <DataTable value={results.recipients} dataKey="id" size="small" stripedRows paginator rows={15} className="mt-2">
-              <Column field="partyName" header={t("distribution.cp.recipient", "Recipient")} />
-              <Column header={t("distribution.cp.partyType", "Who")} body={(r) => t(`distribution.cp.party.${r.partyType}`, r.partyType)} />
-              <Column field="email" header={t("distribution.cp.email", "E-mail")} />
-              <Column header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />
-              <Column header={t("distribution.cp.delivery", "Delivery")} body={(r) => (r.delivery ? `${t(`distribution.status.${r.delivery}`, r.delivery)}${r.deliveryError ? `: ${r.deliveryError}` : ""}` : r.excludedReason || "")} />
-              <Column header={t("distribution.cp.totals.quoted", "Quoted")} body={(r) => (r.quoted ? t("distribution.common.yes", "Yes") : "")} />
-              <Column header={t("distribution.cp.totals.insured", "Insured")} body={(r) => (r.insured ? t("distribution.common.yes", "Yes") : "")} />
-            </DataTable>
-          </div>
+      <DetailDialog visible={!!templatePreview} onHide={() => setTemplatePreview(null)} size="lg" header={templatePreview ? `${t("distribution.cp.preview", "Preview")} · ${templatePreview.name}` : ""}>
+        {templatePreview && (
+          <>
+            <KeyValueGrid columns={2} className="mb-3" items={[{ label: t("distribution.cp.subject", "Subject"), value: templatePreview.subject, span: "full" }]} />
+            <iframe title={t("distribution.cp.preview", "Preview")} sandbox="" srcDoc={templatePreview.html} className="dist-mail-preview" />
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
+
+      <DetailDialog visible={!!results} onHide={() => setResults(null)} size="xl" header={results ? `${t("distribution.cp.results", "Results")} · ${results.campaign.campaignNumber}` : ""}>
+        {results && (
+          <>
+            <DetailHeader title={results.campaign.campaignNumber} status={{ code: results.campaign.status, label: t(`distribution.status.${results.campaign.status}`, results.campaign.status) }}
+              subtitle={results.campaign.name}
+              meta={[
+                { label: t("distribution.cp.segment", "Segment"), value: results.campaign.segmentName },
+                { label: t("distribution.cp.template", "Template"), value: results.campaign.templateName },
+                { label: t("distribution.cp.sentAt", "Sent"), value: results.campaign.sentAt, type: "datetime" },
+                { label: t("distribution.cp.conversionWindow", "Conversion window (days)"), value: results.conversionWindowDays, type: "number" },
+              ]} />
+            <DetailSection title={t("distribution.cp.summary", "Summary")}>
+              <KeyValueGrid columns={4} items={["recipients", "sent", "queued", "failed", "excluded", "optedOut", "quoted", "insured"].map((k) => ({
+                key: k, label: t(`distribution.cp.totals.${k}`), value: results.totals[k], type: "number",
+              }))} />
+            </DetailSection>
+            <DetailSection title={t("distribution.cp.recipients", "Recipients")} flush>
+              <DataTable value={results.recipients} dataKey="id" size="small" stripedRows paginator rows={15}>
+                <Column field="partyName" header={t("distribution.cp.recipient", "Recipient")} />
+                <Column header={t("distribution.cp.partyType", "Who")} body={(r) => t(`distribution.cp.party.${r.partyType}`, r.partyType)} />
+                <Column field="email" header={t("distribution.cp.email", "E-mail")} />
+                <Column header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />
+                <Column header={t("distribution.cp.delivery", "Delivery")} body={(r) => (r.delivery ? (
+                  <div>
+                    <StatusTag status={r.delivery} />
+                    {r.deliveryError ? <div className="pe-muted">{r.deliveryError}</div> : null}
+                  </div>
+                ) : r.excludedReason || "")} />
+                <Column header={t("distribution.cp.totals.quoted", "Quoted")} body={(r) => (r.quoted ? t("distribution.common.yes", "Yes") : "")} />
+                <Column header={t("distribution.cp.totals.insured", "Insured")} body={(r) => (r.insured ? t("distribution.common.yes", "Yes") : "")} />
+              </DataTable>
+            </DetailSection>
+          </>
+        )}
+      </DetailDialog>
     </div>
   );
 };

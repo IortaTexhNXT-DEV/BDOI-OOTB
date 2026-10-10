@@ -194,20 +194,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             <Button
                                 label="Upload"
                                 icon={<ArrowUpToLineIcon />}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    backgroundColor: 'var(--bv-primary)',
-                                    gap: '8px',
-                                    padding: '10px',
-                                    color: '#fff',
-                                    border: '1px solid var(--bv-primary)',
-                                    borderRadius: '6px',
-                                    fontFamily: "Nunito, Arial, sans-serif",
-                                    fontSize: '16px',
-                                    fontWeight: 400,
-                                    lineHeight: '24px',
-                                }}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                                 className="card flex flex-wrap justify-content-spacebetween gap-13"
                             />
                         </div>
@@ -493,18 +480,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             onClick={() => {
                                 formik.handleSubmit();
                             }}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: 'var(--bv-primary)', 
-                                color: '#fff',
-                                border: '1px solid var(--bv-primary)',
-                                borderRadius: '6px',
-                                fontFamily: "Nunito, Arial, sans-serif",
-                                fontSize: '16px',
-                                fontWeight: 400,
-                                lineHeight: '24px',
-                            }}
+                            style={{ display: 'flex', alignItems: 'center' }}
                         >
                             Next
                         </Button>

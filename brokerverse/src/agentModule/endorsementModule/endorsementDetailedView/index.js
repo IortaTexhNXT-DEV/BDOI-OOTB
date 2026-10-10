@@ -5,15 +5,16 @@ import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import brandingService from "../../../services/brandingService";
-import InputTextField from "../../component/inputText";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import endorsementService from "../../../services/endorsementService";
 import s3Service from "../../../services/s3Service";
-import { formatCurrency } from "../../../utility/currencyConverter";
-import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import { notifyError } from "../../../utility/dialogs";
 import { FieldsSkeleton } from "../../../components/Skeletons";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../../components/ActivityLog";
+import { printPdf } from "../../../components/Print";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -124,8 +125,15 @@ const EndorsementDetailedView = ({ action }) => {
     }
   };
 
-  // Dates in the configured display format (System Settings general.date_format)
-  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
+  const printEndorsement = () =>
+    printPdf(`/endorsements/${encodeURIComponent(endorsementId)}/pdf`, { fileName: `${endorsementData?.endorsementNumber || "endorsement"}.pdf` })
+      .catch((e) => notifyError(e.message || t("endorsement.errorLoadingDocument")));
+
+  const premiumEffect = premiumDelta > 0
+    ? t("endorsement.premiumEffect.additional")
+    : premiumDelta < 0
+      ? t("endorsement.premiumEffect.return")
+      : t("endorsement.premiumEffect.none");
 
   if (loading) {
     return (
@@ -141,7 +149,7 @@ const EndorsementDetailedView = ({ action }) => {
 
   return (
     <div className="detailed__endorsement__container m-0">
-      <div className="detailed__endorsement__container__title">{t("endorsement.clients")}</div>
+      <div className="detailed__endorsement__container__title">{t("endorsement.endorsementTitle")}</div>
       <div className="mt-3">
         <div
           onClick={handleCommonAction}
@@ -159,88 +167,37 @@ const EndorsementDetailedView = ({ action }) => {
       </div>
       <div className="detailed__endorsement__card__container mt-4">
         <Card className="card__container">
-          <div className="detailed__endorsement__card__container__title">
-            {t("endorsement.endorsementTitle")}
-          </div>
+          <DetailHeader
+            title={endorsementData?.endorsementNumber || t("endorsement.endorsementTitle")}
+            status={endorsementStatus ? { code: endorsementStatus, label: t(`endorsement.status.${endorsementStatus}`, { defaultValue: endorsementStatus }) } : null}
+            subtitle={[endorsementData?.policyNumber, endorsementData?.insuredName || endorsementData?.clientName].filter(Boolean).join(" · ")}
+            meta={[
+              { label: t("endorsement.effectiveDate"), value: endorsementData?.effectiveDate, type: "date" },
+              { label: t("endorsement.premiumChange"), value: isCancelled ? null : premiumDelta, type: "amount", hidden: isCancelled },
+            ]}
+            actions={<Button className="p-button-outlined" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")} onClick={printEndorsement} />}
+          />
           {action === "completed" && (
             <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
               {t("endorsement.personalDetailsChange")}
             </div>
           )}
 
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.policyNumber")}
-                value={endorsementData?.policyNumber || "N/A"}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.endorsementNumber")}
-                value={endorsementData?.endorsementNumber || "N/A"}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.production")}
-                value={formatDate(
-                  endorsementData?.completionDetails?.productionDate
-                )}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.inception")}
-                value={formatDate(
-                  endorsementData?.completionDetails?.inceptionDate
-                )}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.issuedDate")}
-                value={formatDate(
-                  endorsementData?.completionDetails?.issuedDate
-                )}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("endorsement.expiry")}
-                value={formatDate(
-                  endorsementData?.completionDetails?.expiryDate
-                )}
-                disabled={true}
-              />
-            </div>
-          </div>
-
-          {!isCancelled && (
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("endorsement.premiumChange")}
-                  value={`${premiumDelta > 0 ? "+" : ""}${formatCurrency(premiumDelta)}`}
-                  disabled={true}
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-6 flex align-items-center">
-                <small data-testid="endorsement-premium-note">
-                  {premiumDelta > 0
-                    ? t("endorsement.additionalPremiumDue")
-                    : premiumDelta < 0
-                      ? t("endorsement.returnPremiumNote", { amount: formatCurrency(Math.abs(premiumDelta)) })
-                      : t("endorsement.noPremiumChange")}
-                </small>
-              </div>
-            </div>
-          )}
+          <DetailSection title={t("endorsement.details")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("endorsement.policyNumber"), value: endorsementData?.policyNumber },
+              { label: t("endorsement.endorsementNumber"), value: endorsementData?.endorsementNumber },
+              { label: t("endorsement.endorsementTypeLabel"), value: endorsementData?.endorsementType },
+              { label: t("endorsement.production"), value: endorsementData?.completionDetails?.productionDate, type: "date" },
+              { label: t("endorsement.inception"), value: endorsementData?.completionDetails?.inceptionDate, type: "date" },
+              { label: t("endorsement.issuedDate"), value: endorsementData?.completionDetails?.issuedDate, type: "date" },
+              { label: t("endorsement.expiry"), value: endorsementData?.completionDetails?.expiryDate, type: "date" },
+              { label: t("endorsement.premiumChange"), value: premiumDelta, type: "amount", hidden: isCancelled },
+              { label: t("endorsement.premiumEffectLabel"), value: <span data-testid="endorsement-premium-note">{premiumEffect}</span>, hidden: isCancelled },
+              { label: t("endorsement.cancellationReasonLabel"), value: endorsementData?.cancellationReason, hidden: !isCancelled },
+              { label: t("endorsement.remarksLabel"), value: endorsementData?.remarks, span: "full", hidden: !endorsementData?.remarks },
+            ]} />
+          </DetailSection>
 
           <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
             {t("endorsement.document")}
@@ -268,11 +225,13 @@ const EndorsementDetailedView = ({ action }) => {
               </div>
             </div>
           </div>
+          <DetailSection title={t("endorsement.history")} className="mt-3">
+            <RecordActivityLog entity="endorsement" recordId={endorsementData?.endorsementId || endorsementId} />
+          </DetailSection>
+
           <div className="grid m-0 mt-3">
             <div className="col-12 md:col-12 lg:col-12 p-0 back__complete__btn__container ">
               <div className="complete__btn__container">
-                <Button className="p-button-outlined mr-2" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")}
-                  onClick={() => brandingService.printEndorsement(endorsementId).catch(() => {})} />
                 {isCancelled ? (
                   <Button
                     className="complete__btn"

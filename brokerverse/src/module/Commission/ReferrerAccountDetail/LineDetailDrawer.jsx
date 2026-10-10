@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
@@ -6,8 +7,18 @@ import CommissionService from "../../../services/commissionService";
 import { formatAmount } from "../utils/formatAmount";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import logger from "../../../utility/logger";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import { RecordActivityLog } from "../../../components/ActivityLog";
 
-const stepDate = (value) => value || "—";
+// the actions of a line by its status: the service call and whether it is destructive
+const ACTIONS = {
+  eligible: { call: CommissionService.markLineEligible, when: ["Accrued"] },
+  approve: { call: CommissionService.approveLine, when: ["Eligible"] },
+  pay: { call: CommissionService.payLine, when: ["Approved"] },
+  reverse: { call: CommissionService.reverseLine, when: ["Accrued", "Eligible", "Approved"], danger: true },
+};
 
 const LineDetailDrawer = ({
   visible,
@@ -19,9 +30,11 @@ const LineDetailDrawer = ({
   onUpdated,
   onError,
 }) => {
+  const { t } = useTranslation();
   const [actionLoading, setActionLoading] = useState(false);
   const [ratePct, setRatePct] = useState(null);
   const [rateFixed, setRateFixed] = useState(0);
+  const [activityKey, setActivityKey] = useState(0);
 
   useEffect(() => {
     if (!line) return;
@@ -29,56 +42,9 @@ const LineDetailDrawer = ({
     setRateFixed(line.comsubFixed ?? 0);
   }, [line]);
 
-  if (!line) {
-    return (
-      <Sidebar
-        visible={visible}
-        position="right"
-        onHide={onHide}
-        className="line-detail-drawer"
-        blockScroll
-      />
-    );
-  }
+  if (!line) return null;
 
-  const isAccrued = line.status === "Accrued";
-  const isEligible = line.status === "Eligible";
-  const isApproved = line.status === "Approved";
-  const isPaid = line.status === "Paid";
-
-  const statusClass = isEligible
-    ? "eligible"
-    : isApproved
-      ? "approved"
-      : isPaid
-        ? "paid"
-        : "accrued";
-
-  const canMarkEligible = isAccrued;
-  const canApprove = isEligible;
-  const canPay = isApproved;
-  const canReverse = isAccrued || isEligible || isApproved;
-  const canEditRate = isEligible || isApproved;
-  const lifecycle = line.lifecycle || {};
-
-  const stepState = (key) => {
-    const order = ["Accrued", "Eligible", "Approved", "Paid"];
-    const current = order.indexOf(line.status);
-    const step = order.indexOf(key);
-    if (step < current) return "done";
-    if (step === current) {
-      // Accrued current = solid gray; Eligible/Approved current = blue highlight
-      return key === "Accrued" ? "done" : "current";
-    }
-    return "upcoming";
-  };
-
-  const stepLabel = (key, dateValue) => {
-    if (key === "Approved" && isApproved) {
-      return "Approved";
-    }
-    return `${key} ${stepDate(dateValue)}`;
-  };
+  const canEditRate = ["Eligible", "Approved"].includes(line.status);
 
   const runLineAction = async (fn, args) => {
     setActionLoading(true);
@@ -86,6 +52,7 @@ const LineDetailDrawer = ({
       const res =
         args === undefined ? await fn(referrerId, line.id) : await fn(...args);
       const payload = res?.data || res;
+      setActivityKey((k) => k + 1);
       onUpdated?.(payload);
     } catch (err) {
       logger.error("Line action failed", err);
@@ -95,7 +62,36 @@ const LineDetailDrawer = ({
     }
   };
 
-  const applyRateOverride = () => {
+  const confirmAction = async (name) => {
+    const action = ACTIONS[name];
+    const ok = await openConfirm({
+      title: t(`commissionLine.confirm.${name}Title`, { policy: line.policyNo }),
+      severity: action.danger ? "danger" : "neutral",
+      message: t(`commissionLine.confirm.${name}Message`),
+      facts: [
+        { label: t("commissionLine.referrer"), value: referrerName },
+        { label: t("commissionLine.policy"), value: line.policyNo },
+        { label: t("commissionLine.comsub"), value: line.comsub, type: "amount" },
+        { label: t("commissionLine.wht"), value: line.wht, type: "amount" },
+        { label: t("commissionLine.netPayable"), value: line.net, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t(`commissionLine.confirm.${name}`),
+    });
+    if (ok) runLineAction(action.call);
+  };
+
+  const applyRateOverride = async () => {
+    const ok = await openConfirm({
+      title: t("commissionLine.confirm.rateTitle", { policy: line.policyNo }),
+      message: t("commissionLine.confirm.rateMessage"),
+      facts: [
+        { label: t("commissionLine.currentRate"), value: `${formatAmount(line.comsubFixed)} + ${line.comsubPct}%` },
+        { label: t("commissionLine.newRate"), value: `${formatAmount(rateFixed)} + ${ratePct}%` },
+        { label: t("commissionLine.netPremium"), value: line.netPremium, type: "amount" },
+      ],
+      confirmLabel: t("commissionLine.confirm.rate"),
+    });
+    if (!ok) return;
     runLineAction(CommissionService.updateLineRate, [
       referrerId,
       line.id,
@@ -103,9 +99,23 @@ const LineDetailDrawer = ({
     ]);
   };
 
-  const whtLabel = whtApplicable
-    ? `WHT @ ${line.whtPct}%`
-    : "WHT (not applied)";
+  const rows = [
+    { key: "gross", label: t("commissionLine.grossPremium"), value: line.grossPremium },
+    { key: "discount", label: t("commissionLine.discount", { label: line.discountLabel }), value: -Number(line.discountAmount || 0), muted: true },
+    { key: "net", label: t("commissionLine.netPremium"), value: line.netPremium, strong: true },
+    { key: "brokerage", label: t("commissionLine.brokerage", { pct: line.brokeragePct }), value: line.brokerageAmount },
+    { key: "comsub", label: t("commissionLine.comsubFormula", { fixed: formatAmount(line.comsubFixed), pct: line.comsubPct }), value: line.comsub },
+    {
+      key: "wht",
+      label: whtApplicable ? t("commissionLine.whtAt", { pct: line.whtPct }) : t("commissionLine.whtNotApplied"),
+      value: -Number(line.wht || 0),
+      muted: true,
+    },
+    { key: "payable", label: t("commissionLine.netPayable"), value: line.net, strong: true },
+    { key: "margin", label: t("commissionLine.netMargin"), value: line.netMargin, strong: true, rule: true },
+  ];
+
+  const available = Object.keys(ACTIONS).filter((name) => ACTIONS[name].when.includes(line.status));
 
   return (
     <Sidebar
@@ -118,72 +128,34 @@ const LineDetailDrawer = ({
       showCloseIcon
     >
       <div className="drawer-body">
-        <div className="drawer-header">
-          <span className={`line-status-pill ${statusClass}`}>
-            {line.status}
-          </span>
-          <h2>{line.policyNo}</h2>
-          <p className="subtitle">
-            {line.productInsurer} · Referrer: {referrerName}
-          </p>
-        </div>
+        <DetailHeader
+          title={line.policyNo}
+          subtitle={`${line.productInsurer || ""} · ${referrerName || ""}`}
+          status={{ code: String(line.status || "").toLowerCase(), label: t(`commissionLine.statuses.${line.status}`, { defaultValue: line.status }) }}
+          meta={[
+            { label: t("commissionLine.receipt"), value: line.receiptNo },
+            { label: t("commissionLine.voucher"), value: line.voucherNo },
+          ]}
+        />
 
-        <div className="drawer-card calc-card">
-          <h3 className="card-title">CALCULATION</h3>
-          <div className="calc-row">
-            <span>Gross premium</span>
-            <span>{formatAmount(line.grossPremium)}</span>
-          </div>
-          <div className="calc-row muted">
-            <span>- Discount ({line.discountLabel})</span>
-            <span>-{formatAmount(line.discountAmount)}</span>
-          </div>
-          <div className="calc-row strong">
-            <span>Net premium</span>
-            <span>{formatAmount(line.netPremium)}</span>
-          </div>
-          <div className="calc-row">
-            <span>Brokerage @ {line.brokeragePct}%</span>
-            <span className="amt-with-badge">
-              <span className="income-amt">
-                {formatAmount(line.brokerageAmount)}
-              </span>
-              <span className="badge income">INCOME</span>
-            </span>
-          </div>
-          <div className="calc-row">
-            <span>
-              Comsub = {formatAmount(line.comsubFixed)} + {line.comsubPct}% of
-              net
-            </span>
-            <span className="amt-with-badge">
-              <span className="payable-amt">{formatAmount(line.comsub)}</span>
-              <span className="badge payable">PAYABLE</span>
-            </span>
-          </div>
-          <div className="calc-row muted">
-            <span>{whtLabel}</span>
-            <span>-{formatAmount(line.wht)}</span>
-          </div>
-          <div className="calc-row strong">
-            <span>Net payable</span>
-            <span>{formatAmount(line.net)}</span>
-          </div>
-          <div className="calc-row strong margin-row">
-            <span>Net margin</span>
-            <span className="margin-amt">{formatAmount(line.netMargin)}</span>
-          </div>
+        <DetailSection title={t("commissionLine.calculation")}>
+          <table className="calc-table">
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.key} className={[r.muted && "muted", r.strong && "strong", r.rule && "rule"].filter(Boolean).join(" ") || undefined}>
+                  <th scope="row">{r.label}</th>
+                  <td>{formatAmount(r.value)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {canEditRate && (
             <div className="rate-override">
-              <h4>Override policy rate</h4>
-              <p className="rate-hint">
-                Each line keeps its own comsub rate — change it for this policy
-                only.
-              </p>
+              <h4>{t("commissionLine.overrideRate")}</h4>
               <div className="rate-fields">
                 <label>
-                  Fixed ({currencySymbol()})
+                  {t("commissionLine.fixed", { symbol: currencySymbol() })}
                   <InputNumber
                     value={rateFixed}
                     onValueChange={(e) => setRateFixed(e.value ?? 0)}
@@ -194,7 +166,7 @@ const LineDetailDrawer = ({
                   />
                 </label>
                 <label>
-                  Rate (%)
+                  {t("commissionLine.rate")}
                   <InputNumber
                     value={ratePct}
                     onValueChange={(e) => setRatePct(e.value)}
@@ -207,8 +179,9 @@ const LineDetailDrawer = ({
                   />
                 </label>
                 <Button
-                  label="Apply rate"
-                  className="p-button-sm apply-rate-btn"
+                  label={t("commissionLine.confirm.rate")}
+                  size="small"
+                  outlined
                   disabled={
                     actionLoading || ratePct === null || ratePct === undefined
                   }
@@ -217,67 +190,26 @@ const LineDetailDrawer = ({
               </div>
             </div>
           )}
-        </div>
+        </DetailSection>
 
-        <div className="drawer-card lifecycle-card">
-          <h3 className="card-title">LIFECYCLE</h3>
-          <div className="stepper">
-            <div className={`step-pill ${stepState("Accrued")}`}>
-              {stepLabel("Accrued", lifecycle.accruedAt)}
-            </div>
-            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
-            <div className={`step-pill ${stepState("Eligible")}`}>
-              {stepLabel("Eligible", lifecycle.eligibleAt)}
-            </div>
-            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
-            <div className={`step-pill ${stepState("Approved")}`}>
-              {stepLabel("Approved", lifecycle.approvedAt)}
-            </div>
-            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
-            <div className={`step-pill ${stepState("Paid")}`}>
-              {stepLabel("Paid", lifecycle.paidAt)}
-            </div>
-          </div>
-          <p className="meta-line">
-            Receipt: {line.receiptNo || "—"} · Voucher: {line.voucherNo || "—"}
-          </p>
+        <DetailSection title={t("commissionLine.activity")}>
+          <RecordActivityLog key={activityKey} entity="commission_line" recordId={line.id} />
+        </DetailSection>
+
+        {available.length > 0 && (
           <div className="drawer-actions">
-            {canMarkEligible && (
+            {available.map((name) => (
               <Button
-                label="Mark eligible"
-                className="p-button-outlined mark-eligible-btn"
+                key={name}
+                label={t(`commissionLine.confirm.${name}`)}
+                severity={ACTIONS[name].danger ? "danger" : undefined}
+                outlined={name !== "approve"}
                 disabled={actionLoading}
-                onClick={() =>
-                  runLineAction(CommissionService.markLineEligible)
-                }
+                onClick={() => confirmAction(name)}
               />
-            )}
-            {canApprove && (
-              <Button
-                label="Approve"
-                className="approve-line-btn"
-                disabled={actionLoading}
-                onClick={() => runLineAction(CommissionService.approveLine)}
-              />
-            )}
-            {canPay && (
-              <Button
-                label="Pay (voucher)"
-                className="p-button-outlined pay-line-btn"
-                disabled={actionLoading}
-                onClick={() => runLineAction(CommissionService.payLine)}
-              />
-            )}
-            {canReverse && (
-              <Button
-                label="Reverse (claw-back)"
-                className="p-button-outlined reverse-line-btn"
-                disabled={actionLoading}
-                onClick={() => runLineAction(CommissionService.reverseLine)}
-              />
-            )}
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </Sidebar>
   );

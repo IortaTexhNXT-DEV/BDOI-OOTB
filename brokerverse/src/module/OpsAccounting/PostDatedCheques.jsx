@@ -11,7 +11,9 @@ import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 
 const STATUSES = ["on-hand", "open", "deposited", "cleared", "bounced", "replaced", "returned", "cancelled", "all"];
@@ -72,14 +74,46 @@ const PostDatedCheques = () => {
       : await run(() => service.registerPdc({ ...cheque, [form.targetKind]: form.target }), (r) => t("opsAcc.pdc.registered", { number: r.pdcNumber }));
     if (ok) setForm(null);
   };
+  const chequeFacts = (pdc) => [
+    { label: t("opsAcc.pdc.number"), value: pdc.pdcNumber },
+    { label: t("opsAcc.client"), value: pdc.clientName },
+    { label: t("opsAcc.pdc.bill"), value: pdc.billNumber || pdc.policyNumber },
+    { label: t("opsAcc.pdc.bank"), value: pdc.bankName },
+    { label: t("opsAcc.pdc.chequeNumber"), value: pdc.chequeNumber },
+    { label: t("opsAcc.pdc.chequeDate"), value: pdc.chequeDate, type: "date" },
+    { label: t("opsAcc.amount"), value: pdc.amount, type: "amount", emphasis: true },
+  ];
   const close = async (pdc, action) => {
-    const reason = await promptText(t(`opsAcc.pdc.${action}Reason`));
-    if (reason) run(() => service.pdcAction(pdc.id, action, { reason }), t(`opsAcc.pdc.${action}Done`));
+    const reason = await openConfirm({
+      title: t(`opsAcc.confirmations.pdc.${action}Title`, { number: pdc.pdcNumber }),
+      severity: "danger",
+      message: t(`opsAcc.confirmations.pdc.${action}Message`),
+      facts: chequeFacts(pdc),
+      input: { type: "textarea", label: t(`opsAcc.pdc.${action}Reason`), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t(`opsAcc.confirmations.pdc.${action}`),
+      cancelLabel: t("opsAcc.confirmations.pdc.keep"),
+      onConfirm: (value) => service.pdcAction(pdc.id, action, { reason: value }),
+    });
+    if (reason === null) return;
+    showSuccess(toast, t(`opsAcc.pdc.${action}Done`));
+    load();
   };
+  const clear = async (pdc) => {
+    const ok = await openConfirm({
+      title: t("opsAcc.confirmations.pdc.clearTitle", { number: pdc.pdcNumber }),
+      message: t("opsAcc.confirmations.pdc.clearMessage"),
+      facts: [...chequeFacts(pdc), { label: t("opsAcc.pdc.receipt"), value: pdc.receiptNumber }],
+      confirmLabel: t("opsAcc.confirmations.pdc.clear"),
+    });
+    if (ok) run(() => service.pdcAction(pdc.id, "clear"), t("opsAcc.pdc.clearedDone"));
+  };
+  const summary = (pdc) => (
+    <KeyValueGrid columns={2} className="mb-3" items={chequeFacts(pdc).map(({ emphasis, ...f }) => f)} />
+  );
   const actions = (r) => (
     <span className="flex gap-1 flex-wrap">
       {r.status === "on-hand" && <Button label={t("opsAcc.pdc.deposit")} size="small" outlined onClick={() => setDeposit({ pdc: r, depositAccount: accounts[0]?.value || null, depositDate: new Date() })} />}
-      {r.status === "deposited" && <Button label={t("opsAcc.pdc.clear")} size="small" outlined onClick={() => run(() => service.pdcAction(r.id, "clear"), t("opsAcc.pdc.clearedDone"))} />}
+      {r.status === "deposited" && <Button label={t("opsAcc.pdc.clear")} size="small" outlined onClick={() => clear(r)} />}
       {["deposited", "cleared"].includes(r.status) && <Button label={t("opsAcc.pdc.bounce")} size="small" severity="danger" outlined onClick={() => setBounce({ pdc: r, reason: "", bounceCharge: 0 })} />}
       {["bounced", "on-hand"].includes(r.status) && <Button label={t("opsAcc.pdc.replace")} size="small" text onClick={() => setForm({ ...emptyCheque, mode: "replace", pdc: r, amount: r.amount })} />}
       {r.status === "on-hand" && <Button label={t("opsAcc.pdc.return")} size="small" text onClick={() => close(r, "return")} />}
@@ -159,32 +193,47 @@ const PostDatedCheques = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={deposit ? t("opsAcc.pdc.depositTitle", { number: deposit.pdc.pdcNumber }) : ""} visible={!!deposit} style={{ width: "min(520px, 96vw)" }} onHide={() => setDeposit(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setDeposit(null)} />
-          <Button label={t("opsAcc.pdc.deposit")} icon="pi pi-check" onClick={async () => {
-            if (await run(() => service.pdcAction(deposit.pdc.id, "deposit", { depositAccount: deposit.depositAccount, depositDate: isoOf(deposit.depositDate) }), (r) => t("opsAcc.pdc.deposited", { receipt: r.receiptNumber }))) setDeposit(null);
-          }} /></div>}>
+      <DetailDialog header={deposit ? t("opsAcc.pdc.depositTitle", { number: deposit.pdc.pdcNumber }) : ""} visible={!!deposit} size="md" onHide={() => setDeposit(null)}
+        footer={(
+          <>
+            <Button label={t("opsAcc.cancel")} text onClick={() => setDeposit(null)} />
+            <Button label={t("opsAcc.confirmations.pdc.deposit")} icon="pi pi-check" disabled={!deposit?.depositAccount || !deposit?.depositDate} onClick={async () => {
+              if (await run(() => service.pdcAction(deposit.pdc.id, "deposit", { depositAccount: deposit.depositAccount, depositDate: isoOf(deposit.depositDate) }), (r) => t("opsAcc.pdc.deposited", { receipt: r.receiptNumber }))) setDeposit(null);
+            }} />
+          </>
+        )}>
         {deposit && (
-          <div className="grid">
-            <Field label={t("opsAcc.bankAccount")} col="col-12"><Dropdown value={deposit.depositAccount} options={accounts} optionLabel="label" optionValue="value" onChange={(e) => setDeposit({ ...deposit, depositAccount: e.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.pdc.depositDate")} col="col-12"><Calendar value={deposit.depositDate} onChange={(e) => setDeposit({ ...deposit, depositDate: e.value })} showIcon className="w-full" /></Field>
-          </div>
+          <>
+            <p className="mt-0">{t("opsAcc.confirmations.pdc.depositMessage")}</p>
+            {summary(deposit.pdc)}
+            <div className="grid">
+              <Field label={t("opsAcc.bankAccount")} col="col-12 md:col-7" required><Dropdown value={deposit.depositAccount} options={accounts} optionLabel="label" optionValue="value" onChange={(e) => setDeposit({ ...deposit, depositAccount: e.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.pdc.depositDate")} col="col-12 md:col-5" required><Calendar value={deposit.depositDate} onChange={(e) => setDeposit({ ...deposit, depositDate: e.value })} showIcon className="w-full" /></Field>
+            </div>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
 
-      <Dialog className="pe-dialog" header={bounce ? t("opsAcc.pdc.bounceTitle", { number: bounce.pdc.pdcNumber }) : ""} visible={!!bounce} style={{ width: "min(520px, 96vw)" }} onHide={() => setBounce(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setBounce(null)} />
-          <Button label={t("opsAcc.pdc.bounce")} severity="danger" onClick={async () => {
-            if (await run(() => service.pdcAction(bounce.pdc.id, "bounce", { reason: bounce.reason, bounceCharge: bounce.bounceCharge || 0 }), t("opsAcc.pdc.bouncedDone"))) setBounce(null);
-          }} /></div>}>
+      <DetailDialog header={bounce ? t("opsAcc.pdc.bounceTitle", { number: bounce.pdc.pdcNumber }) : ""} visible={!!bounce} size="md" onHide={() => setBounce(null)}
+        footer={(
+          <>
+            <Button label={t("opsAcc.confirmations.pdc.keep")} text onClick={() => setBounce(null)} />
+            <Button label={t("opsAcc.confirmations.pdc.bounce")} severity="danger" disabled={(bounce?.reason || "").trim().length < 3} onClick={async () => {
+              if (await run(() => service.pdcAction(bounce.pdc.id, "bounce", { reason: bounce.reason.trim(), bounceCharge: bounce.bounceCharge || 0 }), t("opsAcc.pdc.bouncedDone"))) setBounce(null);
+            }} />
+          </>
+        )}>
         {bounce && (
-          <div className="grid">
-            <Field label={t("opsAcc.pdc.bounceReason")} col="col-12" required><InputText value={bounce.reason} onChange={(e) => setBounce({ ...bounce, reason: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.pdc.bounceCharge")} col="col-12"><InputNumber value={bounce.bounceCharge} mode="decimal" minFractionDigits={2} onValueChange={(e) => setBounce({ ...bounce, bounceCharge: e.value })} className="w-full" /></Field>
-            <p className="pe-muted col-12 m-0">{t("opsAcc.pdc.bounceHelp")}</p>
-          </div>
+          <>
+            <p className="mt-0">{t("opsAcc.pdc.bounceHelp")}</p>
+            {summary(bounce.pdc)}
+            <div className="grid">
+              <Field label={t("opsAcc.pdc.bounceReason")} col="col-12 md:col-7" required><InputText value={bounce.reason} onChange={(e) => setBounce({ ...bounce, reason: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.pdc.bounceCharge")} col="col-12 md:col-5"><InputNumber value={bounce.bounceCharge} mode="decimal" minFractionDigits={2} onValueChange={(e) => setBounce({ ...bounce, bounceCharge: e.value })} className="w-full" /></Field>
+            </div>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
     </div>
   );
 };

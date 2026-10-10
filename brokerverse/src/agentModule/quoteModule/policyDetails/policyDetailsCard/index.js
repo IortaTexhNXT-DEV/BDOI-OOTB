@@ -23,7 +23,8 @@ import DialogList from "./DialogList";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
 import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
-import { confirmAction, notifyWarn } from "../../../../utility/dialogs";
+import { notifyWarn } from "../../../../utility/dialogs";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import useQuoteSetup, { missingRiskFields, riskFieldsToAsk } from "../../utils/useQuoteSetup";
 import RiskFactsFields from "./RiskFactsFields";
 import QuoteSteps from "../../quoteSteps";
@@ -281,15 +282,17 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
   };
 
   const handleDeleteCoInsurer = async (rowData) => {
-    if (
-      await confirmAction(
-        t("agent.removeCoInsurerConfirm", {
-          name: rowData.ParticipantName || "",
-        })
-      )
-    ) {
-      dispatch(deleteCoInsurer(rowData.id));
-    }
+    const removed = await openConfirm({
+      title: t("agent.removeCoInsurer"),
+      severity: "danger",
+      message: t("agent.removeCoInsurerMessage"),
+      facts: [
+        { label: t("tables.participantName"), value: rowData.ParticipantName },
+        { label: t("tables.sharePercent"), value: rowData.Sharepercentage, type: "percent" },
+      ],
+      confirmLabel: t("agent.removeCoInsurer"),
+    });
+    if (removed) dispatch(deleteCoInsurer(rowData.id));
   };
 
   const actionsTemplate = (rowData) => {

@@ -19,6 +19,8 @@ import { resetCorrectionJV } from "./store/correctionJVReducers";
 import useJvMasterData from "../JournalVoucher/useJvMasterData";
 import SvgBackicon from "../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { printPdf } from "../../components/Print";
 
 const toCorrectionEntry = (row) => ({
   mainAccount: row.mainAccount,
@@ -50,6 +52,7 @@ const CorrectionJV = () => {
   const [visible, setVisible] = useState(false);
   const [editID, setEditID] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [created, setCreated] = useState(null);
   const items = [
     {
       label: t("accounts.correctionsJV"),
@@ -115,6 +118,20 @@ const CorrectionJV = () => {
   const handleUpdate = () => {};
 
   const handleApproval = async () => {
+    const ok = await openConfirm({
+      title: t("accounts.correctionJVForm.submitTitle", { number: formik.values.transactionNumber.trim() }),
+      message: t("accounts.correctionJVForm.submitMessage"),
+      facts: [
+        { label: t("accounts.correctionJVForm.originalVoucher"), value: formik.values.transactionNumber.trim() },
+        { label: t("accounts.correctionJVForm.correctionCode"), value: `${formik.values.correctionJVTransactionCode} ${describeCode(formik.values.correctionJVTransactionCode)}`.trim() },
+        { label: t("accounts.correctionJVForm.entries"), value: correctionJVList.length, type: "number" },
+        { label: t("accounts.correctionJVForm.totalDebit"), value: totalLocalAmount, type: "amount" },
+        { label: t("accounts.correctionJVForm.totalCredit"), value: totalForeignAmount, type: "amount" },
+      ],
+      note: t("accounts.correctionJVForm.submitNote"),
+      confirmLabel: t("accounts.correctionJVForm.submit"),
+    });
+    if (!ok) return;
     const result = await dispatch(
       postCorrectionJVData({
         transactionNumber: formik.values.transactionNumber.trim(),
@@ -128,12 +145,18 @@ const CorrectionJV = () => {
       return;
     }
     showToast(result.payload?.message);
+    setCreated(result.payload?.data || null);
     setStep(2);
   };
 
-  const handlePrint = () => {
+  const handlePrint = () =>
+    printPdf(`/journal-vouchers/${encodeURIComponent(created.id)}/pdf`, { fileName: `${created.transactionNumber}.pdf` })
+      .catch((error) => showToast(error.message, "error"));
+
+  const handleNew = () => {
     formik.resetForm();
     dispatch(resetCorrectionJV());
+    setCreated(null);
     setStep(0);
   };
   const sumBy = (entryType) =>
@@ -347,7 +370,7 @@ const CorrectionJV = () => {
       )}
       <div className="grid m-0 bottom__container">
         <div className="col-12 button__view__corrections__reversal">
-          {step == 0 && (
+          {step === 0 && (
             <Button
               className="correction__btn__reversal"
               disabled={!formik.isValid || loading}
@@ -357,7 +380,7 @@ const CorrectionJV = () => {
             </Button>
           )}
 
-          {step == 1 && (
+          {step === 1 && (
             <Button
               className="correction__btn__reversal"
               onClick={handleApproval}
@@ -367,14 +390,21 @@ const CorrectionJV = () => {
                 Math.abs(totalForeignAmount - totalLocalAmount) > 0.01
               }
             >
-              Approve
+              {t("accounts.correctionJVForm.submit")}
             </Button>
           )}
 
-          {step == 2 && (
-            <Button className="correction__btn__reversal" onClick={handlePrint}>
-              Print
-            </Button>
+          {step === 2 && (
+            <>
+              <Button className="correction__btn__reversal" outlined onClick={handleNew}>
+                {t("accounts.correctionJVForm.new")}
+              </Button>
+              {created?.id && (
+                <Button className="correction__btn__reversal" icon="pi pi-print" onClick={handlePrint}>
+                  {t("accounts.correctionJVForm.print", { number: created.transactionNumber })}
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>

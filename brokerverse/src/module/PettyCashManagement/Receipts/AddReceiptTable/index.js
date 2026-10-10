@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { postAddReceiptMiddleware } from "../store/pettyCashReceiptsMiddleware";
 import usePettyCashOptions from "../../usePettyCashOptions";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 
 const AddReceiptsTable = () => {
   const { t } = useTranslation();
@@ -27,6 +28,17 @@ const AddReceiptsTable = () => {
   const dispatch = useDispatch();
   const { funds } = usePettyCashOptions();
   const handleSubmit = async () => {
+    const ok = await openConfirm({
+      title: t("pettyCash.confirm.receiptsTitle"),
+      message: t("pettyCash.confirm.receiptsMessage"),
+      facts: [
+        { label: t("pettyCash.confirm.fund"), value: selectedFund?.code || selectedFund?.pettyCashCode, hidden: !selectedFund },
+        { label: t("pettyCash.confirm.lines"), value: selectedRows.length, type: "number" },
+        { label: t("pettyCash.totalAmount"), value: totalAmount, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("pettyCash.confirm.recordReceipts"),
+    });
+    if (!ok) return;
     const result = await dispatch(postAddReceiptMiddleware(selectedRows));
     if (postAddReceiptMiddleware.rejected.match(result)) {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
@@ -250,7 +262,7 @@ const AddReceiptsTable = () => {
         <div className="col-12 md:col-12 lg:col-12">
           <div className="btn__container">
             <Button
-              label="Approve"
+              label={t("pettyCash.confirm.recordReceipts")}
               className="add__btn"
               disabled={selectedRows.length === 0}
               onClick={() => {

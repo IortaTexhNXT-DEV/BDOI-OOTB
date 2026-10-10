@@ -17,7 +17,9 @@ const SRC = path.join(__dirname, "..", "src");
 const STRICT = process.argv.includes("--strict");
 const ADD_DEFAULTS = process.argv.includes("--add-defaults");
 const load = (lang) => JSON.parse(fs.readFileSync(path.join(SRC, "locales", `${lang}.json`), "utf8"));
-const has = (dict, key) => key.split(".").reduce((node, part) => (node && typeof node === "object" ? node[part] : undefined), dict) !== undefined;
+const lookup = (dict, key) => key.split(".").reduce((node, part) => (node && typeof node === "object" ? node[part] : undefined), dict) !== undefined;
+// t("a.b", { count }) resolves to the plural forms a.b_one / a.b_other when a.b itself is absent
+const has = (dict, key) => lookup(dict, key) || lookup(dict, `${key}_other`);
 
 function listFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {

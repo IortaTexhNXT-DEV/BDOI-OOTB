@@ -194,7 +194,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 label={t("common.close")}
                 onClick={handleClose}
                 className="close-button"
-                severity="success"
+                outlined
               />
             </div>
           </div>

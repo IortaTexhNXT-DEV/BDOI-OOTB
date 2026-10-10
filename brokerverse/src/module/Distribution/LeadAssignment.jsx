@@ -16,7 +16,10 @@ import mastersService from "../../services/mastersService";
 import addressService from "../../services/addressService";
 import useMasterOptions from "../../agentModule/component/useMasterOptions";
 import { hasPermission } from "../../utils/canOpen";
-import { confirmAction } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { ActivityLog, fromAssignmentHistory } from "../../components/ActivityLog";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
 import { lobChoices, useProductLines } from "../Sales/salesProducts";
 import ReassignDialog from "./ReassignDialog";
@@ -198,19 +201,31 @@ const LeadAssignment = () => {
     }
   };
   const deleteRule = async (r) => {
-    if (!(await confirmAction(t("distribution.la.deleteRule", "Remove the rule {{name}}?", { name: r.name }), { danger: true }))) return;
-    try {
-      showSuccess(toast, (await service.deleteRule(r.id)).message);
-      loadRules();
-    } catch (e) {
-      showError(toast, e);
-    }
+    let result = null;
+    const done = await openConfirm({
+      title: t("distribution.la.deleteRuleTitle", "Remove assignment rule"),
+      severity: "danger",
+      message: t("distribution.la.deleteRuleMessage", "New prospects are no longer assigned by this rule. Prospects already assigned keep their account executive."),
+      facts: [
+        { label: t("distribution.common.name", "Name"), value: r.name },
+        { label: t("distribution.la.priority", "Priority"), value: r.priority, type: "number" },
+        { label: t("distribution.la.methodLabel", "Method"), value: t(`distribution.la.method.${r.method}`, r.method) },
+        { label: t("distribution.common.status", "Status"), value: t(`distribution.status.${r.status}`, r.status) },
+      ],
+      confirmLabel: t("distribution.la.deleteRuleAction", "Remove rule"),
+      onConfirm: async () => { result = await service.deleteRule(r.id); },
+    });
+    if (!done) return;
+    showSuccess(toast, result?.message);
+    loadRules();
   };
   const openHistory = async (lead) => {
+    setHistory({ lead, entries: [], loading: true, error: null });
     try {
-      setHistory({ lead, rows: await service.assignmentHistory(lead.id) });
+      const rows = await service.assignmentHistory(lead.id);
+      setHistory({ lead, entries: fromAssignmentHistory(rows), loading: false, error: null });
     } catch (e) {
-      showError(toast, e);
+      setHistory({ lead, entries: [], loading: false, error: e?.message || true });
     }
   };
 
@@ -399,30 +414,34 @@ const LeadAssignment = () => {
       <ReassignDialog leads={reassign?.leads} mode={reassign?.mode} onHide={() => setReassign(null)} onError={(e) => showError(toast, e)}
         onDone={(r) => { showSuccess(toast, r.message); setReassign(null); refresh(); }} />
 
-      <Dialog className="pe-dialog" header={t("distribution.la.runTitle", "Assign the queue by the rules")} visible={!!run} style={{ width: "min(820px, 96vw)" }} onHide={() => setRun(null)}
-        footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setRun(null)} /><Button label={t("distribution.la.runConfirm", "Assign {{count}} prospect(s)", { count: run?.assigned.length || 0 })} icon="pi pi-check" onClick={confirmRun} disabled={!run?.assigned.length} /></div>}>
+      <DetailDialog visible={!!run} onHide={() => setRun(null)} size="lg" header={t("distribution.la.runTitle", "Assign the queue by the rules")}
+        footer={(
+          <>
+            <Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setRun(null)} />
+            <Button label={t("distribution.la.runConfirm", "Assign {{count}} prospect(s)", { count: run?.assigned.length || 0 })} icon="pi pi-check" onClick={confirmRun} disabled={!run?.assigned.length} />
+          </>
+        )}>
         {run && (
           <>
-            <p className="pe-muted mt-0">{t("distribution.la.runHelp", "{{count}} prospect(s) match a rule; {{unmatched}} stay in the queue.", { count: run.assigned.length, unmatched: run.unmatched })}</p>
+            <KeyValueGrid columns={2} className="mb-3" items={[
+              { label: t("distribution.la.runMatched", "Matched by a rule"), value: run.assigned.length, type: "number" },
+              { label: t("distribution.la.runUnmatched", "Staying in the queue"), value: run.unmatched, type: "number" },
+            ]} />
             <DataTable value={run.assigned} size="small" stripedRows emptyMessage={t("distribution.la.runNone", "No prospect in the queue matches an active rule")}>
-              <Column header={t("distribution.la.lead", "Prospect")} body={(r) => <span>{r.leadNumber}<br /><span className="pe-muted">{r.name}</span></span>} />
+              <Column field="leadNumber" header={t("distribution.la.lead", "Prospect")} />
+              <Column field="name" header={t("distribution.common.name", "Name")} />
               <Column field="ruleName" header={t("distribution.la.rule", "Rule")} />
               <Column field="toName" header={t("distribution.la.to", "To account executive")} />
             </DataTable>
           </>
         )}
-      </Dialog>
+      </DetailDialog>
 
-      <Dialog className="pe-dialog" header={history ? `${t("distribution.la.history", "Assignment history")} · ${history.lead.leadNumber}` : ""} visible={!!history} style={{ width: "min(820px, 96vw)" }} onHide={() => setHistory(null)}>
-        <DataTable value={history?.rows || []} size="small" stripedRows emptyMessage={t("distribution.common.none", "Nothing to show")}>
-          <Column header={t("distribution.la.when", "When")} body={(r) => dateTime(r.assignedAt)} />
-          <Column header={t("distribution.la.action", "Action")} body={(r) => t(`distribution.la.actions.${r.action}`, r.action)} />
-          <Column field="fromName" header={t("distribution.la.from", "From")} />
-          <Column field="toName" header={t("distribution.la.toShort", "To")} />
-          <Column header={t("distribution.la.why", "Rule or reason")} body={(r) => r.ruleName || r.reason || ""} />
-          <Column field="assignedBy" header={t("distribution.la.by", "By")} />
-        </DataTable>
-      </Dialog>
+      <DetailDialog visible={!!history} onHide={() => setHistory(null)} size="md" header={history ? `${t("distribution.la.history", "Assignment history")} · ${history.lead.leadNumber}` : ""}>
+        {history && (
+          <ActivityLog entries={history.entries} loading={history.loading} error={history.error} onRetry={() => openHistory(history.lead)} expandChanges />
+        )}
+      </DetailDialog>
     </div>
   );
 };

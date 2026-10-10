@@ -3,11 +3,13 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import { printView } from "../../components/Print";
 import { PageHeader, date, money, showError, showSuccess } from "./common";
 
 const MONTH = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleString("en-US", { month: "short", year: "numeric" });
@@ -65,6 +67,7 @@ const Bir2307 = ({ payeeType = null }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cert, setCert] = useState(null);
+  const payees = data?.payees || [];
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -85,7 +88,22 @@ const Bir2307 = ({ payeeType = null }) => {
       showError(toast, e);
     }
   };
+  const certFacts = (c) => [
+    { label: t("periodEnd.bir.payeeName"), value: c.payee.name },
+    { label: t("periodEnd.bir.tin"), value: c.payee.tin },
+    { label: t("periodEnd.bir.forPeriod"), value: `${date(c.periodFrom)} – ${date(c.periodTo)}` },
+    { label: t("periodEnd.bir.incomePayments"), value: c.totalIncome, type: "amount" },
+    { label: t("periodEnd.bir.taxWithheld"), value: c.totalTax, type: "amount", emphasis: true },
+  ];
+
   const issue = async () => {
+    const ok = await openConfirm({
+      title: t("periodEnd.confirmations.issue2307Title"),
+      message: t("periodEnd.confirmations.issue2307Message"),
+      facts: certFacts(cert),
+      confirmLabel: t("periodEnd.confirmations.issue2307"),
+    });
+    if (!ok) return;
     try {
       const c = await periodEndService.issue2307({ year, quarter, direction, payeeKey: cert.payeeKey });
       setCert(c);
@@ -97,6 +115,19 @@ const Bir2307 = ({ payeeType = null }) => {
   };
 
   const issueAll = async () => {
+    const pending = payees.filter((p) => !p.certificateNumber);
+    const ok = await openConfirm({
+      title: t("periodEnd.confirmations.issueAllTitle", { quarter: `Q${quarter} ${year}` }),
+      message: t("periodEnd.confirmations.issueAllMessage"),
+      facts: [
+        { label: t("periodEnd.confirmations.quarter"), value: `Q${quarter} ${year}` },
+        { label: t("periodEnd.confirmations.certificates"), value: pending.length, type: "number" },
+        { label: t("periodEnd.bir.incomePayments"), value: pending.reduce((sum, p) => sum + p.totalIncome, 0), type: "amount" },
+        { label: t("periodEnd.bir.taxWithheld"), value: pending.reduce((sum, p) => sum + p.totalTax, 0), type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("periodEnd.confirmations.issueAll", { count: pending.length }),
+    });
+    if (!ok) return;
     try {
       const r = await periodEndService.issueAll2307({ year, quarter, payeeType: payeeType || undefined });
       showSuccess(toast, t("supplier2307.issuedAll", { count: r.issued.length }));
@@ -106,8 +137,9 @@ const Bir2307 = ({ payeeType = null }) => {
     }
   };
 
+  const print = () => printView(<Form2307 c={cert} t={t} />, { title: `BIR Form 2307 ${cert.certificateNumber || cert.payee.name}` }).catch((e) => showError(toast, e));
+
   const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i).map((y) => ({ label: String(y), value: y }));
-  const payees = data?.payees || [];
   return (
     <div className="pe-page">
       <Toast ref={toast} />
@@ -136,15 +168,16 @@ const Bir2307 = ({ payeeType = null }) => {
           <Column body={(r) => <Button icon="pi pi-print" size="small" outlined label={t("periodEnd.bir.view")} onClick={() => open(r)} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={cert ? `BIR Form 2307 – ${cert.payee.name}` : ""} visible={!!cert} style={{ width: "min(1000px, 96vw)" }} onHide={() => setCert(null)}
+      <DetailDialog header={cert ? `BIR Form 2307 – ${cert.payee.name}` : ""} visible={!!cert} onHide={() => setCert(null)} size="lg"
         footer={cert && (
-          <div>
-            {direction === "issued" && !cert.certificateNumber && <Button icon="pi pi-verified" label={t("periodEnd.bir.issue")} onClick={issue} />}
-            <Button icon="pi pi-print" outlined label={t("periodEnd.bir.print")} onClick={() => window.print()} />
-          </div>
+          <>
+            <Button label={t("detailView.close")} outlined onClick={() => setCert(null)} />
+            <Button icon="pi pi-print" outlined label={t("periodEnd.bir.print")} onClick={print} />
+            {direction === "issued" && !cert.certificateNumber && <Button icon="pi pi-verified" label={t("periodEnd.confirmations.issue2307")} onClick={issue} />}
+          </>
         )}>
-        {cert && <div className="pe-print-area"><Form2307 c={cert} t={t} /></div>}
-      </Dialog>
+        {cert && <Form2307 c={cert} t={t} />}
+      </DetailDialog>
     </div>
   );
 };

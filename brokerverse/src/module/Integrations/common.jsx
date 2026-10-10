@@ -9,7 +9,8 @@ import "./index.scss";
 
 export { money, date, dateTime, showError, showSuccess };
 
-const SEVERITY = {
+/** Colour of each integration status (shared status colours). */
+export const SEVERITY = {
   queued: "info", processing: "info", retry: "warning", sent: "success", failed: "danger", cancelled: "secondary", skipped: "secondary",
   received: "info", processed: "success", ignored: "secondary",
   pending: "warning", requested: "info", authenticated: "success",

@@ -8,6 +8,8 @@ import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../../../../../components/DetailDialog";
+import KeyValueGrid from "../../../../../../components/KeyValueGrid";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
@@ -287,52 +289,12 @@ const TransactionCodeSetupTable = ({ action }) => {
           />
         </div>
       </Dialog>
-      <Dialog
-        header="View Branch & Department"
-        visible={showView}
-        style={{ width: "50vw",boxShadow:"none" }}
-        onHide={() => setShowView(false)}
-        className="dialogue_style master__flow__common__dialog__container"
-        
-      >
-        <div className="grid mt-1">
-
-        </div>
-        <div className="grid mt-1">
-          <div className="col-12 md:col-6 lg-col-6 ">
-            <DropDowns
-              disabled={action === "view" ? true : false}
-              value={mainUserViewData.branchCode}
-              onChange={formik.handleChange("branchCode")}
-              className="dropdown__add__sub"
-              label={t("generalMasters.branch")}
-              classNames="label__sub__add"
-              placeholder={"Select"}
-              options={item}
-              optionLabel="label"
-              optionValue={"label"}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            />
-
-          </div>
-          <div className="col-12 md:col-6 lg-col-6 ">
-            <DropDowns
-              disabled={action === "view" ? true : false}
-              value={mainUserViewData.departmentCode}
-              onChange={formik.handleChange("departmentCode")}
-              className="dropdown__add__sub"
-              label={t("generalMasters.departmentCode")}
-              classNames="label__sub__add"
-              placeholder={"Select"}
-              options={item1}
-              optionLabel="label"
-              optionValue={"label"}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            />
-          </div>
-        </div>
-
-      </Dialog>
+      <DetailDialog visible={showView} onHide={() => setShowView(false)} header={t("generalMasters.branchAndDepartment")} size="md">
+        <KeyValueGrid columns={2} items={[
+          { label: t("generalMasters.branch"), value: mainUserViewData?.branchCode },
+          { label: t("generalMasters.departmentCode"), value: mainUserViewData?.departmentCode },
+        ]} />
+      </DetailDialog>
       {/* </Card> */}
     </div>
   );
