@@ -274,6 +274,7 @@ import AtRiskAnalysis from "../module/Renewal/AtRiskAnalysis";
 import NegotiationWorkspace from "../module/Renewal/NegotiationWorkspace";
 import LapseManagement from "../module/Renewal/LapseManagement";
 import PerformanceTracking from "../module/Renewal/PerformanceTracking";
+import LockInAccounts from "../module/Renewal/LockInAccounts";
 
 // Accounts > Remittance
 import { remittanceRoutes } from "../module/Remittance/routes";
@@ -1118,6 +1119,7 @@ const Maincomponent = () => {
           />
           <Route path="renewal/analytics" element={<RetentionAnalytics />} />
           <Route path="renewal/at-risk" element={<AtRiskAnalysis />} />
+          <Route path="renewal/lock-in-accounts" element={<LockInAccounts />} />
           <Route
             path="renewal/negotiations"
             element={<NegotiationWorkspace />}

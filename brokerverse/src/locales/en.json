@@ -5402,7 +5402,8 @@
       "NotSent": "Not sent",
       "Queued": "Queued",
       "Sent": "Sent",
-      "Failed": "Failed"
+      "Failed": "Failed",
+      "Skipped": "Skipped"
     },
     "batchDetails": "Renewal batch",
     "close": "Close",
@@ -5447,7 +5448,10 @@
       "generatingReportDetail": "The batch report is being prepared.",
       "reportFailed": "The report could not be prepared. Try again.",
       "reportDownloaded": "Report downloaded",
-      "reportDownloadedDetail": "The batch report was downloaded."
+      "reportDownloadedDetail": "The batch report was downloaded.",
+      "allSkipped": "No notices queued",
+      "skippedDetail_one": "{{count}} policy skipped: its notices are held or suppressed.",
+      "skippedDetail_other": "{{count}} policies skipped: their notices are held or suppressed."
     }
   },
   "shareOption": {
@@ -11575,7 +11579,8 @@
     "allReasons": "All lapse reasons",
     "status": {
       "lapsed": "Lapsed",
-      "grace": "In grace period"
+      "grace": "In grace period",
+      "notForRenewal": "Not for renewal"
     },
     "col": {
       "policy": "Policy / insured",
@@ -15708,5 +15713,80 @@
     "balanceLcAmt": "Balance LC Amt",
     "adjustmentAmt": "Adjustment Amt",
     "total": "Total"
+  },
+  "renewalDisposition": {
+    "reassign": "Reassign",
+    "reassignMessage": "Move this renewal to another owner.",
+    "reassignConfirm": "Reassign renewal",
+    "reassigned": "Renewal reassigned",
+    "newOwner": "New owner",
+    "chooseOwner": "Choose the new owner",
+    "ownerRequired": "Choose the new owner.",
+    "notForRenewal": "Not for renewal",
+    "notForRenewalMessage": "Close this renewal: the policy will not be renewed and no more notices are sent.",
+    "notForRenewalConfirm": "Mark not for renewal",
+    "markedNotForRenewal": "Marked not for renewal"
+  },
+  "renewalNotices": {
+    "withheld": "Notices withheld",
+    "lockInSection": "Lock-in and notices",
+    "treatmentLabel": "Notices",
+    "reason": "Reason",
+    "source": "Lock-in",
+    "year": "Lock-in year",
+    "lockInEnd": "Lock-in ends",
+    "reviewDate": "Review date",
+    "loanStatus": "TFS loan status",
+    "treatment": {
+      "send": "Sent as scheduled",
+      "held": "Held",
+      "lock-in": "Lock-in: not sent",
+      "scheme2": "Scheme 2: not sent"
+    }
+  },
+  "lockIn": {
+    "title": "Lock-in Accounts",
+    "download": "Download Excel",
+    "searchHint": "Policy, client or loan account",
+    "asOf": "As of",
+    "window": "Expiring within",
+    "reviewWindow": "Review window",
+    "withinDays_one": "Within {{count}} day",
+    "withinDays_other": "Within {{count}} days",
+    "allSources": "All lock-ins",
+    "allLoanStatuses": "All loan statuses",
+    "allTreatments": "All notice treatments",
+    "figures": {
+      "accounts": "Accounts",
+      "reviewDue": "Review due",
+      "suppressed": "Notices suppressed",
+      "held": "Notices held"
+    },
+    "col": {
+      "policy": "Policy",
+      "lockIn": "Lock-in",
+      "expiry": "Expiry",
+      "review": "Review date",
+      "loan": "TFS loan status",
+      "notices": "Notices",
+      "owner": "Owner",
+      "actions": "Actions"
+    },
+    "yearOf": "Year {{year}} of {{years}}",
+    "reviewDue": "Review due",
+    "emptyTitle": "No lock-in accounts",
+    "emptyText": "No lock-in or Scheme 2 account expires in this window.",
+    "openRenewal": "Open renewal",
+    "setLoanStatus": "Set loan status",
+    "loanStatusMessage": "Set the TFS loan status of this account. A past-due, fraud, terminated or legal-dispute status holds the renewal notices.",
+    "loanAccount": "Loan account",
+    "currentStatus": "Current status",
+    "newStatus": "New status",
+    "note": "Note",
+    "noteRequired": "Add a note for a status that holds the notices.",
+    "saveLoanStatus": "Save loan status",
+    "loanStatusSaved": "Loan status saved",
+    "noticesSkipped_one": "{{count}} queued notice skipped.",
+    "noticesSkipped_other": "{{count}} queued notices skipped."
   }
 }
