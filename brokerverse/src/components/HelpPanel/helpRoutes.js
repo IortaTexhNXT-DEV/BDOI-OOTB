@@ -23,7 +23,6 @@ export const HELP_ROUTES = [
   ["/agent/leaddetail", "view-edit-or-delete-a-prospect"],
   ["/agent/createquote", "create-a-motor-quotation"],
   ["/createquote", "create-a-motor-quotation"],
-  ["/sales/quick-quote", "quick-quote"],
   ["/agent/Quotation", "quotations"],
   ["/agent/quotelisting", "quotations"],
   ["/agent/quotedetailview", "quotations"],
@@ -118,6 +117,9 @@ export const HELP_ROUTES = [
   ["/master/insurance/short-period-rates", "cancel-a-policy-computed-return-premium"],
   ["/master/insurance/cancellation-reasons", "cancel-a-policy-computed-return-premium"],
   ["/master/insurance/endorsement-types", "endorsement-types"],
+  // screens without a TISPH requirement, given to no TISPH role (utils/menuPermissions.js): the nearest TISPH section
+  ["/sales/quick-quote", "quotations"],
+  ["/sales/campaigns", "sales-activities"],
   ["/master/insurance/lead-sources", "lead-sources-and-reason-codes"],
   ["/master/insurance/reason-codes", "lead-sources-and-reason-codes"],
   ["/accounts/period-end", "period-end"],
@@ -179,7 +181,6 @@ export const HELP_ROUTES = [
   ["/operations/fleet-schedules", "fleet-schedules"],
   ["/operations/open-covers", "marine-open-covers"],
   ["/sales/comparison-reports", "comparison-reports"],
-  ["/sales/campaigns", "campaigns"],
   ["/reports/run/dealer-production", "distribution-channels"],
   ["/reports/builder", "report-builder"],
   // the user's own pages

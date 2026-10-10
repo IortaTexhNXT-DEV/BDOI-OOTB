@@ -53,11 +53,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Create and edit",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -72,8 +89,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -90,47 +107,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "View",
-     "modules": [
-      "Marketing campaigns"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -763,11 +744,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -782,9 +780,9 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
+     "access": "Create and edit",
      "modules": [
       "Quotations and placement"
      ]
@@ -800,47 +798,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -1522,11 +1484,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -1541,9 +1520,9 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
+     "access": "Create and edit",
      "modules": [
       "Quotations and placement"
      ]
@@ -1559,47 +1538,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -2415,11 +2358,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
       "Quotations and placement"
      ]
     },
@@ -2434,8 +2394,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -2452,38 +2412,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "View",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -3147,11 +3080,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
       "Quotations and placement"
      ]
     },
@@ -3166,8 +3116,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -3184,38 +3134,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "View",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -3945,11 +3868,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
-     "access": "Create and edit",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -3964,9 +3904,9 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
+     "access": "Create and edit",
      "modules": [
       "Quotations and placement"
      ]
@@ -3982,38 +3922,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "View",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -7325,6 +7238,24 @@
     },
     {
      "section": "Operations > Sales & Marketing",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "View",
+     "modules": [
+      "Quotations and placement"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
      "access": "View",
@@ -7334,8 +7265,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
      "access": "View",
      "modules": [
       "Quotations and placement"
@@ -7352,29 +7283,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "Create and edit",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "View",
-     "modules": [
-      "Quotations and placement"
      ]
     },
     {
@@ -8759,11 +8672,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -8778,9 +8708,9 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
+     "screen": "Comparison Reports",
+     "path": "/sales/comparison-reports",
+     "access": "Create and edit",
      "modules": [
       "Quotations and placement"
      ]
@@ -8796,47 +8726,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
       "Dealer programmes"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Comparison Reports",
-     "path": "/sales/comparison-reports",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Campaigns",
-     "path": "/sales/campaigns",
-     "access": "Create and edit",
-     "modules": [
-      "Marketing campaigns"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
-     "modules": [
-      "Sales activities"
      ]
     },
     {
@@ -10599,12 +10493,12 @@
     }
    ]
   },
-  "/sales/quick-quote": {
-   "menu": "Operations > Sales & Marketing > Quick Quote",
+  "/sales/lead-assignment": {
+   "menu": "Operations > Sales & Marketing > Lead Assignment",
    "roles": [
     {
      "role": "TIS Sales Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Officer",
@@ -10616,15 +10510,19 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
     },
     {
      "role": "TIS General Manager",
@@ -10632,8 +10530,8 @@
     }
    ]
   },
-  "/placement/broker-slips": {
-   "menu": "Operations > Sales & Marketing > Requests for Quotation",
+  "/sales/activities": {
+   "menu": "Operations > Sales & Marketing > Sales Activities",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -10649,18 +10547,14 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -10706,49 +10600,12 @@
     }
    ]
   },
-  "/placement/placement-slips": {
-   "menu": "Operations > Sales & Marketing > Placement Slips",
+  "/placement/broker-slips": {
+   "menu": "Operations > Sales & Marketing > Requests for Quotation",
    "roles": [
     {
      "role": "TIS Sales Associate",
      "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "Approve"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Approve"
-    }
-   ]
-  },
-  "/sales/lead-assignment": {
-   "menu": "Operations > Sales & Marketing > Lead Assignment",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
     },
     {
      "role": "TIS Sales Officer",
@@ -10760,15 +10617,15 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -10777,43 +10634,6 @@
     {
      "role": "TIS General Manager",
      "access": "Create and edit"
-    }
-   ]
-  },
-  "/sales/dealer-programmes": {
-   "menu": "Operations > Sales & Marketing > Dealer Programmes",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
     }
    ]
   },
@@ -10854,8 +10674,45 @@
     }
    ]
   },
-  "/sales/campaigns": {
-   "menu": "Operations > Sales & Marketing > Campaigns",
+  "/placement/placement-slips": {
+   "menu": "Operations > Sales & Marketing > Placement Slips",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Approve"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Approve"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Approve"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Approve"
+    }
+   ]
+  },
+  "/sales/dealer-programmes": {
+   "menu": "Operations > Sales & Marketing > Dealer & Bank Programmes",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -10863,32 +10720,11 @@
     },
     {
      "role": "TIS Sales Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/sales/activities": {
-   "menu": "Operations > Sales & Marketing > Sales Activities",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Associate",
@@ -10903,8 +10739,12 @@
      "access": "View"
     },
     {
-     "role": "TIS General Manager",
+     "role": "TIS IT AppSupport / Admin",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },

@@ -9,14 +9,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Dashboard | Claims Dashboard | View |
 | Dashboard | Processing Dashboard | View |
 | Operations > Sales & Marketing | Prospects | View |
-| Operations > Sales & Marketing | Quick Quote | Create and edit |
-| Operations > Sales & Marketing | Requests for Quotation | Create and edit |
-| Operations > Sales & Marketing | Quotations | Approve |
-| Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Lead Assignment | View |
-| Operations > Sales & Marketing | Dealer Programmes | View |
-| Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Sales Activities | View |
+| Operations > Sales & Marketing | Quotations | Approve |
+| Operations > Sales & Marketing | Requests for Quotation | Create and edit |
+| Operations > Sales & Marketing | Comparison Reports | Create and edit |
+| Operations > Sales & Marketing | Placement Slips | Approve |
+| Operations > Sales & Marketing | Dealer & Bank Programmes | View |
 | Operations | Clients | View |
 | Operations | Policy | Approve |
 | Operations | Fleet Schedules | Create and edit |
@@ -71,13 +70,13 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation, Comparison Reports and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |

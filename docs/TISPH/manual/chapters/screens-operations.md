@@ -43,7 +43,7 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **Category** | Yes | **Retail** (a person) or **Corporate** (a company) | A corporate prospect asks for the company name instead of the personal details |
 | **First name**, **Last name**, **Preferred name** | Yes | As on the client's ID | |
 | **Date of birth**, **Gender** | Yes | | |
-| **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
+| **E-mail** | Yes | The e-mail address | Used for the quotation approval link |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
 | **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes](#lead-sources-and-reason-codes) |
@@ -61,52 +61,39 @@ Select a row (or the eye in **Actions**) to open the prospect. The prospect page
 
 A prospect is not deleted once it has a quotation or a sales activity: set it to **Lost** instead. Every change is kept in the history of the prospect.
 
-## Quick Quote {#quick-quote}
+## Lead Assignment {#lead-assignment}
 
-Quick Quote prices a package product on the spot from the product's rates, without the steps of a full quotation: for example Compulsory Credit Life, Personal Accident or Parcel / Courier Insurance.
+Lead Assignment decides who works each prospect.
 
-{{screen:/sales/quick-quote}}
+{{screen:/sales/lead-assignment}}
 
-1. Choose {{menu:/sales/quick-quote}}.
-2. In **Line of Business**, choose the line; in **Product**, choose the package product. Only package products are offered.
-3. Choose the plan or package and enter the details the product asks for (insured, sum insured or plan, period).
-4. Check the premium shown with its taxes and create the quotation.
+The screen has three tabs:
 
-The quotation is created in **Draft** on [Quotations](#quotations) and follows the same steps as any quotation. When a product has no quick quote on this build (for example **Credit Life - Compulsory**), the screen says so and offers **Request quotation**, which opens a request for quotation to the insurers. For a product that is not a package, use **Request for Quotation (non-package)** at the top of the screen, which opens [Requests for quotation](#requests-for-quotation-broker-slips).
+- **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
+- **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
+- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. **Method** is **Round robin** between the rule's **Account executives**, or a fixed account executive. **Add rule** creates a rule; the switch in **Active** turns it off.
 
-![Operations > Sales & Marketing > Quick Quote](images/screens-operations/quick-quote.png)
+At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
 
-## Requests for quotation (broker slips) {#requests-for-quotation-broker-slips}
+![Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](images/screens-operations/assignment-rules.png)
 
-A request for quotation asks several panel insurers for their terms on one risk, for example a fleet or a group personal accident cover. It is optional: most motor quotations are priced on the motor tariff.
+## Sales activities {#sales-activities}
 
-Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The cards count the requests by status (**Submitted**, **Responses in**, **Placement raised**, **Closed**); select a card to filter. Each row shows **Slip No.**, **Insured**, **Product**, **Sum insured**, **Offers / approached** (with the number declined), **Best offer (gross)**, **Response due**, **Age**, **Status** and the **Quotation Slip** made from it. Select a row to open it.
+Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
 
-{{screen:/placement/broker-slips}}
+{{screen:/sales/activities}}
 
-![Operations > Sales & Marketing > Requests for Quotation, with the offers received per request](images/screens-operations/requests-for-quotation.png)
+{{screen:/master/organization/sales-activity-types}}
 
-To create a request, select **New Request for Quotation**:
+{{screen:/master/organization/sales-activity-outcomes}}
 
-| Field | Required | What to enter | Rule |
-|---|---|---|---|
-| **Customer** | Yes | **Client**, **Prospect** or **New prospect**, then the name | |
-| **Line of Business**, **Product** | Yes | The line and the product of the risk | The product decides the risk details and the covers offered |
-| **Insured** | No | The insured named on the policy, if not the customer | |
-| **Inception**, **Expiry** | No | The period of cover asked for | |
-| **Response due** | No | The date by which the insurers must answer | Shown as overdue afterwards |
-| **Risk details** | Depends on the product | For example the vehicles or the number of employees | |
-| **Requested covers** | No | Each cover with its **Sum insured** and **Deductible**; **Add cover** adds a row | |
-| **Insurers to approach** | Yes | One or more panel insurers | Each receives the request by e-mail |
-| **Remarks** | No | What the client asked for | Printed on the slip |
+The cards count **Activities**, **Account executives**, **Positive outcomes**, **Follow-ups open** and **Follow-ups overdue**. The **Activities** tab lists **Date and time**, **Activity type**, **Subject**, **Record**, **Account executive**, **Outcome**, **Next step** and **Follow-up**, filtered by account executive, activity type and outcome. The **Activity Report** tab totals the activities per account executive (calls, meetings, e-mails, visits; on prospects, clients and quotations; positive outcomes; next steps done, open and overdue), by activity type and by outcome. **Export to Excel** downloads the list.
 
-**Save draft** keeps the request as **Draft**. **Save and submit to market** sends it to the insurers: the status becomes **Submitted**.
+To log an activity, open the prospect, client or quotation, select the activity log and enter the **Activity type**, **Subject**, date and time, **Outcome** and, if there is one, the **Next step** with its follow-up date. The next step appears in [My Work](#my-work) on its date.
 
-![New Request for Quotation (Broker Slip)](images/screens-operations/rfq-new.png)
+The activity types (phone call, meeting, e-mail, visit, proposal presentation) and outcomes are kept on {{menu:/master/organization/sales-activity-types}} and {{menu:/master/organization/sales-activity-outcomes}}, by {{roles:write:masters}}.
 
-On the request, the tabs are **Market responses**, **Compare offers**, **Risk and covers** and **History**. Record each insurer's answer (premium, rate, deductibles, special terms, the line it writes) or its decline; with the answers in, the status becomes **Responses in**. On **Compare offers**, the best offer is marked **Best** and the others show their difference (**vs best**). Select the offer or offers to place and the lead insurer: the shares must total exactly 100%. Then select **Prepare Quotation Slip**.
-
-The buttons of the request are **Print slip**, **Client comparison report** (see [Comparison Reports](#comparison-reports)), **Add insurer**, **Close (not taken up)** and **Cancel slip**. The stepper at the top shows the journey: **Request for Quotation**, **Quotation Slip**, **Placement raised**, **Insurer issued (Booked)**.
+![Operations > Sales & Marketing > Sales Activities](images/screens-operations/sales-activities.png)
 
 ## Quotations {#quotations}
 
@@ -157,6 +144,54 @@ The quotation is created in **Draft**. Open it and select **Send for Customer Ap
 
 ![Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](images/screens-operations/motor-quotation-policy-details.png)
 
+## Requests for quotation (broker slips) {#requests-for-quotation-broker-slips}
+
+A request for quotation asks several panel insurers for their terms on one risk, for example a fleet or a group personal accident cover. It is optional: most motor quotations are priced on the motor tariff.
+
+Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The cards count the requests by status (**Submitted**, **Responses in**, **Placement raised**, **Closed**); select a card to filter. Each row shows **Slip No.**, **Insured**, **Product**, **Sum insured**, **Offers / approached** (with the number declined), **Best offer (gross)**, **Response due**, **Age**, **Status** and the **Quotation Slip** made from it. Select a row to open it.
+
+{{screen:/placement/broker-slips}}
+
+![Operations > Sales & Marketing > Requests for Quotation, with the offers received per request](images/screens-operations/requests-for-quotation.png)
+
+To create a request, select **New Request for Quotation**:
+
+| Field | Required | What to enter | Rule |
+|---|---|---|---|
+| **Customer** | Yes | **Client**, **Prospect** or **New prospect**, then the name | |
+| **Line of Business**, **Product** | Yes | The line and the product of the risk | The product decides the risk details and the covers offered |
+| **Insured** | No | The insured named on the policy, if not the customer | |
+| **Inception**, **Expiry** | No | The period of cover asked for | |
+| **Response due** | No | The date by which the insurers must answer | Shown as overdue afterwards |
+| **Risk details** | Depends on the product | For example the vehicles or the number of employees | |
+| **Requested covers** | No | Each cover with its **Sum insured** and **Deductible**; **Add cover** adds a row | |
+| **Insurers to approach** | Yes | One or more panel insurers | Each receives the request by e-mail |
+| **Remarks** | No | What the client asked for | Printed on the slip |
+
+**Save draft** keeps the request as **Draft**. **Save and submit to market** sends it to the insurers: the status becomes **Submitted**.
+
+![New Request for Quotation (Broker Slip)](images/screens-operations/rfq-new.png)
+
+On the request, the tabs are **Market responses**, **Compare offers**, **Risk and covers** and **History**. Record each insurer's answer (premium, rate, deductibles, special terms, the line it writes) or its decline; with the answers in, the status becomes **Responses in**. On **Compare offers**, the best offer is marked **Best** and the others show their difference (**vs best**). Select the offer or offers to place and the lead insurer: the shares must total exactly 100%. Then select **Prepare Quotation Slip**.
+
+The buttons of the request are **Print slip**, **Client comparison report** (see [Comparison Reports](#comparison-reports)), **Add insurer**, **Close (not taken up)** and **Cancel slip**. The stepper at the top shows the journey: **Request for Quotation**, **Quotation Slip**, **Placement raised**, **Insurer issued (Booked)**.
+
+## Comparison Reports {#comparison-reports}
+
+Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
+
+{{screen:/sales/comparison-reports}}
+
+The list shows **Report**, **Prepared for**, **Compared**, **Options**, **Recommended**, **Sent** and **Status**.
+
+1. Select **New report**.
+2. In **Compared**, choose **Request for quotation** (its insurers' offers become the options) or **Quotations** (quotations of the same client).
+3. Choose the request for quotation. A request with fewer than two offers cannot be compared yet.
+4. Select **Prepare**. Mark the recommended option and write the reasons.
+5. Print the report on the letterhead or e-mail it to the client. The report is marked sent.
+
+![New report: the request for quotation whose offers are compared](images/screens-operations/comparison-report-new.png)
+
 ## Placement Slips {#placement-slips}
 
 The broker never issues cover. A placement slip goes to the insurer, the insurer acknowledges it and returns the e-policy, the e-policy is checked against the slip and only then is the policy booked. No screen lets a user complete cover without the insurer.
@@ -205,25 +240,9 @@ The placement slip becomes **e-Policy received** and opens afterwards for the ch
 
 ![Record e-Policy: the placement slips waiting for the insurer's e-policy](images/screens-operations/record-epolicy.png)
 
-## Lead Assignment {#lead-assignment}
+## Dealer & Bank Programmes {#dealer-programmes}
 
-Lead Assignment decides who works each prospect.
-
-{{screen:/sales/lead-assignment}}
-
-The screen has three tabs:
-
-- **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
-- **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
-- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. **Method** is **Round robin** between the rule's **Account executives**, or a fixed account executive. **Add rule** creates a rule; the switch in **Active** turns it off.
-
-At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
-
-![Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](images/screens-operations/assignment-rules.png)
-
-## Dealer Programmes {#dealer-programmes}
-
-Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
+Choose Operations > Sales & Marketing > Dealer & Bank Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
 
 {{screen:/sales/dealer-programmes}}
 
@@ -249,52 +268,6 @@ The **Programmes** tab lists **Code**, **Name**, **Dealer**, **Financing bank**,
 The **Dealer Sales Upload** tab takes the dealer's sales file: choose the programme, download the **Template** if needed and select **Upload sales**. Each upload is a batch (DSB-YYYY-NNNNN) with its **Created** and **Failed** rows and its status (**Completed** or **Partial**). See [Dealer programme policies](#process-dealer-programme).
 
 ![Add programme: the terms of a dealer programme](images/screens-operations/dealer-programme-add.png)
-
-## Comparison Reports {#comparison-reports}
-
-Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
-
-{{screen:/sales/comparison-reports}}
-
-The list shows **Report**, **Prepared for**, **Compared**, **Options**, **Recommended**, **Sent** and **Status**.
-
-1. Select **New report**.
-2. In **Compared**, choose **Request for quotation** (its insurers' offers become the options) or **Quotations** (quotations of the same client).
-3. Choose the request for quotation. A request with fewer than two offers cannot be compared yet.
-4. Select **Prepare**. Mark the recommended option and write the reasons.
-5. Print the report on the letterhead or e-mail it to the client. The report is marked sent.
-
-![New report: the request for quotation whose offers are compared](images/screens-operations/comparison-report-new.png)
-
-## Campaigns {#campaigns}
-
-Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force and who have an e-mail address. Everyone else is left out and recorded with the reason.
-
-{{screen:/sales/campaigns}}
-
-The screen has four tabs: **Campaigns**, **Segments** (who receives a campaign, for example "Motor clients renewing in 60 days"), **Templates** (the e-mail texts) and **Marketing consents** (the consent of each client and prospect: **Recorded** with how it was given, or **Not Recorded**).
-
-To create a campaign, select **New campaign** and enter **Name**, **Segment**, **Template** and **Notes**, then **Save**. The campaign is **Draft**; schedule it for a date and time (**Scheduled**) or send it. The list shows **Recipients** and **Excluded** for each campaign. Every e-mail carries an opt-out link; an opt-out ends the consent.
-
-![Operations > Sales & Marketing > Campaigns](images/screens-operations/campaigns.png)
-
-## Sales activities {#sales-activities}
-
-Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
-
-{{screen:/sales/activities}}
-
-{{screen:/master/organization/sales-activity-types}}
-
-{{screen:/master/organization/sales-activity-outcomes}}
-
-The cards count **Activities**, **Account executives**, **Positive outcomes**, **Follow-ups open** and **Follow-ups overdue**. The **Activities** tab lists **Date and time**, **Activity type**, **Subject**, **Record**, **Account executive**, **Outcome**, **Next step** and **Follow-up**, filtered by account executive, activity type and outcome. The **Activity Report** tab totals the activities per account executive (calls, meetings, e-mails, visits; on prospects, clients and quotations; positive outcomes; next steps done, open and overdue), by activity type and by outcome. **Export to Excel** downloads the list.
-
-To log an activity, open the prospect, client or quotation, select the activity log and enter the **Activity type**, **Subject**, date and time, **Outcome** and, if there is one, the **Next step** with its follow-up date. The next step appears in [My Work](#my-work) on its date.
-
-The activity types (phone call, meeting, e-mail, visit, proposal presentation) and outcomes are kept on {{menu:/master/organization/sales-activity-types}} and {{menu:/master/organization/sales-activity-outcomes}}, by {{roles:write:masters}}.
-
-![Operations > Sales & Marketing > Sales Activities](images/screens-operations/sales-activities.png)
 
 ## Clients {#clients}
 

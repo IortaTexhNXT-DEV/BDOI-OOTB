@@ -170,18 +170,21 @@ const withoutInsurerRec = (items) => items.filter((item) => item !== "Insurer Re
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
-// Sales & Marketing item by item, for the personas that lack the permission of some of its screens
-const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
-  "Comparison Reports", "Campaigns", "Sales Activities"];
-const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item)).map((item) => `Sales & Marketing > ${item}`);
+// Sales & Marketing item by item, in the order of the TISPH journey (components/SideBar/list.js)
+const SALES_MARKETING = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips",
+  "Dealer Programmes", "Quick Quote", "Campaigns"];
+// entries that map to no TISPH requirement (BRD, FRS, MOM): no TISPH persona is given them. Quick Quote: the BRD raises a
+// quotation per product from the Quotations screen; Campaigns: no requirement. Removing an entry here gives it back.
+const TIS_HIDDEN_SALES = ["Quick Quote", "Campaigns"];
+const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item) && !TIS_HIDDEN_SALES.includes(item))
+  .map((item) => `Sales & Marketing > ${item}`);
 const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
+const TIS_SALES = { ...roleMenuPermissions.sales, operations: [...operationsWithout(), ...salesMarketingWithout()], accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
-  // campaigns are Sales' (read:campaigns)
-  operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
+  operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections", ...REMITTANCE("Remittances")],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
@@ -215,7 +218,7 @@ Object.assign(roleMenuPermissions, {
     "my work": true,
     // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
     // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Quick Quote", "Campaigns", "Sales Activities")],
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
@@ -229,7 +232,7 @@ Object.assign(roleMenuPermissions, {
     dashboard: ["Executive Dashboard", "Sales Dashboard", "Processing Dashboard", "Claims Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     "my work": true,
-    operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+    operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
     // Remittance without Setup; Approvals to decide what approve:remittance gives it
     accounts: [...withoutInsurerRec(roleMenuPermissions.accounting.accounts).filter((item) => item !== "Remittance"),
       ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Settlement")],

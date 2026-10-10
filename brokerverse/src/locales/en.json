@@ -268,7 +268,8 @@
     "Integrations": "Integrations",
     "Message Templates": "Message Templates",
     "Insurer Integration": "Insurer Integration",
-    "Claim Documents": "Claims Awaiting Documents"
+    "Claim Documents": "Claims Awaiting Documents",
+    "Dealer Programmes": "Dealer & Bank Programmes"
   },
   "sidebarFull": {
     "Request for Quotation": "Requests for Quotation (Broker Slips)",
@@ -13862,7 +13863,7 @@
     },
     "mp": {
       "buyerPays": "Buyer pays",
-      "title": "Dealer Programmes",
+      "title": "Dealer & Bank Programmes",
       "subtitle": "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.",
       "add": "Add programme",
       "programmes": "Programmes",

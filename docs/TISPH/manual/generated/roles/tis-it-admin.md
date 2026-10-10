@@ -7,12 +7,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
 | Operations > Sales & Marketing | Prospects | View |
-| Operations > Sales & Marketing | Requests for Quotation | View |
-| Operations > Sales & Marketing | Quotations | View |
-| Operations > Sales & Marketing | Placement Slips | View |
 | Operations > Sales & Marketing | Lead Assignment | View |
-| Operations > Sales & Marketing | Dealer Programmes | Create and edit |
+| Operations > Sales & Marketing | Quotations | View |
+| Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Comparison Reports | View |
+| Operations > Sales & Marketing | Placement Slips | View |
+| Operations > Sales & Marketing | Dealer & Bank Programmes | Create and edit |
 | Operations | Clients | View |
 | Operations | Policy | View |
 | Operations | Claims | View |
@@ -137,8 +137,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation, Comparison Reports and Placement Slips |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |  |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |

@@ -115,7 +115,7 @@ To return to your work list at any time, choose **My Work** at the top of the si
 3. The list shows each matching screen of your menus with its menu path. Select one, or move with the arrow keys and
    press **Enter**. **Esc** clears the search.
 
-![Search menu with "quot" typed: Quotations, Quick Quote and Requests for Quotation of Operations > Sales & Marketing](images/getting-started/menu-search.png)
+![Search menu with "quot" typed: Quotations and Requests for Quotation of Operations > Sales & Marketing](images/getting-started/menu-search.png)
 
 ### The account menu {#the-account-menu}
 

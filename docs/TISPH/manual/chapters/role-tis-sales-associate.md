@@ -29,7 +29,7 @@ approve nothing: every decision on your work is made by another user.
 | Work through your prospects, quotations, placement slips and renewals | Every morning and through the day | [My Work](#my-work) |
 | Contact the new prospects assigned to you and log each call, meeting, e-mail or visit | Daily | [Prospects](#prospects), [Sales Activities](#sales-activities) |
 | Record walk-in clients and referrals as prospects | As they come in | [Prospects](#prospects) |
-| Prepare motor and package quotations and send them to the client | Daily | [Quotations](#quotations), [Quick Quote](#quick-quote) |
+| Prepare motor and package quotations and send them to the client | Daily | [Quotations](#quotations) |
 | Record the client's answer to a quotation | As the client answers | [Quotations](#quotations) |
 | Ask the panel insurers for terms on fleet and corporate risks | As needed | [Requests for Quotation](#requests-for-quotation-broker-slips), [Comparison Reports](#comparison-reports) |
 | Send the placement slips, record the acknowledgements and upload the e-policies | Daily | [Placement Slips](#placement-slips) |
@@ -72,8 +72,7 @@ Open follow-ups are counted on the Sales Activities screen; follow them up on th
 
 ### Quote and close the sale {#tis-sales-associate-quotation}
 
-1. Choose {{menu:/agent/Quotation}} and select **Create Quote**, or use {{menu:/sales/quick-quote}} for a package
-   product priced from its rates in one screen. See [Create a motor quotation](#create-a-motor-quotation) for the
+1. Choose {{menu:/agent/Quotation}} and select **Create Quote**, then the line of business and the product. See [Create a motor quotation](#create-a-motor-quotation) for the
    fields of a motor quotation.
 2. Save the quotation. It is **Draft**.
 3. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**

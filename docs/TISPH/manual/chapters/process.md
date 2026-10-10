@@ -28,8 +28,8 @@ From the booking onwards both policies follow the same steps.
 | Step | Who does it | Screen | Result |
 |---|---|---|---|
 | Prospect | {{roles:write:leads}} | [Prospects](#prospects) | Prospect **New**, assigned to an account executive |
-| Dealer sales | {{roles:write:motor-programmes}} | [Dealer Programmes](#dealer-programmes) | Prospects and quotations, or booked policies |
-| Quotation | {{roles:write:quotations}} | [Quotations](#quotations), [Quick Quote](#quick-quote) | Quotation **Pending Customer**, then **Customer Accepted** |
+| Dealer sales | {{roles:write:motor-programmes}} | [Dealer & Bank Programmes](#dealer-programmes) | Prospects and quotations, or booked policies |
+| Quotation | {{roles:write:quotations}} | [Quotations](#quotations) | Quotation **Pending Customer**, then **Customer Accepted** |
 | Request for quotation | {{roles:write:quotations}} | [Requests for Quotation](#requests-for-quotation-broker-slips) | Insurers' offers compared |
 | Placement | {{roles:write:quotations}} | [Placement Slips](#placement-slips) | **Sent to insurer**, **Acknowledged**, **e-Policy received** |
 | Check of the e-policy | {{roles:approve:policies}} | [Placement Slips](#placement-slips) | **Checked against slip** |
@@ -86,7 +86,7 @@ A dealer programme holds the terms agreed with a Toyota dealer and, for financed
 insurer, the own damage and acts of nature rates, the excess liability limits, the CTPL term, whether the first year
 is free or subsidised and who pays it, and what the dealer's sales upload creates.
 
-![Operations > Sales & Marketing > Dealer Programmes, with the programmes of three Toyota dealers](images/process/dealer-programmes.png)
+![Operations > Sales & Marketing > Dealer & Bank Programmes, with the programmes of three Toyota dealers](images/process/dealer-programmes.png)
 
 As delivered, the programmes are set up, and the dealers' sales files uploaded, by {{roles:write:motor-programmes}}.
 Every sales and operations role can open the programmes and print the bank endorsement letters.
@@ -134,8 +134,6 @@ quotation; a request for quotation to several insurers is optional.
 5. Save the quotation. It is created as **Draft**.
 6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
    **Pending Customer**.
-
-For a package product, [Quick Quote](#quick-quote) prices the quotation from the product's rates in one screen.
 
 ![Quotation of a financed Fortuner waiting for the client, with Copy approval link and Record customer response](images/process/quotation-pending-customer.png)
 

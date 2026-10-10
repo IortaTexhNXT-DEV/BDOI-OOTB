@@ -104,20 +104,23 @@ export const menuList = [
             ],
             permissions: ["read:leads"],
           },
+          // TISPH journey: leads (prospects, their assignment and the account executives' activities; the SALES stream's
+          // lead entries such as call lists go after Lead Assignment) -> quotation (requests for quotation and the
+          // client comparison of the PA market, PJRN-05) -> placement with the insurer -> dealer and bank programmes.
+          // Quick Quote and Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js).
           {
-            id: 31,
-            name: "Quick Quote",
-            path: "/sales/quick-quote",
-            includes: ["/sales/quick-quote"],
-            permissions: ["write:quotations"],
+            id: 36,
+            name: "Lead Assignment",
+            path: "/sales/lead-assignment",
+            includes: ["/sales/lead-assignment"],
+            permissions: ["read:leads"],
           },
           {
-            // the broker slip is the request for quotation sent to several insurers
-            id: 32,
-            name: "Request for Quotation",
-            path: "/placement/broker-slips",
-            includes: ["/placement/broker-slips"],
-            permissions: ["read:quotations"],
+            id: 50,
+            name: "Sales Activities",
+            path: "/sales/activities",
+            includes: ["/sales/activities"],
+            permissions: ["read:sales-activities"],
           },
           {
             id: 33,
@@ -134,28 +137,12 @@ export const menuList = [
             permissions: ["read:quotations"],
           },
           {
-            // firm orders to the insurers through to the e-policy, its check against the slip and the booking
-            id: 34,
-            name: "Placement Slips",
-            path: "/placement/placement-slips",
-            includes: ["/placement/placement-slips", "/placement/record-epolicy"],
+            // the broker slip is the request for quotation sent to several insurers
+            id: 32,
+            name: "Request for Quotation",
+            path: "/placement/broker-slips",
+            includes: ["/placement/broker-slips"],
             permissions: ["read:quotations"],
-          },
-          // distribution: lead assignment and team view, brand-new vehicle programmes of dealers and banks, client
-          // comparison reports and marketing campaigns to consenting clients
-          {
-            id: 36,
-            name: "Lead Assignment",
-            path: "/sales/lead-assignment",
-            includes: ["/sales/lead-assignment"],
-            permissions: ["read:leads"],
-          },
-          {
-            id: 37,
-            name: "Dealer Programmes",
-            path: "/sales/dealer-programmes",
-            includes: ["/sales/dealer-programmes"],
-            permissions: ["read:motor-programmes"],
           },
           {
             id: 38,
@@ -165,19 +152,33 @@ export const menuList = [
             permissions: ["read:quotations"],
           },
           {
+            // firm orders to the insurers through to the e-policy, its check against the slip and the booking
+            id: 34,
+            name: "Placement Slips",
+            path: "/placement/placement-slips",
+            includes: ["/placement/placement-slips", "/placement/record-epolicy"],
+            permissions: ["read:quotations"],
+          },
+          {
+            id: 37,
+            name: "Dealer Programmes",
+            path: "/sales/dealer-programmes",
+            includes: ["/sales/dealer-programmes"],
+            permissions: ["read:motor-programmes"],
+          },
+          {
+            id: 31,
+            name: "Quick Quote",
+            path: "/sales/quick-quote",
+            includes: ["/sales/quick-quote"],
+            permissions: ["write:quotations"],
+          },
+          {
             id: 39,
             name: "Campaigns",
             path: "/sales/campaigns",
             includes: ["/sales/campaigns"],
             permissions: ["read:campaigns"],
-          },
-          // calls, meetings, e-mails and visits of the account executives, and the activity report
-          {
-            id: 50,
-            name: "Sales Activities",
-            path: "/sales/activities",
-            includes: ["/sales/activities"],
-            permissions: ["read:sales-activities"],
           },
         ],
       },
