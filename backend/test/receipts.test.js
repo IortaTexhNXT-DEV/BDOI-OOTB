@@ -8,6 +8,13 @@ let ctx;
 beforeAll(async () => { ctx = await setupFinance(); });
 afterAll(async () => { await pool.end(); });
 
+/** Reverse a receipt: requested by the maker, approved by another user (the administrator). */
+const reverse = async (id) => {
+  const asked = await ctx.as('maker')('post', `/receipts/${id}/reversal`).send({ reasonCode: 'RCT-REV-DAIF' });
+  expect(asked.status, JSON.stringify(asked.body)).toBe(200);
+  return ctx.api('post', `/receipts/${id}/reversal/decision`).send({ action: 'approve' });
+};
+
 const line = (policyNumber, gross, net, status = 'Pending') => ({ policies: policyNumber, netPremium: String(net), paid: status === 'Paid' ? String(gross) : '0.00', unPaid: status === 'Paid' ? '0.00' : String(gross),
   discounts: '0.00', dst: '0.00', lgt: '0.00', vat: '0.00', ewt: '0.00', fcAmount: '0.00', lcAmount: String(gross), other: '0.00', status });
 
@@ -78,7 +85,7 @@ describe('receipts', () => {
     expect(await payment()).toBe('Completed');
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
 
-    const cancel = await ctx.as('maker')('post', `/receipts/${p2.body.data.receiptId}/cancel`).send({ reason: 'Cheque bounced' });
+    const cancel = await reverse(p2.body.data.receiptId);
     expect(cancel.status).toBe(200);
     expect(cancel.body.data.receiptStatus).toBe('Cancelled');
     expect(await payment()).toBe('Partial');
@@ -179,7 +186,7 @@ describe('receipts', () => {
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
 
     // cancelling the balance receipt re-opens the bill and its collection item
-    expect((await ctx.as('maker')('post', `/receipts/${p2.body.data.receiptId}/cancel`).send({ reason: 'Cheque bounced' })).status).toBe(200);
+    expect((await reverse(p2.body.data.receiptId)).status).toBe(200);
     r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [bill.id])).rows[0];
     expect(r).toEqual({ balance: 3010, status: 'partial' });
     expect((await query('SELECT closed_at FROM collection_items WHERE receivable_id = $1', [bill.id])).rows[0].closed_at).toBeNull();

@@ -50,11 +50,16 @@ export function receiptRow(r, lines = []) {
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
     collectedBy: r.collected_by_insurer_id ? { insurerId: r.collected_by_insurer_id, name: r.collected_by_name || null, reference: r.partner_reference || null } : null,
     proof: r.proof_key ? { key: r.proof_key, fileName: r.proof_file_name || null, attachedAt: r.proof_attached_at || null } : null,
+    reversal: r.reversal_status ? { status: r.reversal_status, reasonCode: r.reversal_reason_code, reason: r.reversal_reason, requestedById: r.reversal_requested_by,
+      requestedBy: r.reversal_requested_by_name || null, requestedAt: r.reversal_requested_at, decidedBy: r.reversal_decided_by_name || null, decidedAt: r.reversal_decided_at,
+      returnReason: r.reversal_return_reason } : null,
   };
 }
 
 const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email,
-    (SELECT x.name FROM insurance_companies x WHERE x.id = r.collected_by_insurer_id) AS collected_by_name FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
+    (SELECT x.name FROM insurance_companies x WHERE x.id = r.collected_by_insurer_id) AS collected_by_name,
+    (SELECT u.display_name FROM users u WHERE u.id = r.reversal_requested_by) AS reversal_requested_by_name,
+    (SELECT u.display_name FROM users u WHERE u.id = r.reversal_decided_by) AS reversal_decided_by_name FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN clients cl ON cl.id = r.client_id`;
 const linesOf = async (db, ids) => {
   if (!ids.length) return new Map();

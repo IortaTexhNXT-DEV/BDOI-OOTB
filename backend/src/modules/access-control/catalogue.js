@@ -106,6 +106,8 @@ const PERMISSION_LIST = {
   'write:marine': ['marine', 'edit', 'Set up open covers, issue certificates, submit and bill declarations'],
   'read:receipts': ['receipts', 'view', 'See receipts'],
   'write:receipts': ['receipts', 'edit', 'Issue official receipts, post cash, verify payments'],
+  'reverse:receipts': ['receipts', 'edit', 'Reverse a receipt with a reason; the reversal waits for a checker when required'],
+  'approve:receipt-reversal': ['receipts', 'approve', 'Approve or return the reversal of a receipt requested by another user'],
   'read:pdc': ['pdc', 'view', 'See the post-dated cheque log, its sets, transmittals and cheque history'],
   'write:pdc': ['pdc', 'edit', 'Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques'],
   'approve:pdc': ['pdc', 'approve', 'Approve or return the cancellation of a post-dated cheque requested by another user'],

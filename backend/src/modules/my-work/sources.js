@@ -343,6 +343,13 @@ async function approvals(ctx) {
       LEFT JOIN master_records rc ON rc.type_code = 'reason-code' AND rc.code = pd.cancel_reason_code
       WHERE pd.status = 'cancellation-pending' AND pd.cancel_approved_at IS NULL AND ${notMine(ctx, 'pd.cancel_requested_by')}`);
   }
+  // receipt reversals: decided by the holders of approve:receipt-reversal, never by the user who requested them
+  if (ctx.can('approve:receipt-reversal')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Receipt reversal'", id: 'rr.id', ref: 'rr.receipt_number', title: "'Reverse ' || rr.receipt_number || COALESCE(' - ' || rr.reversal_reason, '')",
+      client_name: 'rr.customer_name', due_date: due('rr.reversal_requested_at'), status: "'pending'", link: "'/accounts/receipts/receiptdetailview?receipt=' || rr.id", amount: 'rr.amount',
+      created_at: 'rr.reversal_requested_at' })}
+      FROM receipts rr WHERE rr.reversal_status = 'pending' AND ${notMine(ctx, 'rr.reversal_requested_by')}`);
+  }
   // incentive batches: decided by the holders of approve:incentive, never by the user who ran or submitted the batch
   if (ctx.can('approve:incentive') && await has('incentive_calculations')) {
     out.push(`SELECT ${select({ ...base, kind: "'Incentive calculation'", id: 'ic.batch_id', ref: 'ic.batch_id', title: "'Incentives of ' || ic.period", due_date: due('COALESCE(ic.submitted_date, ic.created_at)'),

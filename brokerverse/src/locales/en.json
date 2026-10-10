@@ -763,6 +763,31 @@
       "attached": "Proof of payment attached",
       "collectedBy": "Collected by",
       "partnerReference": "Partner reference"
+    },
+    "receiptReversal": {
+      "title": "Reversal",
+      "reverse": "Reverse receipt",
+      "confirmTitle": "Reverse receipt {{number}}?",
+      "confirmMessage": "The receipt is cancelled, its payment journals reversed and the bills it paid opened again.",
+      "sendForApproval": "Send for approval",
+      "keep": "Keep receipt",
+      "reason": "Reason for the reversal",
+      "status": "Status",
+      "statuses": {
+        "pending": "Waiting for approval",
+        "approved": "Approved",
+        "returned": "Returned"
+      },
+      "requestedBy": "Requested by",
+      "requestedAt": "Requested on",
+      "decidedBy": "Decided by",
+      "decidedAt": "Decided on",
+      "returnReason": "Reason returned",
+      "approve": "Approve reversal",
+      "return": "Return",
+      "approveTitle": "Approve the reversal of {{number}}?",
+      "returnTitle": "Return the reversal of {{number}}?",
+      "returnReasonLabel": "Reason for returning"
     }
   },
   "renewalWaiting": {
@@ -15259,7 +15284,9 @@
       "sod_exception": "Segregation of duties exception",
       "access_review": "Access review removal",
       "pdc_cancel": "Post-dated cheque cancellation",
-      "pdc_bounce": "Bounced post-dated cheque"
+      "pdc_bounce": "Bounced post-dated cheque",
+      "receipt_reversal": "Reversal of a receipt",
+      "receipt_reversal_reject": "Return of a receipt reversal"
     }
   },
   "financialStatements": {

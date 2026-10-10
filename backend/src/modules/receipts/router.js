@@ -15,6 +15,7 @@ import { columnMessage, issueText, mapColumns, uploadResult } from '../documents
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
+import * as reversal from './reversal.js';
 import { emailBill, emailReceipt } from './email.js';
 import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
@@ -187,12 +188,26 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/cancel', summary: 'Cancel a receipt: reverses its payment journals and restores receivable balances', screen: `${SCREEN} > View`,
-  middleware: [...write, ownRecord('receipt'), validate(z.object({ reason: z.string().min(3) }))], request: { reason: 'Cheque bounced' }, response: { success: true, data: { ...example, receiptStatus: 'Cancelled' } },
+  method: 'POST', path: '/:id/reversal', summary: 'Reverse a receipt with a reason (context receipt_reversal): sent to a checker when receipts.reversal_requires_approval, else cancelled at once (payment journals reversed, bills re-opened)',
+  screen: `${SCREEN} > View > Reverse receipt`,
+  middleware: [requireAuth, requirePermission('reverse:receipts'), ownRecord('receipt'), validate(z.object({ reasonCode: z.string().min(1), note: z.string().max(1000).optional() }))],
+  request: { reasonCode: 'RCT-REV-DAIF' }, response: { success: true, data: { ...example, reversal: { status: 'pending', reasonCode: 'RCT-REV-DAIF', reason: 'Cheque returned DAIF' } }, message: 'Reversal of receipt OR-2026-00012 sent for approval' },
   handler: async (req, res) => {
-    const r = await withTransaction((db) => svc.cancelReceipt(db, req.params.id, req.body.reason, req.user));
-    await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: 'cancel', before: r.before, after: r.after });
-    ok(res, r.after, 'Receipt cancelled');
+    const r = await withTransaction((db) => reversal.requestReversal(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: r.action, before: r.before, after: r.after });
+    ok(res, r.after, r.message);
+  },
+});
+define({
+  method: 'POST', path: '/:id/reversal/decision', summary: 'Approve or return a receipt reversal requested by another user (maker-checker); a return needs a reason (context receipt_reversal_reject)',
+  screen: `${SCREEN} > View > Reversal; My Work > Approvals`,
+  middleware: [requireAuth, requirePermission(reversal.APPROVE), ownRecord('receipt'),
+    validate(z.object({ action: z.enum(['approve', 'return']), reasonCode: z.string().optional(), note: z.string().max(1000).optional() }))],
+  request: { action: 'approve' }, response: { success: true, data: { ...example, receiptStatus: 'Cancelled' }, message: 'Receipt OR-2026-00012 reversed' },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => reversal.decideReversal(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: r.action, before: r.before, after: r.after });
+    ok(res, r.after, r.message);
   },
 });
 

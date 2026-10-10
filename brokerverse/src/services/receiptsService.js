@@ -133,6 +133,10 @@ export const receiptsService = {
   // Proof of payment of a receipt (an uploaded file): a remittance run on the fully paid basis needs it
   attachProof: async (receiptId, proof) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/proof`, proof)).data?.data,
 
+  // Reversal of a receipt: asked with a reason, approved or returned by another user
+  requestReversal: async (receiptId, reason) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal`, reason)).data,
+  decideReversal: async (receiptId, decision) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal/decision`, decision)).data,
+
   // Add payment to existing receipt
   addPaymentToReceipt: async (receiptId, paymentData) => {
     try {
