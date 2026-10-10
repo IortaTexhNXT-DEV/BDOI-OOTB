@@ -20,7 +20,7 @@
     return id;
   }
   function fromHash() {
-    var el = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    var el = window.location.hash && document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
     if (el) mark(sectionOf(el), true);
   }
   window.addEventListener("hashchange", fromHash);
