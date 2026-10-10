@@ -2925,6 +2925,12 @@
      "area": "Operations",
      "module": "Claims",
      "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
      "meaning": "Register and follow up claims, claim documents and repairs"
     },
     {
@@ -3715,6 +3721,12 @@
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -4600,6 +4612,12 @@
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -14568,6 +14586,11 @@
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
    "TIS General Manager"
+  ],
+  "process:claims": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "read:access-control": [
    "TIS IT AppSupport / Admin",

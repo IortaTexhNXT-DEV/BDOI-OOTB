@@ -6628,7 +6628,7 @@
   }
 }"
 315,Claims,GET,/api/claims/reports/criteria,"Insurance Claims Report by criteria (All | Open | Partial | Settled | Rejected | Cancelled | Aging), claim type, insurer and line, over the reported or (dateBasis=settlement) settlement date, as an .xlsx download (reportType=json for JSON)",Reports > Operational Reports > Claims,Bearer JWT,read:claims,Query: ?startDate=2026-01-01&endDate=2026-09-28&criteria=Settled&dateBasis=settlement&claimType=Motor&insurerId=2&reportType=excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (claims-report-Open-2026-01-01-to-2026-09-28.xlsx)
-316,Claims,PUT,/api/claims/settle/:id,"Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)",Operations > Claims > Settlement details,Bearer JWT,"write:claims, approve:claims","{
+316,Claims,PUT,/api/claims/settle/:id,"Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)",Operations > Claims > Settlement details,Bearer JWT,"write:claims, process:claims, approve:claims","{
   ""settlementType"": ""Cash"",
   ""settlementAmount"": 75000,
   ""settlementIssueDate"": ""2026-09-25"",
@@ -6655,7 +6655,7 @@
     }
   }
 }"
-317,Claims,PUT,/api/claims/updatestatus/:id,"Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",Operations > Claims > Request approval,Bearer JWT,"write:claims, approve:claims","{
+317,Claims,PUT,/api/claims/updatestatus/:id,"Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing",Operations > Claims > Request approval,Bearer JWT,"write:claims, process:claims, approve:claims","{
   ""claimStatus"": ""Processing"",
   ""note"": ""Documents complete""
 }","{

@@ -22376,7 +22376,7 @@
                 }
               ]
             },
-            "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+            "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, process:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -22416,7 +22416,7 @@
                     }
                   ]
                 },
-                "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+                "description": "Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, process:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -22442,7 +22442,7 @@
           ]
         },
         {
-          "name": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",
+          "name": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing",
           "request": {
             "method": "PUT",
             "header": [
@@ -22469,7 +22469,7 @@
                 }
               ]
             },
-            "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
+            "description": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, process:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",
@@ -22509,7 +22509,7 @@
                     }
                   ]
                 },
-                "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
+                "description": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, process:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",

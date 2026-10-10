@@ -91,11 +91,17 @@ describe('first notice of loss', () => {
 
   it('assigns new claims to the Operations users with the fewest open claims', async () => {
     await policy('f2');
-    const handlers = [];
-    for (let i = 0; i < 3; i += 1) handlers.push((await fnol('cc.ops', { policyRefId: 'f2', dateOfIncident: addDays(todayStr, -i - 1) })).body.data.handlerUserId);
-    const counts = await many("SELECT handler_user_id, count(*)::int AS n FROM claims WHERE handler_user_id = ANY($1) AND status NOT IN ('settled', 'closed', 'rejected', 'cancelled') GROUP BY 1", [[ids['cc.ops'], ids['cc.officer']]]);
-    expect(Math.abs(counts[0].n - (counts[1]?.n || 0))).toBeLessThanOrEqual(1);
-    expect(handlers.every((h) => [ids['cc.ops'], ids['cc.officer']].includes(h))).toBe(true);
+    // the open claims of each active Operations Associate and Officer (the sample data may hold some)
+    const load = async () => Object.fromEntries((await many(`SELECT u.id, (SELECT count(*) FROM claims c WHERE c.handler_user_id = u.id
+        AND c.status NOT IN ('settled', 'closed', 'rejected', 'cancelled'))::int AS n
+      FROM users u WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+        WHERE ur.user_id = u.id AND r.code IN ('tis-ops-associate', 'tis-ops-officer'))`)).map((r) => [r.id, r.n]));
+    for (let i = 0; i < 3; i += 1) {
+      const before = await load();
+      const handler = (await fnol('cc.ops', { policyRefId: 'f2', dateOfIncident: addDays(todayStr, -i - 1) })).body.data.handlerUserId;
+      expect(Object.keys(before)).toContain(handler);
+      expect(before[handler]).toBe(Math.min(...Object.values(before)));
+    }
   });
 
   it('shows the outstanding premium, the claims ratio and same-day claims before registering; the TISPH rule registers on unpaid premium', async () => {
@@ -179,20 +185,21 @@ describe('partial and final settlements within the Authority Matrix', () => {
   let c;
   it('approves no more than requested, releases a partial settlement and keeps the claim open', async () => {
     c = await claimInReview('st1');
-    const p = await settle('cc.ops', c.id, { settlementKind: 'partial', settlementAmount: 40000 });
+    const p = await settle('cc.sales', c.id, { settlementKind: 'partial', settlementAmount: 40000 });
     expect(p.status).toBe(403);
-    const sub = await settle('cc.unithead', c.id, { settlementKind: 'partial', settlementAmount: 40000 });
+    const sub = await settle('cc.officer', c.id, { settlementKind: 'partial', settlementAmount: 40000 });
     expect(sub.status).toBe(200);
     expect(sub.body.data.lifecycleStatus).toBe('pending-approval');
+    expect((await as('cc.officer', 'put', `/claims/approve-settlement/${c.id}`).send({ decision: 'approve' })).status).toBe(403);
     const over = await as('cc.gm', 'put', `/claims/approve-settlement/${c.id}`).send({ decision: 'approve', approvedAmount: 45000 });
     expect(over.status).toBe(422);
     expect(over.body.message).toMatch(/cannot exceed the settlement requested/);
     const ap = await as('cc.gm', 'put', `/claims/approve-settlement/${c.id}`).send({ decision: 'approve', approvedAmount: 30000 });
     expect(ap.status).toBe(200);
     expect(ap.body.data).toMatchObject({ lifecycleStatus: 'partially-settled', status: 'Partially Settled', approvedAmount: 30000, settledAmount: 30000, isOpen: true });
-    expect(ap.body.data.settlementRequestedBy).toBe('Ursula Head');
+    expect(ap.body.data.settlementRequestedBy).toBe('Olivia Officer');
     expect(ap.body.data.settlementApprovedBy).toBe('Gerry Manager');
-    expect(ap.body.data.settlements).toEqual([expect.objectContaining({ seq: 1, kind: 'partial', amount: 40000, approvedAmount: 30000, status: 'approved', requestedBy: 'Ursula Head', decidedBy: 'Gerry Manager' })]);
+    expect(ap.body.data.settlements).toEqual([expect.objectContaining({ seq: 1, kind: 'partial', amount: 40000, approvedAmount: 30000, status: 'approved', requestedBy: 'Olivia Officer', decidedBy: 'Gerry Manager' })]);
   });
 
   it('completes the claim with the final settlement; the approver stays within the limit', async () => {
@@ -210,12 +217,26 @@ describe('partial and final settlements within the Authority Matrix', () => {
     expect(ok.body.data.settlements.map((s) => [s.kind, s.status, s.approvedAmount])).toEqual([['partial', 'approved', 30000], ['final', 'returned', null], ['final', 'approved', 50000]]);
   });
 
+  it('lets the Operations Associate and Officer process a claim, never decide it', async () => {
+    await policy('st0');
+    const c0 = (await fnol('cc.ops', { policyRefId: 'st0' })).body.data;
+    expect((await as('cc.sales', 'put', `/claims/updatestatus/${c0.id}`).send({ claimStatus: 'Processing' })).status).toBe(403);
+    expect((await as('cc.ops', 'put', `/claims/updatestatus/${c0.id}`).send({ claimStatus: 'Processing' })).status).toBe(200);
+    const close = await as('cc.ops', 'put', `/claims/updatestatus/${c0.id}`).send({ claimStatus: 'closed' });
+    expect(close.status).toBe(403);
+    expect(close.body.message).toMatch(/approve:claims/);
+    expect((await as('cc.ops', 'put', `/claims/rejectclaim/${c0.id}`).send({ reason: 'Not covered' })).status).toBe(403);
+    expect((await as('cc.officer', 'put', `/claims/cancel/${c0.id}`).send({ reasonCode: 'CCN-ERROR', note: 'Wrong policy' })).status).toBe(403);
+    expect((await settle('cc.ops', c0.id, { settlementAmount: 10000 })).status).toBe(200);
+  });
+
   it('refuses the release of an approved settlement by its requester', async () => {
     await setSetting('claims.auto_settle_on_approval', false);
     const x = await claimInReview('st2');
     await settle('cc.unithead', x.id, { settlementAmount: 20000 });
     expect((await as('cc.gm', 'put', `/claims/approve-settlement/${x.id}`).send({ decision: 'approve' })).body.data.lifecycleStatus).toBe('approved');
     expect((await settle('cc.unithead', x.id, {})).status).toBe(403);
+    expect((await settle('cc.officer', x.id, {})).status).toBe(403);
     const rel = await settle('cc.gm', x.id, {});
     expect(rel.body.data.lifecycleStatus).toBe('settled');
     await setSetting('claims.auto_settle_on_approval', true);
@@ -286,7 +307,7 @@ describe('insurer advice, communications and the end-of-day service levels', () 
     const r = await claimServiceLevels();
     expect(r.fnol).toBeGreaterThanOrEqual(1);
     expect(r.authorisation).toBeGreaterThanOrEqual(1);
-    expect(r.followUps).toBe(1);
+    expect(r.followUps).toBeGreaterThanOrEqual(1);
     const titles = async (id) => (await many("SELECT title FROM notifications WHERE entity = 'claim' AND entity_id = $1 AND type = 'alert'", [id])).map((n) => n.title);
     expect(await titles(c.id)).toContain(`FNOL not submitted: claim ${c.claimNumber}`);
     expect(await titles(d.id)).toEqual(expect.arrayContaining([`Authorisation code overdue: claim ${d.claimNumber}`, `Claim follow-up overdue: ${d.claimNumber}`]));

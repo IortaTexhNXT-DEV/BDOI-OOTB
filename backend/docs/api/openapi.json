@@ -38778,7 +38778,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, process:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -38891,6 +38891,7 @@
         "x-screen": "Operations > Claims > Settlement details",
         "x-permissions": [
           "write:claims",
+          "process:claims",
           "approve:claims"
         ],
         "requestBody": {
@@ -38932,11 +38933,11 @@
     "/claims/updatestatus/{id}": {
       "put": {
         "operationId": "putClaimsUpdatestatusId",
-        "summary": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",
+        "summary": "Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing",
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, process:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -39049,6 +39050,7 @@
         "x-screen": "Operations > Claims > Request approval",
         "x-permissions": [
           "write:claims",
+          "process:claims",
           "approve:claims"
         ],
         "requestBody": {

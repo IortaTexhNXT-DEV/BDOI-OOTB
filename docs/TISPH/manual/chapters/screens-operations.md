@@ -416,6 +416,8 @@ On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), 
 
 ### Assessment and settlement (maker) {#assessment-and-settlement-maker}
 
+The claim is moved to review and its settlement submitted by {{roles:process:claims}}. Rejection, cancellation and closing are decisions of {{roles:approve:claims}}.
+
 On **Assessment**, check the key facts of the claim and the **Assessment basis** (date reported, adjuster and adjuster status) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
 
 On **Settlement**, choose **Final** or **Partial**, enter the **Settlement type** (for example **Repair Shop**, or payment to the insured), the **Settlement amount** the insurer agreed, the deductible or participation and the payee, and select **Submit settlement**. The claim becomes **Pending Approval**: a second claims user must approve it before the claim is settled. A partly settled claim shows **Settled so far** and is settled further, or finally, from the same step.

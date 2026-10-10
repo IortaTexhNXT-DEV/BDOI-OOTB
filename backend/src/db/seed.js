@@ -108,7 +108,7 @@ const TIS_MAKER = ['quotations', 'policies', 'endorsements', 'renewals', 'fleet'
 // the approvers of renewal terms also reassign renewals and mark them not for renewal (assign:renewals, migration 0500)
 const TIS_FRONT_APPROVALS = ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'];
 const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'claims:read'];
-const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read'];
+const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'claims:process', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read'];
 const TIS_CCD = [...TIS_COMMON, 'receipts'];
 const TIS_ACCOUNTING_READS = ['disbursements:read', 'journal-vouchers:read', 'payables:read', 'fixed-assets:read'];
 const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'policies:read', 'endorsements:read', 'renewals:read', 'claims:read'];

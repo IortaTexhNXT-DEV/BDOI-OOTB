@@ -101,6 +101,7 @@ const PERMISSION_LIST = {
   'reverse:claim-cash': ['claims', 'special', 'Reverse claim settlement funds or a payment to the claimant recorded in error'],
   'read:claims': ['claims', 'view', 'See claims'],
   'write:claims': ['claims', 'edit', 'Register and follow up claims, claim documents and repairs'],
+  'process:claims': ['claims', 'edit', 'Move a claim to review and submit its settlement, partial or final, for approval'],
   'approve:claims': ['claims', 'approve', 'Claim decisions: review, reject, settle, approve a settlement, close'],
   'read:fleet': ['fleet', 'view', 'See fleet schedules and print the schedule of vehicles'],
   'write:fleet': ['fleet', 'edit', 'Prepare and issue fleet schedules; add or delete vehicles by endorsement'],

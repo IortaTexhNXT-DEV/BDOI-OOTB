@@ -3,8 +3,9 @@
 A client's claim from the first notice of loss to its settlement (TIS-BRD-CLAIM-01 to 08): registration with the
 acceptance checks, the insurer's advice, documents, review, adjuster, assessment, settlement (partial or final) with
 maker-checker approval, payment through the broker, rejection and cancellation. Routes are under `/claims`
-(Operations > Claims). Access: `read:claims`, `write:claims`; `approve:claims` decides (never the user who submitted
-the settlement); `write:claim-funds` records funds received from the insurer; `reverse:claim-cash` reverses a cash
+(Operations > Claims). Access: `read:claims`, `write:claims`; `process:claims` moves a claim to review and submits its
+settlement for approval (TISPH Operations roles); `approve:claims` decides: rejects, cancels, closes, approves and releases
+a settlement (never the user who submitted it); `write:claim-funds` records funds received from the insurer; `reverse:claim-cash` reverses a cash
 movement recorded in error (never the user who recorded it). Records follow the record scope of the user.
 
 ## Files

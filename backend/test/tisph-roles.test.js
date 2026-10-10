@@ -62,6 +62,11 @@ describe('TISPH roles of a new database', () => {
       expect(g[maker]).toEqual(expect.arrayContaining(['write:quotations', 'write:policies', 'write:endorsements', 'write:renewals']));
       expect(g[maker].filter((p) => ['approve:quotations', 'approve:policies', 'approve:renewals'].includes(p))).toEqual([]);
     }
+    // the Operations Associate and Officer process claims; the Operations Unit Head decides them
+    for (const maker of ['tis-ops-associate', 'tis-ops-officer']) {
+      expect(g[maker]).toContain('process:claims');
+      expect(g[maker]).not.toContain('approve:claims');
+    }
     for (const approver of ['tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-unit-head', 'tis-general-manager']) {
       expect(g[approver]).toEqual(expect.arrayContaining(['approve:quotations', 'approve:policies', 'approve:renewals']));
     }
@@ -184,8 +189,8 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims', 'approve:remittance')");
     await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql')");
     // later migrations that grant to the holders of a module permission (0387: approve:incentive, 0500: assign:renewals)
-    // or to the TISPH roles (0502: claim settlement cash) run again after it
-    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql')");
+    // or to the TISPH roles (0502: claim settlement cash, 0504: claim processing) run again after it
+    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql')");
     await migrate({ log: () => {} });
     const migrated = await grants();
     for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims', 'accounting', 'system-admin']) expect(migrated[code], code).toEqual(seeded[code]);

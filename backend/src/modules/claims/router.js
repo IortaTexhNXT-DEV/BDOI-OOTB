@@ -1,11 +1,11 @@
 import { memoryUpload } from '../../lib/uploadLimits.js';
 import { checkUploadedFiles } from '../uploads/fileTypes.js';
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { assertVisible, ownRecord, withScope } from '../../lib/scope.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
-import { badRequest } from '../../lib/errors.js';
+import { badRequest, forbidden } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { sendSheet } from './docs.js';
 import { printFormat } from '../../lib/pdf/index.js';
@@ -26,6 +26,11 @@ const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
 /** Status decisions (review, reject, settle, approve settlement, close) need approve:claims; the others register, update and upload only. */
 const decide = [...write, requirePermission('approve:claims')];
+// the maker steps of a claim (review, settlement submitted for approval): process:claims, or a claims approver
+const processing = [...write, requirePermission('process:claims', 'approve:claims')];
+const assertDecides = (user) => {
+  if (!hasPermission(user, 'approve:claims')) throw forbidden('Requires permission: approve:claims');
+};
 const policyRef = (req) => [req.body?.policyRefId, req.body?.policyId, req.body?.policyNumber].find((v) => v && !svc.PLACEHOLDER_REFS.has(String(v)));
 const str = z.union([z.string(), z.number(), z.boolean()]).optional().nullable();
 
@@ -102,10 +107,11 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/updatestatus/:id', summary: 'Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)', screen: 'Operations > Claims > Request approval',
-  middleware: [...decide, ownRecord('claim'), validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional(), reasonCode: z.string().max(40).optional().nullable() }).passthrough())],
+  method: 'PUT', path: '/updatestatus/:id', summary: 'Move a claim to review (process:claims) or to closed / rejected (approve:claims); claimStatus accepts a code or label, e.g. Processing', screen: 'Operations > Claims > Request approval',
+  middleware: [...processing, ownRecord('claim'), validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional(), reasonCode: z.string().max(40).optional().nullable() }).passthrough())],
   request: { claimStatus: 'Processing', note: 'Documents complete' }, response: { success: true, message: 'Claim status updated', data: claimExample },
   handler: async (req, res) => {
+    if ((await svc.toStatusCode(req.body.claimStatus)) !== 'in-review') assertDecides(req.user);
     const r = await svc.updateStatus(req.params.id, req.body.claimStatus, req.user, req.body.note, req.body.reasonCode);
     await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'status', before: { status: r.from },
       after: { status: r.claim.lifecycleStatus, ...(r.claim.lifecycleStatus === 'rejected' ? { reason: r.claim.rejectedReason, reasonCode: r.claim.rejectedReasonCode } : {}) } });
@@ -134,10 +140,11 @@ define({
 });
 define({
   method: 'PUT', path: '/settle/:id', summary: 'Submit a settlement, partial (settlementKind partial: the claim stays open) or final (multipart; goes to Pending Approval when maker-checker is on), or release an approved claim (not by its requester)', screen: 'Operations > Claims > Settlement details',
-  middleware: [...decide, ownRecord('claim'), upload.any(), checkUploadedFiles, validate(settleSchema)],
+  middleware: [...processing, ownRecord('claim'), upload.any(), checkUploadedFiles, validate(settleSchema)],
   request: { settlementType: 'Cash', settlementAmount: 75000, settlementIssueDate: '2026-09-25', settlementDate: '2026-09-28', settlementDocument: '(file)' },
   response: { success: true, message: 'Settlement submitted for approval', data: { ...claimExample, status: 'Pending Approval' } },
   handler: async (req, res) => {
+    if ((await svc.loadRow(req.params.id)).status === 'approved') assertDecides(req.user);
     const r = await svc.settleClaim(req.params.id, req.body, req.user, req.files);
     await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'settle', before: { status: r.from }, after: { status: r.claim.lifecycleStatus, settlement: r.claim.settlement } });
     ok(res, r.claim, r.pendingApproval ? 'Settlement submitted for approval' : 'Claim settled');
