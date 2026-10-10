@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiRequest, masterService } from "../../services/remittanceService";
 import { calendarDateFormat, formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
-import { codeAmount } from "../../components/DecisionBar";
+import { codeAmount } from "../../utility/currencyConverter";
 
 /** Accounts > Remittance routes (R1). */
 export const REMITTANCE_ROUTES = {

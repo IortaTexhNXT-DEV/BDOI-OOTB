@@ -10,7 +10,7 @@ import { Skeleton } from "primereact/skeleton";
 import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
-import DecisionBar from "../../../components/DecisionBar";
+import ApprovalActions from "../../../components/ApprovalActions";
 import LoadingBar from "../../../components/LoadingBar";
 import { ActivityLog, fromRemittanceActivity } from "../../../components/ActivityLog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
@@ -31,10 +31,11 @@ export const previousText = (previous) => {
 /**
  * The review panel of one approval (60vw, at least 720px): header, the facts and totals, the previous remittance of the
  * insurer, the checks while pending, the first ten lines with Open full remittance, the open exceptions, the activity
- * (folded) and the DecisionBar, which shows the EligibilityNote instead of Approve and Reject when the user may not
- * decide (with Reject when the server allows it). An adjustment, settlement or transfer of earlier releases shows its
- * own facts (type, insurer, amount, remarks) and its lines when it has any, not the remittance's. There is no comment
- * box. A decision that lost a race (decided or changed meanwhile) leaves the panel read-only with the server's sentence.
+ * (folded) and ApprovalActions with the server's decision, which shows the EligibilityNote instead of Approve and
+ * Reject when the user may not decide (with Reject when the server allows it). An adjustment, settlement or transfer of
+ * earlier releases shows its own facts (type, insurer, amount, remarks) and its lines when it has any, not the
+ * remittance's. There is no comment box. A decision that lost a race (decided or changed meanwhile) leaves the panel
+ * read-only with the server's sentence.
  */
 const ReviewPanel = ({ approvalId, onHide, onDecided }) => {
   const { t } = useTranslation();
@@ -110,7 +111,7 @@ const ReviewPanel = ({ approvalId, onHide, onDecided }) => {
   const footer = a && !loading ? (
     <div className="rm-review__footer">
       {message && message.text !== decision?.blockedReason ? <p className={`rm-review__message rm-review__message--${message.tone}`} role={message.tone === "race" ? "alert" : "status"}>{message.text}</p> : null}
-      <DecisionBar decision={decision} busy={busy} onApprove={approve} canReject={canReject}
+      <ApprovalActions decision={decision || {}} busy={busy} onApprove={approve} canReject={canReject}
         onReject={() => setRejecting({ id: a.id, version: a.version, reference: a.reference, amount: a.amount, makerName: a.submittedBy?.name, entity: a.entity })} />
     </div>
   ) : null;

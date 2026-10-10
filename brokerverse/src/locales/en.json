@@ -15352,8 +15352,6 @@
   },
   "decisionBar": {
     "label": "Decision",
-    "approve": "Approve",
-    "reject": "Reject",
     "yourLimit": "Your limit {{amount}}",
     "noLimit": "No approval limit",
     "thisItem": "This item {{amount}}"

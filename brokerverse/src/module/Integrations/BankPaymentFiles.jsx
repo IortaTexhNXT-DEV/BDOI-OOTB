@@ -20,7 +20,7 @@ import EligibilityNote from "../../components/EligibilityNote";
 import BankBatchDialog from "../../components/BankBatchDialog";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { ActivityLog, fromLifecycle } from "../../components/ActivityLog";
-import { codeAmount } from "../../components/DecisionBar";
+import { codeAmount } from "../../utility/currencyConverter";
 import { hasPermission } from "../../utils/canOpen";
 import { IntTag, PageHeader, SEVERITY, date, dateTime, showError, showSuccess } from "./common";
 

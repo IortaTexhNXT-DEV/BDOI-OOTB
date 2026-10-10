@@ -9515,8 +9515,6 @@
   },
   "decisionBar": {
     "label": "การตัดสิน",
-    "approve": "อนุมัติ",
-    "reject": "ปฏิเสธ",
     "yourLimit": "วงเงินของคุณ {{amount}}",
     "noLimit": "ไม่มีวงเงินอนุมัติ",
     "thisItem": "รายการนี้ {{amount}}"

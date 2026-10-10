@@ -25,7 +25,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import DateField from "../DateField";
-import { codeAmount } from "../DecisionBar";
+import { codeAmount } from "../../utility/currencyConverter";
 import { canOpen } from "../../utils/canOpen";
 import service from "../../services/integrationsService";
 import { formatDate, instantParts } from "../../utility/dateFormat";

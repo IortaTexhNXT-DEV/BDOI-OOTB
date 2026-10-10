@@ -10,12 +10,12 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import "./eligibilityNote.scss";
 
-const EligibilityNote = ({ reason, approvers, className }) => {
+const EligibilityNote = ({ id, reason, approvers, className }) => {
   const { t } = useTranslation();
   const names = (approvers || []).map((a) => a?.name).filter(Boolean);
   if (!reason && !names.length) return null;
   return (
-    <p className={["bv-eligibility", className].filter(Boolean).join(" ")} role="note">
+    <p id={id || undefined} className={["bv-eligibility", className].filter(Boolean).join(" ")} role="note">
       <i className="pi pi-info-circle bv-eligibility__icon" aria-hidden="true" />
       <span className="bv-eligibility__text">
         {reason ? <span className="bv-eligibility__reason">{reason}</span> : null}
@@ -26,6 +26,8 @@ const EligibilityNote = ({ reason, approvers, className }) => {
 };
 
 EligibilityNote.propTypes = {
+  /** id of the line, for the aria-describedby of the buttons it explains */
+  id: PropTypes.string,
   /** the server's blockedReason ("PHP 409,141.43 is above your approval limit of PHP 250,000.00.") */
   reason: PropTypes.node,
   /** eligibleApprovers of the decision: [{ id, name, role, limit }] */
@@ -33,6 +35,6 @@ EligibilityNote.propTypes = {
   className: PropTypes.string,
 };
 
-EligibilityNote.defaultProps = { reason: null, approvers: [], className: null };
+EligibilityNote.defaultProps = { id: null, reason: null, approvers: [], className: null };
 
 export default EligibilityNote;
