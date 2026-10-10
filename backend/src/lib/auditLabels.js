@@ -56,6 +56,7 @@ export const ENTITY_LABELS = {
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
   cas_document: 'CAS document', cas_book_print: 'Book print', opening_balances: 'Opening balance',
+  go_live_lock: 'Go-live lock', golive_setting: 'Go-live setting', post_dated_cheque: 'Post-dated cheque',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -79,6 +80,9 @@ const ACTION_VERBS = {
   purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted', 'access-change': 'access changed',
   request: 'requested', withdraw: 'withdrawn', end: 'ended early', 'sign-off': 'signed off', 'sign-out': 'signed out everywhere', keep: 'kept',
   'remove-roles': 'roles removed', export: 'exported',
+  validate: 'validated', load: 'loaded', expire: 'expired', interrupted: 'interrupted, nothing saved', 'undo-request': 'undo requested', 'undo-approve': 'undo approved',
+  'undo-reject': 'undo rejected', 'undo-withdraw': 'undo request withdrawn', 'download-file': 'uploaded file downloaded', 'export-current-data': 'current data exported',
+  relock: 'unlock ended, imports closed again', 'refused-locked': 'import refused (go-live locked)', 'cutover-date': 'cutover date changed',
 };
 
 /** Sign-in events read as what the user did. */

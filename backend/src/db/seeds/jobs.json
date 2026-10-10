@@ -90,5 +90,19 @@
     "description": "Create follow-up tasks from collection promises to pay, renewal next steps and claim follow-up dates, close those whose record is closed, and notify task reminders and newly overdue tasks",
     "cron": "*/15 * * * *",
     "handler": "myWorkReminders"
+  },
+  {
+    "code": "data-load-sweep",
+    "name": "Data load sweep",
+    "description": "Mark the data loads whose job stopped (deployment, restart) as failed, nothing saved (an undo goes back to loaded), and expire the loads waiting for approval longer than migration.approval_expiry_hours",
+    "cron": "*/5 * * * *",
+    "handler": "dataLoadSweep"
+  },
+  {
+    "code": "golive-relock",
+    "name": "Go-live relock",
+    "description": "End the unlocks of the go-live lock whose hours have run out: the imports they reopened are closed again",
+    "cron": "*/5 * * * *",
+    "handler": "goLiveRelock"
   }
 ]

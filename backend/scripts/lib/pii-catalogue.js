@@ -367,6 +367,8 @@ export const CATALOGUE = {
   'incentive_calculations.approval_remarks': 'freeText',
   // remarks given with the approval or rejection of a data load (migration 0440)
   'data_load_batches.decision_remarks': 'freeText',
+  // remarks given with the rejection of a go-live lock or unlock request (migration 0442)
+  'go_live_lock_requests.decision_remarks': 'freeText',
   'campaign_recipients.party_name': 'partyName',
   'campaign_recipients.email': 'email',
 };

@@ -291,3 +291,14 @@ export function reconciliationWorkbook(batch) {
     ],
   });
 }
+
+const OBJECT_LABELS = { client: 'Client', policy: 'Policy', receivable: 'Open item', post_dated_cheque: 'Post-dated cheque', claim: 'Claim', opening_balances: 'Opening balances' };
+/** The records that stop the undo of a load (undo.js dependents), one row each. */
+export function dependentsWorkbook(batch, deps) {
+  return writeXlsx({
+    title: `Undo of ${batch.loadNumber}`, creator: 'BrokerVerse',
+    sheets: [{ name: 'Dependents', headerStyle: 'navy',
+      columns: [{ header: 'Record', width: 20 }, { header: 'Number', width: 28 }, { header: 'Depends on it', width: 48, type: 'wrap' }, { header: 'Count', width: 10, type: 'integer' }],
+      rows: deps.length ? deps.map((d) => [OBJECT_LABELS[d.object] || d.object, d.key, d.dependent, d.count]) : [['', '', 'Nothing depends on the records of this load', 0]] }],
+  });
+}

@@ -17,7 +17,11 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
 | `duplicates.js` | Duplicate rules (`tin`, `name-birth-date`, `company-name`, `vehicle`, `coc`, `policy-number`, `insurer-variant`, `master-name`), their normalisation and the detector of a validation |
 | `maps.js` | Value maps of the legacy code tables: list, add, change, remove, workbook, upload; `resolveValue(ctx, object, value)` |
 | `naming.js` | Document file naming convention and its checker |
-| `service.js` | Batches: upload, dry-run validation (one rolled-back transaction, a savepoint per row), the result of each row, duplicates and their resolutions, load (one transaction), errors, review, history; the per-record audit of a load |
+| `service.js` | Batches: upload (the file kept with its SHA-256), dry-run validation (one rolled-back transaction, a savepoint per row), the result of each row, duplicates and their resolutions, load (one transaction), errors, review, history; the per-record audit of a load; the status moves (compare-and-set), the load lock and the job limits |
+| `jobs.js` | Job types `data-load.validate`, `data-load.load`, `data-load.undo` on the job queue (`renewals/queue.js`), their progress and place in the queue; the sweep (interrupted jobs, expired approvals) |
+| `approval.js` | Submit, withdraw, approve (starts the load job), reject with a reason; request, approve, reject and withdraw an undo |
+| `undo.js` | What depends on the records of a load (`dependents`) and the undo itself (reverse load order, before-images, opening balances set) |
+| `golive.js` | Go-Live tab: cutover date, lock and unlock requests, lock conditions, relock, the owned settings |
 | `workbook.js` | Workbook builder and reader (per-object download, Lists, Instructions, the hidden Control sheet), errors and reconciliation workbooks |
 | `numbering.js` | Legacy numbers against the numbering series and the COC series |
 | `compare.js`, `comparisons.js` | Environment comparison |
@@ -36,6 +40,9 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
 - `migration_value_maps` (0441): legacy value -> BrokerVerse code per object, unique on the normalised value; kept by
   the transaction reset (configuration).
 - `data_load_comparisons`: environment comparisons.
+- `go_live_lock_requests` (0442): lock and unlock requests (action, reason, scope, hours, `expires_at`, `relocked_at`,
+  steering committee reference, the Go decision), requested by one user and decided by another; one pending at a time.
+  Kept by the transaction reset.
 
 The load history is kept by the transaction reset: loaded migration batches are marked `undone`
 (`scripts/lib/table-classification.js`, `mark-reset`).
@@ -97,6 +104,72 @@ read (`maps_version`) and the load refuses a batch whose maps changed since (`as
 submit). The batch keeps the SHA-256 of its file; a batch of the same kit loaded or waiting for approval with the same
 file is shown (`sameFileAs`) and warned.
 
+## Jobs, approval and undo
+
+States of a batch: `validating` -> `validated` | `failed`; `validated` -> submit -> `pending-approval` -> approve ->
+`running` -> `loaded` (or `failed`, nothing saved); `pending-approval` -> `rejected` | `withdrawn` | `expired`; `loaded`
+-> undo request -> `undo-pending` -> approve -> `undoing` -> `undone` (or back to `loaded`). Every move is a
+compare-and-set (`moveBatch`): two approvals of one batch start one load; the second gets 409 "Load MIG-000012 is already
+running". A batch that is rejected, withdrawn, expired or failed is validated again (`beginValidation`) before a new
+submit.
+
+Validation, load and undo run as jobs (`jobs.js`): the request moves the batch, records the job (`job_id`) and answers
+202; `GET /batches/:id` gives `progress` (sheet, rows done and total, written every 500 rows outside the job's
+transaction) and `queue` (jobs ahead, the load it waits behind). A job takes the load lock (`takeLoadLock`, polled so
+that it can show what it waits for) and sets `statement_timeout` and `idle_in_transaction_session_timeout` from
+`migration.job_statement_timeout_minutes` in its transaction. A job is one transaction: a job that stops saves
+nothing; a session ended by the server is never taken for an error of a row. The sweep (scheduled job
+`data-load-sweep` every 5 minutes, and once at start-up) marks a batch whose job ended without moving it, or wrote no
+progress for `migration.job_stale_minutes`, as `failed` (an undo: `loaded`) with "Interrupted: nothing was saved"; a
+data load job is never requeued (`registerJobType(..., { requeue: false })`) nor run twice. It also expires the loads
+waiting for approval past `expires_at` (`migration.approval_expiry_hours`).
+
+Approval (`approval.js`): `approve:data-load`, never the uploader, the submitter or a user who resolved one of the
+batch's duplicates (`assertChecker(..., { configurable: false })`, 403). What is approved is the batch as validated:
+`assertLoadable` refuses a changed cutover date, value maps changed since the validation and a stored file whose SHA-256
+is not the batch's. The load job runs as the approver (`loaded_by`, the audit entries). Reject: a reason of the Reason
+Codes master, context `data_load_reject` (seed `91_data_load_reasons.sql`). The direct `POST /batches/:id/load` runs in
+the request and is refused while `migration.load_approval_required` is on, and always in production and pre-production
+(`approvalRequired`). Notifications: approvers on submit and on an undo request; the maker on the decision and at the end
+of the job; My Work, category Approvals (`my-work/sources.js`).
+
+Undo (`undo.js`, migration loads, before the go-live lock): requested with a reason, approved by another user, run as a
+job. `dependents(batch)` lists what stops it: on the records the batch created or changed, business entered since or
+records of a load loaded after it (policies on its clients, open items, claims and cheques on its policies, receipts,
+credits and collection actions on its open items, deposited cheques, endorsements, renewals, documents, a CTPL
+authentication sent to the LTO, claim movements), a later load that changed the same records, a later load that
+replaced its opening balances. It is checked at the request, at the approval and in the undo transaction with the
+records locked `FOR UPDATE`. The undo goes through the sheets in reverse load order: a created record is removed with
+the rows its creation wrote (claim history, collection items, CTPL authentication, risk participants); a changed
+record is written back by the importer of its sheet from the row's `before`; the opening balances set is restored from
+`data_load_batches.opening_before` (kept by the load). One `migrate-undo` audit entry per record; rows `undone`.
+Number counters are not wound back.
+
+The uploaded workbook is kept in the storage folder `go-live-loads` (`file_key`, `file_sha256`), refused by
+`/api/s3/object` and the file delete; `GET /batches/:id/file` releases it to `write:data-load` with `view:pii`, each
+download audited (`download-file`).
+
+## Go-live lock
+
+`lib/goLiveLock.js` `assertMigrationOpen(kind)` (409 "Go-live is locked: migration imports are closed (locked on
+dd/mm/yyyy)", audited `go_live_lock` `refused-locked`) guards the migration kit (upload, validation, resolutions,
+submit, approval, load), the undo (`undo`), `POST /policies/bulk-upload` with `mode=go-live` and the files of the
+ordinary upload with rows issued before the cutover date (`policies-go-live`), `POST /receipts/opening-items/import`
+(`opening-items`) and `POST /period-end/opening-balances/validate` and `/import` (`opening-balances`); the three
+single-object imports also need `write:data-load`. The transaction reset refuses while `golive.locked` is on.
+`test/migration-lock.test.js` lists every route that loads legacy data as guarded or exempt with the reason.
+
+The lock (`golive.js`) is requested by a holder of `write:data-load` and approved by another user with
+`approve:data-load`; it needs the Go decision of the production run, its reconciliation signed, its restore point and no
+load in progress (checked at the request and at the approval). The approval writes `golive.locked`, `golive.locked_at`
+and `golive.locked_by`. An unlock names the imports it reopens and its hours (up to `migration.unlock_max_hours`); after
+`migration.unlock_window_days` from the lock it needs a steering committee reference. The lock stays on during an
+unlock; the job `golive-relock` (every 5 minutes) ends it at `expires_at`. The settings `golive.*`,
+`migration.load_approval_required`, `migration.*_include_migrated`, `migration.sap_gl_include_opening` and
+`migration.subledger_tieouts` belong to the Go-Live tab (`lib/settingOwners.js`): `PUT /settings`, the system
+configuration and the Settings sheet refuse them; the cutover date is set by `PUT /golive/cutover-date` (refused once
+locked and while a migration load is loaded or in progress), the others by `PUT /golive/settings` (`approve:data-load`).
+
 ## Templates
 
 `GET /kits/:kit/template?objects=&prefill=`: the whole kit or some objects, blank or with the current data (masked for a
@@ -140,4 +213,7 @@ sheets). `test/migration-registry.test.js` checks the kits.
 
 `go-live-workbench.test.js`, `go-live-roundtrip.test.js`, `migration-registry.test.js`, `migration-origin.test.js`,
 `migration-audit.test.js`, `migration-numbers.test.js`, `migration-review.test.js`, `migration-duplicates.test.js`,
-`migration-amounts.test.js`, `migration-pdc.test.js`, `reset-transactions.test.js`.
+`migration-amounts.test.js`, `migration-pdc.test.js`, `migration-jobs.test.js`, `migration-approval.test.js`,
+`migration-undo.test.js`, `migration-lock.test.js` (fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
+suites that load at once set the cutover date and switch the approval of loads off with `goLiveSetup` and wait for the
+validation job with `validatedBatch` (`test/helpers.js`).

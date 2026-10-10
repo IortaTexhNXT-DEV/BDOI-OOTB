@@ -24,7 +24,7 @@ import { assertSod, proposeLimit } from '../access-control/service.js';
 import { setNextNumber, updateSeries, validatePattern } from '../document-numbering/service.js';
 import { isControlledSetting } from '../posting-rules/service.js';
 import { MIGRATED_NUMBER_TARGETS, collidingNumber } from './numbering.js';
-import { amountValue, cell, dateValue, fail, isDate, keyText, toBool, numberCell, yesNo } from './common.js';
+import { amountValue, cell, dateValue, fail, keyText, toBool, numberCell, yesNo } from './common.js';
 
 // ------------------------------------------------------------------ masters (generic master types)
 
@@ -107,12 +107,14 @@ export async function masterSheet(code) {
 
 // ------------------------------------------------------------------ system settings
 
-/** Settings never loaded from a workbook: secrets (none are kept in settings, the check is a safeguard) and the go-live lock. */
+/**
+ * Settings never loaded from a workbook: secrets (none are kept in settings, the check is a safeguard). The cutover date
+ * and the go-live lock belong to Data Migration & Go-Live > Go-Live (lib/settingOwners.js) and are refused as owned.
+ */
 const NOT_LOADED = /(secret|api_?key|credential|private_?key)/i;
-const LOCK_KEY = 'golive.locked';
 
 /** Settings the workbook carries: editable, changed on Master > Configuration (not owned by another screen, not under approval). */
-const loadableSetting = (s) => s.editable !== false && !settingOwner(s.key) && !isControlledSetting(s.key) && !NOT_LOADED.test(s.key) && s.key !== LOCK_KEY;
+const loadableSetting = (s) => s.editable !== false && !settingOwner(s.key) && !isControlledSetting(s.key) && !NOT_LOADED.test(s.key);
 
 const settingText = (s) => (s.type === 'json' || (s.value !== null && typeof s.value === 'object') ? JSON.stringify(s.value) : cell(s.value === true ? 'true' : s.value === false ? 'false' : s.value));
 
@@ -142,18 +144,15 @@ function parseSettingValue(s, text) {
 const settingsSheet = () => ({
   key: 'settings', name: 'Settings', menu: 'Master > Configuration',
   columns: [
-    { key: 'key', header: 'Setting Key', required: true, format: 'Key of a setting of Master > Configuration, e.g. golive.cutover_date' },
+    { key: 'key', header: 'Setting Key', required: true, format: 'Key of a setting of Master > Configuration, e.g. general.timezone' },
     { key: 'value', header: 'Value', required: true, format: 'Text, number, true / false or JSON text, as the setting type says' },
     { key: 'description', header: 'Description', format: 'For your reference only; not loaded' },
   ],
   keyColumns: ['key'], keyOf: (v) => keyText(v.key),
-  sample: { key: 'golive.cutover_date', value: '2026-11-01', description: 'First day of live transactions' },
+  sample: { key: 'general.timezone', value: 'Asia/Manila', description: 'Business time zone' },
   async exportRows() {
     const rows = await many('SELECT key, value, type, editable, label FROM app_settings ORDER BY "group", key');
     return rows.filter(loadableSetting).map((s) => ({ key: s.key, value: settingText(s), description: s.label || '' }));
-  },
-  async check(ctx, v) {
-    if (v.key === LOCK_KEY) fail('key', `${LOCK_KEY} is not loaded from a workbook: switch it on in Master > Configuration (Go-live) once the migration is signed off`);
   },
   async importRow(ctx, v) {
     const s = await one('SELECT key, value, type, editable FROM app_settings WHERE key = $1', [v.key]);
@@ -167,10 +166,8 @@ const settingsSheet = () => ({
     const [invalid] = await localizationErrors([change]);
     if (invalid) fail('value', `${v.key} ${invalid.message}`);
     const value = change[1];
-    if (v.key === 'golive.cutover_date' && value !== '' && !isDate(value)) fail('value', 'golive.cutover_date must be a date YYYY-MM-DD');
     if (JSON.stringify(value) === JSON.stringify(s.value)) return 'unchanged';
     await setSetting(v.key, value, ctx.user.id);
-    if (v.key === 'golive.cutover_date') ctx.cutover = value || null;
     return 'updated';
   },
 });
@@ -714,5 +711,5 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Referrers / agents and their commission accounts', 'Commission > Agents/Referrer Accounts'],
   ['Petty cash funds', 'Accounts > Petty Cash > Initiate'],
   ['Users\' passwords: never in the workbook. A new user gets a temporary password shown once after the load (change at first sign-in); a forgotten one is reset on the screen', 'Master > Generals > User Management > User > Reset password'],
-  ['Go-live lock (golive.locked)', 'Master > Configuration (Go-live): switch it on once the migration is signed off'],
+  ['Cutover date and go-live lock (switched on by two users once the migration is signed off)', 'Master > System Configuration > Data Migration & Go-Live > Go-Live'],
 ];

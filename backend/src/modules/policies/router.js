@@ -1,6 +1,6 @@
 import { moduleRouter } from '../../lib/registry.js';
 import { formatMoney } from '../../lib/money.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
@@ -10,6 +10,9 @@ import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as payments from './payments.js';
 import { config } from '../../config.js';
 import { badRequest, forbidden } from '../../lib/errors.js';
+import { getSetting } from '../../lib/settings.js';
+import { isoDate } from '../../lib/dates.js';
+import { assertMigrationOpen } from '../../lib/goLiveLock.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { uploadFile, parseUploadedRows, columnMessage, uploadResult } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
@@ -41,18 +44,26 @@ define({
   middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'policies'),
 });
 define({
-  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission', screen: `${SCREEN} > Bulk Upload`,
+  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook',
+  screen: `${SCREEN} > Bulk Upload`,
   middleware: [...canWrite, uploadFile], request: 'multipart/form-data file', response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
     const rows = parseUploadedRows(req.file);
     const mode = String(req.body?.mode || req.query.mode || '');
     if (mode && mode !== 'go-live') throw badRequest('mode must be go-live or empty');
     const migration = mode === 'go-live';
+    const parsed = rows.map((row) => { try { return { p: svc.policyFromRow(row) }; } catch (e) { return { e }; } });
+    if (migration) {
+      if (!hasPermission(req.user, 'write:data-load')) throw forbidden('Loading the policies of the old system needs the permission to load migration data (write:data-load)');
+      await assertMigrationOpen('policies-go-live', { req });
+    } else {
+      await refuseLegacyRows(req, parsed);
+    }
     const errors = [];
     let created = 0;
-    for (const [i, row] of rows.entries()) {
+    for (const [i, { p, e: parseError }] of parsed.entries()) {
       try {
-        const p = svc.policyFromRow(row);
+        if (parseError) throw parseError;
         const missing = migration ? svc.goLiveMissing(p) : [];
         if (missing.length) throw badRequest(`An existing policy (go-live) needs ${missing.join(', ')}`);
         const r = await withTransaction((db) => svc.importPolicy(db, p, actor(req), { migration }));
@@ -64,6 +75,21 @@ define({
     res.json({ success: true, message: data.message, data });
   },
 });
+/**
+ * Rows of the ordinary upload issued before the cutover date are legacy business: once go-live is locked (and no unlock
+ * reopens the policies go-live upload) the file is refused, listing them.
+ */
+async function refuseLegacyRows(req, parsed) {
+  const cutover = String((await getSetting('golive.cutover_date', '')) || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(cutover)) return;
+  const legacy = parsed.map((x, i) => ({ row: i + 2, issued: x.p ? isoDate(x.p.issuedDate) : null })).filter((x) => x.issued && x.issued < cutover);
+  if (!legacy.length) return;
+  try {
+    await assertMigrationOpen('policies-go-live', { req });
+  } catch (e) {
+    throw Object.assign(e, { details: legacy.map((x) => ({ path: `row ${x.row}`, message: `Row ${x.row}: Issue date before go-live: legacy business is loaded by the migration workbook` })) });
+  }
+}
 const canConfirmPayments = [requireAuth, requirePermission('write:receipts')];
 /** A captured payment confirmed or rejected by Accounting: the user who recorded it is told. */
 const tellPaymentMaker = (policy, capture, req, confirmed) => notifyDecision({ userId: capture?.submittedById, decidedBy: req.user.id, document: 'Premium payment',

@@ -22,6 +22,7 @@ import * as tax from './tax.js';
 import { AUTO_CHECKS, blockingChecks, checklistItems, closeBlockers, manualSignOffs, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
 import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS, validateOpeningBalances } from './opening.js';
+import { migrationImportOpen } from '../../lib/goLiveLock.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
 import { buildPdf, printContext, sendPdf } from '../../lib/pdf/index.js';
@@ -32,6 +33,8 @@ import * as st from './statements.js';
 const { router, define } = moduleRouter('Period End', '/period-end');
 const read = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers')];
 const write = [requireAuth, requirePermission('write:period-end')];
+/** The go-live opening balances import: also write:data-load, and closed once go-live is locked. */
+const openingImport = [...write, requirePermission('write:data-load'), migrationImportOpen('opening-balances')];
 const approve = [requireAuth, requirePermission(APPROVE)];
 const readTax = [requireAuth, requirePermission('read:period-end', 'read:masters')];
 const writeTax = [requireAuth, requirePermission('write:period-end', 'write:masters')];
@@ -52,8 +55,8 @@ define({
 });
 const openingRows = (req) => parseUploadedRows(req.file).map((r) => mapColumns(r, OPENING_BALANCE_COLUMNS));
 define({
-  method: 'POST', path: '/opening-balances/validate', summary: 'Go-live: check the old system\'s trial balance (multipart "file" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace',
-  screen: `${S} > Period Management > Import opening balances`, middleware: [...write, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
+  method: 'POST', path: '/opening-balances/validate', summary: 'Go-live: check the old system\'s trial balance (multipart "file" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace. Also needs write:data-load; refused once go-live is locked (409)',
+  screen: `${S} > Period Management > Import opening balances`, middleware: [...openingImport, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
   response: { success: true, data: { valid: false, fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', rows: 8, accounts: 7, totalDebit: 2102400, totalCredit: 2102300, difference: 100,
     ignored: [{ row: 9, accountCode: '1301001' }], errors: [{ row: 4, column: 'Account Code', message: 'Account 9999999 is not in the chart of accounts' }],
     previous: { goLiveDate: '2026-10-01', accounts: 7, loadedAt: '2026-10-02T03:00:00Z', loadedBy: 'Ana Santos' } } },
@@ -63,8 +66,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it',
-  screen: `${S} > Period Management > Import opening balances`, middleware: [...write, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
+  method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it. Also needs write:data-load; refused once go-live is locked (409)',
+  screen: `${S} > Period Management > Import opening balances`, middleware: [...openingImport, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
   response: { success: true, data: { fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', accounts: 7, totalDebit: 2102400, totalCredit: 2102400, replaced: 0, ignored: [{ row: 9, accountCode: '1301001' }] } },
   handler: async (req, res) => {
     const rows = openingRows(req);

@@ -97,6 +97,7 @@ export const SYSTEM_RESET_ACTIONS = {
   data_load_batches: 'mark-reset',
   data_load_rows: 'mark-reset',
   data_load_comparisons: 'keep', // environment comparisons stay with the load history
+  go_live_lock_requests: 'keep', // the requests that locked go-live and lifted the lock: evidence of the cutover
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances

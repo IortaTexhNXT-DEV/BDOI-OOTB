@@ -45,6 +45,12 @@ const active = () => {
 /** True while an ambient transaction (runInTransaction) is active in the current async context. */
 export const inTransaction = () => !!active();
 
+/**
+ * Run fn outside the ambient transaction (on the pool): what it writes is committed at once and seen by other sessions
+ * while the transaction carries on (the progress of a long data load). Never write there a row the transaction updates.
+ */
+export const outsideTransaction = (fn) => ambient.exit(fn);
+
 const poolQuery = pool.query.bind(pool);
 // pool.query is used directly by a few modules: it follows the ambient transaction too.
 pool.query = (...args) => {
