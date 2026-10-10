@@ -129889,6 +129889,155 @@
         ]
       }
     },
+    "/quotations/{id}/extend": {
+      "post": {
+        "operationId": "postQuotationsIdExtend",
+        "summary": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotationStatus": {
+                          "type": "string"
+                        },
+                        "leadRefId": {
+                          "type": "string"
+                        },
+                        "productType": {
+                          "type": "string"
+                        },
+                        "netPremium": {
+                          "type": "integer"
+                        },
+                        "valueAddedTax": {
+                          "type": "integer"
+                        },
+                        "documentaryStampTax": {
+                          "type": "number"
+                        },
+                        "localGovernmentTax": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "totalSumInsured": {
+                          "type": "integer"
+                        },
+                        "lead": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "validUntil": {
+                          "type": "string"
+                        },
+                        "extensionCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Quotation valid until 09/12/2026",
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00001",
+                    "quotationStatus": "Draft",
+                    "leadRefId": "ld_1",
+                    "productType": "Motor",
+                    "netPremium": 18500,
+                    "valueAddedTax": 2220,
+                    "documentaryStampTax": 2312.5,
+                    "localGovernmentTax": 138.75,
+                    "grossPremium": 23171.25,
+                    "totalSumInsured": 1200000,
+                    "lead": {
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz"
+                    },
+                    "validUntil": "2026-12-09",
+                    "extensionCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity",
+        "x-permissions": [
+          "extend:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Customer waiting for the loan release"
+              }
+            }
+          }
+        }
+      }
+    },
     "/quotations/{id}/kyc-prefill": {
       "get": {
         "operationId": "getQuotationsIdKycPrefill",
@@ -130849,6 +130998,243 @@
             }
           }
         }
+      }
+    },
+    "/quotations/{id}/versions": {
+      "get": {
+        "operationId": "getQuotationsIdVersions",
+        "summary": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "currentVersion": {
+                          "type": "integer"
+                        },
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "version": {
+                                "type": "integer"
+                              },
+                              "current": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "quotationNumber": "QT-2026-00001",
+                    "currentVersion": 2,
+                    "versions": [
+                      {
+                        "version": 2,
+                        "current": true,
+                        "status": "Draft",
+                        "grossPremium": 23171.25
+                      },
+                      {
+                        "version": 1,
+                        "current": false,
+                        "status": "PendingCustomer",
+                        "grossPremium": 24300
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Versions",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
+    "/quotations/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getQuotationsIdVersionsVersion",
+        "summary": "One version of a quotation (a superseded version is read-only)",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotationStatus": {
+                          "type": "string"
+                        },
+                        "leadRefId": {
+                          "type": "string"
+                        },
+                        "productType": {
+                          "type": "string"
+                        },
+                        "netPremium": {
+                          "type": "integer"
+                        },
+                        "valueAddedTax": {
+                          "type": "integer"
+                        },
+                        "documentaryStampTax": {
+                          "type": "number"
+                        },
+                        "localGovernmentTax": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "totalSumInsured": {
+                          "type": "integer"
+                        },
+                        "lead": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "readOnly": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00001",
+                    "quotationStatus": "Draft",
+                    "leadRefId": "ld_1",
+                    "productType": "Motor",
+                    "netPremium": 18500,
+                    "valueAddedTax": 2220,
+                    "documentaryStampTax": 2312.5,
+                    "localGovernmentTax": 138.75,
+                    "grossPremium": 23171.25,
+                    "totalSumInsured": 1200000,
+                    "lead": {
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz"
+                    },
+                    "version": 1,
+                    "readOnly": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Versions",
+        "x-permissions": [
+          "read:quotations"
+        ]
       }
     },
     "/quotations/approve-by-customer": {

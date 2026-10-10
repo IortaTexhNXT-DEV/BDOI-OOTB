@@ -71,6 +71,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
+| Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Lead assignment | Create and edit | Maintain assignment rules and reassign prospects |  |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |

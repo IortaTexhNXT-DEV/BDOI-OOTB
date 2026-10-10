@@ -90,8 +90,9 @@ const SALES_ACTIVITY_PERMS = { sales: ['sales-activities'], operations: ['sales-
 for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[role].push(...items);
 // Approvals of the front office (permissions of migration 0348): approving a quotation, the check of a placement
 // against the slip, renewal terms and claim decisions. The approver is never the maker (maker-checker in the services).
-const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve'],
-  operations: ['quotations:approve', 'policies:approve', 'renewals:approve'], claims: ['claims:approve'] };
+// Extending the validity of a quotation (migration 0480) goes with approving it.
+const APPROVAL_PERMS = { sales: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve'], processing: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve'],
+  operations: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve'], claims: ['claims:approve'] };
 for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
 
 // TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
@@ -101,7 +102,7 @@ const TIS_COMMON = ['profile', 'notifications', 'reports:read', 'masters:read'];
 const TIS_FRONT_READS = ['products:read', 'channels:read', 'motor-programmes:read', 'commission:read', 'remittance:read', 'incentive:read', 'collections:read', 'receipts:read',
   'integrations:read', 'schedules:read'];
 const TIS_MAKER = ['quotations', 'policies', 'endorsements', 'renewals', 'fleet', 'marine', 'pii:view'];
-const TIS_FRONT_APPROVALS = ['quotations:approve', 'policies:approve', 'renewals:approve'];
+const TIS_FRONT_APPROVALS = ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve'];
 const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'claims:read'];
 const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read'];
 const TIS_CCD = [...TIS_COMMON, 'receipts'];

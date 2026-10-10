@@ -124,6 +124,7 @@ The cards count **Total Quotations**, **Active Quotations**, **Pending Review**,
 | **Submitted to Insurer** | The placement slip has gone to the insurer |
 | **Approved** | Approved by {{roles:approve:quotations}}, a user other than the one who created it |
 | **Rejected** | Turned down, with a reason |
+| **Expired** | Not accepted or converted within its validity; it cannot be reopened |
 | **Converted to Policy** | The insurer's policy has been booked |
 
 ![Operations > Sales & Marketing > Quotations](images/screens-operations/quotations-list.png)
@@ -131,6 +132,15 @@ The cards count **Total Quotations**, **Active Quotations**, **Pending Review**,
 The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Send for Customer Approval** on a draft, **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation](#process-quotation).
 
 ![A motor quotation waiting for the client, with Copy approval link and Record customer response](images/screens-operations/quotation-pending-customer.png)
+
+### Validity, extension and versions {#quotation-validity-and-versions}
+
+A quotation is valid for the days set on its product (**Quotation validity (days)** on the Product Master), else for 30 days, counted from the day it is issued; it stays valid through its last day. The section **Validity and versions** of the quotation page shows the **Version**, **Issued on**, **Valid until**, the days left (or **Expired**) and the **Longest validity**.
+
+- Five days before the end of the validity the owner of the quotation is reminded under **My Work**; a client who has the quotation for approval is reminded by e-mail.
+- **Extend validity** (for {{roles:extend:quotations}}) adds 30 days once, never beyond 60 days from the day the quotation was issued. Enter the remarks and select **Extend validity**; **Extended on** and **Extended by** are then shown.
+- The day after the last valid day the quotation becomes **Expired**. A quotation whose placement slip is already with the insurer is followed on the placement slip instead.
+- Changing a quotation the client has already received keeps the terms the client saw as a read-only version and makes the change the next version (version 2, version 3) of the same quotation number, back in **Draft**: send it to the client again. The earlier link sent to the client stops working. The versions are listed with their status and gross premium; **View** shows a superseded version as it was. A quotation with an open placement slip cannot be changed: cancel the placement slip first.
 
 ### Create a motor quotation {#create-a-motor-quotation}
 

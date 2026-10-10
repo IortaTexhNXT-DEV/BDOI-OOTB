@@ -75,7 +75,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Master | What it holds |
 |---|---|
 | **Line of Business** | The lines TISPH writes (for example Motor, Accident, Life, Marine), with their code. Only active lines are offered. |
-| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**). The rating and covers of a product are kept in the [Product Configurator](#screens-product-configurator). |
+| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**), **Quotation validity (days)** (empty: the standard 30 days). The rating and covers of a product are kept in the [Product Configurator](#screens-product-configurator). |
 | **Cover** | The covers offered on quotations (for example Own Damage, Acts of Nature, Excess Bodily Injury, Property Damage). |
 | **Signatories** | The company signatories printed on documents, with their signature image. |
 | **Vehicle** | The vehicle master used by motor quotations: **Vehicle Brand**, **Vehicle Model**, **Vehicle Variant**, code and name. **Upload** loads the Toyota model list. |

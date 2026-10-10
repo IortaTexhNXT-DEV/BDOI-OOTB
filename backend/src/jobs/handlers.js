@@ -33,12 +33,8 @@ export async function policyExpiry() {
   const r = await query('UPDATE policies SET status = \'expired\' WHERE status IN (\'active\',\'issued\') AND expiry_date < $1::date', [await today()]);
   return { expired: r.rowCount };
 }
-export async function quoteExpiry() {
-  if (!(await tableExists('quotes'))) return { skipped: 'quotes table missing' };
-  const days = Number(await getSetting('limits.quote_validity_days', 30));
-  const r = await query('UPDATE quotes SET status = \'expired\' WHERE status IN (\'draft\',\'quoted\',\'sent\') AND created_at < now() - ($1 || \' days\')::interval', [String(days)]);
-  return { expired: r.rowCount };
-}
+/** Quotations: the day after the validity ends (quote-expiry) and the reminder before it (quote-expiry-reminder). */
+export { quoteExpiry, quoteExpiryReminders } from '../modules/quotations/validity.js';
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];

@@ -78,6 +78,7 @@ const PERMISSION_LIST = {
   'read:quotations': ['quotations', 'view', 'See quotations, requests for quotation, placement slips and comparison reports'],
   'write:quotations': ['quotations', 'edit', 'Create quotations (Quick Quote too), send requests for quotation, prepare placement slips'],
   'approve:quotations': ['quotations', 'approve', 'Approve a quotation created by another user'],
+  'extend:quotations': ['quotations', 'special', 'Extend the validity of a quotation once, within the longest validity'],
   'read:lead-assignment': ['lead-assignment', 'view', 'See assignment rules, the reassignment queue and every team\'s prospects'],
   'write:lead-assignment': ['lead-assignment', 'edit', 'Maintain assignment rules and reassign prospects'],
   'read:motor-programmes': ['motor-programmes', 'view', 'See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters'],

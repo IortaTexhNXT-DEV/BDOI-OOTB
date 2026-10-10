@@ -1172,6 +1172,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -2003,6 +2009,12 @@
      "module": "Quotations and placement",
      "level": "Approve",
      "meaning": "Approve a quotation created by another user"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
     },
     {
      "area": "Sales & Marketing",
@@ -4450,6 +4462,12 @@
      "module": "Quotations and placement",
      "level": "Approve",
      "meaning": "Approve a quotation created by another user"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
     },
     {
      "area": "Sales & Marketing",
@@ -9926,6 +9944,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -14401,6 +14425,12 @@
    "TIS General Manager"
   ],
   "approve:renewals": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "extend:quotations": [
    "TIS Sales Officer",
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",

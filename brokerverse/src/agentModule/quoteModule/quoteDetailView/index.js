@@ -33,6 +33,7 @@ import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
 import CustomerResponseActions from "../customerResponse/CustomerResponseActions";
 import UnderwritingReferralPanel from "../underwritingReferral/UnderwritingReferralPanel";
+import QuotationValidityPanel from "../quotationValidity/QuotationValidityPanel";
 import ActivityPanel from "../../../components/SalesActivities/ActivityPanel";
 import logger from "../../../utility/logger";
 import DetailSection from "../../../components/DetailSection";
@@ -530,6 +531,7 @@ const QuoteDetailView = ({ action }) => {
               </div>
             </div>
             <QuoteJourneyPanel quotation={quotationData} relatedPolicy={relatedPolicy} onChanged={loadQuotation} />
+            <QuotationValidityPanel quotation={quotationData} onChanged={loadQuotation} />
             {!isFireLOB && !isIarLOB && (
               <>
                 <div className="sub_title">

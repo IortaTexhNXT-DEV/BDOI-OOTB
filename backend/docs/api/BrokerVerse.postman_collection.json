@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1314 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1317 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -78963,6 +78963,99 @@
           ]
         },
         {
+          "name": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/extend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "extend"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Customer waiting for the loan release\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/extend",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "extend"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Customer waiting for the loan release\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Quotation valid until 09/12/2026\",\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    },\n    \"validUntil\": \"2026-12-09\",\n    \"extensionCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form",
           "request": {
             "method": "GET",
@@ -79661,6 +79754,148 @@
               ],
               "cookie": [],
               "body": "{\n  \"quotationId\": \"qt_1\",\n  \"quotationNumber\": \"QT-2026-00001\",\n  \"quotationStatus\": \"Draft\",\n  \"leadRefId\": \"ld_1\",\n  \"productType\": \"Motor\",\n  \"netPremium\": 18500,\n  \"valueAddedTax\": 2220,\n  \"documentaryStampTax\": 2312.5,\n  \"localGovernmentTax\": 138.75,\n  \"grossPremium\": 23171.25,\n  \"totalSumInsured\": 1200000,\n  \"lead\": {\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\"\n  },\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"currentVersion\": 2,\n    \"versions\": [\n      {\n        \"version\": 2,\n        \"current\": true,\n        \"status\": \"Draft\",\n        \"grossPremium\": 23171.25\n      },\n      {\n        \"version\": 1,\n        \"current\": false,\n        \"status\": \"PendingCustomer\",\n        \"grossPremium\": 24300\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One version of a quotation (a superseded version is read-only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/versions/:version",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "versions",
+                ":version"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "version",
+                  "value": "",
+                  "description": "version (path parameter)"
+                }
+              ]
+            },
+            "description": "One version of a quotation (a superseded version is read-only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/versions/:version",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "versions",
+                    ":version"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "version",
+                      "value": "",
+                      "description": "version (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One version of a quotation (a superseded version is read-only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    },\n    \"version\": 1,\n    \"readOnly\": true\n  }\n}"
             }
           ]
         },

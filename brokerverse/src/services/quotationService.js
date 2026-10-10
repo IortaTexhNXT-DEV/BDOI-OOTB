@@ -898,6 +898,24 @@ class QuotationService {
     });
   }
 
+  /** Extend the validity of a quotation (extend:quotations); returns the quotation with its new validity. */
+  extendQuotation(quotationId, remarks) {
+    return this.request(`/quotations/${encodeURIComponent(quotationId)}/extend`, {
+      method: "POST",
+      body: JSON.stringify({ remarks: remarks || null }),
+    });
+  }
+
+  /** Versions of a quotation, newest first: { quotationNumber, currentVersion, versions }. */
+  getQuotationVersions(quotationId) {
+    return this.request(`/quotations/${encodeURIComponent(quotationId)}/versions`);
+  }
+
+  /** One version of a quotation (a superseded version is read-only). */
+  getQuotationVersion(quotationId, version) {
+    return this.request(`/quotations/${encodeURIComponent(quotationId)}/versions/${encodeURIComponent(version)}`);
+  }
+
   /** Server-side premium breakdown (cover premiums, taxes, gross, commission) for a quotation document. */
   calculatePremium(quotationData) {
     return this.request("/quotations/calculate-premium", {

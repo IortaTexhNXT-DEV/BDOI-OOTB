@@ -3573,7 +3573,9 @@
       "read": "Read only",
       "write": "Read and change"
     },
-    "createdOn": "Created on"
+    "createdOn": "Created on",
+    "quoteValidityDays": "Quotation validity (days)",
+    "quoteValidityDaysRange": "Enter 1 to 366 days, or leave empty for the standard validity"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -12036,6 +12038,36 @@
     "reasons": "Referral reasons",
     "quotation": "Quotation",
     "cancel": "Cancel"
+  },
+  "quotationValidity": {
+    "title": "Validity and versions",
+    "version": "Version",
+    "current": "current",
+    "issuedOn": "Issued on",
+    "validUntil": "Valid until",
+    "state": "Validity",
+    "expired": "Expired",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "latestValidUntil": "Longest validity",
+    "extendedAt": "Extended on",
+    "extendedBy": "Extended by",
+    "remarks": "Remarks",
+    "extend": "Extend validity",
+    "extendTitle": "Extend quotation validity",
+    "extendMessage": "The validity is extended once by {{days}} days, up to the longest validity.",
+    "extended": "Quotation validity extended",
+    "quotation": "Quotation",
+    "status": "Status",
+    "grossPremium": "Gross premium",
+    "netPremium": "Net premium",
+    "discount": "Discount",
+    "sumInsured": "Sum insured",
+    "insurer": "Insurer",
+    "supersededAt": "Superseded on",
+    "supersededBy": "Superseded by",
+    "changeReason": "Reason for change",
+    "versionTitle": "Quotation {{number}} version {{version}}"
   },
   "myWork": {
     "loadFailed": "My Work could not be loaded",
