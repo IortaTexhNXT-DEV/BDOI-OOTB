@@ -18,6 +18,7 @@ import {
 import mastersService from "../../../../../services/mastersService";
 import useMasterOptions from "../../../common/useMasterOptions";
 import { RecordValue, useRecordView } from "../../../../../components/RecordView";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const BUSINESS_TYPES = ["package", "non_package"];
 const CUSTOMER_SEGMENTS = ["retail", "corporate", "both"];
@@ -34,6 +35,8 @@ const ProductMatserDetailsAction = ({ action }) => {
     label: o.label,
     value: String(o.value || "").toLowerCase(),
   }));
+  // the line as the master names it; a line no longer in the master keeps its stored code, in words
+  const lobLabel = (value) => (value ? lobOptions.find((o) => o.value === value)?.label || statusLabel(value) : null);
 
   useEffect(() => {
     if ((action === "edit" || action === "view") && id != null) {
@@ -231,9 +234,9 @@ const ProductMatserDetailsAction = ({ action }) => {
                 </div>
               )}
           </div>
-          <div className="col-12 md:col-4 lg:col-4 xl:col-4 ">
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             {readOnly ? (
-              <RecordValue label={t("generalMasters.lineOfBusiness")} value={lobOptions.find((o) => o.value === formik.values.lineofBusiness)?.label || formik.values.lineofBusiness} />
+              <RecordValue label={t("generalMasters.lineOfBusiness")} value={lobLabel(formik.values.lineofBusiness)} />
             ) : (<>
             <label className="input__label__corrections block mb-1" htmlFor="lineofBusiness">{t("generalMasters.lineOfBusiness")}</label>
             <Dropdown
@@ -261,7 +264,7 @@ const ProductMatserDetailsAction = ({ action }) => {
             { name: "businessType", options: BUSINESS_TYPES, label: t("productClassification.businessType"), prefix: "productClassification.businessTypes" },
             { name: "customerSegment", options: CUSTOMER_SEGMENTS, label: t("productClassification.customerSegment"), prefix: "productClassification.segments" },
           ].map((f) => (
-            <div key={f.name} className="col-12 md:col-4 lg:col-4 xl:col-4 ">
+            <div key={f.name} className={f.name === "customerSegment" ? "col-12 md:col-6 lg:col-6 xl:col-6 " : "col-12 md:col-3 lg:col-3 xl:col-3 "}>
               {readOnly ? (
                 <RecordValue label={f.label} value={formik.values[f.name] ? t(`${f.prefix}.${formik.values[f.name]}`) : null} />
               ) : (<>
