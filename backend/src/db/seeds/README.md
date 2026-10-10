@@ -126,4 +126,12 @@ as nil.
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.
 
-No test users are seeded: the tests and the end-to-end checks create their own users.
+No test users are seeded by default: the tests and the end-to-end checks create their own users. On a UAT or demo
+site, `TISPH_TEST_USERS_PASSWORD` seeds one test user per TISPH role (`tisph_test_users.json`: `carla.mendoza` Sales
+Associate, `paolo.villanueva` Sales Officer, `teresa.lim` Sales Unit Head, `jenny.bautista` Operations Associate,
+`mark.castillo` Operations Officer, `liza.fernandez` Operations Unit Head, `rowena.cruz` CCD-PDU, `allan.domingo`
+CCD-PDC / CCD-ADA, `grace.navarro` CCD-BP / QRPh, `edwin.ramos` CCD-Recon, `cecilia.tan` Finance & General Accounting,
+`kevin.santiago` IT AppSupport / Admin, `antonio.delrosario` General Manager; e-mail `<username>@tisph.example.ph`),
+each with that password (checked against the password policy) and the role only, and each must change the password at
+the first sign-in. An existing user keeps its password and roles. The variable is for non-production environments
+only: with `NODE_ENV=production` the step logs a warning and creates nobody. Unset, nothing is created.

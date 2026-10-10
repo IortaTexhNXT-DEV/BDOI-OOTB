@@ -61,6 +61,7 @@ stops the start.
 | Variable | Default | Meaning |
 |---|---|---|
 | `SEED_SAMPLE_DATA` | `true` in development and test, `false` with `NODE_ENV=production` | Seed the sample / demo data. An explicit `true` / `false` wins (e.g. `true` on a UAT or demo site). The API logs a warning when it is on in production. |
+| `TISPH_TEST_USERS_PASSWORD` | unset | Non-production only (UAT and demo sites). When set, the seed creates one test user per TISPH role (`backend/src/db/seeds/README.md` lists the 13 user names) with this password, to be changed at the first sign-in; an existing user keeps its password and roles. With `NODE_ENV=production` the API logs a warning and creates nobody. |
 
 Removing demo data from a database that was started with it (for example a UAT database promoted to production):
 stop the API instances, take a backup, then
