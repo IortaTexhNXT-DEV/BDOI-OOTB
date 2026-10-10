@@ -173,7 +173,7 @@ export const HELP_ROUTES = [
   ["/product-configurator/documents", "document-manager", "module-reference-product-configurator"],
   ["/product-configurator/market-mapping", "market-mapping", "module-reference-product-configurator"],
   ["/product-configurator/risk-mapping", "risk-mapping", "module-reference-product-configurator"],
-  ["/product-configurator/analytics", "product-analytics", "module-reference-product-configurator"],
+  ["/product-configurator/analytics", "product-analytics", "module-reference-product-configurator", "screens-product-configurator"],
   // distribution, programmes and products
   ["/sales/lead-assignment", "lead-assignment"],
   ["/master/insurance/channels", "distribution-channels"],
