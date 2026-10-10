@@ -1,4 +1,5 @@
 import { getRequest, postRequest, putRequest } from '../utility/commonServices';
+import importService from './importService';
 
 export const receiptsService = {
   // Get all receipts with pagination
@@ -129,6 +130,26 @@ export const receiptsService = {
       throw error;
     }
   },
+
+  // Proof of payment of a receipt (an uploaded file): a remittance run on the fully paid basis needs it
+  attachProof: async (receiptId, proof) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/proof`, proof)).data?.data,
+
+  // Reversal of a receipt: asked with a reason, approved or returned by another user
+  requestReversal: async (receiptId, reason) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal`, reason)).data,
+  decideReversal: async (receiptId, decision) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal/decision`, decision)).data,
+
+  // Unapplied collections (excess On Account, floating, advance): list, record, allocate, refund, reverse
+  listUnapplied: async (params = {}) => (await getRequest('receipts/unapplied', params)).data?.data,
+  getUnapplied: async (id) => (await getRequest(`receipts/unapplied/${encodeURIComponent(id)}`)).data?.data,
+  recordUnapplied: async (payload) => (await postRequest('receipts/unapplied', payload)).data,
+  allocateUnapplied: async (id, allocations) => (await postRequest(`receipts/unapplied/${encodeURIComponent(id)}/allocate`, { allocations })).data,
+  refundUnapplied: async (id, reason) => (await postRequest(`receipts/unapplied/${encodeURIComponent(id)}/refund`, reason)).data,
+  reverseUnapplied: async (id, reason) => (await postRequest(`receipts/unapplied/${encodeURIComponent(id)}/reverse`, reason)).data,
+
+  // Receipt voucher batches (bulk uploads) and the commission part kept apart on each
+  receiptBatches: async () => (await getRequest('receipts/batches')).data?.data || [],
+  downloadBatchCommission: (batch, format = 'xlsx') => importService.downloadTemplate(`/receipts/batches/${encodeURIComponent(batch.id)}?format=${format}`,
+    `${batch.kind === 'bank-payments' ? 'bank-payments' : 'commission'}-${batch.batchNumber}.${format}`),
 
   // Add payment to existing receipt
   addPaymentToReceipt: async (receiptId, paymentData) => {

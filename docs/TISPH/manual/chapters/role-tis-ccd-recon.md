@@ -201,14 +201,12 @@ remittance yourself.
 
 ![Accounts > Remittance > Approvals of CCD-Recon (Reconciliation and Reversals): a remittance submitted, waiting for its approvers](images/role-tis-ccd-recon/remittance-approvals.png)
 
-### Collections, receipts and claim settlement funds {#ccd-recon-reconciliation-and-reversals-other}
+### Reverse a receipt and decide reversals {#ccd-recon-reconciliation-and-reversals-other}
 
-You also hold the receipting work of Cash Control when needed:
+A receipt issued in error is reversed from its page with a reason, and another user approves: a second CCD-Recon
+user or TIS Finance & General Accounting. See [Reverse a receipt](#reverse-a-receipt). The reversals waiting for you
+are on My Work; you never approve your own.
 
-- [Issue an official receipt](#ccd-bp-qrph-receipting-official-receipt) and
-  [Receipt bills payment and QRPh collections](#ccd-bp-qrph-receipting-bills-payment)
-- [Follow up an overdue premium](#ccd-bp-qrph-receipting-follow-up)
-- [Record claim settlement funds received from an insurer](#ccd-bp-qrph-receipting-claim-funds)
-
-Disbursement, Open Entry Matching and Open Entry Unmatching are open to you to look up payment vouchers and matched
-entries; the changes there are made by TIS Finance & General Accounting.
+You read the receipts, the unapplied collections and the collections of CCD-BP / QRPh (Receipting), who issues the
+receipts, allocates the amounts held On Account and records the claim settlement funds. Disbursement is open to you to
+look up payment vouchers.

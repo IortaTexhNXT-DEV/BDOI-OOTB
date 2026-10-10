@@ -45,6 +45,8 @@ export const FILE_ROUTES = [
   { module: 'quotations', method: 'POST', path: '/bulk-upload', templates: ['quotations'] },
   { module: 'policies', method: 'POST', path: '/bulk-upload', templates: ['policies'] },
   { module: 'receipts', method: 'POST', path: '/bulk-upload', templates: ['receipts'] },
+  { module: 'receipts', method: 'POST', path: '/bank-payments', templates: ['bank-payments'] },
+  { module: 'receipts', method: 'POST', path: '/insurer-direct', templates: ['insurer-direct-payments'] },
   { module: 'disbursements', method: 'POST', path: '/bulk-upload', templates: ['disbursements'] },
   { module: 'period-end', method: 'POST', path: '/opening-balances/import', templates: ['opening-balances'] },
   { module: 'period-end', method: 'POST', path: '/opening-balances/validate', templates: ['opening-balances'] },

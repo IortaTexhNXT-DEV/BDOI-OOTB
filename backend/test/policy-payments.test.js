@@ -36,7 +36,8 @@ describe('policy payment capture (no mock payment)', () => {
 
   it('validates the capture: reference, amount within the balance, date not in the future', async () => {
     const api = ctx.as('agent');
-    const base = { option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-778812', amount: pol.gross, paymentDate: today };
+    const base = { option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-778812', amount: pol.gross, paymentDate: today, proofKey: 'payment-proofs/slip.jpg' };
+    expect((await api('post', `/policies/${pol.policy.id}/payments`).send({ ...base, proofKey: '' })).body.message).toMatch(/^Attach the proof of payment/);
     expect((await api('post', `/policies/${pol.policy.id}/payments`).send({ ...base, referenceNo: '' })).status).toBe(400);
     expect((await api('post', `/policies/${pol.policy.id}/payments`).send({ ...base, amount: pol.gross + 1 })).status).toBe(400);
     expect((await api('post', `/policies/${pol.policy.id}/payments`).send({ ...base, paymentDate: '2999-01-01' })).status).toBe(400);
@@ -108,11 +109,11 @@ describe('policy payment capture (no mock payment)', () => {
   it('finance can reject a capture; a finance capture is confirmed at once', async () => {
     const p2 = await makePolicy({ net: 4000, owner: ctx.userIds.agent });
     await withTransaction((db) => createReceivable(db, { policyId: p2.policy.id, amount: p2.gross, user: { id: ctx.userIds.agent } }));
-    const c = await ctx.as('agent')('post', `/policies/${p2.policy.id}/payments`).send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-001', amount: 1000, paymentDate: today });
+    const c = await ctx.as('agent')('post', `/policies/${p2.policy.id}/payments`).send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-001', amount: 1000, paymentDate: today, proofKey: 'payment-proofs/slip.jpg' });
     const rej = await ctx.as('maker')('post', `/policies/${p2.policy.id}/payments/${c.body.data.capture.id}/reject`).send({ reason: 'Cheque not received' });
     expect(rej.body.data.capture.status).toBe('rejected');
     expect((await q('SELECT payment_status FROM policies WHERE id = $1', [p2.policy.id]))[0].payment_status).toBe('Pending');
-    const fin = await ctx.as('maker')('post', `/policies/${p2.policy.id}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BPI-1', amount: 1000, paymentDate: today });
+    const fin = await ctx.as('maker')('post', `/policies/${p2.policy.id}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BPI-1', amount: 1000, paymentDate: today, proofKey: 'payment-proofs/slip.jpg' });
     expect(fin.status).toBe(201);
     expect(fin.body.data.posted).toBe(true);
     expect((await q('SELECT payment_status FROM policies WHERE id = $1', [p2.policy.id]))[0].payment_status).toBe('Partial');

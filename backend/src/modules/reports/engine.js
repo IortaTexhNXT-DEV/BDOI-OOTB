@@ -25,6 +25,8 @@ const FILTERS = {
   account: (p) => `(t._account = ${p} OR t._account LIKE ${p} || '%')`,
   // bank account master (code or id); the bank reconciliation reports expose it as _bank_account_code / _bank_account_id
   bankAccount: (p) => `(lower(t._bank_account_code) = lower(${p}) OR t._bank_account_id = ${p})`,
+  // financial statement version (code); the FS reports expose it as _fs_version
+  fsVersion: (p) => `upper(t._fs_version) = upper(${p})`,
 };
 /** Accepted parameter names: the screen's formik field names first, then API-style aliases. */
 const ALIASES = {
@@ -39,6 +41,7 @@ const ALIASES = {
   status: ['Status', 'status'],
   account: ['Account', 'account', 'accountCode', 'glCode'],
   bankAccount: ['BankAccount', 'bankAccount', 'bankAccountCode', 'bankAccountId'],
+  fsVersion: ['FsVersion', 'fsVersion', 'version'],
   period: ['period', 'datePreset'],
 };
 const pick = (raw, key) => {
@@ -110,6 +113,10 @@ export async function normalizeParams(query, raw = {}) {
     if (!query.filters?.includes(f)) { ignored.push(f); continue; }
     filters[f] = String(v);
   }
+  // a filter the report always applies takes its setting when the screen leaves it empty (the default FS version)
+  for (const [f, d] of Object.entries(query.defaults || {})) {
+    if (!filters[f]) filters[f] = String((await getSetting(d.key, d.fallback)) ?? d.fallback);
+  }
   // The screens list the broker itself under "Company"; that means "all insurers", not a filter
   if (filters.insurer && [(await getSetting('general.company_name')) ?? '', await companyName()].some((n) => n && norm(filters.insurer) === norm(n))) delete filters.insurer;
   return { from, to, criteria: criteria || null, filters, ignoredFilters: ignored };
@@ -138,6 +145,8 @@ export async function buildSql(query, np) {
     dims = crit.dims || Object.values(query.criteria)[0].dims;
     const measures = Object.entries(query.aggregate).map(([k, e]) => `${e} AS ${q(k)}`);
     sql = `SELECT ${dims.map((d) => `t.${q(d)}`).join(', ')}, ${measures.join(', ')} FROM (${query.sql}) t WHERE ${where} GROUP BY ${dims.map((_, i) => i + 1).join(', ')}`;
+    // rows the report leaves out once aggregated (zero suppression), on the measures as h."<name>"
+    if (query.having) sql = `SELECT * FROM (${sql}) h WHERE ${query.having}`;
   }
   let order = typeof query.orderBy === 'function' ? query.orderBy(dims || []) : query.orderBy;
   if (!order) order = dims ? dims.map((d) => `f.${q(d)}`).join(', ') : '1';

@@ -77,6 +77,23 @@ const opsAccountingService = {
   registerPdc: (payload) => post("/pdc", payload),
   pdcAction: (pdcId, action, payload = {}) => post(`/pdc/${id(pdcId)}/${action}`, payload),
   downloadPdcs: (params) => openFile(`/pdc${qs({ ...params, format: "xlsx" })}`, "post-dated-cheques.xlsx", { download: true }),
+  pdc: (pdcId) => request(`/pdc/${id(pdcId)}`),
+  updatePdc: (pdcId, payload) => put(`/pdc/${id(pdcId)}`, payload),
+  pdcEncode: (policy, bill) => request(`/pdc/encode${qs({ policy, bill })}`),
+  encodePdcSet: (payload) => post("/pdc/sets", payload),
+  // acknowledgement receipt (PDF) of the cheques of a set, for printPdf
+  pdcAcknowledgementPath: (setId) => `/pdc/sets/${id(setId)}/acknowledgement`,
+  pdcSet: (setId) => request(`/pdc/sets/${id(setId)}`),
+  pdcFollowUp: () => request("/pdc/follow-up"),
+  pdcTransmittals: (params) => request(`/pdc/transmittals${qs(params)}`),
+  pdcTransmittal: (tId) => request(`/pdc/transmittals/${id(tId)}`),
+  forwardPdcs: (payload) => post("/pdc/transmittals", payload),
+  pdcPartnerReceived: (tId, payload) => post(`/pdc/transmittals/${id(tId)}/received`, payload),
+  downloadTransmittal: (tId, number) => openFile(`/pdc/transmittals/${id(tId)}?format=xlsx`, `transmittal-${number || tId}.xlsx`, { download: true }),
+  insurers: async () => {
+    const body = await raw("/masters/insurance-company/options");
+    return body.data || [];
+  },
   // claim documents
   claimsAwaitingDocuments: (params) => request(`/claim-documents/awaiting${qs(params)}`),
   claimChecklist: (claimRef) => request(`/claim-documents/claims/${id(claimRef)}`),

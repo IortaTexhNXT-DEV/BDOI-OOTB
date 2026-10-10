@@ -251,6 +251,8 @@ import AccountDetermination from "../module/FinanceMastersModule/AccountDetermin
 import PostingRules from "../module/FinanceMastersModule/PostingRules";
 import ConfigurationApprovals from "../module/FinanceMastersModule/ConfigurationApprovals";
 import AccountingFlow from "../module/FinanceMastersModule/AccountingFlow";
+import FsVersions from "../module/FinanceMastersModule/FsVersions";
+import UnappliedCollections from "../module/Receipts/UnappliedCollections";
 import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
 import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
@@ -1016,6 +1018,7 @@ const Maincomponent = () => {
           />
           <Route path="master/finance/configuration-approvals" element={<ConfigurationApprovals />} />
           <Route path="master/finance/accounting-flow" element={<AccountingFlow />} />
+          <Route path="master/finance/fs-versions" element={<FsVersions />} />
 
           {/* Remittance Master Routes */}
           <Route
@@ -1608,6 +1611,7 @@ const Maincomponent = () => {
           <Route path="/operations/claim-documents" element={<ClaimDocuments />} />
           <Route path="/operations/motor-claim-repairs" element={<MotorClaimRepairs />} />
           <Route path="/accounts/post-dated-cheques" element={<PostDatedCheques />} />
+          <Route path="/accounts/unapplied-collections" element={<UnappliedCollections />} />
           <Route path="/accounts/claims-settlements" element={<ClaimsSettlements />} />
           <Route path="/accounts/payables/invoices" element={<SupplierInvoices />} />
           <Route path="/accounts/payables/payments" element={<SupplierPayments />} />

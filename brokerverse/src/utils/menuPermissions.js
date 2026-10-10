@@ -114,6 +114,7 @@ export const roleMenuPermissions = {
     operations: ["Payments"],
     accounts: [
       "Receipts",
+      "Unapplied Collections",
       "Collections",
       "Accounting Query",
       "All Clients Accounting",
@@ -150,6 +151,8 @@ export const roleMenuPermissions = {
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
+      // the financial statement versions of the FS reports (write:journal-vouchers)
+      "Finance > Financial Statement Versions",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
       // discount caps of the promotions (read:discount-caps; the Accounting Manager approves them)
@@ -188,20 +191,22 @@ const TIS_HIDDEN_SALES = ["Quick Quote", "Campaigns"];
 const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item) && !TIS_HIDDEN_SALES.includes(item))
   .map((item) => `Sales & Marketing > ${item}`);
 const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
-const TIS_SALES = { ...roleMenuPermissions.sales, operations: [...operationsWithout(), ...salesMarketingWithout()], accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
+// the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
+const TIS_SALES = { ...roleMenuPermissions.sales, operations: [...operationsWithout(), ...salesMarketingWithout()],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE] };
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
   operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
-  accounts: ["Receipts", "Collections", ...REMITTANCE("Remittances")],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
     // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
     "Finance > Discount Caps"],
 };
 // Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
-const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Insurer billing");
+const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Held policies", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
@@ -210,14 +215,17 @@ Object.assign(roleMenuPermissions, {
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
-  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
-  // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); Recon also decides
+  // Receipting (RBAC v4): CCD-PDU has no access to the receipts
+  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
+  // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
+  // instalment plans and the follow-ups of Credit Control (write:collections); Recon also decides
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
   // insurer remits are banked by Cash Control (write:receipts).
-  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
-  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
-    "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing")]),
+  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+    ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+    "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,
@@ -248,7 +256,7 @@ Object.assign(roleMenuPermissions, {
     operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
     // Remittance without Setup; Approvals to decide what approve:remittance gives it
     accounts: [...withoutInsurerRec(roleMenuPermissions.accounting.accounts).filter((item) => item !== "Remittance"),
-      ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Settlement")],
+      ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Settlement")],
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",

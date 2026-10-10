@@ -29,7 +29,7 @@
  */
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { baseCurrency } from '../../lib/currency.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { documentAttachment, queueEmail } from '../../lib/mailer.js';
@@ -51,10 +51,13 @@ import { requiredReason } from '../ops-masters/records.js';
 
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
-export const DN_STATUS_LABELS = { draft: 'Draft', 'for-approval': 'Pending Approval', open: 'Open', partial: 'Partially Collected', collected: 'Collected', rejected: 'Rejected', cancelled: 'Cancelled' };
+export const DN_STATUS_LABELS = { draft: 'Draft', 'for-approval': 'Pending Approval', open: 'Open', partial: 'Partially Collected', collected: 'Collected',
+  settled: 'Settled by retention', rejected: 'Rejected', cancelled: 'Cancelled' };
 export const ITEM_BASES = ['direct', 'gross'];
-/** Number series of a note by the basis of its items: commission debit note (direct bill) or billing statement (gross remittance). */
-const SERIES = { direct: 'commission_debit_note', gross: 'billing_statement' };
+/** Number series of a note by its basis: commission debit note (direct bill) or billing statement (gross remittance, and net basis from the billing run). */
+const SERIES = { direct: 'commission_debit_note', gross: 'billing_statement', net: 'billing_statement' };
+/** Billing statements (gross and net basis) are decided by the holders of approve:insurer-billing; direct-bill debit notes by write:remittance. */
+const deciderOf = (basis) => (basis === 'direct' ? 'write:remittance' : 'approve:insurer-billing');
 const EPS = 0.005;
 
 /** broker | direct from API input ('direct', 'Direct Bill', 'DIRECT_BILLED', 'broker', 'Broker billed'); null when not given. */
@@ -332,14 +335,17 @@ export function debitNoteOut(d) {
     createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedById: d.submitted_by, submittedAt: d.submitted_at,
     approvedBy: d.approved_by_name || d.approved_by, approvedAt: d.approved_at, rejectedBy: d.rejected_by_name || d.rejected_by, rejectedAt: d.rejected_at,
     rejectionReason: d.rejection_reason, sentTo: d.sent_to, sentAt: d.sent_at, updatedAt: d.updated_at,
-    basis: d.basis, documentType: d.basis === 'gross' ? 'Billing Statement' : 'Commission Debit Note', journalNumber: d.journal_number || null,
+    basis: d.basis, documentType: d.basis === 'direct' ? 'Commission Debit Note' : 'Billing Statement', journalNumber: d.journal_number || null,
+    productLine: d.product_line || null, settlement: d.basis === 'net' ? 'Retention' : 'Collection', settledAt: d.settled_at || null,
+    overdue: ['open', 'partial'].includes(d.status) && !!d.due_date && isoDate(d.due_date) < isoDate(new Date()) && Number(d.balance) > 0,
   };
 }
 
 const lineOut = (l) => ({
   id: Number(l.id), itemId: l.item_id, lineNo: l.line_no, policyId: l.policy_id, policyNo: l.policy_number, reference: l.reference, insuredName: l.insured_name,
   product: l.product, lineOfBusiness: l.line_of_business, inceptionDate: isoDate(l.inception_date), grossPremium: Number(l.gross_premium),
-  commissionRate: pctOf(l.commission_rate), commission: Number(l.commission), vat: Number(l.vat), amount: Number(l.amount),
+  commissionRate: pctOf(l.commission_rate), commission: Number(l.commission), vat: Number(l.vat), amount: Number(l.amount), ewt: Number(l.ewt || 0),
+  remittanceNumber: l.remittance_number || null,
 });
 
 const collectionOut = (x) => ({
@@ -452,13 +458,14 @@ export async function raiseDebitNote(b, user) {
 /** Insurer billing with the debit note open (?note=). */
 export const billingLink = (id) => `/finance/remittance/billing?note=${encodeURIComponent(id)}`;
 
-// approved with write:remittance (Remittance > Insurer billing)
-const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
+// approved with write:remittance (debit notes) or approve:insurer-billing (billing statements) on Remittance > Insurer billing
+const askApproval = async (dn, user) => notifyApprovers({ audience: deciderOf(dn.basis), document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
   detail: `${dn.insurerName}, ${codeMoney(dn.amount, dn.currency ? { ...(await printFormat()), currency: dn.currency } : await printFormat())}`, link: billingLink(dn.id), entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
 async function releaseItems(db, dnId) {
   await db.query('UPDATE direct_bill_items SET debit_note_id = NULL, status = \'unbilled\' WHERE debit_note_id = $1 AND status = \'billed\'', [dnId]);
+  await db.query('UPDATE remittance_lines SET billing_note_id = NULL WHERE billing_note_id = $1', [dnId]);
 }
 
 export async function submitDebitNote(id, user) {
@@ -490,10 +497,18 @@ async function reasonOf(body, context) {
 export async function debitNoteDecision(dn, user) {
   const no = (blockedCode, blockedReason) => ({ canDecide: false, blockedCode, blockedReason });
   if (dn.statusCode !== 'for-approval') return no('WRONG_STATUS', null);
-  if (!hasPermission(user, 'write:remittance')) return no('NO_PERMISSION', 'You can view debit notes but not decide them.');
+  if (!hasPermission(user, deciderOf(dn.basis))) return no('NO_PERMISSION', `You can view ${dn.basis === 'direct' ? 'debit notes' : 'billing statements'} but not decide them.`);
   if (await getSetting('finance.maker_checker_enabled', true)) {
-    if (dn.createdById && dn.createdById === user?.id) return no('MAKER', `You raised ${dn.dnNumber}. Another user must approve it.`);
-    if (dn.submittedById && dn.submittedById === user?.id) return no('SUBMITTER', `You submitted ${dn.dnNumber}. Another user must approve it.`);
+    const statement = dn.basis !== 'direct';
+    if (dn.createdById && dn.createdById === user?.id) {
+      return no('MAKER', statement ? `Maker-checker: ${dn.dnNumber} must be approved by a different user.` : `You raised ${dn.dnNumber}. Another user must approve it.`);
+    }
+    if (dn.submittedById && dn.submittedById === user?.id) {
+      return no('SUBMITTER', statement ? `Maker-checker: ${dn.dnNumber} must be approved by a different user.` : `You submitted ${dn.dnNumber}. Another user must approve it.`);
+    }
+  }
+  if (dn.basis !== 'direct' && !String(dn.insurerTin || '').trim()) {
+    return no('NO_TIN', `Insurance Company ${dn.insurerName} has no TIN. Add it on Master > Insurance > Insurance Company before you approve.`);
   }
   return { canDecide: true, blockedCode: null, blockedReason: null };
 }
@@ -509,14 +524,24 @@ export async function decideDebitNote(id, action, body, user) {
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
     if (d.status !== 'for-approval') throw conflict(`Debit note ${d.dn_number} is ${DN_STATUS_LABELS[d.status]}; only a note pending approval can be ${action === 'approve' ? 'approved' : 'rejected'}`);
+    if (!hasPermission(user, deciderOf(d.basis))) throw forbidden(`Requires permission: ${deciderOf(d.basis)}`);
     await assertChecker(user, d.created_by, 'debit note');
     await assertChecker(user, d.submitted_by, 'debit note');
     if (action === 'approve') {
       if (d.basis === 'direct') await assertClientPaid(db, d.id, d.dn_number);
+      if (d.basis !== 'direct') {
+        const ins = (await db.query('SELECT name, tin FROM insurance_companies WHERE id = $1', [d.insurance_company_id])).rows[0];
+        if (!String(ins?.tin || '').trim()) throw conflict(`Insurance Company ${ins?.name || ''} has no TIN. Add it on Master > Insurance > Insurance Company before you approve.`);
+      }
       const journalId = d.basis === 'gross' ? (await postBillingStatement(db, d, user)).id : null;
-      // the approver's remarks go to the audit trail (logged by the route), not onto the printed note
-      await db.query('UPDATE commission_debit_notes SET status = \'open\', approved_by = $2, approved_at = now(), journal_id = COALESCE($3, journal_id), updated_by = $2, updated_at = now() WHERE id = $1',
-        [d.id, user.id, journalId]);
+      // a net-basis statement is settled by the commission the remittance kept; the approver's remarks go to the audit trail
+      if (d.basis === 'net') {
+        await db.query(`UPDATE commission_debit_notes SET status = 'settled', approved_by = $2, approved_at = now(), settled_at = now(), balance = 0, updated_by = $2, updated_at = now()
+          WHERE id = $1`, [d.id, user.id]);
+      } else {
+        await db.query('UPDATE commission_debit_notes SET status = \'open\', approved_by = $2, approved_at = now(), journal_id = COALESCE($3, journal_id), updated_by = $2, updated_at = now() WHERE id = $1',
+          [d.id, user.id, journalId]);
+      }
     } else {
       await db.query(`UPDATE commission_debit_notes SET status = 'rejected', rejected_by = $2, rejected_at = now(), rejection_reason = $3, updated_by = $2, updated_at = now() WHERE id = $1`, [d.id, user.id, reason]);
       await releaseItems(db, d.id);
@@ -544,10 +569,10 @@ export async function cancelDebitNote(id, body, user) {
   const reason = await reasonOf(body, 'billing_cancel');
   await withTransaction(async (db) => {
     const d = await dnRow(db, id, true);
-    if (!['draft', 'for-approval', 'open'].includes(d.status)) throw conflict(`Debit note ${d.dn_number} is ${DN_STATUS_LABELS[d.status]}; it cannot be cancelled`);
+    if (!['draft', 'for-approval', 'open', 'settled'].includes(d.status)) throw conflict(`Debit note ${d.dn_number} is ${DN_STATUS_LABELS[d.status]}; it cannot be cancelled`);
     const posted = (await db.query('SELECT count(*)::int AS n FROM commission_debit_note_collections WHERE debit_note_id = $1 AND status = \'posted\'', [d.id])).rows[0].n;
     if (posted) throw conflict(`Debit note ${d.dn_number} has collections; reverse them first`);
-    if (d.status === 'open' && !String(reason || '').trim()) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to cancel an approved debit note' }]);
+    if (['open', 'settled'].includes(d.status) && !String(reason || '').trim()) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to cancel an approved debit note' }]);
     const reversal = d.journal_id ? await reverseJournal(db, d.journal_id, user, { description: `Cancellation of billing statement ${d.dn_number}: ${reason}` }) : null;
     await db.query(`UPDATE commission_debit_notes SET status = 'cancelled', cancelled_by = $2, cancelled_at = now(), remarks = COALESCE($3, remarks), balance = 0, reversal_jv_id = $4,
       updated_by = $2, updated_at = now() WHERE id = $1`, [d.id, user.id, reason, reversal?.id ?? null]);

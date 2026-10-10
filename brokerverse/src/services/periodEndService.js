@@ -94,6 +94,11 @@ const periodEndService = {
   statementFile: (type, params, format) => file(`/period-end/statements/${type}/export${qs({ ...params, format })}`),
   journalLines: (jvNumber) => request(`/accounting/entries/search${qs({ transactionCode: jvNumber, pageSize: 200 })}`),
   accounts: () => request("/accounting/accounts?status=active"),
+  // financial statement versions (TIS01 local FS, TIS02 BS/IS, TIS03 budget): lines with their GL ranges
+  fsVersions: () => request("/accounting/fs-versions"),
+  fsVersion: (code) => request(`/accounting/fs-versions/${encodeURIComponent(code)}`),
+  createFsVersion: (body) => post("/accounting/fs-versions", body),
+  saveFsVersion: (code, body) => put(`/accounting/fs-versions/${encodeURIComponent(code)}`, body),
 
   // tax
   taxCodes: (params) => request(`/period-end/tax-codes${qs(params)}`),

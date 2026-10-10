@@ -31,7 +31,9 @@ minimal, clearly-correct front-end fix.
   `write:posting-rules`, `approve:posting-rules` and `view:pii` (full personal identifiers), and the approvals of the front office
   (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
   `approve:renewals` (renewal terms) and `approve:claims` (claim decisions), and `approve:remittance` (remittance
-  approvals, migration 0400; an approver needs no `write:remittance`). An approval route requires the approval
+  approvals, migration 0400; an approver needs no `write:remittance`), and those of Cash Control: `approve:pdc`
+  (post-dated cheque cancellations, migration 0520), `approve:insurer-billing` (insurer billing statements, 0522),
+  `reverse:receipts` and `approve:receipt-reversal` (receipt reversals, 0524). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Where the screens must
   explain a refused decision before anyone acts, the module answers a decision block with the shared codes
   (`canDecide`, `blockedCode` such as SUBMITTER, ABOVE_LIMIT, NO_AUTHORITY, ALREADY_DECIDED, and the sentence in
@@ -72,7 +74,8 @@ minimal, clearly-correct front-end fix.
   without a reason (period close and reopening, year-end reversal, void of a printed CAS book, change of a CAS
   document, incentive batch rejection: the contexts of seed `88_accounting_reasons.sql`; the remittance, exception,
   insurer reconciliation and insurer billing decisions: the contexts of seed `89_remittance_reasons.sql`; cancellation
-  of a sales invoice or a payment acknowledgement: seed `89_tax_invoice_reasons.sql`) takes `{ reasonCode, note }`
+  of a sales invoice or a payment acknowledgement: seed `89_tax_invoice_reasons.sql`; post-dated cheque cancellations and
+  bounces, receipt reversals and their return, refunds of unapplied collections: seed `92_cash_control.sql`) takes `{ reasonCode, note }`
   and resolves it with `requiredReason(db, context, { reasonCode, note })` from the same file (the code is required;
   returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns). A
   change of access takes its reason from the context `access_change` (seed `91_role_access.sql`).
