@@ -298,7 +298,7 @@ AppSupport.
 have been signed out.**
 
 **My e-signature** records the signature printed on the documents you issue or approve, where
-[Document Signatures (20.22)](#document-signatures) maps it:
+[Document Signatures (20.23)](#document-signatures) maps it:
 
 1. Select **My e-signature**.
 2. **Draw** the signature on screen, or **Upload image** (PNG or JPEG, up to 512 KB).
@@ -351,7 +351,7 @@ overdue or lost.
 #### Confirmations {#confirmations}
 A confirmation says in one sentence what is about to happen, lists the facts of the record it applies to (amounts in
 pesos on the right, dates as DD/MM/YYYY) and says what follows. The button names the action, for example
-**Submit 3 remittances**, **Register cheque** or **Escalate**; **Cancel** or the X closes the confirmation and
+**Submit 3 remittances**, **Send for approval** or **Escalate**; **Cancel** or the X closes the confirmation and
 changes nothing.
 
 - A rejection, return, reversal, cancellation or escalation asks for the **Reason**, chosen from the list of reasons
@@ -550,13 +550,13 @@ From the booking onwards both policies follow the same steps.
 | Placement | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | **Sent to insurer**, **Acknowledged**, **e-Policy received** |
 | Check of the e-policy | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | **Checked against slip** |
 | Booking | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | Policy, bill, journal and commission; **Insurer issued (Booked)** |
-| Collection | the Cash Control roles | [Receipts (18.1)](#verify-payments-and-post-official-receipts), [Post-Dated Cheques (18.4)](#post-dated-cheques) | Official receipt; policy payment **Completed** |
-| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (18.9)](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
+| Collection | CCD-BP / QRPh (Receipting) | [Receipts (18.1)](#verify-payments-and-post-official-receipts), [Post-Dated Cheques (18.5)](#post-dated-cheques) | Official receipt; policy payment **Completed** |
+| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (18.10)](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
 | Commission | TIS Finance & General Accounting | [Commission to agents and referrers (19.4)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
 | Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (17.10)](#policies) | Policy changed; additional premium billed |
 | Claim | the Operations roles or TIS General Manager | [The claims list (17.13)](#the-claims-list) | Claim **Pending** to **Closed** |
 | Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
-| Month-end and tax | TIS Finance & General Accounting | [Period end (18.20)](#period-end), [Tax: BIR forms and returns (18.17)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
+| Month-end and tax | TIS Finance & General Accounting | [Period end (18.21)](#period-end), [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
 
 Work that waits for you appears in [My Work (2.3)](#my-work). Each approval in the chain is made by another user than the
 one who entered the record (see [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)).
@@ -769,9 +769,9 @@ role works only on its own part:
 | Collection | Role | Screen |
 |---|---|---|
 | Over-the-counter payments, bank transfers, bills payment and QRPh | [CCD-BP / QRPh (Receipting) (chapter 12)](#ccd-bp-qrph-receipting) | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Post-dated cheques | [CCD-PDU (Post-Dated Cheques) (chapter 10)](#ccd-pdu-post-dated-cheques), [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Post-dated cheques (18.4)](#post-dated-cheques) |
+| Post-dated cheques | [CCD-PDU (Post-Dated Cheques) (chapter 10)](#ccd-pdu-post-dated-cheques), [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Post-dated cheques (18.5)](#post-dated-cheques) |
 | Auto-debit arrangements | [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals) (chapter 13)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation (18.15)](#bank-reconciliation), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
+| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals) (chapter 13)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation (18.16)](#bank-reconciliation), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 
 The roles that issue receipts do not cancel or reverse them: see [Reconciliation and reversals (3.7.3)](#process-reversals).
 
@@ -795,71 +795,70 @@ Collections received in a file (bills payment and QRPh settlement reports) are r
 **Bulk Upload** on Receipts: each row pays a policy.
 
 #### Post-dated cheques {#process-pdc}
-A client who pays by post-dated cheques hands them to Cash Control. Nothing is posted until a cheque is deposited.
+A client who pays the instalments by post-dated cheques hands them to Cash Control. Nothing is posted when they are
+received.
 
-1. Choose Accounts > Post-Dated Cheques.
-2. Select **Register cheque** and enter the bill or policy, the drawee bank, the cheque number, the cheque date
-   (picked from the calendar), the amount and where the cheque is kept. The cheque is **On Hand**.
-3. Cheques due within three days appear under **Deposit due**. On or after the cheque date, select **Deposit** and
-   the bank account. The system creates and posts the official receipt.
-4. When the bank clears the cheque, record it as cleared.
-5. If the cheque bounces, record the bounce with the reason. The system cancels its receipt (the journal is reversed
-   and the bill is open again) and informs Accounting and the client. Select **Replace** to register the new cheque.
+1. CCD-PDU (Post-Dated Cheques) chooses Accounts > Post-Dated Cheques and encodes the cheques as a set
+   against the instalments of the bill (**Encode PDCs**), then prints the acknowledgement receipt for the client.
+2. Cheques payable to the Insurance Partner are forwarded with a transmittal and warehoused by the partner. When the
+   partner advises that a cheque was paid (**Partner cleared**), its acknowledgement receipt is posted and the
+   instalment is paid; a bounced cheque re-opens the instalment for a replacement.
+3. Cheques payable to TISPH are deposited on their dates to the one collection account; the official receipt is
+   posted.
+4. A cancellation is asked for with a reason and approved by another user; a replacement keeps the instalment.
 
-**Return** gives a cheque back to the client; **Cancel** removes a cheque registered in error.
-
-![Figure 3.9: Accounts > Post-Dated Cheques, with the cheques on hand and their actions](../images/process/post-dated-cheques.png)
+![Figure 3.9: Accounts > Post-Dated Cheques, with the cheques at TIS](../images/process/post-dated-cheques.png)
 #### Reconciliation and reversals {#process-reversals}
 Each day the bank statements are matched by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting with the receipts on
-[Bank reconciliation (18.15)](#bank-reconciliation), and the reconciliation is approved by TIS Finance & General Accounting.
+[Bank reconciliation (18.16)](#bank-reconciliation), and the reconciliation is approved by TIS Finance & General Accounting.
 
-Receipts are never cancelled on the Receipts screen, which has no cancel action. The receipt of a cheque that the
-bank returns is cancelled by CCD-Recon (Reconciliation and Reversals): on the Reconciliation Workspace (adjustment
-**RCHQ – Returned cheque**) or, for a post-dated cheque, by recording the bounce on Post-Dated Cheques. The payment
-journals are reversed and the bill is open again. Any other receipt issued in error is reported to CCD-Recon, who
-corrects it with TIS Finance & General Accounting. The user who issued a receipt never reverses it; the
-segregation-of-duties rule **Receipting and reversals** warns when one person holds both roles.
+A receipt is reversed from the receipt page by CCD-Recon (Reconciliation and Reversals) with a reason, and another
+user approves the reversal: CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting (see [Reverse a receipt (18.1.1)](#reverse-a-receipt)). On
+approval the payment journals are reversed and the bill is open again. The receipt of a cheque that the bank returns
+is also cancelled on the Reconciliation Workspace (adjustment **RCHQ – Returned cheque**) or, for a post-dated cheque,
+by recording the bounce on Post-Dated Cheques. CCD-BP / QRPh (Receipting), who issues the receipts, does not reverse
+them.
 
 Premium warranty extensions, instalment plans and client credit limits are handled on
-[Credit control (18.3)](#credit-control) and approved by TIS Finance & General Accounting.
+[Credit control (18.4)](#credit-control) and approved by TIS Finance & General Accounting.
 
 ### Remittance to the insurers {#process-remittance}
 Remittances to the insurers are prepared and submitted by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, and approved by
 TIS Finance & General Accounting or TIS General Manager within their approval limit, never by the user who prepared or submitted them. See
-[Remittance to insurers (18.9)](#remittance-to-insurers).
+[Remittance to insurers (18.10)](#remittance-to-insurers).
 
 TISPH collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
 the premium collected, less the commission and the output VAT on it, plus the withholding tax the insurer deducts
 from the commission. For an insurer and product remitted gross, the whole premium is remitted and the commission is
-billed to the insurer separately on [Insurer billing (18.10)](#direct-bill-commission-debit-notes).
+billed to the insurer separately on [Insurer billing (18.11)](#direct-bill-commission-debit-notes).
 
 1. Every Monday at 06:15 the weekly run creates the draft remittances of the policies paid in the Monday to Friday
-   before, one per insurer and product line ([Setup: remittance schedules (18.9.7)](#remittance-schedules)). An off-cycle
+   before, one per insurer and product line ([Setup: remittance schedules (18.10.7)](#remittance-schedules)). An off-cycle
    remittance is created from a list of policies with
-   [Import policy list (18.9.2)](#remittance-import-policy-list).
+   [Import policy list (18.10.2)](#remittance-import-policy-list).
 2. Choose Accounts > Remittance > Remittances. On **My work**, check each draft (policies and amounts), tick it and
    select **Submit for approval (n)**.
 3. The approver decides on Accounts > Remittance > Approvals: **Approve**, or **Reject** with a reason, which
    returns the remittance to its maker as **Returned**.
 4. The approved remittance is settled on Accounts > Remittance > Settlement. The approved settlement
-   raises the insurer's payment voucher on [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques) and the
+   raises the insurer's payment voucher on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques) and the
    remittance shows **Settled (voucher raised)**.
-5. The voucher is paid from [Insurer payments (18.9.5)](#insurer-payments): by a bank payment batch on
-   [Bank payment files (18.8)](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
+5. The voucher is paid from [Insurer payments (18.10.5)](#insurer-payments): by a bank payment batch on
+   [Bank payment files (18.9)](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
    remittance reaches the step **Paid**.
 6. The remittance schedule (XLSX and PDF) and, once the voucher is raised, the remittance advice are downloaded from
    the remittance and sent to the insurer.
 
 ![Figure 3.10: Accounts > Remittance > Remittances of TIS Finance & General Accounting: the drafts to submit, the next run and Automation Off](../images/process/remittances.png)
 Each month the insurers' statements are matched with TISPH's records on
-[Insurer statement reconciliation (18.16)](#insurer-statement-reconciliation); the reconciliation and its adjustments are
+[Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation); the reconciliation and its adjustments are
 approved by CCD-Recon (Reconciliation and Reversals).
 
 ### Commission and incentives {#process-commission}
 Commission is processed by TIS Finance & General Accounting. The telesales incentive is calculated by a
 TIS Sales Unit Head user and approved by another user of that role: the user who runs a calculation never
 approves it. See [Commission to agents and referrers (19.4)](#commission-to-agents-and-referrers) and
-[Incentives (18.22)](#incentives).
+[Incentives (18.23)](#incentives).
 
 TISPH earns its brokerage commission from the insurer: it is kept when the premium is remitted net, or billed to the
 insurer for gross and direct-bill business.
@@ -880,7 +879,7 @@ To pay a referrer:
 1. Choose Commission > Agents/Referrer Accounts and open the referrer.
 2. Approve the **Eligible** lines.
 3. Generate the payout: the approved lines go to a payment voucher on
-   [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques), with the withholding tax of the referrer (5% for an
+   [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), with the withholding tax of the referrer (5% for an
    individual, 10% for a company in the delivered setup).
 
 When premium is returned (an endorsement or a cancellation), the referrer commission of a paid line is clawed back
@@ -941,13 +940,13 @@ still be renewed within 90 days on [Lapse Management (17.15)](#renewal-batch-lap
 ![Figure 3.13: Operations > Renewals > Renewal Batch, with a batch of renewal notices in preparation](../images/process/renewal-batch.png)
 ### Month-end and tax {#process-month-end}
 The month-end and year-end steps and the BIR returns are run by TIS Finance & General Accounting; the close is approved by
-TIS Finance & General Accounting. See [Period end (18.20)](#period-end) and [Tax: BIR forms and returns (18.17)](#tax-bir-forms-and-returns).
+TIS Finance & General Accounting. See [Period end (18.21)](#period-end) and [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns).
 
 The TISPH fiscal year runs from April to March (FY2027: 01/04/2026 to 31/03/2027), with twelve monthly periods and an
 adjustment period 13.
 
 #### Every day {#process-daily}
-- The day's journals are sent to SAP in the [SAP GL export (18.12)](#sap-gl-export) file.
+- The day's journals are sent to SAP in the [SAP GL export (18.13)](#sap-gl-export) file.
 - Cash Control reconciles the bank accounts (see [Reconciliation and reversals (3.7.3)](#process-reversals)).
 
 #### Month-end {#process-month-end-close}
@@ -969,12 +968,12 @@ The BIR forms and returns are prepared on Accounts > Tax from the payment vouche
 
 | Return | When | Screen |
 |---|---|---|
-| BIR Form 2307 to suppliers | With each payment subject to withholding | [BIR Form 2307 for suppliers (18.6)](#bir-form-2307-for-suppliers) |
-| VAT Summary, SAWT, SLSP Sales and Purchases | Each quarter | [Tax: BIR forms and returns (18.17)](#tax-bir-forms-and-returns) |
+| BIR Form 2307 to suppliers | With each payment subject to withholding | [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers) |
+| VAT Summary, SAWT, SLSP Sales and Purchases | Each quarter | [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) |
 
 #### Year-end {#process-year-end}
 After the twelve periods are closed, a user of TIS Finance & General Accounting starts the year-end close on
-[Year-end close (18.21)](#year-end-close-preparer). The pre-checks must pass (periods closed, no unposted journal in the year,
+[Year-end close (18.22)](#year-end-close-preparer). The pre-checks must pass (periods closed, no unposted journal in the year,
 suspense account nil, trial balance balanced, closing accounts set up, previous year closed); the adjustments of
 period 13 are posted and approved. A user of TIS Finance & General Accounting other than the one who started the run then
 closes the year: the system posts the closing entries, carries the balances forward as the opening balances of the
@@ -1025,6 +1024,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Policy Cancellation | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Statement | View |
 | Commission | Commission Dashboard | View |
@@ -1067,7 +1067,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
@@ -1121,7 +1122,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Raise the endorsements and cancellations your clients ask for | As requested | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
 | Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies), [Negotiations (17.18)](#negotiations) |
 | Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management (17.15)](#renewal-batch-lapse-management-and-the-analytics) |
-| Check your pipeline and your incentive progress | Weekly and at month-end | [Incentive (18.22)](#incentives) |
+| Check your pipeline and your incentive progress | Weekly and at month-end | [Incentive (18.23)](#incentives) |
 
 ### Procedures {#tis-sales-associate-procedures}
 #### Start the day from My Work {#tis-sales-associate-my-work}
@@ -1259,6 +1260,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Policy Cancellation | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Statement | View |
 | Commission | Commission Dashboard | View |
@@ -1307,7 +1309,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
@@ -1488,6 +1491,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Policy Cancellation | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Payables | Suppliers | View |
 | Accounts > Payables | Supplier 2307 | View |
 | Accounts | Disbursement | View |
@@ -1542,7 +1546,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
@@ -1600,12 +1605,12 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.18)](#negotiations) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.16)](#renewal-queue-and-at-risk-policies) |
-| Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (18.5)](#accounts-payable) |
+| Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (18.6)](#accounts-payable) |
 | Review the team assignment and the reassignment queue | Weekly | [Lead Assignment (17.6)](#lead-assignment) |
-| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentive (18.22)](#incentives) |
-| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentive (18.22)](#incentives) |
-| Mark the approved incentives as paid | When paid | [Incentive (18.22)](#incentives) |
-| Run the incentive and production reports | Month-end | [Incentive (18.22)](#incentives), [All Reports (22.1)](#reports-catalogue) |
+| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentive (18.23)](#incentives) |
+| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentive (18.23)](#incentives) |
+| Mark the approved incentives as paid | When paid | [Incentive (18.23)](#incentives) |
+| Run the incentive and production reports | Month-end | [Incentive (18.23)](#incentives), [All Reports (22.1)](#reports-catalogue) |
 
 The sales work, lead assignment, campaigns, the check of the e-policies and the approval of renewal terms follow the
 procedures of the [TIS Sales Associate (4.7)](#tis-sales-associate-procedures) and the
@@ -1703,6 +1708,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
@@ -1743,7 +1749,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
@@ -1990,8 +1997,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
@@ -2033,11 +2042,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
@@ -2086,7 +2096,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Register claims, collect their documents, follow motor repairs | Daily | [Claims (17.13)](#the-claims-list), [Claims Awaiting Documents (17.22)](#claims-awaiting-documents), [Motor Claim Repairs (17.23)](#motor-claim-repairs-and-letters-of-authority) |
 | Raise endorsements and cancellations | As requested | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
 | Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies) |
-| Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (18.11)](#journal-vouchers) |
+| Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (18.12)](#journal-vouchers) |
 | Follow the work in flight and the claims position | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
 | Run the production, claims and renewal reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
@@ -2119,7 +2129,7 @@ TIS Finance & General Accounting approver.
 
 ![Figure 8.1: Accounts > Journal Voucher as the TIS Operations Officer: the journal history with its status](../images/role-tis-ops-officer/journal-vouchers.png)
 > Your access to journal vouchers is View only. The **Voucher** and **Upload** buttons are for TIS Finance & General
-> Accounting: the system refuses a voucher entered or uploaded by your role. See [Journal vouchers (18.11)](#journal-vouchers).
+> Accounting: the system refuses a voucher entered or uploaded by your role. See [Journal vouchers (18.12)](#journal-vouchers).
 
 ## TIS Operations Unit Head {#tis-operations-unit-head}
 ### Role summary {#tis-operations-unit-head-summary}
@@ -2171,11 +2181,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Payables | Suppliers | View |
 | Accounts > Payables | Supplier 2307 | View |
 | Accounts | Disbursement | View |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
 | Reports | All Reports | View |
@@ -2222,14 +2234,15 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions and Insurer billing |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
@@ -2293,7 +2306,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Complete the cancellations and return premiums raised by the team | Daily | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
 | Approve or return renewal terms | Daily | [Negotiations (17.18)](#negotiations) |
 | Approve quotations and decide underwriting referrals | As referred | [Quotations (17.4)](#quotations) |
-| Approve supplier invoices | As submitted | [Payables (18.5)](#accounts-payable) |
+| Approve supplier invoices | As submitted | [Payables (18.6)](#accounts-payable) |
 | Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.16)](#renewal-queue-and-at-risk-policies) |
 | Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
 | Review the claims, renewal and production reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
@@ -2400,16 +2413,16 @@ a limit for underwriting referrals, the referral must be within it.
 ### Role summary {#ccd-pdu-post-dated-cheques-summary}
 **Department:** Cash Control. Post-dated cheques: encoding, acknowledgement, deposit and cancellation.
 
-CCD-PDU keeps the register of post-dated cheques that clients hand to Toyota Insurance Services Philippines for their
-premiums. You register each cheque against the client's bill or policy when you receive it, record where it is
-kept, deposit it on or after its date, record whether the bank cleared or returned it, and replace, return or cancel
-cheques when the client asks. The cheque is acknowledged by its registration: the **On Hand** status and the PDC
-number on the register are the record that Cash Control holds the cheque.
-Depositing a cheque is what issues the official receipt: nothing is posted while a cheque is on hand.
+CCD-PDU keeps the post-dated cheques that clients hand to Toyota Insurance Services Philippines for the instalments of
+their premiums. You encode each client's cheques as a set against the instalments of the bill when you receive them,
+give the client the acknowledgement receipt, forward the cheques payable to the Insurance Partner with a transmittal,
+record the partner's receipt and advices, deposit the cheques payable to TISPH on their dates, and ask for the
+cancellation, replacement or return of cheques. Nothing is posted when a cheque is received: a cheque is accounted for
+when it is collected.
 
-You work with CCD-PDC / CCD-ADA, who handles post-dated cheques and auto-debit arrangements on the same register, with
-CCD-BP / QRPh (Receipting), who receipts the other collections, and with CCD-Recon (Reconciliation and Reversals), who
-matches your deposits with the bank statement. The TIS Operations and Sales users see the result on the policy's
+You work with CCD-PDC / CCD-ADA, who approves the cancellations you ask for, with CCD-BP / QRPh (Receipting), who
+receipts the other collections, and with CCD-Recon (Reconciliation and Reversals), who matches the deposits with the
+bank statement. You do not open the receipts. The TIS Operations and Sales users see the result on the policy's
 payment status.
 
 ### Menus available {#ccd-pdu-post-dated-cheques-menus}
@@ -2419,7 +2432,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Operations | Payments | View |
-| Accounts | Receipts | Create and edit |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
@@ -2430,8 +2442,8 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
+| Accounts | Post-dated cheques | Create and edit | Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques |  |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
@@ -2443,121 +2455,95 @@ Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
+| Post-dated cheques | Approve or return the cancellation of a post-dated cheque requested by another user | CCD-PDC / CCD-ADA |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
 ### Segregation of duties {#ccd-pdu-post-dated-cheques-sod}
-| Rule | Conflict | When given together | Reason |
-|---|---|---|---|
-| Administration and transactions | Receipts (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
-| Receipting and selling | Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
+No delivered segregation-of-duties rule concerns this role.
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
 
 ### Daily and periodic tasks {#ccd-pdu-post-dated-cheques-tasks}
 | Task | When | Screen |
 |---|---|---|
-| Read the morning notification of the cheques due for deposit | Every morning | [Notifications (2.4)](#notifications) |
-| Register the post-dated cheques received from clients | Daily, as cheques arrive | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Deposit the cheques dated today or earlier | Daily | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Record the cheques cleared by the bank | Daily, from the bank's advice | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Record bounced cheques and ask the client for a replacement | As the bank returns them | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Return or cancel cheques no longer needed | As requested | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Check the payment status of a policy before answering a client | As needed | [Payments (17.19)](#payments), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Count the cheques in the vault against the register | Month-end | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Run the collection report and the statement of account | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Read the morning notifications: cheques due for deposit, cheques to follow up | Every morning | [Notifications (2.4)](#notifications) |
+| Encode the post-dated cheques received from clients and print their acknowledgement | Daily, as cheques arrive | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Forward the cheques payable to an Insurance Partner | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Record the partners' receipts and their cleared or bounced advices | As they arrive | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Deposit the cheques payable to TISPH on their dates | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Ask for the cancellation of a cheque; replace or return cheques | As requested | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Count the cheques in the vault against the log | Month-end | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Run the PDC reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-pdu-post-dated-cheques-procedures}
-#### Find a cheque in the register {#ccd-pdu-post-dated-cheques-register}
-1. Choose Accounts > Post-Dated Cheques. The cards show the cheques **On hand**, the cheques **Due for
-   deposit** and the number **Bounced**.
-2. On the **Cheques** tab, select the status in
-   the first list (**On hand** is shown first; **All** shows every cheque) and type a PDC number, cheque number,
-   client, policy or bill in the search box.
-3. Select **Export to Excel** to download the register with the status selected.
+#### Find a cheque in the log {#ccd-pdu-post-dated-cheques-register}
+1. Choose Accounts > Post-Dated Cheques.
+2. Open the tab of the cheques you look for: **At TIS**, **With partners**, **Awaiting confirmation** (dated in the
+   past, no advice from the partner yet), **Follow-up**, **Bounced**, **Deposit due** or **All open**.
+3. Type a PDC number, cheque number, client, policy or set in the search box; **Export** downloads the tab.
 
-The **Deposit due** tab lists the cheques on hand dated within the next three days, with their total. Each morning
-the system sends a notification of these cheques to the Cash Control users.
+Select a row to see the cheque, its set with every instalment and its history.
 
-![Figure 10.1: Accounts > Post-Dated Cheques, the register with the cheques on hand and their actions](../images/role-tis-ccd-pdu/post-dated-cheques.png)
-#### Register a post-dated cheque {#ccd-pdu-post-dated-cheques-encode}
-1. Choose Accounts > Post-Dated Cheques and select **Register cheque**.
-2. In **Against**, keep **Bill number** to apply the cheque to one bill, or select **Policy number**.
-3. In **Reference**, type the bill number (for example INV-2026-95007) or the policy number.
-4. In **Drawee bank**, select the client's bank. If the bank is not in the list, type it in **Drawee bank (if not in
-   the list)**.
-5. Type the **Cheque no.**, the **Cheque date** (DD/MM/YYYY, or pick it from the calendar of the field) and the
-   **Amount**.
-6. In **Kept in**, type where the cheque is filed, for example "Finance vault, drawer 2". Add **Remarks** if needed.
-7. Select **Register cheque**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
+![Figure 10.1: Accounts > Post-Dated Cheques, the log with its tabs](../images/role-tis-ccd-pdu/post-dated-cheques.png)
+#### Encode the cheques of a client {#ccd-pdu-post-dated-cheques-encode}
+1. Choose Accounts > Post-Dated Cheques and select **Encode PDCs**.
+2. Enter the policy and choose the bill. One row is proposed per unpaid instalment, with its due date and amount.
+3. Choose the payee: **Insurance Partner** (forwarded for warehousing) or **TISPH** (kept and deposited by TISPH).
+4. For each cheque enter the bank, branch, account number, cheque number, cheque date and amount. **Copy down**
+   repeats the bank details on the next rows.
+5. Enter where the cheques are kept and select **Save set**. The system gives the set its number (PCS-2026-00031) and
+   each cheque its PDC number, **Received at TIS**.
+6. Open a cheque of the set and select **Print acknowledgement**: the client keeps the acknowledgement receipt.
 
-| Field | Required | What to enter | Rule |
-|---|---|---|---|
-| **Against** | Yes | Bill number or Policy number | A policy billed directly by the insurer is refused: the client pays the insurer |
-| **Reference** | Yes | The bill or policy number | The bill must have an open balance |
-| **Drawee bank** | Yes, one of the two | The client's bank | Type it in **Drawee bank (if not in the list)** when it is not listed |
-| **Cheque no.** | Yes | The number printed on the cheque | |
-| **Cheque date** | Yes | The date on the cheque | The cheque cannot be deposited before this date |
-| **Amount** | Yes | The amount of the cheque | Not more than the bill balance left after the cheques already on hand for it |
-| **Kept in** | No | Vault, drawer or folder | Printed on the register and the export |
+| Rule | |
+|---|---|
+| Cheque date | Within a few days of the instalment due date |
+| Amounts | Not more than the bill still owes after the cheques already encoded for it |
+| Cheques | Not the same cheque number of the same bank twice |
 
-![Figure 10.2: Register cheque, with the bill, drawee bank, cheque number, date, amount and vault entered](../images/role-tis-ccd-pdu/register-cheque.png)
-#### Deposit a cheque on its date {#ccd-pdu-post-dated-cheques-deposit}
-1. Choose Accounts > Post-Dated Cheques and open the **Deposit due** tab.
-2. Select **Deposit** in the row of the cheque.
-3. Check the cheque details shown, then select the **Bank account** the cheque is deposited to and the **Deposit
-   date** (today by default).
-4. Select **Deposit cheque**.
+![Figure 10.2: Encode PDCs, one row per instalment](../images/role-tis-ccd-pdu/encode-pdcs.png)
+#### Forward cheques to the Insurance Partner {#ccd-pdu-post-dated-cheques-forward}
+1. On the **At TIS** tab tick the cheques payable to one Insurance Partner and select **Forward to Insurance Partner**.
+2. Choose how they are sent (courier, messenger or hand-carry) and the courier reference. The transmittal
+   (PT-2026-00008) lists them; its Excel file goes with the cheques.
+3. When the partner acknowledges the transmittal, select **Partner received** on the transmittal (all cheques or those
+   ticked), with who received them and the partner's reference. The cheques are **Warehoused**.
 
-The system issues the official receipt for the cheque, posts it to the bank account selected and reduces the bill.
-The cheque becomes **Deposited** and its receipt number is shown in the **Receipt** column. A deposit dated before the
-cheque date is refused. Print or e-mail the receipt from [Receipts (18.1)](#verify-payments-and-post-official-receipts).
+#### Record the partner's advice: cleared or bounced {#ccd-pdu-post-dated-cheques-clear}
+- **Partner cleared**: enter the collection date and the partner's reference. The acknowledgement receipt of the
+  cheque is posted against the premium payable to the partner and the instalment is paid.
+- **Partner bounced**: choose the reason (DAIF, account closed, stop payment, signature differs, stale, other). The
+  receipt of the cheque is cancelled, the instalment is open again and the client is told.
 
-![Figure 10.3: Deposit dialog of a post-dated cheque, with the bank account and the deposit date](../images/role-tis-ccd-pdu/deposit-cheque.png)
-#### Record the bank's answer: cleared or bounced {#ccd-pdu-post-dated-cheques-clear}
-When the bank has honoured the cheque:
+#### Deposit a cheque payable to TISPH {#ccd-pdu-post-dated-cheques-deposit}
+1. Open the **Deposit due** tab and select **Deposit** on the cheque.
+2. The cheque goes to the one collection account of TISPH; enter the deposit date (not before the cheque date).
+3. The official receipt is posted and the cheque is **Deposited**. Record **Cleared** or **Bounced** from the bank's
+   answer.
 
-1. Select **All** (or **Deposited**) in the status list and find the cheque.
-2. Select **Cleared**, check the cheque and its receipt, and select **Mark as cleared**. The cheque becomes
-   **Cleared**.
+#### Cancel, replace or return a cheque {#ccd-pdu-post-dated-cheques-replace}
+- **Request cancellation**: choose the reason (cash or cheque replacement, technical defect, policy cancelled, paid off,
+  encoded in error). CCD-PDC / CCD-ADA approves it; you cannot approve your own request. A cheque the partner holds is
+  pulled out on the next transmittal to that partner.
+- **Replace**: on a bounced or cancelled cheque, enter the new cheque for the same instalment.
+- **Return to client**: a cheque kept at TIS goes back to the client with the reason.
 
-When the bank returns the cheque unpaid:
-
-1. Find the deposited or cleared cheque and select **Bounced**.
-2. In **Reason given by the bank**, type the reason, for example "DAIF (drawn against insufficient funds)". Type the
-   **Bank charge** if the bank charged one.
-3. Select **Mark as bounced**.
-
-The system cancels the official receipt of the cheque: its journals are reversed and the bill is open again. The
-cheque becomes **Bounced**, the Cash Control users receive a high-priority notification and the client, when an
-e-mail address is on file, receives an e-mail about the returned cheque.
-
-![Figure 10.4: Bounced cheque dialog, with the reason given by the bank and the bank charge](../images/role-tis-ccd-pdu/bounced-cheque.png)
-#### Replace, return or cancel a cheque {#ccd-pdu-post-dated-cheques-replace}
-- **Replace** (on a cheque **On Hand** or **Bounced**): enter the new cheque as in
-  [Register a post-dated cheque (10.7.2)](#ccd-pdu-post-dated-cheques-encode) and select **Register replacement**. The old cheque becomes
-  **Replaced** and the new one is linked to it, against the same bill (or the policy when the bill is closed).
-- **Return** (on a cheque **On Hand**): type why the cheque goes back to the client and select **Return cheque**. The
-  cheque becomes **Returned**; the bill stays open.
-- **Cancel** (on a cheque **On Hand** registered in error): type the reason and select **Cancel registration**. The
-  cheque becomes **Cancelled**.
-
-A cheque already deposited cannot be returned or cancelled: when it bounces, record it as bounced and replace it.
-
-See [Post-dated cheques (18.4)](#post-dated-cheques) for the whole screen and [Post-dated cheques (3.7.2)](#process-pdc) in the
+See [Post-dated cheques (18.5)](#post-dated-cheques) for the whole screen and [Post-dated cheques (3.7.2)](#process-pdc) in the
 TISPH process.
 
 ## CCD-PDC / CCD-ADA {#ccd-pdc-ccd-ada}
 ### Role summary {#ccd-pdc-ccd-ada-summary}
 **Department:** Cash Control. Post-dated cheques and auto-debit arrangements.
 
-CCD-PDC / CCD-ADA collects the premiums paid by post-dated cheque and by auto-debit arrangement. On the post-dated
-cheque register you work like CCD-PDU (Post-Dated Cheques): you register, deposit, clear, replace and return cheques.
-For a client who pays by authority to debit, you record each debit made by the bank as an official receipt with the
-receipt mode **Authority to Debit**. You also read the collections, the bank reconciliation and the insurer statements
-to answer clients and follow the cheques and debits you posted until the bank statement shows them.
+CCD-PDC / CCD-ADA collects the premiums paid by post-dated cheque and by auto-debit arrangement. On Post-Dated Cheques
+you work like CCD-PDU (Post-Dated Cheques): you encode, forward, deposit and follow cheques, and you approve the
+cancellations CCD-PDU asks for. For a client who pays by authority to debit, you pass the bank's debit advice to
+CCD-BP / QRPh (Receipting), who issues the official receipt; you read the receipts, the collections, the bank
+reconciliation and the insurer statements to answer clients and follow the cheques and debits until the bank statement
+shows them.
 
 You work with CCD-PDU (Post-Dated Cheques) on the cheque register, with CCD-BP / QRPh (Receipting) for the other
 collections and with CCD-Recon (Reconciliation and Reversals), who matches your receipts with the bank statement and
@@ -2570,12 +2556,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Operations | Payments | View |
-| Accounts | Receipts | Create and edit |
+| Accounts | Receipts | View |
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -2592,83 +2579,70 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
+| Accounts | Post-dated cheques | Create and edit | Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques |  |
+| Accounts | Post-dated cheques | Approve | Approve or return the cancellation of a post-dated cheque requested by another user |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held policies |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 
 ### Approvals {#ccd-pdc-ccd-ada-approvals}
-This role approves nothing.
+This role approves the work of other users:
+
+- Approve or return the cancellation of a post-dated cheque requested by another user
 
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
+| Post-dated cheques | Approve or return the cancellation of a post-dated cheque requested by another user | CCD-PDC / CCD-ADA |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 
 ### Segregation of duties {#ccd-pdc-ccd-ada-sod}
-| Rule | Conflict | When given together | Reason |
-|---|---|---|---|
-| Administration and transactions | Receipts (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
-| Receipting and selling | Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
+No delivered segregation-of-duties rule concerns this role.
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
 
 ### Daily and periodic tasks {#ccd-pdc-ccd-ada-tasks}
 | Task | When | Screen |
 |---|---|---|
-| Read the morning notification of the cheques due for deposit | Every morning | [Notifications (2.4)](#notifications) |
-| Register post-dated cheques and deposit those due | Daily | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Record the cleared and bounced cheques | Daily, from the bank's advice | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Receipt the auto-debits made by the bank | On each debit date, from the bank's debit advice | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Check the premiums still open and their ageing | Daily | [Collections (18.2)](#collections) |
-| Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements (18.16)](#insurer-statement-reconciliation) |
-| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports (22.1)](#reports-catalogue), [Bank Reconciliation (18.15)](#bank-reconciliation) |
+| Read the morning notifications of the cheques due for deposit and to follow up | Every morning | [Notifications (2.4)](#notifications) |
+| Encode and forward post-dated cheques and deposit those due | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Record the partners' advices and the cleared and bounced cheques | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Approve or return the cancellations asked by CCD-PDU | Daily, from My Work | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Check the auto-debits receipted from the bank's debit advice | On each debit date | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
+| Check the premiums still open and their ageing | Daily | [Collections (18.3)](#collections) |
+| Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
+| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports (22.1)](#reports-catalogue), [Bank Reconciliation (18.16)](#bank-reconciliation) |
 
 ### Procedures {#ccd-pdc-ccd-ada-procedures}
 #### Post-dated cheques {#ccd-pdc-ccd-ada-cheques}
-You register, deposit and follow the post-dated cheques on Accounts > Post-Dated Cheques exactly as
-CCD-PDU (Post-Dated Cheques) does:
+You encode, forward, deposit and follow the post-dated cheques on Accounts > Post-Dated Cheques as CCD-PDU
+(Post-Dated Cheques) does:
 
-- [Register a post-dated cheque (10.7.2)](#ccd-pdu-post-dated-cheques-encode)
-- [Deposit a cheque on its date (10.7.3)](#ccd-pdu-post-dated-cheques-deposit): the deposit issues the official receipt
-- [Record the bank's answer: cleared or bounced (10.7.4)](#ccd-pdu-post-dated-cheques-clear): a bounced cheque cancels its
-  receipt and opens the bill again
-- [Replace, return or cancel a cheque (10.7.5)](#ccd-pdu-post-dated-cheques-replace)
+- [Encode the cheques of a client (10.7.2)](#ccd-pdu-post-dated-cheques-encode)
+- [Forward cheques to the Insurance Partner (10.7.3)](#ccd-pdu-post-dated-cheques-forward)
+- [Record the partner's advice: cleared or bounced (10.7.4)](#ccd-pdu-post-dated-cheques-clear)
+- [Deposit a cheque payable to TISPH (10.7.5)](#ccd-pdu-post-dated-cheques-deposit)
+- [Cancel, replace or return a cheque (10.7.6)](#ccd-pdu-post-dated-cheques-replace)
 
-#### Receipt an auto-debit {#ccd-pdc-ccd-ada-auto-debit}
-When the bank has debited the client's account under the client's authority to debit:
+You also decide the cancellations: on **Cancellation pending** (or from My Work) open the cheque and select **Approve
+cancellation**, or **Return request** with a remark. You never decide a cancellation you asked for. A cheque at TIS is
+then **Cancelled**; one the Insurance Partner holds is pulled out on the next transmittal.
 
-1. Choose Accounts > Receipts and select **Receipt**. **Add Receipts** opens with today's date as **Receipt
-   Date**; change it to the debit date if needed.
-2. Keep **Receipt Type** at **Payment**. Select the **Branch Code** and the **Department Code**.
-3. In **Customer Code**, select the client. The list shows the clients with an open premium and the amount open.
-   **Customer Name** is filled in.
-4. In **Policy Number**, select the policy debited. Keep **Currency Code** at **PHP** and **Transaction Code** at
-   **OR – Official Receipt**.
-5. In **Receipt Mode**, select **Authority to Debit**. In **Reference No. (Optional)**, type the bank's debit
-   reference.
-6. Under **Open bills for policy**, select the bill debited. In **Amount received**, type the amount debited, or
-   select **Pay full balance**.
-7. Select **Record payment**, check the client, the bill, the amount and the **Balance after payment**, and select
-   **Record** with the amount.
-
-The system issues the official receipt number, posts the payment to the bank account and reduces the bill. The
-amount cannot be more than the bill balance; a partial debit leaves the rest open. Back on **Receipts**, print the
-receipt or e-mail it to the client from the confirmation.
-
-![Figure 11.1: Accounts > Receipts > Add Receipts with the receipt mode Authority to Debit and the bank's debit reference](../images/role-tis-ccd-pdc/authority-to-debit-receipt.png)
-If the bank reports that a debit failed after you receipted it, tell CCD-Recon (Reconciliation and Reversals), who
-handles the reversals of Cash Control: you do not reverse the receipt yourself. See
-[Reverse a returned cheque (13.7.5)](#ccd-recon-reconciliation-and-reversals-returned-cheque).
+#### Auto-debits {#ccd-pdc-ccd-ada-auto-debit}
+Pass the bank's debit advice to CCD-BP / QRPh (Receipting), who issues the official receipt with the receipt mode
+**Authority to Debit** (see [Issue an official receipt (12.7.1)](#ccd-bp-qrph-receipting-official-receipt)). Check the receipt on
+Accounts > Receipts. If the bank reports that a debit failed after it was receipted, tell CCD-Recon
+(Reconciliation and Reversals), who reverses the receipt (see [Reverse a receipt (18.1.1)](#reverse-a-receipt)).
 
 #### Follow the open premiums {#ccd-pdc-ccd-ada-collections}
 1. Choose Accounts > Collections. The cards show the premium **Outstanding**, **Overdue**, **Committed**,
@@ -2677,9 +2651,9 @@ handles the reversals of Cash Control: you do not reverse the receipt yourself. 
 3. Select **View** in a row to see the bill, its ageing, the follow-up history and the payments.
 
 Your role reads this screen; the follow-up of overdue premiums is done by CCD-BP / QRPh (Receipting) and CCD-Recon
-(Reconciliation and Reversals). See [Collections (18.2)](#collections).
+(Reconciliation and Reversals). See [Collections (18.3)](#collections).
 
-![Figure 11.2: Accounts > Collections, the open premiums with their ageing](../images/role-tis-ccd-pdc/collections.png)
+![Figure 11.1: Accounts > Collections, the open premiums with their ageing](../images/role-tis-ccd-pdc/collections.png)
 #### Check that a deposit or a debit reached the bank {#ccd-pdc-ccd-ada-bank}
 1. Choose Accounts > Bank Reconciliation > Reconciliation Workspace. Select the **Bank account** and the **Period**.
 2. Search the **Book entries** for your receipt and the **Bank statement lines** for the deposit or the debit. A
@@ -2687,7 +2661,7 @@ Your role reads this screen; the follow-up of overdue premiums is done by CCD-BP
 3. For a list, choose Accounts > Bank Reconciliation > Deposits in Transit, type the dates and select **Generate**.
 
 Your role reads the bank reconciliation; the matching and adjustments are the work of CCD-Recon (Reconciliation and
-Reversals). See [Bank reconciliation (18.15)](#bank-reconciliation).
+Reversals). See [Bank reconciliation (18.16)](#bank-reconciliation).
 
 ## CCD-BP / QRPh (Receipting) {#ccd-bp-qrph-receipting}
 ### Role summary {#ccd-bp-qrph-receipting-summary}
@@ -2702,9 +2676,11 @@ The acknowledgement receipt (AR) is not issued on your screens: the system issue
 records a client's payment on the policy. You then confirm that payment against the bank, and the confirmation issues
 the official receipt.
 
-On Collections you record the follow-ups, the promises to pay and the receipts of the premiums. You do not cancel,
-reverse or adjust receipts and collections: the Receipts screen has no cancel action, and a returned payment or a
-receipt issued in error is handled by CCD-Recon (Reconciliation and Reversals).
+On Collections you record the follow-ups, the promises to pay and the receipts of the premiums. You allocate the money
+held On Account (excess, floating and advance payments) to the bills, upload the bank's payment reports and the
+payments made directly to the insurers, and receipt the auto-debits of CCD-PDC / CCD-ADA. You do not reverse
+receipts: a returned payment or a receipt issued in error is reversed by CCD-Recon (Reconciliation and Reversals) with
+another user's approval.
 Premium warranty extensions and client credit limits are approved by TIS Finance & General Accounting.
 
 ### Menus available {#ccd-bp-qrph-receipting-menus}
@@ -2715,11 +2691,16 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
+| Accounts | Unapplied Collections | Create and edit |
 | Accounts | Collections | Create and edit |
-| Accounts | Post-Dated Cheques | Create and edit |
+| Accounts > Credit Control | Instalment Plans | Create and edit |
+| Accounts > Credit Control | Premium Warranty Monitor | Create and edit |
+| Accounts > Credit Control | Remittance Ageing | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -2737,11 +2718,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Operations | Claims | Special | Record claim settlement funds received from an insurer | No screen of its own |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
+| Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
+| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments |  |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held policies |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -2755,6 +2737,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
+| Receipts | Approve or return the reversal of a receipt requested by another user | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
@@ -2776,9 +2759,11 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Issue official receipts for payments over the counter and bank transfers | Daily, as payments arrive | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 | Receipt the bills payment and QRPh collections of the day | Daily, from the settlement report | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 | Print or e-mail the receipts to the clients | Daily | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Follow up overdue premiums, record notes and promises to pay | Daily | [Collections (18.2)](#collections) |
-| Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections (18.2)](#collections) |
-| Register and deposit post-dated cheques | Daily | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
+| Follow up overdue premiums, record notes and promises to pay | Daily | [Collections (18.3)](#collections) |
+| Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections (18.3)](#collections) |
+| Upload the bank's payment report and the payments made to the insurers | Daily | [Receipts (18.1.2)](#receipt-batches) |
+| Allocate or refund the unapplied collections by their date | Daily, from My Work | [Unapplied Collections (18.2)](#unapplied-collections) |
+| Attach the proof of payment of the receipts | Daily | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 | Print the receipts of a client for a period | As requested | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 | Run the collection report and the statement of account | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
@@ -2873,9 +2858,24 @@ then **Send reminders**. Each reminder is recorded in the follow-up history of i
 
 ![Figure 12.5: Accounts > Collections > Collection Details of an overdue premium, with Record receipt](../images/role-tis-ccd-bp/collection-detail.png)
 #### Post-dated cheques {#ccd-bp-qrph-receipting-cheques}
-A client paying the counter with post-dated cheques: register them on Accounts > Post-Dated Cheques as in
-[Register a post-dated cheque (10.7.2)](#ccd-pdu-post-dated-cheques-encode). The official receipt is issued when the cheque is
-deposited on its date ([Deposit a cheque on its date (10.7.3)](#ccd-pdu-post-dated-cheques-deposit)).
+Post-dated cheques handed in at the counter go to CCD-PDU (Post-Dated Cheques), who encodes them (see
+[Encode the cheques of a client (10.7.2)](#ccd-pdu-post-dated-cheques-encode)). You see them on
+Accounts > Post-Dated Cheques; their receipts are raised when they are collected.
+
+#### Upload bank payments and payments made to the insurer {#ccd-bp-qrph-receipting-uploads}
+1. Choose Accounts > Receipts and select **Bulk Upload**.
+2. Choose the file: **Bank payments (matched by reference)** for the bank's report of the day, **Payments made to the
+   insurer** for the payments the insurers report, or **Official receipts** for the receipt voucher file. Download its
+   template the first time.
+3. Upload the file. The result says how many lines were matched, overpaid, underpaid, not found or failed, with the
+   reason of each failed row.
+4. Open **Receipt batches** to see the batch and export its lines. Allocate what was held On Account or not found on
+   [Unapplied Collections (18.2)](#unapplied-collections).
+
+#### Allocate an unapplied collection {#ccd-bp-qrph-receipting-unapplied}
+1. Choose Accounts > Unapplied Collections, or open the item from My Work.
+2. Select **Allocate** in the row, type the amount against each bill and select **Allocate**.
+3. An overpayment the client asks back is refunded with **Refund** and its reason; Finance pays the refund.
 
 ## CCD-Recon (Reconciliation and Reversals) {#ccd-recon-reconciliation-and-reversals}
 ### Role summary {#ccd-recon-reconciliation-and-reversals-summary}
@@ -2900,17 +2900,20 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
+| Accounts | Unapplied Collections | Create and edit |
 | Accounts | Collections | Create and edit |
-| Accounts | Post-Dated Cheques | Create and edit |
+| Accounts > Credit Control | Instalment Plans | Create and edit |
+| Accounts > Credit Control | Premium Warranty Monitor | Create and edit |
+| Accounts > Credit Control | Remittance Ageing | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts | Disbursement | View |
 | Accounts > Remittance | Remittances | Create and edit |
 | Accounts > Remittance | Approvals | Approve |
 | Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
 | Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Held policies | Create and edit |
 | Accounts > Remittance | Insurer billing | Create and edit |
-| Accounts | Open Entry Matching | View |
-| Accounts | Open Entry Unmatching | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliations | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -2929,12 +2932,14 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error | No screen of its own |
 | Operations | Claims | Special | Record claim settlement funds received from an insurer |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
+| Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
+| Accounts | Receipts | Create and edit | Reverse a receipt with a reason; the reversal waits for a checker when required |  |
+| Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions and Insurer billing |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies and Insurer billing |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve insurer statement reconciliations and post their adjustments (not the preparer) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
@@ -2947,13 +2952,16 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Approve insurer statement reconciliations and post their adjustments (not the preparer)
+- Approve or return the reversal of a receipt requested by another user
 
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
+| Receipts | Approve or return the reversal of a receipt requested by another user | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
+| Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
@@ -2964,9 +2972,8 @@ The user who enters a record never approves it: the approval is always another u
 ### Segregation of duties {#ccd-recon-reconciliation-and-reversals-sod}
 | Rule | Conflict | When given together | Reason |
 |---|---|---|---|
-| Administration and transactions | Receipts (create and edit), Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
+| Administration and transactions | Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Placing and paying insurers | Remittance and insurer reconciliation (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
-| Receipting and selling | Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
 | Receipting and reversals | CCD-Recon (Reconciliation and Reversals) and CCD-BP / QRPh (Receipting) held by the same person | Warning | CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
@@ -2975,19 +2982,19 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the follow-ups and approvals waiting for you | Every morning | [My Work (2.3)](#my-work) |
-| Import the bank statement of each bank account | Daily | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Match the statement lines with the receipts and payments | Daily | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Post bank charges, interest and direct credits not yet booked | Daily | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank Reconciliation (18.15)](#bank-reconciliation), [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Follow up overdue premiums and promises to pay | Daily | [Collections (18.2)](#collections) |
-| Cancel stale cheques not presented within the stale period | Month-end | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements (18.16)](#insurer-statement-reconciliation) |
-| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements (18.16)](#insurer-statement-reconciliation) |
-| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances (18.9.1)](#remittances-worklist) |
-| Follow the remittances you submitted until they are approved | Daily | [Approvals (18.9.4)](#remittance-approvals) |
-| Follow up the remittance exceptions assigned to you | Daily | [Exceptions (18.9.6)](#remittance-exceptions) |
-| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation (18.15)](#bank-reconciliation), [All Reports (22.1)](#reports-catalogue) |
+| Import the bank statement of each bank account | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Match the statement lines with the receipts and payments | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Post bank charges, interest and direct credits not yet booked | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank Reconciliation (18.16)](#bank-reconciliation), [Post-Dated Cheques (18.5)](#post-dated-cheques) |
+| Follow up overdue premiums and promises to pay | Daily | [Collections (18.3)](#collections) |
+| Cancel stale cheques not presented within the stale period | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
+| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
+| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances (18.10.1)](#remittances-worklist) |
+| Follow the remittances you submitted until they are approved | Daily | [Approvals (18.10.4)](#remittance-approvals) |
+| Follow up the remittance exceptions assigned to you | Daily | [Exceptions (18.10.6)](#remittance-exceptions) |
+| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation), [All Reports (22.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-recon-reconciliation-and-reversals-procedures}
 #### Start the day from My Work {#ccd-recon-reconciliation-and-reversals-my-work}
@@ -3107,12 +3114,12 @@ approver.
    reconciliation**: the statement returns to **Draft** for the preparer.
 
 You cannot approve a reconciliation you submitted yourself: another CCD-Recon (Reconciliation and Reversals) user
-approves it. See [Insurer statement reconciliation (18.16)](#insurer-statement-reconciliation).
+approves it. See [Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation).
 
 #### Prepare a remittance to an insurer {#ccd-recon-reconciliation-and-reversals-remittance}
 1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit: those of the weekly run
    and those created from a list of policies with
-   [Import policy list (18.9.2)](#remittance-import-policy-list).
+   [Import policy list (18.10.2)](#remittance-import-policy-list).
 2. Select the remittance number to open it. On **Lines**, check its policies, the total premium, the commission, the
    tax and the amount due to the insurer against the collections.
 3. Select **Submit for approval** and confirm. To submit several drafts at once, tick them on **My work** and select
@@ -3130,15 +3137,14 @@ remittance yourself.
    submit it again.
 
 ![Figure 13.5: Accounts > Remittance > Approvals of CCD-Recon (Reconciliation and Reversals): a remittance submitted, waiting for its approvers](../images/role-tis-ccd-recon/remittance-approvals.png)
-#### Collections, receipts and claim settlement funds {#ccd-recon-reconciliation-and-reversals-other}
-You also hold the receipting work of Cash Control when needed:
+#### Reverse a receipt and decide reversals {#ccd-recon-reconciliation-and-reversals-other}
+A receipt issued in error is reversed from its page with a reason, and another user approves: a second CCD-Recon
+user or TIS Finance & General Accounting. See [Reverse a receipt (18.1.1)](#reverse-a-receipt). The reversals waiting for you
+are on My Work; you never approve your own.
 
-- [Issue an official receipt (12.7.1)](#ccd-bp-qrph-receipting-official-receipt) and
-  [Receipt bills payment and QRPh collections (12.7.2)](#ccd-bp-qrph-receipting-bills-payment)
-- [Follow up an overdue premium (12.7.4)](#ccd-bp-qrph-receipting-follow-up)
-
-Disbursement, Open Entry Matching and Open Entry Unmatching are open to you to look up payment vouchers and matched
-entries; the changes there are made by TIS Finance & General Accounting.
+You read the receipts, the unapplied collections and the collections of CCD-BP / QRPh (Receipting), who issues the
+receipts, allocates the amounts held On Account and records the claim settlement funds. Disbursement is open to you to
+look up payment vouchers.
 
 ## TIS Finance & General Accounting {#tis-finance-and-general-accounting}
 ### Role summary {#tis-finance-and-general-accounting-summary}
@@ -3165,6 +3171,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Dashboard | Executive Dashboard | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
+| Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | Approve |
 | Accounts > Credit Control | Premium Warranty Monitor | Approve |
@@ -3179,6 +3186,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
 | Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Held policies | Create and edit |
 | Accounts > Remittance | Insurer billing | Create and edit |
 | Accounts > Remittance | Setup | Create and edit |
 | Accounts > Remittance | Settlement | Create and edit |
@@ -3230,6 +3238,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Posting Rules | Approve |
 | Master > Finance | Configuration Approvals | Approve |
 | Master > Finance | Accounting Flow | View |
+| Master > Finance | Financial Statement Versions | Create and edit |
 | Master > Finance | Premium Taxes & LGU Rates | View |
 | Master > Finance | Taxation | View |
 | Master > Finance | Close Checklist | View |
@@ -3255,7 +3264,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | No screen of its own |
 | Operations | Claims | View | See claims | No screen of its own |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
+| Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files and Insurer payments |
@@ -3265,10 +3276,11 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |  |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV, Reversal JV and Financial Statement Versions |
 | Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject an insurer billing statement raised or submitted by another user |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Bank reconciliation | Create and edit | Prepare bank reconciliations |  |
@@ -3296,9 +3308,11 @@ This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
 - Approve premium warranty extensions and client credit limits (not the requester)
+- Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
 - Approve changes to posting rules and account determination (not the requester)
+- Approve or return the reversal of a receipt requested by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 
 Approval limits of this role on the Authority Matrix:
@@ -3318,6 +3332,7 @@ Who approves the work of this role:
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |
+| Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
@@ -3340,18 +3355,18 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Decide the cheques, journal vouchers, remittances, petty cash requests and other approvals waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL Export (18.12)](#sap-gl-export) |
-| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files (18.8)](#bank-payment-files) |
-| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables (18.5)](#accounts-payable), [BIR Form 2307 for suppliers (18.6)](#bir-form-2307-for-suppliers) |
-| Enter, correct or reverse journal vouchers | As needed | [Journal Voucher (18.11)](#journal-vouchers) |
-| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance (18.9)](#remittance-to-insurers) |
+| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL Export (18.13)](#sap-gl-export) |
+| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files (18.9)](#bank-payment-files) |
+| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables (18.6)](#accounts-payable), [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers) |
+| Enter, correct or reverse journal vouchers | As needed | [Journal Voucher (18.12)](#journal-vouchers) |
+| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance (18.10)](#remittance-to-insurers) |
 | Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts (19.4)](#commission-to-agents-and-referrers) |
-| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation (18.15)](#bank-reconciliation) |
-| Reconcile the insurers' statements | Month-end | [Insurer Statements (18.16)](#insurer-statement-reconciliation) |
-| Run the month-end close and approve the close of another user | Month-end | [Period End (18.20)](#period-end) |
-| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns (3.12.3)](#process-bir)) | [Tax (18.17)](#tax-bir-forms-and-returns) |
+| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Reconcile the insurers' statements | Month-end | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
+| Run the month-end close and approve the close of another user | Month-end | [Period End (18.21)](#period-end) |
+| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns (3.12.3)](#process-bir)) | [Tax (18.18)](#tax-bir-forms-and-returns) |
 | Approve changes to the posting rules and account determination | When another user proposes one | [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination) |
-| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-End Close (18.21)](#year-end-close-preparer) |
+| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-End Close (18.22)](#year-end-close-preparer) |
 | Run the financial reports | Month-end and on request | [All Reports (22.1)](#reports-catalogue) |
 
 ### Procedures {#tis-finance-and-general-accounting-procedures}
@@ -3392,7 +3407,7 @@ vouchers always wait for approval.
 The system's own journals that are parked for approval (for example the bank charges of a statement) are listed when
 you tick **System journals parked for approval**, and are approved in the same way. To correct or reverse a posted
 voucher, use Accounts > Correction JV or Accounts > Reversal JV.
-See [Journal vouchers (18.11)](#journal-vouchers).
+See [Journal vouchers (18.12)](#journal-vouchers).
 
 #### Check the SAP GL export {#tis-finance-and-general-accounting-sap-gl}
 The SAP GL header and line files are written every night at the cut-off with the journals posted since the previous
@@ -3404,7 +3419,7 @@ cut-off.
 3. To send a day again, select **Run now / re-generate**. A re-generation is a new run; every run keeps its files,
    which you download from **Files**.
 
-A journal approved after the cut-off is in the next day's file. See [SAP GL export (18.12)](#sap-gl-export).
+A journal approved after the cut-off is in the next day's file. See [SAP GL export (18.13)](#sap-gl-export).
 
 #### Pay by cheque: payment voucher and cheque release {#tis-finance-and-general-accounting-disbursement}
 1. Choose Accounts > Disbursement and select **Create**.
@@ -3426,13 +3441,13 @@ Payment vouchers are also raised by the system: an approved remittance settlemen
 payout raises the referrer's voucher. A voucher paid by bank transfer goes into a batch of
 Accounts > Bank Payment Files (**New batch**): the batch is approved, its file is uploaded to the bank portal
 and the bank's results post each payment. See
-[Disbursement: payment vouchers and cheques (18.7)](#disbursement-payment-vouchers-and-cheques) and
-[Bank payment files (18.8)](#bank-payment-files).
+[Disbursement: payment vouchers and cheques (18.8)](#disbursement-payment-vouchers-and-cheques) and
+[Bank payment files (18.9)](#bank-payment-files).
 
 ![Figure 14.3: Accounts > Disbursement, a voucher to an insurer with its cheque waiting for approval by another user](../images/role-tis-finance/disbursement-cheque-approval.png)
 #### Prepare and approve a remittance to an insurer {#tis-finance-and-general-accounting-remittance}
 1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit, from the weekly run or
-   from [Import policy list (18.9.2)](#remittance-import-policy-list).
+   from [Import policy list (18.10.2)](#remittance-import-policy-list).
 2. Open a draft, check its policies and amounts, and select **Submit for approval**. The remittance is **Pending
    approval**.
 3. To decide the remittances of another user, choose Accounts > Remittance > Approvals. **Awaiting my decision**
@@ -3443,7 +3458,7 @@ and the bank's results post each payment. See
 5. Pay the voucher from Accounts > Remittance > Insurer payments: in a bank payment batch, or by cheque on Disbursement.
 
 You cannot approve a remittance you prepared or submitted. A remittance above your limit waits for the TIS General
-Manager. See [Remittance to insurers (18.9)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
+Manager. See [Remittance to insurers (18.10)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
 
 #### Pay the commission of agents and referrers {#tis-finance-and-general-accounting-commission}
 1. Choose Commission > Agents/Referrer Accounts and open the agent or referrer.
@@ -3466,7 +3481,7 @@ Manager. See [Remittance to insurers (18.9)](#remittance-to-insurers) and [Remit
 
 To change an approved reconciliation, the approver reopens it with remarks: it returns to draft and its matches are
 unlocked. Cheques not presented after the stale period are listed with **Stale cheques**. See
-[Bank reconciliation (18.15)](#bank-reconciliation).
+[Bank reconciliation (18.16)](#bank-reconciliation).
 
 ![Figure 14.4: Accounts > Bank Reconciliation > Reconciliation Workspace, September of the operating account before the reconciliation is started](../images/role-tis-finance/bank-reconciliation-workspace.png)
 #### Close the month {#tis-finance-and-general-accounting-month-end}
@@ -3483,7 +3498,7 @@ unlocked. Cheques not presented after the stale period are listed with **Stale c
    **Return to preparer** with a reason. On approval the period is **Closed**.
 
 A period can first be soft-closed on Accounts > Period End > Period Management: only the approvers of the close can then
-still post into it. Closing or reopening a period asks for a reason. See [Period end (18.20)](#period-end) and
+still post into it. Closing or reopening a period asks for a reason. See [Period end (18.21)](#period-end) and
 [Month-end (3.12.2)](#process-month-end-close).
 
 ![Figure 14.5: Accounts > Period End > Month-End Close, the New close run window](../images/role-tis-finance/month-end-new-close-run.png)
@@ -3505,7 +3520,7 @@ See [Posting configuration (20.14)](#posting-configuration-configuration-approva
 3. Another user of TIS Finance & General Accounting, not the one who started the run, closes the year: the closing
    entries are posted, the balances are carried forward to the next year, the year is locked and the next one created.
 
-See [Year-end (3.12.4)](#process-year-end) and [Year-end close (18.21)](#year-end-close-preparer).
+See [Year-end (3.12.4)](#process-year-end) and [Year-end close (18.22)](#year-end-close-preparer).
 
 ## TIS IT AppSupport / Admin {#tis-it-appsupport-admin}
 ### Role summary {#tis-it-appsupport-admin-summary}
@@ -3560,6 +3575,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts > Remittance | Setup | View |
 | Accounts > Remittance | Settlement | View |
@@ -3651,13 +3667,14 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Lock-in Accounts, Negotiations and Lapse Management |
 | Operations | Claims | View | See claims | Claims |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
@@ -3710,8 +3727,8 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work (2.3)](#my-work), [Role Permissions (20.8)](#roles-and-role-permissions) |
-| Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules (20.25)](#schedules) |
-| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (20.28)](#e-mail-outbox), [Integrations (20.29)](#integrations) |
+| Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules (20.26)](#schedules) |
+| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (20.29)](#e-mail-outbox), [Integrations (20.30)](#integrations) |
 | Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [User (20.7)](#users) |
 | Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [User (20.7)](#users) |
 | Change the access of a role | On an approved access request | [Role Permissions (20.8)](#roles-and-role-permissions) |
@@ -3722,8 +3739,8 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer Programmes (17.7)](#dealer-programmes) |
 | Maintain the reference masters | On the request of the business | [Masters that work the same way (20.4)](#masters-that-work-the-same-way) |
 | Configure products, covers, rating and acceptance rules | On the request of the business | [Product Templates (21.2)](#product-templates) |
-| Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout (20.21)](#documents-and-reports-layout), [Document Numbering (20.24)](#document-numbering) |
-| Answer audit questions: who changed what and when | On request | [Audit Trail (20.26)](#audit-trail) |
+| Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout (20.22)](#documents-and-reports-layout), [Document Numbering (20.25)](#document-numbering) |
+| Answer audit questions: who changed what and when | On request | [Audit Trail (20.27)](#audit-trail) |
 
 ### Procedures {#tis-it-appsupport-admin-procedures}
 #### Create a user account {#tis-it-appsupport-admin-create-user}
@@ -3756,7 +3773,7 @@ you, or refuses a combination its rule blocks; see [Segregation of Duties (20.12
    - **Sign-in history**: the user's sign-ins with the device and the result.
 
 To stop a leaver from signing in, switch off the **Status** of the user in the list; the account is inactive. Each action is recorded in the
-[Audit Trail (20.26)](#audit-trail). See [Users (20.7)](#users).
+[Audit Trail (20.27)](#audit-trail). See [Users (20.7)](#users).
 
 #### Change the access of a role {#tis-it-appsupport-admin-role-access}
 1. Choose Master > Users and Access > Role Permissions.
@@ -3859,7 +3876,7 @@ See [Product Templates (21.2)](#product-templates) and the other sections of the
 4. To change the schedule of a job or switch it on or off (**Enabled**), select **Edit schedule**.
 
 Agree with TIS Finance & General Accounting before you switch on or reschedule an accounting job (recurring journals,
-accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (20.25)](#schedules).
+accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (20.26)](#schedules).
 
 ![Figure 15.4: Master > System > Schedules, the jobs with their schedule and status](../images/role-tis-it-admin/schedules.png)
 #### Resend a message that failed {#tis-it-appsupport-admin-messages}
@@ -3870,7 +3887,7 @@ accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (2
 4. For e-mails, choose Master > System > E-mail Outbox: each e-mail shows its status, attempts and last
    error.
 
-See [Integrations (20.29)](#integrations) and [E-mail Outbox (20.28)](#e-mail-outbox).
+See [Integrations (20.30)](#integrations) and [E-mail Outbox (20.29)](#e-mail-outbox).
 
 ## TIS General Manager {#tis-general-manager}
 ### Role summary {#tis-general-manager-summary}
@@ -3921,6 +3938,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims Awaiting Documents | Create and edit |
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
+| Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | View |
 | Accounts > Credit Control | Premium Warranty Monitor | View |
@@ -3935,6 +3953,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
@@ -4031,14 +4050,16 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files and Insurer payments |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing and Settlement |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject an insurer billing statement raised or submitted by another user |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, Sales Invoices, CAS Books and Documents, Period Management, Month-End Close, Year-End Close and Financial Statements |
@@ -4061,6 +4082,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
@@ -4108,13 +4130,13 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Decide claims: review, reject, settle, close | As needed | [Claims (17.13)](#the-claims-list) |
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips (17.5)](#placement-slips) |
 | Approve or return renewal terms and complete return premiums | As needed | [Negotiations (17.18)](#negotiations), [Policy (17.10)](#policies) |
-| Approve or reject supplier invoices | As notified | [Payables (18.5)](#accounts-payable) |
-| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (18.9.4)](#remittance-approvals) |
+| Approve or reject supplier invoices | As notified | [Payables (18.6)](#accounts-payable) |
+| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (18.10.4)](#remittance-approvals) |
 | Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard (19.1)](#dashboard), [Claims Dashboard (19.2)](#claims-dashboard), [Processing Dashboard (19.3)](#processing-dashboard) |
 | Review the month's financial reports after the month-end close | Monthly | [All Reports (22.1)](#reports-catalogue) |
 | Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20.12)](#segregation-of-duties) |
 | Review the approval limits of the roles | Quarterly | [Authority Matrix (20.10)](#authority-matrix) |
-| Look up who changed a record and when | As needed | [Audit Trail (20.26)](#audit-trail) |
+| Look up who changed a record and when | As needed | [Audit Trail (20.27)](#audit-trail) |
 
 ### Procedures {#tis-general-manager-procedures}
 #### Decide the approvals in My Work {#tis-general-manager-my-work}
@@ -4188,7 +4210,7 @@ See [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20
    the fields changed and the source (for example **Sign-in**).
 3. Select **Export** to keep the result.
 
-See [Audit Trail (20.26)](#audit-trail).
+See [Audit Trail (20.27)](#audit-trail).
 
 ## Screen reference: Operations {#screens-operations}
 The screens of the Operations menu, in menu order: prospects, quotations and placement, clients, policies, claims, renewals and the policy services.
@@ -4973,7 +4995,7 @@ The repair file shows the plate number, insured, insurer, sum insured and the pa
 ## Screen reference: Accounts {#screens-accounts}
 The screens of the Accounts menu, in menu order: receipts and collections, Cash Control, disbursements and payables, remittance to insurers, journal vouchers, reconciliations, tax, period end and incentives.
 
-Each section names the menu of the screen and the roles that open it, with their access. Your own menu shows only the screens of your role. Every amount is in pesos; every posting goes to the general ledger through the posting rules of [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination), and each document can be traced to its journal on [Accounting Query (18.14)](#accounting-query-and-all-clients-accounting).
+Each section names the menu of the screen and the roles that open it, with their access. Your own menu shows only the screens of your role. Every amount is in pesos; every posting goes to the general ledger through the posting rules of [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination), and each document can be traced to its journal on [Accounting Query (18.15)](#accounting-query-and-all-clients-accounting).
 
 ### Verify payments and post official receipts {#verify-payments-and-post-official-receipts}
 When Operations or Sales record a client payment on the policy, the system issues the acknowledgement receipt (AR), the policy payment status becomes **Reviewing** and Cash Control receives the notification to verify it. Open the notification, check the payment against the bank statement and confirm it (the official receipt is posted, with the transaction code **PAYMENT**) or reject it with a reason.
@@ -4988,8 +5010,7 @@ When Operations or Sales record a client payment on the policy, the system issue
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
-| CCD-PDU (Post-Dated Cheques) | Create and edit |
-| CCD-PDC / CCD-ADA | Create and edit |
+| CCD-PDC / CCD-ADA | View |
 | CCD-BP / QRPh (Receipting) | Create and edit |
 | CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | View |
@@ -5014,9 +5035,53 @@ To issue an official receipt, select **Receipt**:
 | **Receipt Mode** | Yes | **Dollar/Peso** (cash), **Cheque**, **Managers Check/Demand Draft**, **Direct Credit/Transfer to Account**, **Telegraphic Transfer**, **Authority to Debit**, **Online Banking** or **Credit Ticket-Inter Office** | A cheque asks for the cheque details; the mode gives the bank account debited |
 | **Remarks** | No | | |
 
-Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A receipt issued in error is cancelled with a reason by CCD-Recon (Reconciliation and Reversals): the journal is reversed and the bill is open again. See [Collection by Cash Control (3.7)](#process-collection).
+Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A payment above what the policy owes is not billed again: the excess is held On Account on [Unapplied Collections (18.2)](#unapplied-collections). See [Collection by Cash Control (3.7)](#process-collection).
 
-![Figure 18.2: Accounts > Receipts > Add Receipts](../images/screens-accounts/add-receipts.png)
+A payment recorded on the policy carries its proof of payment (deposit slip, cheque image or transfer confirmation): the payment cannot be saved without it. The receipt page shows the proof under **Proof of payment**, where a receipting user attaches or replaces it, and **Paid to**: **TISPH**, or **Insurance company** for a payment made to the insurer.
+
+#### Reverse a receipt {#reverse-a-receipt}
+A receipt issued in error, or paid by a cheque that bounced, is reversed from the receipt page, section **Reversal**. CCD-Recon selects **Reverse receipt**, chooses the reason (cheque returned DAIF, duplicate receipt, wrong amount, applied to the wrong policy or client, payment not received in the bank, other with a note) and sends it for approval. The receipt stays posted until another user approves: CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, never the user who asked. On approval the receipt is cancelled, its journals are reversed, the bills it paid are open again and an amount it held On Account is taken back. The approver can instead **Return** the request with a reason; the receipt is unchanged. The request is on My Work of the approvers.
+
+![Figure 18.2: The Reversal section of a receipt, approved](../images/screens-accounts/receipt-reversal.png)
+#### Bulk upload and receipt batches {#receipt-batches}
+**Bulk Upload** takes three files, each with its template:
+
+- **Official receipts**: each row pays a policy. On the receipt voucher file of TISPH a row can combine premium and commission: **Commission Amount** is the commission part of the **Amount**. The premium is receipted; the commission is kept apart on the batch for Finance & General Accounting to reconcile with the insurer.
+- **Bank payments (matched by reference)**: the bank's report of payments credited to TISPH (**Date**, **Reference**, **Amount**, **Bank Account**, **Payer**). Each line is matched by its reference (the 10-digit payment reference of the policy, its policy number or the bill number) to what the policy owes. Within one peso it is receipted in full; above it the receipt pays the bills and the excess is held On Account; below it the receipt pays part and the line is an insufficient payment; a reference that finds no policy is held as a floating payment.
+- **Payments made to the insurer**: payments the clients made directly to the insurance company (**Policy Number**, **Amount**, **Date Paid**, **Insurer Reference**). Each settles the policy's bills with a receipt marked paid to the insurance company: the premium payable to the insurer is reduced instead of the cash.
+
+Every upload is a receipt batch (RVB-YYYY-NNNNN). **Receipt batches** lists them with the file, the rows receipted, the premium and the commission kept apart. **Export commission** downloads the commission lines of a batch; **Export lines** downloads how each line of a bank payment file was matched.
+
+Each policy has a 10-digit payment reference, the number the client quotes at the bank. Search the open bills on Add Receipts by it, by the plate or chassis number of the vehicle, or by the client, policy or bill number; the bills show the vehicle.
+
+### Unapplied collections {#unapplied-collections}
+Accounts > Unapplied Collections lists the money received that no bill takes yet:
+
+- **Excess payment**: paid above what the policy owes, held On Account;
+- **Floating payment**: a bank credit whose client or bill is not yet known;
+- **Advance payment**: paid by a client before the bill exists.
+
+**Menu:** Accounts > Unapplied Collections
+
+| Role | Access |
+|---|---|
+| CCD-BP / QRPh (Receipting) | Create and edit |
+| CCD-Recon (Reconciliation and Reversals) | Create and edit |
+| TIS Finance & General Accounting | View |
+| TIS General Manager | View |
+
+![Figure 18.3: Accounts > Unapplied Collections](../images/screens-accounts/unapplied-collections.png)
+Each is posted to the clients' deposits and unapplied collections account and must be allocated within two working days (**Allocate by**; past it, the row shows **Overdue** and the item is on My Work of Cash Control). The cards show the open items, the open amount and the items past their date. Filter by status and kind, or search by client, policy, receipt or reference.
+
+**Record payment** records a floating payment (amount, date received, reference, the payer if known) or an advance payment (with the client code). The actions of a row are:
+
+- **Allocate**: choose the open bills (the client's bills, or for a floating payment those found by client, policy or bill number) and the amount for each; the amounts cannot exceed what a bill owes nor what is left to allocate. The bills are paid as by a receipt; a floating payment takes the client of the bill.
+- **Refund**: with a reason (overpayment, paid twice, policy cancelled or not taken up, other with a note), the amount becomes a refund payable to the client, paid by disbursement.
+- **Reverse**: a floating or advance payment recorded in error, nothing allocated yet, is reversed with a reason.
+
+**View** shows the item with its allocations and its activity.
+
+![Figure 18.4: Accounts > Receipts > Add Receipts](../images/screens-accounts/add-receipts.png)
 ### Collections {#collections}
 Accounts > Collections lists every open premium with **Client Name**, **Policy No.**, **Outstanding** spread over the ageing buckets (**Current**, **1-30 Days**, **31-60 Days**, **61-90 Days**, **Over 90 Days**), **Due Date**, **Status** (Pending, Committed, Overdue), **Days Overdue** and **View**. Filter by status and overdue level.
 
@@ -5041,12 +5106,14 @@ The cards show the **Outstanding** and **Overdue** amounts, the items **Committe
 
 Select **View** to open an item. **Collection Details** shows the client and policy, the overdue level, the financial breakdown of the bill (gross premium, net premium, VAT, DST, LGT, paid, outstanding), the ageing, the **Follow-Up History** and the **Payment History**. The **Collection Actions** are **Send Email**, **E-mail invoice**, **Add Note** and **Set Commitment Date**; **Record receipt** opens the receipt for this bill.
 
-![Figure 18.3: Accounts > Collections, the open premiums by ageing bucket](../images/screens-accounts/collections.png)
+![Figure 18.5: Accounts > Collections, the open premiums by ageing bucket](../images/screens-accounts/collections.png)
 ### Credit control {#credit-control}
 **Menu:** Accounts > Credit Control > Instalment Plans
 
 | Role | Access |
 |---|---|
+| CCD-BP / QRPh (Receipting) | Create and edit |
+| CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Approve |
 | TIS General Manager | View |
 
@@ -5054,6 +5121,8 @@ Select **View** to open an item. **Collection Details** shows the client and pol
 
 | Role | Access |
 |---|---|
+| CCD-BP / QRPh (Receipting) | Create and edit |
+| CCD-Recon (Reconciliation and Reversals) | Create and edit |
 | TIS Finance & General Accounting | Approve |
 | TIS General Manager | View |
 
@@ -5061,58 +5130,55 @@ Select **View** to open an item. **Collection Details** shows the client and pol
 
 | Role | Access |
 |---|---|
+| CCD-BP / QRPh (Receipting) | View |
+| CCD-Recon (Reconciliation and Reversals) | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
 Changes on the Credit Control screens that need approval (a credit limit, a warranty extension) are approved by TIS Finance & General Accounting, a user other than the one who requested them.
 
-- **Instalment Plans** lists the open instalments of policies paid by instalment, with **Policy no.**, **Client**, the instalment number, **Due date**, **Outstanding**, **Days past due** and **Ageing**, and the totals per ageing bucket. **Overdue only** narrows the list.
+- **Instalment Plans** lists the open instalments of policies paid by instalment, with **Policy no.**, **Client**, the instalment number, **Due date**, **Outstanding**, **Days past due** and **Ageing**, and the totals per ageing bucket. **Overdue only** narrows the list. Instalments are monthly. A corporate client has 90 days to pay unless the insurer's premium warranty says otherwise; an individual client has 30.
 - **Premium Warranty Monitor** follows the premium payment warranty: the premium must be paid by the warranty deadline after inception, or the cover is at risk. The cards count the policies **Warranty breached** and **At risk** and the **Extensions to approve**. Each row shows the policy, client, insurer, **Inception**, **Warranty deadline**, **Days past deadline**, **Premium due** and **Status**. Request an extension from the row; the extension is approved by another user.
 - **Client Credit Limits** shows each client's **Credit limit** (or **No limit**), **Open premium**, **Available** and **Last changed**. Set or change a client's limit from the row. **Issued over the limit** lists the policies booked over a client's limit.
 - **Remittance Ageing** ages the premium collected and not yet remitted to each insurer, by the insurer's remittance terms (**Not yet due**, **1-30**, **31-60**, **61-90**, **Over 90**), with the detail by policy and receipt. **Excel** downloads it.
 
-![Figure 18.4: Accounts > Credit Control > Premium Warranty Monitor](../images/screens-accounts/premium-warranty-monitor.png)
+![Figure 18.6: Accounts > Credit Control > Premium Warranty Monitor](../images/screens-accounts/premium-warranty-monitor.png)
 ### Post-dated cheques {#post-dated-cheques}
-Accounts > Post-Dated Cheques is the register of cheques received from clients before their date.
+Accounts > Post-Dated Cheques follows the cheques of clients paying by instalment, from receipt to collection.
 
 **Menu:** Accounts > Post-Dated Cheques
 
 | Role | Access |
 |---|---|
+| TIS Sales Associate | View |
+| TIS Sales Officer | View |
+| TIS Sales Unit Head | View |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
 | CCD-PDU (Post-Dated Cheques) | Create and edit |
 | CCD-PDC / CCD-ADA | Create and edit |
-| CCD-BP / QRPh (Receipting) | Create and edit |
-| CCD-Recon (Reconciliation and Reversals) | Create and edit |
+| CCD-BP / QRPh (Receipting) | View |
+| CCD-Recon (Reconciliation and Reversals) | View |
 | TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheques** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
+The tabs list the cheques **All open**, **At TIS**, **With partners**, **Awaiting confirmation** (the cheque date is past and the Insurance Partner has not advised), **Follow-up**, **Bounced**, **Cancellation pending**, **Deposit due**, **Closed** and the **Transmittals**. Each row shows the PDC number and its set, the client and policy, the bank and cheque number, the cheque date, the amount, the instalment ("1 of 4"), the custody, the status and the ageing of a cheque not yet confirmed. **Export** downloads the tab.
 
-To register a cheque, select **Register cheque**:
+To encode the cheques of a client, select **Encode PDCs**, enter the policy and the bill, and the payee: **Insurance Partner** (the cheques are forwarded for warehousing) or **TISPH** (kept and deposited by TISPH). One row is proposed per unpaid instalment; enter the bank, branch, account number, cheque number, cheque date and amount of each. The dates must fall near the instalment due dates and the amounts cannot exceed what the bill owes. **Save set** saves the set (PCS-YYYY-NNNNN) with its cheques **Received at TIS**; nothing is posted. **Print acknowledgement** on the set prints the acknowledgement receipt the client keeps.
 
-| Field | Required | What to enter |
-|---|---|---|
-| **Against** | Yes | **Bill number** (or the policy) |
-| **Reference** | Yes | The bill or policy number |
-| **Drawee bank** | Yes | From the bank list, or **Drawee bank (if not in the list)** |
-| **Cheque no.** | Yes | |
-| **Cheque date** | Yes | The date on the cheque, picked from the calendar |
-| **Amount** | Yes | |
-| **Kept in** | No | Where the cheque is kept, for example "Finance vault, drawer 2" |
-| **Remarks** | No | |
+Cheques payable to the Insurance Partner:
 
-The cheque is **On Hand**. Nothing is posted until it is deposited. The actions of a cheque are:
+- **Forward to Insurance Partner**: choose the cheques of one partner and send them with a transmittal (PT-YYYY-NNNNN): courier, messenger or hand-carry, with the courier reference. They are **Forwarded**.
+- **Partner received**: the partner's acknowledgement of the transmittal; the cheques are **Warehoused**.
+- **Partner cleared**: the partner's advice that the cheque was paid, with the collection date and the partner's reference. The acknowledgement receipt is posted against the premium payable to the partner and the instalment is paid.
+- **Partner bounced**: with the reason (DAIF, account closed, stop payment, signature differs, stale, other); the receipt of the cheque is cancelled and the instalment is open again for a replacement.
 
-- **Deposit**: choose the **Bank account** and the **Deposit date** and select **Deposit cheque**. An official receipt is created and posted to that bank account.
-- **Replace**: register the new cheque that replaces this one (for example after a bounce).
-- **Return**: give the cheque back to the client.
-- **Cancel**: remove a cheque registered in error.
+Cheques payable to TISPH are **Deposit**ed to the one collection account of TISPH (an official receipt is posted), then **Cleared** or **Bounced**.
 
-A cheque that bounces is recorded as bounced with the reason: its receipt is cancelled, the journal reversed and the bill is open again.
+**Request cancellation** asks for the cancellation of a cheque with a reason (cash or cheque replacement, technical defect, policy cancelled, account paid off, encoded in error). Another user approves it: CCD-PDC / CCD-ADA, never the one who asked. A cheque the partner holds is pulled out on the next transmittal to that partner. **Replace** registers the cheque that replaces a bounced or cancelled one for the same instalment; **Return to client** gives back a cheque kept at TIS. The history of each cheque shows every step with its user.
 
-![Figure 18.5: Register cheque with the bill, drawee bank, cheque number, date, amount and vault entered](../images/role-tis-ccd-pdu/register-cheque.png)
-![Figure 18.6: Deposit a post-dated cheque: the official receipt is posted to the bank account chosen](../images/screens-accounts/deposit-cheque.png)
 ### Accounts payable {#accounts-payable}
 Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registration, the EWT tax code withheld (Master > Finance > Taxation, for example WC158 goods, WC160 services, WC100 rentals), payment terms and the default expense account.
 
@@ -5155,7 +5221,7 @@ The expanded withholding tax withheld from a supplier on an approved supplier in
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-Choose the year and the quarter. The cards show the number of **Payees**, the **Income payments subject to expanded withholding tax** and the **Tax withheld for the quarter**. Each row is one supplier: **Payee's name**, **Taxpayer Identification Number (TIN)**, **ATC**, **Transactions**, the income payments, the tax withheld and the **Certificate no.** Print the certificate of a supplier from its row. The same figures are in the QAP of [Tax: BIR forms and returns (18.17)](#tax-bir-forms-and-returns).
+Choose the year and the quarter. The cards show the number of **Payees**, the **Income payments subject to expanded withholding tax** and the **Tax withheld for the quarter**. Each row is one supplier: **Payee's name**, **Taxpayer Identification Number (TIN)**, **ATC**, **Transactions**, the income payments, the tax withheld and the **Certificate no.** Print the certificate of a supplier from its row. The same figures are in the QAP of [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns).
 
 ### Disbursement: payment vouchers and cheques {#disbursement-payment-vouchers-and-cheques}
 A payment voucher (PV-YYYY-NNNNN, with the disbursement transaction DT-YYYY-NNNNN) pays an insurer, an agent or referrer, a client or a supplier.
@@ -5182,7 +5248,7 @@ To create a payment voucher, select **Create**:
 4. Enter the amounts and the accounts debited, and the withholding tax where it applies.
 5. Choose the bank account and the payment method (cheque, bank transfer or bank payment file) and save.
 
-The voucher is approved by a user other than the one who prepared it, within his or her limit of the [Authority Matrix (20.10)](#authority-matrix). An approved voucher is paid by cheque (the cheque number and release are recorded) or by a [bank payment file (18.8)](#bank-payment-files); on payment the journal is posted and the voucher becomes **Paid**.
+The voucher is approved by a user other than the one who prepared it, within his or her limit of the [Authority Matrix (20.10)](#authority-matrix). An approved voucher is paid by cheque (the cheque number and release are recorded) or by a [bank payment file (18.9)](#bank-payment-files); on payment the journal is posted and the voucher becomes **Paid**.
 
 ![Figure 18.9: Create Disbursement](../images/screens-accounts/create-disbursement.png)
 ### Bank payment files {#bank-payment-files}
@@ -5196,13 +5262,13 @@ The voucher is approved by a user other than the one who prepared it, within his
 Bank Payment Files pays approved payment vouchers through the bank's upload file. The list shows **Batch**, **Layout**, **Value date**, **Payments**, **Amount**, **Status** and **Created**.
 
 1. Select **New batch**.
-2. Choose the **Layout** of the bank (see [Bank file layouts and payee bank accounts (20.19)](#bank-file-layouts-and-payee-bank-accounts)), the account to **Pay from**, the **Channel** (for example **PESONet**) and the **Value date**.
+2. Choose the **Layout** of the bank (see [Bank file layouts and payee bank accounts (20.20)](#bank-file-layouts-and-payee-bank-accounts)), the account to **Pay from**, the **Channel** (for example **PESONet**) and the **Value date**.
 3. Tick the payment vouchers waiting for payment and enter **Remarks**.
 4. Select **Create batch**.
 
 The batch is approved by another user, the file is downloaded for the bank portal, and the bank's result file is loaded back: each payment it confirms is posted and its voucher becomes **Paid**; a rejected payment returns to the vouchers waiting for payment.
 
-**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments (18.9.5)](#insurer-payments) with the same batch dialog.
+**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments (18.10.5)](#insurer-payments) with the same batch dialog.
 
 ### Remittance to insurers {#remittance-to-insurers}
 For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its
@@ -5214,14 +5280,14 @@ The Remittance menu has eight entries. Each role sees the entries of its work; a
 
 | Entry | What it is for |
 |---|---|
-| [Remittances (18.9.1)](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
-| [Approvals (18.9.4)](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
-| [Insurer payments (18.9.5)](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
-| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation (18.16)](#insurer-statement-reconciliation) |
-| [Exceptions (18.9.6)](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
-| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes (18.10)](#direct-bill-commission-debit-notes) |
-| [Setup (18.9.7)](#remittance-schedules) | The schedules of the weekly remittance runs |
-| [Settlement (18.9.8)](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
+| [Remittances (18.10.1)](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
+| [Approvals (18.10.4)](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
+| [Insurer payments (18.10.5)](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
+| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation) |
+| [Exceptions (18.10.6)](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
+| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes (18.11)](#direct-bill-commission-debit-notes) |
+| [Setup (18.10.7)](#remittance-schedules) | The schedules of the weekly remittance runs |
+| [Settlement (18.10.9)](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
 
 A remittance (REM-YYYY-NNNNN) covers one insurer and product line for a coverage week. Its status is **Draft** until
 submitted, **Pending approval** until an approver decides, then **Approved**, or **Returned** to its maker when
@@ -5344,7 +5410,7 @@ says why (you submitted it, it is above your limit, or another user decided it) 
 
 **Insurer payments** lists the payment vouchers of the approved remittances with their bank payment batch or cheque
 and the bank's result. It posts nothing itself: batches are approved and released on
-[Bank payment files (18.8)](#bank-payment-files), cheques on [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques).
+[Bank payment files (18.9)](#bank-payment-files), cheques on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques).
 
 The cards and tabs are **To pay**, **In payment**, **Paid** (this week on the card), **Failed** and **All**. Each row
 shows the voucher, the insurer with its bank account masked, the amount, method, batch, paid on and the **Next step**
@@ -5354,7 +5420,7 @@ shows the voucher, the insurer with its bank account masked, the amount, method,
 To pay insurers by bank file, tick the vouchers to pay (an approved voucher with the insurer's bank account on file)
 and select **Create Metrobank batch (n)**. The batch dialog of Bank Payment Files opens with those vouchers and the
 Metrobank layout; check the value date and select **Create batch with n payments**, then submit the batch on
-[Bank payment files (18.8)](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
+[Bank payment files (18.9)](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
 step and cannot be ticked.
 
 ![Figure 18.13: Accounts > Remittance > Insurer payments with the vouchers to pay](../images/screens-accounts/insurer-payments.png)
@@ -5387,16 +5453,38 @@ the amount if any and a note).
 | TIS IT AppSupport / Admin | View |
 
 The weekly schedule **TIS-WEEKLY** runs every Monday at 06:15 for every active insurer and creates one draft per
-insurer and product line for the policies of the Monday to Friday before. The **Automation** chip shows whether the
+insurer and product line for the policies paid in full from the Monday to the Friday before (**Eligibility**: Fully
+paid in the window). With **Proof of payment required** a policy is remitted only when every receipt that paid it
+carries its proof; a policy without it is listed on Exceptions as **No proof of payment**. A schedule on **Inception
+date** remits by inception date instead. The **Automation** chip shows whether the
 daily remittance job is on; it is **Off** until TISPH switches it on.
 
 The row menu offers **View** (the schedule, its latest runs and its activity log) and, to TIS Finance & General
 Accounting: **Edit**, **Preview run** (what a run would create, without creating anything),
 **Run now** and **Pause** or **Resume**. **Run now** asks for the off-cycle reason and shows per insurer what will be
 created; nothing is created until you select **Create n draft remittances**. A week that has been run cannot be run
-again: a later catch-up goes through [Import policy list (18.9.2)](#remittance-import-policy-list).
+again: a later catch-up goes through [Import policy list (18.10.2)](#remittance-import-policy-list).
 
 ![Figure 18.14: Accounts > Remittance > Setup with the weekly schedule and Automation Off](../images/screens-accounts/remittance-schedules.png)
+#### Held policies {#remittance-held-policies}
+**Menu:** Accounts > Remittance > Held policies
+
+| Role | Access |
+|---|---|
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
+| CCD-PDC / CCD-ADA | View |
+| CCD-BP / QRPh (Receipting) | View |
+| CCD-Recon (Reconciliation and Reversals) | Create and edit |
+| TIS Finance & General Accounting | Create and edit |
+| TIS IT AppSupport / Admin | View |
+| TIS General Manager | View |
+
+A part-paid policy on an instalment plan is not remitted until it is paid in full. **Held** lists these policies with the
+insurer, product line, plan, total premium, paid to date, balance, next due date and the cheques that bounced;
+**Released** lists those paid in full since, which go on the next weekly run with their full premium. The list is
+refreshed every morning and after each payment.
+
 #### Settlement {#remittance-settlement}
 **Menu:** Accounts > Remittance > Settlement
 
@@ -5414,9 +5502,9 @@ An approved remittance is settled with the insurer, and the approved settlement 
    **Net Settlement**.
 4. Select **Submit for approval**, or **Save draft**.
 
-Another user approves the settlement on [Approvals (18.9.4)](#remittance-approvals). The system then raises the payment voucher
-for the net amount on [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
-(voucher raised)**. The voucher is paid through [Insurer payments (18.9.5)](#insurer-payments).
+Another user approves the settlement on [Approvals (18.10.4)](#remittance-approvals). The system then raises the payment voucher
+for the net amount on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
+(voucher raised)**. The voucher is paid through [Insurer payments (18.10.5)](#insurer-payments).
 
 For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium
 already remitted) is netted against its next remittance.
@@ -5435,14 +5523,14 @@ See [Remittance to the insurers (3.8)](#process-remittance) for the order of the
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
+For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. For the premium TISPH remits, the commission is billed to the insurer with a billing statement on the 15th and the 26th of the month. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has four tabs:
 
 1. **Raise debit note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
-2. **Debit notes**: the debit notes issued, with their balance; record the insurer's payment against them.
-3. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
+2. **Debit notes**: the debit notes and billing statements issued, with their balance, the line of business of a statement and **Overdue** past its due date; record the insurer's payment against them. A billing statement exports with its schedule to Excel or CSV.
+3. **Billing run**: the next billing dates and the runs made. On the 15th and the 26th (the working day before when that day is a Saturday, Sunday or holiday) the system drafts one billing statement per insurer and line of business from the remittances approved before the billing date and not yet billed: the commission, VAT on the commission (Gross Amount), the withholding tax and the Net Amount Payable, due 15 days after the billing date. **Run billing** drafts them now for a billing date and, if chosen, one insurer.
+4. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
 
-A debit note is approved by another user than the one who raised or submitted it; that user reads why instead of
-**Approve** and **Reject**. **Reject** and **Cancel debit note** ask for the reason from the list.
+A debit note or billing statement is approved by another user than the one who raised or submitted it; that user reads why instead of **Approve** and **Reject**. A billing statement is approved by TIS Finance & General Accounting or TIS General Manager, and only when the insurer's TIN is on Master > Insurance Company. A statement on commission kept from the remittance is then **Settled by retention**. **Reject** and **Cancel debit note** ask for the reason from the list; a cancelled statement's lines are billed again on the next run.
 
 ![Figure 18.15: Accounts > Remittance > Insurer billing on the tab Raise debit note](../images/screens-accounts/insurer-billing.png)
 ### Journal vouchers {#journal-vouchers}
@@ -5501,7 +5589,6 @@ Open entry matching settles open debit and credit entries of the same account ag
 
 | Role | Access |
 |---|---|
-| CCD-Recon (Reconciliation and Reversals) | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
@@ -5509,7 +5596,6 @@ Open entry matching settles open debit and credit entries of the same account ag
 
 | Role | Access |
 |---|---|
-| CCD-Recon (Reconciliation and Reversals) | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
@@ -5734,6 +5820,8 @@ The fiscal year of TISPH runs from April to March. **Period Management** lists t
 
 **Next fiscal year** creates the next year; **Import opening balances** loads the opening balances (validated first, then imported all or nothing).
 
+Operations close on the 26th: a premium booking dated from the 26th of a month is posted in the next period. Finance closes on the 29th, and the month-end close reminder counts down to it. Finance can still post its month-end adjustments into the period until the 6th working day of the next month (holidays of Master > Holiday excluded); the automatic soft-close, when it is switched on, waits until that day has passed.
+
 **Month-End Close** runs the close of a period:
 
 1. Select **New close run**, choose the **Period** and enter **Remarks**. Select **Start**. The run (MEC-) executes its steps: the accrual journals of the period (reversed on day 1 of the next period), the recurring journals due, the deferral of unearned commission, the foreign exchange revaluation and the checklist.
@@ -5818,7 +5906,7 @@ The incentive screens pay the account executives' incentives earned under the pr
 | **Statement** | The earnings of an account executive for a month: the programmes, totals, the trend of the last 13 months and the payments. **Print** and **Export CSV**. |
 | **Reports** | The incentive reports (monthly payout summary, agent payout details, target achievement, top performers, programme effectiveness): **Generate report**. |
 
-An approved batch is paid through [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques); its status becomes **Paid**.
+An approved batch is paid through [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques); its status becomes **Paid**.
 
 ## Screen reference: Dashboards and Commission {#screens-dashboards-and-commission}
 The dashboards and the Commission menu.
@@ -5921,7 +6009,7 @@ A commission line reversed after payment (for example on a cancellation that ret
 1. Choose Commission > Agents/Referrer Accounts and select the referrer. The account shows the lines of the current cycle, the future cycles and the past lines.
 2. Mark as eligible the accrued lines whose premium is fully collected.
 3. Approve the eligible lines. The approval is made by TIS Finance & General Accounting other than the user who prepared the lines.
-4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement (18.7)](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
+4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
 
 A new referrer is added with its type, level, tax details and bank account; the withholding tax can be switched off for a referrer, which recomputes its unpaid lines.
 
@@ -5997,7 +6085,7 @@ Requests for quotation, placement slips, Preliminary Loss Advices and remittance
 
 The list shows **Company Code**, **Company Name**, **E-mail**, **Phone Number**, **Modified By**, **Modified On**, **Status** and **Actions**. Only the panel insurers of TISPH are **Active**; an inactive insurer is not offered on quotations and placements. **Upload** loads insurers from a file (validated first); **Add** creates one.
 
-The insurer record holds the code, name, address, e-mail and phone of the insurer. Whether an insurer's policies are broker-billed or direct-billed is set on [Direct bill: commission debit notes (18.10)](#direct-bill-commission-debit-notes) (**Billing Mode**); its commission rates on [Commission Rate Matrix (20.16)](#commission-rate-matrix).
+The insurer record holds the code, name, address, e-mail and phone of the insurer. Whether an insurer's policies are broker-billed or direct-billed is set on [Direct bill: commission debit notes (18.11)](#direct-bill-commission-debit-notes) (**Billing Mode**); its commission rates on [Commission Rate Matrix (20.16)](#commission-rate-matrix).
 
 ### Masters that work the same way {#masters-that-work-the-same-way}
 All masters work alike: a list with search, **Add** (the form opens on its own page or as a panel on the right), **Upload** where offered, the eye to view, the pencil to edit and a status switch to deactivate. Records are not deleted; a deactivated record no longer appears in the lists of the other screens.
@@ -6322,6 +6410,18 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 | **Bank Transaction Types** | The bank lines with no book entry (bank charges, interest income, final tax on interest): direction, the account they post to, whether they need approval and the description pattern that recognises them on the statement. |
 | **Insurer Statement Formats** | How each insurer's statement file is read; the standard format applies to any insurer without its own. |
 
+### Financial statement versions {#financial-statement-versions}
+**Menu:** Master > Finance > Financial Statement Versions
+
+| Role | Access |
+|---|---|
+| TIS Finance & General Accounting | Create and edit |
+
+![Figure 20.7: Master > Finance > Financial Statement Versions](../images/screens-master/fs-versions.png)
+A financial statement version lists the lines of the statements in order, each with the range of GL accounts it carries: **TIS01 Local financial statements**, **TIS02 Balance sheet and income statement** and **TIS03 Budget** (income statement lines only). A range is given by the first digits of the accounts: **GL from** 110 and **GL to** 112 take every account from 110 to 112, whatever its length. An account belongs to the first line, by line number, whose range takes it; the accounts no line takes are listed under **Accounts not in this version** and show on that line in the reports, so the statements always add up.
+
+Select a version to see its lines: **Line**, **Statement**, **Section**, **FS line**, **GL from**, **GL to**, **Shown as** (debit or credit balance) and the number of **Accounts** each line takes. TIS Finance & General Accounting edits the name, purpose and status and the lines (**Add line**, the bin of a line, **Save**); the lines are checked before they are saved. **Add version** starts a new version from the lines of another. The version of the reports when none is chosen is TIS01. See [Financial Statement by Version and Daily GL Balance (22.1.3)](#reports-by-department).
+
 ### Operational masters {#operational-masters}
 **Menu:** Master > Finance > Cost Centres
 
@@ -6340,9 +6440,9 @@ Master > Finance > Bank File Layouts says how each bank's upload file is written
 |---|---|
 | TIS Finance & General Accounting | View |
 
-The tab **Layouts** lists **Code**, **Name**, **Bank**, **Payment channels** (bulk credit, InstaPay, PESONet), **File format** (delimited or fixed width) and **Status**. **New layout** defines the header, detail and trailer records of a file and how the bank's status file is read. The tab **Payee bank accounts** holds the bank accounts of the payees (insurers, referrers, suppliers, claimants) used by [Bank payment files (18.8)](#bank-payment-files).
+The tab **Layouts** lists **Code**, **Name**, **Bank**, **Payment channels** (bulk credit, InstaPay, PESONet), **File format** (delimited or fixed width) and **Status**. **New layout** defines the header, detail and trailer records of a file and how the bank's status file is read. The tab **Payee bank accounts** holds the bank accounts of the payees (insurers, referrers, suppliers, claimants) used by [Bank payment files (18.9)](#bank-payment-files).
 
-![Figure 20.7: Master > Finance > Bank File Layouts](../images/screens-master/bank-file-layouts.png)
+![Figure 20.8: Master > Finance > Bank File Layouts](../images/screens-master/bank-file-layouts.png)
 ### E-mail Layout {#e-mail-layout}
 **Menu:** Master > System > E-mail Layout
 
@@ -6381,9 +6481,9 @@ For each document (for example the policy schedule), the signature slots: **Slot
 
 Configuration holds the settings of the system, grouped in cards: **Company & Branding**, **Sales, Quotations & Placement**, **Policies, Endorsements & Renewals**, **Claims**, **Billing, Collections & Credit**, **Remittance & Reconciliation**, **Commission & Incentives**, **Accounting & Tax**, **Notifications & E-mail** and the others. Each card shows the number of its settings. Open a card to see and change its settings; the search box finds a setting by its name or description (for example VAT, renewal notice, password).
 
-A setting changes the behaviour of the system for everyone (for example the quotation validity, the renewal notice days, the grace period). Change a setting only on a decision of the business owner; every change is recorded in the [Audit Trail (20.26)](#audit-trail).
+A setting changes the behaviour of the system for everyone (for example the quotation validity, the renewal notice days, the grace period). Change a setting only on a decision of the business owner; every change is recorded in the [Audit Trail (20.27)](#audit-trail).
 
-![Figure 20.8: Master > System > Configuration](../images/screens-master/configuration.png)
+![Figure 20.9: Master > System > Configuration](../images/screens-master/configuration.png)
 ### Document Numbering {#document-numbering}
 Every number the system issues comes from a series on Master > Document Numbering: prospect, request for quotation, quotation, placement slip, policy, client, bill, official receipt, payment voucher, journal voucher, claim, endorsement, debit note, close run, reconciliation, BIR Form 2307 and the others. The list shows each series with module, prefix, format, counter reset, last number and next number.
 
@@ -6407,7 +6507,7 @@ Schedules lists the jobs the system runs by itself: **Job**, **What it does**, *
 
 The actions of a job are **Run now** (the play button), the run history and the pencil to change its schedule or switch it on or off. Check the last status of the jobs every morning.
 
-![Figure 20.9: Master > System > Schedules](../images/screens-master/schedules.png)
+![Figure 20.10: Master > System > Schedules](../images/screens-master/schedules.png)
 ### Audit Trail {#audit-trail}
 The history of a single record (claim history, policy and client **History** tab, quotation **Audit Trail** tab, master records) uses the same layout as a timeline grouped by day, newest first, with a search box, a user filter, a filter by kind of event (created, status changes and approvals, other changes, cancelled or removed) and **Export**.
 
@@ -6421,7 +6521,7 @@ The history of a single record (claim history, policy and client **History** tab
 
 Master > System > Audit Trail shows every change made in the system: **Date & Time**, **User** (with the role), **Record**, **Event**, **Changes** (each field with its value before and after) and **Source** (screen, sign-in, file upload, scheduled job). Filter by user, record type and action; **Export** downloads the result.
 
-![Figure 20.10: Master > System > Audit Trail](../images/screens-master/audit-trail.png)
+![Figure 20.11: Master > System > Audit Trail](../images/screens-master/audit-trail.png)
 ### Features & Releases {#features-and-releases}
 **Menu:** Master > System > Features & Releases
 
@@ -6550,7 +6650,7 @@ The risk details the rules check are asked on the quotation (for example the fai
 
 The Document Manager holds the document templates of each product template, printed from the policy and quotation screens and attached to e-mails: **Document**, **Template / product**, **Printed as** (policy schedule, quotation slip, CTPL certificate, member enrolment form), **Stage** (quotation, policy issuance), **Layout** and **Status**.
 
-Without an upload the standard layout is printed. To use TISPH's own layout, select **Add document template** (or edit a row) and upload the layout: a text file with merge fields. **Merge fields** lists the fields that can be placed in a layout (client, policy, vehicle, covers, premium, signature slots of [Document Signatures (20.22)](#document-signatures)).
+Without an upload the standard layout is printed. To use TISPH's own layout, select **Add document template** (or edit a row) and upload the layout: a text file with merge fields. **Merge fields** lists the fields that can be placed in a layout (client, policy, vehicle, covers, premium, signature slots of [Document Signatures (20.23)](#document-signatures)).
 
 ### Market Mapping {#market-mapping}
 **Menu:** Product Configurator > Market Mapping
@@ -6768,7 +6868,7 @@ Reports > All Reports shows the reports your role may run, as cards grouped unde
 5. Choose the **File format**: **CSV**, **Excel (XLSX)** or **PDF**.
 6. Select **Preview** to see the rows on screen, or **Generate** to download the file.
 
-The PDF and Excel files are printed in the layout of [Documents and Reports Layout (20.21)](#documents-and-reports-layout), with the letterhead of Toyota Insurance Services Philippines. Amounts are in pesos.
+The PDF and Excel files are printed in the layout of [Documents and Reports Layout (20.22)](#documents-and-reports-layout), with the letterhead of Toyota Insurance Services Philippines. Amounts are in pesos.
 
 ![Figure 22.2: Reports > Operational Reports > Production Register: the criteria of a report](../images/reports/production-register.png)
 #### Export and keep a report {#reports-export}
@@ -6805,6 +6905,11 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Claims Ageing** | Open claims by ageing bucket (optionally per insurer or agent) with estimate and approved amounts |
 | **Co-insurance Register** | Co-insured policies incepted in the period: each participating insurer with its role, share, premium, commission, premium taxes and premium due |
 | **Remittance Summary**, **Broker Commission Statement** | The remittances and the commission of the period, for information |
+| **Net Remittance - Fully Paid**, **Net Remittance - Partially Paid** | Per insurer, the broker-billed policies paid in full (or paid in part) in the period: gross premium, commission, remitting rate, net remittance, taxes, paid to date, outstanding and the remittance that carries them |
+| **Premium Report by Payment Status** | Policies incepting in the period as fully paid, partially paid, cancelled or pending, with the official receipts and the remittance batch |
+| **Invoice Tracker** | The premium bills of the period not due, overdue, partially paid and paid, aged 1-15, 16-30, 31-60 and over 60 days overdue, with the count of overpayments held On Account |
+| **Statement of Account per Insurance Partner** | Per insurer, the policies incepting in the period in three sections: premium (gross, net, VAT, DST, LGT), remitting (net remitting, collected, remittance) and commission (commission, VAT, withholding tax) |
+| **Reconciliation Schedule** | Each line of the insurers' statements of the period against TISPH's records: gross premium, commission and amount paid on both sides, the differences and the match status |
 
 **Cash Control** (CCD-PDU (Post-Dated Cheques), CCD-PDC / CCD-ADA, CCD-BP / QRPh (Receipting), CCD-Recon (Reconciliation and Reversals)):
 
@@ -6814,8 +6919,12 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Collection Report** | Bills due in the period with the amount billed, collected (receipts posted up to the To Date), balance and collection rate |
 | **Receivables Ageing** | Outstanding premium receivables as of the To Date by ageing bucket |
 | **Receipts Register** | Official receipts of the period with bill, policy, payment mode, bank and reference |
-| **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (18.15)](#bank-reconciliation) |
+| **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (18.16)](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |
+| **Payment Summary** | Payments received in the period by user or payment method: payment and posting dates, contract, reference, client, amount, bank, cheque, channel, receipt and posting status |
+| **Daily Reversals** | Receipts reversed and cheques bounced in the period, with sub-totals per bank account: reason, reversal and actual dates, contract, client, amount, cheque, method and user |
+| **PDC Encoded Summary**, **PDC Cancelled Summary**, **PDC Maturing**, **PDC Maturing by Product and Warehouse Bank**, **PDC History Log**, **Acknowledgement Receipts of Received PDCs** | The post-dated cheques encoded, cancelled (with the reason and the approver) and maturing in the period, by warehouse bank (the Insurance Partner holding them, or the TISPH account), every action on a cheque, and the sets received; see [Post-dated cheques (18.5)](#post-dated-cheques) |
+| **Insufficient Payments**, **Overpayments** | Bank payments below what the policy owed (expected, paid, shortfall), and payments above it held On Account (excess, still held, allocated or refunded) |
 
 **Finance and Accounting** (TIS Finance & General Accounting):
 
@@ -6827,8 +6936,10 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Journal Register**, **General Ledger Detail** | Journal lines of the period; every movement of an account with its running balance |
 | **Trial Balance**, **Trial Balance (Opening / Movement / Closing)** | Per account: opening balance, period debits and credits, closing balance |
 | **Income Statement**, **Balance Sheet** | The financial statements for the period and the fiscal year to date, with the prior year |
+| **Financial Statement by Version** | The trial balance grouped by the lines of a financial statement version (TIS01 local financial statements, TIS02 balance sheet and income statement, TIS03 budget), per line or per GL account: opening, movement, closing, year to date and the prior year to date; lines with nothing to show are left out. See [Financial statement versions (20.18)](#financial-statement-versions) |
+| **Daily GL Balance** | Per GL account, grouped by the lines of the version: the beginning balance and the balance at the end of each day of the month from the From Date |
 | **Month-End Close Status** | The periods of the range with their status, the latest close run, failed checks, journals generated and who prepared and approved the close |
-| **VAT Summary**, **SAWT**, **QAP**, **SLSP Sales**, **SLSP Purchases** | The BIR working papers; see [Tax: BIR forms and returns (18.17)](#tax-bir-forms-and-returns) |
+| **VAT Summary**, **SAWT**, **QAP**, **SLSP Sales**, **SLSP Purchases** | The BIR working papers; see [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) |
 | Bank reconciliation reports | As for Cash Control |
 
 **Management** (TIS General Manager): every report of the departments above.

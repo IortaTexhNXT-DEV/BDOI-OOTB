@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "8dc92328d77d11290a646393d1df0f7e995f5944f446b384adeecc32cf8fa444",
+ "sourceHash": "1390d099d3420bf2b1e102deea6a348dba31d26b2566217a83209c3f9f69368c",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1069,35 +1069,42 @@
   {
    "id": "ccd-pdu-post-dated-cheques-register",
    "number": "10.7.1",
-   "title": "Find a cheque in the register",
+   "title": "Find a cheque in the log",
    "level": 3,
    "chapter": "CCD-PDU (Post-Dated Cheques)"
   },
   {
    "id": "ccd-pdu-post-dated-cheques-encode",
    "number": "10.7.2",
-   "title": "Register a post-dated cheque",
+   "title": "Encode the cheques of a client",
    "level": 3,
    "chapter": "CCD-PDU (Post-Dated Cheques)"
   },
   {
-   "id": "ccd-pdu-post-dated-cheques-deposit",
+   "id": "ccd-pdu-post-dated-cheques-forward",
    "number": "10.7.3",
-   "title": "Deposit a cheque on its date",
+   "title": "Forward cheques to the Insurance Partner",
    "level": 3,
    "chapter": "CCD-PDU (Post-Dated Cheques)"
   },
   {
    "id": "ccd-pdu-post-dated-cheques-clear",
    "number": "10.7.4",
-   "title": "Record the bank's answer: cleared or bounced",
+   "title": "Record the partner's advice: cleared or bounced",
+   "level": 3,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-deposit",
+   "number": "10.7.5",
+   "title": "Deposit a cheque payable to TISPH",
    "level": 3,
    "chapter": "CCD-PDU (Post-Dated Cheques)"
   },
   {
    "id": "ccd-pdu-post-dated-cheques-replace",
-   "number": "10.7.5",
-   "title": "Replace, return or cancel a cheque",
+   "number": "10.7.6",
+   "title": "Cancel, replace or return a cheque",
    "level": 3,
    "chapter": "CCD-PDU (Post-Dated Cheques)"
   },
@@ -1167,7 +1174,7 @@
   {
    "id": "ccd-pdc-ccd-ada-auto-debit",
    "number": "11.7.2",
-   "title": "Receipt an auto-debit",
+   "title": "Auto-debits",
    "level": 3,
    "chapter": "CCD-PDC / CCD-ADA"
   },
@@ -1273,6 +1280,20 @@
    "id": "ccd-bp-qrph-receipting-cheques",
    "number": "12.7.5",
    "title": "Post-dated cheques",
+   "level": 3,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-uploads",
+   "number": "12.7.6",
+   "title": "Upload bank payments and payments made to the insurer",
+   "level": 3,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-unapplied",
+   "number": "12.7.7",
+   "title": "Allocate an unapplied collection",
    "level": 3,
    "chapter": "CCD-BP / QRPh (Receipting)"
   },
@@ -1412,7 +1433,7 @@
   {
    "id": "ccd-recon-reconciliation-and-reversals-other",
    "number": "13.7.12",
-   "title": "Collections, receipts and claim settlement funds",
+   "title": "Reverse a receipt and decide reversals",
    "level": 3,
    "chapter": "CCD-Recon (Reconciliation and Reversals)"
   },
@@ -2054,204 +2075,232 @@
    "chapter": "Screen reference: Accounts"
   },
   {
-   "id": "collections",
+   "id": "reverse-a-receipt",
+   "number": "18.1.1",
+   "title": "Reverse a receipt",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "receipt-batches",
+   "number": "18.1.2",
+   "title": "Bulk upload and receipt batches",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "unapplied-collections",
    "number": "18.2",
+   "title": "Unapplied collections",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "collections",
+   "number": "18.3",
    "title": "Collections",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "credit-control",
-   "number": "18.3",
+   "number": "18.4",
    "title": "Credit control",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "post-dated-cheques",
-   "number": "18.4",
+   "number": "18.5",
    "title": "Post-dated cheques",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "accounts-payable",
-   "number": "18.5",
+   "number": "18.6",
    "title": "Accounts payable",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "bir-form-2307-for-suppliers",
-   "number": "18.6",
+   "number": "18.7",
    "title": "BIR Form 2307 for suppliers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "disbursement-payment-vouchers-and-cheques",
-   "number": "18.7",
+   "number": "18.8",
    "title": "Disbursement: payment vouchers and cheques",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "bank-payment-files",
-   "number": "18.8",
+   "number": "18.9",
    "title": "Bank payment files",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-to-insurers",
-   "number": "18.9",
+   "number": "18.10",
    "title": "Remittance to insurers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittances-worklist",
-   "number": "18.9.1",
+   "number": "18.10.1",
    "title": "Remittances",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-import-policy-list",
-   "number": "18.9.2",
+   "number": "18.10.2",
    "title": "Import policy list",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-record",
-   "number": "18.9.3",
+   "number": "18.10.3",
    "title": "The remittance page",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-approvals",
-   "number": "18.9.4",
+   "number": "18.10.4",
    "title": "Approvals",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "insurer-payments",
-   "number": "18.9.5",
+   "number": "18.10.5",
    "title": "Insurer payments",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-exceptions",
-   "number": "18.9.6",
+   "number": "18.10.6",
    "title": "Exceptions",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "remittance-schedules",
-   "number": "18.9.7",
+   "number": "18.10.7",
    "title": "Setup: remittance schedules",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
+   "id": "remittance-held-policies",
+   "number": "18.10.8",
+   "title": "Held policies",
+   "level": 3,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
    "id": "remittance-settlement",
-   "number": "18.9.8",
+   "number": "18.10.9",
    "title": "Settlement",
    "level": 3,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "direct-bill-commission-debit-notes",
-   "number": "18.10",
+   "number": "18.11",
    "title": "Direct bill: commission debit notes",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "journal-vouchers",
-   "number": "18.11",
+   "number": "18.12",
    "title": "Journal vouchers",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "sap-gl-export",
-   "number": "18.12",
+   "number": "18.13",
    "title": "SAP GL export",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "open-entry-matching-and-write-offs",
-   "number": "18.13",
+   "number": "18.14",
    "title": "Open entry matching and write-offs",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "accounting-query-and-all-clients-accounting",
-   "number": "18.14",
+   "number": "18.15",
    "title": "Accounting Query and All Clients Accounting",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "bank-reconciliation",
-   "number": "18.15",
+   "number": "18.16",
    "title": "Bank reconciliation",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "insurer-statement-reconciliation",
-   "number": "18.16",
+   "number": "18.17",
    "title": "Insurer statement reconciliation",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "tax-bir-forms-and-returns",
-   "number": "18.17",
+   "number": "18.18",
    "title": "Tax: BIR forms and returns",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "sales-invoices-eopt-act",
-   "number": "18.18",
+   "number": "18.19",
    "title": "Sales invoices (EOPT Act)",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "cas-books-and-documents",
-   "number": "18.19",
+   "number": "18.20",
    "title": "CAS books and documents",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "period-end",
-   "number": "18.20",
+   "number": "18.21",
    "title": "Period end",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "year-end-close-preparer",
-   "number": "18.21",
+   "number": "18.22",
    "title": "Year-end close (preparer)",
    "level": 2,
    "chapter": "Screen reference: Accounts"
   },
   {
    "id": "incentives",
-   "number": "18.22",
+   "number": "18.23",
    "title": "Incentives",
    "level": 2,
    "chapter": "Screen reference: Accounts"
@@ -2418,85 +2467,92 @@
    "chapter": "Screen reference: Master"
   },
   {
-   "id": "operational-masters",
+   "id": "financial-statement-versions",
    "number": "20.18",
+   "title": "Financial statement versions",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "operational-masters",
+   "number": "20.19",
    "title": "Operational masters",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "bank-file-layouts-and-payee-bank-accounts",
-   "number": "20.19",
+   "number": "20.20",
    "title": "Bank file layouts and payee bank accounts",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "e-mail-layout",
-   "number": "20.20",
+   "number": "20.21",
    "title": "E-mail Layout",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "documents-and-reports-layout",
-   "number": "20.21",
+   "number": "20.22",
    "title": "Documents and Reports Layout",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "document-signatures",
-   "number": "20.22",
+   "number": "20.23",
    "title": "Document Signatures",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "configuration",
-   "number": "20.23",
+   "number": "20.24",
    "title": "Configuration",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "document-numbering",
-   "number": "20.24",
+   "number": "20.25",
    "title": "Document Numbering",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "schedules",
-   "number": "20.25",
+   "number": "20.26",
    "title": "Schedules",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "audit-trail",
-   "number": "20.26",
+   "number": "20.27",
    "title": "Audit Trail",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "features-and-releases",
-   "number": "20.27",
+   "number": "20.28",
    "title": "Features & Releases",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "e-mail-outbox",
-   "number": "20.28",
+   "number": "20.29",
    "title": "E-mail Outbox",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "integrations",
-   "number": "20.29",
+   "number": "20.30",
    "title": "Integrations",
    "level": 2,
    "chapter": "Screen reference: Master"
