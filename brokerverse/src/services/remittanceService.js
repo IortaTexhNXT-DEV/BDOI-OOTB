@@ -67,17 +67,8 @@ export const remittanceService = {
   clientPayments: (policyId) => get(`${R}/direct-bill/policies/${id(policyId)}/client-payments`),
   recordClientPayment: (policyId, payload) => post(`${R}/direct-bill/policies/${id(policyId)}/client-payments`, payload),
   voidClientPayment: (paymentId, reason) => post(`${R}/direct-bill/client-payments/${id(paymentId)}/void`, { reason }),
-  /** Opens the printable debit note (PDF fetched with the session token). */
-  openDebitNotePdf: async (dnId) => {
-    const response = await fetch(`${BASE_URL}${R}/direct-bill/${id(dnId)}/pdf`, { headers: { ...authService.getAuthHeader() } });
-    if (!response.ok) {
-      const json = await response.json().catch(() => null);
-      throw new Error(apiErrorMessage(json, response.status));
-    }
-    const url = URL.createObjectURL(await response.blob());
-    window.open(url, "_blank", "noopener,noreferrer");
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
-  },
+  /** API path of the printable debit note, for components/Print printPdf. */
+  debitNotePdfPath: (dnId) => `${R}/direct-bill/${id(dnId)}/pdf`,
   // agency bills
   listAgencyBills: (params) => get(`${R}/agency-bill`, params),
 

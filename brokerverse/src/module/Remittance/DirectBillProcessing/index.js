@@ -25,6 +25,7 @@ import RowActions from "../../../components/RowActions";
 import EligibilityNote from "../../../components/EligibilityNote";
 import ReasonDialog from "../../../components/ReasonDialog";
 import { openConfirm } from "../../../components/ConfirmDialog";
+import { printPdf } from "../../../components/Print";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
 import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
@@ -225,7 +226,7 @@ const DirectBillProcessing = () => {
   const openView = (note) => setNoteParam(note.id);
   const closeView = () => setNoteParam(null);
 
-  const printNote = (note) => remittanceService.openDebitNotePdf(note.id).catch((e) => showError(toast, e));
+  const printNote = (note) => printPdf(remittanceService.debitNotePdfPath(note.id)).catch((e) => showError(toast, e));
 
   const noteFacts = (note) => [
     { label: t("remittance.billing.facts.insurer"), value: note.insurerName },

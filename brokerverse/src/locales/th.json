@@ -2287,7 +2287,7 @@
       "actionsFor": "การดำเนินการของ {{reference}}",
       "actions": {
         "view": "ดู",
-        "print": "ดาวน์โหลด PDF",
+        "print": "พิมพ์ใบแจ้งหนี้",
         "submit": "ส่งอนุมัติ",
         "approve": "อนุมัติ",
         "reject": "ไม่อนุมัติ",

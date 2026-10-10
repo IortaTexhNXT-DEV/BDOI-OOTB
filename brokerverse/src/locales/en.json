@@ -2493,7 +2493,7 @@
       "actionsFor": "Actions for {{reference}}",
       "actions": {
         "view": "View",
-        "print": "Download PDF",
+        "print": "Print debit note",
         "submit": "Submit for approval",
         "approve": "Approve",
         "reject": "Reject",
