@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
@@ -16,78 +16,13 @@ import DetailDialog from "../../components/DetailDialog";
 import DetailHeader from "../../components/DetailHeader";
 import DetailSection from "../../components/DetailSection";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import EligibilityNote from "../../components/EligibilityNote";
+import BankBatchDialog from "../../components/BankBatchDialog";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { ActivityLog, fromLifecycle } from "../../components/ActivityLog";
-import { currentUser } from "../../utility/userIdentity";
-import { IntTag, PageHeader, SEVERITY, date, dateTime, isoDay, money, showError, showSuccess } from "./common";
-import { calendarDateFormat } from "../../utility/dateFormat";
+import { IntTag, PageHeader, SEVERITY, date, dateTime, money, showError, showSuccess } from "./common";
 
 const STATUSES = ["draft", "for-approval", "approved", "file-generated", "sent", "completed", "cancelled"];
-const CHANNELS = ["bulk_credit", "instapay", "pesonet"];
-
-/** New batch: layout, bank account, channel, value date and the vouchers to pay. */
-const NewBatch = ({ visible, onHide, onCreated, toast }) => {
-  const { t } = useTranslation();
-  const [layouts, setLayouts] = useState([]);
-  const [accounts, setAccounts] = useState([]);
-  const [vouchers, setVouchers] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [form, setForm] = useState({ layoutCode: null, bankAccountCode: null, channel: "pesonet", valueDate: new Date(), remarks: "" });
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (!visible) return;
-    setSelected([]);
-    setLoading(true);
-    Promise.all([service.layouts(), service.bankAccounts(), service.eligibleVouchers()])
-      .then(([l, a, v]) => { setLayouts(l.data || []); setAccounts(a); setVouchers(v); })
-      .catch((e) => showError(toast, e))
-      .finally(() => setLoading(false));
-  }, [visible, toast]);
-  const layout = layouts.find((l) => l.code === form.layoutCode);
-  const total = selected.reduce((s, v) => s + Number(v.amount), 0);
-  const create = async () => {
-    try {
-      const r = await service.createBatch({ layoutCode: form.layoutCode, bankAccountCode: form.bankAccountCode, channel: form.channel, valueDate: isoDay(form.valueDate),
-        disbursementIds: selected.map((v) => v.disbursementId), remarks: form.remarks || undefined });
-      showSuccess(toast, r.message);
-      onCreated(r.data);
-    } catch (e) {
-      showError(toast, e);
-    }
-  };
-  return (
-    <Dialog className="pe-dialog" header={t("integrations.newBatch")} visible={visible} style={{ width: "min(1100px, 98vw)" }} onHide={onHide}
-      footer={<div><Button label={t("integrations.cancel")} text onClick={onHide} />
-        <Button label={t("integrations.createBatch")} icon="pi pi-check" onClick={create} disabled={!form.layoutCode || !form.bankAccountCode || !selected.length} /></div>}>
-      <div className="grid">
-        <div className="col-12 md:col-4"><label>{t("integrations.layout")} *</label>
-          <Dropdown value={form.layoutCode} options={layouts.map((l) => ({ label: l.name, value: l.code }))} onChange={(e) => {
-            const l = layouts.find((x) => x.code === e.value);
-            setForm({ ...form, layoutCode: e.value, channel: l?.channels.includes(form.channel) ? form.channel : l?.channels[0] });
-          }} className="w-full" /></div>
-        <div className="col-12 md:col-4"><label>{t("integrations.payFrom")} *</label>
-          <Dropdown value={form.bankAccountCode} options={accounts.map((a) => ({ label: `${a.name} (${a.bankCode} ${a.accountNumber})`, value: a.code }))} onChange={(e) => setForm({ ...form, bankAccountCode: e.value })} className="w-full" /></div>
-        <div className="col-6 md:col-2"><label>{t("integrations.channel")}</label>
-          <Dropdown value={form.channel} options={(layout?.channels || CHANNELS).map((c) => ({ label: t(`integrations.channelTypes.${c}`), value: c }))} onChange={(e) => setForm({ ...form, channel: e.value })} className="w-full" /></div>
-        <div className="col-6 md:col-2"><label>{t("integrations.valueDate")}</label><Calendar value={form.valueDate} onChange={(e) => setForm({ ...form, valueDate: e.value })} dateFormat={calendarDateFormat()} className="w-full" /></div>
-        {layout?.isExample && <div className="col-12"><Message severity="warn" className="w-full" text={t("integrations.exampleLayout")} /></div>}
-        <div className="col-12">
-          <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" stripedRows selectionMode="checkbox" selection={selected}
-            onSelectionChange={(e) => setSelected(e.value.filter((v) => v.ready))} isDataSelectable={(e) => e.data.ready} emptyMessage={t("integrations.noVouchers")} scrollable scrollHeight="22rem">
-            <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-            <Column field="voucherNumber" header={t("integrations.voucher")} />
-            <Column header={t("integrations.payee")} body={(v) => <div><div>{v.payeeName}</div><div className="pe-muted">{t(`integrations.payeeTypes.${v.payeeType}`, { defaultValue: v.payeeType })}</div></div>} />
-            <Column header={t("integrations.amount")} body={(v) => money(v.amount)} className="bv-num" headerClassName="bv-num" />
-            <Column header={t("integrations.payeeAccount")} body={(v) => (v.ready ? `${v.bankCode} ${v.accountNumber}` : <span className="text-orange-600">{t("integrations.noPayeeAccount")}</span>)} />
-            <Column header={t("integrations.voucherDate")} body={(v) => date(v.voucherDate)} />
-          </DataTable>
-          <div className="mt-2 text-right"><strong>{t("integrations.selected", { count: selected.length })}: {money(total)}</strong></div>
-        </div>
-        <div className="col-12"><label>{t("integrations.remarks")}</label><InputText value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></div>
-      </div>
-    </Dialog>
-  );
-};
 
 const LIFECYCLE = [
   { action: "create", at: "createdAt", by: "createdBy" },
@@ -96,12 +31,6 @@ const LIFECYCLE = [
   { action: "generate", at: "fileGeneratedAt" },
   { action: "send", at: "sentAt" },
 ];
-
-/** The signed-in user created the batch (the API names the maker by display name). */
-const ownBatch = (b) => {
-  const me = currentUser();
-  return [me.displayName, me.username].filter(Boolean).some((n) => String(n).toLowerCase() === String(b?.createdBy || "").toLowerCase());
-};
 
 /**
  * One batch: its number, status and totals, the workflow actions (each confirmed with the batch's figures), the batch
@@ -170,21 +99,18 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
 
   if (!batchId) return null;
   const s = b?.status;
-  const own = b ? ownBatch(b) : false;
-  const ownReason = own ? t("makerChecker.ownRecord") : null;
+  const decision = b?.decision || null;
 
   const actions = b ? (
     <>
       {s === "draft" && <Button label={t("integrations.submit")} icon="pi pi-send" onClick={() => step("submit", () => service.submitBatch(b.id))} />}
-      {s === "for-approval" && (
+      {s === "for-approval" && decision?.canDecide ? (
         <span className="bv-int-approval">
-          {own ? <span id={`batch-${b.id}-own`} className="bv-int-approval__reason"><i className="pi pi-lock" aria-hidden="true" />{ownReason}</span> : null}
-          <Button label={t("integrations.reject")} icon="pi pi-undo" outlined severity="danger" disabled={own} aria-describedby={own ? `batch-${b.id}-own` : undefined}
+          <Button label={t("integrations.reject")} icon="pi pi-undo" outlined severity="danger"
             onClick={() => step("reject", (text) => service.rejectBatch(b.id, text), { severity: "danger", reason: true })} />
-          <Button label={t("integrations.approve")} icon="pi pi-check" disabled={own} aria-describedby={own ? `batch-${b.id}-own` : undefined}
-            onClick={() => step("approve", () => service.approveBatch(b.id))} />
+          <Button label={t("integrations.approve")} icon="pi pi-check" onClick={() => step("approve", () => service.approveBatch(b.id))} />
         </span>
-      )}
+      ) : null}
       {["approved", "file-generated", "sent"].includes(s) && !b.paidCount && !b.rejectedCount && (
         <Button label={b.fileName ? t("integrations.rewriteFile") : t("integrations.writeFile")} icon="pi pi-file"
           onClick={() => step(b.fileName ? "rewrite" : "generate", () => service.generateBatchFile(b.id), { severity: b.fileName ? "warning" : "neutral" })} />
@@ -221,6 +147,7 @@ const BatchDialog = ({ batchId, onHide, onChanged, toast }) => {
             ]}
           />
           <div className="bv-int-actions">{actions}</div>
+          {s === "for-approval" && decision && !decision.canDecide && decision.blockedReason ? <EligibilityNote reason={decision.blockedReason} className="mb-2" /> : null}
           {skipped.length > 0 && <Message severity="warn" className="w-full mb-2" text={`${t("integrations.rowsSkipped")}: ${skipped.map((x) => `${x.reference} (${x.reason})`).join("; ")}`} />}
           <DetailSection title={t("integrations.batchFacts")}>
             <KeyValueGrid columns={4} items={[
@@ -292,7 +219,14 @@ const BankPaymentFiles = () => {
   const toast = useRef(null);
   const [filters, setFilters] = useState({ status: null, search: "" });
   const [creating, setCreating] = useState(false);
-  const [openId, setOpenId] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const openId = params.get("batch");
+  const setOpenId = (batchId) => setParams((current) => {
+    const next = new URLSearchParams(current);
+    if (batchId) next.set("batch", batchId);
+    else next.delete("batch");
+    return next;
+  }, { replace: true });
   const fetchPage = useCallback(({ page, pageSize }) => service.batches({ status: filters.status, search: filters.search.trim(), page, pageSize }), [filters]);
   const list = useServerList(fetchPage, { key: "bank-payment-batches" });
   return (
@@ -318,7 +252,7 @@ const BankPaymentFiles = () => {
           <Column header={t("integrations.created")} body={(b) => <div><div>{dateTime(b.createdAt)}</div><div className="pe-muted">{b.createdBy}</div></div>} />
         </DataTable>
       </div>
-      <NewBatch visible={creating} toast={toast} onHide={() => setCreating(false)} onCreated={(b) => { setCreating(false); list.reload(); setOpenId(b.id); }} />
+      <BankBatchDialog visible={creating} onHide={() => setCreating(false)} onCreated={(b, message) => { setCreating(false); showSuccess(toast, message); list.reload(); setOpenId(b.id); }} />
       <BatchDialog batchId={openId} toast={toast} onHide={() => setOpenId(null)} onChanged={list.reload} />
     </div>
   );

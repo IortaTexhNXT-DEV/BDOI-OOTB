@@ -13893,5 +13893,38 @@
     "clear": "Remove file",
     "none": "No file chosen",
     "accepted": "{{types}} file"
+  },
+  "bankBatchDialog": {
+    "title": "New batch",
+    "layout": "Layout",
+    "chooseLayout": "Choose a layout",
+    "debitAccount": "Debit account",
+    "chooseAccount": "Choose a bank account",
+    "channel": "Channel",
+    "valueDate": "Value date",
+    "valueDateProblem": {
+      "required": "Enter the value date.",
+      "past": "The value date cannot be before today.",
+      "weekend": "The value date falls on a weekend. Choose a working day."
+    },
+    "included": "Included payments",
+    "vouchers": "Payment vouchers",
+    "notEligible_one": "{{count}} selected payment can no longer go on a batch.",
+    "notEligible_other": "{{count}} selected payments can no longer go on a batch.",
+    "noVouchers": "No payment voucher is waiting for payment.",
+    "include": "Include {{voucher}}",
+    "voucher": "Voucher",
+    "payee": "Payee",
+    "insurer": "Insurer",
+    "amount": "Amount",
+    "paidTo": "Paid to",
+    "voucherDate": "Voucher date",
+    "noAccount": "No bank account on file",
+    "remarks": "Remarks",
+    "count_one": "{{count}} payment · {{amount}}",
+    "count_other": "{{count}} payments · {{amount}}",
+    "cancel": "Cancel",
+    "create_one": "Create batch with {{count}} payment",
+    "create_other": "Create batch with {{count}} payments"
   }
 }
