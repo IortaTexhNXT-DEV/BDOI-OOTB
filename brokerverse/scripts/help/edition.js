@@ -168,7 +168,7 @@ function effectiveStatus(manifest, { hash, drafts }) {
 
 /**
  * The source of the Word edition (docs/TISPH/tools/md2docx.py): title, document control, then the chapters one heading
- * level down, without heading ids, with the text in preparation as notes and the images by their file path.
+ * level down, without heading ids, with the text in preparation as notes and the images by their path from the folder of the source.
  */
 function wordSource(manifest, { markdown }, status) {
   const rows = [
@@ -184,11 +184,13 @@ function wordSource(manifest, { markdown }, status) {
     out.push("**Approval**", "", "| Role | Name | Date | Signature |", "|---|---|---|---|",
       ...manifest.signOff.map((s) => `| ${cell(s.role)} | ${cell(s.name)} | ${cell(s.date)} | |`), "");
   }
+  // images by their path from the folder of the Word source, so that the committed source names no machine path
+  const up = path.relative(path.dirname(path.join(manifest.dir, manifest.wordSource)), manifest.dir).split(path.sep).join("/") || ".";
   const body = markdown
     .replace(/^(#{1,3}) (.+?)(?:\s+\{#[a-z0-9-]+\})?\s*$/gm, (m, hashes, title) => `#${hashes} ${title}`)
     .replace(/^::: draft\s*\n([\s\S]*?)\n:::\s*$/gm, (m, text) => `> In preparation. ${text.replace(/\n/g, " ").trim()}`)
     .replace(/\[([^\]]+)\]\(#[a-z0-9-]+\)/g, "$1")
-    .replace(/^!\[([^\]]*)\]\((images\/[^)]+)\)\s*$/gm, (m, cap, src) => `![${cap}](${path.join(manifest.dir, src)})`);
+    .replace(/^!\[([^\]]*)\]\((images\/[^)]+)\)\s*$/gm, (m, cap, src) => `![${cap}](${path.posix.join(up, src)})`);
   return `${out.join("\n")}\n${body}`;
 }
 

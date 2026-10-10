@@ -28,6 +28,6 @@ if (!fs.existsSync(source)) {
 const version = manifest.status === "Approved" ? manifest.version : `${manifest.version} ${manifest.status || "Draft"}`;
 execFileSync("python3", ["-I", path.join(TOOLS, "md2docx.py"), source, path.join(dir, manifest.files.word),
   "--template", path.join(TOOLS, "Document_template_Format1.docx"), "--title", manifest.title, "--version", version, "--date", manifest.date,
-  "--prepared-by", manifest.prepared, "--keep-pdf", path.join(dir, manifest.files.pdf)], { stdio: ["ignore", "ignore", "inherit"] });
+  "--prepared-by", manifest.prepared, "--chapter-breaks", "--keep-pdf", path.join(dir, manifest.files.pdf)], { stdio: ["ignore", "ignore", "inherit"] });
 console.log(`help: ${manifest.files.word} and ${manifest.files.pdf} -> ${path.relative(REPO, dir)}`);
 execFileSync(process.execPath, ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", path.join(ROOT, "scripts", "build-help.js")], { stdio: "inherit" });

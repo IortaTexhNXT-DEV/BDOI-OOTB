@@ -13,7 +13,7 @@ Run it isolated, because the template is untrusted input:
         [--title "Cover title"] [--version "0.9 Draft"] [--date "10 October 2026"] \
         [--subtitle "Toyota Insurance Services Philippines"] [--prepared-by "iorta TechNXT"] \
         [--glossary-from other.md ...] [--toc-levels 2] [--signoff-title "Document Sign-Off"] \
-        [--no-pdf-pass]
+        [--chapter-breaks] [--no-pdf-pass]
 
 Without --no-pdf-pass the script converts the result to PDF with LibreOffice
 (soffice) to read the page of every heading, then writes those page numbers
@@ -1666,8 +1666,8 @@ class Builder:
         for h, blocks in sections:
             ht = plain(h['text'])
             hd = self.content_heading(2, h['text'])
-            if first:
-                # page break before the first content heading
+            if first or self.args.chapter_breaks:
+                # page break before the first content heading (with --chapter-breaks, before every chapter)
                 self.items[-1].find(qn('w:pPr')).insert(1, el(f'<w:pageBreakBefore {NSDECL}/>'))
                 first = False
             if re.search(r'open questions|decisions (we need|tisph must|needed)|pending items', ht, re.I) and not pending_done:
@@ -2251,14 +2251,22 @@ def heading_pages(builder, pages):
     while toc_end + 1 < len(pages) and re.search(r'\.{5,}', pages[toc_end + 1]):
         toc_end += 1
     cur = toc_end + 1
+    # a heading is a line of its own that starts with its number and text; the same words in the body
+    # text of an earlier page (a table of chapters, a cross-reference) do not count
+    plines = [[norm(line) for line in p.split('\n') if line.strip()] for p in pages]
     for h in builder.headings:
         key = norm(numbers.get(id(h), '') + h.text)[:40]
         key2 = norm(h.text)[:40]
         found = None
         for k in range(cur, len(npages)):
-            if key in npages[k] or key2 in npages[k]:
+            if any(line.startswith(key) for line in plines[k]):
                 found = k
                 break
+        if found is None:
+            for k in range(cur, len(npages)):
+                if key in npages[k] or key2 in npages[k]:
+                    found = k
+                    break
         if found is None:
             warn(f'page of heading not found: {h.text[:50]}')
             continue
@@ -2282,6 +2290,7 @@ def main():
     ap.add_argument('--signoff-title', default='Document Sign-Off')
     ap.add_argument('--acronym', action='append', default=[], metavar='KEY=DEFINITION',
                     help='add or override an acronym definition (repeatable)')
+    ap.add_argument('--chapter-breaks', action='store_true', help='start every chapter on a new page')
     ap.add_argument('--no-pdf-pass', action='store_true')
     ap.add_argument('--keep-pdf', help='write the final PDF here')
     ap.add_argument('--report', help='write a JSON report here')
