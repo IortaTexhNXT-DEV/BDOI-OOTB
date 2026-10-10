@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
@@ -179,6 +179,8 @@ describe('jobs', () => {
 
 describe('marketing consent', () => {
   it('is recorded by the Sales Associate who keeps the prospect', async () => {
+    // the consents are kept on the Campaigns screen, a future-release feature in TISPH
+    await enableFeatures(ctx.app, ['campaigns']);
     const l = (await as['tf.assoc']('post', '/leads').send({ firstName: 'Consenting' })).body.data;
     const r = await as['tf.assoc']('post', '/campaigns/consents').send({ partyType: 'lead', partyId: l.id, granted: false, channel: 'Phone', evidence: 'Asked not to be called' });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
