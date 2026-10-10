@@ -102,6 +102,11 @@ export async function insurerBillingRun() {
   if (!(await tableExists('insurer_billing_runs'))) return { skipped: 'insurer_billing_runs table missing' };
   return (await import('../modules/remittance/billing.js')).billingJob();
 }
+/** Commission rules and schemes: scheduled sharing schemes come into force, replaced versions are superseded, rules and schemes past their last day end (commission/schemes.js). */
+export async function commissionRulesSchemes() {
+  if (!(await tableExists('sharing_schemes'))) return { skipped: 'sharing_schemes table missing' };
+  return (await import('../modules/commission/schemes.js')).schemesJob();
+}
 /** Instalment hold check: record the part-paid policies held from remittance and release those now fully paid (remittance/holds.js). */
 export async function remittanceHoldCheck() {
   if (!(await tableExists('remittance_holds'))) return { skipped: 'remittance_holds table missing' };

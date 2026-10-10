@@ -493,9 +493,11 @@ export const FEATURES = Object.freeze([
   // ---------------------------------------------------------------- commission
   feature({
     key: 'commission', name: 'Commission and referrer accounts', module: 'Commission', tier: P1,
-    description: 'Commission dashboard and the accounts of agents, dealers and referrers with their share',
-    requirements: ['TIS-BRD-COMM-05', 'TIS-BRD-COMM-06', 'TIS-BRD-PROD-16', 'TIS-BRD-RPT-OPS-07'],
-    menus: ['Commission > Commission Dashboard', 'Commission > Agents/Referrer Accounts'],
+    description: 'Commission dashboard, the accounts of agents, dealers and referrers with their share, the sharing schemes, the commission basis of a policy and the change requests on commission lines',
+    requirements: ['TIS-BRD-COMM-02', 'TIS-BRD-COMM-05', 'TIS-BRD-COMM-06', 'TIS-BRD-PROD-16', 'TIS-BRD-RPT-OPS-07', 'FR-CMR-010', 'FR-CMR-015', 'FR-CMR-022', 'FR-RMT-001', 'FR-RMT-003', 'FR-RMT-005', 'FR-RMT-030'],
+    menus: ['Commission > Commission Dashboard', 'Commission > Agents/Referrer Accounts', 'Commission > Sharing Schemes'],
+    jobs: ['commission-rules-schemes'],
+    permissions: ['read:sharing-schemes', 'write:sharing-schemes', 'approve:sharing-schemes', 'write:commission-share', 'approve:commission'],
   }),
   feature({
     key: 'insurer-overrides', name: 'Insurer overriding commission', module: 'Commission', tier: FUT,

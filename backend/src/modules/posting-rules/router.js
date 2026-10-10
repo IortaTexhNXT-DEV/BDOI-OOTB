@@ -21,9 +21,10 @@ const ad = moduleRouter('Account Determination', '/account-determination');
 // Finance reads the rules and the account map. Changes are proposed by configuration users or Accounting
 // (write:posting-rules) and, with accounting.configuration_maker_checker, take effect when a different user with
 // approve:posting-rules (Accounting Manager, System Administrator) approves them.
-const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings')];
-const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules')];
-const approve = [requireAuth, requirePermission('approve:posting-rules')];
+const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings', 'read:commission-rules', 'read:sharing-schemes')];
+const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules', 'write:commission-rules', 'write:sharing-schemes')];
+// commission rule and sharing scheme changes are decided by their own approvers (service.js changePermission), checked again per change
+const approve = [requireAuth, requirePermission('approve:posting-rules', 'approve:commission-rules', 'approve:sharing-schemes')];
 // Configuration Approvals (Master > Finance): a change waiting for approval goes to approve:posting-rules, the decision to the requester.
 const APPROVALS = '/master/finance/configuration-approvals';
 const changeLabel = (c) => `${c.kindLabel}: ${c.target}${c.kind === 'posting-rule-version' && c.payload?.version ? ` version ${c.payload.version}` : ''}`;
