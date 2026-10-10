@@ -26,7 +26,7 @@ export const TRANSACTION_TABLES = [
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
-  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows',
+  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
   // claims and renewals
