@@ -173,6 +173,7 @@ import EndorsementRejected from "../agentModule/endorsementModule/EndorsementRej
 import Production from "../module/Reports/OperationalReports/Production";
 // Dashboard Imports
 import ExecutiveDashboard from "../module/ExecutiveDashboard";
+import MyDashboard from "../components/Dashboard/MyDashboard";
 import ClaimsDashboard from "../module/ClaimsModule/ClaimsDashboard";
 import SalesDashboard from "../module/SalesDashboard";
 import UnderwritingDashboard from "../module/UnderwritingModule/UnderwritingDashboard";
@@ -1295,6 +1296,7 @@ const Maincomponent = () => {
           {/* // Dashboard Routes */}
           {/* after sign-in: My Work with the role preset */}
           <Route path="/" element={<ToMyWork />} />
+          <Route path="/dashboard" element={<MyDashboard />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
           <Route path="/sales/dashboard" element={<SalesDashboard />} />

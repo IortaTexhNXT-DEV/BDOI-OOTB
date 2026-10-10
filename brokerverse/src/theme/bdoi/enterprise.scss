@@ -602,10 +602,11 @@ $text-strong: #1f2937;
     flex: 1 1 auto;
     height: 6px;
     border-radius: 3px;
-    background: $color-border;
+    // a meter is a data mark: the first data colour on a lighter step of its own ramp (theme/bdoi/dataviz.scss)
+    background: var(--bv-viz-seq-100);
 
     .p-progressbar-value {
-      background: $brand-blue;
+      background: var(--bv-viz-cat-1);
       border-radius: 3px;
     }
 
@@ -616,15 +617,15 @@ $text-strong: #1f2937;
 
   // warning above 80, danger above 100 (components/ProgressMeter sets the modifier)
   &.bv-meter--warning .p-progressbar .p-progressbar-value {
-    background: $brand-gold-600;
+    background: var(--bv-viz-warning);
   }
 
   &.bv-meter--danger .p-progressbar .p-progressbar-value {
-    background: $color-danger;
+    background: var(--bv-viz-critical);
   }
 
   &.bv-meter--success .p-progressbar .p-progressbar-value {
-    background: $color-success;
+    background: var(--bv-viz-good);
   }
 
   .bv-meter__value {

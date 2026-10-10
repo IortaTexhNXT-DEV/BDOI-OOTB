@@ -33,7 +33,12 @@ const RGBA = [
  * primary tint. Greys, status colours and every other hue are left alone.
  */
 // the info severity of the component library (messages, tags, badges) stays semantic
-const KEEP = new Set(["#3b82f6", "#2563eb", "#1d4ed8", "#0ea5e9", "#0284c7", "#0369a1", "#e0f2fe", "#bae6fd", "#dbeafe", "#eff6ff", "#bfdbfe", "#93c5fd", "#60a5fa"]);
+// and the data colours of charts (src/theme/dataviz.json) are not brand colours: a theme never repaints them
+const dataViz = require("../src/theme/dataviz.json");
+const KEEP = new Set([
+  "#3b82f6", "#2563eb", "#1d4ed8", "#0ea5e9", "#0284c7", "#0369a1", "#e0f2fe", "#bae6fd", "#dbeafe", "#eff6ff", "#bfdbfe", "#93c5fd", "#60a5fa",
+  ...dataViz.categorical, ...dataViz.sequential, ...dataViz.diverging.below, ...dataViz.diverging.above,
+]);
 
 function blueRole(hex) {
   if (KEEP.has(hex)) return null;

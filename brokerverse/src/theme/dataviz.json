@@ -1,0 +1,48 @@
+{
+  "categorical": ["#345d9b", "#0f9485", "#8b491f", "#b7852a", "#86528e", "#6a8d43", "#3b90bc"],
+  "categoricalNames": ["slate", "teal", "sienna", "ochre", "plum", "olive", "steel"],
+  "other": "#8c8c8c",
+  "sequential": ["#e1ecfc", "#c2d6f2", "#9cb9e5", "#739ad3", "#507bbb", "#345d9b", "#224271"],
+  "diverging": {
+    "below": ["#8b491f", "#c88762", "#eeccba"],
+    "midpoint": "#eeeeee",
+    "above": ["#c2d6f2", "#739ad3", "#345d9b"]
+  },
+  "status": {
+    "good": { "fill": "#2e7d4f", "text": "#1d7f4e", "icon": "pi-check-circle" },
+    "warning": { "fill": "#d9a21b", "text": "#8a5a00", "icon": "pi-exclamation-circle" },
+    "serious": { "fill": "#cf6a1d", "text": "#a3470d", "icon": "pi-exclamation-triangle" },
+    "critical": { "fill": "#b42318", "text": "#b42318", "icon": "pi-times-circle" }
+  },
+  "ink": {
+    "primary": "#1a1a1a",
+    "secondary": "#4b4b4b",
+    "muted": "#666666",
+    "grid": "#ebebeb",
+    "axis": "#c4c4c4",
+    "surface": "#ffffff"
+  },
+  "entities": {
+    "insurer": [
+      ["pioneer", "pioneer"],
+      ["maagap", "maagap"],
+      ["axa", "axa"],
+      ["stronghold", "stronghold"]
+    ],
+    "lob": [
+      ["motor", "motor|motor vehicle|private car|commercial vehicle"],
+      ["ctpl", "ctpl|compulsory third party"],
+      ["pa", "personal accident|accident|\\bpa\\b"],
+      ["creditLife", "credit life|\\blife\\b"],
+      ["travel", "travel"],
+      ["fire", "fire|property|home"],
+      ["marine", "marine|cargo|parcel|courier"]
+    ],
+    "channel": [
+      ["tfs", "\\btfs\\b|toyota financial|financing"],
+      ["dealer", "dealer|toyota [a-z]"],
+      ["direct", "direct|walk-in"],
+      ["referral", "referral|referrer|agent"]
+    ]
+  }
+}

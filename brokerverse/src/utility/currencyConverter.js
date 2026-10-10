@@ -103,3 +103,25 @@ export const currencySymbol = () => {
     return currency;
   }
 };
+
+/**
+ * An amount in compact notation in the display currency: ₱850, ₱12.9K, ₱1.2M, ₱3.4B. For KPI values and chart axes;
+ * tables and tooltips show the amount in full (formatCurrency).
+ * @param {number|string|null|undefined} amount
+ * @param {{ maximumFractionDigits?: number, empty?: string }} [options]
+ */
+export const formatCompactCurrency = (amount, { maximumFractionDigits = 1, empty = "-" } = {}) => {
+  if (amount === null || amount === undefined || amount === "") return empty;
+  const n = Number(`${amount}`.replace(/,/g, ""));
+  if (Number.isNaN(n)) return empty;
+  const { currency, locale } = getDisplayCurrencyConfig();
+  return new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol", notation: "compact", minimumFractionDigits: 0, maximumFractionDigits }).format(n);
+};
+
+/** A count in compact notation (850, 12.9K, 1.2M), with the configured grouping below a thousand. */
+export const formatCompactNumber = (value, { maximumFractionDigits = 1, empty = "-" } = {}) => {
+  if (value === null || value === undefined || value === "") return empty;
+  const n = Number(`${value}`.replace(/,/g, ""));
+  if (Number.isNaN(n)) return empty;
+  return new Intl.NumberFormat(numberLocale(), { notation: "compact", maximumFractionDigits }).format(n);
+};

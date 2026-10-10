@@ -1,32 +1,18 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { numberLocale } from "../../utility/currencyConverter";
+import KpiCard from "../Dashboard/KpiCard";
 import "./index.scss";
 
 /**
- * The row of figures above a list (totals, counts per status). Every card has the same fixed height, so nothing
- * moves when the figures arrive or refresh: before the first answer a card shows a dash, afterwards it keeps its
- * last figure while a refresh is running. A card with `onClick` acts as a filter (`active` marks the chosen one).
+ * The row of figures above a list or a dashboard (totals, counts per status, KPIs). Every card has the structure of
+ * components/Dashboard/KpiCard (label, value, change against a named period, note) and the same height, so nothing
+ * moves when the figures arrive or refresh: before the first answer a card shows a dash, afterwards it keeps its last
+ * figure while a refresh is running. A card with `onClick` acts as a filter or opens the list behind the figure
+ * (`active` marks the chosen one).
  */
 const StatCards = ({ items, className = "" }) => (
   <div className={`bv-stat-cards ${className}`}>
-    {items.map((item) => {
-      const value = item.value === null || item.value === undefined ? "-" : typeof item.value === "number" ? item.value.toLocaleString(numberLocale()) : item.value;
-      const body = (
-        <>
-          <span className="bv-stat-label">{item.label}</span>
-          <span className="bv-stat-value">{value}</span>
-          <span className="bv-stat-note">{item.note || " "}</span>
-        </>
-      );
-      return item.onClick ? (
-        <button type="button" key={item.key} className={`bv-stat-card clickable ${item.active ? "active" : ""}`} onClick={item.onClick} aria-pressed={!!item.active}>
-          {body}
-        </button>
-      ) : (
-        <div key={item.key} className="bv-stat-card">{body}</div>
-      );
-    })}
+    {items.map(({ key, ...item }) => <KpiCard key={key} {...item} />)}
   </div>
 );
 
@@ -35,7 +21,11 @@ StatCards.propTypes = {
     key: PropTypes.string.isRequired,
     label: PropTypes.node.isRequired,
     value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    change: PropTypes.number,
+    good: PropTypes.oneOf(["up", "down", "neutral"]),
+    comparison: PropTypes.node,
     note: PropTypes.node,
+    status: PropTypes.shape({ severity: PropTypes.string, label: PropTypes.node }),
     onClick: PropTypes.func,
     active: PropTypes.bool,
   })).isRequired,

@@ -1,0 +1,293 @@
+@import "../../theme/bdoi/tokens";
+
+// Dashboard kit (docs/developer-guide/dashboards.md). Neutral surfaces, hairline rules, ink from the brand theme;
+// the data colours are the --bv-viz-* tokens of theme/bdoi/dataviz.scss.
+
+.bv-dash-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+}
+
+.bv-dash-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: center;
+
+  &__title {
+    min-width: 0;
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: $color-heading;
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--bv-viz-ink-muted);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+.bv-dash-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  .p-dropdown,
+  .p-calendar {
+    min-width: 11rem;
+  }
+
+  &__switch {
+    min-width: 13rem;
+  }
+
+  &__spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.bv-dash-asof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--bv-viz-ink-muted);
+  white-space: nowrap;
+
+  .pi {
+    font-size: 12px;
+  }
+}
+
+.bv-dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  > .bv-dash-grid__wide {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.bv-dash-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  @media (max-width: 1280px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.bv-chart-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  padding: 16px 20px 20px;
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  &__titles {
+    min-width: 0;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: $color-heading;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--bv-viz-ink-muted);
+    }
+  }
+
+  &__tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+
+    .bv-viz-tool.p-button {
+      width: 2rem;
+      height: 2rem;
+      color: var(--bv-viz-ink-muted);
+
+      &.active {
+        color: $color-heading;
+        background: var(--bv-viz-div-mid);
+      }
+    }
+  }
+
+  &__body {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  &__print {
+    display: none;
+  }
+}
+
+.bv-viz-switch {
+  display: inline-flex;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  margin-right: 4px;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--bv-viz-ink-secondary);
+    cursor: pointer;
+
+    &.active {
+      background: $color-heading;
+      color: $color-surface;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+    }
+  }
+}
+
+.bv-viz-chart {
+  position: relative;
+  min-width: 0;
+}
+
+.bv-viz-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--bv-viz-ink-muted);
+  font-size: 13px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+
+  .pi {
+    font-size: 20px;
+    color: var(--bv-viz-axis);
+  }
+}
+
+.bv-viz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid $color-border;
+    text-align: left;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--bv-viz-ink-muted);
+  }
+
+  .bv-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// a horizontal bar list drawn in HTML (ranked figures with long names): the bar in the first data colour
+.bv-viz-hbar {
+  display: grid;
+  grid-template-columns: minmax(6rem, 12rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  font-size: 13px;
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--bv-viz-ink-secondary);
+  }
+
+  &__track {
+    height: 12px;
+  }
+
+  &__fill {
+    height: 100%;
+    min-width: 2px;
+    background: var(--bv-viz-cat-1);
+    border-radius: 0 4px 4px 0;
+  }
+
+  &__value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: $color-heading;
+  }
+}
+
+@media print {
+  .bv-dash-toolbar .p-dropdown,
+  .bv-dash-toolbar .p-button,
+  .bv-chart-card__tools {
+    display: none !important;
+  }
+
+  .bv-chart-card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .bv-chart-card__print {
+    display: block;
+    margin-top: 12px;
+  }
+}

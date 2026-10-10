@@ -1,0 +1,54 @@
+// Data colours of charts, KPI cards and meters (docs/developer-guide/dashboards.md). The values are those of
+// src/theme/dataviz.json, which the charts read (src/theme/chartTheme.js); chartTheme.test.js checks that both agree.
+// They are custom properties named --bv-*, so the build plugin (scripts/postcss-brand-vars.js) leaves the blues of the
+// data palette alone: a data colour never turns into the brand colour of a theme.
+//
+// The ink follows the brand theme (Toyota: black text on white, grey rules); the brand accent (Toyota red) is not a
+// data colour and never marks a series or a bad state.
+:root {
+  // categorical: fixed order, assigned in sequence, never cycled (slot 8+ folds into "other")
+  --bv-viz-cat-1: #345d9b;
+  --bv-viz-cat-2: #0f9485;
+  --bv-viz-cat-3: #8b491f;
+  --bv-viz-cat-4: #b7852a;
+  --bv-viz-cat-5: #86528e;
+  --bv-viz-cat-6: #6a8d43;
+  --bv-viz-cat-7: #3b90bc;
+  --bv-viz-other: #8c8c8c;
+
+  // sequential (magnitude, light -> dark) and its lighter steps for meter tracks
+  --bv-viz-seq-100: #e1ecfc;
+  --bv-viz-seq-200: #c2d6f2;
+  --bv-viz-seq-300: #9cb9e5;
+  --bv-viz-seq-400: #739ad3;
+  --bv-viz-seq-500: #507bbb;
+  --bv-viz-seq-600: #345d9b;
+  --bv-viz-seq-700: #224271;
+
+  // diverging (variance against a target): below <- grey midpoint -> above
+  --bv-viz-div-below-3: #8b491f;
+  --bv-viz-div-below-2: #c88762;
+  --bv-viz-div-below-1: #eeccba;
+  --bv-viz-div-mid: #eeeeee;
+  --bv-viz-div-above-1: #c2d6f2;
+  --bv-viz-div-above-2: #739ad3;
+  --bv-viz-div-above-3: #345d9b;
+
+  // status: reserved meaning, always with an icon and a label (fill for marks, text for words)
+  --bv-viz-good: #2e7d4f;
+  --bv-viz-good-text: #1d7f4e;
+  --bv-viz-warning: #d9a21b;
+  --bv-viz-warning-text: #8a5a00;
+  --bv-viz-serious: #cf6a1d;
+  --bv-viz-serious-text: #a3470d;
+  --bv-viz-critical: #b42318;
+  --bv-viz-critical-text: #b42318;
+
+  // neutral foundation: surfaces, rules and ink stay recessive
+  --bv-viz-ink: var(--bv-heading-text, #1a1a1a);
+  --bv-viz-ink-secondary: #4b4b4b;
+  --bv-viz-ink-muted: #666666;
+  --bv-viz-grid: #ebebeb;
+  --bv-viz-axis: #c4c4c4;
+  --bv-viz-surface: #ffffff;
+}

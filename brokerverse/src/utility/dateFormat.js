@@ -84,3 +84,44 @@ export const formatDate = (value, { withTime = false, empty = "-" } = {}) => {
     .replace("DD", pad(date.getDate()));
   return withTime ? `${text} ${pad(date.getHours())}:${pad(date.getMinutes())}` : text;
 };
+
+/**
+ * Business time zone (System Settings general.timezone, e.g. Asia/Manila), applied by applySystemSettings. Business
+ * dates (today, the start of this month) and the time a dashboard's figures were read are shown in this zone, not in
+ * the zone of the browser.
+ */
+export const DEFAULT_TIME_ZONE = "Asia/Manila";
+let activeTimeZone = DEFAULT_TIME_ZONE;
+
+const validZone = (zone) => {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const setBusinessTimeZone = (zone) => {
+  const text = String(zone || "").trim();
+  activeTimeZone = text && validZone(text) ? text : DEFAULT_TIME_ZONE;
+};
+
+export const getBusinessTimeZone = () => activeTimeZone;
+
+/** The calendar date of an instant (now by default) in the business time zone, as YYYY-MM-DD. */
+export const businessDate = (instant = new Date()) => {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: activeTimeZone, year: "numeric", month: "2-digit", day: "2-digit" })
+    .formatToParts(instant instanceof Date ? instant : new Date(instant)).map((p) => [p.type, p.value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
+
+/** An instant (timestamp, ISO text or Date) as date and time in the business time zone, e.g. "10/10/2026 14:05". */
+export const formatBusinessDateTime = (instant, { empty = "-" } = {}) => {
+  if (instant === null || instant === undefined || instant === "") return empty;
+  const date = instant instanceof Date ? instant : new Date(instant);
+  if (Number.isNaN(date.getTime())) return empty;
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: activeTimeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .formatToParts(date).map((p) => [p.type, p.value]));
+  return `${formatDate(`${parts.year}-${parts.month}-${parts.day}`)} ${parts.hour}:${parts.minute}`;
+};
