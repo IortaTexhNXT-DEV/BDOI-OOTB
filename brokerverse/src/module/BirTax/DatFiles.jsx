@@ -182,8 +182,8 @@ const DatFiles = () => {
             <Column header={t("birTax.fileType")} body={(f) => t(`birTax.datType.${f.type}`)} />
             <Column header={t("birTax.period")} body={(f) => (f.form ? `${periodLabel(f)} · ${f.form}` : periodLabel(f))} />
             <Column header={t("birTax.fileName")} body={(f) => <span className="tax-file-name">{f.fileName}</span>} />
-            <Column header={t("birTax.records")} field="records" className="bv-num" headerClassName="bv-num" />
-            <Column header={t("birTax.total")} body={(f) => money(mainTotal(f.totals))} className="bv-num" headerClassName="bv-num" />
+            <Column header={t("birTax.detailRecords")} body={(f) => Number(f.rows || 0).toLocaleString("en-PH")} className="bv-num" headerClassName="bv-num" />
+            <Column header={t("birTax.total")} body={(f) => money(mainTotal(f.totals || {}) ?? 0)} className="bv-num" headerClassName="bv-num" />
             <Column header={t("birTax.result")} body={(f) => <ResultChip valid={f.valid} />} />
             <Column header={t("birTax.generatedBy")} field="generatedByName" />
             <Column header={t("birTax.generatedAt")} body={(f) => dateTime(f.generatedAt)} />

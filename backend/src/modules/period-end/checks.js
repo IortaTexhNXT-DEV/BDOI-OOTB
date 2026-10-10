@@ -113,3 +113,22 @@ export async function blockingChecks(db, p) {
 export async function blockingFailures(db, p) {
   return (await blockingChecks(db, p)).filter((r) => r.status === 'failed');
 }
+
+/**
+ * Blocking manual items of a period (bank reconciliations signed off, ...): signed off on the latest month-end close
+ * run of the period, else pending. A pending one blocks a close, from Period Management as on the close run.
+ */
+export async function manualSignOffs(db, p) {
+  const items = (await checklistItems(db)).filter((i) => i.item_type !== 'auto' && i.severity === 'blocking');
+  if (!items.length) return [];
+  const run = (await db.query('SELECT id FROM period_close_runs WHERE period = $1 AND status <> \'cancelled\' ORDER BY created_at DESC LIMIT 1', [p.period])).rows[0];
+  const signed = new Set(run ? (await db.query('SELECT code FROM period_close_run_checks WHERE run_id = $1 AND status = \'signed-off\'', [run.id])).rows.map((r) => r.code) : []);
+  return items.map((it) => ({ code: it.code, label: it.label, itemType: 'manual', severity: it.severity, sortOrder: it.sort_order, count: 0, amount: null, detail: [],
+    status: signed.has(it.code) ? 'signed-off' : 'pending', message: signed.has(it.code) ? 'OK' : `${it.label}: not signed off on the month-end close of ${p.period}` }));
+}
+
+/** What stops a period moving to `to` (soft_closed | closed): the failing blocking auto checks, and for a close the blocking manual items not signed off. */
+export async function closeBlockers(db, p, to) {
+  const failed = await blockingFailures(db, p);
+  return to === 'closed' ? [...failed, ...(await manualSignOffs(db, p)).filter((c) => c.status === 'pending')] : failed;
+}

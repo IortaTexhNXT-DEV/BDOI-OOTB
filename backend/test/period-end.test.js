@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
-import { withCalendarFiscalYear } from './helpers.js';
+import { withCalendarFiscalYear, withoutManualSignOffs } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { createJournal, cancelJournal } from '../src/modules/accounting/lib/ledger.js';
@@ -72,6 +72,22 @@ describe('fiscal calendar and period statuses', () => {
     const hist = (await maker('get', '/period-end/periods/2026-02/history')).body.data;
     expect(hist.map((h) => h.to)).toEqual(['open', 'soft_closed']);
     expect(hist[0]).toMatchObject({ remarks: 'Other: statement received', reasonCode: 'PRO-OTHER', reasonName: 'Other' });
+  });
+
+  it('a close from Period Management is the checker\'s, and waits for the blocking manual items signed off on the month-end close', async () => {
+    const asMaker = (await maker('get', '/period-end/periods/2026-03/status-preview?status=closed')).body.data;
+    expect(asMaker).toMatchObject({ allowed: false, reason: 'approval' });
+    const refused = await maker('post', '/period-end/periods/2026-03/status').send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'month end' });
+    expect(refused.status).toBe(403);
+    expect(refused.body.message).toMatch(/month-end close of 2026-03 for approval/);
+    const preview = (await admin('get', '/period-end/periods/2026-03/status-preview?status=closed')).body.data;
+    expect(preview).toMatchObject({ allowed: false, reason: 'checks' });
+    expect(preview.checks.find((c) => c.code === 'bank_reconciliation_signoff')).toMatchObject({ itemType: 'manual', severity: 'blocking', status: 'pending' });
+    const soft = (await maker('get', '/period-end/periods/2026-03/status-preview?status=soft_closed')).body.data;
+    expect(soft.checks.map((c) => c.code)).not.toContain('bank_reconciliation_signoff');
+    const blocked = await admin('post', '/period-end/periods/2026-03/status').send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'month end' });
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.message).toMatch(/Bank reconciliations reviewed and signed off: not signed off/);
   });
 });
 
@@ -272,6 +288,7 @@ describe('year-end close', () => {
     expect(chk.body.data.status).toBe('draft');
     expect(chk.body.data.checks.find((c) => c.code === 'periods_closed').status).toBe('failed');
     expect((await admin('post', `/period-end/year-end/${ye.id}/close`).send({})).status).toBe(409);
+    await withoutManualSignOffs();
     for (let m = 1; m <= 12; m += 1) {
       const p = `2025-${String(m).padStart(2, '0')}`;
       const r = await admin('post', `/period-end/periods/${p}/status`).send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'year end' });
@@ -348,12 +365,12 @@ describe('year-end close', () => {
     // adjustment in period 13, approved by a second user, then close again
     const adj = await maker('post', '/period-end/adjustments').send({ fiscalYear: 'FY2025', description: 'Audit adjustment', lines: [{ accountCode: '4401003', debit: 1500, credit: 0 }, { accountCode: '2208001', debit: 0, credit: 1500 }] });
     expect(adj.status, JSON.stringify(adj.body)).toBe(201);
-    expect(adj.body.data).toMatchObject({ period: '2025-13', date: '2025-12-31', status: 'pending' });
+    expect(adj.body.data).toMatchObject({ period: '2025-13', date: '2025-12-31', status: 'for-approval' });
     const again = (await maker('post', '/period-end/year-end').send({ fiscalYear: 'FY2025' })).body.data;
     const blocked = await admin('post', `/period-end/year-end/${again.id}/close`).send({});
     expect(blocked.status).toBe(409);
     expect(blocked.body.message).toMatch(/adjustment journal/);
-    expect((await ctx.as('checker')('put', `/accounting/transactions/${adj.body.data.id}/post`)).status).toBe(200);
+    expect((await ctx.as('checker')('post', `/journal-vouchers/${adj.body.data.id}/approve`)).status).toBe(200);
     const closed = await admin('post', `/period-end/year-end/${again.id}/close`).send({});
     expect(closed.status, JSON.stringify(closed.body)).toBe(200);
     expect(closed.body.data.netIncome).toBeCloseTo(netIncome - 1500, 2);

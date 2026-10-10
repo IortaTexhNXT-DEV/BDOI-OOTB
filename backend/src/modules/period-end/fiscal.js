@@ -140,6 +140,10 @@ export async function transitionProblem(db, p, to, user) {
   if (p.status === to) return fail(409, 'unchanged', `Period ${p.period} is already ${to.replace('_', '-')}`);
   const fy = p.fiscal_year ? await getFiscalYear(db, p.fiscal_year) : null;
   if (fy?.status === 'closed') return fail(409, 'year-closed', `Fiscal year ${fy.code} is closed`);
+  // a close is the checker's: the maker submits the month-end close for approval instead
+  if (to === 'closed' && !hasPermission(user, APPROVE)) {
+    return fail(403, 'approval', `Closing a period requires permission ${APPROVE}; submit the month-end close of ${p.period} for approval`);
+  }
   if (RANK[to] < RANK[p.status]) {
     if (!hasPermission(user, APPROVE)) return fail(403, 'permission', `Reopening a period requires permission ${APPROVE}`);
     if (to === 'open' && isAdjustmentPeriod(p.period) && !(await getSetting('accounting.adjustment_period_enabled', true))) {
@@ -154,8 +158,8 @@ export async function transitionProblem(db, p, to, user) {
 /**
  * Status change requested from Period Management. Every change needs a reason of the Reason Codes master (context
  * period_close to soft-close or close, period_reopen to reopen; the note when the reason asks for one). Closing (soft
- * or hard) runs the blocking month-end checks (`runBlockingChecks` supplied by the caller); reopening needs
- * approve:period-end; a locked period (closed fiscal year) cannot be reopened here.
+ * or hard) runs the blocking month-end checks (`runBlockingChecks(db, period, to)` supplied by the caller; a close also needs
+ * the blocking manual items signed off); closing and reopening need approve:period-end; a locked period (closed fiscal year) cannot be reopened here.
  */
 export async function changePeriodStatus(db, period, to, { reasonCode, note, user, runBlockingChecks }) {
   const p = await getPeriod(db, period, { lock: true });
@@ -165,7 +169,7 @@ export async function changePeriodStatus(db, period, to, { reasonCode, note, use
   const context = reasonContextOf(p.status, to);
   const reason = await requiredReason(db, context, { reasonCode, note });
   if (context === 'period_close' && runBlockingChecks) {
-    const failed = await runBlockingChecks(db, p);
+    const failed = await runBlockingChecks(db, p, to);
     if (failed.length) throw conflict(`Period ${period} cannot be ${to.replace('_', '-')}: ${failed.map((f) => f.message).join('; ')}`);
   }
   const row = await applyStatus(db, p, to, { remarks: reason.text, source: 'manual', user, reasonCode: reason.code });

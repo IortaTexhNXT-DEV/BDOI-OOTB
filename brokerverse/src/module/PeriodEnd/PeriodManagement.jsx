@@ -97,7 +97,7 @@ const PeriodManagement = () => {
           const { allowed, reason, message } = offered[a];
           const tip = allowed ? undefined : t(`periodManagement.notAllowed.${reason}`, { defaultValue: message || "" });
           return (
-            <Button key={a} type="button" icon={ACTION_ICONS[a]} label={t(`periodManagement.button.${a}`)} size="small" outlined={a !== "close"}
+            <Button key={a} type="button" icon={ACTION_ICONS[a]} label={t(`periodManagement.button.${a}`)} size="small" outlined
               severity={a === "reopen" ? "warning" : undefined} disabled={!allowed} tooltip={tip} tooltipOptions={{ showOnDisabled: true, position: "top" }}
               onClick={() => setRequest({ action: a, period: row })} />
           );
@@ -142,7 +142,7 @@ const PeriodManagement = () => {
         onDone={() => { reloadYears(); reloadFy(); }} />
 
       {/* the figures keep their place before the year is loaded, so the periods below do not move */}
-      <div className="pe-kpis">
+      <div className="pe-kpis pm-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy ? fy.code : "-"}</div><div className="pe-muted">{fy ? `${date(fy.startDate)} – ${date(fy.endDate)}` : " "}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearStatus")}</div><div className="pe-kpi-value">{fy ? <StatusTag status={fy.status} /> : "-"}</div></div>
         {["open", "soft_closed", "closed", "locked"].map((s) => (
@@ -166,7 +166,7 @@ const PeriodManagement = () => {
             <span><button type="button" className="pe-link" onClick={() => navigate(`/accounts/period-end/close/${r.closeRun.id}`)}>{r.closeRun.runNumber}</button> <StatusTag status={r.closeRun.status} /></span>
           ) : "")} />
           <Column header={t("periodEnd.lastChange")} body={lastChange} style={{ minWidth: 200 }} />
-          <Column header={t("periodEnd.actions")} body={actions} style={{ minWidth: 340 }} />
+          <Column header={t("periodEnd.actions")} body={actions} className="pm-actions-cell" headerClassName="pm-actions-cell" />
         </DataTable>
       </div>
 
@@ -175,7 +175,6 @@ const PeriodManagement = () => {
 
       <ConfirmDialog visible={!!creating} onHide={() => setCreating(null)} onConfirm={createNext}
         title={t("periodManagement.createYearTitle", { code: creating?.code })}
-        message={t("periodManagement.createYearMessage", { code: creating?.code })}
         facts={creating ? [
           { label: t("periodEnd.fiscalYear"), value: creating.code },
           { label: t("periodEnd.start"), value: creating.startDate, type: "date" },

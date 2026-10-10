@@ -75,7 +75,7 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', withdraw: 'withdrawn', return: 'returned', revoke: 'revoked',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted', withdraw: 'withdrawn', return: 'returned', revoke: 'revoked',
   recompute: 'recomputed', import: 'imported', remind: 'reminder sent', pay: 'paid', 'exclude-line': 'line excluded', 'include-line': 'line included',
   'raise-voucher': 'payment voucher raised', 'in-payment': 'in payment', 'payment-failed': 'payment failed', 'send-advice': 'advice sent',
   'record-confirmation': 'confirmation recorded', 'create-agency-bill': 'agency bill created', 'send-bill': 'bill sent',

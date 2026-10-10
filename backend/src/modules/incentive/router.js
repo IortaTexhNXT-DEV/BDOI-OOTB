@@ -69,14 +69,16 @@ define({
   handler: async (req, res) => ok(res, await svc.getCalculation(req.params.batchId)),
 });
 define({
-  method: 'POST', path: '/calculations', summary: 'Run a calculation for a period and programs (achievement from policies / quotes, payout from program tiers)', screen: S('Calculations > New Calculation'), middleware: write,
+  method: 'POST', path: '/calculations', summary: 'Run a calculation for a month and programs: each program over its calculation period (month, quarter, half or year of its frequency) ending with that month, once per period; a run with no agent line is refused', screen: S('Calculations > New Calculation'), middleware: write,
   request: { period: '2026-09', selectedPrograms: ['INC-2026-002'], description: 'September run' }, response: { success: true, data: { ...batch, status: 'Calculated' } },
   handler: async (req, res) => created(res, await run(req, 'incentive_calculation', 'calculate', () => svc.runCalculation(req.body || {}, req.user)), 'Calculation complete'),
 });
 define({
-  method: 'POST', path: '/calculations/:batchId/adjust', summary: 'Adjust agent lines before submission (amount and reason per line)', screen: S('Calculations > Details'), middleware: write,
-  request: { lines: [{ id: 12, adjustments: -1000, reason: 'Chargeback on cancelled policy' }] }, response: { success: true, data: batch },
-  handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', 'adjust', () => svc.adjustCalculation(req.params.batchId, req.body || {})), 'Adjustments saved'),
+  method: 'POST', path: '/calculations/:batchId/adjust',
+  summary: 'Adjust agent lines before submission (amount per line) with a reason of the Reason Codes master (context incentive_adjustment; a note when the reason needs one). The adjusting user may not approve the batch',
+  screen: S('Calculations > Details'), middleware: write,
+  request: { lines: [{ id: 12, adjustments: -1000 }], reasonCode: 'IAD-CLAWBACK', note: 'Policy cancelled 12/09/2026' }, response: { success: true, data: batch },
+  handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', 'adjust', () => svc.adjustCalculation(req.params.batchId, req.body || {}, req.user)), 'Adjustments saved'),
 });
 define({
   method: 'POST', path: '/calculations/:batchId/submit', summary: 'Submit a batch for approval', screen: S('Calculations'), middleware: write, response: { success: true, data: { ...batch, status: 'Pending Approval' } },
@@ -94,11 +96,12 @@ for (const action of ['approve', 'reject']) {
   define({
     method: 'POST', path: `/calculations/:batchId/${action}`, screen: S('Approvals; Calculations > Details'), middleware: approve,
     summary: action === 'approve'
-      ? 'Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual'
+      ? 'Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator, an adjuster or the submitter); posts the accrual at the end of the incentive period when it is open'
       : 'Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)',
     request: action === 'reject' ? { reasonCode: 'IBR-RATES', note: 'Tier 2 rate' } : { remarks: 'Checked against the production report' },
     response: { success: true, data: { ...batch, status: action === 'approve' ? 'Approved' : 'Rejected' } },
-    handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', action, () => svc.decideCalculation(req.params.batchId, action, req.body || {}, req.user)), `Batch ${action}d`),
+    handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', action, () => svc.decideCalculation(req.params.batchId, action, req.body || {}, req.user)),
+      action === 'approve' ? 'Batch approved' : 'Batch rejected'),
   });
 }
 define({

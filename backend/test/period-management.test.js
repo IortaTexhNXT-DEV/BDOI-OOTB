@@ -74,9 +74,11 @@ describe('reason of a status change', () => {
 
     const p = await periodOf(maker, 'FY2026', '2026-05');
     expect(p.lastChange).toMatchObject({ to: 'soft_closed', byName: 'maker user', reasonCode: 'PCL-SIGNOFF', reasonName: 'Reconciliations reviewed and signed off', source: 'manual' });
-    expect(p.actions).toEqual({ close: { allowed: true }, reopen: { allowed: false, reason: 'permission', message: expect.any(String) } });
+    // closing is the checker's (approve:period-end): the maker sees it refused, with the reason
+    expect(p.actions).toEqual({ close: { allowed: false, reason: 'approval', message: expect.any(String) }, reopen: { allowed: false, reason: 'permission', message: expect.any(String) } });
     expect((await periodOf(admin, 'FY2026', '2026-05')).actions.reopen).toEqual({ allowed: true });
-    expect((await periodOf(maker, 'FY2026', '2026-06')).actions).toEqual({ softClose: { allowed: true }, close: { allowed: true } });
+    expect((await periodOf(maker, 'FY2026', '2026-06')).actions).toEqual({ softClose: { allowed: true }, close: { allowed: false, reason: 'approval', message: expect.any(String) } });
+    expect((await periodOf(admin, 'FY2026', '2026-06')).actions.close).toEqual({ allowed: true });
   });
 
   it('refuses a reopen without approve:period-end before looking at the reason, and takes a period_reopen reason from an approver', async () => {

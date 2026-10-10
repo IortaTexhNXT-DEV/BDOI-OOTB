@@ -17,7 +17,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { migrate } from '../src/db/migrate.js';
 import { seed } from '../src/db/seed.js';
 import { createApp } from '../src/app.js';
-import { withCalendarFiscalYear } from './helpers.js';
+import { withCalendarFiscalYear, withoutManualSignOffs } from './helpers.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { cancelJournal, createJournal } from '../src/modules/accounting/lib/ledger.js';
@@ -392,6 +392,7 @@ describe('go-live imports', () => {
     const cash = Number((await query('SELECT COALESCE(sum(l.debit - l.credit), 0) AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE l.account_code = \'1102001\' AND j.status IN (\'posted\',\'reversed\') AND j.jv_date <= \'2026-12-31\'')).rows[0].b);
     for (const j of (await query('SELECT id FROM journal_vouchers WHERE status IN (\'pending\',\'for-approval\') AND jv_date <= \'2026-12-31\'')).rows) await withTransaction((db) => cancelJournal(db, j.id, { id: null }));
     const ye = (await api('post', '/period-end/year-end').send({ fiscalYear: 'FY2026' })).body.data;
+    await withoutManualSignOffs();
     for (let m = 1; m <= 12; m += 1) {
       const res = await api('post', `/period-end/periods/2026-${String(m).padStart(2, '0')}/status`).send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'year end' });
       expect(res.status, res.body.message).toBe(200);
