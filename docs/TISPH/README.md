@@ -10,8 +10,9 @@ where it is held, its owner, its approver and its status.
 | Folder | Contents |
 |---|---|
 | [`frs/`](frs/) | Functional Requirement Specifications, one per BRD build item (the TISPH SRS): personas, functional requirements with acceptance criteria, traceability to test cases |
-| `pack/` | Non-functional, technical, operational and governance documents (list below) |
+| [`pack/`](pack/) | Non-functional, technical, operational and governance documents (list below) |
 | [`testing/`](testing/) | Test strategy and test pack |
+| [`proposals/`](proposals/) | Design proposals and answers awaiting TISPH decisions |
 
 ## `frs/`: Functional Requirement Specifications
 
@@ -41,6 +42,7 @@ where it is held, its owner, its approver and its status.
 | `TISPH_Data_Migration_and_Cutover.docx` | Data Migration and Cutover Plan |
 | `TISPH_Operations_and_Support.docx` | Operations, Support Model, Runbooks, DR/BCP and Service Levels |
 | `TISPH_Delivery_Governance.docx` | Delivery Governance, RACI, Risks, ADRs, Production Readiness, Go-Live and Hypercare |
+| `TISPH_Documentation_Cleanup.docx` | Documentation clean-up: generic documents retired from this repository and their replacements |
 
 ## `testing/`: test strategy and test pack
 
@@ -48,6 +50,16 @@ where it is held, its owner, its approver and its status.
 |---|---|
 | `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels, environments, entry and exit criteria, roles, tools |
 | [`TISPH_Test_Pack.xlsx`](testing/TISPH_Test_Pack.xlsx) | Requirements, scenarios, positive and negative conditions and gaps, traced to the BRD and FRS identifiers |
+
+## `proposals/`: design proposals
+
+| File | Contents |
+|---|---|
+| `TISPH_Remittance_Redesign_Specification.docx` | Remittance redesign: menu, status model, controls, screens, flows and phased build plan |
+| `TISPH_Agents_Referrer_Commission_and_Reports.docx` | Agents and referrer commission process, Reports screen and overriding commission panel |
+| `TISPH_Platform_Features_Proposal.docx` | Environment promotion, copy of transactions, master uploads, TISPH manual, risk details and personal data |
+
+All documents use the iorta TechNXT document template and are issued as Word files.
 
 ## Related folders
 
