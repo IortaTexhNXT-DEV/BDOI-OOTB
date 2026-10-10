@@ -245,10 +245,6 @@ const SettlementProcessing = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const handleCalculate = async () => {
     if (!policies.length) return;
     setLoading(true);
@@ -729,12 +725,6 @@ const SettlementProcessing = () => {
               icon="pi pi-send"
               onClick={handleSubmitApproval}
               disabled={!editable || loading}
-            />
-            <Button
-              label={t("remittance.print")}
-              icon="pi pi-print"
-              className="p-button-secondary"
-              onClick={handlePrint}
             />
             <Button
               label={t("remittance.cancel")}

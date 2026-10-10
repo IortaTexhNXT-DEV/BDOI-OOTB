@@ -1,8 +1,8 @@
 /**
  * The routes of Accounts > Remittance (R1), mounted by routes/MainRoute.js: the landing, the seven entries of the menu
  * plus Settlement (until R2), the record routes and the addresses of the retired screens, which open their new page
- * (§1.2), keeping their query (?approval=). Until the Remittances, Approvals and Insurer payments pages are built
- * (RM-06 to RM-08) their routes show the screens of earlier releases.
+ * (§1.2), keeping their query (?approval=). Until the Remittances worklist and Insurer payments pages are built
+ * (RM-07, RM-08) their routes show the screens of earlier releases.
  */
 import React from "react";
 import PropTypes from "prop-types";
@@ -11,11 +11,12 @@ import InsurerStatements from "../InsurerReconciliation/Statements";
 import InsurerStatementWorkspace from "../InsurerReconciliation/Workspace";
 import DirectBillProcessing from "./DirectBillProcessing";
 import ElectronicTransfer from "./ElectronicTransfer";
-import RemittanceApproval from "./RemittanceApproval";
 import RemittanceExceptions from "./RemittanceExceptions";
 import SettlementProcessing from "./Settlement";
 import RemittanceTracking from "./Tracking";
+import Approvals from "./Approvals";
 import Landing from "./Landing";
+import RemittanceRecord from "./Record";
 import Setup from "./Setup";
 import { REMITTANCE_ROUTES } from "./shared";
 
@@ -65,8 +66,8 @@ export const REDIRECTS = [
 export const remittanceRoutes = () => [
   <Route key="landing" path={OLD} element={<Landing />} />,
   <Route key="remittances" path={`${OLD}/remittances`} element={<RemittanceTracking />} />,
-  <Route key="record" path={`${OLD}/remittances/:id`} element={<RemittanceTracking />} />,
-  <Route key="approvals" path={`${OLD}/approvals`} element={<RemittanceApproval />} />,
+  <Route key="record" path={`${OLD}/remittances/:id`} element={<RemittanceRecord />} />,
+  <Route key="approvals" path={`${OLD}/approvals`} element={<Approvals />} />,
   <Route key="payments" path={`${OLD}/payments`} element={<ElectronicTransfer />} />,
   <Route key="reconciliation" path={`${OLD}/reconciliation/insurer-statements`} element={<InsurerStatements />} />,
   <Route key="statement" path={`${OLD}/reconciliation/statements/:id`} element={<InsurerStatementWorkspace />} />,

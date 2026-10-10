@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
@@ -11,27 +12,21 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { Timeline } from "primereact/timeline";
-import { TabView, TabPanel } from "primereact/tabview";
 import remittanceService from "../../../services/remittanceService";
-import { printPdf } from "../../../components/Print";
-import { calendarDateFormat, downloadCsv, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
+import { REMITTANCE_ROUTES, calendarDateFormat, downloadCsv, formatDate, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 
 const RemittanceTracking = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [dateRange, setDateRange] = useState([null, null]);
   const [insurerCode, setInsurerCode] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [selectedRemittance, setSelectedRemittance] = useState(null);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [remittanceDetails, setRemittanceDetails] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     totalCount: 0,
     pendingAmount: 0,
@@ -119,19 +114,8 @@ const RemittanceTracking = () => {
     loadRemittances(currentFilters({ status: code }));
   };
 
-  const handleView = async (rowData) => {
-    setSelectedRemittance(rowData);
-    setLoading(true);
-    try {
-      const details = await remittanceService.getRemittance(rowData.id);
-      setRemittanceDetails(details);
-      setDetailsVisible(true);
-    } catch (error) {
-      showError(toast, error, 'Failed to load remittance details');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // the record page replaces the details pop-up of earlier releases
+  const handleView = (rowData) => navigate(REMITTANCE_ROUTES.record(rowData.id));
 
   const handleProcess = async (rowData) => {
     confirmDialog({
@@ -170,12 +154,6 @@ const RemittanceTracking = () => {
     return formatCurrency(rowData[field]);
   };
 
-  // the remittance advice PDF of the server, not the screen: a dialog over a list does not print as a document
-  const handlePrint = (rowData) => {
-    printPdf(remittanceService.remittanceAdvicePath(rowData.id), { fileName: `remittance-${rowData.remittanceNo}.pdf` })
-      .catch((error) => showError(toast, error, t("print.failed")));
-  };
-
   const handleExport = () => {
     downloadCsv(`remittances_${isoDate(new Date())}.csv`, remittances, [
       { field: 'remittanceNo', header: 'Remittance No' },
@@ -212,19 +190,13 @@ const RemittanceTracking = () => {
             tooltip="Process" aria-label="Process"
           />
         )}
-        <Button
-          icon="pi pi-print"
-          className="p-button-text"
-          onClick={() => handlePrint(rowData)}
-          tooltip="Print" aria-label="Print"
-        />
       </div>
     );
   };
 
   const linkBodyTemplate = (rowData) => {
     return (
-      <a href="#" className="remittance-link" onClick={(e) => {
+      <a href={REMITTANCE_ROUTES.record(rowData.id)} className="remittance-link" onClick={(e) => {
         e.preventDefault();
         handleView(rowData);
       }}>
@@ -232,26 +204,6 @@ const RemittanceTracking = () => {
       </a>
     );
   };
-
-  const detailsDialogFooter = (
-    <div className="dialog-footer">
-      <Button
-        label="Close"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={() => setDetailsVisible(false)}
-      />
-      <Button
-        label="Process"
-        icon="pi pi-play"
-        onClick={() => {
-          setDetailsVisible(false);
-          handleProcess(selectedRemittance);
-        }}
-        disabled={selectedRemittance?.statusCode !== 'draft'}
-      />
-    </div>
-  );
 
   return (
     <div className="container__remittance__tracking__master">
@@ -314,92 +266,6 @@ const RemittanceTracking = () => {
           </Card>
         </div>
 
-        {/* Details Dialog */}
-        <Dialog
-          header="Remittance Details"
-          visible={detailsVisible}
-          onHide={() => setDetailsVisible(false)}
-          style={{ width: '70vw' }}
-          footer={detailsDialogFooter}
-        >
-          {remittanceDetails && (
-            <TabView>
-              <TabPanel header="General Information">
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label>Remittance No:</label>
-                    <span>{remittanceDetails.remittanceNo}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Status:</label>
-                    <Tag value={remittanceDetails.status} severity={statusSeverity(remittanceDetails.statusCode)} />
-                  </div>
-                  <div className="detail-item">
-                    <label>Created Date:</label>
-                    <span>{formatDate(remittanceDetails.createdDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Created By:</label>
-                    <span>{remittanceDetails.createdBy}</span>
-                  </div>
-                </div>
-              </TabPanel>
-
-              <TabPanel header="Insurer Details">
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label>Insurer Code:</label>
-                    <span>{remittanceDetails.insurerDetails.code}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Insurer Name:</label>
-                    <span>{remittanceDetails.insurerDetails.name}</span>
-                  </div>
-                  <div className="detail-item full-width">
-                    <label>Address:</label>
-                    <span>{remittanceDetails.insurerDetails.address}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Email:</label>
-                    <span>{remittanceDetails.insurerDetails.contact}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Phone:</label>
-                    <span>{remittanceDetails.insurerDetails.phone}</span>
-                  </div>
-                </div>
-              </TabPanel>
-
-              <TabPanel header={`Policies (${remittanceDetails.policies.length})`}>
-                <DataTable value={remittanceDetails.policies} className="detail-table">
-                  <Column field="policyNo" header="Policy No" />
-                  <Column field="premium" header="Premium" body={(data) => formatCurrency(data.premium)} />
-                  <Column field="commission" header="Commission" body={(data) => formatCurrency(data.commission)} />
-                  <Column field="status" header="Status" body={(data) =>
-                    <Tag value={data.status} severity={data.status === 'Active' ? 'success' : 'warning'} />
-                  } />
-                </DataTable>
-              </TabPanel>
-
-              <TabPanel header="Activity Log">
-                <Timeline value={remittanceDetails.activityLog}
-                  content={(item) => (
-                    <div className="timeline-content">
-                      <div className="timeline-header">
-                        <strong>{item.action}</strong>
-                        <small>{formatDateTime(item.at)}</small>
-                      </div>
-                      <div className="timeline-details">
-                        <p>By: {item.by}</p>
-                        {item.notes && <p>Notes: {item.notes}</p>}
-                      </div>
-                    </div>
-                  )}
-                />
-              </TabPanel>
-            </TabView>
-          )}
-        </Dialog>
 
         <div className="dashboard-cards">
           <Card className="dashboard-card">

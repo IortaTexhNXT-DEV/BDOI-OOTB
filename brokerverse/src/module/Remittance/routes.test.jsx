@@ -7,7 +7,8 @@ jest.mock("../InsurerReconciliation/Statements", () => () => <div>Insurer statem
 jest.mock("../InsurerReconciliation/Workspace", () => () => <div>Statement workspace</div>);
 jest.mock("./DirectBillProcessing", () => () => <div>Direct bill</div>);
 jest.mock("./ElectronicTransfer", () => () => <div>Transfers</div>);
-jest.mock("./RemittanceApproval", () => () => <div>Approvals</div>);
+jest.mock("./Approvals", () => () => <div>Approvals</div>);
+jest.mock("./Record", () => () => <div>Remittance record</div>);
 jest.mock("./RemittanceExceptions", () => () => <div>Exceptions</div>);
 jest.mock("./Settlement", () => () => <div>Settlement</div>);
 jest.mock("./Tracking", () => () => <div>Remittances</div>);
@@ -60,7 +61,7 @@ describe("Accounts > Remittance routes", () => {
   it("every retired address of §1.2 is redirected, and the entries keep their pages", () => {
     expect(REDIRECTS).toHaveLength(16);
     for (const [path, page] of [["/finance/remittance", "Landing"], ["/finance/remittance/exceptions", "Exceptions"], ["/finance/remittance/settlement/process", "Settlement"],
-      ["/finance/remittance/setup/schedules", "Setup"], ["/finance/remittance/remittances/rm_21", "Remittances"]]) {
+      ["/finance/remittance/setup/schedules", "Setup"], ["/finance/remittance/remittances/rm_21", "Remittance record"], ["/finance/remittance/remittances", "Remittances"]]) {
       const { unmount } = open(path);
       expect(screen.getByTestId("where")).toHaveTextContent(path);
       expect(screen.getByText(page)).toBeInTheDocument();
