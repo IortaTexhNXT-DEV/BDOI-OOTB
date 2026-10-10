@@ -143,6 +143,8 @@ export const roleMenuPermissions = {
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
+      // the financial statement versions of the FS reports (write:journal-vouchers)
+      "Finance > Financial Statement Versions",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
       // bank payment file layouts and payee bank accounts (write:disbursements)

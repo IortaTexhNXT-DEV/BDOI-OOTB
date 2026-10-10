@@ -13529,7 +13529,8 @@
           "title": "Edit {{number}}",
           "confirm": "Save"
         }
-      }
+      },
+      "printAcknowledgement": "Print acknowledgement"
     },
     "claimPay": {
       "title": "Claims Settlements",
@@ -16007,5 +16008,72 @@
     "balanceLcAmt": "Balance LC Amt",
     "adjustmentAmt": "Adjustment Amt",
     "total": "Total"
+  },
+  "fsVersions": {
+    "title": "Financial Statement Versions",
+    "help": "Each version lists the lines of the statements with the GL accounts each line carries. The financial statement reports group the ledger by the lines of the version chosen.",
+    "add": "Add version",
+    "code": "Code",
+    "name": "Name",
+    "purpose": "Purpose",
+    "scope": "Statements",
+    "lines": "Lines",
+    "status": "Status",
+    "details": "Version {{code}}",
+    "lineSection": "Lines",
+    "addLine": "Add line",
+    "save": "Save",
+    "removeLine": "Remove line {{line}}",
+    "lineNo": "Line",
+    "statement": "Statement",
+    "section": "Section",
+    "caption": "FS line",
+    "glFrom": "GL from",
+    "glTo": "GL to",
+    "normalBalance": "Shown as",
+    "accounts": "Accounts",
+    "unmapped": "Accounts not in this version ({{count}})",
+    "allMapped": "Every account is on a line of this version.",
+    "accountCode": "GL account",
+    "accountName": "Account name",
+    "accountType": "Type",
+    "copyFrom": "Copy the lines of",
+    "cancel": "Cancel",
+    "create": "Add",
+    "saved": "Version {{code}} saved",
+    "added": "Version {{code}} added",
+    "fixErrors": "Correct the lines marked before you save.",
+    "statements": {
+      "bs": "Balance sheet",
+      "is": "Income statement"
+    },
+    "balances": {
+      "debit": "Debit balance",
+      "credit": "Credit balance"
+    },
+    "scopes": {
+      "full": "Balance sheet and income statement",
+      "income": "Income statement only"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "errors": {
+      "lineNo": "Enter a whole number from 1",
+      "lineNoTwice": "This line number is used twice",
+      "incomeOnly": "This version has income statement lines only",
+      "required": "Required",
+      "glCode": "Enter an account code or its first digits",
+      "glOrder": "GL to must not come before GL from",
+      "noLines": "Add at least one line"
+    }
   }
 }

@@ -26,7 +26,7 @@ export const TRANSACTION_TABLES = [
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
-  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs',
+  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs', 'insurer_billing_runs',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
   // claims and renewals
@@ -124,7 +124,7 @@ export const MASTER_CONFIG_TABLES = [
   'commission_rates', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'incentive_programs', 'payment_gateways',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
-  'gl_accounts', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
+  'gl_accounts', 'fs_versions', 'fs_version_lines', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',

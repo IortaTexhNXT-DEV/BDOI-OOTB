@@ -1176,6 +1176,14 @@ export const menuList = [
             includes: ["/master/finance/accounting-flow"],
           },
           {
+            // statement lines and their GL ranges, used by the FS reports (read:journal-vouchers; Finance edits)
+            id: 46,
+            name: "Financial Statement Versions",
+            path: "/master/finance/fs-versions",
+            includes: ["/master/finance/fs-versions"],
+            permissions: ["read:journal-vouchers"],
+          },
+          {
             // packaged products: bundles sold under one master policy, and each insurer's rates for comparisons
             id: 41,
             name: "Package Bundles",

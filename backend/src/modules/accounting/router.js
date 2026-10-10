@@ -9,6 +9,7 @@ import { pageParams, sendList } from './lib/http.js';
 import { toCsv } from './lib/files.js';
 import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './lib/ledger.js';
 import * as svc from './service.js';
+import * as fsVersions from './fsVersions.js';
 import { notifyDecision } from '../notifications/approvals.js';
 import { isCoInsured, policyParticipants } from './lib/coinsurance.js';
 import { today } from '../../lib/dates.js';
@@ -205,6 +206,46 @@ define({
   response: { success: true, data: { types: ['asset', 'liability', 'equity', 'income', 'expense'], groups: [{ group: 'Current Assets', accountType: 'asset' }] } },
   handler: async (_req, res) => ok(res, { types: ['asset', 'liability', 'equity', 'income', 'expense'], groups: svc.FS_GROUPS.map(([group, accountType]) => ({ group, accountType })) }),
 });
+const fsLine = z.object({ lineNo: z.coerce.number(), statement: z.string(), section: z.string(), caption: z.string(), glFrom: z.string(), glTo: z.string(), normalBalance: z.string() });
+const fsExample = { code: 'TIS01', name: 'TIS01 Local financial statements', purpose: 'Statutory financial statements by line item', scope: 'full', status: 'active', lineCount: 30,
+  lines: [{ lineNo: 10, statement: 'bs', section: 'Current Assets', caption: 'Cash and cash equivalents', glFrom: '100', glTo: '109', normalBalance: 'debit', accounts: 5 }],
+  unmapped: [{ code: '700000', name: 'Suspense - conversion', accountType: 'asset' }] };
+define({
+  method: 'GET', path: '/fs-versions', summary: 'Financial statement versions (TIS01 local FS, TIS02 BS/IS, TIS03 budget) with their line counts',
+  screen: 'Master > Finance > Financial Statement Versions; Reports (FS version)', middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:reports')],
+  response: { success: true, data: [{ code: 'TIS01', name: 'TIS01 Local financial statements', scope: 'full', status: 'active', lineCount: 30 }] },
+  handler: async (_req, res) => ok(res, await fsVersions.listVersions(pool)),
+});
+define({
+  method: 'GET', path: '/fs-versions/:code', summary: 'One financial statement version: its lines with the GL ranges and the accounts each takes, and the accounts no line takes',
+  screen: 'Master > Finance > Financial Statement Versions', middleware: [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:reports')],
+  response: { success: true, data: fsExample },
+  handler: async (req, res) => ok(res, await fsVersions.getVersion(pool, req.params.code)),
+});
+define({
+  method: 'POST', path: '/fs-versions', summary: 'Add a financial statement version with its lines, or as a copy of another version (copyFrom)', screen: 'Master > Finance > Financial Statement Versions > Add',
+  middleware: [...write, validate(z.object({ code: z.string(), name: z.string(), purpose: z.string().optional().nullable(), scope: z.enum(['full', 'income']).optional(),
+    copyFrom: z.string().optional(), lines: z.array(fsLine).optional() }))],
+  request: { code: 'TIS04', name: 'TIS04 Group reporting', copyFrom: 'TIS02' }, response: { success: true, data: { ...fsExample, code: 'TIS04' } },
+  handler: async (req, res) => {
+    const v = await withTransaction((db) => fsVersions.createVersion(db, req.body, req.user));
+    await audit(req, { entity: 'fs_version', entityId: v.code, action: 'create', after: v });
+    created(res, v, `Financial statement version ${v.code} added`);
+  },
+});
+define({
+  method: 'PUT', path: '/fs-versions/:code', summary: 'Change a financial statement version: name, purpose, scope, status and its lines (the list sent replaces the lines)',
+  screen: 'Master > Finance > Financial Statement Versions > Edit',
+  middleware: [...write, validate(z.object({ name: z.string().optional(), purpose: z.string().optional().nullable(), scope: z.enum(['full', 'income']).optional(),
+    status: z.enum(['active', 'inactive']).optional(), lines: z.array(fsLine).optional() }))],
+  request: { lines: fsExample.lines }, response: { success: true, data: fsExample },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => fsVersions.updateVersion(db, req.params.code, req.body, req.user));
+    await audit(req, { entity: 'fs_version', entityId: r.after.code, action: 'update', before: r.before, after: r.after });
+    ok(res, r.after, `Financial statement version ${r.after.code} saved`);
+  },
+});
+
 const accountSchema = z.object({ code: z.string().regex(/^[0-9A-Za-z-]{3,20}$/).optional(), name: z.string().min(2).optional(), accountType: z.enum(['asset', 'liability', 'equity', 'income', 'expense']).optional(),
   parentCode: z.string().optional(), category: z.string().optional(), isOpenItem: z.boolean().optional(), allowManual: z.boolean().optional(), status: z.enum(['active', 'inactive']).optional(),
   fsGroup: z.string().optional(), normalBalance: z.enum(['debit', 'credit']).optional(), description: z.string().max(500).optional() });

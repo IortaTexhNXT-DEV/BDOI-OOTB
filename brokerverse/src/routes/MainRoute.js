@@ -252,6 +252,7 @@ import AccountDetermination from "../module/FinanceMastersModule/AccountDetermin
 import PostingRules from "../module/FinanceMastersModule/PostingRules";
 import ConfigurationApprovals from "../module/FinanceMastersModule/ConfigurationApprovals";
 import AccountingFlow from "../module/FinanceMastersModule/AccountingFlow";
+import FsVersions from "../module/FinanceMastersModule/FsVersions";
 import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
 import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
@@ -1022,6 +1023,7 @@ const Maincomponent = () => {
           />
           <Route path="master/finance/configuration-approvals" element={<ConfigurationApprovals />} />
           <Route path="master/finance/accounting-flow" element={<AccountingFlow />} />
+          <Route path="master/finance/fs-versions" element={<FsVersions />} />
 
           {/* Remittance Master Routes */}
           <Route
