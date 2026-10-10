@@ -58,6 +58,12 @@ minimal, clearly-correct front-end fix.
   create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go
   through `queueEmail()` in `src/lib/mailer.js`, with the text from `renderTemplate()` (`src/lib/template.js`;
   subjects with `{ html: false }`).
+  Give the audit row a `before` with the status the action started from, so the history shows the move. On a
+  created record the history lists only its own top-level facts (number, parties, status, dates, amounts); ids of
+  other records are dropped unless they resolve to a number or name, so store the name next to the id. A record
+  type whose steps are stamped on its own columns (created / approved / posted ... at and by) is listed in
+  `LIFECYCLE` of `src/modules/audit/service.js`, so records the trail never saw (sample data, go-live loads) still
+  show those steps.
 - Errors: throw `badRequest`, `notFound`, `conflict`, `forbidden` from `src/lib/errors.js`; the error handler turns
   them into the JSON error body with the request id.
 - Shared helpers: dates in `src/lib/dates.js` (`today`, `isoDate`, `addDays`, `businessDate`), amounts in

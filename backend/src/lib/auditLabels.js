@@ -74,7 +74,9 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', pay: 'paid', accrue: 'accrued', 'mark-eligible': 'marked eligible',
+  acknowledge: 'acknowledged by the insurer', 'record-epolicy': 'e-policy recorded', check: 'checked against the slip', book: 'booked',
+  'send-for-approval': 'sent for approval', 'customer-accept': 'accepted by the customer',
 };
 
 /** Sign-in events read as what the user did. */
@@ -117,6 +119,15 @@ export function actionText(action) {
   const verb = ACTION_VERBS[a.toLowerCase()];
   return verb ? verb.charAt(0).toUpperCase() + verb.slice(1) : sentenceCase(a);
 }
+
+/** Status labels of record types whose stored status codes are not the words the screens show. */
+export const STATUS_LABELS = {
+  placement: { draft: 'Placement raised', sent: 'Sent to insurer', acknowledged: 'Acknowledged', epolicy_received: 'e-Policy received',
+    checked: 'Checked against slip', issued: 'Insurer issued', declined: 'Declined', cancelled: 'Cancelled' },
+  broker_slip: { draft: 'Draft', submitted: 'Submitted', 'responses-in': 'Responses in', closed: 'Closed', cancelled: 'Cancelled' },
+  supplier_invoice: { 'for-approval': 'For approval' },
+  supplier_payment: { 'for-approval': 'For approval' },
+};
 
 /** Field labels shared by every record type. Keys are matched exactly, then without case / separators. */
 const COMMON = {

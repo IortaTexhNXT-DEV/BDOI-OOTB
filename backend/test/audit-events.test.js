@@ -81,6 +81,16 @@ describe('audit value formatting', () => {
     const pw = diffFields('user', { password_hash: 'a' }, { password_hash: 'b' }, ctx());
     expect(pw).toEqual([{ key: 'password_hash', label: 'Password hash', from: MASK, to: MASK, masked: true }]);
   });
+  it('describes a created record by its own facts, without ids, nested working data or repeated labels', () => {
+    const created = diffFields('fleet_schedule', null, {
+      status: 'draft', clientId: 'cl_crs_02', insuranceCompanyId: 8, clientName: 'Bayanihan Logistics Corp.', fleetNumber: 'FLT-2026-00001',
+      summary: { premiumChange: { delta: { commission: -10 } } }, lines: [{ id: 1, amount: 5 }], failed: [], ewtRate: 2, grossPremium: 1000, batchId: 'BLK-1',
+    }, ctx());
+    expect(created.map((c) => [c.label, c.to])).toEqual([
+      ['Fleet number', 'FLT-2026-00001'], ['Client', 'Bayanihan Logistics Corp.'], ['Status', 'Draft'], ['Gross premium', 'PHP 1,000.00'],
+      ['EWT rate', '2%'], ['Batch ID', 'BLK-1'],
+    ]);
+  });
   it('gives instants in the business time zone and configured date format', () => {
     expect(instant('2026-10-01T17:30:00Z', FMT)).toEqual({ day: '2026-10-02', date: '02/10/2026', time: '01:30', text: '02/10/2026 01:30' });
   });
