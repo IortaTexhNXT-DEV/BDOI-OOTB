@@ -195,6 +195,13 @@ export async function setActive(db, id, active, user) {
   return { before: await getRule(db, r.id).then((x) => ({ ...x, active: r.active })), after: await getRule(db, r.id), change: null };
 }
 
+const TAX_WORDS = new Set(['vat', 'dst', 'lgt', 'fst', 'ewt', 'wht', 'cwt']);
+/** An amount key in words with its tax acronyms in capitals: "commission_ewt" -> "Commission EWT", "vat" -> "VAT". */
+export function amountName(key) {
+  const words = String(key || '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter(Boolean).map((w) => w.toLowerCase());
+  return words.map((w, i) => (TAX_WORDS.has(w) ? w.toUpperCase() : i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
+}
+
 // ---------- account determination ----------
 
 export async function accountDetermination(db) {

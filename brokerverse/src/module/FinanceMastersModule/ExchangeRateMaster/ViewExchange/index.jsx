@@ -1,53 +1,27 @@
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import InputField from "../../../../components/InputField";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import DropDowns from "../../../../components/DropDowns";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../components/LabelWrapper";
-import { useFormik } from "formik";
 import { useSelector } from "react-redux";
-import { calendarDateFormat } from "../../../../utility/dateFormat";
+import DetailHeader from "../../../../components/DetailHeader";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../../../components/ActivityLog";
 
-const initialValues = {
-  EffectiveFrom: new Date(),
-  EffectiveTo: new Date(),
-  CurrencyCode: "",
-  ToCurrencyCode: "",
-  ExchangeRate: "",
-  CurrencyDescription: "",
-  ToCurrencyDescription: "",
-};
+// a currency as "EUR · Euro"
+const currencyText = (code, description) => [code, description].filter(Boolean).join(" · ");
 
+/** Master > Finance > Exchange Rate > View: the rate as a record (its facts once, read only) with its history. */
 function ViewExchange() {
   const { t } = useTranslation();
-  const { ExchangeDetailView } = useSelector(
-    ({ exchangeMasterReducer }) => {
-      return {
-        loading: exchangeMasterReducer?.loading,
-        ExchangeDetailView: exchangeMasterReducer?.ExchangeDetailView,
-      };
-    }
-  );
-  const Navigate = useNavigate();
-
-  const currencyCode = [
-    {
-      label: ExchangeDetailView.CurrencyCode,
-      value: ExchangeDetailView.CurrencyCode,
-    },
-  ];
-  const ToCurrencyCode = [
-    {
-      label: ExchangeDetailView.ToCurrencyCode,
-      value: ExchangeDetailView.ToCurrencyCode,
-    },
-  ];
+  const { ExchangeDetailView } = useSelector(({ exchangeMasterReducer }) => ({
+    ExchangeDetailView: exchangeMasterReducer?.ExchangeDetailView || {},
+  }));
+  const navigate = useNavigate();
+  const r = ExchangeDetailView;
 
   const home = { label: t("financeMasters.master") };
   const items = [
@@ -55,175 +29,31 @@ function ViewExchange() {
     { label: t("financeMasters.viewExchangeRate") },
   ];
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-
-  const handleSubmit = (value) => {
-    Navigate("/master/finance/exchangerate");
-  };
-
-  const customValidation = (values) => {
-    const errors = {};
-
-    if (!values.CurrencyCode) {
-      errors.CurrencyCode = "This field is required";
-    }
-    if (!values.ToCurrencyCode) {
-      errors.ToCurrencyCode = "This field is required";
-    }
-    if (!values.ExchangeRate) {
-      errors.ExchangeRate = "This field is required";
-    }
-
-    return errors;
-  };
-  const effectiveFromDate = ExchangeDetailView.EffectiveFrom;
-  const effectiveToDate = ExchangeDetailView.EffectiveTo;
-
-  const formik = useFormik({
-    initialValues: initialValues,
-    validate: customValidation,
-    // onSubmit: (values) => {
-    //   // Handle form submission
-
-    // },
-    onSubmit: handleSubmit,
-  });
-
   return (
     <div className="overall__viewexchange__container">
-      <div>
-        <span onClick={() => Navigate(-1)}>
-          <SvgBackicon />
-        </span>
-        <label className="label_header">Exchange Rate Details</label>
+      <div className="flex align-items-center gap-2">
+        <button type="button" className="p-link" onClick={() => navigate(-1)} aria-label={t("common.back")}><SvgBackicon /></button>
+        <label className="label_header">{t("financeMasters.exchangeRateDetails")}</label>
       </div>
-      <BreadCrumb
-        model={items}
-        home={home}
-        className="breadcrumbs_container"
-        separatorIcon={<SvgDot color={"#000"} />}
-      />
+      <BreadCrumb model={items} home={home} className="breadcrumbs_container" separatorIcon={<SvgDot color="currentColor" />} />
 
       <Card>
-        <div class="grid">
-          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
-            <div>
-              <DropDowns
-                className="dropdown__container"
-                label="Currency Code"
-                value={ExchangeDetailView.CurrencyCode}
-                onChange={(e) => formik.setFieldValue("CurrencyCode", e.value)}
-                options={currencyCode}
-                optionLabel="label"
-                placeholder={"Select"}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-              {formik.touched.CurrencyCode && formik.errors.CurrencyCode && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                  {formik.errors.CurrencyCode}
-                </div>
-              )}
-            </div>
-          </div>
-          <div class="sm-col-12 col-12 md:col-6 lg-col-6">
-            <div>
-              <InputField
-                classNames="field__container"
-                label="Currency  Description"
-                placeholder={"Enter"}
-                value={
-                  ExchangeDetailView.CurrencyCode
-                    ? `CurrencyCode ${ExchangeDetailView.CurrencyDescription}`
-                    : ""
-                }
-                onChange={formik.handleChange("CurrencyDescription")}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
-            <div>
-              <DropDowns
-                className="dropdown__container"
-                label="To Currency Code"
-                value={ExchangeDetailView.ToCurrencyCode}
-                onChange={(e) =>
-                  formik.setFieldValue("ToCurrencyCode", e.value)
-                }
-                options={ToCurrencyCode}
-                optionLabel="label"
-                placeholder={"Select"}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-              {formik.touched.ToCurrencyCode &&
-                formik.errors.ToCurrencyCode && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                    {formik.errors.ToCurrencyCode}
-                  </div>
-                )}
-            </div>
-          </div>
-          <div class="sm-col-12 col-12 md:col-6 lg-col-6">
-            <div>
-              <InputField
-                classNames="field__container"
-                label="To Currency  Description"
-                placeholder={"Enter"}
-                value={
-                  ExchangeDetailView.ToCurrencyCode
-                    ? `ToCurrencyCode ${ExchangeDetailView.ToCurrencyDescription}`
-                    : ""
-                }
-                onChange={formik.handleChange("ToCurrencyDescription")}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-3 md:col-3 lg-col-3">
-            <LabelWrapper className="calenderlable__container">
-              Effective From
-            </LabelWrapper>
-            <Calendar
-              classNames="calender__container"
-              showIcon
-              value={new Date(effectiveFromDate)}
-              dateFormat={calendarDateFormat()}
-            />
-          </div>
-          <div class="col-3 md:col-3 lg-col-3">
-            <LabelWrapper className="calenderlable__container">
-              Effective To
-            </LabelWrapper>
-            <Calendar
-              classNames="calender__container"
-              showIcon
-              value={new Date(effectiveToDate)}
-              dateFormat={calendarDateFormat()}
-            />
-          </div>
-          <div class="col-3 md:col-3 lg-col-3">
-            <InputField
-              classNames="field__container"
-              label="Exchange Rate"
-              placeholder={"Enter"}
-              value={ExchangeDetailView.ExchangeRate}
-              onChange={formik.handleChange("ExchangeRate")}
-            />
-            {formik.touched.ExchangeRate && formik.errors.ExchangeRate && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                {formik.errors.ExchangeRate}
-              </div>
-            )}
-          </div>
-        </div>
+        <DetailHeader title={`${r.CurrencyCode || ""} → ${r.ToCurrencyCode || ""}`} />
+        <DetailSection title={t("financeMasters.exchangeRateDetails")}>
+          <KeyValueGrid columns={3} items={[
+            { label: t("financeMasters.fromCurrency"), value: currencyText(r.CurrencyCode, r.CurrencyDescription) },
+            { label: t("financeMasters.toCurrency"), value: currencyText(r.ToCurrencyCode, r.ToCurrencyDescription) },
+            { label: t("financeMasters.exchangeRate"), value: r.ExchangeRate, type: "number", decimals: 6 },
+            { label: t("financeMasters.effectiveFrom"), value: r.EffectiveFrom, type: "date" },
+            { label: t("financeMasters.effectiveTo"), value: r.EffectiveTo, type: "date" },
+          ]} />
+        </DetailSection>
+        {r.id ? (
+          <DetailSection title={t("detailView.activity")}>
+            <RecordActivityLog entity="master:exchange-rate" recordId={r.id} />
+          </DetailSection>
+        ) : null}
       </Card>
-
-      {/*  */}
     </div>
   );
 }

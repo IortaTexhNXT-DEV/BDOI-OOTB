@@ -21,6 +21,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 /** Drawing pad: pointer strokes on a transparent canvas; exports a PNG data URL (null when empty). */
 export const SignaturePad = ({ onChange, height = 180 }) => {
+  const { t } = useTranslation();
   const canvas = useRef(null);
   const drawing = useRef(false);
   const empty = useRef(true);
@@ -62,9 +63,9 @@ export const SignaturePad = ({ onChange, height = 180 }) => {
   return (
     <div className="bv-sig-pad">
       <canvas ref={canvas} width={720} height={height * 1.5} style={{ height }} data-testid="signature-pad"
-        onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end} aria-label="Signature pad" />
+        onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end} aria-label={t("signature.pad", "Signature pad")} />
       <span className="bv-sig-pad__line" />
-      <Button type="button" label="Clear" icon="pi pi-eraser" className="p-button-text p-button-sm bv-sig-pad__clear" onClick={clear} />
+      <Button type="button" label={t("signature.clear", "Clear")} icon="pi pi-eraser" className="p-button-text p-button-sm bv-sig-pad__clear" onClick={clear} />
     </div>
   );
 };
@@ -158,7 +159,14 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
   const ready = consent && (mode === "draw" ? !!drawn : !!file);
 
   return (
-    <Dialog header={`${t("signature.title", "E-signature")}${ownerName ? `: ${ownerName}` : ""}`} visible={visible} onHide={onHide} style={{ width: "min(760px, 96vw)" }} className="bv-sig" modal>
+    <Dialog header={`${t("signature.title", "E-signature")}${ownerName ? `: ${ownerName}` : ""}`} visible={visible} onHide={onHide} style={{ width: "min(760px, 96vw)" }} className="bv-sig" modal
+      footer={(
+        // the save sits in the footer with Close, as on every dialog
+        <>
+          <Button type="button" label={t("signature.close", "Close")} text onClick={onHide} />
+          {canManage && <Button type="button" label={t("signature.save", "Save signature")} icon="pi pi-check" onClick={save} disabled={!ready} loading={saving} data-testid="save-signature" />}
+        </>
+      )}>
       {error && <Message severity="error" text={error} className="mb-3 w-full justify-content-start" />}
       {canManage && (
         <div className="bv-sig__capture">
@@ -183,7 +191,6 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
             <Checkbox inputId="sig-consent" checked={consent} onChange={(e) => setConsent(e.checked)} />
             <label htmlFor="sig-consent">{consentText || t("signature.consent", "I confirm the signer's consent to print this signature on the mapped documents.")}</label>
           </div>
-          <Button type="button" label={t("signature.save", "Save signature")} icon="pi pi-check" onClick={save} disabled={!ready} loading={saving} data-testid="save-signature" />
         </div>
       )}
       <h4 className="bv-sig__h">{t("signature.versions", "Versions")}</h4>

@@ -37456,7 +37456,7 @@
     "/commission/referrer-accounts/{id}/lines/{lineId}/reverse": {
       "post": {
         "operationId": "postCommissionReferrerAccountsIdLinesLineIdReverse",
-        "summary": "Reverse a line (reverses the accrual; clawback journal if already paid)",
+        "summary": "Reverse a line, with the reason (reverses the accrual; clawback journal if already paid)",
         "tags": [
           "Commission"
         ],
@@ -37777,9 +37777,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
               },
-              "example": {}
+              "example": {
+                "reason": "Policy cancelled from inception"
+              }
             }
           }
         }
@@ -38309,7 +38315,7 @@
     "/commission/referrer-accounts/{id}/wht": {
       "post": {
         "operationId": "postCommissionReferrerAccountsIdWht",
-        "summary": "Toggle withholding tax for a referrer (recomputes unpaid lines)",
+        "summary": "Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail",
         "tags": [
           "Commission"
         ],
@@ -38556,11 +38562,15 @@
                 "properties": {
                   "whtApplicable": {
                     "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string"
                   }
                 }
               },
               "example": {
-                "whtApplicable": false
+                "whtApplicable": false,
+                "reason": "BIR certificate of exemption received"
               }
             }
           }
@@ -94003,7 +94013,7 @@
       },
       "post": {
         "operationId": "postPettyCashFunds",
-        "summary": "Create a petty cash fund (posts its journal)",
+        "summary": "Create a petty cash fund (waits for approval by another user, then posts its journal)",
         "tags": [
           "Petty Cash"
         ],
@@ -94307,6 +94317,220 @@
               },
               "example": {
                 "maxLimit": 6000
+              }
+            }
+          }
+        }
+      }
+    },
+    "/petty-cash/funds/{id}/approve": {
+      "post": {
+        "operationId": "postPettyCashFundsIdApprove",
+        "summary": "Approve (establish: posts its journal) a fund waiting for approval (approver must differ from its initiator)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fundSize": {
+                          "type": "integer"
+                        },
+                        "maxLimit": {
+                          "type": "integer"
+                        },
+                        "minimumCashbox": {
+                          "type": "integer"
+                        },
+                        "branchCode": {
+                          "type": "string"
+                        },
+                        "departmentCode": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "PCF-MKT",
+                    "description": "Makati office petty cash",
+                    "fundSize": 20000,
+                    "maxLimit": 5000,
+                    "minimumCashbox": 3000,
+                    "branchCode": "PHP",
+                    "departmentCode": "FI",
+                    "status": "active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Initiate",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/petty-cash/funds/{id}/reject": {
+      "post": {
+        "operationId": "postPettyCashFundsIdReject",
+        "summary": "Reject a fund waiting for approval (approver must differ from its initiator)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "fundSize": {
+                          "type": "integer"
+                        },
+                        "maxLimit": {
+                          "type": "integer"
+                        },
+                        "minimumCashbox": {
+                          "type": "integer"
+                        },
+                        "branchCode": {
+                          "type": "string"
+                        },
+                        "departmentCode": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "PCF-MKT",
+                    "description": "Makati office petty cash",
+                    "fundSize": 20000,
+                    "maxLimit": 5000,
+                    "minimumCashbox": 3000,
+                    "branchCode": "PHP",
+                    "departmentCode": "FI",
+                    "status": "rejected"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Initiate",
+        "x-permissions": [
+          "write:disbursements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Fund size not agreed"
               }
             }
           }

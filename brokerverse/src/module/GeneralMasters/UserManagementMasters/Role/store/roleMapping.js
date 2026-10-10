@@ -32,6 +32,9 @@ export const toRoleRow = (role) => {
   };
 };
 
+/** Every menu module a role reaches, in words ("Masters, Bank Reconciliation"), for the view of the role. */
+export const roleModules = (role) => unique((role?.permissionCodes || []).map(moduleOf)).map(titleCase).join(", ");
+
 /** Permission codes granted by the chosen menu / sub-menu modules and level ("write" includes read). */
 export const accessPermissions = ({ menuAccess, subMenuAccess, permissions }) => {
   const levels = permissions === "write" ? ["read", "write"] : ["read"];

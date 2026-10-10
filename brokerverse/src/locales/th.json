@@ -849,9 +849,14 @@
         "bank-transfer": "โอนเงินผ่านธนาคาร",
         "bank_transfer": "โอนเงินผ่านธนาคาร",
         "online": "โอนเงินออนไลน์"
-      }
+      },
+      "approveCheque": "อนุมัติเช็ค",
+      "printCheque": "พิมพ์เช็ค",
+      "selectPendingCheque": "เลือกเช็คที่รออนุมัติ"
     },
-    "bulkUploadTitle": "อัปโหลดการจ่ายเงินหลายรายการ"
+    "bulkUploadTitle": "อัปโหลดการจ่ายเงินหลายรายการ",
+    "printVouchers": "พิมพ์ใบสำคัญจ่าย",
+    "customerCodeFromRequired": "กรุณาระบุรหัสลูกค้าเริ่มต้น"
   },
   "renewal": {
     "renewals": "การต่ออายุ",
@@ -1257,6 +1262,46 @@
       "fund": "กองทุน",
       "accounts": "ธนาคารและบัญชี",
       "printVoucher": "พิมพ์ใบสำคัญจ่าย"
+    },
+    "disbursementNumber": "เลขที่การจ่าย",
+    "disbursedAmount": "จำนวนเงินที่จ่าย",
+    "reimbursementAmount": "จำนวนเงินที่เบิกชดเชย",
+    "currentBalance": "ยอดคงเหลือปัจจุบัน",
+    "balanceAmount": "ยอดคงเหลือ",
+    "removeLine": "ลบรายการ",
+    "addItem": "เพิ่มรายการ",
+    "bankAccountName": "ชื่อบัญชีธนาคาร",
+    "subAccountDescription": "คำอธิบายบัญชีย่อย",
+    "receiptNumber": "เลขที่ใบรับ",
+    "requester": "ผู้ขอเบิก",
+    "transactionDescription": "คำอธิบายรายการ",
+    "disbursementFromDate": "จ่ายตั้งแต่วันที่",
+    "disbursementToDate": "จ่ายถึงวันที่",
+    "requesterRequired": "กรุณาระบุผู้ขอเบิก",
+    "subAccountCodeRequired": "กรุณาระบุรหัสบัญชีย่อย",
+    "transactionCodeRequired": "กรุณาระบุรหัสรายการ",
+    "branchCodeRequired": "กรุณาระบุรหัสสาขา",
+    "departmentCodeRequired": "กรุณาระบุรหัสแผนก",
+    "fundRequired": "กรุณาระบุรหัสเงินสดย่อย",
+    "mainAccountCodeRequired": "กรุณาระบุรหัสบัญชีหลัก",
+    "status": "สถานะ",
+    "actions": "การดำเนินการ",
+    "fundStatus": {
+      "pending": "รออนุมัติ",
+      "active": "ใช้งาน",
+      "rejected": "ไม่อนุมัติ",
+      "inactive": "ไม่ใช้งาน"
+    },
+    "fundApproval": {
+      "submitTitle": "ส่งกองทุนเงินสดย่อยเพื่ออนุมัติ",
+      "submit": "ส่งเพื่ออนุมัติ",
+      "submitted": "ส่งกองทุนเงินสดย่อยเพื่ออนุมัติแล้ว",
+      "nextCode": "เลขถัดไปของชุดเลขที่",
+      "approveTitle": "อนุมัติกองทุนเงินสดย่อย",
+      "rejectTitle": "ไม่อนุมัติกองทุนเงินสดย่อย",
+      "approve": "อนุมัติกองทุน",
+      "reject": "ไม่อนุมัติกองทุน",
+      "rejectReason": "เหตุผลที่ไม่อนุมัติ"
     }
   },
   "employeeBenefit": {
@@ -1456,7 +1501,25 @@
     "downloadReport": "ดาวน์โหลดรายงาน",
     "processAnotherFile": "ประมวลผลไฟล์อื่น",
     "back": "กลับ",
-    "startProcessing": "เริ่มประมวลผล"
+    "startProcessing": "เริ่มประมวลผล",
+    "adjustmentMaster": {
+      "title": "ประเภทการปรับปรุงการนำส่งเบี้ย",
+      "remittanceMaster": "ข้อมูลหลักการนำส่งเบี้ย",
+      "mode": {
+        "view": "ดู",
+        "edit": "แก้ไข",
+        "add": "เพิ่ม"
+      },
+      "active": "ใช้งาน",
+      "inactive": "ไม่ใช้งาน",
+      "type": "ประเภทการปรับปรุง",
+      "category": "หมวด",
+      "nature": "ลักษณะ",
+      "glAccount": "บัญชีแยกประเภท (เดบิต / เครดิต)",
+      "requiresApproval": "ต้องอนุมัติ",
+      "autoApproveBelow": "อนุมัติอัตโนมัติเมื่อต่ำกว่า",
+      "close": "ปิด"
+    }
   },
   "incentive": {
     "incentive": "สิ่งจูงใจ",
@@ -1895,7 +1958,10 @@
     "editAccountCategory": "แก้ไขหมวดบัญชี",
     "addAccountCategory": "เพิ่มหมวดบัญชี",
     "saveChanges": "บันทึกการเปลี่ยนแปลง",
-    "cancel": "ยกเลิก"
+    "cancel": "ยกเลิก",
+    "exchangeRateDetails": "อัตราแลกเปลี่ยน",
+    "fromCurrency": "จากสกุลเงิน",
+    "toCurrency": "เป็นสกุลเงิน"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -2230,7 +2296,12 @@
     "branchAndDepartment": "สาขาและแผนก",
     "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้",
     "primaryCompany": "บริษัทหลัก",
-    "address": "ที่อยู่"
+    "address": "ที่อยู่",
+    "accessLevel": {
+      "read": "อ่านอย่างเดียว",
+      "write": "อ่านและแก้ไข"
+    },
+    "createdOn": "สร้างเมื่อ"
   },
   "agent": {
     "createQuote": "สร้างใบเสนอราคา",
@@ -4999,37 +5070,37 @@
     "pageReportTemplate": "แสดง {first} ถึง {last} จาก {totalRecords} รายการ"
   },
   "collectionDetail": {
-    "backToCollections": "กลับไปที่ Collections",
-    "collectionDetails": "รายละเอียดการเก็บเงิน",
-    "clientPolicyInfo": "ข้อมูลลูกค้าและกรมธรรม์",
-    "clientName": "ชื่อลูกค้า:",
-    "policyNumber": "เลขกรมธรรม์:",
-    "dueDate": "วันครบกำหนด:",
-    "daysPastDue": "เลยกำหนด:",
+    "backToCollections": "กลับไปที่การติดตามเบี้ย",
+    "collectionDetails": "การติดตามเบี้ย",
+    "clientPolicyInfo": "ลูกค้าและกรมธรรม์",
+    "clientName": "ลูกค้า",
+    "policyNumber": "เลขที่กรมธรรม์",
+    "dueDate": "วันครบกำหนด",
+    "daysPastDue": "จำนวนวันที่เกินกำหนด",
     "days": "วัน",
-    "status": "สถานะ:",
-    "overdueLevel": "ระดับเลยกำหนด:",
+    "status": "สถานะ",
+    "overdueLevel": "ระดับการค้างชำระ",
     "level": "ระดับ",
-    "financialBreakdown": "รายละเอียดการเงิน",
-    "grossPremium": "เบี้ยรวม:",
-    "netPremium": "เบี้ยสุทธิ:",
-    "vat": " VAT:",
-    "dst": "DST:",
-    "lgt": "LGT:",
-    "others": "อื่นๆ:",
-    "discount": "ส่วนลด:",
-    "paidAmount": "จำนวนที่ชำระ:",
-    "outstanding": "ค้างชำระ:",
-    "agingAnalysis": "การวิเคราะห์อายุหนี้",
-    "currentNotDue": "ปัจจุบัน (ยังไม่ครบกำหนด):",
-    "days1to30": "1-30 วัน:",
-    "days31to60": "31-60 วัน:",
-    "days61to90": "61-90 วัน:",
-    "over90Days": "เกิน 90 วัน:",
+    "financialBreakdown": "เบี้ยประกันและการชำระ",
+    "grossPremium": "เบี้ยรวม",
+    "netPremium": "เบี้ยสุทธิ",
+    "vat": "VAT",
+    "dst": "อากรแสตมป์",
+    "lgt": "ภาษีท้องถิ่น",
+    "others": "ค่าใช้จ่ายอื่น",
+    "discount": "ส่วนลด",
+    "paidAmount": "ชำระแล้ว",
+    "outstanding": "ค้างชำระ",
+    "agingAnalysis": "อายุหนี้",
+    "currentNotDue": "ยังไม่ถึงกำหนด",
+    "days1to30": "1-30 วัน",
+    "days31to60": "31-60 วัน",
+    "days61to90": "61-90 วัน",
+    "over90Days": "เกิน 90 วัน",
     "collectionActions": "การดำเนินการเก็บเงิน",
-    "sendEmail": "ส่งอีเมล",
-    "addNote": "เพิ่มหมายเหตุ",
-    "setCommitmentDate": "กำหนดวันผูกพัน",
+    "sendEmail": "ส่งการแจ้งเตือน",
+    "addNote": "เพิ่มบันทึก",
+    "setCommitmentDate": "กำหนดวันนัดชำระ",
     "followUpHistory": "ประวัติการติดตาม",
     "noFollowUpActions": "ไม่มีการดำเนินการติดตาม",
     "date": "วันที่",
@@ -5084,7 +5155,9 @@
       },
       "emailSubject": "เบี้ยประกันถึงกำหนดชำระ: กรมธรรม์ {{policy}}",
       "emailBody": "เรียน {{name}}\n\nเบี้ยประกันจำนวน {{amount}} ของกรมธรรม์ {{policy}} ถึงกำหนดชำระเมื่อวันที่ {{dueDate}} กรุณาชำระเงินโดยเร็วเพื่อให้ความคุ้มครองต่อเนื่อง\n\nหากท่านชำระแล้ว โปรดละเว้นการแจ้งเตือนนี้\n\nขอบคุณ"
-    }
+    },
+    "collections": "การติดตามเบี้ย",
+    "back": "กลับ"
   },
   "agingReport": {
     "backToCollections": "กลับไปที่ Collections",
@@ -5989,7 +6062,11 @@
       },
       "salesActivityOutcomes": {
         "item": "ผลลัพธ์กิจกรรมการขาย"
-      }
+      },
+      "months_one": "{{count}} เดือน",
+      "months_other": "{{count}} เดือน",
+      "history": "ประวัติ",
+      "historyOf": "ประวัติของ{{item}} {{name}}"
     },
     "confirmations": {
       "activity": "Activity",
@@ -6059,12 +6136,17 @@
         "deactivateTitle": "ปิดใช้งาน {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
         "activateTitle": "เปิดใช้งาน {{name}}",
-        "activateMessage": "The record is offered again for new transactions."
+        "activateMessage": "The record is offered again for new transactions.",
+        "deactivateItemTitle": "ปิดการใช้งาน{{item}}: {{name}}",
+        "activateItemTitle": "เปิดการใช้งาน{{item}}: {{name}}"
       }
     },
     "cancellation": {
       "confirmTitle": "สร้างสลักหลังยกเลิกกรมธรรม์ {{number}}",
       "confirmMessage": "ระบบจะสร้างสลักหลังยกเลิกฉบับร่างพร้อมเบี้ยคืนด้านล่าง และส่งให้บริษัทประกันจากหน้าสรุป"
+    },
+    "pdc": {
+      "allCheques": "เช็ค"
     }
   },
   "numberingMasters": {
@@ -6232,7 +6314,8 @@
       "template": "แม่แบบผลิตภัณฑ์",
       "coverage": "ความคุ้มครอง",
       "rule": "กฎการรับประกัน",
-      "mapping": "การจับคู่ตลาด"
+      "mapping": "การจับคู่ตลาด",
+      "ratingFactor": "ปัจจัยการคำนวณเบี้ย"
     },
     "kinds": {
       "template": "แม่แบบผลิตภัณฑ์",
@@ -6482,7 +6565,10 @@
     },
     "revokeTitle": "เพิกถอนลายเซ็นเวอร์ชันนี้",
     "revokeMessage": "ลายเซ็นเวอร์ชันด้านล่างจะถูกเพิกถอนและไม่ถูกพิมพ์อีก",
-    "revokeNote": "เอกสารที่พิมพ์ไปแล้วยังคงมีลายเซ็นเดิม"
+    "revokeNote": "เอกสารที่พิมพ์ไปแล้วยังคงมีลายเซ็นเดิม",
+    "close": "ปิด",
+    "clear": "ล้าง",
+    "pad": "พื้นที่ลงลายมือชื่อ"
   },
   "distribution": {
     "common": {
@@ -6698,7 +6784,8 @@
     "lastChanged": "แก้ไขล่าสุด",
     "newLimit": "วงเงินใหม่",
     "limitHistory": "ประวัติการเปลี่ยนวงเงิน",
-    "noLimitChanges": "ยังไม่เคยเปลี่ยนวงเงิน"
+    "noLimitChanges": "ยังไม่เคยเปลี่ยนวงเงิน",
+    "billDueAfterCancel": "ใบแจ้งหนี้ครบกำหนดวันที่"
   },
   "insurerRec": {
     "confirmations": {
@@ -6860,7 +6947,11 @@
     "fromValue": "ตั้งแต่ (รวม)",
     "toValue": "ถึง (ไม่รวม)",
     "computeTitle": "คำนวณ {{period}} · {{agreement}}",
-    "nothingToCompute": "ไม่มียอดผลงานในงวดนี้"
+    "nothingToCompute": "ไม่มียอดผลงานในงวดนี้",
+    "agreementHistory": "ประวัติ",
+    "status": {
+      "not-applicable": "ไม่ต้องยื่น: จดทะเบียน VAT"
+    }
   },
   "commissionLine": {
     "statuses": {
@@ -6927,7 +7018,11 @@
       "reverse": "Reverse commission",
       "rateTitle": "Change the commission rate of {{policy}}",
       "rateMessage": "The commission, withholding tax and net payable of this line are recalculated.",
-      "rate": "Apply rate"
+      "rate": "Apply rate",
+      "whtOnTitle": "หักภาษี ณ ที่จ่าย",
+      "whtOffTitle": "ยกเลิกการหักภาษี ณ ที่จ่าย",
+      "whtOn": "หักภาษี ณ ที่จ่าย",
+      "whtOff": "ยกเลิกการหักภาษี ณ ที่จ่าย"
     },
     "bulk": {
       "lines": "Lines",
@@ -6944,7 +7039,16 @@
       "eligibleMessage": "The accrued lines whose premium has been collected become payable.",
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
-    }
+    },
+    "whtState": {
+      "on": "หัก",
+      "off": "ไม่หัก"
+    },
+    "linesRecomputed": "รายการที่ยังไม่จ่ายที่คำนวณใหม่",
+    "netPayableNow": "ยอดสุทธิที่ต้องจ่ายก่อนเปลี่ยน",
+    "whtReason": "เหตุผลของการเปลี่ยนแปลง",
+    "reverseReason": "เหตุผลในการกลับรายการ",
+    "taxesAndCharges": "หัก: ภาษีและค่าธรรมเนียมเบี้ยประกัน"
   },
   "fileField": {
     "choose": "เลือกไฟล์",
@@ -6956,5 +7060,55 @@
     "sendEmail": "ส่งอีเมล",
     "ccOptional": "สำเนาถึง (ไม่บังคับ)",
     "ccPlaceholder": "name@example.com, name2@example.com"
+  },
+  "signatoriesList": {
+    "code": "รหัสผู้ลงนาม",
+    "name": "ชื่อผู้ลงนาม",
+    "modifiedBy": "แก้ไขโดย",
+    "modifiedOn": "แก้ไขเมื่อ",
+    "status": "สถานะ",
+    "actions": "การดำเนินการ"
+  },
+  "openEntryFilters": {
+    "activityCode1": "รหัสกิจกรรม 1",
+    "analysisCode1": "รหัสวิเคราะห์ 1",
+    "analysisCode2": "รหัสวิเคราะห์ 2",
+    "controlAccountCode": "รหัสบัญชีคุม",
+    "currencyCode": "สกุลเงิน",
+    "department": "แผนก",
+    "departmentCode": "รหัสแผนก",
+    "division": "ฝ่าย",
+    "divisionCode": "รหัสฝ่าย",
+    "documentReference": "เลขที่อ้างอิงเอกสาร",
+    "narration": "คำอธิบายรายการ",
+    "net": "สุทธิ",
+    "subAccountCode": "รหัสบัญชีย่อย",
+    "writeOffAmount": "จำนวนเงินตัดจำหน่าย",
+    "writeOffCode": "รหัสตัดจำหน่าย",
+    "writeOffReason": "เหตุผลการตัดจำหน่าย"
+  },
+  "correctionJv": {
+    "mainAccount": "บัญชีหลัก",
+    "subAccount": "บัญชีย่อย",
+    "remarks": "หมายเหตุ",
+    "currency": "สกุลเงิน",
+    "foreignAmount": "จำนวนเงินต่างประเทศ",
+    "localAmount": "จำนวนเงินสกุลท้องถิ่น (PHP)",
+    "entryType": "เดบิต / เครดิต",
+    "edit": "แก้ไข",
+    "rowCount": "จำนวนแถวต่อหน้า",
+    "branch": "สาขา",
+    "department": "แผนก",
+    "select": "เลือก",
+    "required": "จำเป็นต้องระบุ",
+    "cancel": "ยกเลิก",
+    "updateLine": "ปรับปรุงรายการ",
+    "editLine": "แก้ไขรายการ",
+    "editLineTitle": "แก้ไขรายการที่ {{line}} · {{account}}",
+    "amountIn": "จำนวนเงิน {{currency}}",
+    "entry": {
+      "Debit": "เดบิต",
+      "Credit": "เครดิต"
+    }
   }
 }

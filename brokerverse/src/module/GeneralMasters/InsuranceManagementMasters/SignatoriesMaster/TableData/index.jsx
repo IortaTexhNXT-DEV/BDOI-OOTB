@@ -156,31 +156,31 @@ const TableData = ({ navigate }) => {
       >
         <Column
           field="signatoryCode"
-          header="Signatories Code"
+          header={t("signatoriesList.code")}
           className="fieldvalue_container"
           sortable
           body={(rowData) => rowData.signatoryCode?.toUpperCase()}
         ></Column>
         <Column
           field="signatoryName"
-          header="Signatory Name"
+          header={t("signatoriesList.name")}
           className="fieldvalue_container"
           body={(rowData) => rowData.signatoryName}
         ></Column>
         <Column
           field="modifiedBy"
-          header="Modified by"
+          header={t("signatoriesList.modifiedBy")}
           className="fieldvalue_container"
           body={(rowData) => rowData.modifiedBy}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
-          header="Modified On"
+          header={t("signatoriesList.modifiedOn")}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="status"
-          header="status"
+          header={t("signatoriesList.status")}
           className="fieldvalue_container"
           body={(columnData) => <MasterStatusToggle type="signatory" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
@@ -190,7 +190,7 @@ const TableData = ({ navigate }) => {
           }}
           field="id"
           body={renderActionButton}
-          header="Action"
+          header={t("signatoriesList.actions")}
           className="fieldvalue_container"
         ></Column>
       </DataTable>

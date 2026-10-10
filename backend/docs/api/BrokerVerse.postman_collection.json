@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1215 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1217 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -22174,7 +22174,7 @@
           ]
         },
         {
-          "name": "Reverse a line (reverses the accrual; clawback journal if already paid)",
+          "name": "Reverse a line, with the reason (reverses the accrual; clawback journal if already paid)",
           "request": {
             "method": "POST",
             "header": [
@@ -22209,10 +22209,10 @@
                 }
               ]
             },
-            "description": "Reverse a line (reverses the accrual; clawback journal if already paid)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Line drawer\n\nAccess: write:commission",
+            "description": "Reverse a line, with the reason (reverses the accrual; clawback journal if already paid)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Line drawer\n\nAccess: write:commission",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"reason\": \"Policy cancelled from inception\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -22257,10 +22257,10 @@
                     }
                   ]
                 },
-                "description": "Reverse a line (reverses the accrual; clawback journal if already paid)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Line drawer\n\nAccess: write:commission",
+                "description": "Reverse a line, with the reason (reverses the accrual; clawback journal if already paid)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Line drawer\n\nAccess: write:commission",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"reason\": \"Policy cancelled from inception\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -22473,7 +22473,7 @@
           ]
         },
         {
-          "name": "Toggle withholding tax for a referrer (recomputes unpaid lines)",
+          "name": "Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail",
           "request": {
             "method": "POST",
             "header": [
@@ -22501,10 +22501,10 @@
                 }
               ]
             },
-            "description": "Toggle withholding tax for a referrer (recomputes unpaid lines)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
+            "description": "Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"whtApplicable\": false\n}",
+              "raw": "{\n  \"whtApplicable\": false,\n  \"reason\": \"BIR certificate of exemption received\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -22542,10 +22542,10 @@
                     }
                   ]
                 },
-                "description": "Toggle withholding tax for a referrer (recomputes unpaid lines)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
+                "description": "Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"whtApplicable\": false\n}",
+                  "raw": "{\n  \"whtApplicable\": false,\n  \"reason\": \"BIR certificate of exemption received\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -57576,7 +57576,7 @@
           ]
         },
         {
-          "name": "Create a petty cash fund (posts its journal)",
+          "name": "Create a petty cash fund (waits for approval by another user, then posts its journal)",
           "request": {
             "method": "POST",
             "header": [
@@ -57595,7 +57595,7 @@
                 "funds"
               ]
             },
-            "description": "Create a petty cash fund (posts its journal)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate > Add\n\nAccess: write:disbursements",
+            "description": "Create a petty cash fund (waits for approval by another user, then posts its journal)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate > Add\n\nAccess: write:disbursements",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"code\": \"PCF-MKT\",\n  \"description\": \"Makati office petty cash\",\n  \"fundSize\": 20000,\n  \"maxLimit\": 5000,\n  \"minimumCashbox\": 3000,\n  \"branchCode\": \"PHP\",\n  \"departmentCode\": \"FI\"\n}",
@@ -57627,7 +57627,7 @@
                     "funds"
                   ]
                 },
-                "description": "Create a petty cash fund (posts its journal)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate > Add\n\nAccess: write:disbursements",
+                "description": "Create a petty cash fund (waits for approval by another user, then posts its journal)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate > Add\n\nAccess: write:disbursements",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"code\": \"PCF-MKT\",\n  \"description\": \"Makati office petty cash\",\n  \"fundSize\": 20000,\n  \"maxLimit\": 5000,\n  \"minimumCashbox\": 3000,\n  \"branchCode\": \"PHP\",\n  \"departmentCode\": \"FI\"\n}",
@@ -57807,6 +57807,196 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PCF-MKT\",\n    \"description\": \"Makati office petty cash\",\n    \"fundSize\": 20000,\n    \"maxLimit\": 5000,\n    \"minimumCashbox\": 3000,\n    \"branchCode\": \"PHP\",\n    \"departmentCode\": \"FI\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve (establish: posts its journal) a fund waiting for approval (approver must differ from its initiator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/petty-cash/funds/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "petty-cash",
+                "funds",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve (establish: posts its journal) a fund waiting for approval (approver must differ from its initiator)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/petty-cash/funds/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "petty-cash",
+                    "funds",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve (establish: posts its journal) a fund waiting for approval (approver must differ from its initiator)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PCF-MKT\",\n    \"description\": \"Makati office petty cash\",\n    \"fundSize\": 20000,\n    \"maxLimit\": 5000,\n    \"minimumCashbox\": 3000,\n    \"branchCode\": \"PHP\",\n    \"departmentCode\": \"FI\",\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject a fund waiting for approval (approver must differ from its initiator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/petty-cash/funds/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "petty-cash",
+                "funds",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a fund waiting for approval (approver must differ from its initiator)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Fund size not agreed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/petty-cash/funds/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "petty-cash",
+                    "funds",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject a fund waiting for approval (approver must differ from its initiator)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Fund size not agreed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"PCF-MKT\",\n    \"description\": \"Makati office petty cash\",\n    \"fundSize\": 20000,\n    \"maxLimit\": 5000,\n    \"minimumCashbox\": 3000,\n    \"branchCode\": \"PHP\",\n    \"departmentCode\": \"FI\",\n    \"status\": \"rejected\"\n  }\n}"
             }
           ]
         },

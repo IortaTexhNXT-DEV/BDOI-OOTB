@@ -314,7 +314,7 @@ HistoryDialog.propTypes = { kind: PropTypes.string.isRequired, row: PropTypes.ob
  * Read-only view of a record: its code and name with the status chip, then the facts as label above value. `rows` are
  * [label, value, { span, type }] (span "full" for long texts); `onHistory` adds a History button to the footer.
  */
-export const ViewDialog = ({ header, title, subtitle, status, rows, visible, onHide, onHistory }) => {
+export const ViewDialog = ({ header, title, subtitle, status, rows, visible, onHide, onHistory, children }) => {
   const { t } = useTranslation();
   if (!visible) return null;
   const items = rows.filter(Boolean).map(([label, value, options]) => ({ label, value, ...(options || {}) }));
@@ -328,6 +328,7 @@ export const ViewDialog = ({ header, title, subtitle, status, rows, visible, onH
     <DetailDialog visible onHide={onHide} header={header} size="md" footer={footer}>
       {title ? <DetailHeader title={title} subtitle={subtitle} status={status ? { code: String(status).toLowerCase(), label: statusLabel(status) } : null} /> : null}
       <KeyValueGrid columns={2} items={items} />
+      {children}
     </DetailDialog>
   );
 };
@@ -340,5 +341,7 @@ ViewDialog.propTypes = {
   rows: PropTypes.array.isRequired,
   visible: PropTypes.bool,
   onHide: PropTypes.func.isRequired,
+  /** more of the record under its facts (a table of its lines) */
+  children: PropTypes.node,
   onHistory: PropTypes.func,
 };

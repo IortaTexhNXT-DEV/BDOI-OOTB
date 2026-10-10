@@ -127,14 +127,14 @@ const Schedules = () => {
     }
   };
 
-  // what each run did, in words: the job's result, or its error
-  // what a run did, counted by kind ("Updated 5", "Notifications 3"), under What changed; a text result stays a remark
+  // what a run did is a result, not a change of fields: its counts by kind as one line ("Updated: 5 · Notifications: 3"),
+  // a text result as it is, or the error
   const runEntries = (rows) => fromJobRuns(rows).map((entry, i) => {
     const out = rows[i].output;
     if (!out || typeof out !== "object" || Array.isArray(out)) return { ...entry, remarks: entry.remarks || describeOutput(out) || null };
-    const changes = Object.entries(out).filter(([, v]) => v !== null && v !== undefined && typeof v !== "object")
-      .map(([k, v]) => ({ field: k, label: humanize(k), before: null, after: String(v) }));
-    return { ...entry, changes };
+    const counts = Object.entries(out).filter(([, v]) => v !== null && v !== undefined && typeof v !== "object")
+      .map(([k, v]) => `${humanize(k)}: ${v}`).join(" · ");
+    return { ...entry, changes: [], remarks: entry.remarks || counts || null };
   });
 
   const actions = (job) => (
