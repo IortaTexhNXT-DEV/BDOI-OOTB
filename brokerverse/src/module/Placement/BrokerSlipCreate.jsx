@@ -18,6 +18,7 @@ import useQuoteSetup from "../../agentModule/quoteModule/utils/useQuoteSetup";
 import RiskFactsFields from "../../agentModule/quoteModule/policyDetails/policyDetailsCard/RiskFactsFields";
 import ProductPicker from "../Sales/ProductPicker";
 import "./index.scss";
+import { useFeature } from "../../features/Feature";
 
 const blankCover = () => ({ cover: "", sumInsured: null, deductible: "" });
 
@@ -46,6 +47,8 @@ const prefilledCustomer = (prefill) => {
  */
 const BrokerSlipCreate = () => {
   const { t } = useTranslation();
+  // one request to several insurers is a future-release feature: one insurer per client
+  const multiInsurer = useFeature("rfq-multi-insurer").on;
   const navigate = useNavigate();
   const prefill = useLocation().state?.prefill || null;
   const toast = useRef(null);
@@ -191,7 +194,8 @@ const BrokerSlipCreate = () => {
         <div className="grid">
           <div className="col-12 md:col-8">
             <label>{t("placement.fields.insurersApproached")} *</label>
-            <MultiSelect value={insurers} options={options.insurers.map((i) => ({ label: i.name, value: i.id }))} onChange={(e) => setInsurers(e.value)} filter display="chip" className="w-full" placeholder={t("placement.fields.chooseInsurers")} />
+            <MultiSelect value={insurers} options={options.insurers.map((i) => ({ label: i.name, value: i.id }))} onChange={(e) => setInsurers(e.value)} filter display="chip" className="w-full"
+              placeholder={t("placement.fields.chooseInsurers")} selectionLimit={multiInsurer ? undefined : 1} showSelectAll={multiInsurer} />
           </div>
           <div className="col-12">
             <label>{t("placement.fields.remarks")}</label>

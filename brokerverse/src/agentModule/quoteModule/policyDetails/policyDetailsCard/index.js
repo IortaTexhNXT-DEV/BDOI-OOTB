@@ -28,6 +28,7 @@ import { openConfirm } from "../../../../components/ConfirmDialog";
 import useQuoteSetup, { missingRiskFields, riskFieldsToAsk } from "../../utils/useQuoteSetup";
 import RiskFactsFields from "./RiskFactsFields";
 import QuoteSteps from "../../quoteSteps";
+import { isFeatureOn } from "../../../../features/entitlements";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -206,10 +207,12 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         quotationData: policyDetailsData,
         leadId: lead?.generatedLeadId || state?.lead?.generatedLeadId,
       };
-      navigate("/agent/createquote/product-recommendation", {
-        state: { ...propsState },
-      });
-      //implement a navigate to page for product recommendation
+      // the product recommendation step is a future-release feature: without it the wizard goes on to the coverage
+      if (isFeatureOn("product-recommendation")) {
+        navigate("/agent/createquote/product-recommendation", { state: { ...propsState } });
+      } else {
+        navigate(propsState.path, payloadState);
+      }
     }
   };
 

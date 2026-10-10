@@ -15,6 +15,11 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 import HelpPanel from "../../components/HelpPanel";
 import { loadIdleMinutes, startIdleTimer } from "../../utility/idleTimeout";
 import { logout } from "../../utility/logout";
+import NotInEdition from "../../components/NotInEdition";
+import LoadingBar from "../../components/LoadingBar";
+import { useFeatureList } from "../../features/Feature";
+import { blockedFeatureFor, hasFeatureState } from "../../features/entitlements";
+import featuresService from "../../services/featuresService";
 
 const NotAuthorised = () => (
   <div className="protected__layout__not-authorised" role="alert">
@@ -46,6 +51,13 @@ const ProtectedLayout = () => {
     };
   }, []);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // the functions this environment runs: fetched once per visit; until then the last known state applies
+  const features = useFeatureList();
+  const [featuresKnown, setFeaturesKnown] = useState(hasFeatureState);
+  useEffect(() => {
+    if (!isAuthenticated()) return;
+    featuresService.refreshState().catch(() => undefined).finally(() => setFeaturesKnown(true));
+  }, []);
 
   useEffect(() => {
     // Initialize global toast reference
@@ -178,6 +190,10 @@ const ProtectedLayout = () => {
             <Navigate to="/login" replace />
           ) : location.pathname === "/" && !isPathAllowed("/", menuList, getUserRoles()) && firstAllowedPath(menuList, getUserRoles()) ? (
             <Navigate to={firstAllowedPath(menuList, getUserRoles())} replace />
+          ) : !featuresKnown ? (
+            <LoadingBar active inline />
+          ) : blockedFeatureFor(location.pathname, menuList, features) ? (
+            <NotInEdition />
           ) : isPathAllowed(location.pathname, menuList, getUserRoles()) ? (
             <ErrorBoundary resetKey={location.pathname}>
               <Outlet />

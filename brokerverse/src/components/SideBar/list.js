@@ -1433,6 +1433,28 @@ export const menuList = [
             path: "/master/configuration/insurer-integration",
             includes: ["/master/configuration/insurer-integration"],
           },
+          {
+            // the functions of the platform with their release tier and status (read only)
+            id: 40,
+            name: "Features & Releases",
+            path: "/master/configuration/features",
+            includes: ["/master/configuration/features"],
+          },
+        ],
+      },
+      {
+        // the iorta TechNXT platform administrator only (utils/menuPermissions.js): enabling the releases of the platform
+        name: "Platform",
+        section: true,
+        platform: true,
+        submenu: [
+          {
+            id: 41,
+            name: "Features & Releases",
+            path: "/master/platform/features",
+            includes: ["/master/platform/features"],
+            platform: true,
+          },
         ],
       },
     ],

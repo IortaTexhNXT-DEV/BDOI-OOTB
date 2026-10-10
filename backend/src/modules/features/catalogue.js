@@ -128,8 +128,8 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'executive-satisfaction', name: 'Customer satisfaction indicator', module: 'Dashboard', tier: FUT,
-    description: 'Customer satisfaction figure on the executive dashboard and the renewal performance targets',
-    sections: ['Executive Dashboard: customer satisfaction', 'Renewals > Performance: customer satisfaction'],
+    description: 'Customer satisfaction figure among the renewal performance targets (no survey data is captured)',
+    sections: ['Renewals > Performance: customer satisfaction'],
   }),
   feature({
     key: 'executive-regional', name: 'Regional performance', module: 'Dashboard', tier: FUT,
