@@ -368,8 +368,11 @@ the reports and scripts that read them.
 - **API.** Clients, policies, claims, collections, the open bills of a receipt (`/receipts/open-receivables`) and
   journal vouchers return an `origin` block on every row and detail:
   `{ kind: 'migrated', label: 'Migrated', legacySystem, legacyNumber, loadId, loadNumber, migratedAt, migratedByName }`
-  or `{ kind: 'issued', label: 'Issued in BrokerVerse' }`; claims and collection items also carry `policyOrigin` and
-  `policyLegacyNumber` of their policy. The lists filter on `?origin=issued|migrated` (`all` or empty for both).
+  or `{ kind: 'issued', label: 'Issued in BrokerVerse' }`; claims, collection items, endorsements and renewals
+  (`/api/policy-renewals`, `/api/renewals/queue`) also carry `policyOrigin` and `policyLegacyNumber` of their policy,
+  and a policy renewed in BrokerVerse carries `renewedFromOrigin` and `renewedFromLegacyNumber` of the term it renews.
+  The lists filter on `?origin=issued|migrated` (`all` or empty for both); on the renewals it is the origin of the
+  expiring policy.
 - **Read-only.** The origin, legacy system and number, migration date and user and load cannot be changed after the
   load: an update that changes them is refused (400); a body that sends back the values it read is accepted.
 - **Per-record audit.** A migration load writes one audit entry per record it creates (`migrate-create`, "migrated")
@@ -527,6 +530,27 @@ the user who ran the check).
 
 The four `migration.*` settings and `dashboard.default_origin` are changed on Data Migration & Go-Live > Go-Live
 (`PUT /api/data-load/golive/settings`, approve:data-load); `migration.sap_gl_include_opening` only before the lock.
+
+## Migrated and issued on the screens
+
+What a user sees of the origin outside the workspace (`components/OriginChip`, `components/Dashboard/useDashboardOrigin.js`):
+
+| Screen | Shown |
+|---|---|
+| Client view, Policy view, claim pages, collection item | Chip **Migrated** with "Legacy no. ..." and "Load MIG-000012"; the load opens the load in Data Migration & Go-Live for holders of read:data-load and is plain text for others; the tooltip gives the legacy system, when and by whom |
+| Endorsement view, claim pages, collection item of a record issued in BrokerVerse on a migrated policy | Chip **Migrated policy** with the legacy policy number |
+| Policy view of a renewal issued in BrokerVerse | "Renewal of legacy policy PC-..." in place of "Renewal term", with the link to the expiring term |
+| Renewal Queue | Origin column and filter; chip **Renewal of legacy policy** on the row and in the side panel |
+| Clients, Policies (filter panel), Claims, Collections, Journal Voucher lists | Filter **Origin** (All, Issued in BrokerVerse, Migrated) sent to the API as `origin`; Origin column with the chip on migrated rows only (and *Migrated policy* on claims and bills of a migrated policy) |
+| Add Receipt bill list | The chip next to the bill number and the old system's bill number |
+| Journal Voucher | The opening balance journal with status chip **Opening balance** and the Migrated chip; view only |
+| Executive and Sales dashboards | Switch **Issued since go-live** / **All business** in the toolbar, sent as `origin=issued|all`; KPI tile **Issued since go-live** (premium and number of policies issued in BrokerVerse since the cutover date, from `issuedSinceGoLive`), shown once a cutover date is set; the figures behind a tile open the policy list filtered the same way |
+| Reports | Filter Origin on the reports that declare it (production register, premium by product, new business vs renewals, dealer production) |
+
+The dashboards open on the user's last choice, kept per user in the browser (`localStorage`
+`bv.dashboard.origin.<user id>`); without one, or when the browser blocks storage, on the configured default
+(`GET /api/dashboard/settings`: `defaultOrigin` from `dashboard.default_origin`, and the cutover date). A dashboard reads
+its figures once the view is known, so it never shows one view and then the other.
 
 ## Opening balance journal
 

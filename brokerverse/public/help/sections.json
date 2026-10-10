@@ -1,7 +1,7 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.2.6",
- "date": "09 October 2026",
+ "version": "1.2.7",
+ "date": "10 October 2026",
  "sections": [
   {
    "id": "about-this-manual",
@@ -412,28 +412,46 @@
    "chapter": "System Administrator"
   },
   {
-   "id": "go-live-data-load",
-   "title": "Go-Live Data Load",
+   "id": "data-migration-and-go-live",
+   "title": "Data Migration & Go-Live",
    "level": 1,
    "chapter": null
   },
   {
-   "id": "the-two-workbooks",
-   "title": "The two workbooks",
+   "id": "the-tabs",
+   "title": "The tabs",
    "level": 2,
-   "chapter": "Go-Live Data Load"
+   "chapter": "Data Migration & Go-Live"
   },
   {
-   "id": "migration-rules-and-reconciliation",
-   "title": "Migration rules and reconciliation",
+   "id": "loads",
+   "title": "Loads",
    "level": 2,
-   "chapter": "Go-Live Data Load"
+   "chapter": "Data Migration & Go-Live"
+  },
+  {
+   "id": "reconciliation-and-sign-off",
+   "title": "Reconciliation and sign-off",
+   "level": 2,
+   "chapter": "Data Migration & Go-Live"
+  },
+  {
+   "id": "mock-runs-cutover-and-go-no-go",
+   "title": "Mock runs, cutover and Go / No-Go",
+   "level": 2,
+   "chapter": "Data Migration & Go-Live"
   },
   {
    "id": "go-live-lock",
    "title": "Go-live lock",
    "level": 2,
-   "chapter": "Go-Live Data Load"
+   "chapter": "Data Migration & Go-Live"
+  },
+  {
+   "id": "migrated-and-issued-business",
+   "title": "Migrated and issued business",
+   "level": 2,
+   "chapter": "Data Migration & Go-Live"
   },
   {
    "id": "sales-and-marketing-account-executive",

@@ -106,6 +106,16 @@ natural key of the row), `migrated_at`, `migrated_by` (the uploader) and `load_b
 schedule, the COC and the loan file); business issued after go-live, including the renewal of a migrated policy, is
 `issued` and numbered as any issue. Readers use `src/lib/origin.js`.
 
+The business APIs return the origin block and filter on `?origin=issued|migrated`: clients, policies, claims,
+collections, `/receipts/open-receivables`, journal vouchers, and the renewals (`/policy-renewals`, `/renewals/queue`,
+by the origin of the expiring policy). Endorsements, claims, collection items and renewals carry `policyOrigin` and
+`policyLegacyNumber`; a policy renewed in BrokerVerse carries `renewedFromOrigin` and `renewedFromLegacyNumber`.
+`GET /dashboard/settings` serves the view the dashboards open on (`dashboard.default_origin`) and the cutover date. The
+screens show them with `brokerverse/src/components/OriginChip` (Migrated / Migrated policy / Renewal of legacy policy,
+legacy number, load linked for read:data-load holders, Origin filter and column) and the dashboard toolbar switch
+Issued since go-live / All business (`useDashboardOrigin`); the list of places is in
+`docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`, *Migrated and issued on the screens*.
+
 ## Product-wise policy sheets
 
 One sheet per kind of TISPH product: Motor (MOTOR), CTPL, Personal Accident (PA, GPA), Credit Life (CL-COMP, CL-VOL),

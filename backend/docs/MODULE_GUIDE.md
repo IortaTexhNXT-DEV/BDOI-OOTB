@@ -88,6 +88,8 @@ minimal, clearly-correct front-end fix.
   kind)`. All in `src/lib/origin.js`; never test the older flags (`source = 'go-live-migration'`, `doc.source`) in new
   code. A record created by an import of legacy business is written with `origin = 'migrated'`. Dashboards take
   `origin=issued|all` (`dashboard/service.js` `dashboardOrigin`); a renewal-rate denominator counts migrated policies.
+  A record issued in BrokerVerse on a migrated policy (endorsement, claim, bill, renewal) returns `policyOrigin` and
+  `policyLegacyNumber` from the policy join; the screens mark it with `OriginChip variant="policy"`.
 - The opening balance journal of go-live (`journal_vouchers.source = 'go-live-opening'`, status `opening`) has no
   journal lines (its lines are the opening balances set, `period-end/opening.js` `openingJournalLines`). A query that
   reads journal headers without a status filter shows it as read-only or leaves status `opening` out; a change to a
