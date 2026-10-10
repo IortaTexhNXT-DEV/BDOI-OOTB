@@ -226,15 +226,19 @@ export const REGISTRATION = {
   custodianUserId: 'cas.backup_custodian_user', custodian: 'cas.backup_custodian', contactUserId: 'cas.system_contact_user', contact: 'cas.system_contact',
 };
 
-/** The registration values and the active users who can be named custodian or contact. */
+/** The registration values and the active staff users who can be named custodian or contact. */
 export async function registration(db) {
   const values = {};
   for (const [field, key] of Object.entries(REGISTRATION)) values[field] = String((await getSetting(key, '')) || '');
   values.casPermitNumber = String((await getSetting('invoice.cas_permit_number', '')) || '');
-  const people = (await db.query(`SELECT id, COALESCE(display_name, username) AS name, email, designation FROM users WHERE status = 'active'
-    ORDER BY lower(COALESCE(display_name, username)) LIMIT 1000`)).rows.map((u) => ({ userId: u.id, name: u.name, email: u.email || '', position: u.designation || '' }));
+  const people = (await db.query(`SELECT id, COALESCE(display_name, username) AS name, email, designation FROM users u WHERE status = 'active' AND ${STAFF}
+    ORDER BY lower(COALESCE(display_name, username)) LIMIT 1000`, [await staffRoles()])).rows.map((u) => ({ userId: u.id, name: u.name, email: u.email || '', position: u.designation || '' }));
   return { ...values, people };
 }
+
+/** Roles of the staff who may be named custodian or contact (cas.staff_roles; every active user when empty). */
+const staffRoles = async () => (await getSetting('cas.staff_roles', [])) || [];
+const STAFF = `(cardinality($1::text[]) = 0 OR EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.code = ANY($1::text[])))`;
 
 /**
  * Save registration values ({ field: value } of REGISTRATION); a custodian or contact is chosen among the active users
@@ -252,8 +256,9 @@ export async function saveRegistration(db, body, user) {
       changes[REGISTRATION[textField]] = '';
       continue;
     }
-    const u = (await db.query('SELECT id, COALESCE(display_name, username) AS name, email FROM users WHERE id = $1 AND status = \'active\'', [body[idField]])).rows[0];
-    if (!u) throw badRequest('Validation failed', [{ path: idField, message: 'choose an active user' }]);
+    const u = (await db.query(`SELECT id, COALESCE(display_name, username) AS name, email FROM users u WHERE id = $2 AND status = 'active' AND ${STAFF}`,
+      [await staffRoles(), body[idField]])).rows[0];
+    if (!u) throw badRequest('Validation failed', [{ path: idField, message: 'choose an active staff user' }]);
     const position = String(body[`${role}Position`] || '').trim();
     changes[REGISTRATION[idField]] = u.id;
     changes[REGISTRATION[textField]] = [u.name, position, role === 'contact' ? u.email : null].filter(Boolean).join(', ');

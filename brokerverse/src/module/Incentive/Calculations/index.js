@@ -24,17 +24,19 @@ import { formatDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
 import { showSuccess } from "../../Remittance/shared";
 import BatchDetailDialog from "../BatchDetailDialog";
-import { BATCH_STATUSES, IncentiveHeader, WRITE, monthOptions } from "../common";
+import { BATCH_STATUSES, IncentiveHeader, WRITE, monthOptions, programWindow } from "../common";
 
 const STEPS = ["period", "programs", "review"];
 const emptyRun = { period: null, description: "", programs: [] };
 
 /** Programs that run in a month (their dates overlap it). */
-const runsIn = (program, month) => month && program.startDate <= month.to && program.endDate >= month.from;
+// a program running in the month whose calculation period ends with it
+const runsIn = (program, month) => month && program.startDate <= month.to && program.endDate >= month.from && programWindow(program, month).due;
 
 /**
- * New calculation: the month and an optional description, the active programs running in that month (a table with
- * checkboxes), then a review of what will be calculated with Run calculation.
+ * New calculation: the month and an optional description, the active programs whose calculation period ends with that
+ * month (a quarterly program in the last month of its quarter; a table with checkboxes and the period each covers), then
+ * a review of what will be calculated with Run calculation.
  */
 const NewCalculationDialog = ({ visible, onHide, onDone, programs, agentCount, loadError }) => {
   const { t } = useTranslation();
@@ -75,6 +77,10 @@ const NewCalculationDialog = ({ visible, onHide, onDone, programs, agentCount, l
     <Column key="period" header={t("incentive.wizard.programPeriod")} body={(p) => `${formatDate(p.startDate)} - ${formatDate(p.endDate)}`} />,
     <Column key="measure" header={t("incentive.wizard.measure")} field="targetMetric" />,
     <Column key="frequency" header={t("incentive.wizard.frequency")} field="calculationFrequency" />,
+    <Column key="window" header={t("incentive.wizard.calculationPeriod")} body={(p) => {
+      const w = programWindow(p, month);
+      return w ? `${formatDate(w.from)} - ${formatDate(w.to)}` : "-";
+    }} />,
     <Column key="agents" header={t("incentive.wizard.eligibleAgents")} body={() => agentCount} className="inc-num" headerClassName="inc-num" />,
   ];
 
@@ -165,8 +171,8 @@ const Calculations = () => {
   const rows = (data || []).filter((c) => {
     const text = search.trim().toLowerCase();
     const matches = !text || [c.batchId, c.period, c.createdBy, c.description].some((v) => String(v || "").toLowerCase().includes(text));
-    const label = months.find((m) => m.value === period)?.label;
-    return matches && (!status || c.status === status) && (!period || c.period === label);
+    // a batch belongs to the month its incentive period ends in (a quarter to its last month)
+    return matches && (!status || c.status === status) && (!period || String(c.periodTo || "").slice(0, 7) === period);
   });
 
   const changed = (batch, message) => {
@@ -190,7 +196,7 @@ const Calculations = () => {
           <Dropdown value={period} options={months} onChange={(e) => setPeriod(e.value)} showClear placeholder={t("incentive.filters.allPeriods")}
             aria-label={t("incentive.filters.period")} />
         </div>
-        <DataTable value={rows} dataKey="batchId" loading={loading} paginator rows={20} size="small" className="inc-table" emptyMessage={t("incentive.batch.noBatches")}
+        <DataTable value={rows} dataKey="batchId" loading={loading} paginator={rows.length > 20} rows={20} size="small" className="inc-table" emptyMessage={t("incentive.batch.noBatches")}
           onRowClick={(e) => setOpenBatch(e.data.batchId)} rowClassName={() => "inc-row-link"}>
           <Column header={t("incentive.batch.batch")} field="batchId" />
           <Column header={t("incentive.batch.period")} field="period" />

@@ -17286,7 +17286,7 @@
     "/bir/cas/documents/{type}/draft/reject": {
       "post": {
         "operationId": "postBirCasDocumentsTypeDraftReject",
-        "summary": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)",
+        "summary": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)",
         "tags": [
           "BIR Forms and Invoicing"
         ],
@@ -17407,6 +17407,49 @@
             }
           }
         }
+      }
+    },
+    "/bir/cas/documents/{type}/draft/withdraw": {
+      "post": {
+        "operationId": "postBirCasDocumentsTypeDraftWithdraw",
+        "summary": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents > Document",
+        "x-permissions": [
+          "write:period-end"
+        ]
       }
     },
     "/bir/cas/documents/{type}/versions": {
@@ -90727,7 +90770,7 @@
     "/period-end/adjustments": {
       "post": {
         "operationId": "postPeriodEndAdjustments",
-        "summary": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+        "summary": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)",
         "tags": [
           "Period End"
         ],
@@ -90769,7 +90812,7 @@
                     "id": "jv_1",
                     "jvNumber": "JV-2026-00200",
                     "period": "2025-13",
-                    "status": "pending"
+                    "status": "for-approval"
                   }
                 }
               }
@@ -95821,7 +95864,7 @@
     "/period-end/year-end/{id}/cancel": {
       "post": {
         "operationId": "postPeriodEndYearEndIdCancel",
-        "summary": "Cancel a year-end close run that has not closed the year",
+        "summary": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)",
         "tags": [
           "Period End"
         ],
@@ -95906,9 +95949,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
               },
-              "example": {}
+              "example": {
+                "reasonCode": "YEC-RERUN",
+                "note": "Started before the December close"
+              }
             }
           }
         }

@@ -37,8 +37,9 @@ const statementFacts = (s, t) => [
 export const PrintedStatement = ({ statement: s }) => {
   const { t } = useTranslation();
   return (
-    <PrintableDocument title={t("incentive.stmt.printTitle")} number={s.period}>
+    <PrintableDocument title={t("incentive.stmt.printTitle")}>
       <KeyValueGrid columns={3} items={statementFacts(s, t)} />
+      <h2>{t("incentive.stmt.earnings")}</h2>
       <KeyValueGrid columns={4} items={[
         { label: t("incentive.stmt.earned"), value: s.totalEarnings, type: "amount" },
         { label: t("incentive.stmt.ytd"), value: s.ytdEarnings, type: "amount" },

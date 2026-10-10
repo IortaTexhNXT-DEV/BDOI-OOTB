@@ -2387,7 +2387,6 @@
       "noBatches": "No calculation batches.",
       "submitForApproval": "Submit for approval",
       "submitTitle": "Submit batch for approval",
-      "submitMessage": "The batch is sent to the approvers and can no longer be adjusted.",
       "submitted": "{{batchId}} submitted for approval",
       "reject": "Reject",
       "rejectBatch": "Reject batch",
@@ -2395,8 +2394,6 @@
       "rejected": "{{batchId}} rejected",
       "approveBatch": "Approve batch",
       "approveTitle": "Approve calculation batch",
-      "approveMessage": "Approve the incentives of this batch.",
-      "approveNote": "The incentives are accrued in the books and the batch can be paid.",
       "remarks": "Remarks",
       "approved": "{{batchId}} approved",
       "markPaid": "Mark as paid",
@@ -2406,11 +2403,12 @@
       "adjust": "Adjust",
       "adjustTitle": "Adjust agent line",
       "adjustmentReason": "Reason",
-      "adjustmentReasonRequired": "Enter the reason for the adjustment.",
       "saveAdjustment": "Save adjustment",
       "adjusted": "Line of {{name}} adjusted",
       "noApprovePermission": "Approving incentive batches needs the incentive approval permission.",
-      "ownBatch": "You ran or submitted this batch. A different user must approve or reject it."
+      "ownBatch": "You ran, adjusted or submitted this batch. A different user must approve or reject it.",
+      "emptyBatch": "No agent lines: nothing to submit for approval.",
+      "adjustedBy": "Adjusted by"
     },
     "board": {
       "pending": "Pending approval",
@@ -2439,10 +2437,11 @@
       "programs": "Programs",
       "from": "From",
       "to": "To",
-      "noPrograms": "No active program runs in {{period}}.",
+      "noPrograms": "No active program has a calculation period ending in {{period}}.",
       "run": "Run calculation",
       "doneTitle": "Calculation complete",
-      "done": "{{batchId}}: {{agents}} agents, {{amount}}"
+      "done": "{{batchId}}: {{agents}} agents, {{amount}}",
+      "calculationPeriod": "Calculation period"
     },
     "mine": {
       "title": "My Incentive Programs",
@@ -2458,9 +2457,6 @@
       "achieved": "Achieved",
       "achievement": "Achievement",
       "status": "Status",
-      "daysLeft_one": "{{count}} day left",
-      "daysLeft_other": "{{count}} days left",
-      "ended": "Ended {{date}}",
       "noPrograms": "No incentive programs.",
       "chartTitle": "Achievement by program",
       "noAchievement": "No achievement recorded yet in the current periods.",
@@ -2492,12 +2488,15 @@
       "performance": "My performance",
       "currentTier": "Current tier",
       "nextTier": "Next tier",
-      "nextTierNeeded": "{{needed}} more to reach {{tier}}",
       "topTier": "Highest tier reached",
       "payPercentAchieved": "{{rate}} of premium achieved",
       "payPercentTarget": "{{rate}} of target",
       "payPerPolicy": "{{amount}} per policy",
-      "payMaximum": "{{payout}}, maximum {{max}}"
+      "payMaximum": "{{payout}}, maximum {{max}}",
+      "daysLeft": "Days left",
+      "statusRunning": "Running",
+      "statusEnded": "Ended",
+      "stillNeeded": "Still needed"
     },
     "stmt": {
       "agent": "Agent",
@@ -7498,24 +7497,17 @@
       "cancel": "Run cancelled"
     },
     "dialog": {
-      "closeMessage": "The closing entries are posted in {{period}}, dated {{date}}, and the balances are carried into {{fiscalYear}}.",
-      "reverseMessage": "The close of {{fiscalYear}} is reversed with the reason of the request.",
-      "withdrawMessage": "The reversal request is withdrawn; {{fiscalYear}} stays closed.",
-      "cancelMessage": "Run {{runNumber}} is cancelled.",
       "closeTitle": "Close fiscal year {{fiscalYear}}",
-      "closeConsequence": "The periods of {{fiscalYear}} are locked; no journal can be posted in them until the close is reversed.",
       "requestTitle": "Request reversal of the {{fiscalYear}} close",
-      "requestConsequence": "Another Accounting Manager approves the reversal.",
       "reverseTitle": "Reverse the {{fiscalYear}} close",
-      "reverseConsequence": "The closing entries are reversed, the opening balances of {{fiscalYear}} removed and the periods unlocked.",
       "withdrawTitle": "Withdraw reversal request",
       "keepRequest": "Keep request",
       "cancelTitle": "Cancel run {{runNumber}}",
-      "cancelConsequence": "{{fiscalYear}} returns to Open.",
       "keepRun": "Keep run",
       "adjustmentTitle": "Adjustment journal {{fiscalYear}}",
-      "adjustmentConsequence": "Posted in the adjustment period after approval by a second user.",
-      "submitAdjustment": "Submit for approval"
+      "submitAdjustment": "Submit for approval",
+      "startTitle": "Start year-end close of {{fiscalYear}}",
+      "prerequisitesFailed": "Prerequisites failed"
     },
     "toast": {
       "checked": "Checks run",
@@ -8051,7 +8043,9 @@
       "billing_reject": "Insurer billing rejection",
       "billing_cancel": "Insurer billing cancellation",
       "sales_invoice_cancel": "Sales invoice cancellation",
-      "invoice_payment_cancel": "Invoice payment cancellation"
+      "invoice_payment_cancel": "Invoice payment cancellation",
+      "incentive_adjustment": "Incentive line adjustment",
+      "year_end_cancel": "Year-end close run cancellation"
     }
   },
   "birTax": {
@@ -8203,7 +8197,9 @@
         "systemDescription": "System description approved",
         "backupProcedure": "Backup procedure approved",
         "books": "Books printed at least once"
-      }
+      },
+      "action": "Action",
+      "setByAdministrator": "Set by the administrator"
     },
     "casReg": {
       "title": {
@@ -8291,7 +8287,8 @@
       "discardMessage": "Draft version {{version}} is cancelled; the approved version stays in force.",
       "unsavedTitle": "Unsaved changes",
       "unsavedMessage": "The changes to the draft are not saved.",
-      "closeWithoutSaving": "Close without saving"
+      "closeWithoutSaving": "Close without saving",
+      "withdraw": "Withdraw submission"
     },
     "systemDescription": "System description",
     "backupProcedure": "Backup procedure",

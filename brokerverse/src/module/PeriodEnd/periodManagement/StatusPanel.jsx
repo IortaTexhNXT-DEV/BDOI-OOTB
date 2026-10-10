@@ -132,7 +132,7 @@ const StatusPanel = ({ request, onHide, onDone }) => {
               <Column header={t("periodEnd.result")} style={{ width: "8rem" }}
                 body={(c) => <StatusChip code={c.status} label={t(`periodEnd.status.${c.status}`)} severity={CHECK_SEVERITY[c.status] || "secondary"} />} />
               <Column header={t("periodManagement.countOrAmount")} className="bv-num" headerClassName="bv-num" style={{ width: "9rem" }}
-                body={(c) => (c.status === "failed" ? (c.amount !== null && c.amount !== undefined ? money(c.amount) : c.count) : "—")} />
+                body={(c) => (c.status === "failed" ? (c.amount !== null && c.amount !== undefined ? money(c.amount) : c.count) : "-")} />
               <Column style={{ width: "6rem" }} body={(c) => (blocks(c) && canOpen(resolvePath(c.code)) ? (
                 <Button type="button" label={t("periodManagement.resolve")} link size="small" className="pm-panel__resolve" onClick={() => navigate(resolvePath(c.code))} />
               ) : null)} />

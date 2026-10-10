@@ -8,7 +8,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
-import { PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+import { PageHeader, StatusTag, date, dateTime, money, showError, showSuccess, yearLabel } from "./common";
 import { hasPermission } from "../../utils/canOpen";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import LoadingBar from "../../components/LoadingBar";
@@ -110,7 +110,7 @@ const PeriodManagement = () => {
 
   const lastChange = (row) => {
     const c = row.lastChange;
-    if (!c) return <span className="pe-muted">—</span>;
+    if (!c) return <span className="pe-muted">-</span>;
     return (
       <div className="pm-last-change">
         <div className="pm-last-change__who">
@@ -130,7 +130,7 @@ const PeriodManagement = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]} help={t("periodManagement.help")}>
-        <Dropdown value={selected} options={(years || []).map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))}
+        <Dropdown value={selected} options={(years || []).map((y) => ({ label: yearLabel(t, y), value: y.code }))}
           onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} aria-label={t("periodEnd.fiscalYear")} />
         {canWrite && next && <Button type="button" icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={() => setCreating(next)} />}
         {canWrite && (
@@ -189,7 +189,7 @@ const PeriodManagement = () => {
           <Column header={t("periodEnd.severity")} body={(r) => t(`periodEnd.severityValue.${r.severity}`)} />
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("periodManagement.countOrAmount")} className="bv-num" headerClassName="bv-num"
-            body={(r) => (r.status === "failed" || r.status === "warning" ? (r.amount !== null && r.amount !== undefined ? money(r.amount) : r.count) : "—")} />
+            body={(r) => (r.status === "failed" || r.status === "warning" ? (r.amount !== null && r.amount !== undefined ? money(r.amount) : r.count) : "-")} />
         </DataTable>
       </Dialog>
     </div>

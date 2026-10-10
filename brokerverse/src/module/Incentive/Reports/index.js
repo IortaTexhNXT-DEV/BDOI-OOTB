@@ -44,9 +44,13 @@ const GenerateDialog = ({ template, templates, onHide, onDone, lists }) => {
   const { t } = useTranslation();
   const [templateId, setTemplateId] = useState(template?.id ?? null);
   const [values, setValues] = useState({});
+  const [format, setFormat] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const chosen = templates.find((x) => x.id === templateId) || null;
+  // the file formats the template is produced in (Master > Incentive Report Templates)
+  const formats = chosen?.formats?.length ? chosen.formats : ["Excel"];
+  const shownFormat = formats.includes(format) ? format : formats[0];
   const fields = (chosen?.parameters || []).map((p) => ({ name: p, field: parameterField(p) })).filter((p) => p.field);
   const set = (key, value) => setValues((v) => ({ ...v, [key]: value }));
 
@@ -54,7 +58,7 @@ const GenerateDialog = ({ template, templates, onHide, onDone, lists }) => {
     setBusy(true);
     setError(null);
     try {
-      const result = await incentiveService.generateReport({ templateId: chosen.id, parameters: reportParameters(values), format: "CSV" });
+      const result = await incentiveService.generateReport({ templateId: chosen.id, parameters: reportParameters(values), format: shownFormat });
       onDone(result);
     } catch (e) {
       setError(readableError(e?.message) || t("confirmDialog.failed"));
@@ -113,15 +117,20 @@ const GenerateDialog = ({ template, templates, onHide, onDone, lists }) => {
       <div className="inc-form">
         <label htmlFor="inc-rpt-template" className="inc-form__label">{t("incentive.rpt.report")} *</label>
         <Dropdown inputId="inc-rpt-template" value={templateId} options={templates.map((x) => ({ label: x.name, value: x.id }))}
-          onChange={(e) => { setTemplateId(e.value); setValues({}); }} className="w-full" />
+          onChange={(e) => { setTemplateId(e.value); setValues({}); setFormat(null); }} className="w-full" />
         {chosen ? (
-          <KeyValueGrid columns={3} items={[
+          <KeyValueGrid columns={2} items={[
             { label: t("incentive.rpt.category"), value: chosen.category },
-            { label: t("incentive.rpt.description"), value: chosen.description, span: 2 },
-            { label: t("incentive.rpt.format"), value: "CSV" },
+            { label: t("incentive.rpt.description"), value: chosen.description },
           ]} />
         ) : null}
-        <div className="inc-form inc-form--two">{fields.map(control)}</div>
+        <div className="inc-form inc-form--two">
+          {fields.map(control)}
+          <div>
+            <label htmlFor="inc-rpt-format" className="inc-form__label">{t("incentive.rpt.format")}</label>
+            <Dropdown inputId="inc-rpt-format" value={shownFormat} options={formats.map((f) => ({ label: f, value: f }))} onChange={(e) => setFormat(e.value)} className="w-full" />
+          </div>
+        </div>
         {error ? <FieldError error={error} /> : null}
       </div>
     </Dialog>
@@ -171,22 +180,23 @@ const Reports = () => {
         <DataTable value={setup.data.templates} dataKey="id" loading={setup.loading} size="small" className="inc-table" emptyMessage={t("incentive.rpt.noTemplates")}>
           <Column header={t("incentive.rpt.report")} field="name" />
           <Column header={t("incentive.rpt.category")} field="category" />
-          <Column header={t("incentive.rpt.description")} field="description" />
           <Column header={t("incentive.rpt.parameters")} body={(x) => (x.parameters || []).join(", ")} />
-          <Column header={t("incentive.batch.actions")} body={(x) => (
-            <Button type="button" label={t("incentive.rpt.generate")} outlined size="small" onClick={() => setGenerating({ template: x })} />
+          <Column header={t("incentive.rpt.format")} body={(x) => (x.formats || []).join(", ")} />
+          <Column header={t("incentive.batch.actions")} style={{ width: "6rem" }} body={(x) => (
+            <Button type="button" icon="pi pi-file-export" text rounded aria-label={t("incentive.rpt.generate")} tooltip={t("incentive.rpt.generate")}
+              onClick={() => setGenerating({ template: x })} />
           )} />
         </DataTable>
       </DetailSection>
 
       <DetailSection title={t("incentive.rpt.history")} className="bv-loading-host" flush>
         <LoadingBar active={history.refreshing} />
-        <DataTable value={history.data} dataKey="reportId" loading={history.loading} paginator rows={20} size="small" className="inc-table" emptyMessage={t("incentive.rpt.noReports")}>
+        <DataTable value={history.data} dataKey="reportId" loading={history.loading} paginator={(history.data || []).length > 20} rows={20} size="small" className="inc-table" emptyMessage={t("incentive.rpt.noReports")}>
           <Column header={t("incentive.rpt.report")} field="reportType" />
           <Column header={t("incentive.rpt.generatedOn")} body={(r) => formatInstant(r.generatedDate)} />
           <Column header={t("incentive.rpt.generatedBy")} body={(r) => r.generatedBy || "-"} />
           <Column header={t("incentive.rpt.rows")} field="rowCount" className="inc-num" headerClassName="inc-num" />
-          <Column header={t("incentive.rpt.format")} body={() => "CSV"} />
+          <Column header={t("incentive.rpt.format")} body={(r) => r.format || "-"} />
           <Column header={t("incentive.batch.status")} body={(r) => <StatusChip label={r.status === "done" ? t("incentive.rpt.completed") : r.status} />} />
           <Column header={t("incentive.batch.actions")} body={(r) => (
             <Button type="button" icon="pi pi-download" text rounded aria-label={t("incentive.rpt.download")} tooltip={t("incentive.rpt.download")}

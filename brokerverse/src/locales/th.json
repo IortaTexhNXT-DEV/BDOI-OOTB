@@ -1961,7 +1961,6 @@
       "noBatches": "ไม่มีชุดการคำนวณ",
       "submitForApproval": "ส่งเพื่ออนุมัติ",
       "submitTitle": "ส่งชุดการคำนวณเพื่ออนุมัติ",
-      "submitMessage": "ชุดการคำนวณจะถูกส่งให้ผู้อนุมัติและไม่สามารถปรับปรุงได้อีก",
       "submitted": "ส่ง {{batchId}} เพื่ออนุมัติแล้ว",
       "reject": "ปฏิเสธ",
       "rejectBatch": "ปฏิเสธชุดการคำนวณ",
@@ -1969,8 +1968,6 @@
       "rejected": "ปฏิเสธ {{batchId}} แล้ว",
       "approveBatch": "อนุมัติชุดการคำนวณ",
       "approveTitle": "อนุมัติชุดการคำนวณ",
-      "approveMessage": "อนุมัติค่าตอบแทนจูงใจของชุดการคำนวณนี้",
-      "approveNote": "ค่าตอบแทนจะถูกตั้งค้างจ่ายในบัญชีและสามารถจ่ายชุดการคำนวณได้",
       "remarks": "หมายเหตุ",
       "approved": "อนุมัติ {{batchId}} แล้ว",
       "markPaid": "บันทึกว่าจ่ายแล้ว",
@@ -1980,11 +1977,12 @@
       "adjust": "ปรับปรุง",
       "adjustTitle": "ปรับปรุงรายการของตัวแทน",
       "adjustmentReason": "เหตุผล",
-      "adjustmentReasonRequired": "ระบุเหตุผลของการปรับปรุง",
       "saveAdjustment": "บันทึกการปรับปรุง",
       "adjusted": "ปรับปรุงรายการของ {{name}} แล้ว",
       "noApprovePermission": "การอนุมัติชุดการคำนวณต้องมีสิทธิ์อนุมัติค่าตอบแทนจูงใจ",
-      "ownBatch": "คุณเป็นผู้คำนวณหรือผู้ส่งชุดนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ"
+      "ownBatch": "คุณเป็นผู้คำนวณ ปรับปรุง หรือส่งชุดนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
+      "emptyBatch": "ไม่มีรายการของตัวแทน: ไม่มีสิ่งที่ต้องส่งอนุมัติ",
+      "adjustedBy": "ปรับปรุงโดย"
     },
     "board": {
       "pending": "รออนุมัติ",
@@ -2013,10 +2011,11 @@
       "programs": "โปรแกรม",
       "from": "ตั้งแต่",
       "to": "ถึง",
-      "noPrograms": "ไม่มีโปรแกรมที่ใช้งานอยู่ใน {{period}}",
+      "noPrograms": "ไม่มีโครงการที่ใช้งานซึ่งงวดการคำนวณสิ้นสุดใน {{period}}",
       "run": "เริ่มคำนวณ",
       "doneTitle": "คำนวณเสร็จแล้ว",
-      "done": "{{batchId}}: ตัวแทน {{agents}} ราย, {{amount}}"
+      "done": "{{batchId}}: ตัวแทน {{agents}} ราย, {{amount}}",
+      "calculationPeriod": "งวดการคำนวณ"
     },
     "mine": {
       "title": "โปรแกรมค่าตอบแทนจูงใจของฉัน",
@@ -2032,9 +2031,6 @@
       "achieved": "ผลงาน",
       "achievement": "ความสำเร็จ",
       "status": "สถานะ",
-      "daysLeft_one": "เหลือ {{count}} วัน",
-      "daysLeft_other": "เหลือ {{count}} วัน",
-      "ended": "สิ้นสุด {{date}}",
       "noPrograms": "ไม่มีโปรแกรมค่าตอบแทนจูงใจ",
       "chartTitle": "ความสำเร็จตามโปรแกรม",
       "noAchievement": "ยังไม่มีผลงานในงวดปัจจุบัน",
@@ -2066,12 +2062,15 @@
       "performance": "ผลงานของฉัน",
       "currentTier": "ระดับปัจจุบัน",
       "nextTier": "ระดับถัดไป",
-      "nextTierNeeded": "ต้องการอีก {{needed}} เพื่อถึง {{tier}}",
       "topTier": "ถึงระดับสูงสุดแล้ว",
       "payPercentAchieved": "{{rate}} ของเบี้ยประกันที่ทำได้",
       "payPercentTarget": "{{rate}} ของเป้าหมาย",
       "payPerPolicy": "{{amount}} ต่อกรมธรรม์",
-      "payMaximum": "{{payout}} สูงสุด {{max}}"
+      "payMaximum": "{{payout}} สูงสุด {{max}}",
+      "daysLeft": "จำนวนวันที่เหลือ",
+      "statusRunning": "กำลังดำเนินการ",
+      "statusEnded": "สิ้นสุดแล้ว",
+      "stillNeeded": "ยังต้องการอีก"
     },
     "stmt": {
       "agent": "ตัวแทน",
@@ -6794,24 +6793,17 @@
       "cancel": "ยกเลิกรอบการปิด"
     },
     "dialog": {
-      "closeMessage": "ผ่านรายการปิดบัญชีในงวด {{period}} ลงวันที่ {{date}} และยกยอดคงเหลือไปยัง {{fiscalYear}}",
-      "reverseMessage": "ยกเลิกการปิดปี {{fiscalYear}} ตามเหตุผลของคำขอ",
-      "withdrawMessage": "ถอนคำขอยกเลิกการปิดปี {{fiscalYear}} ยังคงปิดอยู่",
-      "cancelMessage": "ยกเลิกรอบการปิด {{runNumber}}",
       "closeTitle": "ปิดปีบัญชี {{fiscalYear}}",
-      "closeConsequence": "งวดบัญชีของ {{fiscalYear}} จะถูกล็อก และไม่สามารถผ่านรายการได้จนกว่าจะยกเลิกการปิดปี",
       "requestTitle": "ขอยกเลิกการปิดปี {{fiscalYear}}",
-      "requestConsequence": "ผู้จัดการฝ่ายบัญชีคนอื่นเป็นผู้อนุมัติการยกเลิก",
       "reverseTitle": "ยกเลิกการปิดปี {{fiscalYear}}",
-      "reverseConsequence": "รายการปิดบัญชีจะถูกกลับรายการ ยอดยกมาของ {{fiscalYear}} จะถูกลบ และงวดบัญชีจะถูกปลดล็อก",
       "withdrawTitle": "ถอนคำขอยกเลิกการปิดปี",
       "keepRequest": "เก็บคำขอไว้",
       "cancelTitle": "ยกเลิกรอบการปิด {{runNumber}}",
-      "cancelConsequence": "{{fiscalYear}} จะกลับเป็นสถานะเปิด",
       "keepRun": "เก็บรอบการปิดไว้",
       "adjustmentTitle": "รายการปรับปรุง {{fiscalYear}}",
-      "adjustmentConsequence": "ผ่านรายการในงวดปรับปรุงหลังจากผู้ใช้คนที่สองอนุมัติ",
-      "submitAdjustment": "ส่งเพื่ออนุมัติ"
+      "submitAdjustment": "ส่งเพื่ออนุมัติ",
+      "startTitle": "เริ่มการปิดบัญชีสิ้นปี {{fiscalYear}}",
+      "prerequisitesFailed": "เงื่อนไขเบื้องต้นที่ไม่ผ่าน"
     },
     "toast": {
       "checked": "ตรวจสอบแล้ว",
@@ -6883,7 +6875,9 @@
       "billing_reject": "การปฏิเสธใบแจ้งหนี้ถึงบริษัทประกัน",
       "billing_cancel": "การยกเลิกใบแจ้งหนี้ถึงบริษัทประกัน",
       "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
-      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี"
+      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี",
+      "incentive_adjustment": "การปรับปรุงรายการค่าตอบแทนจูงใจ",
+      "year_end_cancel": "การยกเลิกรายการปิดบัญชีสิ้นปี"
     }
   },
   "birTax": {
@@ -6913,7 +6907,9 @@
         "systemDescription": "คำอธิบายระบบได้รับอนุมัติ",
         "backupProcedure": "ขั้นตอนการสำรองข้อมูลได้รับอนุมัติ",
         "books": "พิมพ์สมุดบัญชีอย่างน้อยหนึ่งครั้ง"
-      }
+      },
+      "action": "การดำเนินการ",
+      "setByAdministrator": "กำหนดโดยผู้ดูแลระบบ"
     },
     "casReg": {
       "title": {
@@ -7001,7 +6997,8 @@
       "discardMessage": "ฉบับร่างที่ {{version}} จะถูกยกเลิก และฉบับที่อนุมัติยังคงใช้อยู่",
       "unsavedTitle": "มีการแก้ไขที่ยังไม่บันทึก",
       "unsavedMessage": "การแก้ไขฉบับร่างยังไม่ได้บันทึก",
-      "closeWithoutSaving": "ปิดโดยไม่บันทึก"
+      "closeWithoutSaving": "ปิดโดยไม่บันทึก",
+      "withdraw": "ถอนการส่ง"
     },
     "datFilesHelp": "สร้างไฟล์จากรายงาน QAP, SAWT, SLSP และ 1604-E และตรวจสอบกับรายงานก่อนดาวน์โหลด",
     "salesInvoicesHelp": "ใบกำกับภาษีขายของบริการนายหน้า เลขที่เรียงตามลำดับ ใบที่ยกเลิกยังคงเลขที่เดิม",

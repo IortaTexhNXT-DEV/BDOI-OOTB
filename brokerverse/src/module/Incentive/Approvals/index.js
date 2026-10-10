@@ -66,7 +66,7 @@ const Approvals = () => {
           <Dropdown value={period} options={periods} onChange={(e) => setPeriod(e.value)} showClear placeholder={t("incentive.filters.allPeriods")}
             aria-label={t("incentive.filters.period")} />
         </div>
-        <DataTable value={rows} dataKey="batchId" loading={loading} paginator rows={20} size="small" className="inc-table" emptyMessage={t("incentive.batch.noBatches")}
+        <DataTable value={rows} dataKey="batchId" loading={loading} paginator={rows.length > 20} rows={20} size="small" className="inc-table" emptyMessage={t("incentive.batch.noBatches")}
           onRowClick={(e) => setOpenBatch(e.data.batchId)} rowClassName={() => "inc-row-link"}>
           <Column header={t("incentive.batch.batch")} field="batchId" />
           <Column header={t("incentive.batch.period")} field="period" />

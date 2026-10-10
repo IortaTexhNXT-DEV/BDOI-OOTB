@@ -11,7 +11,7 @@
  * (the Validate step of the import dialog) and lists every error with its row and column.
  */
 import { badRequest, conflict } from '../../lib/errors.js';
-import { round2 } from '../../lib/money.js';
+import { formatMoney, round2 } from '../../lib/money.js';
 import { ensureCalendar, iso } from './fiscal.js';
 
 export const GO_LIVE_PREFIX = 'go-live:';
@@ -82,7 +82,8 @@ function checkRows(rows, accounts) {
     if (!code) fail('Account Code', 'Account Code is required');
     else if (!a) fail('Account Code', `Account ${code} is not in the chart of accounts`);
     else if (a.status !== 'active') fail('Account Code', `Account ${code} is inactive`);
-    if (Number.isNaN(debit) || Number.isNaN(credit) || debit < 0 || credit < 0) fail(Number.isNaN(debit) || debit < 0 ? 'Debit' : 'Credit', 'Debit and Credit must be amounts of zero or more');
+    const bad = [['Debit', debit], ['Credit', credit]].find(([, v]) => Number.isNaN(v) || v < 0);
+    if (bad) fail(bad[0], Number.isNaN(bad[1]) ? `${bad[0]} must be a number` : `${bad[0]} cannot be negative`);
     else if (debit && credit) fail('Debit / Credit', 'Enter the balance as a debit or a credit, not both');
     if (code && seen.has(code)) fail('Account Code', `Account ${code} appears more than once`);
     seen.add(code);
@@ -100,6 +101,10 @@ async function previousLoad(db, fiscalYear) {
     WHERE l.entity = 'opening_balances' AND l.entity_id = $1 AND l.action = 'go-live-import' ORDER BY l.at DESC, l.id DESC LIMIT 1`, [fiscalYear])).rows[0];
   return { goLiveDate: ob.run.slice(GO_LIVE_PREFIX.length), accounts: ob.n, loadedAt: a?.at || null, loadedBy: a?.name || null };
 }
+
+/** "Debits ₱1,500,000.00 and credits ₱1,400,000.00 do not balance (difference ₱100,000.00)". */
+const imbalance = async (debit, credit) =>
+  `Debits ${await formatMoney(debit)} and credits ${await formatMoney(credit)} do not balance (difference ${await formatMoney(round2(debit - credit))})`;
 
 const asAtOf = (goLiveDate) => iso(new Date(Date.parse(`${goLiveDate}T00:00:00Z`) - 86400000));
 
@@ -119,9 +124,7 @@ export async function validateOpeningBalances(db, rows, { goLiveDate }) {
   const fileErrors = (await yearConflicts(db, fy, goLiveDate)).map((message) => ({ row: null, column: 'Go-live date', message }));
   if (!rows.length) fileErrors.push({ row: null, column: null, message: 'The file has no rows' });
   else if (!errors.length && !lines.length) fileErrors.push({ row: null, column: null, message: 'The file has no amounts' });
-  else if (!errors.length && difference !== 0) {
-    fileErrors.push({ row: null, column: null, message: `Debits ${totalDebit.toFixed(2)} and credits ${totalCredit.toFixed(2)} do not balance (difference ${difference.toFixed(2)})` });
-  }
+  else if (difference) fileErrors.push({ row: null, column: null, message: await imbalance(totalDebit, totalCredit) });
   const all = [...fileErrors, ...errors];
   return {
     valid: !all.length, fiscalYear: fy.code, goLiveDate, asAt: asAtOf(goLiveDate), rows: lines.length + ignored.length, accounts: lines.length,
@@ -148,7 +151,7 @@ export async function importOpeningBalances(db, rows, { goLiveDate }) {
   if (!lines.length) throw badRequest('The file has no amounts');
   const totalDebit = round2(lines.reduce((s, l) => s + l.debit, 0));
   const totalCredit = round2(lines.reduce((s, l) => s + l.credit, 0));
-  if (totalDebit !== totalCredit) throw badRequest(`Debits ${totalDebit.toFixed(2)} and credits ${totalCredit.toFixed(2)} do not balance (difference ${round2(totalDebit - totalCredit).toFixed(2)}); nothing was loaded`);
+  if (totalDebit !== totalCredit) throw badRequest(`${await imbalance(totalDebit, totalCredit)}; nothing was loaded`);
 
   const run = `${GO_LIVE_PREFIX}${goLiveDate}`;
   const replaced = (await db.query('DELETE FROM opening_balances WHERE fiscal_year = $1 AND source_run = $2', [fy.code, run])).rowCount;

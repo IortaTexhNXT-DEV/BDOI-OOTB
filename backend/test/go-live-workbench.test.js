@@ -494,7 +494,7 @@ describe('migration kit', () => {
       ]);
       // debits and credits that do not balance: no row error, one message for the sheet, every row held
       const u = await upload('migration', ob([...base.slice(0, 3), { 'Account Code': '5101001', Credit: '299000' }]));
-      expect(u.body.data.errors).toEqual([expect.objectContaining({ sheetName: 'Opening Balances', row: null, message: expect.stringMatching(/^Nothing was loaded: Debits .* do not balance \(difference 1000\.00\)$/) })]);
+      expect(u.body.data.errors).toEqual([expect.objectContaining({ sheetName: 'Opening Balances', row: null, message: expect.stringMatching(/^Nothing was loaded: Debits .* do not balance \(difference ₱1,000\.00\)$/) })]);
       expect(sheetOf(u, 'opening-balances')).toMatchObject({ errors: 0, held: 4 });
       expect(u.body.data.batch).toMatchObject({ status: 'failed', rowsError: 4 });
       const detail = await api('get', `/data-load/batches/${u.body.data.batch.id}`);

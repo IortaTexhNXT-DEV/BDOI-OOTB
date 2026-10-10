@@ -503,12 +503,14 @@ export async function reverseYearEnd(db, id, user, { remarks = null } = {}) {
   return getYearEnd(db, r.id);
 }
 
-export async function cancelYearEnd(db, id, user = null) {
+/** Cancel a run that has not closed the year, with a reason of the Reason Codes master (context year_end_cancel). */
+export async function cancelYearEnd(db, id, user = null, body = {}) {
   const r = await lockRun(db, id);
   if (!ACTIVE.includes(r.status)) throw conflict(`Run ${r.run_number} is ${r.status}`);
+  const reason = await requiredReason(db, 'year_end_cancel', body);
   await db.query('UPDATE year_end_runs SET status = \'cancelled\', updated_at = now() WHERE id = $1', [r.id]);
   await db.query('UPDATE fiscal_years SET status = \'open\', updated_at = now() WHERE code = $1 AND status = \'closing\'', [r.fiscal_year]);
-  await record(db, r, 'cancel', { to: 'cancelled', user });
+  await record(db, r, 'cancel', { to: 'cancelled', reasonCode: reason.code, remarks: reason.text, user });
   return getYearEnd(db, r.id);
 }
 

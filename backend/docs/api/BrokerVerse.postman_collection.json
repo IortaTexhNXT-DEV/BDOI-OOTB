@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1273 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1274 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -11910,7 +11910,7 @@
           "response": []
         },
         {
-          "name": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)",
+          "name": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)",
           "request": {
             "method": "POST",
             "header": [
@@ -11940,7 +11940,7 @@
                 }
               ]
             },
-            "description": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
+            "description": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"remarks\": \"Name the restore test frequency\"\n}",
@@ -11994,6 +11994,36 @@
                 }
               }
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end"
           },
           "response": []
         },
@@ -54655,7 +54685,7 @@
       "name": "Period End",
       "item": [
         {
-          "name": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+          "name": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)",
           "request": {
             "method": "POST",
             "header": [
@@ -54674,7 +54704,7 @@
                 "adjustments"
               ]
             },
-            "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
@@ -54706,7 +54736,7 @@
                     "adjustments"
                   ]
                 },
-                "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
@@ -54727,7 +54757,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"jvNumber\": \"JV-2026-00200\",\n    \"period\": \"2025-13\",\n    \"status\": \"pending\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"jvNumber\": \"JV-2026-00200\",\n    \"period\": \"2025-13\",\n    \"status\": \"for-approval\"\n  }\n}"
             }
           ]
         },
@@ -58145,7 +58175,7 @@
           ]
         },
         {
-          "name": "Cancel a year-end close run that has not closed the year",
+          "name": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)",
           "request": {
             "method": "POST",
             "header": [
@@ -58173,10 +58203,10 @@
                 }
               ]
             },
-            "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"reasonCode\": \"YEC-RERUN\",\n  \"note\": \"Started before the December close\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -58214,10 +58244,10 @@
                     }
                   ]
                 },
-                "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"reasonCode\": \"YEC-RERUN\",\n  \"note\": \"Started before the December close\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

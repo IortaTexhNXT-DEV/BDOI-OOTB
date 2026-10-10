@@ -6,7 +6,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
 import { Skeleton } from "primereact/skeleton";
 import ActivityLog, { toEntry } from "../../components/ActivityLog";
 import { openConfirm } from "../../components/ConfirmDialog";
@@ -24,32 +24,42 @@ import { formatCurrency } from "../../utility/currencyConverter";
 import { formatDate } from "../../utility/dateFormat";
 import { formatPercent } from "../../utility/numberFormat";
 import { hasPermission } from "../../utils/canOpen";
-import { WRITE, batchFacts, decisionBlock, formatMeasure } from "./common";
+import { WRITE, batchFacts, decisionBlock, formatMeasure, programNames } from "./common";
 
-/** Rejection of a batch: its facts and a reason of the Reason Codes master (incentive_batch_reject) with a note. */
-export const RejectBatchDialog = ({ batch, visible, onHide, onRejected }) => {
+/**
+ * The decision on a batch, approve or reject, in one layout: the facts of the batch, then optional remarks (approve) or
+ * a reason of the Reason Codes master (incentive_batch_reject) with its note (reject).
+ */
+export const BatchDecisionDialog = ({ action, batch, visible, onHide, onDone }) => {
   const { t } = useTranslation();
   const [reason, setReason] = useState(null);
+  const [remarks, setRemarks] = useState("");
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const approving = action === "approve";
 
-  const close = () => {
+  const reset = () => {
     setReason(null);
+    setRemarks("");
     setTried(false);
     setError(null);
+  };
+  const close = () => {
+    reset();
     onHide();
   };
-  const reject = async () => {
+  const decide = async () => {
     setTried(true);
-    if (reasonProblem(reason)) return;
+    if (!approving && reasonProblem(reason)) return;
     setBusy(true);
     setError(null);
     try {
-      const after = await incentiveService.rejectCalculation(batch.batchId, reasonPayload(reason));
-      setReason(null);
-      setTried(false);
-      onRejected(after);
+      const after = approving
+        ? await incentiveService.approveCalculation(batch.batchId, remarks.trim())
+        : await incentiveService.rejectCalculation(batch.batchId, reasonPayload(reason));
+      reset();
+      onDone(after);
     } catch (e) {
       setError(readableError(e?.message) || t("confirmDialog.failed"));
     } finally {
@@ -60,43 +70,52 @@ export const RejectBatchDialog = ({ batch, visible, onHide, onRejected }) => {
   const footer = (
     <>
       <Button type="button" label={t("common.cancel")} outlined onClick={close} disabled={busy} />
-      <Button type="button" label={t("incentive.batch.rejectBatch")} severity="danger" onClick={reject} loading={busy} />
+      <Button type="button" label={t(approving ? "incentive.batch.approveBatch" : "incentive.batch.rejectBatch")} severity={approving ? undefined : "danger"}
+        onClick={decide} loading={busy} />
     </>
   );
   return (
-    <Dialog visible={visible} onHide={close} header={t("incentive.batch.rejectTitle")} footer={footer} modal draggable={false} resizable={false}
-      className="bv-centered inc-reject-dialog" style={{ width: "36rem" }} breakpoints={{ "640px": "100vw" }}>
+    <Dialog visible={visible} onHide={close} header={t(approving ? "incentive.batch.approveTitle" : "incentive.batch.rejectTitle")} footer={footer} modal draggable={false}
+      resizable={false} className="bv-centered inc-decision-dialog" style={{ width: "36rem" }} breakpoints={{ "640px": "100vw" }}>
       {batch ? <KeyValueGrid columns={2} items={batchFacts(batch, t)} /> : null}
-      <ReasonPicker context="incentive_batch_reject" value={reason} onChange={setReason} showErrors={tried} autoFocus className="inc-reject-dialog__reason" />
+      {approving ? (
+        <div className="inc-form inc-decision-dialog__input">
+          <label htmlFor="inc-approve-remarks" className="inc-form__label">{t("incentive.batch.remarks")}</label>
+          <InputTextarea id="inc-approve-remarks" value={remarks} rows={3} maxLength={1000} autoResize onChange={(e) => setRemarks(e.target.value)} autoFocus />
+        </div>
+      ) : (
+        <ReasonPicker context="incentive_batch_reject" value={reason} onChange={setReason} showErrors={tried} autoFocus className="inc-decision-dialog__input" />
+      )}
       {error ? <FieldError error={error} /> : null}
     </Dialog>
   );
 };
 
-RejectBatchDialog.propTypes = {
+BatchDecisionDialog.propTypes = {
+  action: PropTypes.oneOf(["approve", "reject"]).isRequired,
   batch: PropTypes.shape({ batchId: PropTypes.string }),
   visible: PropTypes.bool.isRequired,
   onHide: PropTypes.func.isRequired,
-  onRejected: PropTypes.func.isRequired,
+  onDone: PropTypes.func.isRequired,
 };
-RejectBatchDialog.defaultProps = { batch: null };
+BatchDecisionDialog.defaultProps = { batch: null };
 
-/** Adjustment of one agent line: the amount added (or taken off, negative) and the reason for it. */
+/** Adjustment of one agent line: the amount added (or taken off, negative) and a reason of the Reason Codes master (incentive_adjustment). */
 const AdjustLineDialog = ({ batchId, line, onHide, onSaved }) => {
   const { t } = useTranslation();
   const [amount, setAmount] = useState(line ? Number(line.adjustments || 0) : 0);
-  const [reason, setReason] = useState(line?.adjustmentReason || "");
+  const [reason, setReason] = useState(null);
   const [tried, setTried] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
   const save = async () => {
     setTried(true);
-    if (!reason.trim() || amount === null) return;
+    if (reasonProblem(reason) || amount === null) return;
     setBusy(true);
     setError(null);
     try {
-      await incentiveService.adjustCalculation(batchId, [{ id: line.id, adjustments: amount, reason: reason.trim() }]);
+      await incentiveService.adjustCalculation(batchId, [{ id: line.id, adjustments: amount }], reasonPayload(reason));
       onSaved();
     } catch (e) {
       setError(readableError(e?.message) || t("confirmDialog.failed"));
@@ -121,12 +140,11 @@ const AdjustLineDialog = ({ batchId, line, onHide, onSaved }) => {
             { label: t("incentive.batch.program"), value: line.program },
             { label: t("incentive.batch.baseIncentive"), value: line.baseIncentive, type: "amount" },
             { label: t("incentive.batch.payout"), value: line.finalAmount, type: "amount" },
+            { label: t("incentive.batch.adjustmentReason"), value: line.adjustmentReason, span: "full", hidden: !line.adjustmentReason },
           ]} />
           <label htmlFor="inc-adjust-amount" className="inc-form__label">{t("incentive.batch.adjustment")}</label>
           <InputNumber inputId="inc-adjust-amount" value={amount} onValueChange={(e) => setAmount(e.value)} mode="decimal" minFractionDigits={2} maxFractionDigits={2} />
-          <label htmlFor="inc-adjust-reason" className="inc-form__label">{t("incentive.batch.adjustmentReason")} *</label>
-          <InputText id="inc-adjust-reason" value={reason} maxLength={200} onChange={(e) => setReason(e.target.value)} className={tried && !reason.trim() ? "p-invalid" : ""} />
-          {tried && !reason.trim() ? <FieldError error={t("incentive.batch.adjustmentReasonRequired")} /> : null}
+          <ReasonPicker context="incentive_adjustment" value={reason} onChange={setReason} showErrors={tried} />
           {error ? <FieldError error={error} /> : null}
         </div>
       ) : null}
@@ -149,7 +167,7 @@ AdjustLineDialog.defaultProps = { batchId: null, line: null };
  */
 const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
   const { t } = useTranslation();
-  const [rejecting, setRejecting] = useState(false);
+  const [deciding, setDeciding] = useState(null);
   const [adjusting, setAdjusting] = useState(null);
   const open = !!batchId;
 
@@ -170,23 +188,14 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
     onChanged(after || shown, message);
   };
 
+  // a batch without agent lines has nothing to approve
+  const empty = shown && !Number(shown.agentCount);
   const submit = () => openConfirm({
     title: t("incentive.batch.submitTitle"),
-    message: t("incentive.batch.submitMessage"),
     facts: batchFacts(shown, t),
     confirmLabel: t("incentive.batch.submitForApproval"),
     onConfirm: () => incentiveService.submitCalculation(shown.batchId),
   }).then((done) => done && refresh(t("incentive.batch.submitted", { batchId: shown.batchId })));
-
-  const approve = () => openConfirm({
-    title: t("incentive.batch.approveTitle"),
-    message: t("incentive.batch.approveMessage"),
-    facts: batchFacts(shown, t),
-    note: t("incentive.batch.approveNote"),
-    input: { type: "textarea", label: t("incentive.batch.remarks"), required: false, maxLength: 1000 },
-    confirmLabel: t("incentive.batch.approveBatch"),
-    onConfirm: (remarks) => incentiveService.approveCalculation(shown.batchId, remarks),
-  }).then((value) => value !== null && refresh(t("incentive.batch.approved", { batchId: shown.batchId })));
 
   const markPaid = () => openConfirm({
     title: t("incentive.batch.payTitle"),
@@ -205,12 +214,18 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
           {block}
         </span>
       ) : null}
+      {editable && canWrite && empty ? (
+        <span className="inc-dialog-footer__reason">
+          <i className="pi pi-lock" aria-hidden="true" />
+          {t("incentive.batch.emptyBatch")}
+        </span>
+      ) : null}
       <Button type="button" label={t("incentive.close")} outlined onClick={onHide} />
-      {editable && canWrite ? <Button type="button" label={t("incentive.batch.submitForApproval")} onClick={submit} /> : null}
+      {editable && canWrite ? <Button type="button" label={t("incentive.batch.submitForApproval")} disabled={empty} onClick={submit} /> : null}
       {pending ? (
         <>
-          <Button type="button" label={t("incentive.batch.reject")} severity="danger" outlined disabled={!!block} onClick={() => setRejecting(true)} />
-          <Button type="button" label={t("incentive.batch.approveBatch")} disabled={!!block} onClick={approve} />
+          <Button type="button" label={t("incentive.batch.reject")} severity="danger" outlined disabled={!!block} onClick={() => setDeciding("reject")} />
+          <Button type="button" label={t("incentive.batch.approveBatch")} disabled={!!block} onClick={() => setDeciding("approve")} />
         </>
       ) : null}
       {shown?.status === "Approved" && canWrite ? <Button type="button" label={t("incentive.batch.markPaid")} onClick={markPaid} /> : null}
@@ -230,7 +245,7 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
               <DetailHeader title={shown.batchId} status={shown.status} subtitle={shown.description || null}
                 meta={[
                   { label: t("incentive.batch.period"), value: shown.period },
-                  { label: t("incentive.batch.programs"), value: (shown.programsIncluded || []).join(", ") },
+                  { label: t("incentive.batch.programs"), value: programNames(shown) },
                   { label: t("incentive.batch.agents"), value: shown.agentCount, type: "number" },
                   { label: t("incentive.batch.totalPayout"), value: shown.totalAmount, type: "amount" },
                 ]} />
@@ -239,6 +254,7 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
                   { label: t("incentive.batch.periodDates"), value: `${formatDate(shown.periodFrom)} - ${formatDate(shown.periodTo)}` },
                   { label: t("incentive.batch.calculatedOn"), value: shown.createdAt || shown.calculationDate, type: shown.createdAt ? "datetime" : "date" },
                   { label: t("incentive.batch.createdBy"), value: shown.createdBy },
+                  { label: t("incentive.batch.adjustedBy"), value: (shown.adjustedBy || []).join(", "), hidden: !(shown.adjustedBy || []).length },
                   { label: t("incentive.batch.submittedBy"), value: shown.submittedBy, hidden: !shown.submittedBy },
                   { label: t("incentive.batch.submittedOn"), value: shown.submittedAt, type: "datetime", hidden: !shown.submittedAt },
                   { label: t("incentive.batch.approvedBy"), value: shown.approvedBy, hidden: !shown.approvedBy },
@@ -274,10 +290,11 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
           ) : null}
         </div>
       </DetailDialog>
-      <RejectBatchDialog batch={shown} visible={rejecting} onHide={() => setRejecting(false)}
-        onRejected={() => {
-          setRejecting(false);
-          refresh(t("incentive.batch.rejected", { batchId: shown.batchId }));
+      <BatchDecisionDialog action={deciding || "approve"} batch={shown} visible={!!deciding} onHide={() => setDeciding(null)}
+        onDone={() => {
+          const done = deciding;
+          setDeciding(null);
+          refresh(t(done === "approve" ? "incentive.batch.approved" : "incentive.batch.rejected", { batchId: shown.batchId }));
         }} />
       {adjusting ? (
         <AdjustLineDialog batchId={shown?.batchId} line={adjusting} onHide={() => setAdjusting(null)}

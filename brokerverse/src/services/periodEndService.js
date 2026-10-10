@@ -83,7 +83,8 @@ const periodEndService = {
   requestYearEndReversal: (id, reason) => post(`/period-end/year-end/${id}/reverse-request`, reason),
   withdrawYearEndReversal: (id) => post(`/period-end/year-end/${id}/reverse-request/withdraw`),
   reverseYearEnd: (id, remarks) => post(`/period-end/year-end/${id}/reverse`, { remarks: remarks || undefined }),
-  cancelYearEnd: (id) => post(`/period-end/year-end/${id}/cancel`),
+  // reason: { reasonCode, note } of the Reason Codes master (context year_end_cancel)
+  cancelYearEnd: (id, reason) => post(`/period-end/year-end/${id}/cancel`, reason),
   createAdjustment: (body) => post("/period-end/adjustments", body),
 
   // statements and journals

@@ -32,6 +32,27 @@ export const resolveFields = (text, fields = []) => {
   return String(text || "").replace(PLACEHOLDER, (m, key) => (values.has(key) ? values.get(key) || DASH : m));
 };
 
+/**
+ * The text of a section as the editor shows it: each live field by its label in brackets ("[Taxpayer name]") rather
+ * than its key; fromLabels() turns the labels back into the fields the server keeps ({{taxpayerName}}).
+ */
+export const toLabels = (text, fields = []) => {
+  const labels = new Map(fields.map((f) => [f.key, f.label]));
+  return String(text || "").replace(PLACEHOLDER, (m, key) => (labels.has(key) ? `[${labels.get(key)}]` : m));
+};
+export const fromLabels = (text, fields = []) => fields.reduce((out, f) => out.split(`[${f.label}]`).join(`{{${f.key}}}`), String(text || ""));
+
+/** A line with its live fields shown as labelled chips (the comparison of two versions). */
+export const FieldChips = ({ text, fields }) => {
+  const labels = new Map(fields.map((f) => [f.key, f.label]));
+  const parts = String(text || "").split(/(\{\{\s*[a-zA-Z0-9_]+\s*\}\})/);
+  return parts.map((part, i) => {
+    const key = part.match(/^\{\{\s*([a-zA-Z0-9_]+)\s*\}\}$/)?.[1];
+    // eslint-disable-next-line react/no-array-index-key
+    return key ? <span key={i} className="cas-field-chip">{labels.get(key) || key}</span> : part;
+  });
+};
+
 const STATUS_SEVERITY = { draft: "info", submitted: "warning", approved: "success", superseded: "secondary", cancelled: "secondary" };
 export const DocStatus = ({ status, t }) => (status ? <StatusChip code={status} label={t(`birTax.status.${status}`)} severity={STATUS_SEVERITY[status]} /> : null);
 
@@ -39,13 +60,14 @@ export const DocStatus = ({ status, t }) => (status ? <StatusChip code={status} 
 const SectionEditor = ({ section, index, count, fields, onChange, onMove, onRemove }) => {
   const { t } = useTranslation();
   const area = useRef(null);
+  // the text is edited with the fields by label; the section keeps them as fields
+  const shown = toLabels(section.text, fields);
   const insert = (key) => {
     const el = area.current;
-    const token = `{{${key}}}`;
-    const text = section.text || "";
-    const start = el && typeof el.selectionStart === "number" ? el.selectionStart : text.length;
-    const end = el && typeof el.selectionEnd === "number" ? el.selectionEnd : text.length;
-    onChange({ ...section, text: `${text.slice(0, start)}${token}${text.slice(end)}` });
+    const token = `[${fields.find((f) => f.key === key)?.label || key}]`;
+    const start = el && typeof el.selectionStart === "number" ? el.selectionStart : shown.length;
+    const end = el && typeof el.selectionEnd === "number" ? el.selectionEnd : shown.length;
+    onChange({ ...section, text: fromLabels(`${shown.slice(0, start)}${token}${shown.slice(end)}`, fields) });
   };
   const id = `cas-sec-${section.key}`;
   return (
@@ -59,8 +81,8 @@ const SectionEditor = ({ section, index, count, fields, onChange, onMove, onRemo
         <Button type="button" icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("birTax.casDoc.removeSection")} tooltip={t("birTax.casDoc.removeSection")}
           disabled={count === 1} onClick={onRemove} />
       </div>
-      <InputTextarea ref={area} id={`${id}-text`} aria-label={t("birTax.casDoc.text")} className="w-full" value={section.text} rows={5} autoResize maxLength={20000}
-        onChange={(e) => onChange({ ...section, text: e.target.value })} />
+      <InputTextarea ref={area} id={`${id}-text`} aria-label={t("birTax.casDoc.text")} className="w-full" value={shown} rows={5} autoResize maxLength={20000}
+        onChange={(e) => onChange({ ...section, text: fromLabels(e.target.value, fields) })} />
       <Dropdown className="cas-section-editor__field" value={null} options={fields.map((f) => ({ label: f.label, value: f.key }))} onChange={(e) => insert(e.value)}
         placeholder={t("birTax.casDoc.insertField")} aria-label={t("birTax.casDoc.insertField")} filter />
     </div>
@@ -80,7 +102,7 @@ const SectionsView = ({ sections, fields }) => (
 );
 
 /** Comparison of two versions: section by section, removed and added lines marked. */
-export const CompareView = ({ data }) => {
+export const CompareView = ({ data, fields = [] }) => {
   const { t } = useTranslation();
   return (
     <div className="cas-compare">
@@ -102,7 +124,7 @@ export const CompareView = ({ data }) => {
                 <div key={i} className={`cas-compare__line cas-compare__line--${l.type}`}>
                   <span className="cas-compare__mark" aria-hidden="true">{l.type === "added" ? "+" : l.type === "removed" ? "-" : " "}</span>
                   <span className="cas-sr-only">{l.type === "same" ? "" : t(`birTax.casDoc.line.${l.type}`)}</span>
-                  {l.text || " "}
+                  {l.text ? <FieldChips text={l.text} fields={fields} /> : " "}
                 </div>
               ))}
             </div>
@@ -118,7 +140,7 @@ const sameSections = (a, b) => JSON.stringify(a || []) === JSON.stringify(b || [
 /**
  * A CAS document (system description and controls, backup and restore procedure) as a controlled document: its
  * content (edited as sections while a draft, with live fields), its versions with a comparison of two of them and
- * its activity log. Submit asks for a reason and a change note; approval is for another user with approve:period-end.
+ * its activity log. Submit asks for a reason with its note as the change note; approval is for another user with approve:period-end.
  */
 const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
   const { t } = useTranslation();
@@ -133,7 +155,6 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
   const [comparison, setComparison] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [reason, setReason] = useState(null);
-  const [changeNote, setChangeNote] = useState("");
   const [tried, setTried] = useState(false);
 
   const open = doc?.open;
@@ -188,16 +209,17 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
   };
   const submit = async () => {
     setTried(true);
-    if (reasonProblem(reason) || !changeNote.trim()) return;
+    if (reasonProblem(reason)) return;
+    // the note of the reason is the change note of the version
+    const { reasonCode, note } = reasonPayload(reason);
     const done = await act(async () => {
       await saveIfDirty();
-      return birTaxService.submitCasDraft(slug, { ...reasonPayload(reason), changeNote: changeNote.trim() });
+      return birTaxService.submitCasDraft(slug, { reasonCode, changeNote: note });
     });
     if (done) setSubmitting(false);
   };
   const openSubmit = () => {
     setReason(null);
-    setChangeNote("");
     setTried(false);
     setSubmitting(true);
   };
@@ -212,6 +234,7 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
     input: { type: "textarea", label: t("birTax.casDoc.remarks"), required: true, maxLength: 1000 },
     onConfirm: async (remarks) => { setData(await birTaxService.rejectCasDraft(slug, remarks)); onChanged(); },
   });
+  const withdraw = () => act(() => birTaxService.withdrawCasDraft(slug));
   const compare = () => {
     const [a, b] = [...selected].sort((x, y) => x.version - y.version);
     act(async () => { setComparison(await birTaxService.compareCasDocument(slug, a.version, b.version)); return null; });
@@ -251,6 +274,9 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
           <Button type="button" icon="pi pi-save" outlined label={t("birTax.casDoc.saveDraft")} disabled={!dirty} loading={busy} onClick={save} />
           <Button type="button" icon="pi pi-send" label={t("birTax.submit")} disabled={busy} onClick={openSubmit} />
         </>
+      ) : null}
+      {open && open.status === "submitted" && canWrite && isInitiator({ id: open.submittedBy }) ? (
+        <Button type="button" icon="pi pi-undo" outlined label={t("birTax.casDoc.withdraw")} loading={busy} onClick={withdraw} />
       ) : null}
       {open && open.status === "submitted" && canApprove ? (
         <ApprovalActions initiator={{ id: open.makers.find((m) => isInitiator({ id: m })) || open.submittedBy }} approveLabel={t("birTax.casDoc.approveVersion")}
@@ -302,7 +328,7 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
                 <Button type="button" icon="pi pi-clone" outlined label={t("birTax.casDoc.compare")} disabled={selected.length !== 2 || busy} onClick={compare} />
                 <span className="pe-muted">{t("birTax.casDoc.selectedCount", { count: selected.length })}</span>
               </div>
-              {comparison ? <CompareView data={comparison} /> : null}
+              {comparison ? <CompareView data={comparison} fields={fields} /> : null}
             </TabPanel>
             <TabPanel header={t("birTax.casDoc.activity")}>
               <ActivityLog entries={doc.activity || []} />
@@ -319,13 +345,7 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
             <Button type="button" icon="pi pi-send" label={t("birTax.submit")} loading={busy} onClick={submit} />
           </div>
         )}>
-        <ReasonPicker context="cas_document_change" value={reason} onChange={setReason} showErrors={tried} autoFocus />
-        <div className="field mt-3">
-          <label htmlFor="cas-change-note">{t("birTax.casDoc.changeNote")}<span className="bv-required" aria-hidden="true"> *</span></label>
-          <InputTextarea id="cas-change-note" className={`w-full${tried && !changeNote.trim() ? " p-invalid" : ""}`} rows={3} autoResize maxLength={2000} value={changeNote}
-            onChange={(e) => setChangeNote(e.target.value)} />
-          {tried && !changeNote.trim() ? <small className="p-error">{t("birTax.casReg.required")}</small> : null}
-        </div>
+        <ReasonPicker context="cas_document_change" value={reason} onChange={setReason} showErrors={tried} autoFocus noteRequired noteLabel={t("birTax.casDoc.changeNote")} />
         {actionError ? <div className="pe-error" role="alert">{actionError}</div> : null}
       </Dialog>
     </Dialog>

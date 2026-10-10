@@ -27,6 +27,9 @@ const SEVERITY = {
   done: "success", skipped: "secondary", active: "success", undone: "secondary", posted: "success", inactive: "secondary", completed: "secondary", issued: "success",
 };
 
+/** A fiscal year in a year selector, the same on every Period End screen: "FY2026 · Open". */
+export const yearLabel = (t, y) => `${y.code} · ${t(`periodEnd.status.${y.status}`)}`;
+
 /** Status chip with a translated label (periodEnd.status.<status>). */
 export const StatusTag = ({ status }) => {
   const { t } = useTranslation();

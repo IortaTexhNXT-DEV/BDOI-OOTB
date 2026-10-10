@@ -52,6 +52,10 @@ describe("Year-End Close", () => {
     expect(await screen.findByText("yearEndClose.empty")).toBeInTheDocument();
     expect(screen.getByText("yearEndClose.check.periods_closed.label")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "yearEndClose.start" }));
+    // the start is confirmed first, with the facts of the year
+    const confirm = await screen.findByRole("dialog");
+    expect(periodEndService.createYearEnd).not.toHaveBeenCalled();
+    fireEvent.click(within(confirm).getByRole("button", { name: "yearEndClose.start" }));
     await waitFor(() => expect(periodEndService.createYearEnd).toHaveBeenCalledWith("FY2026"));
     await waitFor(() => expect(periodEndService.yearEndOverview).toHaveBeenCalledTimes(2));
     expect(periodEndService.yearEndOverview).toHaveBeenLastCalledWith("FY2026");

@@ -39,7 +39,12 @@ const sendFile = (res, buf, name, type) => {
   res.send(buf);
 };
 
-const dateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+// a real calendar date (2026-02-31 is refused)
+const dateField = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD')
+  .refine((v) => {
+    const d = new Date(`${v}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
+  }, 'date is not a calendar date');
 const periodQ = z.object({ year: z.coerce.number().int().min(2000).max(2100), month: z.coerce.number().int().min(1).max(12).optional(), quarter: z.coerce.number().int().min(1).max(4).optional() });
 const formParam = z.object({ form: z.enum(ret.FORM_CODES) });
 const returnExample = { form: '1601-EQ', title: 'Quarterly Remittance Return of Creditable Income Taxes Withheld (Expanded)', period: { key: '2026-Q3', from: '2026-07-01', to: '2026-09-30' },
@@ -490,12 +495,21 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/cas/documents/:type/draft/reject', summary: 'Return the submitted version to its preparer as a draft, with remarks (approve:period-end)',
+  method: 'POST', path: '/cas/documents/:type/draft/reject', summary: 'Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)',
   screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...approve, validate(docParam, 'params'), validate(z.object({ remarks: z.string().trim().min(1).max(1000) }))],
   request: { remarks: 'Name the restore test frequency' },
   handler: async (req, res) => {
     const r = await tx((db) => casDocs.rejectVersion(db, req.params.type, req.body, req.user));
     await docAction(req, 'reject', r, req.body.remarks);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft/withdraw', summary: 'Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...write, validate(docParam, 'params')],
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.withdrawSubmission(db, req.params.type, req.user));
+    await docAction(req, 'withdraw', r, null);
     ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
   },
 });

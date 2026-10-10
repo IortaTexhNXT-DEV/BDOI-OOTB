@@ -177,11 +177,11 @@ const SalesInvoices = () => {
             <Dropdown inputId="si-status" value={filters.status} options={STATUSES.map((x) => ({ label: t(`birTax.status.${x}`), value: x }))} onChange={(e) => set({ status: e.value })}
               placeholder={t("birTax.all")} showClear />
           </div>
-          <div className="tax-field">
+          <div className="tax-field tax-field--date">
             <label htmlFor="si-from">{t("birTax.from")}</label>
             <DateField id="si-from" value={filters.from} max={filters.to || undefined} onChange={(e) => set({ from: e.target.value })} />
           </div>
-          <div className="tax-field">
+          <div className="tax-field tax-field--date">
             <label htmlFor="si-to">{t("birTax.to")}</label>
             <DateField id="si-to" value={filters.to} min={filters.from || undefined} onChange={(e) => set({ to: e.target.value })} />
           </div>

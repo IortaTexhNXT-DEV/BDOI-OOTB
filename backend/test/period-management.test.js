@@ -113,12 +113,16 @@ describe('opening balances: validate before loading', () => {
     expect(bad.errors).toEqual(expect.arrayContaining([
       { row: 2, column: 'Account Code', message: 'Account 9999999 is not in the chart of accounts' },
       { row: 3, column: 'Debit / Credit', message: 'Enter the balance as a debit or a credit, not both' },
-      { row: 4, column: 'Debit', message: 'Debit and Credit must be amounts of zero or more' },
+      { row: 4, column: 'Debit', message: 'Debit must be a number' },
       { row: 4, column: 'Account Code', message: 'Account 2201001 appears more than once' },
     ]));
     const unbalanced = (await send(maker, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90']])).body.data;
     expect(unbalanced).toMatchObject({ valid: false, totalDebit: 100, totalCredit: 90, difference: 10 });
-    expect(unbalanced.errors).toEqual([{ row: null, column: null, message: 'Debits 100.00 and credits 90.00 do not balance (difference 10.00)' }]);
+    expect(unbalanced.errors).toEqual([{ row: null, column: null, message: 'Debits ₱100.00 and credits ₱90.00 do not balance (difference ₱10.00)' }]);
+    // the difference of the rows read is listed beside the row errors
+    const both = (await send(maker, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90'], ['5101002', '', '-5', '']])).body.data;
+    expect(both.errors).toEqual(expect.arrayContaining([{ row: 4, column: 'Debit', message: 'Debit cannot be negative' },
+      { row: null, column: null, message: expect.stringMatching(/do not balance/) }]));
     expect((await send(maker, 'validate', GOOD, '')).status).toBe(400);
     expect(await count()).toBe(0);
   });
