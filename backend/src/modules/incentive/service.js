@@ -2,7 +2,8 @@
  * Incentive programs, calculations (achievement from policies / quotes, payout from the program's tier structure),
  * maker-checker approval, payment, agent statements, "my programs" and reports.
  */
-import { many, one, query, withTransaction } from '../../db/pool.js';
+import { many, one, pool, query, withTransaction } from '../../db/pool.js';
+import { activityEntries } from '../../lib/auditEvents.js';
 import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -11,6 +12,7 @@ import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { getLetterhead } from '../../lib/letterhead.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
@@ -212,6 +214,28 @@ export function payout(program, achieved, target) {
   return { achievementPercent: pct, amount: round2(amount), tier: hit.level };
 }
 
+/**
+ * How a tier pays, for the screens: percentOfAchieved (a % of the premium achieved), percentOfTarget (a % of the
+ * target), perUnit (an amount per policy) or fixed (one amount); the same rules as payout().
+ */
+function tierBasis(program, tier) {
+  if (tier.type === 'Percentage') return program.metric === 'premium' ? 'percentOfAchieved' : 'percentOfTarget';
+  return program.metric === 'policies' ? 'perUnit' : 'fixed';
+}
+export const tiersOf = (program) => (program.structure || []).map((t) => ({ level: t.level, type: t.type, value: toNumber(t.value), maxPayout: t.maxPayout == null ? null : toNumber(t.maxPayout),
+  basis: tierBasis(program, t) }));
+
+/** The next tier above an achievement and what is still needed to reach it, in the program's measure; null at the top. */
+export function nextTier(program, achieved, target) {
+  const pct = target ? (achieved / target) * 100 : 0;
+  const bands = (program.structure || []).map((t) => ({ t, r: tierRange(t.level) })).filter((x) => x.r).sort((a, b) => a.r.min - b.r.min);
+  for (const { t, r } of bands) {
+    const needed = r.percent ? round2((target * r.min) / 100 - achieved) : round2(r.min - achieved);
+    if ((r.percent ? r.min > pct : r.min > achieved) && needed > 0) return { level: t.level, needed };
+  }
+  return null;
+}
+
 // ---------------- calculations ----------------
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -247,20 +271,27 @@ export function parsePeriod(v, fromOverride, toOverride) {
 }
 
 const CALC_SELECT = `SELECT c.*, (SELECT display_name FROM users u WHERE u.id = c.submitted_by) AS submitted_by_name, (SELECT display_name FROM users u WHERE u.id = c.approved_by) AS approved_by_name,
-  (SELECT display_name FROM users u WHERE u.id = c.created_by) AS created_by_name, (SELECT display_name FROM users u WHERE u.id = c.rejected_by) AS rejected_by_name FROM incentive_calculations c`;
+  (SELECT display_name FROM users u WHERE u.id = c.created_by) AS created_by_name, (SELECT display_name FROM users u WHERE u.id = c.rejected_by) AS rejected_by_name,
+  (SELECT username FROM users u WHERE u.id = c.created_by) AS created_by_username, (SELECT username FROM users u WHERE u.id = c.submitted_by) AS submitted_by_username
+  FROM incentive_calculations c`;
 
 async function calcOut(c, withDetails = true) {
-  const details = withDetails ? (await many(`SELECT r.*, u.display_name, COALESCE(u.employee_code, u.username) AS code, p.name AS program_name, p.program_code
+  const details = withDetails ? (await many(`SELECT r.*, u.display_name, COALESCE(u.employee_code, u.username) AS code, p.name AS program_name, p.program_code, p.metric
       FROM incentive_results r JOIN users u ON u.id = r.agent_user_id JOIN incentive_programs p ON p.id = r.program_id WHERE r.calculation_id = $1 ORDER BY u.display_name, p.name`, [c.batch_id]))
     .map((r) => ({ id: Number(r.id), agentId: r.agent_user_id, agentName: r.display_name, agentCode: r.code, programId: r.program_id, program: r.program_name, programCode: r.program_code,
-      target: r.target, achieved: r.achieved, achievementPercent: r.achievement_percent, tier: r.tier, baseIncentive: r.base_incentive, adjustments: r.adjustments, adjustmentReason: r.adjustment_reason,
-      finalAmount: r.payout, status: r.status })) : undefined;
+      metric: r.metric, target: r.target, achieved: r.achieved, achievementPercent: r.achievement_percent, tier: r.tier, baseIncentive: r.base_incentive, adjustments: r.adjustments,
+      adjustmentReason: r.adjustment_reason, finalAmount: r.payout, status: r.status })) : undefined;
   const ts = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+  const at = (d) => (d ? new Date(d).toISOString() : null);
   return {
     batchId: c.batch_id, period: c.period, periodFrom: c.period_from, periodTo: c.period_to, calculationDate: ts(c.created_at), programsIncluded: c.programs_included, description: c.description,
     totalAmount: c.total_amount, agentCount: c.agent_count, status: c.status, createdBy: c.created_by_name, submittedBy: c.submitted_by_name, submittedDate: ts(c.submitted_date),
     approvedBy: c.approved_by_name, approvalDate: ts(c.approval_date), rejectedBy: c.rejected_by_name, rejectionDate: ts(c.rejection_date), rejectionReason: c.rejection_reason,
     paymentDate: c.payment_date, paymentReference: c.payment_reference,
+    // who made the batch (maker-checker: neither may approve it) and the decision details
+    createdById: c.created_by, createdByUsername: c.created_by_username, submittedById: c.submitted_by, submittedByUsername: c.submitted_by_username,
+    createdAt: at(c.created_at), submittedAt: at(c.submitted_date), approvedAt: at(c.approval_date), rejectedAt: at(c.rejection_date),
+    approvalRemarks: c.approval_remarks, rejectionReasonCode: c.rejection_reason_code,
     daysWaiting: c.status === 'Pending Approval' && c.submitted_date ? Math.floor((Date.now() - new Date(c.submitted_date).getTime()) / 86400000) : 0, details,
   };
 }
@@ -349,20 +380,29 @@ export async function adjustCalculation(batchId, b) {
 export async function submitCalculation(batchId, user) {
   const c = await calcRow(batchId);
   if (!['Calculated', 'Rejected'].includes(c.status)) throw conflict(`Batch is already ${c.status.toLowerCase()}`);
-  await query('UPDATE incentive_calculations SET status = \'Pending Approval\', submitted_by = $2, submitted_date = now(), rejection_reason = NULL, updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);
-  await notifyApprovers({ audience: 'write:incentive', document: 'Incentive calculation', number: c.batch_id, by: user.username, detail: `period ${c.period}`,
+  await query(`UPDATE incentive_calculations SET status = 'Pending Approval', submitted_by = $2, submitted_date = now(), rejection_reason = NULL, rejection_reason_code = NULL,
+                 updated_at = now() WHERE batch_id = $1`, [c.batch_id, user.id]);
+  await notifyApprovers({ audience: 'approve:incentive', document: 'Incentive calculation', number: c.batch_id, by: user.username, detail: `period ${c.period}`,
     link: '/incentive/approvals', entity: 'incentive_calculation', entityId: c.batch_id });
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 
+/**
+ * Approve or reject a batch pending approval. Maker-checker: neither the user who ran the calculation nor the one who
+ * submitted it may decide it. A rejection needs a reason of the Reason Codes master (context incentive_batch_reject,
+ * a note when the reason asks for one); an approval takes optional remarks.
+ */
 export async function decideCalculation(batchId, action, b, user) {
   const c = await calcRow(batchId);
   if (c.status !== 'Pending Approval') throw conflict(`Batch is ${c.status}; only batches pending approval can be ${action}d`);
   await assertChecker(user, c.submitted_by, 'calculation batch');
   await assertChecker(user, c.created_by, 'calculation batch');
+  const reason = action === 'reject' ? await requiredReason(pool, 'incentive_batch_reject', b) : null;
+  const remarks = action === 'approve' ? String(b.remarks ?? b.comments ?? '').trim().slice(0, 1000) || null : null;
   await withTransaction(async (tx) => {
     if (action === 'approve') {
-      await tx.query('UPDATE incentive_calculations SET status = \'Approved\', approved_by = $2, approval_date = now(), updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);
+      await tx.query(`UPDATE incentive_calculations SET status = 'Approved', approved_by = $2, approval_date = now(), approval_remarks = $3, updated_at = now()
+                      WHERE batch_id = $1`, [c.batch_id, user.id, remarks]);
       await tx.query('UPDATE incentive_results SET status = \'Approved\' WHERE calculation_id = $1', [c.batch_id]);
       // incentives earned are accrued (posting rule incentive.accrual)
       const total = round2((await tx.query('SELECT COALESCE(sum(payout), 0) AS t FROM incentive_results WHERE calculation_id = $1', [c.batch_id])).rows[0].t);
@@ -373,13 +413,13 @@ export async function decideCalculation(batchId, action, b, user) {
         await tx.query('UPDATE incentive_calculations SET accrual_jv_id = $2 WHERE batch_id = $1', [c.batch_id, jv.id]);
       }
     } else {
-      if (!b.reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
-      await tx.query('UPDATE incentive_calculations SET status = \'Rejected\', rejected_by = $2, rejection_date = now(), rejection_reason = $3, updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id, b.reason]);
+      await tx.query(`UPDATE incentive_calculations SET status = 'Rejected', rejected_by = $2, rejection_date = now(), rejection_reason = $3, rejection_reason_code = $4, updated_at = now()
+                      WHERE batch_id = $1`, [c.batch_id, user.id, reason.text, reason.code]);
       await tx.query('UPDATE incentive_results SET status = \'Rejected\' WHERE calculation_id = $1', [c.batch_id]);
     }
   });
   await notifyDecision({ userId: c.submitted_by || c.created_by, decidedBy: user.id, document: 'Incentive calculation', number: c.batch_id, approved: action === 'approve', by: user.username,
-    reason: action === 'approve' ? null : b.reason, link: '/incentive/calculations', entity: 'incentive_calculation', entityId: c.batch_id });
+    reason: action === 'approve' ? null : reason.text, link: '/incentive/calculations', entity: 'incentive_calculation', entityId: c.batch_id });
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 
@@ -414,6 +454,31 @@ export async function approvalsBoard() {
   };
 }
 
+/** The remarks of a batch action as the activity log shows them, from the batch after the action. */
+function activityRemarks(action, after) {
+  if (!after || typeof after !== 'object') return null;
+  if (action === 'calculate') return after.description || null;
+  if (action === 'adjust') return [...new Set((after.details || []).map((d) => d.adjustmentReason).filter(Boolean))].join('; ') || null;
+  if (action === 'approve') return after.approvalRemarks || null;
+  if (action === 'reject') return after.rejectionReason || null;
+  if (action === 'pay') return after.paymentReference || null;
+  return null;
+}
+
+/**
+ * Activity log of a calculation batch, oldest first: its audit rows (calculated, adjusted, submitted, approved,
+ * rejected, paid) as lib/auditEvents#activityEntries gives them (user display name and roles, date and time, status
+ * from / to), with the remarks of each action. The batch snapshots hold every agent line, so their field changes are
+ * not listed.
+ */
+export async function calculationActivity(batchId, { viewer = null } = {}) {
+  const c = await calcRow(batchId);
+  const rows = await many(`SELECT a.id, a.at, a.user_id, a.username, a.entity, a.entity_id, a.action, a.before_data, a.after_data, a.source FROM audit_log a
+                           WHERE a.entity = 'incentive_calculation' AND a.entity_id = $1 ORDER BY a.at, a.id`, [c.batch_id]);
+  const entries = await activityEntries(rows, { viewer });
+  return entries.map((e, i) => ({ ...e, remarks: activityRemarks(rows[i].action, rows[i].after_data), changes: [] }));
+}
+
 // ---------------- agent views ----------------
 
 export async function agentPrograms(agentId) {
@@ -432,15 +497,35 @@ export async function agentPrograms(agentId) {
       assigned.push({ programId: p.id, programCode: p.program_code, programName: p.name, targetMetric: p.target_metric, target: p.target, stretchTarget: p.stretch_target, achieved,
         achievementPercent: pay.achievementPercent, potentialEarning: pay.amount, tier: pay.tier, daysRemaining: Math.max(0, Math.ceil((Date.parse(p.period_to) - Date.parse(t)) / 86400000)),
         startDate: p.period_from, endDate: p.period_to, calculationFrequency: p.calculation_frequency, periodFrom: current.from, periodTo: current.to,
-        periodDaysRemaining: Math.max(0, Math.ceil((Date.parse(current.to) - Date.parse(t)) / 86400000)), lastUpdated: t });
+        periodDaysRemaining: Math.max(0, Math.ceil((Date.parse(current.to) - Date.parse(t)) / 86400000)), lastUpdated: t,
+        // facts of the program details: measure, eligibility, tiers and the next tier to reach
+        metric: p.metric, programType: p.program_type, programStatus: p.status, applicableTo: p.applicable_to, currency: p.currency, ended: isoDate(p.period_to) < t,
+        tiers: tiersOf(p), nextTier: nextTier(p, Number(achieved), Number(p.target)) });
     }
     // activity to date only: a policy incepting after today is not an achievement yet
     const acts = await many(`SELECT p.inception_date, p.premium_total, p.renewed_from, pr.name AS product FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
                              WHERE p.owner_user_id = $1 AND p.inception_date <= $2::date AND p.status <> 'cancelled' ORDER BY p.inception_date DESC LIMIT 10`, [a.id, t]);
     out.push({ agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, assignedPrograms: assigned,
-      recentActivities: acts.map((x) => ({ date: x.inception_date, activity: `${x.renewed_from ? 'Policy Renewal' : 'New Policy'} - ${x.product || 'Policy'}`, impact: round2(x.premium_total), points: Math.round(Number(x.premium_total) / 100) })) });
+      recentActivities: acts.map((x) => ({ date: x.inception_date, activity: `${x.renewed_from ? 'Policy Renewal' : 'New Policy'} - ${x.product || 'Policy'}`, impact: round2(x.premium_total), points: Math.round(Number(x.premium_total) / 100) })),
+      activity: await incentiveEvents(a.id) });
   }
   return out;
+}
+
+/**
+ * The incentive events of an agent, newest first: each result calculated, approved, rejected or paid, with its
+ * program, incentive period, batch and amount (the incentive_results of the agent and their batches).
+ */
+export async function incentiveEvents(agentId, limit = 10) {
+  const rows = await many(`SELECT r.period, r.payout, p.name AS program_name, p.program_code, c.batch_id, c.created_at, c.approval_date, c.rejection_date, c.payment_date
+                           FROM incentive_results r JOIN incentive_calculations c ON c.batch_id = r.calculation_id JOIN incentive_programs p ON p.id = r.program_id
+                           WHERE r.agent_user_id = $1 ORDER BY c.created_at DESC LIMIT 50`, [agentId]);
+  const events = rows.flatMap((r) => {
+    const base = { programName: r.program_name, programCode: r.program_code, period: parsePeriod(r.period).label, batchId: r.batch_id, amount: round2(r.payout) };
+    return [['calculated', r.created_at], ['approved', r.approval_date], ['rejected', r.rejection_date], ['paid', r.payment_date]]
+      .filter(([, at]) => at).map(([action, at]) => ({ ...base, action, date: new Date(at).toISOString() }));
+  });
+  return events.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).slice(0, limit);
 }
 
 /** Contact block of the statement: the letterhead company (Company master, primary company) name, e-mail and phone. */
@@ -455,7 +540,17 @@ export async function emptyStatement(periodRef) {
   const t = await today();
   const period = parsePeriod(periodRef || t.slice(0, 7));
   return { agentId: null, agentName: '', agentCode: '', branch: '', period: period.label, statementDate: t, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0,
-    lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: await statementContact() };
+    lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], paymentHistory: [], programBreakdown: [], monthlyTrend: [], contact: await statementContact() };
+}
+
+/** Approved and paid incentives of an agent, one row per batch and incentive period, newest period first. */
+async function paymentHistory(agentId) {
+  const rows = await many(`SELECT c.batch_id, r.period, array_agg(DISTINCT p.name ORDER BY p.name) AS programs, sum(r.payout) AS amount, c.status, c.approval_date, c.payment_date, c.payment_reference
+                           FROM incentive_results r JOIN incentive_calculations c ON c.batch_id = r.calculation_id JOIN incentive_programs p ON p.id = r.program_id
+                           WHERE r.agent_user_id = $1 AND c.status IN ('Approved', 'Paid')
+                           GROUP BY c.batch_id, r.period ORDER BY r.period DESC, c.batch_id DESC LIMIT 24`, [agentId]);
+  return rows.map((r) => ({ batchId: r.batch_id, period: parsePeriod(r.period).label, periodKey: r.period, programs: r.programs, amount: round2(r.amount), status: r.status,
+    approvalDate: r.approval_date ? new Date(r.approval_date).toISOString().slice(0, 10) : null, paymentDate: r.payment_date ? isoDate(r.payment_date) : null, paymentReference: r.payment_reference }));
 }
 
 export async function statement(agentId, periodRef) {
@@ -473,7 +568,7 @@ export async function statement(agentId, periodRef) {
     const achieved = await programAchievement(p, a.id, period.from, period.to);
     if (!achieved) continue;
     const pay = payout(p, achieved, Number(p.target));
-    inProgress.push({ program: p.name, target: Number(p.target), achievement: achieved, achievementPercent: pay.achievementPercent, rate: pay.tier || '-', earnedAmount: 0,
+    inProgress.push({ program: p.name, metric: p.metric, target: Number(p.target), achievement: achieved, achievementPercent: pay.achievementPercent, rate: pay.tier || '-', earnedAmount: 0,
       potentialEarning: pay.amount, status: 'In Progress' });
   }
   const earned = (statuses, extra = '', params = []) => one(`SELECT COALESCE(sum(payout), 0) AS v FROM incentive_results WHERE agent_user_id = $1 AND status = ANY($2) ${extra}`, [a.id, statuses, ...params]);
@@ -489,7 +584,8 @@ export async function statement(agentId, periodRef) {
     lastPayment: last ? round2(last.v) : 0, lastPaymentDate: last?.paid_at ? new Date(last.paid_at).toISOString().slice(0, 10) : null,
     // incentive periods of the last payment and of the approved, unpaid results (labels such as "August 2026")
     lastPaymentPeriods: periodLabels(last?.periods || []), pendingPeriods: periodLabels(pendingPeriods), contact: await statementContact(),
-    programBreakdown: [...lines.map((l) => ({ program: l.name, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
+    paymentHistory: await paymentHistory(a.id),
+    programBreakdown: [...lines.map((l) => ({ program: l.name, metric: l.metric, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
       ...inProgress],
     monthlyTrend: months.map(({ key: k }) => ({ month: new Date(`${k}-01T00:00:00Z`).toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }) + '-' + k.slice(2, 4), period: k, earnings: round2(trend.find((t) => t.period === k)?.v || 0) })),
   };
@@ -502,29 +598,51 @@ export async function reportTemplates() {
   return rows.map((r) => ({ id: r.id, ...r.data }));
 }
 
+/** Column headings of the report files. */
+const REPORT_LABELS = {
+  period: 'Period', agent: 'Agent', agent_code: 'Agent code', branch: 'Branch', program_code: 'Program code', program: 'Program', name: 'Program', target_metric: 'Measure',
+  agents: 'Agents', target: 'Target', achieved: 'Achieved', achievement_percent: 'Achievement %', tier: 'Tier', base_incentive: 'Base incentive', adjustments: 'Adjustments',
+  payout: 'Payout', status: 'Status',
+};
+const reportColumns = (keys) => keys.map((k) => ({ key: k, label: REPORT_LABELS[k] || k }));
+const periodKeyOf = (v) => (v ? parsePeriod(v).from.slice(0, 7) : null);
+
 export async function generateReport(b, user) {
   const ref = b.templateId ?? b.reportType ?? b.templateCode;
   if (!ref) throw badRequest('Validation failed', [{ path: 'templateId', message: 'templateId is required' }]);
   const tpl = await one('SELECT id, data FROM master_records WHERE type_code = \'incentive-report-template\' AND status = \'active\' AND (id::text = $1 OR code = $1 OR name = $1)', [String(ref)]);
   if (!tpl) throw notFound('Report template not found');
   const p = b.parameters?.parameters || b.parameters || {};
-  const periodKey = p.period || p.Period ? parsePeriod(p.period || p.Period).from.slice(0, 7) : null;
+  // parameters of the template (Master > Incentive Report Templates): period, program, agent, branch (code), a range of
+  // incentive periods (from / to: months or dates), a minimum achievement % and the number of top performers
+  const periodKey = periodKeyOf(p.period || p.Period);
   const program = p.program || p.Program || null;
+  const agent = p.agent || p.agentId || null;
+  const branch = p.branch || null;
+  const fromKey = periodKeyOf(p.from || p.dateFrom || p.daterangeFrom);
+  const toKey = periodKeyOf(p.to || p.dateTo || p.daterangeTo);
+  const minAchievement = p.minAchievement === undefined || p.minAchievement === null || p.minAchievement === '' ? null : toNumber(p.minAchievement, null);
   let rows;
   let columns;
   if (tpl.data.category === 'Program Analysis') {
     rows = await many(`SELECT p.program_code, p.name, p.target_metric, count(DISTINCT r.agent_user_id)::int AS agents, COALESCE(sum(r.achieved), 0) AS achieved, COALESCE(sum(r.payout), 0) AS payout
-                       FROM incentive_programs p LEFT JOIN incentive_results r ON r.program_id = p.id AND r.status <> 'Rejected' WHERE p.status <> 'Deleted' AND ($1::text IS NULL OR p.program_code = $1)
-                       GROUP BY p.id ORDER BY p.program_code`, [program]);
-    columns = ['program_code', 'name', 'target_metric', 'agents', 'achieved', 'payout'].map((k) => ({ key: k, label: k }));
+                       FROM incentive_programs p LEFT JOIN incentive_results r ON r.program_id = p.id AND r.status <> 'Rejected'
+                         AND ($2::text IS NULL OR r.period >= $2) AND ($3::text IS NULL OR r.period <= $3)
+                       WHERE p.status <> 'Deleted' AND ($1::text IS NULL OR p.program_code = $1)
+                       GROUP BY p.id ORDER BY p.program_code`, [program, fromKey, toKey]);
+    columns = reportColumns(['program_code', 'name', 'target_metric', 'agents', 'achieved', 'payout']);
   } else {
-    rows = await many(`SELECT r.period, u.display_name AS agent, COALESCE(u.employee_code, u.username) AS agent_code, p.program_code, p.name AS program, r.target, r.achieved, r.achievement_percent,
-                         r.base_incentive, r.adjustments, r.payout, r.status FROM incentive_results r JOIN users u ON u.id = r.agent_user_id JOIN incentive_programs p ON p.id = r.program_id
-                       WHERE r.status <> 'Rejected' AND ($1::text IS NULL OR r.period = $1) AND ($2::text IS NULL OR p.program_code = $2)
-                       ORDER BY ${tpl.data.category === 'Performance Reports' ? 'r.achievement_percent DESC NULLS LAST' : 'r.period DESC, u.display_name'}`, [periodKey, program]);
+    rows = await many(`SELECT r.period, u.display_name AS agent, COALESCE(u.employee_code, u.username) AS agent_code, COALESCE(b.name, u.branch_code) AS branch, p.program_code, p.name AS program,
+                         r.target, r.achieved, r.achievement_percent, r.tier, r.base_incentive, r.adjustments, r.payout, r.status
+                       FROM incentive_results r JOIN users u ON u.id = r.agent_user_id JOIN incentive_programs p ON p.id = r.program_id LEFT JOIN branches b ON b.code = u.branch_code
+                       WHERE r.status <> 'Rejected' AND ($1::text IS NULL OR r.period = $1) AND ($2::text IS NULL OR p.program_code = $2) AND ($3::text IS NULL OR u.id = $3)
+                         AND ($4::text IS NULL OR u.branch_code = $4) AND ($5::text IS NULL OR r.period >= $5) AND ($6::text IS NULL OR r.period <= $6)
+                         AND ($7::numeric IS NULL OR r.achievement_percent >= $7)
+                       ORDER BY ${tpl.data.category === 'Performance Reports' ? 'r.achievement_percent DESC NULLS LAST' : 'r.period DESC, u.display_name'}`,
+    [periodKey, program, agent, branch, fromKey, toKey, minAchievement]);
     const top = toNumber(p.topN ?? p['Top N'], 0);
     if (top > 0) rows = rows.slice(0, top);
-    columns = ['period', 'agent', 'agent_code', 'program_code', 'program', 'target', 'achieved', 'achievement_percent', 'base_incentive', 'adjustments', 'payout', 'status'].map((k) => ({ key: k, label: k }));
+    columns = reportColumns(['period', 'agent', 'agent_code', 'branch', 'program_code', 'program', 'target', 'achieved', 'achievement_percent', 'tier', 'base_incentive', 'adjustments', 'payout', 'status']);
   }
   const saved = await saveFile({ category: 'incentive-reports', fileName: `${tpl.data.code}_${(await today())}.csv`, content: toCsv(rows, columns), contentType: 'text/csv', entity: 'incentive_report', entityId: tpl.data.code, userId: user.id });
   const r = await one(`INSERT INTO generated_reports(code, name, params, format, storage_key, row_count, generated_by, status) VALUES ($1,$2,$3,'csv',$4,$5,$6,'done') RETURNING id, created_at`,

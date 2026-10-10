@@ -55,8 +55,9 @@ const ROLE_PERMS = {
     // full personal identifiers (migration 0276)
     'pii:view'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
-  // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
-  accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read',
+  // Accounting calculates, approves (maker-checker, incentive:approve of migration 0387) and pays incentives; program
+  // set-up stays with the system administrator.
+  accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'incentive:approve', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read',
     // accounts payable sub-ledger and fixed asset register (permissions of migration 0298)
     'payables', 'fixed-assets',
     // full personal identifiers for BIR forms and payees' bank accounts (migration 0276)
@@ -106,7 +107,7 @@ const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'po
 Object.assign(ROLE_PERMS, {
   'tis-sales-associate': [...TIS_SALES, 'lead-assignment:read', 'campaigns:read'],
   'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns'],
-  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'incentive', 'disbursements:read', 'payables:read', 'payables:approve'],
+  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'incentive', 'incentive:approve', 'disbursements:read', 'payables:read', 'payables:approve'],
   'tis-ops-associate': [...TIS_OPS],
   'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
   'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],

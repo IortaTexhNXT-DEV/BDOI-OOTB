@@ -1,0 +1,168 @@
+// Accounts > Incentive screens (My Programs, Calculations, Approvals, Statement, Reports). Theme CSS variables only.
+
+.inc-page {
+  padding: 0 24px 32px;
+  font-family: var(--font-body);
+
+  > .bv-section {
+    margin-top: 16px;
+  }
+
+  > .p-error {
+    display: block;
+    margin-top: 12px;
+  }
+}
+
+.inc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+
+  > .bv-section + .bv-section {
+    margin-top: 0;
+  }
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.inc-filters {
+  display: grid;
+  grid-template-columns: minmax(14rem, 2fr) repeat(2, minmax(10rem, 1fr));
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+
+  @media (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.inc-table {
+  .inc-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .p-datatable-thead > tr > th.inc-num .p-column-header-content {
+    justify-content: flex-end;
+  }
+
+  .inc-row-link {
+    cursor: pointer;
+  }
+
+  .bv-meter {
+    min-width: 8rem;
+  }
+}
+
+.inc-table--spaced {
+  margin-top: 16px;
+}
+
+.inc-muted {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.inc-muted-text {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.inc-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+
+  &--padded {
+    padding: 14px 16px;
+  }
+}
+
+.inc-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-heading);
+}
+
+.inc-header-field {
+  min-width: 12rem;
+}
+
+.inc-steps {
+  margin-bottom: 20px;
+}
+
+.inc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  > .bv-kv {
+    margin: 8px 0;
+  }
+
+  &--two {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+
+    @media (max-width: 640px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+.inc-form__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.inc-form__pair {
+  display: contents;
+}
+
+.inc-reject-dialog__reason {
+  margin-top: 16px;
+}
+
+.inc-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.inc-dialog-footer__reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+// the printed statement (components/Print): amounts right-aligned
+.bv-print-doc {
+  th.inc-num,
+  td.inc-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  h2 {
+    margin: 16px 0 6px;
+    font-size: 13px;
+  }
+}
