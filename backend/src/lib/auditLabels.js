@@ -57,7 +57,9 @@ export const ENTITY_LABELS = {
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
   cas_document: 'CAS document', cas_book_print: 'Book print', opening_balances: 'Opening balance',
   go_live_lock: 'Go-live lock', golive_setting: 'Go-live setting', post_dated_cheque: 'Post-dated cheque',
-  migration_reconciliation: 'Migration reconciliation', sap_opening_file: 'SAP opening file',
+  migration_reconciliation: 'Migration reconciliation', sap_opening_file: 'SAP opening file', migration_run: 'Migration run', migration_run_step: 'Cutover step',
+  migration_run_defect: 'Migration defect', migration_evidence: 'Migration evidence', go_live_decision: 'Go / No-Go decision', go_live_runbook_step: 'Runbook step',
+  go_live_criterion: 'Go / No-Go criterion',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -86,6 +88,9 @@ const ACTION_VERBS = {
   relock: 'unlock ended, imports closed again', 'refused-locked': 'import refused (go-live locked)', 'cutover-date': 'cutover date changed',
   recompute: 'recomputed', 'legacy-update': 'legacy figures changed', tolerance: 'tolerance set', explain: 'difference explained', accept: 'difference accepted',
   sign: 'signed', supersede: 'superseded by a later load', download: 'downloaded',
+  start: 'started', done: 'done', block: 'blocked', skip: 'skipped', 'evidence-pack': 'evidence pack downloaded', criterion: 'criterion recorded', waive: 'criterion waived',
+  refresh: 'criteria computed', 'open-voting': 'voting opened', vote: 'vote recorded', go: 'decided Go', 'no-go': 'decided No-Go', 'purge-file': 'uploaded file deleted (retention)',
+  'purge-rows': 'rows deleted (retention)',
 };
 
 /** Sign-in events read as what the user did. */

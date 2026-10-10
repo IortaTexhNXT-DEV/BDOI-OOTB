@@ -43,6 +43,7 @@ import { presentKinds, productsOfKind, sheetKindOf } from './products.js';
 import { RULE_COLUMNS, RULE_LABELS, duplicateDetector, matchText } from './duplicates.js';
 import { loadMaps, mapsVersion, saveMap } from './maps.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
+import { runForLoad } from './runs.js';
 import { comparable, fail, isDate } from './common.js';
 
 export { KITS };
@@ -574,22 +575,23 @@ export async function approvalRequired() {
 /**
  * Create a batch from an uploaded workbook: rows stored, the file kept in the storage folder go-live-loads with its
  * SHA-256, status validating. The validation runs as a job (jobs.js). legacySystem: the source of the migrated records
- * (setting by default).
+ * (setting by default); runId: the run the load belongs to (planned or running, runs.js).
  */
-export async function createBatch({ kit, file, user, legacySystem = null, req = null }) {
+export async function createBatch({ kit, file, user, legacySystem = null, runId = null, req = null }) {
   if (!KITS[kit]) throw badRequest('kit must be configuration or migration');
   if (!file?.buffer?.length) throw badRequest('Upload the workbook (.xlsx) in the "file" field');
   await assertKitAllowed(kit, { req });
+  const run = await runForLoad(runId);
   const sheets = await kitSheets(kit);
   const parsed = readKitWorkbook(file.buffer, sheets, kit);
   const total = Object.values(parsed).reduce((s, r) => s + r.length, 0);
   if (!total) throw badRequest('The workbook has no data rows (data starts on row 3 of each sheet; the sample row is never loaded)');
   const sha256 = crypto.createHash('sha256').update(file.buffer).digest('hex');
   const batch = await withTransaction(async (db) => {
-    const b = (await db.query(`INSERT INTO data_load_batches(kit, file_name, status, rows_read, created_by, legacy_system, file_sha256, progress)
-      VALUES ($1,$2,'validating',$3,$4,$5,$6,$7) RETURNING *`,
+    const b = (await db.query(`INSERT INTO data_load_batches(kit, file_name, status, rows_read, created_by, legacy_system, file_sha256, progress, run_id)
+      VALUES ($1,$2,'validating',$3,$4,$5,$6,$7,$8) RETURNING *`,
     [kit, file.originalname || null, total, user.id, kit === 'migration' ? String(legacySystem || '').trim().slice(0, 100) || await legacySystemName() : null, sha256,
-      JSON.stringify({ stage: 'queued', done: 0, total, at: new Date().toISOString() })])).rows[0];
+      JSON.stringify({ stage: 'queued', done: 0, total, at: new Date().toISOString() }), run])).rows[0];
     for (const [sheet, rows] of Object.entries(parsed)) {
       for (let i = 0; i < rows.length; i += 500) {
         const chunk = rows.slice(i, i + 500);

@@ -159,7 +159,8 @@ async function serveObject(req, res) {
   if (doc.category === 'e-signatures') throw forbidden('Signature images are not available through file links');
   // uploaded data load workbooks hold personal data in clear: GET /api/data-load/batches/:id/file checks the caller
   if (doc.category === LOAD_FOLDER) throw forbidden('The workbook of a data load is not available through file links');
-  // signed reconciliation reports: GET /api/data-load/reconciliations/:id/report?version=signed checks the caller
+  // evidence of the go-live (signed reconciliation reports, evidence files of the runs): served only by the data-load routes
+  // that check the caller (GET /api/data-load/reconciliations/:id/report?version=signed, GET /api/data-load/evidence/:id)
   if (doc.category === EVIDENCE_FOLDER) throw forbidden('The evidence of the go-live is not available through file links');
   const stored = String(doc.content_type || '').split(';')[0].trim().toLowerCase();
   const known = [...await allowedTypes(), ...INLINE_TYPES];

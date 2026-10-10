@@ -18,6 +18,7 @@ import * as maps from './maps.js';
 import * as naming from './naming.js';
 import { afterBatchChange } from './reconciliation.js';
 import { defineReconciliationRoutes } from './reconciliationRoutes.js';
+import { defineRunRoutes } from './runRoutes.js';
 
 /**
  * Data Migration & Go-Live: the configuration and migration workbooks (the go-live scripts, npm run rehearsal:golive
@@ -25,7 +26,9 @@ import { defineReconciliationRoutes } from './reconciliationRoutes.js';
  * the whole kit or some of its objects; upload (validated as a dry run in a job, nothing saved: each row New, Changed,
  * Unchanged, Duplicate or Error), review the rows, resolve the duplicates, download the rows in error, submit, approval
  * by a second user (the load runs as a job), history, undo of a migration load (approved, a job) and the reconciliation
- * of the migration loads of a run (lines, tie-outs, differences, sign-off, report; reconciliationRoutes.js); the cutover date and the two-person go-live lock with its scoped, time-boxed unlock; the value
+ * of the migration loads of a run (lines, tie-outs, differences, sign-off, report; reconciliationRoutes.js); the mock runs,
+ * the cutover checklist, defects, evidence files and the evidence pack, the Go / No-Go decision, the overview and the
+ * hypercare figures (runRoutes.js); the cutover date and the two-person go-live lock with its scoped, time-boxed unlock; the value
  * maps of the legacy code tables; the document file naming check; the environment comparison (an export of another
  * environment compared with this one, or two exports with each other: never loads). Administrators and the roles
  * granted read:data-load / write:data-load / approve:data-load (migrations 0244, 0247 and 0440); the downloads and the
@@ -255,11 +258,11 @@ define({
 });
 define({
   method: 'POST', path: '/batches', summary: 'Upload a workbook (multipart "file", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id',
-  screen: `${WORKSPACE} > Loads > Upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)',
+  screen: `${WORKSPACE} > Loads > Upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file, kit=configuration|migration, runId (the run of the load: planned or running), legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)',
   response: { success: true, message: 'Validating MIG-000007', data: { batch: { ...batchExample, status: 'validating', progress: { ...progressExample, step: 'validate' } }, job: { ...jobExample, type: 'data-load.validate' } } },
   handler: async (req, res) => {
     const kit = kitOf(req.body?.kit || req.query.kit);
-    const batch = await svc.createBatch({ kit, file: req.file, user: req.user, legacySystem: req.body?.legacySystem || null, req });
+    const batch = await svc.createBatch({ kit, file: req.file, user: req.user, legacySystem: req.body?.legacySystem || null, runId: req.body?.runId ?? null, req });
     const job = await jobs.startJob('validate', batch, req.user);
     await audit(req, { entity: 'data_load_batch', entityId: batch.id, action: 'upload', after: { loadNumber: batch.loadNumber, kit, fileName: batch.fileName, rowsRead: batch.rowsRead, fileSha256: batch.fileSha256 } });
     accepted(res, { batch: await svc.getBatch(batch.id), job }, `Validating ${batch.loadNumber}`);
@@ -518,6 +521,7 @@ define({
 });
 
 defineReconciliationRoutes(define, { canRead, canWrite, canApprove, canWriteOrApprove, WORKSPACE, sendXlsx });
+defineRunRoutes(define, { canRead, canWrite, canApprove, canWriteOrApprove, WORKSPACE, sendXlsx });
 
 export default router;
 export const mount = '/data-load';
