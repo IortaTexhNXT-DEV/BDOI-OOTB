@@ -1,0 +1,29 @@
+// A master record shown from its form (components/RecordView): label above value, the same type as KeyValueGrid.
+.bv-record-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0 8px;
+  min-width: 0;
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    font-size: 14px;
+    color: var(--color-heading);
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  &__value--empty {
+    color: var(--color-placeholder);
+  }
+}
+
+.bv-record-view__activity {
+  margin-top: 16px;
+}

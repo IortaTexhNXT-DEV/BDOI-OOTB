@@ -178,7 +178,7 @@ const MonthEndCloseRun = () => {
             const st = run.steps?.[s] || {};
             return (
               <div className="pe-step" key={s}>
-                <div className="pe-step-head"><span>{t(`periodEnd.step.${s}`)}</span><StatusTag status={st.status || "pending"} /></div>
+                <div className="pe-step-head"><span>{t(`periodEnd.step.${s}`)}</span><StatusTag status={st.status || (run.status === "cancelled" ? "skipped" : "pending")} /></div>
                 <div className="pe-step-msg">{st.message || t(`periodEnd.stepHelp.${s}`)}</div>
                 {st.reversalWarning && <div className="pe-step-msg pe-error">{st.reversalWarning}</div>}
                 {st.at && <div className="pe-muted mt-1">{dateTime(st.at)}</div>}
@@ -194,7 +194,8 @@ const MonthEndCloseRun = () => {
           <Column header={t("periodEnd.item")} body={(r) => <div><div>{r.label}</div>{r.remarks && <div className="pe-muted">{r.remarks}</div>}</div>} />
           <Column header={t("periodEnd.type")} body={(r) => t(`periodEnd.itemType.${r.itemType}`)} style={{ width: "7rem" }} />
           <Column header={t("periodEnd.severity")} body={(r) => t(`periodEnd.severityValue.${r.severity}`)} style={{ width: "7rem" }} />
-          <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} style={{ width: "9rem" }} />
+          {/* a cancelled run did not check what was still pending */}
+          <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={run.status === "cancelled" && r.status === "pending" ? "skipped" : r.status} />} style={{ width: "9rem" }} />
           <Column header={t("periodEnd.result")} body={(r) => (r.itemType === "manual"
             ? (r.signedByName ? `${t("periodEnd.signedBy")} ${r.signedByName}, ${dateTime(r.signedAt)}` : "")
             : <span>{r.message}{r.amount ? ` (${money(r.amount)})` : ""}</span>)} />

@@ -172,9 +172,8 @@ const PlacementDetail = () => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={`${t("placement.placementSlip.title")} ${p.placementNumber}`} subtitle={`${p.insuredName || p.customerName} - ${p.productType || ""} - ${t(`placement.source.${p.source}`)}`} onBack={() => navigate("/placement/placement-slips")}>
-        <StatusTag status={p.status} />
-        <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => pdf()} className="ml-2" />
+      <PageHeader title={`${t("placement.placementSlip.title")} ${p.placementNumber}`} subtitle={`${p.insuredName || p.customerName} - ${p.productType || ""} - ${t(`placement.source.${p.source}`)}`} onBack={() => navigate("/placement/placement-slips")} status={<StatusTag status={p.status} />}>
+        <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => pdf()} />
         {editable && <Button label={t("placement.actions.editParticipants")} icon="pi pi-users" severity="secondary" outlined className="ml-2"
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
         {write && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}

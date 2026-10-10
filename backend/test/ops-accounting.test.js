@@ -159,6 +159,17 @@ describe('cancellation return premium', () => {
     expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(r2(610.4 - expected));
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
   });
+  it('a motor policy kept with its gross premium alone returns its premium taxes on the net taken out of the gross', async () => {
+    // a loaded motor own damage policy: gross premium only; it is not a CTPL tariff policy
+    const m = await makePolicy({ net: 0, product: 'MOTOR', inceptionOffset: -10 });
+    await query("UPDATE policies SET premium_total = 35650, net_premium = 0, details = '{}' WHERE id = $1", [m.policy.id]);
+    const quote = await ctx.api('post', '/cancellations/quote').send({ policyId: m.policy.id, effectiveDate: asOf, reason: 'NON_PAYMENT' });
+    expect(quote.status, JSON.stringify(quote.body)).toBe(200);
+    expect(quote.body.data.tariffOnly).toBe(false);
+    expect(quote.body.data.policyNetPremium).toBeLessThan(35650);
+    expect(quote.body.data.policyNetPremium).toBeGreaterThan(25000);
+    expect(quote.body.data.taxes.vat).toBeGreaterThan(0);
+  });
 });
 
 // ---------------------------------------------------------------- 8.12 post-dated cheques

@@ -181,7 +181,11 @@ export const ParticipantsTable = ({ participants, currency, actions }) => {
   );
 };
 
-/** Journey steps Broker Slip -> Quotation Slip -> Placement Slip -> Policy with links to each document. */
+/**
+ * Journey steps Broker Slip -> Quotation Slip -> Placement Slip -> Policy with links to each document.
+ * Each step: { key, done, stopped, current, mode ("required" | "optional" | "skip"), reference, id, at, label }.
+ * A stopped step (a rejected quotation) ends the journey there: its marker is a cross and no connector runs on from it.
+ */
 export const JourneyTimeline = ({ steps }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -190,11 +194,11 @@ export const JourneyTimeline = ({ steps }) => {
   return (
     <ol className="journey-timeline" aria-label={t("placement.journey.title")}>
       {steps.map((s, i) => {
-        const state = s.done ? "done" : s.mode === "skip" ? "skipped" : s.current ? "current" : "todo";
+        const state = s.stopped ? "stopped" : s.done ? "done" : s.mode === "skip" ? "skipped" : s.current ? "current" : "todo";
         const to = s.id && link[s.key] ? link[s.key](s.id) : null;
         return (
           <li key={s.key} className={`journey-step ${state}`}>
-            <span className="journey-marker">{s.done ? <i className="pi pi-check" /> : i + 1}</span>
+            <span className="journey-marker">{state === "stopped" ? <i className="pi pi-times" /> : s.done ? <i className="pi pi-check" /> : i + 1}</span>
             <div className="journey-body">
               <div className="journey-label" title={t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}>{t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}</div>
               {s.reference ? (to ? <button type="button" className="journey-link" onClick={() => navigate(to)}>{s.reference}</button> : <span className="journey-ref" title={s.reference}>{s.reference}</span>)
@@ -300,12 +304,13 @@ export const RiskDetailsEditor = ({ value, onChange }) => {
   );
 };
 
-export const PageHeader = ({ title, subtitle, children, onBack }) => (
+/** Page title with an optional back button; `status` (a status pill) sits beside the title, `children` are the actions. */
+export const PageHeader = ({ title, subtitle, status, children, onBack }) => (
   <div className="placement-header">
     <div className="placement-header-text">
       {onBack && <Button icon="pi pi-arrow-left" text rounded onClick={onBack} className="mr-2" aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />}
       <div>
-        <h2>{title}</h2>
+        <div className="placement-header-title"><h2>{title}</h2>{status}</div>
         {subtitle && <p className="subtitle">{subtitle}</p>}
       </div>
     </div>

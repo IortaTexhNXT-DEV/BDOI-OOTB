@@ -6,7 +6,8 @@
  *            remittances of the quarter; attachment: the QAP
  *   1604-E   Annual Information Return of Creditable Income Taxes Withheld (Expanded): remittances per month and the
  *            alphalist of payees (schedule 3: subject to expanded withholding; schedule 4: income payments exempt)
- *   2551Q    Quarterly Percentage Tax Return (non-VAT broker or agent): gross sales per month at bir.percentage_tax_rate
+ *   2551Q    Quarterly Percentage Tax Return (non-VAT broker or agent): gross sales per month at bir.percentage_tax_rate;
+ *            for a VAT-registered broker it is not applicable (no tax due, no filing)
  *
  * The withholding figures are the payment vouchers with tax withheld and the approved supplier invoices of accounts
  * payable with EWT (period-end/tax.js#withholdingLines, the same source as BIR Form 2307 and the QAP); each 0619-E / 1601-EQ is reconciled with the QAP report and with the ledger
@@ -310,7 +311,9 @@ async function compute2551Q(db, p) {
   });
   const monthTotals = p.months.map((m) => sum(rows.filter((r) => r.month === m), 'amount'));
   const gross = round2(monthTotals.reduce((s, v) => s + v, 0));
-  const tax = round2((gross * rate) / 100);
+  // a VAT-registered broker files VAT, not percentage tax: the working paper still shows the sales, with no tax due
+  const applicable = !id.vatRegistered;
+  const tax = applicable ? round2((gross * rate) / 100) : 0;
   // creditable percentage tax withheld per BIR Form 2307 (none on commission: kept for completeness), prior payments
   const prior = (await filingsOf(db, '2551Q', p.key)).active;
   const penalties = prior ? Number(prior.penalties) : 0;
@@ -329,12 +332,12 @@ async function compute2551Q(db, p) {
     schedules: [
       { code: 'months', title: 'Working paper: gross sales per month (ledger revenue accounts)',
         columns: [{ key: 'month', label: 'Month' }, { key: 'grossSales', label: 'Gross sales / receipts', type: 'money' }, { key: 'rate', label: 'Rate (%)', type: 'number' }, { key: 'tax', label: 'Percentage tax', type: 'money' }],
-        rows: p.months.map((m, i) => ({ month: m, grossSales: monthTotals[i], rate, tax: round2((monthTotals[i] * rate) / 100) })), totals: { grossSales: gross, tax } },
+        rows: p.months.map((m, i) => ({ month: m, grossSales: monthTotals[i], rate, tax: applicable ? round2((monthTotals[i] * rate) / 100) : 0 })), totals: { grossSales: gross, tax } },
       { code: 'accounts', title: 'Working paper: gross sales per revenue account',
         columns: [{ key: 'account', label: 'Account' }, { key: 'accountName', label: 'Account name' }, ...p.months.map((m, i) => ({ key: `month${i + 1}`, label: m, type: 'money' })), { key: 'total', label: 'Total', type: 'money' }],
         rows: perAccount, totals: { month1: monthTotals[0], month2: monthTotals[1], month3: monthTotals[2], total: gross } },
     ],
-    reconciliation: { checks: [], perAtc: [], reconciled: true }, taxDue: tax, rate, atc,
+    reconciliation: { checks: [], perAtc: [], reconciled: true }, taxDue: tax, rate, atc, applicable,
   };
 }
 
@@ -376,6 +379,7 @@ export async function returnCalendar(db, y) {
 export async function recordFiling(db, form, b, user) {
   const ret = await computeReturn(db, form, b);
   const p = ret.period;
+  if (ret.applicable === false) throw conflict(`${form} does not apply to a VAT-registered broker`);
   const current = (await filingsOf(db, form, p.key)).active;
   if (current && !b.amended) throw conflict(`${form} ${p.label} is already filed (${current.filing_reference || iso(current.date_filed)}); record an amended return instead`);
   if (!current && b.amended) throw badRequest(`No filed ${form} for ${p.label} to amend`);

@@ -38,14 +38,28 @@ const splitStatus = (changes, key = "key") => {
   return { status, rest: all.filter((c) => c !== status) };
 };
 
-/** GET /audit/records/:entity/:id (components/AuditTrail, the history of policies, quotations, journals, receipts ...). */
+const CREATION = /^(create|bulk-create|create-from-.*)$/;
+const blank = (v) => v === null || v === undefined || v === "";
+
+/**
+ * GET /audit/records/:entity/:id (components/AuditTrail, the history of policies, quotations, journals, receipts ...).
+ * A creation lists no field changes: every field went from nothing to the value the record itself shows.
+ */
 export const fromAuditEvents = (events = []) =>
   events.map((e, i) => {
     const { status, rest } = splitStatus(e.changes);
+    const created = CREATION.test(String(e.action || "")) && rest.every((c) => blank(c.from));
+    const seen = new Set();
+    const changes = created ? [] : rest.filter((c) => {
+      const key = `${c.label}|${JSON.stringify(c.to)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     return toEntry({
       id: e.id, at: e.at, day: e.day, date: e.date, time: e.time, actionCode: e.action, actionLabel: e.title,
       user: userOf(e.user?.displayName, e.user?.username, e.user?.roles), fromStatus: status?.from, toStatus: status?.to, remarks: e.note,
-      changes: rest.map((c) => ({ field: c.key, label: c.label, before: c.from, after: c.to, masked: !!c.masked })), source: e.source,
+      changes: changes.map((c) => ({ field: c.key, label: c.label, before: c.from, after: c.to, masked: !!c.masked })), source: e.source,
     }, i);
   });
 

@@ -16,6 +16,8 @@ import { hasPermission } from "../../../utils/canOpen";
 import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import { PageHeader } from "../../../module/PeriodEnd/common";
 import logger from "../../../utility/logger";
 import { ActivityLog, fromCollectionActions } from "../../../components/ActivityLog";
 
@@ -229,15 +231,14 @@ const CollectionDetail = () => {
     <div className="collection-detail-container">
       <Toast ref={toast} />
 
-      <div className="detail-header">
-        <Button
-          icon="pi pi-arrow-left"
-          label={t("collectionDetail.backToCollections")}
-          className="p-button-text"
-          onClick={() => navigate("/agent/collections")}
-        />
-        <h2>{t("collectionDetail.collectionDetails")}</h2>
-      </div>
+      <PageHeader title={`${t("collectionDetail.collectionDetails")} · ${collection.policyNumber || ""}`} section={t("collectionDetail.collections")}
+        trail={[collection.policyNumber].filter(Boolean)}>
+        <Button label={t("collectionDetail.back")} icon="pi pi-arrow-left" outlined onClick={() => navigate("/agent/collections")} />
+        <Button label={t("collectionDetail.sendEmail")} icon="pi pi-envelope" outlined onClick={() => handleFollowUpAction("Email")} />
+        <Button label={t("emailDocument.emailInvoice")} icon="pi pi-file-pdf" outlined disabled={!collection.receivableId} onClick={() => setShowInvoiceEmail(true)} />
+        <Button label={t("collectionDetail.addNote")} icon="pi pi-file-edit" outlined onClick={() => handleFollowUpAction("Note")} />
+        <Button label={t("collectionDetail.setCommitmentDate")} icon="pi pi-calendar" onClick={() => handleFollowUpAction("Commitment")} />
+      </PageHeader>
 
       {collection.outstandingAmount > 0 && (
         <NextStep title={t("collectionDetail.nextStepTitle")} text={t("collectionDetail.nextStepText", { amount: formatCurrency(collection.outstandingAmount), bill: collection.billNumber })}
@@ -247,42 +248,14 @@ const CollectionDetail = () => {
 
       {/* Client and Policy Information */}
       <Card title={t("collectionDetail.clientPolicyInfo")} className="info-card">
-        <div className="info-grid">
-          <div className="info-item">
-            <label>{t("collectionDetail.clientName")}</label>
-            <span>
-              {`${client.firstName || ""} ${client.lastName || ""}`.trim()}
-            </span>
-          </div>
-          <div className="info-item">
-            <label>{t("collectionDetail.policyNumber")}</label>
-            <span>{collection.policyNumber}</span>
-          </div>
-          <div className="info-item">
-            <label>{t("collectionDetail.dueDate")}</label>
-            <span>{formatDate(collection.dueDate)}</span>
-          </div>
-          <div className="info-item">
-            <label>{t("collectionDetail.daysPastDue")}</label>
-            <span className="highlight-danger">
-              {collection.daysPastDue} {t("collectionDetail.days")}
-            </span>
-          </div>
-          <div className="info-item">
-            <label>{t("collectionDetail.status")}</label>
-            <span
-              className={`status-badge status-${collection.collectionStatus.toLowerCase()}`}
-            >
-              {collection.collectionStatus}
-            </span>
-          </div>
-          <div className="info-item">
-            <label>{t("collectionDetail.overdueLevel")}</label>
-            <span className={`level-badge level-${collection.overdueLevel}`}>
-              {t("collectionDetail.level")} {collection.overdueLevel}
-            </span>
-          </div>
-        </div>
+        <KeyValueGrid columns={3} items={[
+          { label: t("collectionDetail.clientName"), value: `${client.firstName || ""} ${client.lastName || ""}`.trim() },
+          { label: t("collectionDetail.policyNumber"), value: collection.policyNumber },
+          { label: t("collectionDetail.dueDate"), value: formatDate(collection.dueDate) },
+          { label: t("collectionDetail.daysPastDue"), value: <span className="highlight-danger">{collection.daysPastDue} {t("collectionDetail.days")}</span> },
+          { label: t("collectionDetail.status"), value: <span className={`status-badge status-${String(collection.collectionStatus || "").toLowerCase()}`}>{collection.collectionStatus}</span> },
+          { label: t("collectionDetail.overdueLevel"), value: <span className={`level-badge level-${collection.overdueLevel}`}>{t("collectionDetail.level")} {collection.overdueLevel}</span> },
+        ]} />
       </Card>
 
       {isCoInsurance && coInsuranceRows.length > 0 && (
@@ -364,103 +337,29 @@ const CollectionDetail = () => {
         </Card>
       )}
 
-      {/* Financial Breakdown */}
+      {/* the premium and its parts (a part that is nil is left out), then what was paid and what is still due */}
       <Card title={t("collectionDetail.financialBreakdown")} className="financial-card">
-        <div className="financial-grid">
-          <div className="financial-item total">
-            <label>{t("collectionDetail.grossPremium")}</label>
-            <span>{formatCurrency(collection.grossPremium)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.netPremium")}</label>
-            <span>{formatCurrency(collection.netPremium)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.vat")}</label>
-            <span>{formatCurrency(collection.valueAddedTax)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.dst")}</label>
-            <span>{formatCurrency(collection.documentaryStampTax)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.lgt")}</label>
-            <span>{formatCurrency(collection.localGovernmentTax)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.others")}</label>
-            <span>{formatCurrency(collection.accountPremiumOthers)}</span>
-          </div>
-          <div className="financial-item">
-            <label>{t("collectionDetail.discount")}</label>
-            <span>{formatCurrency(collection.discount)}</span>
-          </div>
-          <div className="financial-item paid">
-            <label>{t("collectionDetail.paidAmount")}</label>
-            <span>{formatCurrency(collection.paidAmount)}</span>
-          </div>
-          <div className="financial-item outstanding">
-            <label>{t("collectionDetail.outstanding")}</label>
-            <span>{formatCurrency(collection.outstandingAmount)}</span>
-          </div>
-        </div>
+        <KeyValueGrid columns={4} items={[
+          { label: t("collectionDetail.netPremium"), value: collection.netPremium, type: "amount" },
+          { label: t("collectionDetail.vat"), value: collection.valueAddedTax, type: "amount", hidden: !Number(collection.valueAddedTax) },
+          { label: t("collectionDetail.dst"), value: collection.documentaryStampTax, type: "amount", hidden: !Number(collection.documentaryStampTax) },
+          { label: t("collectionDetail.lgt"), value: collection.localGovernmentTax, type: "amount", hidden: !Number(collection.localGovernmentTax) },
+          { label: t("collectionDetail.others"), value: collection.accountPremiumOthers, type: "amount", hidden: !Number(collection.accountPremiumOthers) },
+          { label: t("collectionDetail.discount"), value: collection.discount, type: "amount", hidden: !Number(collection.discount) },
+          { label: t("collectionDetail.grossPremium"), value: collection.grossPremium, type: "amount" },
+          { label: t("collectionDetail.paidAmount"), value: collection.paidAmount, type: "amount" },
+          { label: t("collectionDetail.outstanding"), value: collection.outstandingAmount, type: "amount" },
+        ]} />
       </Card>
 
-      {/* Aging Breakdown */}
       <Card title={t("collectionDetail.agingAnalysis")} className="aging-card">
-        <div className="aging-grid">
-          <div className="aging-item">
-            <label>{t("collectionDetail.currentNotDue")}</label>
-            <span>{formatCurrency(collection.currentAmount)}</span>
-          </div>
-          <div className="aging-item">
-            <label>{t("collectionDetail.days1to30")}</label>
-            <span>{formatCurrency(collection.days1to30Amount)}</span>
-          </div>
-          <div className="aging-item">
-            <label>{t("collectionDetail.days31to60")}</label>
-            <span>{formatCurrency(collection.days31to60Amount)}</span>
-          </div>
-          <div className="aging-item">
-            <label>{t("collectionDetail.days61to90")}</label>
-            <span>{formatCurrency(collection.days61to90Amount)}</span>
-          </div>
-          <div className="aging-item danger">
-            <label>{t("collectionDetail.over90Days")}</label>
-            <span>{formatCurrency(collection.over90DaysAmount)}</span>
-          </div>
-        </div>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card title={t("collectionDetail.collectionActions")} className="actions-card">
-        <div className="action-buttons-grid">
-          <Button
-            label={t("collectionDetail.sendEmail")}
-            icon="pi pi-envelope"
-            className="p-button-outlined p-button-primary"
-            onClick={() => handleFollowUpAction("Email")}
-          />
-          <Button
-            label={t("emailDocument.emailInvoice")}
-            icon="pi pi-file-pdf"
-            className="p-button-outlined p-button-primary"
-            disabled={!collection.receivableId}
-            onClick={() => setShowInvoiceEmail(true)}
-          />
-          <Button
-            label={t("collectionDetail.addNote")}
-            icon="pi pi-file-edit"
-            className="p-button-outlined p-button-primary"
-            onClick={() => handleFollowUpAction("Note")}
-          />
-          <Button
-            label={t("collectionDetail.setCommitmentDate")}
-            icon="pi pi-calendar"
-            className="p-button-outlined p-button-secondary"
-            onClick={() => handleFollowUpAction("Commitment")}
-          />
-        </div>
+        <KeyValueGrid columns={"auto"} items={[
+          { label: t("collectionDetail.currentNotDue"), value: collection.currentAmount, type: "amount" },
+          { label: t("collectionDetail.days1to30"), value: collection.days1to30Amount, type: "amount" },
+          { label: t("collectionDetail.days31to60"), value: collection.days31to60Amount, type: "amount" },
+          { label: t("collectionDetail.days61to90"), value: collection.days61to90Amount, type: "amount" },
+          { label: t("collectionDetail.over90Days"), value: collection.over90DaysAmount, type: "amount" },
+        ]} />
       </Card>
 
       {/* Follow-Up History */}

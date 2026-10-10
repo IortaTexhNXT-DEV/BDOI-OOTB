@@ -176,7 +176,7 @@ const CQPolicyAndRiskDetails = ({ action, flow, }) => {
                             fontWeight: 600,
                             fontFamily: "Nunito, Arial, sans-serif",
                             lineHeight: '51px',
-                            color: '#111927',
+                            color: "var(--text-color)",
                         }}
                     >
                         {action === "quotedetails" ? t("employeeBenefit.editQuote") : t("employeeBenefit.createQuote")}

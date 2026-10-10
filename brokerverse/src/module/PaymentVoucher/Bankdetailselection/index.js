@@ -553,7 +553,7 @@ function Bankdetailselection() {
                 0}
             </strong>
           </p>
-          <p style={{ margin: "0.5rem 0 0", color: "#6b7280", fontSize: 13 }}>
+          <p style={{ margin: "0.5rem 0 0", color: "var(--text-color-secondary)", fontSize: 13 }}>
             Approving marks selected commission lines Paid and assigns the
             voucher number (net of WHT).
           </p>
@@ -564,7 +564,7 @@ function Bankdetailselection() {
       <div className="tablegap_container">
         <DataTable
           value={checkbookList}
-          tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+          tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}

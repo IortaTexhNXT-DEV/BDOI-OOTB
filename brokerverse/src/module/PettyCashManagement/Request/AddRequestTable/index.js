@@ -15,7 +15,6 @@ import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Column } from "primereact/column";
 import InputField from "../../../../components/InputField";
-import SvgDelete from "../../../../assets/icons/SvgDeleteIcon";
 import { Card } from "primereact/card";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -24,6 +23,8 @@ import {
 } from "../store/pettyCashRequestMiddleware";
 import { removeRequestLine } from "../store/pettyCashRequestReducer";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
+import { optionCode } from "../../pettyCashFormat";
 
 const initialValue = {
   Narration: "",
@@ -39,11 +40,13 @@ const AddRequestTable = () => {
   const toastRefApprove = useRef(null);
   const navigate = useNavigate();
 
-  const { AddRequestTable } = useSelector(
+  const { formatCurrency } = useFormatCurrency();
+  const { AddRequestTable, RequestDraft } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,
         AddRequestTable: pettyCashRequestReducer?.AddRequestTable,
+        RequestDraft: pettyCashRequestReducer?.RequestDraft,
       };
     }
   );
@@ -56,6 +59,8 @@ const AddRequestTable = () => {
         title: t("pettyCash.confirm.submitNewTitle"),
         message: t("pettyCash.confirm.submitMessage"),
         facts: [
+          { label: t("pettyCash.requester"), value: RequestDraft?.RequesterName?.label || RequestDraft?.RequesterName?.name || RequestDraft?.RequesterName },
+          { label: t("pettyCash.pettyCashCode"), value: optionCode(RequestDraft?.PettyCashCode) },
           { label: t("pettyCash.confirm.lines"), value: AddRequestTable.length, type: "number" },
           { label: t("pettyCash.totalAmount"), value: totalAmount, type: "amount", emphasis: true },
         ],
@@ -124,7 +129,7 @@ const AddRequestTable = () => {
       errors.Narration = t("pettyCash.narrationRequired");
     }
 
-    if (!values.Amount) {
+    if (!(Number(values.Amount) > 0)) {
       errors.Amount = t("pettyCash.amountRequired");
     }
     return errors;
@@ -138,8 +143,7 @@ const AddRequestTable = () => {
     dispatch(postEditRequestMiddleware(valueWithId));
     setVisible(false);
     setshow(true);
-    formik.setFieldValue("Narration",);
-    formik.setFieldValue("Amount",);
+    formik.resetForm();
   };
 
   const formik = useFormik({
@@ -219,24 +223,17 @@ const AddRequestTable = () => {
             <Column
               field="Amount"
               header={t("pettyCash.amount")}
-              headerStyle={headerStyle}
-              sortable
+              body={(rowData) => formatCurrency(rowData.Amount)}
+              bodyClassName="bv-num"
+              headerClassName="bv-num"
             ></Column>
             <Column
-              field="Action"
               header={t("pettyCash.action")}
-              headerStyle={{
-                ...headerStyle,
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
+              className="bv-actions"
+              style={{ width: "6rem" }}
               body={(rowData) => (
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button
-                    icon={<SvgDelete />}
-                    className="delete__btn"
-                    onClick={() => handleDelete(rowData.id)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
-                </div>
+                <Button icon="pi pi-trash" text severity="danger" onClick={() => handleDelete(rowData.id)}
+                  aria-label={t("pettyCash.removeLine")} tooltip={t("pettyCash.removeLine")} tooltipOptions={{ position: "top" }} />
               )}
             ></Column>
           </DataTable>
@@ -248,12 +245,8 @@ const AddRequestTable = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.totalAmount")}
-              placeholder={t("pettyCash.enter")}
-              textColor={"#111927"}
               disabled={true}
-              textSize={"16"}
-              textWeight={500}
-              value={totalAmount}
+              value={formatCurrency(totalAmount)}
             />
           </div>
         </div>
@@ -282,55 +275,37 @@ const AddRequestTable = () => {
       <Dialog
         header={t("pettyCash.addRequestItem")}
         visible={visible}
-        style={{ width: "50vw" }}
+        style={{ width: "min(640px, 96vw)" }}
         onHide={() => setVisible(false)}
-        dismissableMask={true}
-        headerStyle={{
-          color: "#343434",
-          fontFamily: "Nunito, Arial, sans-serif",
-          fontSize: 16,
-          fontWeight: 500,
-          // lineHeight: "150%",
-        }}
-        className="dailog__container"
+        className="bv-centered"
+        draggable={false}
+        footer={(
+          <>
+            <Button type="button" label={t("pettyCash.cancel")} text onClick={() => { setVisible(false); formik.resetForm(); }} />
+            <Button type="button" label={t("pettyCash.addItem")} icon="pi pi-plus" onClick={() => formik.handleSubmit()} />
+          </>
+        )}
       >
-
         <div className="grid">
-          <div className="col-12 md:col-8 lg:col-8">
+          <div className="col-12 md:col-8">
             <InputField
               classNames="fielduniqueone__container"
               label={t("pettyCash.narration")}
-              placeholder={t("pettyCash.enter")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
+              required
               value={formik.values.Narration}
               onChange={formik.handleChange("Narration")}
+              error={formik.touched.Narration && formik.errors.Narration}
             />
           </div>
-          <div className="col-12 md:col-4 lg:col-4">
+          <div className="col-12 md:col-4">
             <InputField
               classNames="fielduniqueone__container"
               label={t("pettyCash.amount")}
-              placeholder={t("pettyCash.enter")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
+              type="number"
+              required
               value={formik.values.Amount}
               onChange={formik.handleChange("Amount")}
-            />
-          </div>
-        </div>
-
-        <div className="grid">
-          <div className="col-12 md:col-12 lg:col-12 bt__container">
-            <Button
-              label={t("pettyCash.save")}
-              className="add__btn"
-              outlined
-              onClick={() => {
-                formik.handleSubmit();
-              }}
+              error={formik.touched.Amount && formik.errors.Amount}
             />
           </div>
         </div>

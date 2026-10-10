@@ -79,7 +79,7 @@ const CompanyMasterTable = () => {
         <div className="card" style={{ maxHeight: "50vh", overflowY: "auto" }}>
           <DataTable
             value={products}
-            tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+            tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}

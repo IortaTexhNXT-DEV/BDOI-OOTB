@@ -11,7 +11,12 @@ import { Checkbox } from "primereact/checkbox";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { BreadCrumb } from "primereact/breadcrumb";
+import DetailHeader from "../../../../components/DetailHeader";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../../../components/ActivityLog";
 import { masterService } from "../../../../services/remittanceService";
 import { showError } from "../../../Remittance/shared";
 import { MASTER_HOME, saveRecord } from "../masterRecord";
@@ -49,6 +54,7 @@ const AdjustmentMaster = () => {
   const { mode } = useParams();
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
+  const location = useLocation();
 
   // Adjustment types are records of the remittance-adjustment-type master
   const [adjustmentTypes, setAdjustmentTypes] = useState([]);
@@ -209,25 +215,65 @@ const AdjustmentMaster = () => {
     );
   };
 
+  // View from the list opens the adjustment type chosen there as a record; the whole master is edited from Edit
+  const viewed = isViewMode ? adjustmentTypes.find((r) => r.adjustmentCode === location.state?.data?.code) || null : null;
+  const header = (
+    <div className="header-section">
+      <div className="flex align-items-center gap-2">
+        <Button icon="pi pi-arrow-left" text rounded aria-label={t("common.back")} onClick={handleCancel} />
+        <h2 className="m-0">{t("remittance.adjustmentMaster.title")}</h2>
+      </div>
+      <BreadCrumb home={{ label: t("financeMasters.master") }} className="mt-2"
+        model={[{ label: t("remittance.adjustmentMaster.remittanceMaster"), url: "/master/finance/remittance" }, { label: t(`remittance.adjustmentMaster.mode.${mode}`, { defaultValue: mode }) }]} />
+    </div>
+  );
+
+  if (viewed) {
+    return (
+      <div className="adjustment-master">
+        <Toast ref={toast} />
+        {header}
+        <Card>
+          <DetailHeader title={viewed.adjustmentCode} subtitle={viewed.adjustmentName}
+            status={{ code: viewed.active ? "active" : "inactive", label: t(viewed.active ? "remittance.adjustmentMaster.active" : "remittance.adjustmentMaster.inactive") }} />
+          <DetailSection title={t("remittance.adjustmentMaster.type")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("remittance.adjustmentMaster.category"), value: viewed.category },
+              { label: t("remittance.adjustmentMaster.nature"), value: viewed.adjustmentNature },
+              { label: t("remittance.adjustmentMaster.glAccount"), value: viewed.glAccount },
+              { label: t("remittance.adjustmentMaster.requiresApproval"), value: viewed.requiresApproval, type: "boolean" },
+              { label: t("remittance.adjustmentMaster.autoApproveBelow"), value: viewed.approvalLimit, type: "amount" },
+            ]} />
+          </DetailSection>
+          <DetailSection title={t("detailView.activity")}>
+            <RecordActivityLog entity={`master:${TYPE}`} recordId={viewed.id} />
+          </DetailSection>
+          <div className="action-buttons mt-4">
+            <Button label={t("remittance.adjustmentMaster.close")} outlined onClick={handleCancel} />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="adjustment-master">
       <Toast ref={toast} />
-      <div className="header-section">
-        <h2>Remittance Adjustment Master - {mode?.charAt(0).toUpperCase() + mode?.slice(1)}</h2>
-      </div>
+      {header}
 
       <Card>
         <TabView>
           <TabPanel header="Adjustment Types">
             <div className="adjustment-types-section">
               <div className="toolbar mb-3">
-                <Button
-                  label={t("remittance.addType")}
-                  icon="pi pi-plus"
-                  className="p-button-primary"
-                  onClick={handleAddType}
-                  disabled={isViewMode}
-                />
+                {!isViewMode && (
+                  <Button
+                    label={t("remittance.addType")}
+                    icon="pi pi-plus"
+                    className="p-button-primary"
+                    onClick={handleAddType}
+                  />
+                )}
               </div>
 
               <DataTable

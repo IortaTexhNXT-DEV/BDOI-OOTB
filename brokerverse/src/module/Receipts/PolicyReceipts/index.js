@@ -731,7 +731,7 @@ const PolicyReceipts = () => {
               }
               tableStyle={{
                 minWidth: "50rem",
-                color: "#2e2e2e",
+                color: "var(--text-color)",
                 maxHeight: "50vh",
                 overflowy: "auto",
               }}
@@ -841,7 +841,7 @@ const PolicyReceipts = () => {
                       <div style={{ fontWeight: "600", color: "var(--color-success)" }}>
                         {t("accounts.receipts.total")} {formatCurrency(totalPaid)}
                       </div>
-                      <div style={{ fontSize: "11px", color: "#6b7280" }}>
+                      <div style={{ fontSize: "11px", color: "var(--text-color-secondary)" }}>
                         {paymentsList.map((payment, idx) => (
                           <div key={idx}>
                             #{idx + 1}: {formatCurrency(parseFloat(payment.paid || "0"))}

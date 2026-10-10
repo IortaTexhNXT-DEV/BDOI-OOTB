@@ -16,6 +16,8 @@ import birTaxService from "../../services/birTaxService";
 import { insurerOptions } from "../InsurerReconciliation/common";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, PageHeader, date, showError, showSuccess } from "./common";
+import DetailDialog from "../../components/DetailDialog";
+import { RecordActivityLog } from "../../components/ActivityLog";
 
 export const TYPES = ["overriding", "profit", "contingent"];
 export const BASES = ["production", "loss_ratio", "growth"];
@@ -39,6 +41,7 @@ const OverrideAgreements = () => {
   const [insurers, setInsurers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [history, setHistory] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -80,8 +83,13 @@ const OverrideAgreements = () => {
           <Column header={t("birTax.tiers")} body={(r) => r.tiers.map((x) => `${x.fromValue.toLocaleString()}${x.toValue === null ? "+" : ` to ${x.toValue.toLocaleString()}`}: ${x.rate}%`).join("; ")} />
           <Column header={t("birTax.effectiveFrom")} body={(r) => date(r.effectiveFrom)} />
           <Column header={t("birTax.statusLabel")} body={(r) => <BirTag status={r.status} />} />
-          <Column body={(r) => <Button icon="pi pi-pencil" text size="small" aria-label={t("birTax.edit")} onClick={() => setEditing({ isNew: false, id: r.id, values: { ...EMPTY, ...r, remarks: r.remarks || "",
-            effectiveFrom: toDate(r.effectiveFrom), effectiveTo: toDate(r.effectiveTo), tiers: r.tiers.map((x) => ({ fromValue: x.fromValue, toValue: x.toValue, rate: x.rate })) } })} />} />
+          <Column body={(r) => (
+            <span className="flex gap-1">
+              <Button icon="pi pi-pencil" text size="small" aria-label={t("birTax.edit")} tooltip={t("birTax.edit")} onClick={() => setEditing({ isNew: false, id: r.id, values: { ...EMPTY, ...r, remarks: r.remarks || "",
+                effectiveFrom: toDate(r.effectiveFrom), effectiveTo: toDate(r.effectiveTo), tiers: r.tiers.map((x) => ({ fromValue: x.fromValue, toValue: x.toValue, rate: x.rate })) } })} />
+              <Button icon="pi pi-history" text size="small" aria-label={t("birTax.agreementHistory")} tooltip={t("birTax.agreementHistory")} onClick={() => setHistory(r)} />
+            </span>
+          )} />
         </DataTable>
       </div>
       <Dialog className="pe-dialog" visible={!!editing} header={editing ? (editing.isNew ? t("birTax.newAgreement") : v.agreementCode) : ""} style={{ width: "min(980px, 96vw)" }} onHide={() => setEditing(null)}
@@ -118,6 +126,10 @@ const OverrideAgreements = () => {
           </div>
         )}
       </Dialog>
+      {/* the changes of an agreement (tiers, rates, terms), with who made them and when */}
+      <DetailDialog visible={!!history} onHide={() => setHistory(null)} size="md" header={history ? `${t("birTax.agreementHistory")} · ${history.agreementCode}` : ""}>
+        {history && <RecordActivityLog entity="override_agreement" recordId={history.agreementCode} />}
+      </DetailDialog>
     </div>
   );
 };

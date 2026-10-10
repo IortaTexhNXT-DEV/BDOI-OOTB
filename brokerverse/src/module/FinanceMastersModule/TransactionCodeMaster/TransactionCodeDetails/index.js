@@ -127,7 +127,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Transaction Code"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -144,7 +144,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Transaction Name"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -163,7 +163,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -177,7 +177,7 @@ const TransactionCodeDetails = () => {
                 className="input__filed"
                 label="Transaction Basis"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -198,7 +198,7 @@ const TransactionCodeDetails = () => {
                 className="input__filed"
                 label="Main Account Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -219,7 +219,7 @@ const TransactionCodeDetails = () => {
               <InputField
                 classNames="input__filed"
                 label="Main Account Description"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -238,7 +238,7 @@ const TransactionCodeDetails = () => {
                 className="input__filed"
                 label="Sub Account Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -256,7 +256,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Sub Account Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -271,7 +271,7 @@ const TransactionCodeDetails = () => {
                 className="input__filed"
                 label="Branch Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -294,7 +294,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Branch Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -308,7 +308,7 @@ const TransactionCodeDetails = () => {
                 className="input__filed"
                 label="Department"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -323,7 +323,7 @@ const TransactionCodeDetails = () => {
                 classNames="input__filed"
                 label="Department Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}

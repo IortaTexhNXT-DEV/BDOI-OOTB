@@ -967,9 +967,14 @@
         "bank-transfer": "Bank transfer",
         "bank_transfer": "Bank transfer",
         "online": "Online transfer"
-      }
+      },
+      "approveCheque": "Approve cheque",
+      "printCheque": "Print cheque",
+      "selectPendingCheque": "Select a pending cheque to approve"
     },
-    "bulkUploadTitle": "Bulk upload disbursements"
+    "bulkUploadTitle": "Bulk upload disbursements",
+    "printVouchers": "Print vouchers",
+    "customerCodeFromRequired": "Customer code from is required"
   },
   "renewal": {
     "renewals": "Renewals",
@@ -1167,6 +1172,46 @@
       "recordDisbursements": "Record disbursements",
       "approvedBy": "Approved by",
       "activity": "Activity"
+    },
+    "disbursementNumber": "Disbursement no.",
+    "disbursedAmount": "Disbursed amount",
+    "reimbursementAmount": "Reimbursement amount",
+    "currentBalance": "Current balance",
+    "balanceAmount": "Balance",
+    "removeLine": "Remove line",
+    "addItem": "Add item",
+    "bankAccountName": "Bank account name",
+    "subAccountDescription": "Sub-account description",
+    "receiptNumber": "Receipt number",
+    "requester": "Requester",
+    "transactionDescription": "Transaction description",
+    "disbursementFromDate": "Disbursements from",
+    "disbursementToDate": "Disbursements to",
+    "requesterRequired": "Requester is required",
+    "subAccountCodeRequired": "Sub-account code is required",
+    "transactionCodeRequired": "Transaction code is required",
+    "branchCodeRequired": "Branch code is required",
+    "departmentCodeRequired": "Department code is required",
+    "fundRequired": "Petty cash code is required",
+    "mainAccountCodeRequired": "Main account code is required",
+    "status": "Status",
+    "actions": "Actions",
+    "fundStatus": {
+      "pending": "Waiting for approval",
+      "active": "Active",
+      "rejected": "Rejected",
+      "inactive": "Inactive"
+    },
+    "fundApproval": {
+      "submitTitle": "Submit petty cash fund for approval",
+      "submit": "Submit for approval",
+      "submitted": "Petty cash fund submitted for approval",
+      "nextCode": "Next number in the series",
+      "approveTitle": "Approve petty cash fund",
+      "rejectTitle": "Reject petty cash fund",
+      "approve": "Approve fund",
+      "reject": "Reject fund",
+      "rejectReason": "Reason for rejecting"
     }
   },
   "employeeBenefit": {
@@ -1608,6 +1653,24 @@
     "approvalLimitsNote": "Who may approve a settlement, and up to what amount, is set in the Authority Matrix (transaction type \"Remittance settlement, adjustment and transfer\").",
     "openAuthorityMatrix": "Open the Authority Matrix",
     "authorityMatrix": "Authority Matrix",
+    "adjustmentMaster": {
+      "title": "Remittance adjustment types",
+      "remittanceMaster": "Remittance master",
+      "mode": {
+        "view": "View",
+        "edit": "Edit",
+        "add": "Add"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "type": "Adjustment type",
+      "category": "Category",
+      "nature": "Nature",
+      "glAccount": "GL account (debit / credit)",
+      "requiresApproval": "Requires approval",
+      "autoApproveBelow": "Auto-approved below",
+      "close": "Close"
+    },
     "approvals": {},
     "common": {
       "accounts": "Accounts",
@@ -3082,7 +3145,10 @@
     "editAccountCategory": "Edit account category",
     "addAccountCategory": "Add account category",
     "saveChanges": "Save changes",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "exchangeRateDetails": "Exchange rate",
+    "fromCurrency": "From currency",
+    "toCurrency": "To currency"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -3498,7 +3564,12 @@
     "branchAndDepartment": "Branch and department",
     "userGroupAccess": "User group access",
     "primaryCompany": "Primary company",
-    "address": "Address"
+    "address": "Address",
+    "accessLevel": {
+      "read": "Read only",
+      "write": "Read and change"
+    },
+    "createdOn": "Created on"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -4620,7 +4691,8 @@
     "openExpiringTerm": "Open the expiring term",
     "print": "Print",
     "close": "Close",
-    "download": "Download"
+    "download": "Download",
+    "noVehicleDetails": "No vehicle details recorded"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -6229,7 +6301,7 @@
     "share": "Share",
     "proceedToPolicy": "Proceed to Policy",
     "checkingPolicy": "Checking policy...",
-    "waitingForPolicy": "Waiting for Policy",
+    "waitingForPolicy": "Waiting for policy",
     "sendForCustomerApproval": "Send for Customer Approval",
     "waitingForCustomerApproval": "Waiting for customer approval",
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
@@ -6240,7 +6312,9 @@
     "scheduleSection": "Section / item / perils",
     "scheduleSumInsured": "Sum insured",
     "schedulePremium": "Premium",
-    "fst": "Fire service tax"
+    "fst": "Fire service tax",
+    "viewPolicy": "View policy",
+    "completePolicy": "Complete policy"
   },
   "policyList": {
     "title": "Policies",
@@ -6767,45 +6841,45 @@
     "back": "Back"
   },
   "collectionDetail": {
-    "backToCollections": "Back to Collections",
-    "collectionDetails": "Collection Details",
-    "clientPolicyInfo": "Client & Policy Information",
-    "clientName": "Client Name:",
-    "policyNumber": "Policy Number:",
-    "dueDate": "Due Date:",
-    "daysPastDue": "Days Past Due:",
+    "backToCollections": "Back to collections",
+    "collectionDetails": "Collection",
+    "clientPolicyInfo": "Client and policy",
+    "clientName": "Client",
+    "policyNumber": "Policy no.",
+    "dueDate": "Due date",
+    "daysPastDue": "Days past due",
     "days": "days",
-    "status": "Status:",
-    "overdueLevel": "Overdue Level:",
+    "status": "Status",
+    "overdueLevel": "Overdue level",
     "level": "Level",
-    "financialBreakdown": "Financial Breakdown",
-    "grossPremium": "Gross Premium:",
-    "netPremium": "Net Premium:",
-    "vat": "VAT:",
-    "dst": "DST:",
-    "lgt": "LGT:",
-    "others": "Others:",
-    "discount": "Discount:",
-    "paidAmount": "Paid Amount:",
-    "outstanding": "Outstanding:",
-    "agingAnalysis": "Aging Analysis",
-    "currentNotDue": "Current (Not Due):",
-    "days1to30": "1-30 Days:",
-    "days31to60": "31-60 Days:",
-    "days61to90": "61-90 Days:",
-    "over90Days": "Over 90 Days:",
+    "financialBreakdown": "Premium and payment",
+    "grossPremium": "Gross premium",
+    "netPremium": "Net premium",
+    "vat": "VAT",
+    "dst": "DST",
+    "lgt": "LGT",
+    "others": "Other charges",
+    "discount": "Discount",
+    "paidAmount": "Paid",
+    "outstanding": "Outstanding",
+    "agingAnalysis": "Ageing",
+    "currentNotDue": "Not yet due",
+    "days1to30": "1-30 days",
+    "days31to60": "31-60 days",
+    "days61to90": "61-90 days",
+    "over90Days": "Over 90 days",
     "collectionActions": "Collection Actions",
-    "sendEmail": "Send Email",
-    "addNote": "Add Note",
-    "setCommitmentDate": "Set Commitment Date",
-    "followUpHistory": "Follow-Up History",
+    "sendEmail": "Send reminder",
+    "addNote": "Add note",
+    "setCommitmentDate": "Set commitment date",
+    "followUpHistory": "Follow-up history",
     "noFollowUpActions": "No follow-up actions recorded",
     "date": "Date",
     "actionType": "Action Type",
     "actionBy": "Action By",
     "notes": "Notes",
     "outcome": "Outcome",
-    "paymentHistory": "Payment History",
+    "paymentHistory": "Payment history",
     "noPaymentsRecorded": "No payments recorded",
     "method": "Method",
     "reference": "Reference",
@@ -6853,6 +6927,8 @@
       "emailSubject": "Premium due: policy {{policy}}",
       "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you."
     },
+    "collections": "Collections",
+    "back": "Back",
     "nextStepTitle": "Next step: record the premium received",
     "nextStepText": "{{amount}} is outstanding on {{bill}}. Record the receipt when the client pays; it is applied to this bill.",
     "recordReceipt": "Record receipt"
@@ -8248,7 +8324,8 @@
       "partially_settled": "Partly settled",
       "settled": "Settled",
       "active": "Active",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "not-applicable": "Not applicable: VAT registered"
     },
     "linePriceRequired": "Enter the quantity and unit price of each line",
     "pageRange": "{{first}} to {{last}}",
@@ -8508,7 +8585,8 @@
     "paymentChannelPlaceholder": "e.g. eFPS, eBIRForms, LANDBANK Link.BizPortal",
     "vatRegistered": "VAT registered",
     "computeTitle": "Compute {{period}} · {{agreement}}",
-    "nothingToCompute": "No production in this period"
+    "nothingToCompute": "No production in this period",
+    "agreementHistory": "History"
   },
   "placement": {
     "status": {
@@ -9541,7 +9619,8 @@
       "template": "Product template",
       "coverage": "Coverage",
       "rule": "Acceptance rule",
-      "mapping": "Market mapping"
+      "mapping": "Market mapping",
+      "ratingFactor": "Rating factor"
     },
     "kinds": {
       "template": "Product template",
@@ -10029,7 +10108,8 @@
     "lastChanged": "Last changed",
     "newLimit": "New credit limit",
     "limitHistory": "Limit changes",
-    "noLimitChanges": "The limit has not been changed yet."
+    "noLimitChanges": "The limit has not been changed yet.",
+    "billDueAfterCancel": "Bill due on"
   },
   "packagedProducts": {
     "active": "Active",
@@ -13017,6 +13097,10 @@
       "editItem": "Edit {{item}}: {{name}}",
       "days_one": "{{count}} day",
       "days_other": "{{count}} days",
+      "months_one": "{{count}} month",
+      "months_other": "{{count}} months",
+      "history": "History",
+      "historyOf": "History of {{item}} {{name}}",
       "allOf": "{{name}}: all"
     },
     "instalments": {
@@ -13147,6 +13231,7 @@
       "cancelDone": "Cheque registration cancelled",
       "against": "Against",
       "billNumber": "Bill number",
+      "allCheques": "Cheques",
       "chequesCount": "{{count}} cheques",
       "chequesCount_one": "{{count}} cheque",
       "chequesCount_other": "{{count}} cheques"
@@ -13406,7 +13491,9 @@
         "deactivateTitle": "Deactivate {{name}}",
         "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
         "activateTitle": "Activate {{name}}",
-        "activateMessage": "The record is offered again for new transactions."
+        "activateMessage": "The record is offered again for new transactions.",
+        "deactivateItemTitle": "Deactivate {{item}}: {{name}}",
+        "activateItemTitle": "Activate {{item}}: {{name}}"
       }
     }
   },
@@ -14179,7 +14266,10 @@
     },
     "revokeTitle": "Revoke signature version",
     "revokeMessage": "The signature version below is revoked and no longer printed.",
-    "revokeNote": "Documents printed before keep the signature they were printed with."
+    "revokeNote": "Documents printed before keep the signature they were printed with.",
+    "close": "Close",
+    "clear": "Clear",
+    "pad": "Signature pad"
   },
   "salesActivities": {
     "title": "Activities",
@@ -15326,7 +15416,11 @@
       "reverse": "Reverse commission",
       "rateTitle": "Change the commission rate of {{policy}}",
       "rateMessage": "The commission, withholding tax and net payable of this line are recalculated.",
-      "rate": "Apply rate"
+      "rate": "Apply rate",
+      "whtOnTitle": "Apply withholding tax",
+      "whtOffTitle": "Stop withholding tax",
+      "whtOn": "Apply withholding tax",
+      "whtOff": "Stop withholding tax"
     },
     "bulk": {
       "lines": "Lines",
@@ -15343,7 +15437,16 @@
       "eligibleMessage": "The accrued lines whose premium has been collected become payable.",
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
-    }
+    },
+    "whtState": {
+      "on": "Applied",
+      "off": "Not applied"
+    },
+    "linesRecomputed": "Unpaid lines recomputed",
+    "netPayableNow": "Net payable before the change",
+    "whtReason": "Reason for the change",
+    "reverseReason": "Reason for reversing",
+    "taxesAndCharges": "Less: premium taxes and charges"
   },
   "eligibilityNote": {
     "approvers": "Can decide: {{names}}"
@@ -15366,6 +15469,56 @@
     "clear": "Remove file",
     "none": "No file chosen",
     "accepted": "{{types}} file"
+  },
+  "signatoriesList": {
+    "code": "Signatory code",
+    "name": "Signatory name",
+    "modifiedBy": "Modified by",
+    "modifiedOn": "Modified on",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "openEntryFilters": {
+    "activityCode1": "Activity code 1",
+    "analysisCode1": "Analysis code 1",
+    "analysisCode2": "Analysis code 2",
+    "controlAccountCode": "Control account code",
+    "currencyCode": "Currency",
+    "department": "Department",
+    "departmentCode": "Department code",
+    "division": "Division",
+    "divisionCode": "Division code",
+    "documentReference": "Document reference",
+    "narration": "Narration",
+    "net": "Net",
+    "subAccountCode": "Sub-account code",
+    "writeOffAmount": "Write-off amount",
+    "writeOffCode": "Write-off code",
+    "writeOffReason": "Write-off reason"
+  },
+  "correctionJv": {
+    "mainAccount": "Main account",
+    "subAccount": "Sub-account",
+    "remarks": "Remarks",
+    "currency": "Currency",
+    "foreignAmount": "Foreign amount",
+    "localAmount": "Local amount (PHP)",
+    "entryType": "Debit / credit",
+    "edit": "Edit",
+    "rowCount": "Rows per page",
+    "branch": "Branch",
+    "department": "Department",
+    "select": "Select",
+    "required": "Required",
+    "cancel": "Cancel",
+    "updateLine": "Update line",
+    "editLine": "Edit line",
+    "editLineTitle": "Edit line {{line}} · {{account}}",
+    "amountIn": "Amount {{currency}}",
+    "entry": {
+      "Debit": "Debit",
+      "Credit": "Credit"
+    }
   },
   "bankBatchDialog": {
     "title": "New batch",

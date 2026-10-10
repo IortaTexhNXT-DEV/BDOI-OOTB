@@ -9,8 +9,9 @@
  * auto | pro-rata | short-period | flat); endorsements.short_period_for_insured switches the short-period scale off.
  * A partial cancellation (cancellationType PARTIAL / PRO_RATA_PARTIAL) returns on the premium of the part cancelled
  * (partialPremium, or partialPercent of the policy premium) and leaves the policy in force.
- * A policy whose premium is only the CTPL tariff (net premium 0, gross premium the tariff amount with its taxes and the
- * authentication fee inside) returns on the tariff amount with no premium tax of its own (tariffOnly in the result).
+ * A CTPL policy whose premium is only the tariff (net premium 0, gross premium the tariff amount with its taxes and the
+ * authentication fee inside) returns on the tariff amount with no premium tax of its own (tariffOnly in the result); any
+ * other policy kept with its gross premium alone has its net premium taken out of the gross at the rates in force.
  *
  * The premium taxes of the return come from the premium tax and charge engine (premium-charges quotationCharges) on the
  * returned premium, those of endorsements.cancellation_returned_taxes only (documentary stamp tax is not refundable by
@@ -23,7 +24,7 @@ import { badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, today } from '../../lib/dates.js';
 import { num, round2 } from '../../lib/money.js';
-import { quotationCharges } from '../premium-charges/service.js';
+import { chargesFor, quotationCharges } from '../premium-charges/service.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { activeRecord, activeRecords } from '../ops-masters/records.js';
 import { policyBasis } from '../remittance/basis.js';
@@ -49,6 +50,24 @@ export function shortPeriodRetained(scale, daysInForce, totalDays) {
   const annualDays = totalDays >= 365 ? daysInForce : Math.ceil((daysInForce * 365) / Math.max(totalDays, 1));
   const band = scale.find((s) => annualDays <= s.maxDays) || null;
   return { band, annualDays, retainedPercent: band ? band.retainedPercent : 100 };
+}
+
+/** Whether the policy is a CTPL policy (its product, or the CTPL-only flag of its document). */
+async function isCtplPolicy(db, policy) {
+  const doc = policy.doc || {};
+  if (doc.ctplOnly === true || /^ctpl$/i.test(String(doc.insurancePolicyType || ''))) return true;
+  if (!policy.product_id) return false;
+  const { rows } = await db.query('SELECT code FROM products WHERE id = $1', [policy.product_id]);
+  return String(rows[0]?.code || '').toUpperCase() === 'CTPL';
+}
+
+/** Net premium of a gross premium: the gross less the premium taxes in force for the policy's product and place. */
+async function netOfGross(db, policy, gross) {
+  const doc = policy.doc || {};
+  const c = await chargesFor({ premium: gross, productId: policy.product_id || null, lob: policy.lob || null, regime: doc.premiumTaxRegime || null,
+    lguCode: doc.lguCode || null, city: doc.lguCity || null, includeFlat: false }, db);
+  const rate = gross > 0 ? num(c.totalCharges) / gross : 0;
+  return round2(gross / (1 + rate));
 }
 
 /**
@@ -83,11 +102,15 @@ export async function computeReturn(db, policy, input = {}) {
   }
 
   const doc = policy.doc || {};
-  const policyNet = round2(num(policy.net_premium) || num(doc.netPremium) || num(policy.details?.netPremium));
-  // A policy whose premium is only the CTPL tariff has no net premium: the Insurance Commission tariff carries its
+  let policyNet = round2(num(policy.net_premium) || num(doc.netPremium) || num(policy.details?.netPremium));
+  // A CTPL policy whose premium is only the tariff has no net premium: the Insurance Commission tariff carries its
   // taxes and the authentication fee inside, so the return is computed on the tariff amount and adds no premium tax.
+  // Any other policy kept with its gross premium alone (a loaded or migrated policy) has its net premium taken out of
+  // the gross at the rates in force, as the policy page shows it, so its taxes are returned as usual.
   const policyGross = round2(num(policy.premium_total) || num(doc.grossPremium) || num(policy.details?.grossPremium));
-  const tariffOnly = !(policyNet > 0) && policyGross > 0;
+  const ctpl = await isCtplPolicy(db, policy);
+  const tariffOnly = !(policyNet > 0) && policyGross > 0 && ctpl;
+  if (!(policyNet > 0) && policyGross > 0 && !ctpl) policyNet = await netOfGross(db, policy, policyGross);
   if (!(policyNet > 0) && !tariffOnly) throw conflict(`Policy ${policy.policy_number} has no net premium to compute a return on`);
   const policyBase = tariffOnly ? policyGross : policyNet;
   const partial = isPartialCancellation(type);

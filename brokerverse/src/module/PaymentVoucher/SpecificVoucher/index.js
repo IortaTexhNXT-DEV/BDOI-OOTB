@@ -339,7 +339,7 @@ function SpecificVoucher() {
       <div className="tablegap_container">
         <DataTable
           value={invoiceListData}
-          tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+          tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
@@ -354,7 +354,7 @@ function SpecificVoucher() {
         >
           <Column
             selectionMode="multiple"
-            headerStyle={{ width: "4rem", border: "0px solid #e5e7eb" }}
+            headerStyle={{ width: "4rem", border: "0px solid var(--surface-border)" }}
             style={{ textAlign: "center" }}
           ></Column>
           <Column

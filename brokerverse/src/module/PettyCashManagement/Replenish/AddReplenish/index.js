@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useRef } from "react";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -34,6 +35,7 @@ const initialValue = {
 };
 
 const AddReplenish = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const toastRef = useRef(null);
@@ -68,11 +70,11 @@ const AddReplenish = () => {
     const errors = {};
 
     if (!values.PettycashCode) {
-      errors.PettycashCode = "Receipt Number is required";
+      errors.PettycashCode = t("pettyCash.fundRequired");
     }
 
     if (!values.BankCode) {
-      errors.BankCode = "Bank Code is required";
+      errors.BankCode = t("pettyCash.bankCodeRequired");
     }
 
     return errors;
@@ -122,9 +124,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 xl:col-3 input__view">
               <InputField
                 classNames="input__filed"
-                label="Date"
+                label={t("pettyCash.date")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value="24/01/2024"
@@ -133,9 +135,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 xl:col-3 input__view">
             <InputField
                 classNames="input__filed"
-                label="Transaction Code"
+                label={t("pettyCash.transactionCode")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 
@@ -144,9 +146,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 xl:col-3 input__view">
               <InputField
                 classNames="input__filed"
-                label="Transaction Number"
+                label={t("pettyCash.transactionNumber")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value=""
@@ -157,9 +159,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Petty cash Code*"
-                placeholder="Select"
-                textColor={"#111927"}
+                label={t("pettyCash.pettyCashCode")} required
+                placeholder={t("pettyCash.select")}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -179,9 +181,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Petty cash Description"
+                label={t("pettyCash.pettyCashDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.PettycashDescription}
@@ -193,9 +195,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Bank Code*"
-                placeholder="Select"
-                textColor={"#111927"}
+                label={t("pettyCash.bankCode")} required
+                placeholder={t("pettyCash.select")}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -213,9 +215,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Bank Account Name"
+                label={t("pettyCash.bankAccountName")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.BankAccountName}
@@ -231,9 +233,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Sub Account Code"
-                placeholder="Select"
-                textColor={"#111927"}
+                label={t("pettyCash.subAccountCode")}
+                placeholder={t("pettyCash.select")}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -253,9 +255,9 @@ const AddReplenish = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Sub Account Description"
+                label={t("pettyCash.subAccountDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.SubAccountDescription}
@@ -269,12 +271,10 @@ const AddReplenish = () => {
           </div>
           <div className="grid ">
             <div className="calender__container col-12 md:col-3 lg:col-3 ">
-              <LabelWrapper className="calenderlable__container">
-                Disbursement From date
-              </LabelWrapper>
+              <LabelWrapper label={t("pettyCash.disbursementFromDate")} className="calenderlable__container" />
               <Calendar
                 showIcon
-                placeholder="Select"
+                placeholder={t("pettyCash.select")}
                 className="calendar_container"
                 value={formik.values.DisbursementFromdate}
                 onChange={(e) => {
@@ -284,12 +284,10 @@ const AddReplenish = () => {
               />
             </div>
             <div className="calender__container col-12 md:col-3 lg:col-3 ">
-              <LabelWrapper className="calenderlable__container">
-                Disbursement To date
-              </LabelWrapper>
+              <LabelWrapper label={t("pettyCash.disbursementToDate")} className="calenderlable__container" />
               <Calendar
                 showIcon
-                placeholder="Select"
+                placeholder={t("pettyCash.select")}
                 className="calendar_container"
                 value={formik.values.DisbursementTodate}
                 onChange={(e) => {
@@ -305,7 +303,7 @@ const AddReplenish = () => {
         <div className="col-12 md:col-12 lg:col-12">
           <div className="btn__container">
             <Button
-              label="Next"
+              label={t("pettyCash.next")}
               className="add__btn"
               onClick={() => {
                 formik.handleSubmit();

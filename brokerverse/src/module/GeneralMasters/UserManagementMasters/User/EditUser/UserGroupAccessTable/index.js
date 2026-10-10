@@ -264,7 +264,7 @@ const UserGroupAccess = () => {
               error={formik.touched.RoleName && formik.errors.RoleName}
               label={t("generalMasters.roleName")}
               placeholder={t("generalMasters.enter")}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
             />
@@ -277,7 +277,7 @@ const UserGroupAccess = () => {
               error={formik.touched.ActiveHours && formik.errors.ActiveHours}
               label={t("generalMasters.activeHours")}
               placeholder={t("generalMasters.enter")}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
             />

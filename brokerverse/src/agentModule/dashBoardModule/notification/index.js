@@ -165,7 +165,7 @@ const Notification = () => {
               <div className="no-notifications">
                 <i
                   className="pi pi-bell-slash"
-                  style={{ fontSize: "2rem", color: "#6c757d" }}
+                  style={{ fontSize: "2rem", color: "var(--text-color-secondary)" }}
                 ></i>
                 <p>{t("notificationPage.noNotifications")}</p>
               </div>

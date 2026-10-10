@@ -1,5 +1,5 @@
 /**
- * Petty cash: funds (initiate = Dr Petty Cash Fund / Cr Cash in Bank), requests (maker-checker approval), disbursements
+ * Petty cash: funds (initiate, approved by a second user = Dr Petty Cash Fund / Cr Cash in Bank), requests (maker-checker approval), disbursements
  * (Dr Expense + Input VAT / Cr Petty Cash Fund + WHT Payable), receipts (cash returned: Dr Petty Cash Fund / Cr account)
  * and replenishments (Dr Petty Cash Fund / Cr Cash in Bank). available_cash is kept in step with every posting.
  */
@@ -12,11 +12,12 @@ import { assertChecker, isoDate, num, round2, str, today } from '../accounting/l
 import { notify } from '../notifications/service.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { getSetting } from '../../lib/settings.js';
 
 export const fundRow = (f) => ({ id: f.id, code: f.code, pettyCashCode: f.code, description: f.description, transactionNumber: f.transaction_number, transactionDate: f.transaction_date,
   fundSize: Number(f.fund_size), maxLimit: Number(f.max_limit), minimumCashbox: Number(f.minimum_cashbox), availableCash: Number(f.available_cash), bankCode: f.bank_code,
   bankAccountCode: f.bank_account_code, mainAccountCode: f.main_account, subAccountCode: f.sub_account, currency: f.currency, branchCode: f.branch_code,
-  departmentCode: f.department_code, custodianUserId: f.custodian_user_id, status: f.status, journalId: f.journal_id, createdAt: f.created_at });
+  departmentCode: f.department_code, custodianUserId: f.custodian_user_id, status: f.status, journalId: f.journal_id, createdBy: f.created_by, createdAt: f.created_at });
 export const requestRow = (r, lines = []) => ({ id: r.id, requestNumber: r.request_number, fundId: r.fund_id, pettyCashCode: r.fund_code, requesterName: r.requester_name,
   requestDate: r.request_date, departmentCode: r.department_code, branchCode: r.branch_code, purpose: r.purpose, totalAmount: Number(r.total_amount), status: r.status,
   approvedBy: r.approved_by, approvedByName: r.approved_by_name || null, approvedAt: r.approved_at, rejectionReason: r.rejection_reason, createdBy: r.created_by, createdAt: r.created_at,
@@ -44,6 +45,10 @@ async function fundAccount(db, f) {
  * Establish a petty cash fund (Accounts > Petty Cash > Initiate, the owner of the fund: code, size, limits). A code
  * left empty is issued from the petty_cash_fund numbering series (Petty Cash Code).
  */
+/**
+ * A new fund waits for a second user (maker-checker, finance.maker_checker_enabled): it is established, its journal
+ * posted and its cash made available, when another user approves it. With maker-checker off it is established at once.
+ */
 export async function createFund(db, b, user) {
   b = { ...b, code: str(b.code) || (await nextDocumentNumber('petty_cash_fund', { db })) };
   const exists = (await db.query('SELECT 1 FROM petty_cash_funds WHERE code = $1', [b.code])).rows[0];
@@ -51,14 +56,41 @@ export async function createFund(db, b, user) {
   if (!(Number(num(b.fundSize)) > 0)) throw badRequest('Validation failed', [{ path: 'fundSize', message: 'Fund size must be greater than zero' }]);
   const size = round2(num(b.fundSize));
   const txn = await nextDocumentNumber('petty_cash', { db });
+  const approval = (await getSetting('finance.maker_checker_enabled', true)) !== false;
   const f = (await db.query(`INSERT INTO petty_cash_funds(code, description, transaction_number, transaction_date, fund_size, max_limit, minimum_cashbox, available_cash, bank_code, bank_account_code,
-      main_account, sub_account, currency, branch_code, department_code, custodian_user_id, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$5,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
+      main_account, sub_account, currency, branch_code, department_code, custodian_user_id, created_by, status) VALUES ($1,$2,$3,$4,$5,$6,$7,$5,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
   [b.code, str(b.description), txn, isoDate(b.transactionDate) || (await today()), size, round2(num(b.maxLimit)), round2(num(b.minimumCashbox)), str(b.bankCode), str(b.bankAccountCode),
-    str(b.mainAccountCode), str(b.subAccountCode), b.currency || (await baseCurrency()), str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, user.id])).rows[0];
-  const jv = await postEvent('pettycash.fund', { source: 'petty-cash', entryType: 'PETTY_CASH_FUND', referenceType: 'PettyCash', referenceId: f.id, transactionCode: txn, description: `Petty cash fund ${f.code} established`,
-    branchCode: f.branch_code, departmentCode: f.department_code, bankAccount: f.bank_account_code, accounts: { fund: await fundAccount(db, f) },
-    amounts: { amount: size }, vars: { fundCode: f.code } }, { db, user });
-  return (await db.query('UPDATE petty_cash_funds SET journal_id = $2 WHERE id = $1 RETURNING *', [f.id, jv.id])).rows[0];
+    str(b.mainAccountCode), str(b.subAccountCode), b.currency || (await baseCurrency()), str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, user.id,
+    approval ? 'pending' : 'active'])).rows[0];
+  if (!approval) return establishFund(db, f, user);
+  await notifyApprovers({ audience: 'write:disbursements', document: 'Petty cash fund', number: f.code, by: user.username,
+    detail: `${f.description || f.code}, ${await formatMoney(size)}`, link: '/accounts/pettycash/pettycashcodeinitiate', entity: 'petty_cash_fund', entityId: f.id });
+  return f;
+}
+
+/** Post the fund's journal (Dr Petty Cash Fund / Cr Cash in Bank) and make it active. */
+async function establishFund(db, f, user) {
+  const jv = await postEvent('pettycash.fund', { source: 'petty-cash', entryType: 'PETTY_CASH_FUND', referenceType: 'PettyCash', referenceId: f.id, transactionCode: f.transaction_number,
+    description: `Petty cash fund ${f.code} established`, branchCode: f.branch_code, departmentCode: f.department_code, bankAccount: f.bank_account_code,
+    accounts: { fund: await fundAccount(db, f) }, amounts: { amount: round2(Number(f.fund_size)) }, vars: { fundCode: f.code } }, { db, user });
+  return (await db.query("UPDATE petty_cash_funds SET journal_id = $2, status = 'active', updated_at = now() WHERE id = $1 RETURNING *", [f.id, jv.id])).rows[0];
+}
+
+/** Approve (establish) or reject a fund waiting for approval; the approver must not be the user who initiated it. */
+export async function decideFund(db, id, action, user, reason = null) {
+  const f = await getFund(db, id, true);
+  if (f.status !== 'pending') throw conflict(`Petty cash fund ${f.code} is ${f.status}; only a fund waiting for approval can be ${action === 'approve' ? 'approved' : 'rejected'}`);
+  await assertChecker(user, f.created_by, 'petty cash fund');
+  const out = action === 'approve' ? await establishFund(db, f, user)
+    : (await db.query("UPDATE petty_cash_funds SET status = 'rejected', updated_at = now() WHERE id = $1 RETURNING *", [f.id])).rows[0];
+  await notifyDecision({ userId: f.created_by, decidedBy: user.id, document: 'Petty cash fund', number: f.code, approved: action === 'approve', status: action === 'approve' ? 'approved' : 'rejected',
+    by: user.username, reason, link: '/accounts/pettycash/pettycashcodeinitiate', entity: 'petty_cash_fund', entityId: f.id });
+  return out;
+}
+
+/** A fund that can take requests and postings: established and not closed. */
+function assertUsable(f) {
+  if (f.status !== 'active') throw conflict(`Petty cash fund ${f.code} is ${f.status === 'pending' ? 'waiting for approval' : f.status}`);
 }
 
 export async function updateFund(db, id, b) {
@@ -90,6 +122,7 @@ async function saveLines(db, id, lines) {
 }
 export async function createRequest(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode);
+  assertUsable(f);
   const no = await nextDocumentNumber('petty_cash_request', { db });
   const r = (await db.query(`INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, requester_user_id, request_date, department_code, branch_code, purpose, status, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`, [no, f.id, b.requesterName, b.requesterUserId || null, isoDate(b.requestDate) || (await today()), str(b.departmentCode), str(b.branchCode),
@@ -140,6 +173,7 @@ async function adjustCash(db, f, delta) {
 
 export async function createDisbursement(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode, true);
+  assertUsable(f);
   const amount = round2(num(b.amount)); const vat = round2(num(b.vat)); const wht = round2(num(b.wht));
   if (!(amount > 0)) throw badRequest('amount must be greater than zero');
   if (vat >= amount || wht >= amount) throw badRequest('VAT and WHT must be less than the amount');
@@ -169,6 +203,7 @@ export async function createDisbursement(db, b, user) {
 
 export async function createReceipt(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode, true);
+  assertUsable(f);
   const amount = round2(num(b.amount));
   if (!(amount > 0)) throw badRequest('amount must be greater than zero');
   const no = await nextDocumentNumber('petty_cash_receipt', { db });
@@ -184,6 +219,7 @@ export async function createReceipt(db, b, user) {
 
 export async function createReplenishment(db, b, user) {
   const f = await getFund(db, b.fundId || b.pettyCashCode, true);
+  assertUsable(f);
   const amount = round2(b.amount === undefined || b.amount === '' ? Number(f.fund_size) - Number(f.available_cash) : num(b.amount));
   if (!(amount > 0)) throw conflict(`Fund ${f.code} is already at its full size`);
   const txn = await nextDocumentNumber('petty_cash', { db });

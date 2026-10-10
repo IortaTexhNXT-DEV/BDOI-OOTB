@@ -18,17 +18,23 @@ import mastersService from "../../services/mastersService";
 import service from "../../services/opsAccountingService";
 import userService from "../../services/userService";
 import { openConfirm } from "../../components/ConfirmDialog";
-import { humanize } from "../../components/ActivityLog";
+import { humanize, RecordActivityLog } from "../../components/ActivityLog";
+import DetailDialog from "../../components/DetailDialog";
 import { Field, OpsTag, PageHeader, blank, isoOf, showError, showSuccess, toDate, useFieldErrors } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-// whole numbers of days: payment terms, follow-up days, maximum days in force
+// whole numbers of days (payment terms, follow-up days, maximum days in force) and months (useful life); percentages
+// (premium retained, rates) keep their unit, which the form shows in the label hint
 const DAY_FIELDS = /Days$/;
+const MONTH_FIELDS = /Months$/;
+const PERCENT_FIELDS = /(Percent|Pct|Rate)$/;
 const display = (f, v, t) => {
   if (v === null || v === undefined || v === "") return "";
   if (f.type === "boolean") return v === true || v === "true" ? t("detailView.yes") : t("detailView.no");
   if (DAY_FIELDS.test(f.name) && Number.isFinite(Number(v))) return t("opsAcc.masters.days", { count: Number(v) });
+  if (MONTH_FIELDS.test(f.name) && Number.isFinite(Number(v))) return t("opsAcc.masters.months", { count: Number(v) });
+  if ((PERCENT_FIELDS.test(f.name) || /%/.test(f.label || "")) && Number.isFinite(Number(v))) return `${Number(v)}%`;
   // "*" matches every line of business or claim type
   if (v === "*") return t("opsAcc.masters.anyValue");
   if (f.type === "select" && Array.isArray(f.options)) {
@@ -57,7 +63,7 @@ const recordName = (r, fields) => {
   const code = r.code ? String(r.code) : "";
   const nameField = fields.find((f) => NAME_FIELDS.test(f.name) && r[f.name]);
   const name = nameField ? String(r[nameField.name]) : "";
-  return [code, name].filter(Boolean).join(" ") || String(r.id);
+  return [code, name].filter(Boolean).join(" · ") || String(r.id);
 };
 // the record as people call it: its name, else its code
 const shortName = (r, fields) => {
@@ -88,6 +94,7 @@ const MasterRecordsPage = ({ type, title, item, group, section, help, columns, o
   const [edit, setEdit] = useState(null); // { id, values }
   const { errors, check, fromApi, clear } = useFieldErrors();
   const open = (value) => { clear(); setEdit(value); };
+  const [history, setHistory] = useState(null); // the record whose history is open
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -139,7 +146,7 @@ const MasterRecordsPage = ({ type, title, item, group, section, help, columns, o
     // the code and name are in the title; the facts are the other fields of the list, as they are shown there
     const named = ["code", ...fields.filter((f) => NAME_FIELDS.test(f.name)).slice(0, 1).map((f) => f.name)];
     const ok = await openConfirm({
-      title: t(`opsAcc.confirmations.master.${action}Title`, { name: recordName(r, fields) }),
+      title: t(`opsAcc.confirmations.master.${action}ItemTitle`, { item: item || title, name: recordName(r, fields) }),
       severity: r.isActive ? "warning" : "neutral",
       message: t(`opsAcc.confirmations.master.${action}Message`),
       facts: [
@@ -196,7 +203,9 @@ const MasterRecordsPage = ({ type, title, item, group, section, help, columns, o
           {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name], t)} />)}
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.isActive ? "active" : "inactive"} />} />
           <Column header={t("common.actions")} {...actionsColumn} body={(r) => (
-            <RowActions onEdit={() => open({ id: r.id, values: { ...r } })} editLabel={t("opsAcc.edit")} active={r.isActive} onStatus={() => toggle(r)} />
+            <RowActions onEdit={() => open({ id: r.id, values: { ...r } })} editLabel={t("opsAcc.edit")} active={r.isActive} onStatus={() => toggle(r)}>
+              <Button type="button" icon="pi pi-history" text rounded aria-label={t("opsAcc.masters.history")} tooltip={t("opsAcc.masters.history")} tooltipOptions={{ position: "top" }} onClick={() => setHistory(r)} />
+            </RowActions>
           )} />
         </DataTable>
       </div>
@@ -204,6 +213,11 @@ const MasterRecordsPage = ({ type, title, item, group, section, help, columns, o
         onHide={() => open(null)} footer={<div><Button label={t("opsAcc.cancel")} outlined onClick={() => open(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
         {edit && <div className="grid">{fields.map((f) => <Field key={f.name} label={f.label} required={f.required && !f.numbering} error={errors[f.name]}>{input(f)}</Field>)}</div>}
       </Dialog>
+      {/* every change of a record (bank details, terms, rates), with who made it and when */}
+      <DetailDialog visible={!!history} onHide={() => setHistory(null)} size="md"
+        header={history ? t("opsAcc.masters.historyOf", { item: item || title, name: recordName(history, fields) }) : ""}>
+        {history && <RecordActivityLog entity={`master:${type}`} recordId={history.id} />}
+      </DetailDialog>
     </div>
   );
 };

@@ -263,7 +263,7 @@ const BankMaster = () => {
         <div className="card">
           <DataTable
             value={search ? BankSearchList : bankList}
-            tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+            tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}

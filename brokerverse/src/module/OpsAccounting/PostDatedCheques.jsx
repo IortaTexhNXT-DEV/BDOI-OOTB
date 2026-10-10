@@ -150,7 +150,7 @@ const PostDatedCheques = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("opsAcc.pdc.title")} subtitle={t("opsAcc.pdc.intro")}>
+      <PageHeader title={t("opsAcc.pdc.title")}>
         <Button icon="pi pi-download" label={t("opsAcc.export")} outlined onClick={() => service.downloadPdcs({ status }).catch((e) => showError(toast, e))} />
         <Button icon="pi pi-plus" label={t("opsAcc.pdc.register")} onClick={() => openForm({ ...emptyCheque, mode: "register", targetKind: "receivableId", target: "" })} />
       </PageHeader>
@@ -163,7 +163,7 @@ const PostDatedCheques = () => {
       )}
       <div className="pe-card">
         <TabView>
-          <TabPanel header={t("opsAcc.pdc.register")}>
+          <TabPanel header={t("opsAcc.pdc.allCheques")}>
             <div className="flex gap-2 mb-2">
               <Dropdown value={status} options={STATUSES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }))} onChange={(e) => setStatus(e.value)} className="w-12rem" />
               <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.pdc.searchHint")} className="w-20rem" />
@@ -184,22 +184,22 @@ const PostDatedCheques = () => {
           <div className="grid">
             {form.mode === "register" && (
               <>
-                <Field label={t("opsAcc.pdc.against")} col="col-12 md:col-4">
+                <Field label={t("opsAcc.pdc.against")} col="col-12 md:col-6">
                   <Dropdown value={form.targetKind} options={[{ label: t("opsAcc.pdc.billNumber"), value: "receivableId" }, { label: t("opsAcc.policyNumber"), value: "policyId" }]}
                     onChange={(e) => setForm({ ...form, targetKind: e.value })} className="w-full" />
                 </Field>
-                <Field label={t("opsAcc.reference")} col="col-12 md:col-8" required error={errors.target || errors[form.targetKind]}><InputText value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} className="w-full" /></Field>
+                <Field label={t("opsAcc.reference")} col="col-12 md:col-6" required error={errors.target || errors[form.targetKind]}><InputText value={form.target} onChange={(e) => setForm({ ...form, target: e.target.value })} className="w-full" /></Field>
               </>
             )}
             <Field label={t("opsAcc.pdc.bank")} col="col-12 md:col-6">
               <Dropdown value={form.bankId} options={banks} optionLabel="label" optionValue="value" filter showClear onChange={(e) => setForm({ ...form, bankId: e.value })} className="w-full" />
             </Field>
             <Field label={t("opsAcc.pdc.draweeBank")} col="col-12 md:col-6"><InputText value={form.draweeBank} onChange={(e) => setForm({ ...form, draweeBank: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.pdc.chequeNumber")} col="col-12 md:col-4" required error={errors.chequeNumber}><InputText value={form.chequeNumber} onChange={(e) => setForm({ ...form, chequeNumber: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.pdc.chequeDate")} col="col-12 md:col-4" required error={errors.chequeDate}><Calendar value={form.chequeDate} onChange={(e) => setForm({ ...form, chequeDate: e.value })} showIcon className="w-full" /></Field>
-            <Field label={t("opsAcc.amount")} col="col-12 md:col-4" required error={errors.amount}><InputNumber value={form.amount} mode="decimal" minFractionDigits={2} onValueChange={(e) => setForm({ ...form, amount: e.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.pdc.chequeNumber")} col="col-12 md:col-6" required error={errors.chequeNumber}><InputText value={form.chequeNumber} onChange={(e) => setForm({ ...form, chequeNumber: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.pdc.chequeDate")} col="col-12 md:col-6" required error={errors.chequeDate}><Calendar value={form.chequeDate} onChange={(e) => setForm({ ...form, chequeDate: e.value })} showIcon className="w-full" /></Field>
+            <Field label={t("opsAcc.amount")} col="col-12 md:col-6" required error={errors.amount}><InputNumber value={form.amount} mode="decimal" minFractionDigits={2} onValueChange={(e) => setForm({ ...form, amount: e.value })} className="w-full" /></Field>
             <Field label={t("opsAcc.pdc.keptIn")} col="col-12 md:col-6"><InputText value={form.storageLocation} onChange={(e) => setForm({ ...form, storageLocation: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.remarks")} col="col-12 md:col-6"><InputText value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.remarks")} col="col-12"><InputText value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></Field>
           </div>
         )}
       </Dialog>

@@ -174,9 +174,8 @@ const BrokerSlipDetail = () => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={`${t("placement.brokerSlip.title")} ${slip.slipNumber}`} subtitle={`${slip.insuredName || slip.customerName} - ${slip.productType || ""}`} onBack={() => navigate("/placement/broker-slips")}>
-        <StatusTag status={slip.status} />
-        <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => printSlip()} className="ml-2" />
+      <PageHeader title={`${t("placement.brokerSlip.title")} ${slip.slipNumber}`} subtitle={`${slip.insuredName || slip.customerName} - ${slip.productType || ""}`} onBack={() => navigate("/placement/broker-slips")} status={<StatusTag status={slip.status} />}>
+        <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => printSlip()} />
         {/* a comparison needs two offers; until then the report is not offered */}
         {!["draft", "cancelled"].includes(slip.status) && offered.length >= 2 && canOpen("/sales/comparison-reports") && (
           <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"

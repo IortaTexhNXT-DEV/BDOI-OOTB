@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
+import { printPdf } from "../components/Print/printPdf";
 
 /**
  * Distribution, programmes and products API: lead assignment (/lead-assignment), distribution channels (/channels),
@@ -36,24 +37,21 @@ const upload = async (path, file) => {
   form.append("file", file);
   return handle(await fetch(`${BASE_URL}${path}`, { method: "POST", body: form, headers: { ...authService.getAuthHeader() } }));
 };
-/** Fetch a file with the session token and open (PDF) or save it. */
+/** Print a PDF of the API (components/Print printPdf), or fetch any other file with the session token and save it. */
 const fileFrom = async (path, fileName, { open = false, method = "GET", payload = null } = {}) => {
+  if (open) return printPdf(path, { fileName });
   const response = await fetch(`${BASE_URL}${path}`, {
     method, headers: { ...(payload ? { "Content-Type": "application/json" } : {}), ...authService.getAuthHeader() }, body: payload ? JSON.stringify(payload) : undefined,
   });
   if (!response.ok) await handle(response);
   const name = (response.headers.get("content-disposition") || "").match(/filename="([^"]+)"/)?.[1] || fileName;
   const url = URL.createObjectURL(await response.blob());
-  if (open) {
-    window.open(url, "_blank", "noopener");
-  } else {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 const id = (v) => encodeURIComponent(v);

@@ -28,6 +28,7 @@ export const toFundRow = (fund) => ({
   MaxLimit: fund.maxLimit,
   MinimumCashbox: fund.minimumCashbox,
   status: fund.status,
+  createdBy: fund.createdBy,
 });
 
 const errorMessage = (error) => error?.message || "Something went wrong";

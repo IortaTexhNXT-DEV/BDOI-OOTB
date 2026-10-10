@@ -8,6 +8,7 @@ import { JourneyTimeline } from "./shared";
 import "./index.scss";
 
 const PLACEABLE = ["CustomerAccepted", "SubmittedToInsurer", "Approved"];
+const STOPPED = ["Rejected", "Expired", "Cancelled", "Lapsed"];
 
 /**
  * Placement journey of a quotation (Quotation Slip): Broker Slip -> Quotation Slip -> Placement Slip -> Policy with links,
@@ -20,11 +21,15 @@ const QuoteJourneyPanel = ({ quotation, relatedPolicy, onChanged }) => {
   if (!quotation?.quotationId) return null;
   const journey = quotation.journey || {};
   const policyId = quotation.policyId || relatedPolicy?.policyId || null;
+  // a rejected quotation stops the journey at the quotation slip; once the policy is issued, a step that was never
+  // taken is shown as not used rather than still to do
+  const stopped = STOPPED.includes(quotation.quotationStatus);
+  const placementMode = policyId && !quotation.placementId ? "skip" : journey.placementSlip;
   const steps = [
-    { key: "brokerSlip", done: Boolean(quotation.brokerSlipId), reference: quotation.brokerSlipNumber, id: quotation.brokerSlipId, mode: journey.brokerSlip },
-    { key: "quotationSlip", done: true, reference: quotation.quotationNumber, mode: journey.quotationSlip },
-    { key: "placementSlip", done: Boolean(quotation.placementId), reference: quotation.placementNumber, id: quotation.placementId, mode: journey.placementSlip },
-    { key: "policy", done: Boolean(policyId), reference: relatedPolicy?.policyNumber || (policyId ? t("placement.journey.issued") : null), id: policyId, mode: "required" },
+    { key: "brokerSlip", done: Boolean(quotation.brokerSlipId), reference: quotation.brokerSlipNumber, id: quotation.brokerSlipId, mode: policyId && !quotation.brokerSlipId ? "skip" : journey.brokerSlip },
+    { key: "quotationSlip", done: !stopped, stopped, reference: quotation.quotationNumber, mode: journey.quotationSlip },
+    { key: "placementSlip", done: Boolean(quotation.placementId), reference: quotation.placementNumber, id: quotation.placementId, mode: placementMode },
+    { key: "policy", done: Boolean(policyId), reference: relatedPolicy?.policyNumber || relatedPolicy?.policyData?.policyNumber || (policyId ? t("placement.journey.issued") : null), id: policyId, mode: "required" },
   ];
   const canPlace = !quotation.placementId && !policyId && journey.placementSlip && journey.placementSlip !== "skip" && PLACEABLE.includes(quotation.quotationStatus);
   const place = async () => {

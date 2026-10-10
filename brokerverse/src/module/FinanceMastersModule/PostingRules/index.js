@@ -21,6 +21,11 @@ import DateField from "../../../components/DateField";
 import { formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
+const TAX_WORDS = new Set(["vat", "dst", "lgt", "fst", "ewt", "wht", "cwt"]);
+// an amount key in words with its tax acronyms in capitals: "commission_ewt" -> "Commission EWT", "vat" -> "VAT"
+const amountName = (key) => String(key || "").replace(/([a-z0-9])([A-Z])/g, "$1 $2").split(/[\s_-]+/).filter(Boolean).map((w) => w.toLowerCase())
+  .map((w, i) => (TAX_WORDS.has(w) ? w.toUpperCase() : i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
+
 const money = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const today = () => new Date().toISOString().slice(0, 10);
 // a narration as the journal will read it: each {{field}} it fills in is shown as the field's name ("‹Insurer›")
@@ -180,7 +185,6 @@ const PostingRules = () => {
         { label: t("postingRules.version"), value: `v${rule.version}` },
         { label: t("postingRules.effectiveFrom"), value: rule.effectiveFrom, type: "date" },
       ],
-      note: t("postingRules.confirm.approvalNote"),
       confirmLabel: t(deactivate ? "postingRules.confirm.deactivateAction" : "postingRules.confirm.activateAction"),
       onConfirm: async () => {
         out = await postingRulesService.setActive(rule.id, !rule.active);
@@ -282,7 +286,7 @@ const PostingRules = () => {
                     <Column field="lineNo" header="#" style={{ width: "3rem" }} />
                     <Column header={t("postingRules.side")} style={{ width: "5rem" }} body={(l) => <Tag value={l.side} severity={l.side === "Dr" ? "success" : "info"} />} />
                     <Column header={t("postingRules.account")} body={accountLabel} />
-                    <Column header={t("postingRules.amount")} style={{ width: "9rem" }} body={(l) => humanize(l.amountKey)} />
+                    <Column header={t("postingRules.amount")} style={{ width: "9rem" }} body={(l) => amountName(l.amountKey)} />
                     <Column header={t("postingRules.perParticipant")} style={{ width: "6rem" }} body={(l) => (l.perParticipant ? <i className="pi pi-users" /> : null)} />
                     <Column header={t("postingRules.lineNarration")} body={(l) => readableNarration(l.narration)} bodyClassName="posting-rules__narration" />
                   </DataTable>

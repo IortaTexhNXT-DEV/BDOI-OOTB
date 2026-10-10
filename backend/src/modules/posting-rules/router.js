@@ -199,7 +199,16 @@ define({
     // what a new version changed against the one before it: the lines added and removed (side, account, amount)
     const lines = (await pool.query(`SELECT p.version, l.side, l.account_type, l.account, l.fallback_role, l.amount_key FROM posting_rule_lines l
       JOIN posting_rules p ON p.id = l.rule_id WHERE p.event_code = $1 ORDER BY l.line_no`, [r.eventCode])).rows;
-    const lineText = (l) => `${l.side} ${l.account || humanize(l.fallback_role || l.account_type || '')} · ${humanize(l.amount_key || '')}`;
+    // a line by its account as the books name it (code and name of a role's or a GL account) and its amount in words
+    const roleGl = new Map((await svc.accountDetermination(pool)).sections.flatMap((x) => x.roles).map((x) => [x.role, x]));
+    const glNames = new Map((await pool.query('SELECT code, name FROM gl_accounts')).rows.map((g) => [g.code, g.name]));
+    const accountText = (l) => {
+      const role = roleGl.get(l.account_type === 'role' ? l.account : l.fallback_role);
+      if (l.account_type === 'gl') return [l.account, glNames.get(l.account)].filter(Boolean).join(' ');
+      if (l.account_type === 'role' && role) return [role.glCode, role.glName || role.label].filter(Boolean).join(' ');
+      return humanize(String(l.account || l.fallback_role || l.account_type || '').replace(/_account$/, ''));
+    };
+    const lineText = (l) => `${l.side} ${accountText(l)} · ${svc.amountName(l.amount_key)}`;
     const linesOf = (v) => lines.filter((l) => Number(l.version) === v).map(lineText);
     for (const x of out) {
       if (!x.version || x.action !== 'create-version') continue;

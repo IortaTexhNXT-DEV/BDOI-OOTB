@@ -166,7 +166,7 @@ const CurrencyMaster = () => {
                 value={search ? CurrencySearchList : CurrencyList}
                 tableStyle={{
                   minWidth: "50rem",
-                  color: "#2e2e2e",
+                  color: "var(--text-color)",
                 }}
                 scrollable={true}
                 scrollHeight="40vh"

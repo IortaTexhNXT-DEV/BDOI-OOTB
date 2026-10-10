@@ -41,6 +41,7 @@ const Index = () => {
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [code, setCode] = useState("");
   const [codeTo, setCodeTo] = useState("");
+  const [bulkErrors, setBulkErrors] = useState({});
   // Set dateFrom to yesterday (t-1 day) and dateTo to today
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -99,16 +100,11 @@ const Index = () => {
     }));
   };
 
+  // the required fields are marked; an empty one is named under its field rather than in a toast
   const handleBulkPrint = async () => {
-    if (!code || !dateFrom || !dateTo) {
-      toast.current?.show({
-        severity: "warn",
-        summary: t("common.error"),
-        detail: t("paymentVoucher.fillRequiredFields"),
-        life: 4000,
-      });
-      return;
-    }
+    const missing = { code: !code, dateFrom: !dateFrom, dateTo: !dateTo };
+    setBulkErrors(missing);
+    if (Object.values(missing).some(Boolean)) return;
 
     // Force string conversion to ensure we always get a string value
     let customerCodeString;
@@ -387,6 +383,7 @@ const Index = () => {
     navigate("/accounts/paymentvoucher/createvoucher");
   };
   const handleModal = (rowData) => {
+    setBulkErrors({});
     setVisiblePopup(true);
   };
 
@@ -540,7 +537,7 @@ const Index = () => {
                   ? paymentVocherFilterList
                   : paymentVocherList
               }
-              tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+              tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
               rowClassName={(row) =>
                 recorded && ((recorded.disbursementId && (row.id || row.disbursementId) === recorded.disbursementId) || (recorded.voucherNumber && row.VoucherNumber === recorded.voucherNumber))
                   ? "voucher-row--recorded"
@@ -651,7 +648,7 @@ const Index = () => {
           footer={(
             <>
               <Button type="button" label={t("common.cancel")} text onClick={() => setVisiblePopup(false)} />
-              <Button type="button" icon="pi pi-print" label={t("paymentVoucher.generate")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
+              <Button type="button" icon="pi pi-print" label={t("paymentVoucher.printVouchers")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
             </>
           )}
         >
@@ -660,9 +657,11 @@ const Index = () => {
             <div className="col-12 md:col-6 lg:col-6">
               <DropDowns
                 value={code}
-                onChange={(e) => setCode(e.value)}
+                onChange={(e) => { setCode(e.value); setBulkErrors((x) => ({ ...x, code: false })); }}
                 className="dropdown__container"
                 label={t("paymentVoucher.customerCodeFrom")}
+                required
+                error={bulkErrors.code ? t("paymentVoucher.customerCodeFromRequired") : null}
                 options={getCustomerCodeOptions()}
                 optionLabel="name"
                 optionValue="code"
@@ -690,7 +689,7 @@ const Index = () => {
           {/* Date From and Date To */}
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper label={t("paymentVoucher.dateFrom")}>
+              <LabelWrapper label={t("paymentVoucher.dateFrom")} required>
                 <Calendar
                   showIcon
                   className="w-full"
@@ -703,7 +702,7 @@ const Index = () => {
               </LabelWrapper>
             </div>
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper label={t("paymentVoucher.dateTo")}>
+              <LabelWrapper label={t("paymentVoucher.dateTo")} required>
                 <Calendar
                   showIcon
                   className="w-full"

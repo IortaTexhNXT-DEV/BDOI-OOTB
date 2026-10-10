@@ -131,3 +131,16 @@
     // }
   }
 }
+
+// Edit line dialog: two columns of fields under the title, the field errors in the theme's error colour
+.corrections__jv__edit__line {
+  .corrections__jv__edit__form {
+    padding-top: 4px;
+  }
+  .bv-field-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-danger);
+  }
+}

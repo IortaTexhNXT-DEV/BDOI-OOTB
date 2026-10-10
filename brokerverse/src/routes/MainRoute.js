@@ -60,6 +60,7 @@ import ReplenishtDetailView from "../module/PettyCashManagement/Replenish/Replen
 import TransactionCodeMasterView from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeMasterView";
 import TransactionCodeDetails from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeDetails";
 import ViewCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
+import MasterRecordView from "../components/RecordView";
 import EditCurrency from "../module/FinanceMastersModule/CurrencyMaster/EditCurrency";
 import TransactioncodeEdit from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeMasterEdit/index";
 import ViewExchange from "../module/FinanceMastersModule/ExchangeRateMaster/ViewExchange";
@@ -607,7 +608,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/insurancecompany/view/:id"
-            element={<InsuranceDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:insurance-company"><InsuranceDetailsAction action="view" /></MasterRecordView>}
           />
 
           <Route
@@ -624,7 +625,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/lineofbusiness/view/:id"
-            element={<LineBusinessDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:line-of-business"><LineBusinessDetailsAction action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/insurancemanagement/productmaster"
@@ -640,7 +641,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/productmaster/view/:id"
-            element={<ProductMatserDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:product"><ProductMatserDetailsAction action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/insurancemanagement/policytype"
@@ -656,7 +657,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/policytype/view/:id"
-            element={<PolicyTypeDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:policy-type"><PolicyTypeDetailsAction action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/insurancemanagement/cover"
@@ -672,7 +673,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/cover/view/:id"
-            element={<CoverDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:cover"><CoverDetailsAction action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/insurancemanagement/signatories"
@@ -688,7 +689,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/signatories/view/:id"
-            element={<SignatoriesDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:signatory"><SignatoriesDetailsAction action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/insurancemanagement/vehicle"
@@ -704,7 +705,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/insurancemanagement/vehicle/view/:id"
-            element={<VehicleDetailsAction action="view" />}
+            element={<MasterRecordView entity="master:vehicle"><VehicleDetailsAction action="view" /></MasterRecordView>}
           />
 
           {/* Location */}
@@ -719,7 +720,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/location/country/view"
-            element={<AddCountry action="view" />}
+            element={<MasterRecordView><AddCountry action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/location/country/add"
@@ -734,7 +735,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/location/state/view"
-            element={<AddState action="view" />}
+            element={<MasterRecordView><AddState action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/location/state/add"
@@ -749,7 +750,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/location/city/view"
-            element={<AddCity action="view" />}
+            element={<MasterRecordView><AddCity action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/location/city/add"
@@ -774,7 +775,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/employeemanagement/hierarchy/view/:id"
-            element={<AddHierarchy action="view" />}
+            element={<MasterRecordView entity="master:hierarchy"><AddHierarchy action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/employeemanagement/:id"
@@ -795,7 +796,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/employeemanagement/designation/view/:id"
-            element={<AddDesignation action="view" />}
+            element={<MasterRecordView entity="master:designation"><AddDesignation action="view" /></MasterRecordView>}
           />
 
           <Route
@@ -822,7 +823,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/usermanagement/user/view/:id"
-            element={<AddUser action="view" />}
+            element={<MasterRecordView entity="user"><AddUser action="view" /></MasterRecordView>}
           />
           <Route
             path="master/generals/usermanagement/adduser"
@@ -842,7 +843,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/generals/usermanagement/role/view/:id"
-            element={<AddRole action="view" />}
+            element={<MasterRecordView entity="role"><AddRole action="view" /></MasterRecordView>}
           />
 
           {/* Branch Master Module */}
@@ -985,7 +986,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/finance/transactioncode/transactioncodedetails"
-            element={<TransactionCodeDetails />}
+            element={<MasterRecordView entity="master:transaction-code" selectRecordId={(state) => state.transactionCodeMasterReducer?.TrascationcodeDetailsView?.id}><TransactionCodeDetails /></MasterRecordView>}
           />
 
           <Route
@@ -1209,7 +1210,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/finance/currency/viewcurrency"
-            element={<ViewCurrency />}
+            element={<MasterRecordView entity="master:currency" selectRecordId={(state) => state.currencyMasterReducer?.CurrencyDetailView?.id}><ViewCurrency /></MasterRecordView>}
           />
 
           {/* // Dashboard Routes */}
