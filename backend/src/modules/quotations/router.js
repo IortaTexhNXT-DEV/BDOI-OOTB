@@ -197,12 +197,12 @@ for (const method of ['PUT', 'PATCH']) {
   });
 }
 define({
-  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team', screen: `${SCREEN} > Quote detail > Send for customer approval`,
+  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)', screen: `${SCREEN} > Quote detail > Send for customer approval`,
   middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);
     await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo, emailSending: r.emailSending } });
-    let message = `Quotation sent to ${r.sentTo} for approval`;
+    let message = r.approved ? `Quotation approved and sent to ${r.sentTo}` : `Quotation sent to ${r.sentTo} for approval`;
     if (!r.emailSending) {
       message = `${r.sentTo ? `The e-mail to ${r.sentTo} is queued, but e-mail` : 'E-mail'} sending is not configured, so the customer has not been e-mailed. `
         + 'Share the approval link (Copy approval link) or record the customer\'s response when it comes in.';

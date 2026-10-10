@@ -116,7 +116,7 @@ The cards count **Total Quotations**, **Active Quotations**, **Pending Review**,
 
 ![Operations > Sales & Marketing > Quotations](images/screens-operations/quotations-list.png)
 
-The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Send for Customer Approval** on a draft, **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation](#process-quotation).
+The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Approve and send to client** on a draft (a user other than the raiser), **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation](#process-quotation).
 
 ![A motor quotation waiting for the client, with Copy approval link and Record customer response](images/screens-operations/quotation-pending-customer.png)
 
@@ -162,7 +162,7 @@ A motor quotation is made for a prospect and has four steps: **Policy details**,
 5. **Accessories**: add the accessories with their value, if any.
 6. **Summary**: check the premium (net premium, DST, VAT, LGT, gross premium) and complete the quotation.
 
-The quotation is created in **Draft**. Open it and select **Send for Customer Approval** to send it to the client.
+The quotation is created in **Draft**. Another user holding the quotation approval opens it and selects **Approve and send to client**.
 
 ![Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](images/screens-operations/motor-quotation-policy-details.png)
 

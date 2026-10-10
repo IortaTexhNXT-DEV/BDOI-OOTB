@@ -640,8 +640,10 @@ quotation; a request for quotation to several insurers is optional.
    passenger personal accident per seat, and CTPL at the tariff amount for 1 or 3 years. DST, VAT and LGT are added
    to give the gross premium.
 5. Save the quotation. It is created as **Draft**.
-6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
-   **Pending Customer**.
+6. The quotation waits for approval by another user: TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager other than the raiser opens it
+   (**View Details**, the eye icon) and selects **Approve and send to client**. The status becomes **Pending Customer**
+   and the client receives the quotation slip (PDF) and its approval link by e-mail. The raiser sees **Awaiting approval
+   by another user before it is sent to the client**; a new version of the quotation is approved again.
 
 ![Figure 3.3: Quotation of a financed Fortuner waiting for the client, with Copy approval link and Record customer response](../images/process/quotation-pending-customer.png)
 #### The client's answer {#process-client-acceptance}
@@ -1176,8 +1178,9 @@ Open follow-ups are counted on the Sales Activities screen; follow them up on th
 1. Choose Operations > Sales & Marketing > Quotations and select **Create Quote**, then the line of business and the product. See [Create a motor quotation (17.4.4)](#create-a-motor-quotation) for the
    fields of a motor quotation.
 2. Save the quotation. It is **Draft**.
-3. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**
-   and the client receives the quotation by e-mail with its approval link.
+3. A Sales Officer or another approver opens the quotation and selects **Approve and send to client**; you cannot send
+   your own quotation. The status becomes **Pending Customer** and the client receives the quotation slip by e-mail with
+   its approval link.
 4. When the client answers by phone, e-mail or in person, open the quotation and select **Record customer response**.
    On acceptance the status becomes **Customer Accepted** and the system raises the placement slip at once
    (**Placement raised**).
@@ -1383,6 +1386,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through your own records and the work waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
+| Approve the quotations raised by your team, which sends them to the client | Daily | [Quotation and request for quotation (3.4)](#process-quotation) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.7)](#placement-slips) |
 | Apply a promotion to a brand-new vehicle's quotation; lower its Own Damage rate to the minimum with a reason | As needed | [Promotion of a motor quotation (17.4.3)](#quotation-promotion) |
 | Approve or return the renewal terms submitted by your team | Daily | [Negotiations (17.18)](#negotiations) |
@@ -1644,6 +1648,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 |---|---|---|
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.18)](#negotiations) |
+| Approve the quotations raised by your team, which sends them to the client | Daily | [Quotation and request for quotation (3.4)](#process-quotation) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.7)](#placement-slips) |
 | Approve or return promotions and discount caps; suspend, resume or withdraw a promotion | As submitted | [Promotions (17.9)](#promotions), [Discount Caps (20.18)](#discount-caps) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.17)](#renewal-queue-and-at-risk-policies) |
@@ -4630,7 +4635,7 @@ The cards count **Total Quotations**, **Active Quotations**, **Pending Review**,
 | **Converted to Policy** | The insurer's policy has been booked |
 
 ![Figure 17.6: Operations > Sales & Marketing > Quotations](../images/screens-operations/quotations-list.png)
-The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Send for Customer Approval** on a draft, **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation (3.4)](#process-quotation).
+The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Approve and send to client** on a draft (a user other than the raiser), **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation (3.4)](#process-quotation).
 
 ![Figure 17.7: A motor quotation waiting for the client, with Copy approval link and Record customer response](../images/screens-operations/quotation-pending-customer.png)
 #### Validity, extension and versions {#quotation-validity-and-versions}
@@ -4671,7 +4676,7 @@ A motor quotation is made for a prospect and has four steps: **Policy details**,
 5. **Accessories**: add the accessories with their value, if any.
 6. **Summary**: check the premium (net premium, DST, VAT, LGT, gross premium) and complete the quotation.
 
-The quotation is created in **Draft**. Open it and select **Send for Customer Approval** to send it to the client.
+The quotation is created in **Draft**. Another user holding the quotation approval opens it and selects **Approve and send to client**.
 
 ![Figure 17.8: Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](../images/screens-operations/motor-quotation-policy-details.png)
 ### Requests for quotation (broker slips) {#requests-for-quotation-broker-slips}

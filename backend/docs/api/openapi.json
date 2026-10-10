@@ -135324,7 +135324,7 @@
     "/quotations/{id}/send-for-approval": {
       "post": {
         "operationId": "postQuotationsIdSendForApproval",
-        "summary": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
+        "summary": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)",
         "tags": [
           "Quotations"
         ],

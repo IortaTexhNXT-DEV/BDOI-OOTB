@@ -10,6 +10,7 @@
  *   bank-endorsement-letter { saleId }       letter to the financing bank of a dealer sale (motor programmes)
  *   comparison-report      { reportId }      client comparison and recommendation report
  *   endorsement            { endorsementId } endorsement or cancellation request to the insurer
+ *   quotation-slip         { quoteId }       the quotation as printed for the client
  */
 import { pool } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -59,6 +60,12 @@ const GENERATORS = {
     const row = await getEndorsementRow(endorsementId);
     const e = toEndorsement(row);
     return { fileName: `endorsement-${e.endorsementNumber}.pdf`, content: buildPdf(await endorsementDoc(e, row)) };
+  },
+  'quotation-slip': async ({ quoteId }) => {
+    const { quoteById } = await import('../quotations/service.js');
+    const { quoteDoc } = await import('./templates.js');
+    const q = await quoteById(String(quoteId));
+    return { fileName: `quotation-${q.quotationNumber}.pdf`, content: buildPdf(await quoteDoc(q)) };
   },
   'comparison-report': async ({ reportId }) => {
     const { comparisonReportSpec } = await import('../comparison-reports/service.js');

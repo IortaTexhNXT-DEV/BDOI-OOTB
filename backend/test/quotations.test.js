@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withDirectSend } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
@@ -21,6 +21,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withDirectSend();
   const s = await persona('t.sales', ['sales']);
   const u = await persona('t.uw', ['processing']);
   sales = s.api; salesId = s.id; uw = u.api; underwriterId = u.id;

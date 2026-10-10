@@ -244,3 +244,15 @@ export async function withDirectEndorsements() {
     'endorsements.complete_maker_checker', 'endorsements.prorata', 'endorsements.types_required', 'endorsements.cancellation_note_required')`);
   clearSettingsCache();
 }
+
+/**
+ * The raiser sends a quotation to the client (the platform default), for suites that test the client's side of the
+ * quotation; TISPH's approval by a second user before the client (quotations.approve_before_send, QUOT-03) is covered
+ * by test/quotation-release.test.js.
+ */
+export async function withDirectSend() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query("UPDATE app_settings SET value = 'false' WHERE key = 'quotations.approve_before_send'");
+  clearSettingsCache();
+}

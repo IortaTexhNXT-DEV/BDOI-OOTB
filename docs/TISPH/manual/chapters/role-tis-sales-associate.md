@@ -75,8 +75,9 @@ Open follow-ups are counted on the Sales Activities screen; follow them up on th
 1. Choose {{menu:/agent/Quotation}} and select **Create Quote**, then the line of business and the product. See [Create a motor quotation](#create-a-motor-quotation) for the
    fields of a motor quotation.
 2. Save the quotation. It is **Draft**.
-3. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**
-   and the client receives the quotation by e-mail with its approval link.
+3. A Sales Officer or another approver opens the quotation and selects **Approve and send to client**; you cannot send
+   your own quotation. The status becomes **Pending Customer** and the client receives the quotation slip by e-mail with
+   its approval link.
 4. When the client answers by phone, e-mail or in person, open the quotation and select **Record customer response**.
    On acceptance the status becomes **Customer Accepted** and the system raises the placement slip at once
    (**Placement raised**).

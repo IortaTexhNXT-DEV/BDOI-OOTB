@@ -26,6 +26,7 @@ and pays them. You never decide a record you entered yourself.
 |---|---|---|
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations](#negotiations) |
+| Approve the quotations raised by your team, which sends them to the client | Daily | [Quotation and request for quotation](#process-quotation) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
 | Approve or return promotions and discount caps; suspend, resume or withdraw a promotion | As submitted | [Promotions](#promotions), [Discount Caps](#discount-caps) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies](#renewal-queue-and-at-risk-policies) |

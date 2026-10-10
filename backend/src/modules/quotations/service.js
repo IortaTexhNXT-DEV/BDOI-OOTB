@@ -6,7 +6,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
-import { queueEmail, emailSendingStatus } from '../../lib/mailer.js';
+import { documentAttachment, queueEmail, emailSendingStatus } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
 import { notifyDecision } from '../notifications/approvals.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
@@ -196,7 +196,8 @@ export async function updateQuote(id, body, userId) {
       await partyOf(c, body.leadRefId || before.lead_id, before.client_id), before.id);
     const previous = before.doc?.promotion?.promotionId ? before.doc.promotion : null;
     const orderDiscount = body.discount !== undefined ? num(body.discount) : previous ? num(previous.orderDiscount) : num(doc.discount);
-    const asked = Object.prototype.hasOwnProperty.call(body, 'promotion');
+    // a screen sending the whole quotation echoes the priced terms (with their promotionId): not a new choice
+    const asked = Object.prototype.hasOwnProperty.call(body, 'promotion') && !body.promotion?.promotionId;
     const promo = await applyPromotion(c, { request: asked ? body.promotion : previous, requested: asked, previous, doc, productId: before.product_id,
       productType: body.productType || before.product_type, icId, leadId: body.leadRefId || before.lead_id, userId, orderDiscount }, (d) => premiumBreakdown(d, { insurerId: icId }));
     const b = promo ? promo.b : await premiumBreakdown(doc, { insurerId: icId });
@@ -324,6 +325,14 @@ export async function sendForApproval(id, user) {
   if (!(Number(q.premium_total) > 0)) throw badRequest(`Quotation ${q.quote_number} has no premium: price the cover before sending it to the customer`);
   await assertCurrent(q, 'sending it to the customer');
   assertReferralCleared(q, 'sending it to the customer');
+  // QUOT-03: the raiser never sends; a second user holding approve:quotations approves the quotation, which sends it
+  const release = q.status === 'draft' && await getSetting('quotations.approve_before_send', false);
+  if (release) {
+    if ([q.created_by, q.agent_user_id].includes(user.id)) {
+      throw forbidden(`Maker-checker: quotation ${q.quote_number} is approved and sent to the client by a user other than the one who raised it`);
+    }
+    if (!hasPermission(user, 'approve:quotations')) throw forbidden('Requires permission: approve:quotations');
+  }
   const email = await emailSendingStatus();
   // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
   const client = q.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [q.client_id]) : null;
@@ -335,17 +344,18 @@ export async function sendForApproval(id, user) {
   let emailId = null;
   if (to) {
     const t = await emailTemplate('quote_approval');
-    emailId = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id });
+    emailId = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'quote_approval', entity: 'quotation', entityId: q.id,
+      attachments: [documentAttachment('quotation-slip', { quoteId: q.id }, `quotation-${q.quote_number}.pdf`)] });
   }
-  await query("UPDATE quotes SET status = 'sent', approval_sent_to = $2, approval_sent_at = now(), updated_by = $3, updated_at = now() WHERE id = $1",
-    [q.id, to, user.id]);
+  await query(`UPDATE quotes SET status = 'sent', approval_sent_to = $2, approval_sent_at = now(), updated_by = $3, updated_at = now()
+    ${release ? ', approved_by = $3, approved_at = now()' : ''} WHERE id = $1`, [q.id, to, user.id]);
   if (await getSetting('notification.approval_requests', true)) {
     for (const u of await usersWithRoles(await getSetting('quotations.approval_notify_roles', ['processing']))) {
       await notify({ userId: u.id, type: 'approval', title: 'Quotation sent for approval', message: `Quotation ${q.quote_number} (${v.customerName}, ${await formatMoney(q.premium_total, v.currency)}) was sent to the customer for approval`,
         link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
     }
   }
-  return { sentTo: to, approvalUrl: url, emailId, emailSending: email.active, before: q, after: await getQuoteRow(q.id) };
+  return { sentTo: to, approvalUrl: url, emailId, emailSending: email.active, approved: release, before: q, after: await getQuoteRow(q.id) };
 }
 
 /**
@@ -647,6 +657,8 @@ export async function quoteById(id) {
     ...quote, participants, isCoInsurance: participants.length > 1 || Boolean(quote.isCoInsurance),
     brokerSlipId: slip?.id || null, brokerSlipNumber: slip?.slip_number || null, placementId: placement?.id || null, placementNumber: placement?.placement_number || null,
     placementStatus: placement?.status || null, journey, validity: await validityOf(row),
+    // QUOT-03: a Draft reaches the client only through a second user's approval
+    approveBeforeSend: row.status === 'draft' && Boolean(await getSetting('quotations.approve_before_send', false)),
     offers: offers.map((o) => ({ offerId: o.id, insuranceCompanyId: o.insurance_company_id, insuranceCompanyName: o.insurer_name, status: o.status, premium: o.premium === null ? null : Number(o.premium),
       rate: o.rate === null ? null : Number(o.rate), premiumTotal: o.premium_total === null ? null : Number(o.premium_total), offeredShare: Number(o.offered_share), deductibles: o.deductibles,
       validityDate: o.validity_date, selected: o.selected })),

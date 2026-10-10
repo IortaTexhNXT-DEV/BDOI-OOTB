@@ -215,3 +215,9 @@ UPDATE app_settings SET value = '[]'::jsonb, updated_at = now()
  WHERE key = 'cover_note.quote_statuses' AND updated_by IS NULL AND value = '["accepted","approved","submitted"]'::jsonb;
 UPDATE app_settings SET value = '["acknowledged","epolicy_received","checked"]'::jsonb, updated_at = now()
  WHERE key = 'cover_note.placement_statuses' AND updated_by IS NULL AND value = '["sent","acknowledged","epolicy_received","checked"]'::jsonb;
+
+-- ---------------------------------------------------------------- quotation approval before the client (QUOT-03)
+-- Proposal (DECISIONS D-QP-19): the raiser never sends a quotation; a second user holding approve:quotations approves
+-- it, which e-mails it to the client with the quotation slip.
+UPDATE app_settings SET value = 'true'::jsonb, updated_at = now()
+ WHERE key = 'quotations.approve_before_send' AND updated_by IS NULL AND value = 'false'::jsonb;

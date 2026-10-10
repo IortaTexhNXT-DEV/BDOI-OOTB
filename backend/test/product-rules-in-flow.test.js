@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts } from './helpers.js';
+import { setup, loginAs, withProducts, withDirectSend } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { parseCondition, bandOf, test as testCondition, adjustNet } from '../src/modules/product-configurator/underwriting.js';
@@ -38,6 +38,7 @@ const ruleId = async (code) => (await q("SELECT c.id FROM product_components c J
 
 beforeAll(async () => {
   ctx = await setup();
+  await withDirectSend();
   await withProducts();
   sales = await persona('r.sales', ['sales']);
   proc = await persona('r.proc', ['tis-ops-unit-head']);
@@ -112,6 +113,7 @@ describe('acceptance rules on a quotation', () => {
     expect(bySales.status).toBe(403);
     expect(bySales.body.message).toContain('Operations Unit Head');
     // an Operations Unit Head limit below the sum insured refuses the approval (authority matrix)
+    await q("DELETE FROM authority_limits WHERE transaction_type = 'underwriting_referral' AND role_code = 'tis-ops-unit-head'");
     await q("INSERT INTO authority_limits(transaction_type, role_code, max_amount, status) VALUES ('underwriting_referral', 'tis-ops-unit-head', 500000, 'active')");
     const above = await proc('post', `/quotations/${referred.quotationId}/underwriting-referral`).send({ decision: 'approve' });
     expect(above.status).toBe(403);

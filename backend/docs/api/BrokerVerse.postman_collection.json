@@ -81859,7 +81859,7 @@
           ]
         },
         {
-          "name": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
+          "name": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)",
           "request": {
             "method": "POST",
             "header": [
@@ -81886,7 +81886,7 @@
                 }
               ]
             },
-            "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+            "description": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -81926,7 +81926,7 @@
                     }
                   ]
                 },
-                "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+                "description": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"sentBy\": \"agent\"\n}",

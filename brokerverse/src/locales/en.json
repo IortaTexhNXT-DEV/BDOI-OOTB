@@ -6390,7 +6390,9 @@
     "schedulePremium": "Premium",
     "fst": "Fire service tax",
     "viewPolicy": "View policy",
-    "completePolicy": "Complete policy"
+    "completePolicy": "Complete policy",
+    "approveAndSend": "Approve and send to client",
+    "awaitingApprovalToSend": "Awaiting approval by another user before it is sent to the client"
   },
   "policyList": {
     "title": "Policies",

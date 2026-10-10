@@ -25,6 +25,9 @@ import { QuotationStatus } from "../../../utils/statusHelpers";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorsementCategories";
 import { Toast } from "primereact/toast";
+import { Message } from "primereact/message";
+import { isInitiator } from "../../../components/ApprovalActions";
+import { hasPermission } from "../../../utils/canOpen";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
@@ -1318,13 +1321,21 @@ const QuoteDetailView = ({ action }) => {
                   flexWrap: "wrap",
                 }}
               >
-                {/* Draft: Can send for approval */}
-                {quotationData?.quotationStatus === "Draft" && (
+                {/* Draft: sent for the customer's approval; with the approval before sending (QUOT-03) a second
+                    user holding approve:quotations approves it, which sends it */}
+                {quotationData?.quotationStatus === "Draft" && !quotationData?.approveBeforeSend && (
                   <Button
                     label={t("quoteDetailView.sendForCustomerApproval")}
                     icon="pi pi-send"
                     onClick={handleSendForApproval}
                   />
+                )}
+                {quotationData?.quotationStatus === "Draft" && quotationData?.approveBeforeSend && (
+                  isInitiator({ id: quotationData.createdById }) || !hasPermission("approve:quotations") ? (
+                    <Message severity="info" text={t("quoteDetailView.awaitingApprovalToSend")} />
+                  ) : (
+                    <Button label={t("quoteDetailView.approveAndSend")} icon="pi pi-check" onClick={handleSendForApproval} />
+                  )
                 )}
 
                 {/* PendingCustomer: Waiting for customer */}

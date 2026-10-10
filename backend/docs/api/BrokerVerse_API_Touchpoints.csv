@@ -22962,7 +22962,7 @@
     ""plateNumber"": ""NBC 1234""
   }
 }"
-1101,Quotations,POST,/api/quotations/:id/send-for-approval,Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team,Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval,Bearer JWT,write:quotations,"{
+1101,Quotations,POST,/api/quotations/:id/send-for-approval,"Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)",Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval,Bearer JWT,write:quotations,"{
   ""sentBy"": ""agent""
 }","{
   ""success"": true,

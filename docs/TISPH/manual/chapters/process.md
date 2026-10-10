@@ -132,8 +132,10 @@ quotation; a request for quotation to several insurers is optional.
    passenger personal accident per seat, and CTPL at the tariff amount for 1 or 3 years. DST, VAT and LGT are added
    to give the gross premium.
 5. Save the quotation. It is created as **Draft**.
-6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
-   **Pending Customer**.
+6. The quotation waits for approval by another user: {{roles:approve:quotations}} other than the raiser opens it
+   (**View Details**, the eye icon) and selects **Approve and send to client**. The status becomes **Pending Customer**
+   and the client receives the quotation slip (PDF) and its approval link by e-mail. The raiser sees **Awaiting approval
+   by another user before it is sent to the client**; a new version of the quotation is approved again.
 
 ![Quotation of a financed Fortuner waiting for the client, with Copy approval link and Record customer response](images/process/quotation-pending-customer.png)
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withDirectSend } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { ageOn } from '../src/modules/quotations/creditLife.js';
@@ -24,6 +24,7 @@ const cl = (creditLife, extra = {}) => ({ leadRefId: lead, productType: 'CL-VOL'
 
 beforeAll(async () => {
   ctx = await setup();
+  await withDirectSend();
   now = await today();
   associate = (await persona('cl.associate', ['tis-sales-associate'])).api;
   officer = (await persona('cl.officer', ['tis-sales-officer'])).api;
