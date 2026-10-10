@@ -65,6 +65,6 @@ describe("PageHeader", () => {
     render(<PageHeader title="CLM-0001" home={{ label: "Claims", onClick }} trail={["CLM-0001"]} meta={<span>Own damage</span>} />);
     fireEvent.click(screen.getByText("Claims"));
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("Own damage").parentElement).toHaveClass("bv-page-header__meta");
+    expect(screen.getByText("Own damage", { selector: ".bv-page-header__meta > span" })).toBeInTheDocument();
   });
 });
