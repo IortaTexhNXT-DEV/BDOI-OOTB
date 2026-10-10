@@ -57,11 +57,11 @@ const OpenEntryMatching = () => {
   const items = [
     {
       id: 1,
-      label: "Open Entry Matching",
+      label: t("openEntryMatching.title"),
       to: "/accounts/open-entry-matching",
     },
   ];
-  const home = { label: "Accounts" };
+  const home = { label: t("openEntryMatching.accounts") };
 
   const handlePull = async () => {
     setLoading(true);
@@ -71,7 +71,7 @@ const OpenEntryMatching = () => {
         currency: filters.currencyCode,
       });
       if (!response.success) {
-        notifyError(response.error || "Failed to fetch unmatched entries");
+        notifyError(response.error || t("openEntryMatching.failedToFetchUnmatchedEntries"));
       } else {
         const entries = response.data || [];
         const debitEntries = entries.filter(
@@ -84,7 +84,7 @@ const OpenEntryMatching = () => {
         setCreditEntries(creditEntries);
       }
     } catch (error) {
-      notifyError("Failed to fetch unmatched entries");
+      notifyError(t("openEntryMatching.failedToFetchUnmatchedEntries"));
     } finally {
       setLoading(false);
     }
@@ -142,7 +142,7 @@ const OpenEntryMatching = () => {
       });
 
       if (!response.success) {
-        notifyError(response.error || "Failed to match entries");
+        notifyError(response.error || t("openEntryMatching.failedToMatchEntries"));
       } else {
         notifySuccess(`Successfully matched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
@@ -150,7 +150,7 @@ const OpenEntryMatching = () => {
         handlePull();
       }
     } catch (error) {
-      notifyError(error.message || "Failed to match entries");
+      notifyError(error.message || t("openEntryMatching.failedToMatchEntries"));
     } finally {
       setLoading(false);
     }
@@ -207,47 +207,47 @@ const OpenEntryMatching = () => {
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
             <Column
               field="transactionCode"
-              header="Document No"
+              header={t("openEntryMatching.documentNo")}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="documentDate"
-              header="Doc Dt"
+              header={t("openEntryMatching.docDt")}
               body={(rowData) => formatDate(rowData.documentDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="dueDate"
-              header="Due Dt"
+              header={t("openEntryMatching.dueDt")}
               body={(rowData) => formatDate(rowData.dueDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="amount"
-              header="FC Amount"
+              header={t("openEntryMatching.fcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="LC Amount"
+              header={t("openEntryMatching.lcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="Balance FC Amt"
+              header={t("openEntryMatching.balanceFcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
               field="amount"
-              header="Balance LC Amt"
+              header={t("openEntryMatching.balanceLcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
-              header="Adjustment Amt"
+              header={t("openEntryMatching.adjustmentAmt")}
               body={() => (
                 <InputText className="adjustment__input__open__entry__matching" />
               )}
@@ -265,7 +265,7 @@ const OpenEntryMatching = () => {
             />
           </DataTable>
           <div className="total__row__open__entry__matching">
-            <span>Total:</span>
+            <span>{t("openEntryMatching.total")}:</span>
             <span>{formatCurrency(debitTotal)}</span>
             <span>{formatCurrency(debitTotal)}</span>
             <span>{formatCurrency(debitTotal)}</span>
@@ -294,47 +294,47 @@ const OpenEntryMatching = () => {
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
             <Column
               field="transactionCode"
-              header="Document No"
+              header={t("openEntryMatching.documentNo")}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="documentDate"
-              header="Doc Dt"
+              header={t("openEntryMatching.docDt")}
               body={(rowData) => formatDate(rowData.documentDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="dueDate"
-              header="Due Dt"
+              header={t("openEntryMatching.dueDt")}
               body={(rowData) => formatDate(rowData.dueDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="amount"
-              header="FC Amount"
+              header={t("openEntryMatching.fcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="LC Amount"
+              header={t("openEntryMatching.lcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="Balance FC Amt"
+              header={t("openEntryMatching.balanceFcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
               field="amount"
-              header="Balance LC Amt"
+              header={t("openEntryMatching.balanceLcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
-              header="Adjustment Amt"
+              header={t("openEntryMatching.adjustmentAmt")}
               body={() => (
                 <InputText className="adjustment__input__open__entry__matching" />
               )}
@@ -352,7 +352,7 @@ const OpenEntryMatching = () => {
             />
           </DataTable>
           <div className="total__row__open__entry__matching">
-            <span>Total:</span>
+            <span>{t("openEntryMatching.total")}:</span>
             <span>{formatCurrency(creditTotal)}</span>
             <span>{formatCurrency(creditTotal)}</span>
             <span>{formatCurrency(creditTotal)}</span>
@@ -470,20 +470,20 @@ const OpenEntryMatching = () => {
             </div>
             <div className="action__row__open__entry__matching">
               <Button
-                label="Pull"
+                label={t("openEntryActions.pull")}
                 onClick={handlePull}
                 disabled={loading}
                 outlined
                 className="action__button__open__entry__matching"
               />
               <Button
-                label="Match"
+                label={t("openEntryActions.match")}
                 onClick={handleMatch}
                 disabled={loading}
                 className="action__button__open__entry__matching"
               />
               <div className="radio__group__open__entry__matching">
-                <div>Pull By Criteria</div>
+                <div>{t("openEntryActions.side")}</div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
                     inputId="debit"
@@ -491,7 +491,7 @@ const OpenEntryMatching = () => {
                     checked={debitCredit === "DEBIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="debit">Debit</label>
+                  <label htmlFor="debit">{t("openEntryActions.debit")}</label>
                 </div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
@@ -500,7 +500,7 @@ const OpenEntryMatching = () => {
                     checked={debitCredit === "CREDIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="credit">Credit</label>
+                  <label htmlFor="credit">{t("openEntryActions.credit")}</label>
                 </div>
               </div>
               <div className="checkbox__group__open__entry__matching">
@@ -509,12 +509,8 @@ const OpenEntryMatching = () => {
                   checked={selectAll}
                   onChange={(e) => handleSelectAll(debitCredit.toLowerCase())}
                 />
-                <label htmlFor="selectAll">Select All ?</label>
+                <label htmlFor="selectAll">{t("openEntryActions.selectAll")}</label>
               </div>
-              <Button
-                label="Cash Discount"
-                className="action__button__open__entry__matching"
-              />
             </div>
           </div>
 
@@ -523,68 +519,6 @@ const OpenEntryMatching = () => {
               <>
                 {debitEntriesTable(debitEntries)}
                 {creditEntriesTable(creditEntries)}
-                <Column
-                  selectionMode="multiple"
-                  headerStyle={{ width: "3rem" }}
-                />
-                <Column
-                  field="transactionCode"
-                  header="Document No"
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="documentDate"
-                  header="Doc Dt"
-                  body={(rowData) => formatDate(rowData.documentDate)}
-                  style={{ minWidth: "100px" }}
-                />
-                <Column
-                  field="dueDate"
-                  header="Due Dt"
-                  body={(rowData) => formatDate(rowData.dueDate)}
-                  style={{ minWidth: "100px" }}
-                />
-                <Column
-                  field="amount"
-                  header="FC Amount"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="amount"
-                  header="LC Amount"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="amount"
-                  header="Balance FC Amt"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  field="amount"
-                  header="Balance LC Amt"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  header="Adjustment Amt"
-                  body={() => (
-                    <InputText className="adjustment__input__open__entry__matching" />
-                  )}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  header="Cr"
-                  body={() => <Checkbox />}
-                  style={{ minWidth: "50px" }}
-                />
-                <Column
-                  header="Ok"
-                  body={() => <Checkbox />}
-                  style={{ minWidth: "50px" }}
-                />
               </>
             ) : (
               <>

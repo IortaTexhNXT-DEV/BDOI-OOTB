@@ -15680,5 +15680,28 @@
       "lines": "Lines",
       "settings": "Settings"
     }
+  },
+  "openEntryActions": {
+    "pull": "Pull",
+    "match": "Match",
+    "side": "Side",
+    "debit": "Debit",
+    "credit": "Credit",
+    "selectAll": "Select all"
+  },
+  "openEntryMatching": {
+    "title": "Open Entry Matching",
+    "accounts": "Accounts",
+    "failedToFetchUnmatchedEntries": "Failed to fetch unmatched entries",
+    "failedToMatchEntries": "Failed to match entries",
+    "documentNo": "Document No",
+    "docDt": "Doc Dt",
+    "dueDt": "Due Dt",
+    "fcAmount": "FC Amount",
+    "lcAmount": "LC Amount",
+    "balanceFcAmt": "Balance FC Amt",
+    "balanceLcAmt": "Balance LC Amt",
+    "adjustmentAmt": "Adjustment Amt",
+    "total": "Total"
   }
 }

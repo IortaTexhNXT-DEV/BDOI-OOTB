@@ -10503,5 +10503,28 @@
     "colRole": "บทบาท",
     "colPasswordAge": "อายุรหัสผ่าน (วัน)",
     "start": "เริ่ม"
+  },
+  "openEntryActions": {
+    "pull": "ดึงรายการ",
+    "match": "จับคู่",
+    "side": "ด้าน",
+    "debit": "เดบิต",
+    "credit": "เครดิต",
+    "selectAll": "เลือกทั้งหมด"
+  },
+  "openEntryMatching": {
+    "title": "จับคู่รายการคงค้าง",
+    "accounts": "บัญชี",
+    "failedToFetchUnmatchedEntries": "ไม่สามารถดึงรายการที่ยังไม่จับคู่ได้",
+    "failedToMatchEntries": "ไม่สามารถจับคู่รายการได้",
+    "documentNo": "เลขที่เอกสาร",
+    "docDt": "วันที่เอกสาร",
+    "dueDt": "วันครบกำหนด",
+    "fcAmount": "จำนวน FC",
+    "lcAmount": "จำนวน LC",
+    "balanceFcAmt": "ยอด FC",
+    "balanceLcAmt": "ยอด LC",
+    "adjustmentAmt": "จำนวนปรับ",
+    "total": "รวม"
   }
 }

@@ -477,7 +477,7 @@ const OpenEntryUnmatching = () => {
                 className="action__button__open__entry__matching"
               />
               <div className="radio__group__open__entry__matching">
-                <div>Pull By Criteria</div>
+                <div>{t("openEntryActions.side")}</div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
                     inputId="debit"
@@ -485,7 +485,7 @@ const OpenEntryUnmatching = () => {
                     checked={debitCredit === "DEBIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="debit">Debit</label>
+                  <label htmlFor="debit">{t("openEntryActions.debit")}</label>
                 </div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
@@ -494,7 +494,7 @@ const OpenEntryUnmatching = () => {
                     checked={debitCredit === "CREDIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="credit">Credit</label>
+                  <label htmlFor="credit">{t("openEntryActions.credit")}</label>
                 </div>
               </div>
               <div className="checkbox__group__open__entry__matching">
@@ -503,12 +503,8 @@ const OpenEntryUnmatching = () => {
                   checked={selectAll}
                   onChange={(e) => handleSelectAll(debitCredit.toLowerCase())}
                 />
-                <label htmlFor="selectAll">Select All ?</label>
+                <label htmlFor="selectAll">{t("openEntryActions.selectAll")}</label>
               </div>
-              <Button
-                label="Cash Discount"
-                className="action__button__open__entry__matching"
-              />
             </div>
           </div>
 
