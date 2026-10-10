@@ -183,6 +183,16 @@ describe('call list', () => {
     expect(early.status).toBe(400);
     expect(early.body.message).toBe('Download the call list before you mark it as sent');
   });
+  it('refuses a Contact Import file type other than xlsx', async () => {
+    await setting('talkbot.export_format', 'xls');
+    try {
+      const r = await as['tb.sales']('post', `/talkbot/lists/${list.id}/download`);
+      expect(r.status).toBe(400);
+      expect(r.body.message).toMatch(/Excel workbook \(xlsx\) only/);
+    } finally {
+      await setting('talkbot.export_format', 'xlsx');
+    }
+  });
   it('downloads the Contact Import file; a policy renewed meanwhile is dropped', async () => {
     await query("UPDATE policies SET status = 'renewed' WHERE id = 'pol_tb6'");
     const f = await binary(as['tb.sales']('post', `/talkbot/lists/${list.id}/download`));
