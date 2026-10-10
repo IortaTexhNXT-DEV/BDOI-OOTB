@@ -141934,7 +141934,7 @@
     "/schedules/{code}/runs": {
       "get": {
         "operationId": "getSchedulesCodeRuns",
-        "summary": "Run history of a job (who started a run: triggeredBy, triggeredByName)",
+        "summary": "Run history of a job (who started a run: triggeredBy, triggeredByName, triggeredByRoles; triggeredBy schedule for a scheduled run)",
         "tags": [
           "Schedules"
         ],
@@ -141987,6 +141987,12 @@
                           },
                           "triggeredByName": {
                             "type": "string"
+                          },
+                          "triggeredByRoles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           }
                         }
                       }
@@ -142004,7 +142010,10 @@
                         "notifications": 3
                       },
                       "triggeredBy": "r.finance",
-                      "triggeredByName": "Rosa Finance"
+                      "triggeredByName": "Rosa Finance",
+                      "triggeredByRoles": [
+                        "TIS Finance & General Accounting"
+                      ]
                     }
                   ]
                 }

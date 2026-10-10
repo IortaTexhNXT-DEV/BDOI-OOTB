@@ -23732,7 +23732,7 @@
     }
   }
 }"
-1181,Schedules,GET,/api/schedules/:code/runs,"Run history of a job (who started a run: triggeredBy, triggeredByName)",Master > Schedules > History,Bearer JWT,read:schedules,,"{
+1181,Schedules,GET,/api/schedules/:code/runs,"Run history of a job (who started a run: triggeredBy, triggeredByName, triggeredByRoles; triggeredBy schedule for a scheduled run)",Master > Schedules > History,Bearer JWT,read:schedules,,"{
   ""success"": true,
   ""data"": [
     {
@@ -23743,7 +23743,10 @@
         ""notifications"": 3
       },
       ""triggeredBy"": ""r.finance"",
-      ""triggeredByName"": ""Rosa Finance""
+      ""triggeredByName"": ""Rosa Finance"",
+      ""triggeredByRoles"": [
+        ""TIS Finance & General Accounting""
+      ]
     }
   ]
 }"

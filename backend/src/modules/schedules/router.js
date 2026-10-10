@@ -23,14 +23,15 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:code/runs', summary: 'Run history of a job (who started a run: triggeredBy, triggeredByName)', screen: 'Master > Schedules > History', middleware: canRead,
-  response: { success: true, data: [{ id: 1, status: 'success', startedAt: '2026-01-01T06:00:00Z', output: { notifications: 3 }, triggeredBy: 'r.finance', triggeredByName: 'Rosa Finance' }] },
+  method: 'GET', path: '/:code/runs', summary: 'Run history of a job (who started a run: triggeredBy, triggeredByName, triggeredByRoles; triggeredBy schedule for a scheduled run)', screen: 'Master > Schedules > History', middleware: canRead,
+  response: { success: true, data: [{ id: 1, status: 'success', startedAt: '2026-01-01T06:00:00Z', output: { notifications: 3 }, triggeredBy: 'r.finance', triggeredByName: 'Rosa Finance', triggeredByRoles: ['TIS Finance & General Accounting'] }] },
   handler: async (req, res) => {
     const job = await one('SELECT id FROM scheduled_jobs WHERE code = $1', [req.params.code]);
     if (!job) throw notFound('Job not found');
     // triggeredBy: 'schedule' for a run of the timer, else the login name of the user who pressed Run now
     ok(res, await many(`SELECT r.id, r.started_at AS "startedAt", r.finished_at AS "finishedAt", r.status, r.output, r.error, r.triggered_by AS "triggeredBy",
-        u.display_name AS "triggeredByName"
+        u.display_name AS "triggeredByName",
+        (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS "triggeredByRoles"
       FROM job_runs r LEFT JOIN users u ON u.username = r.triggered_by WHERE r.job_id = $1 ORDER BY r.id DESC LIMIT 100`, [job.id]));
   },
 });
