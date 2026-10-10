@@ -245,6 +245,10 @@ Object.assign(roleMenuPermissions, {
 const RENEWALS_WITHOUT_TALKBOT = ["Renewal Policy", "Renewal Batch", "Renewal Queue", "Retention Analytics", "At-Risk Policies", "Negotiations",
   "Lapse Management", "Performance"].map((item) => `Renewals > ${item}`);
 roleMenuPermissions["tis-it-admin"].operations = [...roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Renewals"), ...RENEWALS_WITHOUT_TALKBOT];
+// Prospects and Lead Assignment by permission (RBAC v4): Finance reads prospects (read:leads); IT AppSupport has no
+// read:lead-assignment, so Lead Assignment is not in its menu.
+roleMenuPermissions["tis-it-admin"].operations = roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Sales & Marketing > Lead Assignment");
+roleMenuPermissions["tis-finance"].operations = [...(roleMenuPermissions["tis-finance"].operations || []), "Sales & Marketing > Prospects"];
 
 /** Roles of the signed-in user, from the login response stored by authService. */
 export const getUserRoles = () => {

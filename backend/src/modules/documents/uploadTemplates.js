@@ -26,6 +26,7 @@ import { DEALER_SALE_COLUMNS } from '../motor-programmes/service.js';
 import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
 import { IMPORT_COLUMNS as REMITTANCE_IMPORT_COLUMNS, PRODUCT_LINES } from '../remittance/imports.js';
 import { CALL_RECORD_COLUMNS } from '../talkbot/columns.js';
+import { TFS_COLUMNS } from '../leads/tfsImport.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -94,6 +95,17 @@ export function staticUploads() {
           city: 'San Fernando', province: 'Pampanga', country: 'Philippines', zipCode: '2000', leadCategory: 'Corporate', taxInformationNumber: '009-876-543-000', lob: 'MOTOR', product: 'Motor Vehicle Insurance', source: 'Walk-in' },
       ],
       notes: ['A lead needs a First Name (individual) or a Company Name (corporate).'],
+    },
+    {
+      id: 'tfs-accounts', file: 'TFS_Accounts_Upload_Template.xlsx', title: 'TFS accounts upload', menu: 'Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts',
+      route: 'POST /api/leads/tfs-import (multipart field "file")', columns: TFS_COLUMNS, maxRows: IMPORT_ROWS,
+      samples: [
+        { tfsReference: 'TFS-2026-104233', loanId: 'LN-0094418', firstName: 'Andrea', lastName: 'Villanueva', DOB: '1987-06-21', contactNumber: '09173047105', emailId: 'andrea.villanueva@gmail.com',
+          houseNo: '12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', zipCode: '1600', make: 'Toyota', model: 'Raize', variant: '1.0 Turbo CVT',
+          modelYear: '2023', plateNumber: 'NAB 1234', chassisNumber: 'MHKA4DE30PJ012345', engineNumber: '1KR0123456', insuranceProvider: 'Malayan Insurance Co., Inc.',
+          policyExpiryDate: '2026-12-15', loanStartDate: '2023-12-15', loanBookingDate: '2023-12-10', loanMaturityDate: '2028-12-15', productGroup: 'Motor', srp: '1078000', leadCategory: 'Retail' },
+      ],
+      notes: ['One prospect per Loan ID: a Loan ID already loaded updates that prospect (TFS details, status and disposition).', 'An account without a Policy Expiry Date gives no prospect.'],
     },
     {
       id: 'talkbot-results', file: 'Talkbot_Call_Results_Template.xlsx', title: 'Talkbot call results', menu: 'Operations > Renewals > Talkbot Calls > Upload results',

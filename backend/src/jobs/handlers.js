@@ -140,7 +140,7 @@ export { pdcDepositDue } from '../modules/pdc/jobs.js';
 export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
 // Distribution and reporting: prospects not worked in time go to the reassignment queue (lead assignment), scheduled
 // marketing campaigns are sent, the BI extract is written to the storage folder (all disabled until switched on)
-export { leadAssignmentSla } from '../modules/leads/assignment.js';
+export { leadAssignmentSla, leadRetention } from '../modules/leads/assignment.js';
 // Talkbot call lists of Motor renewals: the Draft list of the day (disabled until switched on) and the closing of
 // worked lists with the removal of old call records files
 export { dailyCallList as talkbotCallList, closeOldLists as talkbotCallListClose } from '../modules/talkbot/service.js';

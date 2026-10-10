@@ -393,6 +393,14 @@ describe('call list', () => {
   });
 });
 
+describe('reasons', () => {
+  it('ships the reasons of an account removed from a call list and of a call list cancelled', async () => {
+    const r = (await query(`SELECT data->>'context' AS context, count(*)::int AS n FROM master_records WHERE type_code = 'reason-code' AND data->>'context' LIKE 'talkbot_%'
+      GROUP BY 1 ORDER BY 1`)).rows;
+    expect(r).toEqual([{ context: 'talkbot_line_remove', n: 5 }, { context: 'talkbot_list_cancel', n: 4 }]);
+  });
+});
+
 describe('access', () => {
   it('lets Operations view call lists but not maintain them, and keeps Cash Control and IT out', async () => {
     expect((await as['tb.ops']('get', '/talkbot/lists')).status).toBe(200);

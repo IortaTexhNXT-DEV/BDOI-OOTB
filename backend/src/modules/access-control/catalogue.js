@@ -76,6 +76,7 @@ export const MODULES = MODULE_LIST.map(([code, area, name, screens], i) => ({ co
 const PERMISSION_LIST = {
   'read:leads': ['leads', 'view', 'See prospects and leads'],
   'write:leads': ['leads', 'edit', 'Create and edit prospects and leads'],
+  'delete:leads': ['leads', 'special', 'Delete a prospect that has no policy'],
   'read:quotations': ['quotations', 'view', 'See quotations, requests for quotation, placement slips and comparison reports'],
   'write:quotations': ['quotations', 'edit', 'Create quotations (Quick Quote too), send requests for quotation, prepare placement slips'],
   'approve:quotations': ['quotations', 'approve', 'Approve a quotation created by another user'],

@@ -11,12 +11,14 @@ import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 import { today } from '../../lib/dates.js';
 import assignmentRouter from './assignmentRoutes.js';
+import * as tfs from './tfsImport.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
 const SCREEN = 'Operations > Sales & Marketing > Prospects';
 const canRead = [requireAuth, requirePermission('read:leads')];
 const canWrite = [requireAuth, requirePermission('write:leads')];
+const canDelete = [requireAuth, requirePermission('delete:leads')];
 
 const optionalEmail = z.string().email('emailId must be a valid e-mail').optional().nullable().or(z.literal(''));
 const leadBody = z.object({
@@ -77,24 +79,62 @@ define({
   response: { success: true, data: { message: 'Processed 3 rows: 3 created, 0 failed', total: 3, created: 3, failed: 0, errors: [] } },
   handler: async (req, res) => {
     const rows = parseUploadedRows(req.file);
+    const batch = await tfs.newBatch('prospects', req.file?.originalname || null, rows.length, actor(req));
     const errors = [];
     let created = 0;
+    let updated = 0;
     for (const [i, row] of rows.entries()) {
       const body = svc.leadFromRow(row);
-      const parsed = createBody.safeParse(body);
-      if (!parsed.success) { errors.push({ row: i + 2, message: columnMessage(parsed.error.issues.map((x) => x.message).join('; '), svc.LEAD_UPLOAD_COLUMNS) }); continue; }
       try {
-        const lead = await withTransaction((c) => svc.createLead(parsed.data, actor(req), c));
-        await audit(req, { entity: 'lead', entityId: lead.id, action: 'bulk-create', after: svc.toLead(lead) });
+        // a row naming a prospect already loaded (Lead Number, Loan ID) updates its status and disposition
+        const existing = await svc.leadOfRow(body);
+        if (existing) {
+          const lead = await svc.updateStatusFromRow(existing, body, actor(req), batch.id);
+          await audit(req, { entity: 'lead', entityId: lead.id, action: 'bulk-update', before: { status: existing.status, disposition: existing.disposition },
+            after: { status: lead.status, disposition: lead.disposition, batch: batch.number } });
+          updated += 1;
+          continue;
+        }
+        const parsed = createBody.safeParse(body);
+        if (!parsed.success) { errors.push({ row: i + 2, message: columnMessage(parsed.error.issues.map((x) => x.message).join('; '), svc.LEAD_UPLOAD_COLUMNS) }); continue; }
+        const lead = await withTransaction(async (c) => {
+          const l = await svc.createLead(parsed.data, actor(req), c);
+          await c.query('UPDATE leads SET import_batch_id = $2 WHERE id = $1', [l.id, batch.id]);
+          return l;
+        });
+        await audit(req, { entity: 'lead', entityId: lead.id, action: 'bulk-create', after: { ...svc.toLead(lead), batch: batch.number } });
         created += 1;
       } catch (e) { errors.push({ row: i + 2, message: columnMessage(e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message, svc.LEAD_UPLOAD_COLUMNS) }); }
     }
-    const data = uploadResult(rows.length, created, errors);
+    await tfs.closeBatch(batch.id, { created, updated, errors });
+    const data = { ...uploadResult(rows.length, created, errors), updated, batchNumber: batch.number };
+    if (updated) data.message = `Processed ${rows.length} rows: ${created} created, ${updated} updated, ${errors.length} failed`;
     res.json({ success: true, message: data.message, data });
   },
 });
 define({
-  method: 'GET', path: '/duplicates', summary: 'Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check',
+  method: 'GET', path: '/tfs-import/template', summary: 'TFS account file template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk Upload > TFS accounts > Download template`,
+  middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'tfs-accounts'),
+});
+define({
+  method: 'POST', path: '/tfs-import', summary: 'Load the TFS account file (multipart field "file", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn',
+  screen: `${SCREEN} > Bulk Upload > TFS accounts`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, data: { message: 'Processed 250 rows: 246 created, 2 updated, 2 failed (batch LIB-2026-00004)', total: 250, created: 246, updated: 2, failed: 2,
+    errors: [{ row: 17, message: 'Row 17: No policy expiry date: no prospect is created for this account' }] } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file);
+    const data = await tfs.importTfs(rows, { fileName: req.file?.originalname || null, userId: actor(req),
+      onLead: (lead, action, before) => audit(req, { entity: 'lead', entityId: lead.id, action, before: before || null, after: lead }) });
+    res.json({ success: true, message: data.message, data });
+  },
+});
+define({
+  method: 'GET', path: '/options', summary: 'Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers (insurance provider)', screen: `${SCREEN} > Create / Edit`,
+  middleware: canRead, response: { success: true, data: { categories: ['Retail', 'Corporate'], customerTypes: ['TFS', 'Non-TFS', 'Direct Customer'], dispositions: ['Interested'], insurers: [{ id: 2, name: 'Malayan Insurance Co., Inc.' }] } },
+  handler: async (_req, res) => res.json({ success: true, data: await svc.leadOptions() }),
+});
+define({
+  method: 'GET', path: '/duplicates', summary: 'Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth; with leads.duplicate_rule four-key the same first name, last name, mobile and date of birth together, or the same Loan ID (clientId: the open prospects of that client); off with leads.duplicate_check',
   screen: `${SCREEN} > Create Prospect`, middleware: canRead, query: { firstName: 'Juan', lastName: 'Dela Cruz', DOB: '1990-05-01', emailId: 'juan@example.com', contactNumber: '09171234567' },
   response: { success: true, data: [{ kind: 'client', id: 'cli_1', number: 'CL-2026-00004', name: 'Juan Dela Cruz', ownerName: 'Ana Garcia', matchedOn: ['email', 'name', 'birthDate'] }] },
   handler: async (req, res) => res.json({ success: true, data: await svc.possibleDuplicates(req.query) }),
@@ -136,7 +176,7 @@ define({
   },
 });
 define({
-  method: 'DELETE', path: '/:id', summary: 'Delete a lead (soft delete; blocked once a policy exists)', screen: `${SCREEN} > Delete`, middleware: [...canWrite, ownRecord('lead')],
+  method: 'DELETE', path: '/:id', summary: 'Delete a lead (soft delete; blocked once a policy exists; delete:leads)', screen: `${SCREEN} > Delete`, middleware: [...canDelete, ownRecord('lead')],
   response: { success: true, message: 'Lead deleted', data: { leadId: 'ld_1' } },
   handler: async (req, res) => {
     const lead = await svc.deleteLead(req.params.id, actor(req));

@@ -139,6 +139,8 @@ Object.assign(ROLE_PERMS, {
 // Talkbot call lists (migration 0460): the Sales personas and the General Manager maintain them, Operations view them.
 for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('talkbot-calls');
 for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('talkbot-calls:read');
+// Deleting a prospect (delete:leads, migration 0461): not the TIS Sales Associate (RBAC v4 CRUDA: CRU).
+for (const role of ['sales', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('leads:delete');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */
