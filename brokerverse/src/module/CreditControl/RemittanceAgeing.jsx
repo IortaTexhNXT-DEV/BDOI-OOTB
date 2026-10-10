@@ -12,6 +12,7 @@ import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
 import { loadInsurerOptions } from "../Remittance/shared";
 import { PageHeader, bucketLabels, date, isoOf, money, showError } from "./common";
+import "./remittanceAgeing.scss";
 
 const BUCKETS = ["current", "b1", "b2", "b3", "b4"];
 
@@ -69,7 +70,7 @@ const RemittanceAgeing = () => {
         </div>
         {/* the summary keeps the height of a few insurers and its total line from the start, so the detail below does not jump */}
         <DataTable value={data?.insurers || []} dataKey="insurerId" loading={loading} size="small" stripedRows emptyMessage={data ? t("creditControl.none") : " "}
-          className="bv-hold-rows-5" footerColumnGroup={totals}>
+          className="bv-hold-rows-5 cc-ageing-summary" footerColumnGroup={totals}>
           <Column field="insurerName" header={t("creditControl.insurer")} />
           {BUCKETS.map((b) => <Column key={b} header={labels[b]} body={(r) => money(r[b])} className="bv-num" headerClassName="bv-num" />)}
           <Column header={t("creditControl.total")} body={(r) => <b>{money(r.total)}</b>} className="bv-num" headerClassName="bv-num" />

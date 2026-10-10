@@ -72,6 +72,11 @@ describe('lead assignment rules', () => {
     const kept = await manager('post', '/leads').send({ firstName: 'Cebuano', lob: 'FIRE', province: 'Cebu' });
     expect(kept.body.ownerUserId).toBe(ids['la.manager']);
     expect(kept.body.assignmentStatus).toBe('assigned');
+    // with no move recorded, its history is the assignment it has: to whom and by whom
+    const kh = await manager('get', `/lead-assignment/history/${kept.body.leadId || kept.body.id}`);
+    expect(kh.body.data).toHaveLength(1);
+    expect(kh.body.data[0]).toMatchObject({ action: 'manual', toUserId: ids['la.manager'], fromName: null });
+    expect(kh.body.data[0].toName).toBeTruthy();
     await setting('leads.assignment_fallback', 'queue');
     const queued = await manager('post', '/leads').send({ firstName: 'Davaoeno', lob: 'FIRE', province: 'Davao del Sur' });
     expect(queued.body.assignmentStatus).toBe('queued');

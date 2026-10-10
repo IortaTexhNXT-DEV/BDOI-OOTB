@@ -4,7 +4,8 @@
  * app_settings (limits.receivable_ageing_buckets, collections.*).
  */
 import { getSetting } from '../../lib/settings.js';
-import { formatMoney } from '../../lib/money.js';
+import { formatMoney, num } from '../../lib/money.js';
+import { chargesFor } from '../premium-charges/service.js';
 import { today } from '../../lib/dates.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -25,7 +26,7 @@ async function thresholds() {
 /** Base query; $1..$7 = b1, b2, b3, l1, l2, window, today (business date in general.timezone, not the DB current_date). */
 const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.due_date, r.status AS receivable_status, r.net_premium, r.vat, r.dst, r.lgt, r.other_charges,
     r.discount, r.source AS receivable_source, r.reference AS receivable_reference, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
-    p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
+    p.policy_number, p.status AS policy_status, p.product_id, p.lob AS policy_lob, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
     (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
     CASE WHEN r.balance <= 0 OR r.status IN ('paid','written-off') THEN 'Paid'
@@ -102,6 +103,23 @@ export async function listCollections(db, q, pg) {
   return { rows: rows.map(itemRow), total, overdueLevels: [t.l1, t.l2] };
 }
 
+/**
+ * Net premium and taxes of a bill kept with its gross amount alone (a loaded or migrated bill): the gross split at the
+ * premium tax rates in force for the policy's product, so the breakdown adds up to the gross. {} when the bill has them.
+ */
+async function premiumParts(db, x) {
+  const gross = Number(x.amount);
+  if (Number(x.net_premium) > 0 || !(gross > 0)) return {};
+  const c = await chargesFor({ premium: gross, productId: x.product_id || null, lob: x.policy_lob || null, includeFlat: false }, db);
+  const rate = num(c.totalCharges) / gross;
+  if (!(rate > 0)) return { netPremium: gross };
+  const net = round2(gross / (1 + rate));
+  const share = (v) => round2((num(v) * net) / gross);
+  const parts = { valueAddedTax: share(c.vat), documentaryStampTax: share(c.dst), localGovernmentTax: share(c.lgt) };
+  const others = round2(gross - net - parts.valueAddedTax - parts.documentaryStampTax - parts.localGovernmentTax);
+  return { netPremium: net, ...parts, accountPremiumOthers: others };
+}
+
 export async function getCollection(db, id) {
   const t = await thresholds();
   const x = (await db.query(`SELECT * FROM (${BASE}) y WHERE id = $8 OR receivable_id = $8`, [...baseParams(t), id])).rows[0];
@@ -115,6 +133,7 @@ export async function getCollection(db, id) {
   const coRows = x.participant_count > 1 ? await coInsuranceRows(db, x) : [];
   return {
     ...itemRow(x),
+    ...(await premiumParts(db, x)),
     isCoInsurancePolicy: coRows.length > 0, coInsuranceCollectionRows: coRows,
     followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, actionByName: a.action_by_name || a.action_by,
       actionByRoles: a.action_by_roles || [], callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
