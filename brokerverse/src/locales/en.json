@@ -7374,6 +7374,140 @@
       "empty": "No placement slip is waiting for an e-policy"
     }
   },
+  "accountingFlow": {
+    "title": "Accounting Flow",
+    "master": "Master",
+    "finance": "Finance",
+    "help": "The journal each business event posts, read from the posting rules and accounts in force today. Read only: rules change in Posting Rules, accounts in Account Determination, both approved by a second user.",
+    "export": {
+      "action": "Export",
+      "excel": "Accounting reference (Excel)",
+      "pdf": "Accounting entries handbook (PDF)"
+    },
+    "print": "Print",
+    "status": {
+      "label": "Status of the accounting reference",
+      "asOf": "Rules in force on {{date}} · Edition {{edition}}",
+      "editionTip": "The edition changes whenever a rule or an account changes. It is printed on the exports, so a signed handbook can be matched to the configuration.",
+      "mapping": "Account mapping",
+      "pendingChanges": "{{count}} changes pending approval",
+      "pendingChanges_one": "1 change pending approval",
+      "item": {
+        "provisional": "{{item}}: provisional account {{account}}",
+        "outside-chart": "{{item}}: {{account}} is outside the TISPH chart",
+        "inactive": "{{item}}: account {{account}} is inactive or missing"
+      }
+    },
+    "toolbar": {
+      "search": "Search events, accounts or amounts",
+      "modules": "Modules",
+      "allModules": "All modules",
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "pendingOnly": "Mapping pending only",
+      "jump": "Jump to an event",
+      "count": "{{shown}} of {{total}} events"
+    },
+    "contentsTitle": "Contents",
+    "attention": "Needs attention",
+    "empty": "No event matches these filters.",
+    "clearFilters": "Clear filters",
+    "loadError": "Could not load the accounting flow: {{message}}",
+    "retry": "Try again",
+    "openRule": "Open the rule",
+    "area": {
+      "premium": "Premium billing",
+      "collections": "Collections",
+      "remittance": "Remittance to insurers",
+      "direct-bill": "Direct-bill commission",
+      "overrides": "Overriding commission",
+      "comsub": "Agent and referrer commission",
+      "incentives": "Incentives",
+      "claims": "Claims",
+      "payments": "Payments and payables",
+      "petty-cash": "Petty cash",
+      "sales-invoices": "Sales invoices",
+      "write-offs": "Write-offs",
+      "fixed-assets": "Fixed assets",
+      "system": "Other system journals"
+    },
+    "chip": {
+      "posting": {
+        "posted": "Posted at once",
+        "parked": "Waits for approval",
+        "pending": "Saved as pending"
+      },
+      "parkedTip": "The journal is saved for approval and posted when a user other than the maker approves it in Journal Voucher.",
+      "pendingTip": "Automatic posting of system journals is off: the journal is saved as pending and posted from Journal Voucher.",
+      "alwaysPostedTip": "Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps.",
+      "changePending": "Change pending approval",
+      "changePendingTip": "Requested by {{by}} on {{on}}, from {{from}}",
+      "scheduled": "New rule from {{date}}",
+      "mappingTip": "A line posts to an account Finance still has to confirm.",
+      "noRule": "No rule in force",
+      "noRuleTip": "Transactions of this event cannot post.",
+      "fixed": "Fixed entry",
+      "fixedTip": "Built by the system, not by a posting rule."
+    },
+    "facts": {
+      "when": "When",
+      "where": "Where",
+      "approval": "Approval before posting",
+      "limit": "Approval limit",
+      "limitText": "Authority Matrix: {{name}}",
+      "lastPosted": "Last posted",
+      "notPosted": "Not posted yet"
+    },
+    "entries": {
+      "side": "Dr / Cr",
+      "debit": "Debit",
+      "credit": "Credit",
+      "account": "Account",
+      "amount": "Amount",
+      "notes": "Notes",
+      "none": "No entries",
+      "formula": "How it is computed: {{formula}}",
+      "perInsurer": "For each insurer",
+      "perInsurerTip": "One line per insurer of the policy, at its share.",
+      "onlyWhen": "Only when {{condition}}",
+      "notPosted": "Not posted",
+      "notPostedTip": "Switched off: {{condition}}.",
+      "changePending": "Account change pending",
+      "changePendingTo": "To {{account}} on approval, requested by {{by}}",
+      "changePendingBy": "A change waits for approval, requested by {{by}}"
+    },
+    "account": {
+      "else": "else {{account}}",
+      "accounts": "Accounts ({{count}})"
+    },
+    "mapping": {
+      "pending": "Mapping pending",
+      "inactive": "Account inactive",
+      "mapAccount": "Map the account",
+      "tip": {
+        "provisional": "Provisional account: Finance has not given the SAP account yet.",
+        "outside-chart": "Starter account outside the TISPH chart: the SAP GL file lists it as a warning.",
+        "inactive": "Postings to this account are refused."
+      }
+    },
+    "example": {
+      "toggle": "Example",
+      "title": "Example with sample amounts (nothing is posted)",
+      "single": "Single insurer",
+      "coInsured": "Two insurers (60 / 40)",
+      "name": "Name",
+      "total": "Total",
+      "balanced": "Balanced",
+      "notBalanced": "Not balanced",
+      "exampleAccount": "example account",
+      "omitted": "Not in this example (zero): {{items}}"
+    },
+    "technical": {
+      "rule": "Rule",
+      "lines": "Lines",
+      "settings": "Settings"
+    }
+  },
   "postingRules": {
     "title": "Posting Rules",
     "master": "Master",
@@ -7510,19 +7644,6 @@
       "rejected": "Rejected",
       "withdrawn": "Withdrawn",
       "all": "All"
-    },
-    "flow": {
-      "title": "Accounting Flow",
-      "intro": "What each operational event posts, read from the posting rules in force on {{date}}: the screen or action that triggers it, the approval before it posts, and the accounts it debits and credits. It changes as soon as an approved posting rule or account determination change takes effect.",
-      "allModules": "All modules",
-      "openRule": "Open the rule",
-      "trigger": "Triggered by",
-      "approval": "Approval",
-      "debit": "Debit",
-      "credit": "Credit",
-      "perInsurer": "per insurer",
-      "decidedAtPosting": "Decided when posting",
-      "else": "else"
     }
   },
   "bankReconciliation": {

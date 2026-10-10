@@ -18,6 +18,22 @@ async function request(method, path, body) {
   return data.data;
 }
 
+/** Download a file of the API with the session token; the file name comes from Content-Disposition. */
+async function download(path, fallbackName) {
+  const response = await fetch(`${BASE_URL}${path}`, { headers: authService.getAuthHeader() });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(apiErrorMessage(data, response.status));
+  }
+  const name = (response.headers.get("Content-Disposition") || "").match(/filename="([^"]+)"/)?.[1] || fallbackName;
+  const url = URL.createObjectURL(await response.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 const postingRulesService = {
   events: () => request("GET", "/posting-rules/events"),
   meta: () => request("GET", "/posting-rules/meta"),
@@ -35,6 +51,9 @@ const postingRulesService = {
   setCommissionTaxes: (body) => request("PUT", "/account-determination/commission-taxes", body),
   writeOffReasons: () => request("GET", "/accounting/write-off-reasons"),
   flow: () => request("GET", "/posting-rules/flow"),
+  flowExample: (eventCode, coInsurance) => request("GET", `/posting-rules/flow/${encodeURIComponent(eventCode)}/example${coInsurance ? "?coInsurance=true" : ""}`),
+  /** The accounting reference workbook (xlsx) or the Accounting Entries Handbook (pdf). */
+  downloadFlow: (format) => download(`/posting-rules/flow?format=${format === "pdf" ? "pdf&download=1" : "xlsx"}`, format === "pdf" ? "accounting-entries-handbook.pdf" : "accounting-reference.xlsx"),
   // maker-checker on posting rule and account determination changes
   changes: (status) => request("GET", `/posting-rules/changes?status=${encodeURIComponent(status || "pending")}`),
   approveChange: (id, remarks) => request("POST", `/posting-rules/changes/${id}/approve`, remarks ? { remarks } : {}),
