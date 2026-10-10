@@ -15,7 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgEye from "../../../assets/icons/SvgEye";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 import { useDispatch, useSelector } from "react-redux";
 import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import {
@@ -892,14 +892,10 @@ const PolicyReceipts = () => {
               ></Column>
 
               <Column
-                // sortable
-                body={(rowData) => (
-                  <SvgEye onClick={() => handleArrowClick(rowData)} />
-                )}
+                body={(rowData) => <RowActions onView={() => handleArrowClick(rowData)} viewLabel={t("common.view")} />}
                 header={t("accounts.receipts.action")}
-                headerStyle={headerStyle}
-                className="fieldvalue_containers"
-              ></Column>
+                {...actionsColumn}
+              />
             </DataTable>
           </div>
         </div>
