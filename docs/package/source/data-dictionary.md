@@ -609,6 +609,7 @@ The figures of the withholding and percentage tax returns (0619-E, 1601-EQ, 1604
 | `sales_invoices`, `sales_invoice_lines`, `sales_invoice_payments` | Sales invoices, their lines and the payments received. |
 | `eis_submissions` | E-invoice submissions to the EIS with status, attempts and reply. |
 | `cas_book_prints` | Loose-leaf books printed per period with page ranges. |
+| `cas_documents` | Versions of the CAS system description and backup procedure: sections, status, change note, reason, maker and approver. |
 
 | From | To | Meaning |
 |---|---|---|
@@ -1244,6 +1245,7 @@ This appendix lists every table and view with a one-line description and the num
 |---|---|---|
 | `bir_return_filings` | Filing record of each BIR return period (0619-E, 1601-EQ, 1604-E, 2551Q): status, reference, payment | 0 |
 | `cas_book_prints` | Loose-leaf books of accounts printed per period for the CAS registration pack, with page numbers | 0 |
+| `cas_documents` | Controlled versions of the CAS system description and controls and of the backup and restore procedure (draft, submitted, approved, superseded, cancelled) | 0 |
 | `eis_submissions` | E-invoice submissions to the BIR Electronic Invoicing System: payload, status, attempts, reply | 0 |
 | `sales_invoice_lines` | Lines of a sales invoice (description, amount, VAT) | 0 |
 | `sales_invoice_payments` | Payments received against a sales invoice | 0 |

@@ -20,6 +20,7 @@ const request = async (path, options = {}) => {
   if (!response.ok || body.success === false) {
     const error = new Error(body.message || `Request failed (${response.status})`);
     error.status = response.status;
+    error.errors = body.errors || [];
     throw error;
   }
   return body.data;
@@ -108,9 +109,22 @@ const birTaxService = {
   printBook: (book, period) => postFile(`/bir/cas/books/${enc(book)}/print`, { period }),
   bookPrints: (params) => request(`/bir/cas/prints${qs(params)}`),
   reprintBook: (id) => openFile(`/bir/cas/prints/${enc(id)}/pdf`),
-  voidPrint: (id, reason) => post(`/bir/cas/prints/${enc(id)}/void`, { reason }),
-  systemDescription: () => openFile("/bir/cas/documents/system-description"),
-  backupProcedure: () => openFile("/bir/cas/documents/backup-procedure"),
+  voidPrint: (id, reason) => post(`/bir/cas/prints/${enc(id)}/void`, reason),
+  casRegistration: () => request("/bir/cas/registration"),
+  saveCasRegistration: (body) => put("/bir/cas/registration", body),
+
+  // CAS documents (system description, backup procedure): versions, draft, approval
+  casDocuments: () => request("/bir/cas/documents"),
+  casDocument: (slug) => request(`/bir/cas/documents/${enc(slug)}/versions`),
+  casDocumentVersion: (slug, version) => request(`/bir/cas/documents/${enc(slug)}/versions/${enc(version)}`),
+  compareCasDocument: (slug, from, to) => request(`/bir/cas/documents/${enc(slug)}/compare${qs({ from, to })}`),
+  casDocumentPdf: (slug, version) => openFile(`/bir/cas/documents/${enc(slug)}${qs({ version })}`),
+  startCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft`),
+  saveCasDraft: (slug, sections) => put(`/bir/cas/documents/${enc(slug)}/draft`, { sections }),
+  submitCasDraft: (slug, body) => post(`/bir/cas/documents/${enc(slug)}/draft/submit`, body),
+  approveCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/approve`, remarks ? { remarks } : {}),
+  rejectCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/reject`, { remarks }),
+  discardCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft/discard`),
   auditExtract: (from, to, format) => openFile(`/bir/cas/audit-extract${qs({ from, to, format })}`, { fallbackName: `audit-trail.${format}` }),
 
   // overriding commission from insurers

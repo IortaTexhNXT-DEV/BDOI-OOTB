@@ -6933,7 +6933,122 @@
     "remainingWithBir": "What remains with the BIR",
     "eisSettingsNote": "Credentials are read from the environment variables {{id}} and {{secret}}; payloads are signed with the key in {{key}}. Their values are never stored in the system.",
     "cas": "CAS Books and Documents",
-    "casHelp": "Registration pack of the computerized accounting system: loose-leaf books per month with page numbers that run on through the year, the system description and controls, the backup procedure and the audit trail extract.",
+    "casHelp": "Registration pack of the computerized accounting system. Books print per month with page numbers that run on through the year; the documents print their approved version.",
+    "pageRange": "{{first}} to {{last}}",
+    "pdf": "PDF",
+    "casReadiness": {
+      "count": "{{complete}} of {{total}} complete",
+      "complete": "Complete",
+      "missing": "Missing",
+      "openCompany": "Open Company master",
+      "openDocument": "Open document",
+      "goToBooks": "Go to books",
+      "enter": {
+        "permit": "Enter permit",
+        "atp": "Enter ATP",
+        "custodian": "Name custodian",
+        "contact": "Name contact"
+      },
+      "item": {
+        "company": "Taxpayer name, TIN and registered address",
+        "rdo": "RDO code",
+        "permit": "CAS permit or acknowledgement number and date",
+        "atp": "Invoice ATP or acknowledgement",
+        "custodian": "Backup custodian",
+        "contact": "System contact person",
+        "systemDescription": "System description approved",
+        "backupProcedure": "Backup procedure approved",
+        "books": "Books printed at least once"
+      }
+    },
+    "casReg": {
+      "title": {
+        "permit": "CAS permit",
+        "atp": "Invoice ATP or acknowledgement",
+        "custodian": "Backup custodian",
+        "contact": "System contact person"
+      },
+      "number": {
+        "permit": "Permit or acknowledgement number",
+        "atp": "ATP or acknowledgement number"
+      },
+      "date": {
+        "permit": "Date issued",
+        "atp": "Date issued"
+      },
+      "user": {
+        "custodian": "Custodian",
+        "contact": "Contact person"
+      },
+      "position": "Position",
+      "chooseUser": "Choose a user",
+      "save": "Save",
+      "required": "Required"
+    },
+    "casDoc": {
+      "documents": "Documents",
+      "document": "Document",
+      "title": {
+        "system_description": "System Description and Controls",
+        "backup_procedure": "Backup and Restore Procedure"
+      },
+      "approvedVersion": "Approved version",
+      "approvedAt": "Approved on",
+      "approvedBy": "Approved by",
+      "inProgress": "In progress",
+      "content": "Content",
+      "versions": "Versions",
+      "activity": "Activity",
+      "version": "Version",
+      "preparedBy": "Prepared by",
+      "updatedAt": "Last changed",
+      "submittedBy": "Submitted by",
+      "submittedAt": "Submitted on",
+      "changeNote": "Change note",
+      "returnedWith": "Returned with",
+      "standardText": "Standard text (not approved)",
+      "remarks": "Remarks",
+      "heading": "Section heading",
+      "text": "Section text",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeSection": "Remove section",
+      "insertField": "Insert field",
+      "addSection": "Add section",
+      "liveFields": "Live fields",
+      "edit": "Edit document",
+      "saveDraft": "Save draft",
+      "discard": "Discard draft",
+      "printDraft": "Print draft",
+      "printVersion": "Print version {{version}}",
+      "compare": "Compare versions",
+      "selectedCount": "{{count}} of 2 selected",
+      "noVersions": "No versions yet",
+      "compareHead": "Version {{from}} compared with version {{to}}",
+      "compareSummary": "Changed {{changed}}, added {{added}}, removed {{removed}}",
+      "change": {
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "same": "Unchanged"
+      },
+      "line": {
+        "added": "Added line",
+        "removed": "Removed line"
+      },
+      "submitTitle": "Submit for approval",
+      "approveTitle": "Approve document version",
+      "approveMessage": "Version {{version}} becomes the approved document; the previous approved version is superseded.",
+      "approveVersion": "Approve version",
+      "rejectTitle": "Return to preparer",
+      "rejectMessage": "Version {{version}} returns to its preparer as a draft.",
+      "returnToPreparer": "Return to preparer",
+      "discardTitle": "Discard draft",
+      "discardMessage": "Draft version {{version}} is cancelled; the approved version stays in force.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedMessage": "The changes to the draft are not saved.",
+      "closeWithoutSaving": "Close without saving"
+    },
     "systemDescription": "System description",
     "backupProcedure": "Backup procedure",
     "readiness": "Readiness",
