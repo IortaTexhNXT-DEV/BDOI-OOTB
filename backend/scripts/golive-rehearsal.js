@@ -51,7 +51,7 @@ import { RehearsalLog, expect } from './golive/log.js';
 import { Api, Session, dataOf } from './uat/http.js';
 import { Random } from './uat/random.js';
 import { todayIn, addDays } from './uat/dates.js';
-import { countRows, reset } from './golive/database.js';
+import { countRows, reset, setGoLiveLock } from './golive/database.js';
 import { step1, step2 } from './golive/steps-config.js';
 import { step3 } from './golive/steps-smoke.js';
 import { step4 } from './golive/steps-migration.js';
@@ -88,7 +88,7 @@ async function preflight() {
     const notes = [];
     if (kits.locked) {
       expect(cfg.allowUnlock, 'golive.locked is on: TARGET holds a live book. Set REHEARSAL_ALLOW_UNLOCK=yes only if it is a rehearsal environment');
-      await ctx.tgt.admin.put('/settings', { settings: { 'golive.locked': false } });
+      await setGoLiveLock(cfg.targetDb, false);
       notes.push('golive.locked was on: switched off (REHEARSAL_ALLOW_UNLOCK=yes)');
     }
     const counts = await countRows(cfg.targetDb, ['clients', 'policies', 'journal_vouchers', 'opening_balances']);

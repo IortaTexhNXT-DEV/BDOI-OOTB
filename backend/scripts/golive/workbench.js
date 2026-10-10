@@ -8,13 +8,25 @@ export async function template(session, kit, { prefill = false } = {}) {
   return Book.from(await session.file(`/data-load/kits/${kit}/template`, prefill ? { prefill: 'true' } : {}));
 }
 
-/** Upload and validate: { batch, errors }. */
-export async function upload(session, kit, book, fileName) {
-  const buf = Buffer.isBuffer(book) ? book : book.toBuffer();
-  return dataOf(await session.upload('POST', '/data-load/batches', { kit }, [{ field: 'file', name: fileName, type: XLSX, data: buf }]));
+export const batch = async (session, id) => dataOf(await session.get(`/data-load/batches/${id}`));
+
+/** Wait for the job of a batch (validation, load or undo) to end: { batch, errors }. */
+export async function settled(session, id, { minutes = 30 } = {}) {
+  const end = Date.now() + minutes * 60000;
+  for (;;) {
+    const d = await batch(session, id);
+    if (!['validating', 'running', 'undoing'].includes(d.batch.status)) return d;
+    if (Date.now() > end) throw new Error(`load ${d.batch.loadNumber} is still ${d.batch.status} after ${minutes} minutes`);
+    await new Promise((resolve) => { setTimeout(resolve, 1000); });
+  }
 }
 
-export const batch = async (session, id) => dataOf(await session.get(`/data-load/batches/${id}`));
+/** Upload and validate (the validation runs as a job): { batch, errors } once it has ended. */
+export async function upload(session, kit, book, fileName) {
+  const buf = Buffer.isBuffer(book) ? book : book.toBuffer();
+  const r = dataOf(await session.upload('POST', '/data-load/batches', { kit }, [{ field: 'file', name: fileName, type: XLSX, data: buf }]));
+  return settled(session, r.batch.id);
+}
 export const load = async (session, id, { validRowsOnly = false } = {}) => dataOf(await session.post(`/data-load/batches/${id}/load`, { validRowsOnly }));
 export const errorsBook = async (session, id) => Book.from(await session.file(`/data-load/batches/${id}/errors`));
 export const reconciliationBook = async (session, id) => Book.from(await session.file(`/data-load/batches/${id}/reconciliation`));

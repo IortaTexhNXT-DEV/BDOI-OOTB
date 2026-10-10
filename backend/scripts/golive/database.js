@@ -23,6 +23,18 @@ export async function withClient(url, fn) {
   }
 }
 
+/**
+ * Switch the go-live lock of TARGET on or off in its database. A rehearsal environment only: in a real cutover two users
+ * lock go-live on Data Migration & Go-Live > Go-Live once the production run has its Go decision, and it is never
+ * switched off on screen.
+ */
+export function setGoLiveLock(url, on) {
+  return withClient(url, async (client) => {
+    await client.query('UPDATE app_settings SET value = $2::jsonb, updated_at = now() WHERE key = $1', ['golive.locked', JSON.stringify(on)]);
+    await client.query('UPDATE app_settings SET value = $2::jsonb, updated_at = now() WHERE key = $1', ['golive.locked_at', JSON.stringify(on ? new Date().toISOString() : '')]);
+  });
+}
+
 /** Transaction reset of TARGET (dry run or execute); throws ResetRefused when the go-live lock is on. */
 export function reset(url, { execute, actor = 'go-live rehearsal' }) {
   return withClient(url, (client) => resetTransactions(client, { execute, actor }));

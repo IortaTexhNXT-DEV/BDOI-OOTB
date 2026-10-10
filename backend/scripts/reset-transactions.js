@@ -31,8 +31,8 @@
  * history and environment comparisons (evidence of the mock runs: the loaded migration batches, whose records go, are
  * marked undone with the reason "transaction reset").
  *
- * Safety: refuses to run unless CONFIRM_RESET=yes, and refuses while the setting golive.locked is on (an administrator
- * switches it off in Master > Configuration > Go-live; that change is audited). Dry run by default (prints the row
+ * Safety: refuses to run unless CONFIRM_RESET=yes, and refuses while the setting golive.locked is on (switched on by two
+ * users on Data Migration & Go-Live > Go-Live and never lifted on screen; an unlock reopens named imports only). Dry run by default (prints the row
  * counts per table); --execute deletes. Everything runs in one transaction: any error rolls the whole reset back.
  *
  * Usage:
@@ -105,8 +105,8 @@ export async function resetTransactions(client, {
   let committed = false;
   try {
     if (await isGoLiveLocked(client)) {
-      throw new ResetRefused(`Refusing to reset: ${GO_LIVE_LOCK_KEY} is on, this database holds the live book. An administrator switches it off in `
-        + 'Master > Configuration > Go-live (recorded in the audit trail) only if the database really has to be reset.', 'GOLIVE_LOCKED');
+      throw new ResetRefused(`Refusing to reset: ${GO_LIVE_LOCK_KEY} is on, this database holds the live book. Only a copy restored from it that really has `
+        + `to be reset is unlocked, by the database administrator (setting ${GO_LIVE_LOCK_KEY}), never the live database.`, 'GOLIVE_LOCKED');
     }
     const existing = (await client.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")).rows.map((r) => r.tablename);
     const gaps = classificationGaps(existing);
@@ -280,7 +280,7 @@ async function main() {
     if (opts.purgeFiles) console.log(r.files.length ? `  files ${r.executed ? 'removed' : 'to remove'}: ${r.files.map((f) => `${f.folder}/ ${f.files}`).join(', ')}` : '  no transaction files in storage');
     console.log(`  opening balances: ${opts.keepOpeningBalances ? 'go-live balances kept' : 'removed (load the go-live migration again)'}`);
     if (!r.executed) console.log('Nothing was changed. Run again with --execute to reset.');
-    else console.log(`Done. Load the go-live migration, then switch on ${GO_LIVE_LOCK_KEY} (Master > Configuration > Go-live).`);
+    else console.log(`Done. Load the go-live migration, then lock go-live (${GO_LIVE_LOCK_KEY}: Data Migration & Go-Live > Go-Live, two users).`);
     return 0;
   } finally {
     client.release();
