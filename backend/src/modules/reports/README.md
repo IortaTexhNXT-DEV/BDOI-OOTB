@@ -27,7 +27,8 @@ permission, `query_name`), `report_schedules`, `generated_reports` (files produc
 3. `engine.buildSql` wraps the base query: `SELECT * FROM (<base>) t WHERE <filters>`. The base query receives
    `$1` from date, `$2` to date, then the `extras` (settings or today's business date) as `$3`, `$4` ...
 4. Columns whose name starts with `_` are only for filtering and never returned. Numeric columns in
-   `default_columns` are totalled.
+   `default_columns` are totalled. A column with `"pdf": false` is left out of the PDF (kept in Excel and CSV), for
+   wide reports whose detail columns would not fit a printed page; an empty PDF listing says so under its header.
 
 ## Key settings
 

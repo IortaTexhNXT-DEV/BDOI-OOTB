@@ -1361,7 +1361,7 @@
       "rejectDone": "Request rejected",
       "lines": "Lines",
       "fund": "Petty cash fund",
-      "approval": "Approval and activity",
+      "approval": "Approval",
       "status": "Status",
       "approvedAt": "Approved on",
       "statuses": {
@@ -1384,7 +1384,9 @@
       "disbursementsMessage": "The disbursements are posted against the fund.",
       "wht": "Withholding tax",
       "netAmount": "Net amount",
-      "recordDisbursements": "Record disbursements"
+      "recordDisbursements": "Record disbursements",
+      "approvedBy": "Approved by",
+      "activity": "Activity"
     },
     "view": {
       "netAmount": "Net amount",
@@ -1399,7 +1401,8 @@
       "narration": "Narration",
       "purpose": "Purpose",
       "fund": "Fund",
-      "accounts": "Bank and accounts"
+      "accounts": "Bank and accounts",
+      "printVoucher": "Print voucher"
     }
   },
   "employeeBenefit": {

@@ -1213,7 +1213,7 @@
       "rejectDone": "Request rejected",
       "lines": "Lines",
       "fund": "Petty cash fund",
-      "approval": "Approval and activity",
+      "approval": "การอนุมัติ",
       "status": "Status",
       "approvedAt": "Approved on",
       "statuses": {
@@ -1236,7 +1236,9 @@
       "disbursementsMessage": "The disbursements are posted against the fund.",
       "wht": "Withholding tax",
       "netAmount": "Net amount",
-      "recordDisbursements": "Record disbursements"
+      "recordDisbursements": "Record disbursements",
+      "approvedBy": "อนุมัติโดย",
+      "activity": "ประวัติการดำเนินการ"
     },
     "view": {
       "netAmount": "ยอดสุทธิ",
@@ -1251,7 +1253,8 @@
       "narration": "คำอธิบาย",
       "purpose": "วัตถุประสงค์",
       "fund": "กองทุน",
-      "accounts": "ธนาคารและบัญชี"
+      "accounts": "ธนาคารและบัญชี",
+      "printVoucher": "พิมพ์ใบสำคัญจ่าย"
     }
   },
   "employeeBenefit": {

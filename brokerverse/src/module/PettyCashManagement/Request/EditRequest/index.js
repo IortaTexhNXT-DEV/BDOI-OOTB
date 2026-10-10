@@ -233,14 +233,19 @@ const EditRequestForm = ({ action }) => {
                     </DataTable>
                 </DetailSection>
                 {editrequestDetails?.id ? (
-                    <DetailSection title={t("pettyCash.confirm.approval")}>
-                        <KeyValueGrid columns={4} items={[
-                            { label: t("pettyCash.view.purpose"), value: editrequestDetails.purpose, span: 2, hidden: !editrequestDetails.purpose },
-                            { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime", hidden: !editrequestDetails.approvedAt },
-                            { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
-                        ]} />
-                        <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
-                    </DetailSection>
+                    <>
+                        <DetailSection title={t("pettyCash.confirm.approval")}>
+                            <KeyValueGrid columns={4} items={[
+                                { label: t("pettyCash.view.purpose"), value: editrequestDetails.purpose, span: 2, hidden: !editrequestDetails.purpose },
+                                { label: t("pettyCash.confirm.approvedBy"), value: editrequestDetails.approvedByName, hidden: !editrequestDetails.approvedAt },
+                                { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime", hidden: !editrequestDetails.approvedAt },
+                                { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
+                            ]} />
+                        </DetailSection>
+                        <DetailSection title={t("pettyCash.confirm.activity")}>
+                            <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
+                        </DetailSection>
+                    </>
                 ) : null}
             </div>
         );
@@ -472,14 +477,19 @@ const EditRequestForm = ({ action }) => {
             </div>
             <AddDialog visible={visible} setVisible={setVisible} />
             {action === "view" && editrequestDetails?.id ? (
-                <DetailSection title={t("pettyCash.confirm.approval")} className="mt-4">
-                    <KeyValueGrid columns={4} items={[
-                        { label: t("pettyCash.confirm.status"), value: requestStatus ? <StatusChip code={requestStatus} label={t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus })} /> : null },
-                        { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime" },
-                        { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
-                    ]} />
-                    <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
-                </DetailSection>
+                <>
+                    <DetailSection title={t("pettyCash.confirm.approval")} className="mt-4">
+                        <KeyValueGrid columns={4} items={[
+                            { label: t("pettyCash.confirm.status"), value: requestStatus ? <StatusChip code={requestStatus} label={t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus })} /> : null },
+                            { label: t("pettyCash.confirm.approvedBy"), value: editrequestDetails.approvedByName },
+                            { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime" },
+                            { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
+                        ]} />
+                    </DetailSection>
+                    <DetailSection title={t("pettyCash.confirm.activity")}>
+                        <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
+                    </DetailSection>
+                </>
             ) : null}
         </div>
     );

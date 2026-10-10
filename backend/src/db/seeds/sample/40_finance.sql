@@ -273,7 +273,7 @@ BEGIN
       VALUES (v_pvno, 'Insurer', p.ic_id::text, COALESCE(p.ic_name, 'Insurer'), p.amount - p.commission_amount, p.amount, 'check',
         CASE p.rn WHEN 1 THEN 'paid' WHEN 2 THEN 'approved' ELSE 'draft' END, current_date - (6 - p.rn)::int,
         next_number('disbursement-txn', pg_temp.fin_setting('numbering.disbursement_txn.prefix', 'DT')), 'REMT', 'Premium remittance – ' || p.policy_number,
-        'Specific', p.client_code, p.client_id, p.ic_id, p.ic_name, p.id, p.policy_number, 'PHP', 'insurer-remittance', v_admin, 'FI', 'HO')
+        'Specific', p.client_code, p.client_id, p.ic_id, p.ic_name, p.id, p.policy_number, 'PHP', 'insurer-remittance', v_admin, 'FIN', 'HO')
       RETURNING id INTO v_pv;
       INSERT INTO invoice_lists(invoice_number, disbursement_id, customer_code, client_id, insurance_company_id, policy_id, policy_number, payee_type, payables, outstanding, lc_amount, comsub,
         bal_amount, total_amount, bank_code, bank_amount, is_invoice_paid, status, source, created_by)
@@ -300,7 +300,7 @@ BEGIN
     INSERT INTO disbursements(voucher_number, payee_type, payee_name, amount, payment_mode, status, voucher_date, transaction_number, transaction_code, transaction_description, criteria,
       instrument_currency, source, remarks, created_by, department_code, branch_code)
     VALUES (next_number('voucher', pg_temp.fin_setting('numbering.voucher.prefix', 'PV')), 'Supplier', 'LBC Express Inc.', 3850, 'check', 'draft', current_date - 1,
-      next_number('disbursement-txn', pg_temp.fin_setting('numbering.disbursement_txn.prefix', 'DT')), 'SUPP', 'Courier services – September', 'Specific', 'PHP', 'manual', 'Monthly courier billing', v_admin, 'FI', 'HO');
+      next_number('disbursement-txn', pg_temp.fin_setting('numbering.disbursement_txn.prefix', 'DT')), 'SUPP', 'Courier services – September', 'Specific', 'PHP', 'manual', 'Monthly courier billing', v_admin, 'FIN', 'HO');
 
     PERFORM pg_temp.fin_jv(current_date - 6, 'Accrual of statutory audit fee FY2026', 'manual', 'JOURNAL_VOUCHER', 'JV01', 'JournalVoucher', NULL, NULL, NULL, NULL, NULL,
       '[{"a":"4401003001","d":85000,"m":"Statutory audit FY2026"},{"a":"2206001","c":85000,"m":"Accrued audit fee – external auditor"}]'::jsonb, v_admin);
@@ -311,17 +311,17 @@ BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM petty_cash_funds WHERE code = 'PCF-MKT') THEN
       INSERT INTO petty_cash_funds(code, description, transaction_number, fund_size, max_limit, minimum_cashbox, available_cash, bank_code, main_account, currency, branch_code, department_code, created_by)
-      VALUES ('PCF-MKT', 'Makati head office petty cash', next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 20000, 5000, 3000, 20000, 'BDO', '1103001', 'PHP', 'HO', 'FI', v_admin),
-             ('PCF-CEB', 'Cebu branch petty cash', next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 10000, 3000, 2000, 10000, 'BPI', '1103001', 'PHP', 'CEB', 'SL', v_admin);
+      VALUES ('PCF-MKT', 'Makati head office petty cash', next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 20000, 5000, 3000, 20000, 'BDO', '1103001', 'PHP', 'HO', 'FIN', v_admin),
+             ('PCF-CEB', 'Cebu branch petty cash', next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 10000, 3000, 2000, 10000, 'BPI', '1103001', 'PHP', 'CEB', 'SLS', v_admin);
       UPDATE petty_cash_funds SET journal_id = pg_temp.fin_jv(current_date - 20, 'Petty cash fund ' || code || ' established', 'petty-cash', 'PETTY_CASH_FUND', transaction_number, 'PettyCash', id, NULL, NULL, NULL, NULL,
         jsonb_build_array(jsonb_build_object('a','1103001','d',fund_size,'m','Fund ' || code), jsonb_build_object('a','1102001','c',fund_size,'m','Cheque to custodian')), v_admin);
       INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, request_date, department_code, purpose, total_amount, status, approved_by, approved_at, created_by, created_at)
-      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Ana Reyes', current_date - 4, 'FI', 'Courier and office supplies', 1850, 'disbursed', v_admin, now() - interval '3 days', v_admin, now() - interval '4 days'
+      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Ana Reyes', current_date - 4, 'FIN', 'Courier and office supplies', 1850, 'disbursed', v_admin, now() - interval '3 days', v_admin, now() - interval '4 days'
       FROM petty_cash_funds WHERE code = 'PCF-MKT';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'LBC courier – policy documents', 650, '4401007' FROM petty_cash_requests WHERE purpose = 'Courier and office supplies';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'Bond paper and toner', 1200, '4401008' FROM petty_cash_requests WHERE purpose = 'Courier and office supplies';
       INSERT INTO petty_cash_requests(request_number, fund_id, requester_name, request_date, department_code, purpose, total_amount, status, created_by)
-      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Mark Tolentino', current_date, 'SL', 'Client meeting snacks', 950, 'submitted', v_admin FROM petty_cash_funds WHERE code = 'PCF-MKT';
+      SELECT next_number('petty-cash-request', pg_temp.fin_setting('numbering.petty_cash_request.prefix', 'PCR')), id, 'Mark Tolentino', current_date, 'SLS', 'Client meeting snacks', 950, 'submitted', v_admin FROM petty_cash_funds WHERE code = 'PCF-MKT';
       INSERT INTO petty_cash_request_lines(request_id, narration, amount, expense_account) SELECT id, 'Meeting snacks – Ayala client visit', 950, '4401001' FROM petty_cash_requests WHERE purpose = 'Client meeting snacks';
       INSERT INTO petty_cash_disbursements(transaction_number, transaction_code, fund_id, request_id, criteria, expense_account, amount, vat, wht, net_amount, vat_account, wht_account, remarks, disbursement_date, created_by, created_at)
       SELECT next_number('petty-cash', pg_temp.fin_setting('numbering.petty_cash.prefix', 'PC')), 'PCD', f.id, r.id, 'Specific', '4401008', 1850, 198.21, 0, 1850, '1301001', '2204001', 'Courier and office supplies', current_date - 3, v_admin, now() - interval '3 days'
