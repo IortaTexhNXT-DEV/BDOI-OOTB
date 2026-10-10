@@ -374,7 +374,7 @@ export const menuList = [
         name: "Post-Dated Cheques",
         path: "/accounts/post-dated-cheques",
         includes: ["/accounts/post-dated-cheques"],
-        permissions: ["read:receipts"],
+        permissions: ["read:pdc"],
       },
   {
         id: 41,

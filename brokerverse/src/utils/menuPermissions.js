@@ -170,7 +170,8 @@ const withoutInsurerRec = (items) => items.filter((item) => item !== "Insurer Re
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
+// the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
+const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE] };
 // Sales & Marketing item by item, for the personas that lack the permission of some of its screens
 const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
   "Comparison Reports", "Campaigns", "Sales Activities"];
@@ -182,7 +183,7 @@ const TIS_OPERATIONS = {
   "my work": true,
   // campaigns are Sales' (read:campaigns)
   operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
-  accounts: ["Receipts", "Collections", ...REMITTANCE("Remittances")],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };

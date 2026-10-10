@@ -165,7 +165,7 @@ export async function listPdcs(db, q = {}) {
       onHand: s.at_tis, onHandAmount: Number(s.at_tis_amount), dueNow: s.due_now, dueNowAmount: Number(s.due_now_amount) },
     counts: { open: s.open, 'at-tis': s.at_tis, 'with-partners': s.partners, awaiting: s.awaiting, bounced: s.bounced, 'cancellation-pending': s.pending, closed: s.closed,
       'deposit-due': s.deposit_due },
-    ageing: { buckets: bucketDays.slice(0, 3), amounts: ageing }, rows,
+    ageing: { buckets: bucketDays.slice(0, 3), amounts: ageing }, depositAccount: (await getSetting('pdc.default_deposit_account', '')) || null, rows,
   };
 }
 

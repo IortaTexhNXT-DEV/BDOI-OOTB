@@ -12984,7 +12984,7 @@
       "expired": "Expired",
       "cancelled": "Cancelled",
       "all": "All",
-      "on-hand": "On hand",
+      "on-hand": "Received at TIS",
       "open": "Open",
       "deposited": "Deposited",
       "cleared": "Cleared",
@@ -13017,7 +13017,10 @@
       "disposed": "Disposed",
       "accepted": "Accepted",
       "sent": "Sent",
-      "bound": "Bound"
+      "bound": "Bound",
+      "forwarded": "Forwarded",
+      "warehoused": "Warehoused",
+      "cancellation-pending": "Cancellation pending"
     },
     "masters": {
       "add": "Add",
@@ -13199,7 +13202,7 @@
       "bounced": "Bounced",
       "depositDue": "Deposit due",
       "depositDueHelp": "Cheques on hand dated within {{days}} day(s): {{total}}.",
-      "searchHint": "PDC, cheque, client, policy or bill",
+      "searchHint": "PDC, set, cheque, client, policy or bill",
       "number": "PDC no.",
       "bill": "Bill / policy",
       "bank": "Drawee bank",
@@ -13224,7 +13227,7 @@
       "replaceTitle": "Replace {{number}}",
       "replaced": "Replacement cheque {{number}} registered",
       "return": "Return",
-      "returnReason": "Why is the cheque returned to the client?",
+      "returnReason": "Reason",
       "returnDone": "Cheque returned",
       "cancelReason": "Why is the registration cancelled?",
       "cancelDone": "Cheque registration cancelled",
@@ -13234,7 +13237,194 @@
       "chequesCount": "{{count}} cheques",
       "chequesCount_one": "{{count}} cheque",
       "chequesCount_other": "{{count}} cheques",
-      "registerReplacement": "Register replacement"
+      "registerReplacement": "Register replacement",
+      "help": "Post-dated cheques from receipt to collection: encoded in sets against the instalment plan, forwarded to the Insurance Partner or deposited by TISPH, aged until the partner's advice, and cancelled with a second user's approval.",
+      "encode": "Encode PDCs",
+      "saveSet": "Save set",
+      "setSaved": "Set {{set}} saved with {{count}} cheques, {{amount}}",
+      "forward": "Forward to Insurance Partner",
+      "forwardHint": "Tick cheques received at TIS, payable to one Insurance Partner",
+      "forwardedDone": "{{count}} cheques forwarded to {{partner}} on transmittal {{transmittal}}",
+      "warehousedDone": "{{count}} cheques of transmittal {{transmittal}} are warehoused with {{partner}}",
+      "clearedByPartner": "Cheque {{number}} cleared; AR {{ar}} raised",
+      "clearedManyByPartner": "{{count}} cheques cleared; one AR raised for each",
+      "bouncedByPartner": "Cheque {{number}} marked bounced",
+      "cancelledDone": "Cheque {{number}} cancelled",
+      "returnedDone": "Cheque {{number}} returned to the client",
+      "savedDone": "Cheque {{number}} saved",
+      "cancelRequested": "Cancellation of cheque {{number}} sent for approval",
+      "pullOutRequestedDone": "Cancellation approved. Pull-out requested from {{partner}}",
+      "requestReturned": "Cancellation of cheque {{number}} returned to the requester",
+      "accountNumber": "Account no.",
+      "actionsFor": "Actions for {{number}}",
+      "ageing": "Ageing",
+      "approveCancellation": "Approve cancellation",
+      "approveTitle": "Approve the cancellation of {{number}}",
+      "approvedBy": "Approved by",
+      "ar": "AR",
+      "atTis": "At TIS",
+      "awaiting": "Awaiting confirmation",
+      "bankCheque": "Bank / cheque no.",
+      "billBalance": "Bill balance",
+      "billLabel": "Bill",
+      "bounceReasonRequired": "Choose the reason given",
+      "bouncedOn": "Bounced on",
+      "branch": "Branch",
+      "brstn": "BRSTN",
+      "cancelMessage": "The cheque is cancelled once another user approves the request.",
+      "cancelTitle": "Request cancellation of {{number}}",
+      "cancellationSection": "Cancellation",
+      "cancelledBy": "Cancelled by",
+      "cancelledOn": "Cancelled on",
+      "chequeFrom": "Cheque date from",
+      "chequeTo": "Cheque date to",
+      "chequeSection": "Cheque",
+      "chequeTitle": "Cheque {{number}}",
+      "cheques": "Cheques",
+      "chequesForwarded": "Cheques forwarded",
+      "chooseBank": "Row {{n}}: choose the drawee bank",
+      "clientPolicy": "Client / policy",
+      "collectedOn": "Collection date",
+      "copyDown": "Copy bank details down",
+      "courierReference": "Courier reference",
+      "createdBy": "Forwarded by",
+      "current": "Current",
+      "custody": "Custody",
+      "depositAccount": "Collection account",
+      "dueDate": "Due date",
+      "dueThisWeek": "Due this week",
+      "endOfTerm": "End of term",
+      "followUpReason": "Follow-up",
+      "forwardedOn": "Forwarded on",
+      "history": "History",
+      "inst": "Inst.",
+      "instOf": "{{n}} of {{m}}",
+      "insurancePartner": "Insurance Partner",
+      "keepOneRow": "Keep at least one cheque in the set",
+      "nothingToEncode": "Every instalment of this bill is paid or already covered by a cheque.",
+      "ofSet": "Set {{set}}",
+      "over": "Over {{days}}",
+      "partnerBounceReason": "Reason given by the Insurance Partner",
+      "partnerReference": "Partner reference",
+      "partnerReferenceRequired": "Enter the Insurance Partner's reference",
+      "payee": "Payee",
+      "pullOut": "Pull-out",
+      "pullOutNote": "The cheque is with {{partner}}: once approved, a pull-out goes on the next transmittal to the partner.",
+      "pullOutRequested": "Requested from the Insurance Partner",
+      "pullOutTransmittal": "Pull-out on transmittal",
+      "pullOutsOnTransmittal": "Pull-outs requested from this partner",
+      "receivedBy": "Received by",
+      "receivedByRequired": "Enter who received the cheques at the Insurance Partner",
+      "receivedDate": "Received date",
+      "receivedOn": "Received on",
+      "removeRow": "Remove row {{n}}",
+      "replacedBy": "Replaced by",
+      "replacementFollows": "Replacement follows",
+      "replaces": "Replaces",
+      "requestedBy": "Requested by",
+      "returnRemark": "Why is the request returned?",
+      "returnRequest": "Return request",
+      "returnRequestTitle": "Return the cancellation request of {{number}}",
+      "returnedOn": "Returned on",
+      "returnedTo": "Returned to",
+      "sendForApproval": "Send for approval",
+      "sentBy": "Sent by",
+      "setSection": "Set {{set}}",
+      "transmittal": "Transmittal",
+      "transmittalSection": "Transmittal",
+      "transmittalTitle": "Transmittal {{number}}",
+      "vaultFolder": "Vault folder",
+      "warehousedOn": "Warehoused on",
+      "withPartners": "With partners",
+      "payees": {
+        "insurance-partner": "Insurance Partner",
+        "tisph": "TISPH"
+      },
+      "sentByOptions": {
+        "courier": "Courier",
+        "messenger": "Messenger",
+        "hand-carry": "Hand carry"
+      },
+      "replacement": {
+        "cheque": "Cheque replacement",
+        "cash": "Cash",
+        "none": "None"
+      },
+      "transmittalStatus": {
+        "sent": "Sent",
+        "partly-received": "Partly received",
+        "received": "Received"
+      },
+      "tabs": {
+        "open": "All open",
+        "at-tis": "At TIS",
+        "with-partners": "With partners",
+        "awaiting": "Awaiting confirmation",
+        "follow-up": "Follow-up",
+        "bounced": "Bounced",
+        "cancellation-pending": "Cancellation pending",
+        "deposit-due": "Deposit due",
+        "closed": "Closed",
+        "transmittals": "Transmittals"
+      },
+      "menu": {
+        "view": "View",
+        "edit": "Edit",
+        "partner-received": "Partner received",
+        "partner-cleared": "Partner cleared",
+        "partner-bounced": "Partner bounced",
+        "deposit": "Deposit",
+        "clear": "Cleared",
+        "bounce": "Bounced",
+        "request-cancellation": "Request cancellation",
+        "approve-cancellation": "Approve cancellation",
+        "return-cancellation": "Return request",
+        "partner-returned": "Partner returned",
+        "replace": "Replace",
+        "return": "Return to client"
+      },
+      "actions": {
+        "forward": {
+          "title": "Forward to Insurance Partner",
+          "confirm": "Forward"
+        },
+        "partner-received": {
+          "title": "Partner received {{transmittal}}",
+          "confirm": "Record receipt"
+        },
+        "partner-cleared": {
+          "title": "Partner cleared",
+          "confirm": "Record collection"
+        },
+        "partner-bounced": {
+          "title": "Partner bounced {{number}}",
+          "confirm": "Mark as bounced"
+        },
+        "bounce": {
+          "title": "Bounced cheque {{number}}",
+          "confirm": "Mark as bounced"
+        },
+        "deposit": {
+          "title": "Deposit {{number}}",
+          "confirm": "Deposit cheque"
+        },
+        "partner-returned": {
+          "title": "Partner returned {{number}}",
+          "confirm": "Record return"
+        },
+        "return": {
+          "title": "Return {{number}} to the client",
+          "confirm": "Return cheque"
+        },
+        "replace": {
+          "title": "Replace {{number}}",
+          "confirm": "Encode replacement"
+        },
+        "edit": {
+          "title": "Edit {{number}}",
+          "confirm": "Save"
+        }
+      }
     },
     "claimPay": {
       "title": "Claims Settlements",
@@ -14987,7 +15177,9 @@
       "delegation": "Delegation of approval authority",
       "delegation_end": "Delegation ended early",
       "sod_exception": "Segregation of duties exception",
-      "access_review": "Access review removal"
+      "access_review": "Access review removal",
+      "pdc_cancel": "Post-dated cheque cancellation",
+      "pdc_bounce": "Bounced post-dated cheque"
     }
   },
   "financialStatements": {

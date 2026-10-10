@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import { Calendar } from "primereact/calendar";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
@@ -10,6 +10,8 @@ import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat"
  * ({ target: { name, id, value } }), so it replaces <input type="date"> without changing the form code.
  */
 const DateField = ({ id, name, value, onChange, min, max, className, placeholder, disabled = false, invalid = false, ...rest }) => {
+  // one Date per value: a new one on every render would write the field again while the user types
+  const date = useMemo(() => toDate(value), [value]);
   const change = (e) => {
     const iso = e.value ? toIsoDate(e.value) : "";
     onChange({ target: { name, id, value: iso, type: "text" }, persist: () => {} });
@@ -18,7 +20,7 @@ const DateField = ({ id, name, value, onChange, min, max, className, placeholder
     <Calendar
       inputId={id}
       name={name}
-      value={toDate(value)}
+      value={date}
       onChange={change}
       dateFormat={calendarDateFormat()}
       minDate={toDate(min) || undefined}

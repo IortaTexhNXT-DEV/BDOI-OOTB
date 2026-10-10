@@ -29,6 +29,37 @@ describe("date fields", () => {
     expect(screen.queryByRole("button", { hidden: true, name: /choose date/i })).toBeNull();
   });
 
+  it("take a date typed digit by digit: a part of a date changes nothing, the whole date is the value", () => {
+    const Host = () => {
+      const [value, setValue] = React.useState("");
+      return <><DateField id="cheque" name="chequeDate" value={value} onChange={(e) => setValue(e.target.value)} /><output>{value || "none"}</output></>;
+    };
+    render(<Host />);
+    const input = screen.getByRole("textbox");
+    let text = "";
+    for (const ch of "15/10/2026") {
+      text += ch;
+      fireEvent.input(input, { target: { value: text } });
+      expect(input).toHaveValue(text);
+    }
+    expect(screen.getByText("2026-10-15")).toBeInTheDocument();
+    fireEvent.input(input, { target: { value: "" } });
+    expect(screen.getByText("none")).toBeInTheDocument();
+  });
+
+  it("let a date already set be corrected by typing over it", () => {
+    const Host = () => {
+      const [value, setValue] = React.useState(new Date(2026, 9, 15));
+      return <><Calendar inputId="d2" value={value} onChange={(e) => setValue(e.value)} /><output>{value ? value.toDateString() : "none"}</output></>;
+    };
+    render(<Host />);
+    const input = screen.getByRole("textbox");
+    fireEvent.input(input, { target: { value: "15/11/202" } });
+    expect(input).toHaveValue("15/11/202");
+    fireEvent.input(input, { target: { value: "15/11/2026" } });
+    expect(screen.getByText(new Date(2026, 10, 15).toDateString())).toBeInTheDocument();
+  });
+
   it("replace the browser date input: ISO text in and out, an input-like change event", () => {
     const onChange = jest.fn();
     render(<DateField id="from" name="effectiveFrom" value="2026-10-09" onChange={onChange} />);
