@@ -3,9 +3,10 @@ import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
 
 /**
- * Access control API (/access-control): user access matrix, role permissions and the changes of a role's access
- * waiting for approval, authority matrix (limits, their changes, upload and exports), delegations,
- * segregation-of-duties rules, access reviews and ending a user's sessions.
+ * Access control API (/access-control): role directory, user access matrix and the access of one person, role
+ * permissions, authority matrix (limits, their changes, upload and exports), delegations, segregation of duties
+ * (rules, conflicts by user, exceptions), access reviews, the changes of access waiting for approval and ending a
+ * user's sessions.
  */
 const queryString = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -42,8 +43,11 @@ const download = async (path, fallbackName) => {
 };
 
 const accessControlService = {
+  directory: () => request("GET", "/directory").then((r) => r.data),
   userMatrix: (params) => request("GET", `/user-matrix${queryString(params)}`).then((r) => r.data),
-  downloadUserMatrix: () => download("/user-matrix?format=xlsx", "user-access-matrix.xlsx"),
+  userAccess: (userId) => request("GET", `/users/${encodeURIComponent(userId)}/access`).then((r) => r.data),
+  userAuthority: (userId, date) => request("GET", `/users/${encodeURIComponent(userId)}/authority${queryString({ date })}`).then((r) => r.data),
+  downloadUserMatrix: (params) => download(`/user-matrix${queryString({ format: "xlsx", ...params })}`, "user-access-matrix.xlsx"),
 
   roleAccess: () => request("GET", "/role-access").then((r) => r.data),
   checkRoleAccess: (role, { grant, revoke }) => request("POST", "/role-access/check", { role, grant, revoke }).then((r) => r.data),
@@ -69,19 +73,31 @@ const accessControlService = {
   }),
 
   delegations: (params) => request("GET", `/delegations${queryString(params)}`).then((r) => r.data),
-  createDelegation: (body) => request("POST", "/delegations", body),
-  revokeDelegation: (id) => request("POST", `/delegations/${id}/revoke`),
+  delegationOptions: () => request("GET", "/delegations/options").then((r) => r.data),
+  previewDelegation: (body) => request("POST", "/delegations/preview", body).then((r) => r.data),
+  requestDelegation: (body) => request("POST", "/delegations", body),
+  endDelegation: (id, reason) => request("POST", `/delegations/${id}/end`, reason),
+  downloadDelegations: (params) => download(`/delegations${queryString({ format: "xlsx", ...params })}`, "delegations.xlsx"),
 
   sodRules: () => request("GET", "/sod-rules").then((r) => r.data),
-  saveSodRule: (rule) => (rule.id ? request("PUT", `/sod-rules/${rule.id}`, rule) : request("POST", "/sod-rules", rule)),
-  switchOffSodRule: (id) => request("DELETE", `/sod-rules/${id}`),
-  sodCheck: (roles) => request("POST", "/sod-check", { roles }).then((r) => r.data),
+  requestSodRule: (rule) => (rule.id ? request("PUT", `/sod-rules/${rule.id}`, rule) : request("POST", "/sod-rules", rule)),
+  switchOffSodRule: (id, reason) => request("DELETE", `/sod-rules/${id}`, reason),
+  checkSodRule: (rule) => request("POST", "/sod-rules/check", rule).then((r) => r.data),
+  sodConflicts: (params) => request("GET", `/sod-conflicts${queryString(params)}`).then((r) => r.data),
+  requestSodException: (body) => request("POST", "/sod-exceptions", body),
+  endSodException: (id) => request("POST", `/sod-exceptions/${id}/end`),
+  sodCheck: (roles, userId) => request("POST", "/sod-check", { roles, userId }).then((r) => r.data),
+  downloadSod: (params) => download(`/sod-rules${queryString({ format: "xlsx", ...params })}`, "segregation-of-duties.xlsx"),
 
   reviews: () => request("GET", "/reviews").then((r) => r.data),
   review: (id) => request("GET", `/reviews/${id}`).then((r) => r.data),
-  downloadReview: (id) => download(`/reviews/${id}?format=xlsx`, `access-review-${id}.xlsx`),
+  previewReview: (scope) => request("POST", "/reviews/preview", scope).then((r) => r.data),
+  downloadReviews: () => download("/reviews?format=xlsx", "access-reviews.xlsx"),
+  downloadReview: (id, params) => download(`/reviews/${id}${queryString({ format: "xlsx", ...params })}`, `access-review-${id}.xlsx`),
   startReview: (body) => request("POST", "/reviews", body),
-  decideReviewItem: (id, itemId, decision, remarks) => request("POST", `/reviews/${id}/items/${itemId}`, { decision, remarks }),
+  decideReviewItem: (id, itemId, body) => request("POST", `/reviews/${id}/items/${itemId}`, body),
+  keepReviewItems: (id, itemIds, note) => request("POST", `/reviews/${id}/items/keep`, { itemIds, note }),
+  submitReview: (id) => request("POST", `/reviews/${id}/submit`),
   closeReview: (id) => request("POST", `/reviews/${id}/close`),
 
   signOutUser: (userId) => request("POST", `/users/${userId}/sign-out`),

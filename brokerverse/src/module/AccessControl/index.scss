@@ -1,5 +1,6 @@
-// User Management: user access matrix, role permissions, authority matrix, delegations, segregation of duties and
-// access reviews. Page frame, filters and form fields come from ../Administration/index.scss (admin__*).
+// Users and Access: user access matrix, role permissions, authority matrix, delegations, segregation of duties and
+// access reviews. Page frame, filters and form fields come from ../Administration/index.scss (admin__*); the access__*
+// classes below are also used by the client onboarding screens.
 @import "../../theme/bdoi/tokens";
 
 .access__page {
@@ -23,9 +24,9 @@
     align-items: flex-start;
     gap: 0.25rem;
     padding: 0.875rem 1rem;
-    border: 1px solid var(--surface-border, #e5e7eb);
-    border-radius: 8px;
-    background: var(--surface-0, #ffffff);
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    background: $color-surface;
     text-align: left;
     cursor: pointer;
     font: inherit;
@@ -36,11 +37,11 @@
 
     &:not(:disabled):hover,
     &.is-selected {
-      border-color: var(--primary-color, #0072d8);
+      border-color: $marker;
     }
 
     &.is-selected {
-      box-shadow: inset 0 0 0 1px var(--primary-color, #0072d8);
+      box-shadow: inset 0 0 0 1px $marker;
     }
   }
 
@@ -53,7 +54,7 @@
 
   .access__stat-label {
     font-size: 0.8125rem;
-    color: var(--text-color-secondary, #6b7280);
+    color: $color-text-muted;
   }
 
   .access__filters {
@@ -78,21 +79,21 @@
   }
 
   .access__muted {
-    color: var(--text-color-secondary, #6b7280);
+    color: $color-text-muted;
     font-size: 0.8125rem;
   }
 
   .access__warn {
-    color: #b45309;
+    color: $color-warning;
     font-size: 0.8125rem;
   }
 
   .access__ok {
-    color: #15803d;
+    color: $color-success;
   }
 
   .access__dash {
-    color: #cbd5e1;
+    color: $color-border-strong;
   }
 
   .access__code {
@@ -107,8 +108,8 @@
   }
 
   .access__role-tag {
-    background: #eef2ff;
-    color: #3730a3;
+    background: $brand-blue-050;
+    color: $color-heading;
     font-weight: 600;
   }
 
@@ -1142,5 +1143,259 @@
     @media (max-width: 575px) {
       grid-template-columns: minmax(0, 1fr);
     }
+  }
+}
+
+// ---------------------------------------------------------------- User Access Matrix, Delegations, Segregation of
+// Duties, Access Reviews (access-*). Theme tokens only; panels and dialogs render outside the page, so top level.
+
+.access-stats {
+  margin-bottom: 16px;
+}
+
+.access-filter {
+  min-width: 12rem;
+  max-width: 20rem;
+}
+
+.access-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.access-chip-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.access-role-tag.p-tag {
+  background: $brand-blue-050;
+  color: $color-heading;
+  font-weight: 600;
+}
+
+.access-role-tag--through.p-tag {
+  background: $color-surface;
+  border: 1px dashed $color-border-strong;
+  font-weight: 400;
+}
+
+.access-warn {
+  color: $color-warning;
+}
+
+.access-ok {
+  color: $color-success;
+}
+
+.access-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.access-rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.access-group {
+  color: $color-heading;
+}
+
+.access-table {
+  .access-row--click {
+    cursor: pointer;
+  }
+
+  .access-row--focus > td {
+    background: $brand-blue-050;
+  }
+}
+
+.rp-table .access-row--focus > td {
+  background: $brand-blue-050;
+}
+
+.access-lines {
+  margin: 0;
+  padding-left: 18px;
+
+  li + li {
+    margin-top: 2px;
+  }
+}
+
+.access-note {
+  margin: 12px 0 0;
+}
+
+.access-empty {
+  flex-wrap: wrap;
+}
+
+.access-review-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.access-pending {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid $color-border;
+  border-left: 3px solid $color-warning;
+  border-radius: $radius-sm;
+  background: $color-warning-050;
+
+  .access-pending__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .pi {
+      color: $color-warning;
+    }
+  }
+
+  .access-pending__lines {
+    margin: 0;
+    padding-left: 18px;
+  }
+}
+
+.access-form,
+.access-panel {
+  .rp-cell-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .access-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+
+    legend {
+      padding: 0 4px;
+      font-weight: 600;
+      color: $color-heading;
+    }
+  }
+
+  .access-checklist__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    label {
+      margin: 0;
+      font-weight: 400;
+    }
+  }
+
+  .access-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    label {
+      margin: 0;
+    }
+  }
+
+  .access-panel__levels {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 6px 8px 6px 0;
+      border-bottom: 1px solid $color-border;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    th {
+      font-weight: 600;
+      color: $color-heading;
+      width: 45%;
+
+      .rp-code {
+        display: block;
+      }
+    }
+  }
+}
+
+.access-panel.p-sidebar {
+  width: min(36rem, 100vw);
+
+  .access-panel__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: $color-heading;
+  }
+
+  .access-panel__body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .access-panel__facts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .access-panel__section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .access-panel__section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      color: $color-heading;
+    }
+  }
+
+  .access-panel__role {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 0;
+    border-bottom: 1px solid $color-border;
+  }
+
+  .access-panel__role-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
   }
 }
