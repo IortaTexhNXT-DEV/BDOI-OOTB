@@ -18,11 +18,14 @@ import { many, one, query, withTransaction } from '../../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../../lib/errors.js';
 import { getSetting } from '../../../lib/settings.js';
 import { round2 } from '../../../lib/money.js';
+import { moneyText } from '../../../lib/auditEvents.js';
+import { printFormat } from '../../../lib/pdf/index.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { companyName } from '../../../lib/letterhead.js';
 import { today } from '../../../lib/dates.js';
 import { assertChecker } from '../../../lib/makerChecker.js';
-import { assertAuthority } from '../../access-control/service.js';
+import { hasPermission } from '../../../lib/auth.js';
+import { assertAuthority, effectiveAuthority } from '../../access-control/service.js';
 import { registerMessageType } from '../framework/registry.js';
 import { enqueue, processOutbox, receive } from '../framework/outbox.js';
 import { layoutRow, parseStatusFile, renderFile } from './layouts.js';
@@ -107,7 +110,7 @@ const OPEN_LINE = `EXISTS (SELECT 1 FROM bank_payment_batch_lines l JOIN bank_pa
   WHERE l.disbursement_id = d.id AND b.status <> 'cancelled' AND l.status IN ('pending', 'paid'))`;
 const HAS_CHEQUE = "EXISTS (SELECT 1 FROM checkbooks c WHERE c.disbursement_id = d.id AND c.status IN ('Pending', 'Approved', 'Printed'))";
 
-async function eligibleStatuses() {
+export async function eligibleStatuses() {
   return (await getSetting('bank_payments.allow_draft_vouchers', false)) ? ['draft', 'for-approval'] : ['for-approval'];
 }
 
@@ -241,6 +244,42 @@ export async function approveBatch(id, user) {
     await db.query("UPDATE bank_payment_batches SET status = 'approved', approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1", [b.id, user.id]);
     return { before, after: await getBatch(b.id, db) };
   });
+}
+
+/**
+ * Can `user` approve or reject batch `b` (a bank_payment_batches row)? The rules of approveBatch as a code and the
+ * sentence the screen shows instead of the buttons: { canDecide, blockedCode, blockedReason }. Read only; approveBatch
+ * enforces them. Codes: WRONG_STATUS (not awaiting approval), NO_PERMISSION, MAKER (created the batch), SUBMITTER,
+ * VOUCHER_MAKER (made a voucher of the batch), NO_AUTHORITY, ABOVE_LIMIT (Authority Matrix payment_voucher).
+ */
+export async function batchDecision(b, user, db = null) {
+  const no = (blockedCode, blockedReason) => ({ canDecide: false, blockedCode, blockedReason });
+  if (b.status !== 'for-approval') return no('WRONG_STATUS', null);
+  if (!hasPermission(user, 'write:disbursements')) return no('NO_PERMISSION', 'You can view payment batches but not approve them.');
+  if (await getSetting('finance.maker_checker_enabled', true)) {
+    if (b.created_by === user.id) return no('MAKER', 'You prepared this batch. Another user must approve it.');
+    if (b.submitted_by === user.id) return no('SUBMITTER', 'You submitted this batch. Another user must approve it.');
+    const mine = (await run(db).query(`SELECT d.voucher_number FROM bank_payment_batch_lines l JOIN disbursements d ON d.id = l.disbursement_id
+      WHERE l.batch_id = $1 AND d.created_by = $2 ORDER BY l.seq LIMIT 1`, [b.id, user.id])).rows[0];
+    if (mine) return no('VOUCHER_MAKER', `You prepared payment voucher ${mine.voucher_number} in this batch. Another user must approve it.`);
+  }
+  if (await getSetting('access.authority_enforced', true)) {
+    const a = await effectiveAuthority(run(db), user.id, 'payment_voucher', await today());
+    const type = (await run(db).query("SELECT name FROM authority_transaction_types WHERE code = 'payment_voucher'")).rows[0]?.name || 'Payment voucher';
+    if (!a.found && String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse') {
+      return no('NO_AUTHORITY', `You have no approval limit for ${type}. Ask an administrator to set one in the Authority Matrix.`);
+    }
+    if (a.found && !a.unlimited && Number(b.total_amount) > a.limit) {
+      const fmt = await printFormat();
+      return no('ABOVE_LIMIT', `${moneyText(Number(b.total_amount), fmt)} is above your approval limit of ${moneyText(a.limit, fmt)}.`);
+    }
+  }
+  return { canDecide: true, blockedCode: null, blockedReason: null };
+}
+
+/** A batch (toBatch / getBatch) with the decision block of `user`. */
+export async function withDecision(batch, user) {
+  return { ...batch, decision: await batchDecision(await batchRow(batch.id), user) };
 }
 
 export async function rejectBatch(id, reason, user) {
