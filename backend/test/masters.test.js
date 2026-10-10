@@ -42,6 +42,8 @@ describe('signatories master (order summary Authorized Signature)', () => {
     const byName = Object.fromEntries(list.body.data.map((s) => [s.signatoryName, s]));
     expect(byName['Maria Regina Cruz']).toMatchObject({ designation: 'President & CEO', status: 'Active' });
     expect(byName['Maria Regina Cruz'].signatoryCode).toMatch(/^SIG-\d{3}$/);
+    // loaded with the set-up data, it was last changed by the system; one added on the screen names its user
+    expect(byName['Maria Regina Cruz'].modifiedBy).toBe('System');
     const opts = await as(salesToken, 'get', '/masters/signatory/options');
     expect(opts.status).toBe(200);
     expect(opts.body.data.map((o) => o.value)).toEqual(expect.arrayContaining(['Maria Regina Cruz', 'Jose Antonio Reyes', 'Ana Patricia Lim']));
@@ -51,6 +53,7 @@ describe('signatories master (order summary Authorized Signature)', () => {
   it('a signatory added under Master is offered; an inactive one is not', async () => {
     const c = await ctx.api('post', '/masters/signatory').send({ signatoryCode: 'SIG-900', signatoryName: 'Carmela Santos', signatoryDescription: 'Operations Head', designation: 'Operations Head' });
     expect(c.status).toBe(201);
+    expect(c.body.data.modifiedBy).toBe('BrokerVerse Administrator');
     let opts = await as(salesToken, 'get', '/masters/signatory/options');
     expect(opts.body.data.map((o) => o.value)).toContain('Carmela Santos');
     expect((await ctx.api('patch', `/masters/signatory/${c.body.data.id}/status`).send({ status: 'Inactive' })).status).toBe(200);

@@ -271,7 +271,8 @@ function tableOut(t, row) {
 const SETUP_ACTORS = "('seed', 'system', 'migration', 'gl-sync')";
 
 /** Who last changed a record (display name): the last editor, else its creator. */
-const lastChangedBy = (row) => row.updated_by_name || row.created_by_name || row.updated_by || row.created_by || null;
+// a record loaded with the reference data at set-up has no user: it was the system's
+const lastChangedBy = (row) => row.updated_by_name || row.created_by_name || row.updated_by || row.created_by || 'System';
 
 function withAudit(t, rec, row) {
   const updatedOn = row.updated_at ? new Date(row.updated_at).toISOString().slice(0, 10) : null;
