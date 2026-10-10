@@ -27158,12 +27158,12 @@
           ]
         },
         {
-          "name": "Executive KPIs (premium, policies in force, new business, claims ratio, retention), premium by product, monthly trend, regions, products, agents",
+          "name": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/dashboard/executive?period=month",
+              "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -27175,10 +27175,14 @@
                 {
                   "key": "period",
                   "value": "month"
+                },
+                {
+                  "key": "compare",
+                  "value": "previous"
                 }
               ]
             },
-            "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention), premium by product, monthly trend, regions, products, agents\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
+            "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
           },
           "response": [
             {
@@ -27187,7 +27191,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/executive?period=month",
+                  "raw": "{{baseUrl}}/dashboard/executive?period=month&compare=previous",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -27199,10 +27203,14 @@
                     {
                       "key": "period",
                       "value": "month"
+                    },
+                    {
+                      "key": "compare",
+                      "value": "previous"
                     }
                   ]
                 },
-                "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention), premium by product, monthly trend, regions, products, agents\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
+                "description": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read\n\nFront-end touchpoint: Dashboard > Executive Dashboard\n\nAccess: read:reports"
               },
               "status": "OK",
               "code": 200,
@@ -27329,12 +27337,12 @@
           ]
         },
         {
-          "name": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+          "name": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&salesPerson=usr_0123",
+              "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -27349,12 +27357,16 @@
                   "value": "month"
                 },
                 {
+                  "key": "compare",
+                  "value": "previous"
+                },
+                {
                   "key": "salesPerson",
                   "value": "usr_0123"
                 }
               ]
             },
-            "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+            "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
           },
           "response": [
             {
@@ -27363,7 +27375,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&salesPerson=usr_0123",
+                  "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&compare=previous&salesPerson=usr_0123",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -27378,12 +27390,16 @@
                       "value": "month"
                     },
                     {
+                      "key": "compare",
+                      "value": "previous"
+                    },
+                    {
                       "key": "salesPerson",
                       "value": "usr_0123"
                     }
                   ]
                 },
-                "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+                "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -27395,7 +27411,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2026-09-01\",\n      \"to\": \"2026-09-30\"\n    },\n    \"kpis\": {\n      \"prospects\": 61,\n      \"newProspects\": 12,\n      \"quotations\": 9,\n      \"policies\": 4,\n      \"premium\": 125000,\n      \"prospectConversionRate\": 25,\n      \"pipelineValue\": 350000\n    },\n    \"pipeline\": {\n      \"prospects\": [\n        {\n          \"stage\": \"New\",\n          \"count\": 7\n        }\n      ],\n      \"quotations\": [\n        {\n          \"stage\": \"Draft\",\n          \"count\": 2,\n          \"premium\": 45000\n        }\n      ]\n    },\n    \"bySalesPerson\": [\n      {\n        \"userId\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\",\n        \"prospects\": 5,\n        \"quotations\": 3,\n        \"policies\": 2,\n        \"premium\": 64000,\n        \"conversionRate\": 40\n      }\n    ],\n    \"salesPersons\": [\n      {\n        \"id\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\"\n      }\n    ],\n    \"scoped\": false\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2026-09-01\",\n      \"to\": \"2026-09-30\",\n      \"compare\": \"previous\",\n      \"comparedFrom\": \"2026-08-01\",\n      \"comparedTo\": \"2026-08-30\"\n    },\n    \"kpis\": {\n      \"prospects\": 61,\n      \"newProspects\": 12,\n      \"quotations\": 9,\n      \"policies\": 4,\n      \"premium\": 125000,\n      \"prospectConversionRate\": 25,\n      \"pipelineValue\": 350000\n    },\n    \"previous\": {\n      \"prospects\": 58,\n      \"newProspects\": 9,\n      \"quotations\": 7,\n      \"policies\": 3,\n      \"premium\": 98000\n    },\n    \"pipeline\": {\n      \"prospects\": [\n        {\n          \"stage\": \"New\",\n          \"count\": 7\n        }\n      ],\n      \"quotations\": [\n        {\n          \"stage\": \"Draft\",\n          \"count\": 2,\n          \"premium\": 45000\n        }\n      ]\n    },\n    \"bySalesPerson\": [\n      {\n        \"userId\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\",\n        \"prospects\": 5,\n        \"quotations\": 3,\n        \"policies\": 2,\n        \"premium\": 64000,\n        \"conversionRate\": 40\n      }\n    ],\n    \"salesPersons\": [\n      {\n        \"id\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\"\n      }\n    ],\n    \"scoped\": false\n  }\n}"
             }
           ]
         }

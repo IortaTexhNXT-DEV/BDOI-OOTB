@@ -7625,7 +7625,7 @@
     ]
   }
 }"
-372,Dashboards,GET,/api/dashboard/executive,"Executive KPIs (premium, policies in force, new business, claims ratio, retention), premium by product, monthly trend, regions, products, agents",Dashboard > Executive Dashboard,Bearer JWT,read:reports,Query: ?period=month,"{
+372,Dashboards,GET,/api/dashboard/executive,"Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read",Dashboard > Executive Dashboard,Bearer JWT,read:reports,Query: ?period=month&compare=previous,"{
   ""success"": true,
   ""data"": {
     ""executiveKPIs"": {
@@ -7684,12 +7684,15 @@
     ]
   }
 }"
-375,Dashboards,GET,/api/dashboard/sales/overview,"Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",Dashboard > Sales Dashboard,Bearer JWT,"read:leads, read:quotations",Query: ?period=month&salesPerson=usr_0123,"{
+375,Dashboards,GET,/api/dashboard/sales/overview,"Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",Dashboard > Sales Dashboard,Bearer JWT,"read:leads, read:quotations",Query: ?period=month&compare=previous&salesPerson=usr_0123,"{
   ""success"": true,
   ""data"": {
     ""period"": {
       ""from"": ""2026-09-01"",
-      ""to"": ""2026-09-30""
+      ""to"": ""2026-09-30"",
+      ""compare"": ""previous"",
+      ""comparedFrom"": ""2026-08-01"",
+      ""comparedTo"": ""2026-08-30""
     },
     ""kpis"": {
       ""prospects"": 61,
@@ -7699,6 +7702,13 @@
       ""premium"": 125000,
       ""prospectConversionRate"": 25,
       ""pipelineValue"": 350000
+    },
+    ""previous"": {
+      ""prospects"": 58,
+      ""newProspects"": 9,
+      ""quotations"": 7,
+      ""policies"": 3,
+      ""premium"": 98000
     },
     ""pipeline"": {
       ""prospects"": [

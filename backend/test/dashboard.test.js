@@ -103,6 +103,26 @@ describe('dashboards', () => {
     const all = await ctx.api('get', '/agent/get-dashboard-details?scope=all');
     expect(all.body.data.funnel.leads).toBeGreaterThanOrEqual(17);
   });
+  it('compares a period with the same days of the previous period or of last year, and says when the figures were read', async () => {
+    const { comparisonRange } = await import('../src/modules/dashboard/service.js');
+    expect(comparisonRange({ from: '2026-09-01', to: '2026-09-04', prevFrom: '2026-08-01' })).toEqual({ compare: 'previous', from: '2026-08-01', to: '2026-08-04' });
+    expect(comparisonRange({ from: '2026-03-01', to: '2026-03-31', prevFrom: '2026-02-01' })).toMatchObject({ from: '2026-02-01', to: '2026-02-28' });
+    expect(comparisonRange({ from: '2026-09-01', to: '2026-09-04' }, 'lastYear')).toEqual({ compare: 'lastYear', from: '2025-09-01', to: '2025-09-04' });
+    expect(comparisonRange({ from: '2026-09-11', to: '2026-09-20' })).toMatchObject({ from: '2026-09-01', to: '2026-09-10' });
+    const year = (await ctx.api('get', '/dashboard/executive?period=year&compare=lastYear')).body.data;
+    expect(year.period).toMatchObject({ compare: 'lastYear', comparedFrom: `${Number(year.period.from.slice(0, 4)) - 1}-01-01` });
+    const before = Number((await pool.query(`SELECT COALESCE(sum(premium_total), 0) AS s FROM policies
+      WHERE COALESCE(doc->>'source', '') <> 'go-live-migration' AND load_batch_id IS NULL
+        AND COALESCE(issued_date, (created_at AT TIME ZONE 'Asia/Manila')::date) BETWEEN $1::date AND $2::date`, [year.period.comparedFrom, year.period.comparedTo])).rows[0].s);
+    const expected = before ? Math.round(((year.executiveKPIs.totalRevenue.value - before) / before) * 1000) / 10 : null;
+    expect(year.executiveKPIs.totalRevenue.change).toBe(expected);
+    expect(Date.parse(year.asOf)).toBeGreaterThan(Date.now() - 60000);
+    const sales = (await ctx.api('get', '/dashboard/sales/overview?period=month&compare=previous')).body.data;
+    expect(sales.period.comparedFrom < sales.period.from).toBe(true);
+    expect(Object.keys(sales.previous)).toEqual(Object.keys(sales.kpis));
+    expect(sales.asOf).toBeTruthy();
+    expect((await ctx.api('get', '/dashboard/processing')).body.data.asOf).toBeTruthy();
+  });
   it('enforces permissions', async () => {
     expect((await finance('get', '/dashboard/sales')).status).toBe(403);
     expect((await finance('get', '/dashboard/claims')).status).toBe(200); // finance reads claims KPIs

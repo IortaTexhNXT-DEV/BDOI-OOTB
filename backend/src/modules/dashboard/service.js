@@ -4,7 +4,7 @@ import { getSetting } from '../../lib/settings.js';
 import { round2 } from '../documents/common.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { scopeSql } from '../../lib/scope.js';
-import { businessTimeZone, calendarPeriod, today } from '../../lib/dates.js';
+import { DAY_MS, addCalendarMonths, addDays, businessTimeZone, calendarPeriod, today } from '../../lib/dates.js';
 
 /**
  * One user's own book, with the same ownership rules as the record scope of security.scoped_roles (lib/scope.js): the
@@ -23,20 +23,35 @@ const renewalsDueDays = async () => Number(await getSetting('dashboard.renewals_
 const PRODUCT = "COALESCE(p.product_type, pr.name, p.lob, 'Other')";
 
 /**
+ * The dates a range is compared with: the same number of days at the start of the previous period ("previous": 1 to
+ * 4 August when the range is 1 to 4 September), or the same dates a year earlier ("lastYear"). `prevFrom` is the start
+ * of the previous calendar period; without it (a custom range) the previous period is the equal span just before.
+ */
+export function comparisonRange({ from, to, prevFrom }, compare = 'previous') {
+  if (compare === 'lastYear') return { compare, from: addCalendarMonths(from, -12), to: addCalendarMonths(to, -12) };
+  const days = Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS);
+  const start = prevFrom || addDays(from, -(days + 1));
+  const end = addDays(start, days);
+  return { compare: 'previous', from: start, to: end < from ? end : addDays(from, -1) };
+}
+
+/**
  * Premium written in the current and previous period, policies in force, new business, claims ratio, retention.
  * The period is the calendar month / quarter / year to date in the configured time zone (1 September to today for
  * "This Month"), compared with the same number of days of the previous period (1 to 4 August when today is
- * 4 September), so a period that has just started is not compared with a whole one.
+ * 4 September), so a period that has just started is not compared with a whole one, or with the same dates a year
+ * earlier (compare = "lastYear").
  */
-export async function executive(period = 'month') {
+export async function executive(period = 'month', compare = 'previous') {
   const range = await calendarPeriod(period);
+  const cmp = comparisonRange(range, compare);
   // premium is written on the policy's issue date (a policy keyed in later still counts in the month it was issued)
   const written = 'COALESCE(issued_date, (created_at AT TIME ZONE $4)::date)';
   // policies loaded by the go-live migration were written in the old system: they count as in force, not as premium
   // written or new business in BrokerVerse
   const live = "COALESCE(doc->>'source', '') <> 'go-live-migration' AND load_batch_id IS NULL";
   const cur = `${live} AND ${written} >= $1::date AND ${written} < $2::date`;
-  const prev = `${live} AND ${written} >= $3::date AND ${written} < LEAST($1::date, $3::date + ($5::date - $1::date + 1))`;
+  const prev = `${live} AND ${written} >= $3::date AND ${written} <= $6::date`;
   const k = await one(`SELECT
       COALESCE(sum(premium_total) FILTER (WHERE ${cur}), 0) AS premium_cur,
       COALESCE(sum(premium_total) FILTER (WHERE ${prev}), 0) AS premium_prev,
@@ -46,7 +61,7 @@ export async function executive(period = 'month') {
       COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${cur}), 0) AS new_business,
       COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${prev}), 0) AS new_business_prev,
       COALESCE(sum(premium_total), 0) AS premium_all
-    FROM policies`, [range.from, range.next, range.prevFrom, range.timeZone, range.to]);
+    FROM policies`, [range.from, range.next, cmp.from, range.timeZone, range.to, cmp.to]);
   const claims = await one(`SELECT count(*)::int AS total, count(*) FILTER (WHERE status NOT IN ('settled','closed','rejected'))::int AS open,
       COALESCE(sum(COALESCE(settled_amount, approved_amount, 0)), 0) AS incurred, COALESCE(sum(estimate_amount), 0) AS reserved FROM claims`);
   const ret = await one(`SELECT count(*) FILTER (WHERE status = 'renewed')::int AS renewed, count(*) FILTER (WHERE status IN ('renewed','lapsed'))::int AS closed FROM renewals`);
@@ -70,7 +85,9 @@ export async function executive(period = 'month') {
     claimsAnalytics: { totalClaims: claims.total, openClaims: claims.open, incurred: round2(claims.incurred), reserved: round2(claims.reserved), claimsRatio },
     receivables: await receivablesPosition(),
     currency: await getSetting('currency.default', 'PHP'),
-    period: { code: range.period, from: range.from, to: range.to, end: range.end, previousFrom: range.prevFrom, previousTo: range.prevTo },
+    period: { code: range.period, from: range.from, to: range.to, end: range.end, previousFrom: range.prevFrom, previousTo: range.prevTo,
+      compare: cmp.compare, comparedFrom: cmp.from, comparedTo: cmp.to, timeZone: range.timeZone },
+    asOf: new Date().toISOString(),
   };
 }
 
@@ -198,13 +215,15 @@ export async function processing() {
     myCases: cases.map((c) => ({ caseId: c.quote_number, quotationId: c.id, proposedInsured: c.insured, agent: c.agent, faceAmount: round2(c.sum_insured), premium: round2(c.premium_total),
       productType: c.product_type || c.lob, requirementDue: c.valid_until, status: quoteStatusOut(c.status), priority: Number(c.sum_insured) >= hiSi ? 'high' : 'medium' })),
     volumeByLOB: { labels: byLob.map((r) => r.lob), data: byLob.map((r) => r.count) },
+    asOf: new Date().toISOString(),
   };
 }
 
 export async function claimsSummary() {
   const byStatus = await many('SELECT status, count(*)::int AS count, COALESCE(sum(estimate_amount),0) AS estimate FROM claims GROUP BY 1 ORDER BY 2 DESC');
   const t = await one(`SELECT count(*)::int AS total, COALESCE(sum(settled_amount),0) AS settled, COALESCE(avg(settled_at::date - reported_date) FILTER (WHERE settled_at IS NOT NULL), 0) AS avg_days FROM claims`);
-  return { totalClaims: t.total, settledAmount: round2(t.settled), averageDaysToSettle: round2(t.avg_days), claimsByStatus: byStatus.map((r) => ({ ...r, estimate: round2(r.estimate) })) };
+  return { totalClaims: t.total, settledAmount: round2(t.settled), averageDaysToSettle: round2(t.avg_days), claimsByStatus: byStatus.map((r) => ({ ...r, estimate: round2(r.estimate) })),
+    asOf: new Date().toISOString() };
 }
 
 /** Sales home (Account Executive): own leads, quotes, policies, premium and renewals due. */
@@ -240,12 +259,8 @@ const OPEN_QUOTES = ['draft', 'sent', 'accepted', 'submitted', 'approved'];
 /** Sales person of a record: the owner column, else whoever entered it (created_by holds a user id or a username). */
 const personOf = (col, alias) => `(SELECT u.id FROM users u WHERE u.id = COALESCE(${alias}.${col}, ${alias}.created_by) OR u.username = COALESCE(${alias}.${col}, ${alias}.created_by) LIMIT 1)`;
 
-/**
- * Sales Dashboard: prospects, quotations, conversion and premium for a date range (default this month), the current
- * pipeline by stage and the figures per sales person. `book` (ownBook) limits every figure to one sales person's book;
- * null is the whole book.
- */
-export async function salesOverview({ book = null, from, to } = {}) {
+/** The headline sales figures of one date range; `book` (ownBook) limits them to one sales person's book. */
+async function salesKpis(book, from, to) {
   const p = [];
   const lead = inBook(book, 'lead', 'l', p);
   const quote = inBook(book, 'quote', 'q', p);
@@ -272,7 +287,21 @@ export async function salesOverview({ book = null, from, to } = {}) {
       (SELECT COALESCE(sum(po.premium_total), 0) FROM policies po WHERE ${policy} AND ${issued} BETWEEN ${f} AND ${t}) AS premium,
       (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND q.status = ANY(${open})) AS pipeline_count,
       (SELECT COALESCE(sum(q.premium_total), 0) FROM quotes q WHERE q.deleted_at IS NULL AND ${quote} AND q.status = ANY(${open})) AS pipeline_value`, p);
+  return {
+    prospects: k.prospects, newProspects: k.new_prospects, convertedProspects: k.converted_prospects, quotations: k.quotations,
+    quotedPremium: round2(k.quoted_premium), convertedQuotations: k.converted_quotes, policies: k.policies, premium: round2(k.premium),
+    prospectConversionRate: pct(k.converted_prospects, k.new_prospects), quoteConversionRate: pct(k.converted_quotes, k.quotations),
+    pipelineCount: k.pipeline_count, pipelineValue: round2(k.pipeline_value),
+  };
+}
 
+/**
+ * Sales Dashboard: prospects, quotations, conversion and premium for a date range (default this month), the current
+ * pipeline by stage and the figures per sales person. `book` (ownBook) limits every figure to one sales person's book;
+ * null is the whole book. With `compared` ({ from, to }, comparisonRange) the same headline figures of the compared
+ * dates come as `previous`.
+ */
+export async function salesOverview({ book = null, from, to, compared = null } = {}) {
   // current pipeline: open prospects by status (in the configured order), then open quotations by status
   const statuses = await getSetting('leads.statuses', ['New', 'Contacted', 'Qualified', 'QuoteGenerated', 'Converted', 'Lost']);
   const lp = [];
@@ -323,13 +352,9 @@ export async function salesOverview({ book = null, from, to } = {}) {
     GROUP BY 1 ORDER BY 2 DESC`, pr);
 
   return {
-    period: { from, to },
-    kpis: {
-      prospects: k.prospects, newProspects: k.new_prospects, convertedProspects: k.converted_prospects, quotations: k.quotations,
-      quotedPremium: round2(k.quoted_premium), convertedQuotations: k.converted_quotes, policies: k.policies, premium: round2(k.premium),
-      prospectConversionRate: pct(k.converted_prospects, k.new_prospects), quoteConversionRate: pct(k.converted_quotes, k.quotations),
-      pipelineCount: k.pipeline_count, pipelineValue: round2(k.pipeline_value),
-    },
+    period: { from, to, ...(compared ? { compare: compared.compare, comparedFrom: compared.from, comparedTo: compared.to } : {}) },
+    kpis: await salesKpis(book, from, to),
+    ...(compared ? { previous: await salesKpis(book, compared.from, compared.to) } : {}),
     pipeline,
     bySalesPerson: people.map((r) => ({
       userId: r.uid, name: r.name || 'Unassigned', branch: r.branch, prospects: r.prospects, quotations: r.quotations, quotedPremium: round2(r.quoted),
@@ -337,6 +362,7 @@ export async function salesOverview({ book = null, from, to } = {}) {
     })),
     premiumByProduct: { labels: byProduct.map((r) => r.product), data: byProduct.map((r) => round2(r.premium)), policies: byProduct.map((r) => r.policies) },
     monthlyTrend: await monthlyTrend(12, book),
+    asOf: new Date().toISOString(),
   };
 }
 

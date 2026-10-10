@@ -45233,7 +45233,7 @@
     "/dashboard/executive": {
       "get": {
         "operationId": "getDashboardExecutive",
-        "summary": "Executive KPIs (premium, policies in force, new business, claims ratio, retention), premium by product, monthly trend, regions, products, agents",
+        "summary": "Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read",
         "tags": [
           "Dashboards"
         ],
@@ -45247,6 +45247,15 @@
               "type": "string"
             },
             "example": "month"
+          },
+          {
+            "name": "compare",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "previous"
           }
         ],
         "responses": {
@@ -45558,7 +45567,7 @@
     "/dashboard/sales/overview": {
       "get": {
         "operationId": "getDashboardSalesOverview",
-        "summary": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+        "summary": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
         "tags": [
           "Dashboards"
         ],
@@ -45572,6 +45581,15 @@
               "type": "string"
             },
             "example": "month"
+          },
+          {
+            "name": "compare",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "previous"
           },
           {
             "name": "salesPerson",
@@ -45605,6 +45623,15 @@
                             },
                             "to": {
                               "type": "string"
+                            },
+                            "compare": {
+                              "type": "string"
+                            },
+                            "comparedFrom": {
+                              "type": "string"
+                            },
+                            "comparedTo": {
+                              "type": "string"
                             }
                           }
                         },
@@ -45630,6 +45657,26 @@
                               "type": "integer"
                             },
                             "pipelineValue": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "previous": {
+                          "type": "object",
+                          "properties": {
+                            "prospects": {
+                              "type": "integer"
+                            },
+                            "newProspects": {
+                              "type": "integer"
+                            },
+                            "quotations": {
+                              "type": "integer"
+                            },
+                            "policies": {
+                              "type": "integer"
+                            },
+                            "premium": {
                               "type": "integer"
                             }
                           }
@@ -45725,7 +45772,10 @@
                   "data": {
                     "period": {
                       "from": "2026-09-01",
-                      "to": "2026-09-30"
+                      "to": "2026-09-30",
+                      "compare": "previous",
+                      "comparedFrom": "2026-08-01",
+                      "comparedTo": "2026-08-30"
                     },
                     "kpis": {
                       "prospects": 61,
@@ -45735,6 +45785,13 @@
                       "premium": 125000,
                       "prospectConversionRate": 25,
                       "pipelineValue": 350000
+                    },
+                    "previous": {
+                      "prospects": 58,
+                      "newProspects": 9,
+                      "quotations": 7,
+                      "policies": 3,
+                      "premium": 98000
                     },
                     "pipeline": {
                       "prospects": [
