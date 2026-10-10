@@ -197,6 +197,7 @@ export const remittanceService = {
   advicePath: (remId) => `${R}/remittances/${id(remId)}/advice.pdf`,
   approvalInbox: (params) => apiRequest("GET", `${R}/approvals`, { params: { view: "mine", ...params } }),
   getApproval: (approvalId) => get(`${R}/approvals/${id(approvalId)}`),
+  approvalExportPath: (params = {}) => `${R}/approvals/export.xlsx${toQuery(params)}`,
   // { items: [{ id, version }], action: approve | reject, reasonCode, note }; per-item results
   decideApprovals: (payload) => post(`${R}/approvals/decide`, payload),
   approveApproval: (approvalId, { version, comments } = {}) => post(`${R}/approvals/${id(approvalId)}/approve`, { version, comments }),

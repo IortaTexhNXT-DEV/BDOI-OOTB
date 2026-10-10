@@ -2003,6 +2003,288 @@
       "dueToInsurer": "Due to insurer",
       "result": "Result",
       "message": "Message"
+    },
+    "flags": {
+      "offCycle": "Off-cycle",
+      "offCycleReason": "Off-cycle · {{reason}}",
+      "overdue": "Overdue"
+    },
+    "decision": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "approveTitle": "Approve remittance",
+      "approveMessage": "Approve {{reference}} for {{amount}}? Settlement and payment follow in Disbursement.",
+      "approveVerb": "Approve",
+      "approved": "Remittance approved. Settlement and payment follow in Disbursement.",
+      "rejectTitle": "Reject {{reference}}",
+      "rejectNote": "{{reference}} · {{amount}} returns to {{maker}}.",
+      "rejectVerb": "Reject and return to maker",
+      "rejected": "Remittance returned to the maker.",
+      "theMaker": "the maker",
+      "reference": "Remittance",
+      "amount": "Amount",
+      "reason": "Reason"
+    },
+    "inbox": {
+      "title": "Approvals",
+      "help": "Remittances waiting for a decision. You can decide only items you did not prepare or submit, within your approval limit.",
+      "approveSelected": "Approve selected ({{count}})",
+      "export": "Export XLSX",
+      "exportFailed": "Export failed",
+      "cover": "Out-of-office cover",
+      "authority": {
+        "label": "Approval authority",
+        "upTo": "Remittance up to {{amount}}",
+        "unlimited": "Remittance: no limit",
+        "covering": "Covering for {{name}} until {{date}}",
+        "none": "No approval authority for remittances"
+      },
+      "kpis": {
+        "mine": "Awaiting my decision",
+        "pastSla": "Past SLA",
+        "oldest": "oldest {{hours}} h",
+        "submitted": "Submitted by me",
+        "awaitingOthers": "awaiting others",
+        "decidedToday": "Decided by me today",
+        "approvedRejected": "{{approved}} approved / {{rejected}} rejected"
+      },
+      "segments": {
+        "mine": "Awaiting my decision ({{count}})",
+        "submitted": "Submitted by me ({{count}})",
+        "all": "All pending",
+        "decided": "Decided"
+      },
+      "filters": {
+        "type": "Type",
+        "insurer": "Insurer",
+        "search": "Search reference"
+      },
+      "allTypes": "All types",
+      "allInsurers": "All insurers",
+      "types": {
+        "remittance": "Remittance",
+        "settlement": "Settlement"
+      },
+      "columns": {
+        "reference": "Reference",
+        "type": "Type",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "amount": "Amount",
+        "submittedBy": "Submitted by",
+        "submittedOn": "Submitted on",
+        "sla": "SLA",
+        "level": "Level",
+        "canDecide": "Can I decide?",
+        "nextStep": "Next step",
+        "decision": "Decision",
+        "by": "By",
+        "reason": "Reason",
+        "limitAtDecision": "Limit at decision",
+        "decidedOn": "Decided on",
+        "actions": "Actions"
+      },
+      "outcomes": {
+        "Approved": "Approved",
+        "Rejected": "Returned"
+      },
+      "yes": "Yes",
+      "no": "No · {{reason}}",
+      "short": {
+        "SUBMITTER": "You submitted it",
+        "MAKER": "You prepared it",
+        "EARLIER_LEVEL": "You approved an earlier level",
+        "ABOVE_LIMIT": "Above your limit ({{limit}})",
+        "NO_AUTHORITY": "No approval authority",
+        "NO_PERMISSION": "View only",
+        "DELEGATED_AWAY": "Delegated to another approver",
+        "ALREADY_DECIDED": "Already decided"
+      },
+      "actions": {
+        "view": "View",
+        "remind": "Remind approver"
+      },
+      "actionsFor": "Actions for {{reference}}",
+      "openReview": "Review {{reference}}",
+      "selectable": "{{count}} of {{total}} rows can be approved by you",
+      "bulkTitle": "Approve {{count}} items",
+      "bulkMessage": "Approve {{count}} items for {{amount}}? Settlement and payment follow in Disbursement.",
+      "bulkVerb": "Approve {{count}} items",
+      "results": "{{approved}} approved · {{refused}} not approved",
+      "resultApproved": "Approved",
+      "reminded": "Reminder sent",
+      "remindFailed": "Reminder not sent",
+      "empty": {
+        "mine": "Nothing is waiting for your decision.",
+        "submitted": "You have nothing awaiting approval.",
+        "all": "Nothing is pending approval.",
+        "decided": "No decisions in the last 30 days."
+      },
+      "loadError": "The approvals could not be loaded."
+    },
+    "review": {
+      "title": "Review approval",
+      "facts": "Remittance",
+      "insurer": "Insurer",
+      "productLine": "Product line",
+      "period": "Period",
+      "source": "Source",
+      "policies": "Policies",
+      "premium": "Total premium",
+      "commission": "Commission",
+      "tax": "Tax",
+      "dueToInsurer": "Due to insurer",
+      "dueDate": "Due date",
+      "previous": "Previous remittance",
+      "noPrevious": "No earlier remittance for this insurer.",
+      "checks": "Checks at submission",
+      "checkResult": {
+        "pass": "Pass",
+        "fail": "Fail",
+        "info": "Information"
+      },
+      "lines": "Lines ({{shown}} of {{count}})",
+      "openFull": "Open full remittance",
+      "policyNo": "Policy no",
+      "client": "Client",
+      "exceptions": "Exceptions",
+      "noExceptions": "No open exceptions.",
+      "activity": "Activity",
+      "showActivity": "Show activity",
+      "hideActivity": "Hide activity",
+      "activityCount": "{{count}} entries · latest {{at}}"
+    },
+    "record": {
+      "title": "Remittance",
+      "remittances": "Remittances",
+      "back": "Back to Remittances",
+      "system": "System",
+      "states": {
+        "notFound": "Remittance not found.",
+        "forbidden": "You do not have access to remittances.",
+        "error": "The remittance could not be loaded."
+      },
+      "steps": {
+        "created": "Created",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "returned": "Returned",
+        "voucher": "Voucher raised",
+        "paid": "Paid"
+      },
+      "sod": {
+        "prepared": "Prepared {{name}}",
+        "submitted": "Submitted {{name}}",
+        "approved": "Approved {{name}}",
+        "returned": "Returned by {{name}}",
+        "voucher": "Voucher {{number}}"
+      },
+      "basis": "{{basis}} basis",
+      "coverage": "Coverage {{from}}–{{to}}",
+      "due": "Due {{date}}",
+      "source": "Source {{source}}",
+      "checks": "Checks {{passed}}/{{total}}",
+      "banner": {
+        "decide": "Awaiting your decision · Your limit {{limit}} · This item {{amount}}",
+        "noLimit": "no limit",
+        "returned": "Returned by {{name}} on {{at}}",
+        "paid": "Paid on {{at}}"
+      },
+      "stale": "{{message}} Reload to see the current version.",
+      "reload": "Reload",
+      "submit": "Submit for approval",
+      "submitTitle": "Submit {{reference}} for approval",
+      "submitMessage": "Submit {{reference}} for {{amount}}? It goes to the remittance approvers.",
+      "submitted": "Submitted for approval",
+      "submitFailed": "Not submitted",
+      "downloadFailed": "Download failed",
+      "actions": {
+        "download-schedule-xlsx": "Download schedule (XLSX)",
+        "download-schedule-pdf": "Download schedule (PDF)",
+        "download-advice": "Download advice (PDF)",
+        "open-voucher": "Open voucher"
+      },
+      "totals": {
+        "policies": "Policies",
+        "premium": "Total premium",
+        "commission": "Commission",
+        "tax": "Tax",
+        "adjustments": "Adjustments",
+        "due": "Due to insurer",
+        "voucher": "Voucher amount",
+        "paidOn": "Paid on"
+      },
+      "tabs": {
+        "lines": "Lines ({{count}})",
+        "payment": "Payment",
+        "documents": "Documents",
+        "activity": "Activity"
+      },
+      "lines": {
+        "policyNo": "Policy no",
+        "client": "Client",
+        "product": "Product",
+        "effective": "Effective",
+        "premium": "Total premium",
+        "commission": "Commission",
+        "tax": "Tax",
+        "due": "Due to insurer",
+        "expected": "Expected due",
+        "variance": "Variance",
+        "status": "Status",
+        "statuses": {
+          "active": "Included",
+          "settled": "Remitted"
+        },
+        "total": "Total",
+        "empty": "No lines.",
+        "actions": "Actions",
+        "actionsFor": "Actions for {{policy}}",
+        "viewPolicy": "View policy"
+      },
+      "payment": {
+        "none": "No voucher yet. It is raised when the remittance is included in a settlement.",
+        "voucher": "Voucher",
+        "voucherNo": "Voucher no",
+        "voucherStatus": "Status",
+        "amount": "Amount",
+        "settlement": "Settlement",
+        "payment": "Payment",
+        "method": "Method",
+        "valueDate": "Value date",
+        "bankReference": "Bank reference",
+        "paidOn": "Paid on"
+      },
+      "documents": {
+        "schedule-xlsx": "Remittance schedule (XLSX)",
+        "schedule-pdf": "Remittance schedule (PDF)",
+        "advice": "Remittance advice (PDF)",
+        "download": "Download",
+        "downloadOf": "Download {{name}}",
+        "none": "No documents."
+      },
+      "activity": {
+        "summary": "Approval summary",
+        "authority": "Authority",
+        "level": "Level",
+        "content": "Content version",
+        "version": "v{{version}}",
+        "unchanged": "v{{version}} · unchanged since submission",
+        "changed": "v{{version}} · changed since submission (v{{submitted}})",
+        "decision": "Decision",
+        "decisions": {
+          "Pending": "Pending",
+          "Approved": "Approved",
+          "Rejected": "Returned"
+        },
+        "decidedBy": "Decided by",
+        "decidedOn": "Decided on",
+        "limit": "Limit at decision",
+        "limitSource": "Limit source",
+        "reason": "Reason",
+        "log": "Activity log",
+        "download": "Download log (XLSX)"
+      }
     }
   },
   "incentive": {
