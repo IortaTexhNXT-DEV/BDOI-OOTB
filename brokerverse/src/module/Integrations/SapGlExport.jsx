@@ -104,7 +104,7 @@ const SapGlExport = () => {
           <Column header={t("sapGl.debit")} body={(r) => money(r.totalDebit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.credit")} body={(r) => money(r.totalCredit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.trigger")} body={(r) => <div><div>{t(`sapGl.triggers.${r.trigger}`)}</div><div className="pe-muted">{r.createdBy || ""}</div></div>} />
-          <Column header={t("sapGl.notes")} body={notes} style={{ maxWidth: "18rem" }} />
+          <Column header={t("sapGl.notes")} body={notes} style={{ minWidth: "12rem", maxWidth: "18rem" }} />
           <Column header={t("sapGl.files")} body={(r) => (r.files.length ? (
             <div className="flex flex-column align-items-start gap-1">
               {r.files.map((f) => (
