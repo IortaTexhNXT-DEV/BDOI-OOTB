@@ -21,6 +21,7 @@ import { companyName } from '../../lib/letterhead.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { assertAuthority } from '../access-control/service.js';
 import { GROSS_BILLED_SQL } from './basis.js';
+import { activityEntries } from '../../lib/auditEvents.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -99,8 +100,9 @@ export function remittanceOut(r, labels) {
     billNumber: r.bill_number, billNo: r.bill_number, billDate: r.remittance_date, billAmount, totalDue: billAmount, previousBalance: r.previous_balance,
     billStatus: r.sent_at ? 'Sent' : (r.bill_number ? 'Generated' : 'Draft'), sentAt: r.sent_at, deliveryMethod: r.delivery_method,
     agencyCode: r.agency_code, agencyName: r.agency_name, agentUserId: r.agent_user_id, configCode: r.config_code, batchRef: r.batch_ref,
-    remarks: r.remarks, createdBy: r.created_by_name || r.created_by, createdAt: r.created_at, submittedAt: r.submitted_at,
-    approvedBy: r.approved_by_name || r.approved_by, approvedAt: r.approved_at, settledAt: r.settled_at, updatedAt: r.updated_at,
+    remarks: r.remarks, createdBy: r.created_by_name || r.created_by, createdById: r.created_by, createdAt: r.created_at, submittedAt: r.submitted_at,
+    approvedBy: r.approved_by_name || r.approved_by, approvedById: r.approved_by, approvedAt: r.approved_at, settledAt: r.settled_at, updatedAt: r.updated_at,
+    paymentReference: r.data?.paymentReference || null,
   };
 }
 
@@ -139,19 +141,56 @@ const lineOut = (l) => ({
   premium: l.premium, commission: l.commission, tax: l.tax, netAmount: l.net, commissionRate: l.premium ? round2((l.commission / l.premium) * 100) : 0, status: l.status,
 });
 
+/** Approval level and delegate of an approval decision (the other fields of an approval snapshot are bookkeeping). */
+function approvalChanges(before, after) {
+  const out = [];
+  if (!before || !after) return out;
+  const of = (x) => (x.currentLevel ? `${x.currentLevel} of ${x.requiredLevels}` : null);
+  if (before.currentLevel !== after.currentLevel) out.push({ field: 'currentLevel', label: 'Approval level', before: of(before), after: of(after) });
+  if ((before.delegatedTo || null) !== (after.delegatedTo || null)) out.push({ field: 'delegatedTo', label: 'Delegated to', before: before.delegatedTo || null, after: after.delegatedTo || null });
+  return out;
+}
+
+/**
+ * Activity log of a remittance, oldest first: its own audit rows, the decisions taken on its approval (Accounts >
+ * Remittance > Approval Workflow audits them by approval id) and the approval of the settlement that settled it.
+ * Each entry keeps the fields of earlier releases (action, by, at, notes) and adds the activity log entry of
+ * lib/auditEvents#activityEntries (action label, user display name and roles, status from / to, remarks, changes).
+ */
+export async function remittanceActivity(remittanceId, { viewer = null } = {}) {
+  const labels = await statusLabels();
+  const rows = await many(`SELECT a.id, a.at, a.user_id, a.username, a.entity, a.entity_id, a.action, a.before_data, a.after_data, a.source FROM audit_log a
+    WHERE (a.entity = 'remittance' AND a.entity_id = $1)
+       OR (a.entity = 'remittance_approval' AND a.entity_id IN (SELECT id::text FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1))
+       OR (a.entity = 'remittance_approval' AND a.action = 'approve' AND a.after_data->>'status' = 'Approved' AND a.entity_id IN (
+             SELECT ra.id::text FROM remittance_approvals ra JOIN remittance_items x ON x.id = ra.entity_id
+             WHERE ra.entity = 'item' AND x.kind = 'settlement' AND x.data->'remittanceIds' ? $1))
+    ORDER BY a.at, a.id`, [remittanceId]);
+  const entries = await activityEntries(rows, { viewer, statusLabels: labels });
+  return entries.map((e, i) => {
+    const r = rows[i];
+    const approval = r.after_data && typeof r.after_data === 'object' && 'requiredLevels' in r.after_data;
+    const settledBy = r.entity === 'remittance_approval' && r.after_data?.transactionType === 'Settlement';
+    const entry = settledBy
+      ? { ...e, actionCode: 'settle', actionLabel: `Settled by settlement ${r.after_data.referenceNo}`, fromStatus: labels.approved || 'Approved', toStatus: labels.settled || 'Settled',
+        changes: [{ field: 'settlementNo', label: 'Settlement', before: null, after: r.after_data.referenceNo }] }
+      : { ...e, ...(approval ? { changes: approvalChanges(r.before_data, r.after_data) } : {}) };
+    return { action: entry.actionCode, by: r.username, notes: entry.remarks, ...entry };
+  });
+}
+
 /** Detail view used by Tracking / Approval dialogs: insurer, policies, documents and the activity log. */
-export async function remittanceDetails(id) {
+export async function remittanceDetails(id, { viewer = null } = {}) {
   const r = await getRemittanceRow(id);
   const lines = await many('SELECT * FROM remittance_lines WHERE remittance_id = $1 ORDER BY id', [r.id]);
   const docs = await many('SELECT storage_key, file_name, size_bytes, created_at FROM documents WHERE entity = \'remittance\' AND entity_id = $1 ORDER BY created_at', [r.id]);
-  const log = await many('SELECT action, username, at, after_data FROM audit_log WHERE entity = \'remittance\' AND entity_id = $1 ORDER BY id', [r.id]);
   const base = remittanceOut(r, await statusLabels());
   return {
     ...base, createdDate: r.created_at, lastModified: r.updated_at,
     insurerDetails: { code: r.insurer_code, name: r.insurer_name, address: r.insurer_address, contact: r.insurer_email, phone: r.insurer_phone },
     policies: lines.map(lineOut),
     documents: docs.map((d) => ({ name: d.file_name, size: d.size_bytes, key: d.storage_key, uploadedAt: d.created_at })),
-    activityLog: log.map((a) => ({ action: a.action, by: a.username, at: a.at, notes: a.after_data?.remarks || a.after_data?.comments || null })),
+    activityLog: await remittanceActivity(r.id, { viewer }),
   };
 }
 

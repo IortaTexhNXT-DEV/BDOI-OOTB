@@ -7,6 +7,7 @@ import { ok, created } from '../../lib/respond.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
 import { accountingFlow } from './flow.js';
+import { actionText } from '../../lib/auditLabels.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
 const ad = moduleRouter('Account Determination', '/account-determination');
@@ -129,12 +130,16 @@ define({
 });
 define({
   method: 'GET', path: '/:id/history', summary: 'Audit trail of a posting rule (versions saved, activated, deactivated)', screen: S, middleware: read,
-  response: { success: true, data: [{ action: 'create-version', username: 'BrokerVerse', at: '2026-09-29T08:00:00Z', version: 2 }] },
+  response: { success: true, data: [{ action: 'create-version', actionLabel: 'Create version', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator', roles: ['System Administrator'],
+    at: '2026-09-29T08:00:00Z', version: 2 }] },
   handler: async (req, res) => {
     const r = await svc.getRule(pool, req.params.id);
-    const rows = (await pool.query(`SELECT a.action, a.username, a.at, a.after_data->>'version' AS version, a.after_data->>'changeNote' AS change_note, a.entity_id FROM audit_log a
+    const rows = (await pool.query(`SELECT a.action, a.username, a.at, a.after_data->>'version' AS version, a.after_data->>'changeNote' AS change_note, a.entity_id,
+        u.display_name, (SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id) AS roles
+      FROM audit_log a LEFT JOIN users u ON u.id = a.user_id OR (a.user_id IS NULL AND u.username = a.username)
       WHERE a.entity = 'posting_rule' AND a.entity_id IN (SELECT id::text FROM posting_rules WHERE event_code = $1) ORDER BY a.at DESC LIMIT 200`, [r.eventCode])).rows;
-    ok(res, rows.map((x) => ({ action: x.action, username: x.username, at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) })));
+    ok(res, rows.map((x) => ({ action: x.action, actionLabel: actionText(x.action), username: x.username, displayName: x.display_name || x.username || 'System', roles: x.roles || [],
+      at: x.at, version: x.version ? Number(x.version) : null, changeNote: x.change_note, ruleId: Number(x.entity_id) })));
   },
 });
 

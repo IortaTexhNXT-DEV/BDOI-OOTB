@@ -84,3 +84,59 @@ export const formatDate = (value, { withTime = false, empty = "-" } = {}) => {
     .replace("DD", pad(date.getDate()));
   return withTime ? `${text} ${pad(date.getHours())}:${pad(date.getMinutes())}` : text;
 };
+
+/** Business time zone (System Settings general.timezone, e.g. "Asia/Manila"); null: the browser's own. */
+let activeTimeZone = null;
+
+const validZone = (zone) => {
+  try {
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/** Set the business time zone from system settings; an unknown zone falls back to the browser's. */
+export const setTimeZone = (zone) => {
+  const text = String(zone || "").trim();
+  activeTimeZone = text && validZone(text) ? text : null;
+};
+
+export const getTimeZone = () => activeTimeZone;
+
+/**
+ * An instant (ISO text with a time, Date or timestamp) as seen in the business time zone: { day: "YYYY-MM-DD",
+ * date: in the configured format, time: "HH:mm", text: "<date> <time>" }; null when there is no valid instant. A plain
+ * YYYY-MM-DD date has no time and is kept as that calendar day.
+ */
+export const instantParts = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  const plain = typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+  const at = plain ? toDate(value) : value instanceof Date ? value : new Date(value);
+  if (!at || Number.isNaN(at.getTime())) return null;
+  const pad = (n) => String(n).padStart(2, "0");
+  let y = at.getFullYear();
+  let m = at.getMonth() + 1;
+  let d = at.getDate();
+  let time = `${pad(at.getHours())}:${pad(at.getMinutes())}`;
+  if (!plain && activeTimeZone) {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-GB", { timeZone: activeTimeZone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+        .formatToParts(at)
+        .map((p) => [p.type, p.value])
+    );
+    y = Number(parts.year);
+    m = Number(parts.month);
+    d = Number(parts.day);
+    time = `${parts.hour}:${parts.minute}`;
+  }
+  const date = formatDate(new Date(y, m - 1, d));
+  return { day: `${y}-${pad(m)}-${pad(d)}`, date, time: plain ? null : time, text: plain ? date : `${date} ${time}` };
+};
+
+/**
+ * An instant as "<date> <time>" in the configured date format and the business time zone (29/09/2026 14:05);
+ * options.empty ("-" by default) when there is none.
+ */
+export const formatInstant = (value, { empty = "-" } = {}) => instantParts(value)?.text ?? empty;

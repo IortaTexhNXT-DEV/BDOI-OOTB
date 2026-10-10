@@ -1,0 +1,136 @@
+// Printing (components/Print): the hidden frame of printPdf, the print container of printView and the letterhead page
+// of PrintableDocument. Colours are the theme's CSS variables; the documents theme sets the --bv-doc-* ones.
+
+.bv-print-frame {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 0;
+  visibility: hidden;
+}
+
+// laid out off screen so that its fonts and images load; shown only on paper
+.bv-print-root {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 190mm;
+  visibility: hidden;
+}
+
+@media print {
+  body.bv-printing {
+    height: auto !important;
+    overflow: visible !important;
+    background: var(--color-surface) !important;
+
+    > *:not(.bv-print-root) {
+      display: none !important;
+    }
+
+    > .bv-print-root {
+      position: static;
+      width: auto;
+      visibility: visible;
+    }
+  }
+
+  .bv-print-doc {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+.bv-print-doc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-heading);
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  th,
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    background: var(--bv-doc-table-head-bg, var(--bv-table-header-bg));
+    color: var(--bv-doc-table-head-text, var(--bv-table-header-text));
+    font-weight: 600;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+}
+
+.bv-print-doc__letterhead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--bv-doc-accent, var(--bv-primary));
+}
+
+.bv-print-doc__logo {
+  max-width: 180px;
+  object-fit: contain;
+}
+
+.bv-print-doc__company {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: var(--color-text);
+
+  strong {
+    font-size: 14px;
+    color: var(--bv-doc-heading, var(--color-heading));
+  }
+}
+
+.bv-print-doc__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 16px 0 12px;
+  padding: 6px 8px;
+  background: var(--bv-doc-heading-bg, transparent);
+
+  h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--bv-doc-heading, var(--color-heading));
+  }
+
+  span {
+    font-weight: 600;
+  }
+}
+
+.bv-print-doc__content > * + * {
+  margin-top: 12px;
+}
+
+.bv-print-doc__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
