@@ -109,6 +109,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -191,11 +209,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
      "access": "Create and edit",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -494,6 +512,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -569,6 +599,18 @@
      "module": "Talkbot call lists",
      "level": "Create and edit",
      "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Create and edit",
+     "meaning": "Record lock-in review decisions and request lock-in changes"
     },
     {
      "area": "Operations",
@@ -699,6 +741,15 @@
    ],
    "approves": [],
    "approvedBy": [
+    {
+     "work": "Lock-in review and TFS loan status",
+     "approval": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
     {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
@@ -907,6 +958,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -989,11 +1058,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
      "access": "Create and edit",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -1322,6 +1391,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -1421,6 +1502,18 @@
      "module": "Talkbot call lists",
      "level": "Create and edit",
      "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Create and edit",
+     "meaning": "Record lock-in review decisions and request lock-in changes"
     },
     {
      "area": "Operations",
@@ -1585,6 +1678,15 @@
     }
    ],
    "approvedBy": [
+    {
+     "work": "Lock-in review and TFS loan status",
+     "approval": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
     {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
@@ -1793,6 +1895,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -1875,11 +1995,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
      "access": "Create and edit",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -2268,6 +2388,24 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Approve",
+     "meaning": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -2367,6 +2505,24 @@
      "module": "Talkbot call lists",
      "level": "Create and edit",
      "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Create and edit",
+     "meaning": "Record lock-in review decisions and request lock-in changes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Approve",
+     "meaning": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)"
     },
     {
      "area": "Operations",
@@ -2547,6 +2703,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -2568,6 +2728,10 @@
     },
     {
      "what": "Approve or return renewal terms of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
      "kind": "maker-checker"
     },
     {
@@ -2599,6 +2763,15 @@
      "approvers": [
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Lock-in review and TFS loan status",
+     "approval": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -2825,6 +2998,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "Create and edit",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -2907,11 +3098,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
-     "access": "Create and edit",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
+     "access": "View",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -3166,6 +3357,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Scheme Document Checklist",
+     "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Repair Shops",
      "path": "/master/insurance/repair-shops",
      "access": "View",
@@ -3258,6 +3458,24 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "Create and edit",
+     "meaning": "Create and upload scheme applications, receive documents, request waivers, send to the insurer, cancel before sending"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Sales activities",
      "level": "View",
      "meaning": "See activity timelines and the activity report"
@@ -3309,6 +3527,18 @@
      "module": "Talkbot call lists",
      "level": "View",
      "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Special",
+     "meaning": "Upload the TFS account status file and set the loan status of a policy by hand"
     },
     {
      "area": "Operations",
@@ -3488,6 +3718,15 @@
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme issuance",
+     "approval": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
+     "approvers": [
       "TIS Operations Unit Head",
       "TIS General Manager"
      ],
@@ -3697,6 +3936,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "Create and edit",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "Create and edit",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -3779,11 +4036,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
      "access": "Create and edit",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -4074,6 +4331,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Scheme Document Checklist",
+     "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Repair Shops",
      "path": "/master/insurance/repair-shops",
      "access": "View",
@@ -4172,6 +4438,30 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Create and edit",
+     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "Create and edit",
+     "meaning": "Create and upload scheme applications, receive documents, request waivers, send to the insurer, cancel before sending"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Sales activities",
      "level": "View",
      "meaning": "See activity timelines and the activity report"
@@ -4223,6 +4513,24 @@
      "module": "Talkbot call lists",
      "level": "View",
      "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Create and edit",
+     "meaning": "Record lock-in review decisions and request lock-in changes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Special",
+     "meaning": "Upload the TFS account status file and set the loan status of a policy by hand"
     },
     {
      "area": "Operations",
@@ -4408,6 +4716,15 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Lock-in review and TFS loan status",
+     "approval": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
@@ -4445,6 +4762,24 @@
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme issuance",
+     "approval": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
+     "approvers": [
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme Master",
+     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -4653,6 +4988,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "Create and edit",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "Create and edit",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -4735,11 +5088,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
      "access": "Create and edit",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -5084,6 +5437,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Scheme Document Checklist",
+     "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Repair Shops",
      "path": "/master/insurance/repair-shops",
      "access": "View",
@@ -5203,6 +5565,36 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Create and edit",
+     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "Create and edit",
+     "meaning": "Create and upload scheme applications, receive documents, request waivers, send to the insurer, cancel before sending"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "Approve",
+     "meaning": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Sales activities",
      "level": "View",
      "meaning": "See activity timelines and the activity report"
@@ -5272,6 +5664,24 @@
      "module": "Talkbot call lists",
      "level": "View",
      "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Create and edit",
+     "meaning": "Record lock-in review decisions and request lock-in changes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Special",
+     "meaning": "Upload the TFS account status file and set the loan status of a policy by hand"
     },
     {
      "area": "Operations",
@@ -5528,6 +5938,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Claim settlement approval",
      "kind": "authority",
      "type": "claim_settlement",
@@ -5583,6 +5997,15 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Lock-in review and TFS loan status",
+     "approval": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
@@ -5620,6 +6043,24 @@
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme issuance",
+     "approval": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
+     "approvers": [
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme Master",
+     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -7082,6 +7523,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -7133,6 +7592,15 @@
      "access": "View",
      "modules": [
       "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
+     "access": "View",
+     "modules": [
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -7999,6 +8467,18 @@
      "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
      "area": "Operations",
      "module": "Clients",
      "level": "View",
@@ -8021,6 +8501,12 @@
      "module": "Renewals",
      "level": "View",
      "meaning": "See renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
     },
     {
      "area": "Operations",
@@ -8642,6 +9128,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -8693,6 +9197,15 @@
      "access": "View",
      "modules": [
       "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
+     "access": "View",
+     "modules": [
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -9245,6 +9758,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Scheme Document Checklist",
+     "path": "/master/insurance/scheme-document-checklist",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Repair Shops",
      "path": "/master/insurance/repair-shops",
      "access": "Create and edit",
@@ -9666,6 +10188,18 @@
      "meaning": "Maintain programmes and upload dealer vehicle sales"
     },
     {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
      "area": "Operations",
      "module": "Clients",
      "level": "View",
@@ -9688,6 +10222,12 @@
      "module": "Renewals",
      "level": "View",
      "meaning": "See renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
     },
     {
      "area": "Operations",
@@ -10117,6 +10657,24 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Master",
+     "path": "/sales/scheme-master",
+     "access": "View",
+     "modules": [
+      "Scheme Master"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Scheme Issuance",
+     "path": "/sales/scheme-issuance",
+     "access": "View",
+     "modules": [
+      "Scheme issuance"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -10199,11 +10757,11 @@
     },
     {
      "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
-     "access": "Create and edit",
+     "screen": "Lock-in Review",
+     "path": "/renewal/lock-in-review",
+     "access": "View",
      "modules": [
-      "Renewals"
+      "Lock-in review and TFS loan status"
      ]
     },
     {
@@ -11125,6 +11683,30 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "View",
+     "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Approve",
+     "meaning": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "View",
+     "meaning": "See scheme applications, their checklists and the loan bookings uploads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme issuance",
+     "level": "Approve",
+     "meaning": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -11224,6 +11806,18 @@
      "module": "Talkbot call lists",
      "level": "Create and edit",
      "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "View",
+     "meaning": "See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report"
+    },
+    {
+     "area": "Operations",
+     "module": "Lock-in review and TFS loan status",
+     "level": "Approve",
+     "meaning": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)"
     },
     {
      "area": "Operations",
@@ -11526,6 +12120,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return Release, Not for renewal and lock-in changes (never one you requested)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -11551,6 +12149,14 @@
     },
     {
      "what": "Approve or return renewal terms of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
      "kind": "maker-checker"
     },
     {
@@ -12404,6 +13010,88 @@
     }
    ]
   },
+  "/sales/scheme-master": {
+   "menu": "Operations > Sales & Marketing > Scheme Master",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/sales/scheme-issuance": {
+   "menu": "Operations > Sales & Marketing > Scheme Issuance",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
   "/agent/clientlisting": {
    "menu": "Operations > Clients",
    "roles": [
@@ -12749,8 +13437,8 @@
     }
    ]
   },
-  "/renewal/lock-in-accounts": {
-   "menu": "Operations > Renewals > Lock-in Accounts",
+  "/renewal/lock-in-review": {
+   "menu": "Operations > Renewals > Lock-in Review",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -12766,7 +13454,7 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Officer",
@@ -12777,8 +13465,16 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
      "role": "TIS General Manager",
-     "access": "Create and edit"
+     "access": "View"
     }
    ]
   },
@@ -15088,6 +15784,27 @@
     }
    ]
   },
+  "/master/insurance/scheme-document-checklist": {
+   "menu": "Master > Insurance > Scheme Document Checklist",
+   "roles": [
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/master/insurance/repair-shops": {
    "menu": "Master > Insurance > Repair Shops",
    "roles": [
@@ -15869,6 +16586,10 @@
   "approve:insurer-reconciliation": [
    "CCD-Recon (Reconciliation and Reversals)"
   ],
+  "approve:lock-in": [
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
   "approve:payables": [
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
@@ -15917,6 +16638,14 @@
    "TIS Sales Officer",
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "approve:scheme-issuance": [
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "approve:schemes": [
+   "TIS Sales Unit Head",
    "TIS General Manager"
   ],
   "approve:sharing-schemes": [
@@ -16150,6 +16879,17 @@
    "TIS General Manager",
    "TIS Audit (read only)"
   ],
+  "read:lock-in": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
   "read:marine": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -16353,6 +17093,28 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
+  "read:scheme-issuance": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
+  "read:schemes": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
   "read:settings": [
    "TIS IT AppSupport / Admin"
   ],
@@ -16493,6 +17255,18 @@
    "TIS Sales Unit Head",
    "TIS General Manager"
   ],
+  "write:loan-status": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
+  "write:lock-in": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
   "write:marine": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -16582,6 +17356,15 @@
   ],
   "write:schedules": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:scheme-issuance": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
+  "write:schemes": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "write:settings": [
    "TIS IT AppSupport / Admin"

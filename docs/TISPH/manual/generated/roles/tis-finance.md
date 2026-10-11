@@ -12,12 +12,15 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | View |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
 | Operations > Sales & Marketing | Promotions | View |
+| Operations > Sales & Marketing | Scheme Master | View |
+| Operations > Sales & Marketing | Scheme Issuance | View |
 | Operations | Clients | View |
 | Operations | Policy | View |
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | View |
 | Operations > Renewals | Renewal Batch | View |
 | Operations > Renewals | Renewal Queue | View |
+| Operations > Renewals | Lock-in Review | View |
 | Operations > Renewals | Negotiations | View |
 | Operations > Renewals | Lapse Management | View |
 | Operations | Payments | View |
@@ -123,10 +126,13 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
+| Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
+| Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
 | Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
