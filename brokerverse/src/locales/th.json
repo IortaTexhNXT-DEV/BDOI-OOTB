@@ -1295,7 +1295,8 @@
     "rejectTerms": "ปฏิเสธเงื่อนไข",
     "client": "ลูกค้า",
     "noteOptional": "หมายเหตุ (ไม่บังคับ)",
-    "rejectNote": "เหตุผล"
+    "rejectNote": "เหตุผล",
+    "policy": "กรมธรรม์"
   },
   "atRisk": {
     "title": "กรมธรรม์ที่มีความเสี่ยง",

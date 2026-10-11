@@ -172,7 +172,7 @@ const NegotiationWorkspace = () => {
       title: approve ? t("negotiations.approveTitle") : t("negotiations.rejectTitle"),
       severity: approve ? "neutral" : "danger",
       facts: [
-        { label: t("negotiations.col.policy"), value: row.policyNumber },
+        { label: t("negotiations.policy"), value: row.policyNumber },
         { label: t("negotiations.client"), value: row.clientName || "—" },
         { label: t("negotiations.col.current"), value: row.currentPremium, type: "amount" },
         { label: t("negotiations.col.proposed"), value: row.quotedPremium, type: "amount" },

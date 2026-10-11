@@ -12025,7 +12025,8 @@
     "rejectTerms": "Reject terms",
     "client": "Client",
     "noteOptional": "Note (optional)",
-    "rejectNote": "Reason"
+    "rejectNote": "Reason",
+    "policy": "Policy"
   },
   "atRisk": {
     "title": "At-Risk Policies",
