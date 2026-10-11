@@ -86,6 +86,32 @@ async function resolveInsurer(db, ref) {
   return (await db.query('SELECT * FROM insurance_companies WHERE id::text = $1 OR code = $1 OR name = $1 OR short_name = $1 LIMIT 1', [String(ref)])).rows[0] || null;
 }
 
+/**
+ * The bank a voucher is paid from (TIS-BRD-DISB-01, CR-09): the bank chosen on the voucher, else the dedicated bank of
+ * the dealer (the distribution channel whose payee is the voucher's referrer), else disbursements.default_bank_code.
+ * A chosen bank must be active and, when disbursements.allowed_bank_codes lists banks (TISPH: Metrobank only), one of
+ * them. Returns the bank id or null.
+ */
+export async function voucherBank(db, { bankId = null, referrerId = null } = {}) {
+  const allowed = ((await getSetting('disbursements.allowed_bank_codes', [])) || []).map((c) => String(c).toUpperCase());
+  if (bankId) {
+    const bank = (await db.query('SELECT id, code, name, status FROM banks WHERE id::text = $1 OR upper(code) = upper($1)', [String(bankId)])).rows[0];
+    if (!bank || bank.status !== 'active') throw badRequest('Validation failed', [{ path: 'bankId', message: 'Choose an active bank' }]);
+    if (allowed.length && !allowed.includes(String(bank.code).toUpperCase())) {
+      throw badRequest('Validation failed', [{ path: 'bankId', message: `Vouchers are paid from ${allowed.join(', ')} only; ${bank.name} is not a disbursing bank` }]);
+    }
+    return bank.id;
+  }
+  if (referrerId) {
+    const dealer = (await db.query(`SELECT c.bank_id FROM distribution_channels c JOIN banks b ON b.id = c.bank_id AND b.status = 'active'
+      WHERE c.referrer_id = $1 AND c.bank_id IS NOT NULL ORDER BY c.id LIMIT 1`, [referrerId])).rows[0];
+    if (dealer) return dealer.bank_id;
+  }
+  const code = await getSetting('disbursements.default_bank_code', null);
+  if (!code) return null;
+  return (await db.query("SELECT id FROM banks WHERE upper(code) = upper($1) AND status = 'active'", [String(code)])).rows[0]?.id ?? null;
+}
+
 /** Create a voucher from the Create Voucher screen payload (or bulk upload row). */
 export async function createDisbursement(db, b, user, { source = 'manual', status = 'draft' } = {}) {
   const payeeType = b.payeeType || 'Customer';
@@ -95,6 +121,7 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
   let referrer = null;
   if (payeeType === AGENT && b.referrerId) referrer = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [b.referrerId])).rows[0] || null;
   const payeeName = b.payeeName || referrer?.name || b.referrerName || (payeeType === 'Insurer' ? insurer?.name || b.insurerName : null) || client?.display_name || b.customerCode || payeeType;
+  const bankId = await voucherBank(db, { bankId: b.bankId, referrerId: referrer?.id || null });
   const voucherNumber = await nextDocumentNumber('voucher', { db, unique: { table: 'disbursements', column: 'voucher_number' } });
   const txn = b.transactionNumber || await nextDocumentNumber('disbursement_txn', { db });
   const d = (await db.query(`INSERT INTO disbursements(voucher_number, payee_type, payee_id, payee_name, amount, payment_mode, bank_id, reference_no, purpose, status,
@@ -102,7 +129,7 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
       referrer_id, referrer_name, insurance_company_id, insurer_name, policy_id, policy_number, instrument_currency, remarks, source, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) RETURNING *`,
   [voucherNumber, payeeType, referrer?.id || client?.id || (insurer ? String(insurer.id) : null), payeeName, round2(num(b.amount)),
-    b.paymentMode || (await getSetting('disbursements.default_payment_mode', 'check')), b.bankId || null, str(b.referenceNo), str(b.purpose || b.transactionDescription),
+    b.paymentMode || (await getSetting('disbursements.default_payment_mode', 'check')), bankId, str(b.referenceNo), str(b.purpose || b.transactionDescription),
     status, isoDate(b.voucherDate) || (await today()), txn, str(b.transactionCode), str(b.transactionDescription), str(b.departmentCode), str(b.branchCode), str(b.criteria),
     str(b.customerCode) || (referrer ? referrer.id : null), client?.id || null, referrer?.id || str(b.referrerId), referrer?.name || str(b.referrerName),
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
@@ -167,6 +194,7 @@ export async function updateDisbursement(db, id, b, user) {
   const d = await getDisbursementRaw(db, id, true);
   if (['paid', 'cancelled'].includes(d.status)) throw conflict(`Voucher ${d.voucher_number} is ${d.status} and cannot be changed`);
   const sets = []; const p = [d.id];
+  if (b.bankId) b = { ...b, bankId: await voucherBank(db, { bankId: b.bankId }) };
   for (const [k, col] of Object.entries(EDITABLE)) if (b[k] !== undefined) { p.push(col === 'voucher_date' ? isoDate(b[k]) : b[k]); sets.push(`${col} = $${p.length}`); }
   if (b.amount !== undefined) { p.push(round2(num(b.amount))); sets.push(`amount = $${p.length}`); }
   if (b.status !== undefined) {

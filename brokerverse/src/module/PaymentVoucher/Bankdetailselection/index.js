@@ -377,6 +377,8 @@ function Bankdetailselection() {
         const disbursementUpdateResult =
           await disbursementService.updateDisbursement(disbursementId, {
             amount: effectiveAmount,
+            // the disbursing bank chosen here (checked against the allowed banks); none keeps the dealer's or the default bank
+            ...(selectedItem?.code ? { bankId: selectedItem.code } : {}),
           });
 
         if (!disbursementUpdateResult.success) {
