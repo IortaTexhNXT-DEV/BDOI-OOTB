@@ -28,9 +28,9 @@
     margin-bottom: 1.5rem;
     animation: fadeIn 0.3s ease-in;
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
     border: 1px solid #e9ecef;
-    background: $card-background;
+    background: var(--color-surface);
 
     .p-card-body {
       padding: 1.5rem;
@@ -231,9 +231,9 @@
   .results-card {
     animation: fadeIn 0.3s ease-in;
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
     border: 1px solid #e9ecef;
-    background: $card-background;
+    background: var(--color-surface);
 
     .p-card-body {
       padding: 1.5rem;
@@ -306,7 +306,7 @@
     text-align: center;
     padding: 3rem 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
     border: 1px solid #e9ecef;
     background: $card-background;
 

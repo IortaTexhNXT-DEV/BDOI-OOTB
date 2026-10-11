@@ -680,7 +680,7 @@ $text-strong: #1f2937;
 
 .p-dialog {
   border-radius: $radius-md;
-  box-shadow: 0 16px 48px rgba(17, 24, 39, 0.18);
+  box-shadow: var(--shadow-md);
 
   .p-dialog-header {
     padding: 18px 24px;
@@ -728,7 +728,7 @@ $text-strong: #1f2937;
   max-width: min(72rem, 100vw) !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  box-shadow: -8px 0 32px rgba(17, 24, 39, 0.16);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
 
@@ -1222,7 +1222,7 @@ small.p-error {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, transparent 0%, var(--primary-color, #0072d8) 50%, transparent 100%);
+    background: var(--primary-color, #0072d8);
     background-size: 50% 100%;
     background-repeat: no-repeat;
     animation: bv-table-progress 1.1s linear infinite;
@@ -1676,4 +1676,10 @@ small.p-error {
 // not marked scrollable wraps to a second line instead; a scrollable one shows its arrows.
 .p-tabview:not(.p-tabview-scrollable) .p-tabview-nav {
   flex-wrap: wrap;
+}
+
+// UI standard (docs/developer-guide/ui-standard.md): no pill buttons. A rounded button with a label keeps the button
+// radius of the theme; only icon-only buttons are round.
+.p-button.p-button-rounded:not(.p-button-icon-only) {
+  border-radius: var(--bv-radius-button);
 }

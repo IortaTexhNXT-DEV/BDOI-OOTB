@@ -45,6 +45,30 @@ describe("UI standard guard", () => {
   });
 });
 
+describe("visual rules", () => {
+  const sheets = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return sheets(full);
+    return /\.s?css$/.test(e.name) && e.name !== "primereact-bdoi.css" ? [full] : [];
+  });
+  const code = (f) => fs.readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("uses no gradients and only the theme's shadows (focus rings and inset lines aside)", () => {
+    const problems = sheets(SRC).flatMap((f) => {
+      const css = code(f);
+      const rel = path.relative(SRC, f);
+      const out = [];
+      if (/(linear|radial)-gradient\(/.test(css)) out.push(`${rel}: gradient`);
+      (css.match(/box-shadow:\s*[^;{}]+;/g) || []).forEach((d) => {
+        const v = d.replace(/box-shadow:\s*/, "");
+        if (!/^(none|inherit|var\(--|\$shadow|\$focus)/.test(v) && !/inset/.test(v) && !/^0 0 0 /.test(v)) out.push(`${rel}: ${d.trim()}`);
+      });
+      return out;
+    });
+    expect(problems).toEqual([]);
+  });
+});
+
 describe("sentence case", () => {
   it("finds no Title Case label in en.json outside the allow-list", () => {
     const en = JSON.parse(fs.readFileSync(path.join(SRC, "locales", "en.json"), "utf8"));

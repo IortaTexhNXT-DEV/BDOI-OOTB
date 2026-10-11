@@ -200,7 +200,7 @@
 
   // Comparison insights card
   .comparison-insights-card {
-    background: $brand-blue-050;
+    background: var(--color-surface);
     border: 1px solid $color-border !important;
 
     .comparison-insights-header {

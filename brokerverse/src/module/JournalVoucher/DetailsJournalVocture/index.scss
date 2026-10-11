@@ -41,7 +41,7 @@
     }
 
     // .sub__account__details__jV {
-    //     // box-shadow: 0px 0px 20px 0px #00000014 !important;
+    //     // box-shadow: var(--shadow-md);
     //     // border-radius: 10px;
 
 
@@ -152,7 +152,7 @@
     }
 
     .add__journal__vocture {
-        box-shadow: rgba(241, 244, 247, 0.3) 0px 1px 2px 0px, rgba(169, 174, 179, 0.15) 0px 2px 6px 2px;
+        box-shadow: var(--shadow-md);
         border-radius: 10px;
 
         .dropdown__add__sub {
@@ -171,7 +171,7 @@
 
     }
     .add__journal__vocture__view {
-        // box-shadow: rgba(241, 244, 247, 0.3) 0px 1px 2px 0px, rgba(169, 174, 179, 0.15) 0px 2px 6px 2px;
+        // box-shadow: var(--shadow-md);
         // border-radius: 10px;
 
         .dropdown__add__sub {
