@@ -50,16 +50,22 @@ describe('remittance schedule', () => {
     expect(banner.slice(1, 4)).toEqual(['Remittance Schedule', 'Insurer: Document Test Insurance Corp.', 'Product line: Motor']);
     expect(banner).toContain(`REM no: ${rem.remittanceNo}`);
     expect(banner.some((l) => /^Coverage Date: \d{2}\/\d{2}\/\d{4} to \d{2}\/\d{2}\/\d{4}$/.test(l))).toBe(true);
-    expect(sheet.rows[at]).toEqual(['ISSUED DATE', 'CLIENT NAME', 'CAR MODEL', 'INSURANCE COMPANY', 'POLICY NO.', 'BUSINESS TYPE', 'INCEPTION DATE FROM', 'SI', 'TOTAL PREMIUM',
-      'COMMISSION', 'TAXES', 'DUE TO INSURER']);
+    const head = sheet.rows[at];
+    // the Motor layout of FRS COMM-06 6.1: premium, remitting and commission per peril, then the commission taxes
+    expect(head.slice(0, 8)).toEqual(['ISSUED DATE', 'CLIENT NAME', 'CAR MODEL', 'INSURANCE COMPANY', 'POLICY NO.', 'BUSINESS TYPE / MOTOR TYPE', 'INCEPTION DATE FROM', 'SI']);
+    for (const h of ['PREMIUM OD/TH', 'PREMIUM AON', 'PREMIUM PA', 'TOTAL PREMIUM', 'REMITTING OD/TH', 'TOTAL REMITTING', 'COMMISSION AON', 'GROSS AMOUNT', 'NET OF VAT', 'EWT',
+      'NET AMOUNT PAYABLE', 'DUE TO INSURER']) expect(head).toContain(h);
+    expect(head).not.toContain('VARIANCE SHARE');
+    const col = (r, h) => r[head.indexOf(h)];
     const data = sheet.rows.slice(at + 1);
     expect(data).toHaveLength(4);
     const pol = data.find((row) => row[4] === 'TISPH-PC-DOC-0001');
     expect(pol[3]).toBe('Document Test Insurance Corp.');
     expect(pol[5]).toBe('NEW');
-    expect(pol.slice(7).map(Number)).toEqual([1250000, 64159.68, 24022.5, 0, 40137.18]);
+    expect([col(pol, 'SI'), col(pol, 'TOTAL PREMIUM'), col(pol, 'NET OF VAT'), col(pol, 'TOTAL REMITTING'), col(pol, 'DUE TO INSURER')].map(Number))
+      .toEqual([1250000, 64159.68, 24022.5, 40137.18, 40137.18]);
     expect(data[2][1]).toBe('TOTAL');
-    expect(data[2].slice(8).map(Number)).toEqual([76159.68, 25822.5, 200, 50137.18]);
+    expect([col(data[2], 'TOTAL PREMIUM'), col(data[2], 'NET OF VAT'), col(data[2], 'DUE TO INSURER')].map(Number)).toEqual([76159.68, 25822.5, 50137.18]);
     expect(data[3][0]).toBe('Note: This is a system-generated document and is valid without physical signature.');
   });
 
@@ -72,6 +78,28 @@ describe('remittance schedule', () => {
     expect(text.slice(0, 5)).toBe('%PDF-');
     for (const s of ['Remittance Schedule', 'TISPH-PC-DOC-0001', 'EXT-DOC-2', 'TOTAL', '40,137.18', '50,137.18', 'Note: This is a system-generated document']) expect(text).toContain(`(${s}`);
     expect(text).toMatch(/\/MediaBox \[0 0 841\.89 595\.28\]/);
+  });
+});
+
+describe('per-peril schedule (FR-RMT-015)', () => {
+  it('takes the premium, remitting and commission of each peril from the commission basis; the internal copy adds the variance share', async () => {
+    const basis = { rateBasis: 'issuing-remitting', motorType: 'PC-SEDAN', insurerRemitting: 26227.5, varianceShare: 4800, referrer: { name: 'Ramon Fortuner' },
+      perils: [{ code: 'OD', premium: 24000, insurerRemitting: 11400, commission: 12600 }, { code: 'AON', premium: 6000, insurerRemitting: 3000, commission: 3000 },
+        { code: 'BI', premium: 1000, insurerRemitting: 800, commission: 200 }, { code: 'RSA', premium: 500, insurerRemitting: 500, commission: 0 }] };
+    await q("UPDATE policies SET details = COALESCE(details, '{}'::jsonb) || jsonb_build_object('commissionBasis', $1::jsonb) WHERE policy_number = 'TISPH-PC-DOC-0001'", [JSON.stringify(basis)]);
+    const read = async (path) => readWorkbook((await binary(ctx.api('get', path))).body)[0];
+    const sheet = await read(`/remittance/remittances/${rem.id}/schedule.xlsx?copy=internal`);
+    const at = sheet.rows.findIndex((row) => row[0] === 'ISSUED DATE');
+    const head = sheet.rows[at];
+    const pol = sheet.rows.slice(at + 1).find((row) => row[4] === 'TISPH-PC-DOC-0001');
+    const col = (h) => pol[head.indexOf(h)];
+    expect(col('BUSINESS TYPE / MOTOR TYPE')).toBe('NEW / PC-SEDAN');
+    expect([col('PREMIUM OD/TH'), col('PREMIUM AON'), col('PREMIUM BI'), col('ROADSIDE ASSISTANCE')].map(Number)).toEqual([24000, 6000, 1000, 500]);
+    expect([col('REMITTING OD/TH'), col('REMITTING AON'), col('TOTAL REMITTING')].map(Number)).toEqual([11400, 3000, 26227.5]);
+    expect([col('COMMISSION OD/TH'), col('COMMISSION BI'), col('PREMIUM PD')].map(Number)).toEqual([12600, 200, 0]);
+    expect([Number(col('VARIANCE SHARE')), col('REFERRER')]).toEqual([4800, 'Ramon Fortuner']);
+    // the insurer's copy never carries the variance share
+    expect((await read(`/remittance/remittances/${rem.id}/schedule.xlsx`)).rows[at]).not.toContain('VARIANCE SHARE');
   });
 });
 

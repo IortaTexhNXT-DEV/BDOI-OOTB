@@ -1,7 +1,7 @@
 import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { canRead, canWrite, sendList } from '../masters/helpers.js';
@@ -175,14 +175,17 @@ define({
 for (const [ext, doc] of [['xlsx', 'XLSX'], ['pdf', 'PDF']]) {
   define({
     method: 'GET', path: `/remittances/:id/schedule.${ext}`,
-    summary: `Remittance schedule (${doc}${ext === 'pdf' ? ', A4 landscape' : ''}): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.${ext}`,
+    summary: `Remittance schedule (${doc}${ext === 'pdf' ? ', A4 landscape' : ''}): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy in the FRS COMM-06 layout (Motor: premium, remitting and commission per peril OD/TH, AON, PD, BI, PA; other lines: premium and commission sections; then due to insurer; copy=internal adds the variance share and referrer for read:commission), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.${ext}`,
     screen: `${S('Remittances > Download schedule')}; ${S('Remittances > Record > Documents')}`, middleware: read, response: ext === 'pdf' ? 'application/pdf' : '(xlsx file)',
+    query: { copy: 'internal' },
     handler: async (req, res) => {
+      // the internal copy (variance share, referrer) for a commission reader; the insurer's copy otherwise
+      const opts = { internal: req.query.copy === 'internal' && hasPermission(req.user, 'read:commission') };
       if (ext === 'pdf') {
-        const { buffer, fileName } = await documents.schedulePdf(req.params.id, req.user);
+        const { buffer, fileName } = await documents.schedulePdf(req.params.id, req.user, opts);
         return sendPdf(res, buffer, fileName, 'attachment');
       }
-      return sendXlsx(res, await documents.scheduleXlsx(req.params.id, req.user));
+      return sendXlsx(res, await documents.scheduleXlsx(req.params.id, req.user, opts));
     },
   });
 }

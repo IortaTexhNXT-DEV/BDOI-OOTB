@@ -211,8 +211,7 @@ status, guards) and submits the ready ones as one processing batch; the result p
 
 Documents (`documents.js`), named `<Ref>_<Document>_<yyyymmdd>.<ext>`: `GET /remittances/:id/schedule.xlsx` and
 `schedule.pdf` (A4 landscape; company, "Remittance Schedule", insurer, product line, coverage date, REM no and date,
-one row per policy with the columns today's lines hold, totals and the note that it is valid without signature; the per-peril premium,
-remitting and commission columns of the FRS layout come with the Phase 2 line data) and `advice.pdf` (portrait letter:
+one row per policy in the FRS COMM-06 layout: Motor premium, remitting and commission per peril from `policies.details.commissionBasis`, other lines premium and commission sections; `copy=internal` adds the variance share and referrer for `read:commission`; the PDF keeps the section totals; totals and the note that it is valid without signature) and `advice.pdf` (portrait letter:
 insurer's name, address and TIN; REM no, coverage week, product line, basis; voucher no, method, value date and bank
 reference of the settlement voucher; total premium, commission, VAT and EWT on commission from the voucher's payables,
 due to insurer, refund credits netted on the voucher, amount paid). `GET /remittances/:id/pdf` of Tracking stays.
