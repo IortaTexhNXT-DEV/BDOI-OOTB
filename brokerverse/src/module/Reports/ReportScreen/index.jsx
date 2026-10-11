@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import PageHeader from "../../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
@@ -12,7 +12,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
-import SvgDot from "../../../assets/icons/SvgDot";
 import reportsService from "../../../services/reportsService";
 import mastersService from "../../../services/mastersService";
 import periodEndService from "../../../services/periodEndService";
@@ -182,12 +181,8 @@ const ReportScreen = ({ code, group, groupPath }) => {
   return (
     <div className="report-screen">
       <Toast ref={toast} />
-      <div className="report-screen__header">
-        <div>
-          <h1 className="page-title">{title || t("reports.heading")}</h1>
-          <BreadCrumb model={crumbs} home={{ label: t("reports.heading"), command: () => navigate("/reports/catalogue") }} separatorIcon={<SvgDot color={"#000"} />} />
-        </div>
-      </div>
+      <PageHeader title={title || t("reports.heading")} home={{ label: t("reports.heading"), to: "/reports/catalogue" }}
+        trail={crumbs.map((c) => (c.command ? { label: c.label, onClick: c.command } : c.label))} />
 
       {loadError && <Message severity="warn" text={loadError} className="w-full mb-3" />}
 

@@ -6,8 +6,8 @@
  * and its server checks.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import PageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { InputText } from "primereact/inputtext";
 import { ColorPicker } from "primereact/colorpicker";
 import { Message } from "primereact/message";
@@ -50,14 +50,8 @@ export const LayoutPage = ({ title, lead, actions, errors = [], toast, children 
   return (
     <div className="bv-dl">
       <Toast ref={toast} />
-      <BreadCrumb model={[{ label: t("sidebar.System Configuration", "System") }, { label: title }]} home={{ label: t("documentLayouts.master", "Master") }} />
-      <div className="bv-dl__top">
-        <div>
-          <h1 className="page-title">{title}</h1>
-          {lead && <p className="bv-dl__lead">{lead}</p>}
-        </div>
-        {actions && <div className="bv-dl__actions">{actions}</div>}
-      </div>
+      <PageHeader title={title} home={t("documentLayouts.master", "Master")} section={t("sidebar.System Configuration", "System")} trail={[title]} help={lead}
+        actions={actions ? <div className="bv-dl__actions">{actions}</div> : null} />
       {errors.length > 0 && (
         <Message severity="error" className="bv-dl__msg" text={`${t("documentLayouts.cannotSave", "Cannot save")}: ${errors.map((e) => e.message).join("; ")}`} />
       )}
