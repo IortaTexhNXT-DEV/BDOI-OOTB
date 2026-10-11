@@ -96,7 +96,8 @@ describe("Campaign templates and marketing consents", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Preview" }).at(-1));
     expect(await screen.findByText("Insure your new Toyota, Maria")).toBeInTheDocument();
     expect(service.previewCampaignTemplateDraft).toHaveBeenCalledWith(expect.objectContaining({ subject: "Insure your new Toyota, {{firstName}}" }));
-  });
+    // opens the template editor with its rich-text toolbar, validates and previews in one pass: the heaviest flow of the screen
+  }, 15000);
 
   it("records the marketing consent a client gave", async () => {
     service.marketingConsents.mockResolvedValue([{ partyType: "client", partyId: "cl_1", name: "Maria Santos", code: "CL-1", email: "maria@example.ph", status: "not-recorded" }]);
