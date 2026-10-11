@@ -250,6 +250,11 @@ class EndorsementService {
     return json.data;
   }
 
+  /** The commission the insurer calculated on an endorsement (TIS-BRD-COMM-07), recorded before it is booked. */
+  setInsurerCommission(endorsementId, amount) {
+    return this.call(`/${encodeURIComponent(endorsementId)}/insurer-commission`, { method: 'PUT', body: { amount } });
+  }
+
   /** The endorsement with the workflow actions open to the user. */
   getEndorsementWorkflow(endorsementId) {
     return this.call(`/${encodeURIComponent(endorsementId)}`);

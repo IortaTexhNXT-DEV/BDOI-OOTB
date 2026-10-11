@@ -181,12 +181,26 @@ export const RELEASED = { 'direct-bill': ['cancelled'], 'agency-bill': ['rejecte
  * Direct-bill policies are never remitted: the client paid the insurer, so no premium is payable (their commission is
  * billed with a commission debit note, see directbill.js).
  */
+/**
+ * An open cover (marine / parcel declarations, PJRN-09) is billed again every period: it is remitted per bill, each bill
+ * once, instead of once per policy. A policy is remitted per bill when its details say openCover, or its product line
+ * is one of remittance.per_bill_lines. $1 / $2 of the query are the remittance kind and its released statuses.
+ */
+const perBillSql = (lines) => `(COALESCE(p.details->>'openCover', '') = 'true' OR upper(COALESCE(pr.line, p.lob, '')) = ANY(${lines}::text[]))`;
+export const LIVE_BILL = `rv.status NOT IN ('cancelled', 'written-off', 'credited') AND rv.source <> 'opening'`;
+export const UNREMITTED_BILL = `NOT EXISTS (SELECT 1 FROM remittance_lines bl JOIN remittances br ON br.id = bl.remittance_id
+    WHERE rv.id = ANY(bl.receivable_ids) AND br.kind = $1 AND br.status <> ALL($2))`;
+export const perBillLines = async () => ((await getSetting('remittance.per_bill_lines', ['MARINE'])) || []).map((x) => String(x).toUpperCase());
+
 export async function eligiblePolicies({ insurerId, agentUserId, from, to, productLine, policyIds, kind = 'direct-bill', includeExpired = false }) {
   const p = params([kind, RELEASED[kind] || RELEASED['direct-bill']]);
   const ins = insurerId ? p.add(Number(insurerId)) : null;
-  // a co-insured policy is remitted to each participating insurer for its share (remittance_lines.insurance_company_id)
+  const perBill = perBillSql(p.add(await perBillLines()));
+  // a co-insured policy is remitted to each participating insurer for its share (remittance_lines.insurance_company_id);
+  // an open cover while one of its bills is on no live remittance
   const conds = [`p.status IN ('issued', 'active', 'renewed'${includeExpired ? ", 'expired'" : ''})`, 'p.billing_mode <> \'direct\'',
-    `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status <> ALL($2)${ins ? ` AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = ${ins}::int)` : ''})`];
+    `CASE WHEN ${perBill} THEN EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = p.id AND ${LIVE_BILL} AND ${UNREMITTED_BILL})
+      ELSE NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status <> ALL($2)${ins ? ` AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = ${ins}::int)` : ''}) END`];
   if (ins) conds.push(`((NOT ${CO_INSURED} AND p.insurance_company_id = ${ins}::int) OR (${CO_INSURED} AND EXISTS (SELECT 1 FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active' AND x.insurance_company_id = ${ins}::int)))`);
   if (agentUserId) conds.push(`p.owner_user_id = ${p.add(agentUserId)}`);
   if (from) conds.push(`p.inception_date >= ${p.add(from)}::date`);
@@ -194,10 +208,14 @@ export async function eligiblePolicies({ insurerId, agentUserId, from, to, produ
   if (productLine && productLine !== 'All') conds.push(`(pr.line ILIKE ${p.add(productLine)} OR pr.name ILIKE $${p.values.length})`);
   if (policyIds) conds.push(`(p.id = ANY(${p.add(policyIds.map(String))}) OR p.policy_number = ANY($${p.values.length}))`);
   // gross remittance (remittance/basis.js): the whole premium is remitted, the commission is billed to the insurer separately
-  return many(`SELECT p.id, p.policy_number, p.premium_total, CASE WHEN ${GROSS_BILLED_SQL} THEN 0 ELSE p.commission_amount END AS commission_amount,
+  // an open cover offers its bills not yet remitted: their premium, commission and balance
+  const open = `(SELECT COALESCE(sum(rv.%s), 0) FROM receivables rv WHERE rv.policy_id = p.id AND ${LIVE_BILL} AND ${UNREMITTED_BILL})`;
+  return many(`SELECT p.id, p.policy_number, CASE WHEN ${perBill} THEN ${open.replace('%s', 'amount')} ELSE p.premium_total END AS premium_total,
+                 CASE WHEN ${GROSS_BILLED_SQL} THEN 0 WHEN ${perBill} THEN ${open.replace('%s', 'commission_amount')} ELSE p.commission_amount END AS commission_amount,
                  ${GROSS_BILLED_SQL} AS gross_billed, p.inception_date, p.insurance_company_id, p.owner_user_id, p.details,
-                 c.display_name AS insured_name, pr.name AS product_name, pr.line AS product_line,
-                 COALESCE((SELECT sum(balance) FROM receivables rv WHERE rv.policy_id = p.id AND rv.status <> 'paid'), 0) AS outstanding,
+                 c.display_name AS insured_name, pr.name AS product_name, pr.line AS product_line, ${perBill} AS per_bill,
+                 CASE WHEN ${perBill} THEN ${open.replace('%s', 'balance')}
+                   ELSE COALESCE((SELECT sum(balance) FROM receivables rv WHERE rv.policy_id = p.id AND rv.status <> 'paid'), 0) END AS outstanding,
                  EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = p.id) AS billed,
                  (SELECT max(received_date) FROM receipts rc WHERE rc.policy_id = p.id AND rc.status <> 'cancelled') AS last_payment
                FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
@@ -255,15 +273,28 @@ export async function buildLines(lines, insurerId = null) {
       if (!pol && l.policyId) throw badRequest('Validation failed', [{ path: 'lines', message: `Policy ${l.policyId} was not found` }]);
     }
     const share = pol && insurerId ? await insurerShare(pol, insurerId) : null;
-    const premium = toNumber(l.premium ?? share?.premium ?? pol?.premium_total, NaN);
-    const commission = toNumber(l.commission ?? (pol?.gross_billed ? 0 : share?.commission) ?? pol?.commission_amount, 0);
-    const tax = toNumber(l.tax ?? share?.tax ?? pol?.details?.taxTotal ?? (pol && !pol.gross_billed ? await commissionTaxesOf(pol.id) : 0), 0);
+    // an open cover is remitted for its bills not yet on a live remittance (each bill once)
+    const bills = pol && l.premium === undefined ? await openCoverBills(pol) : null;
+    const premium = toNumber(l.premium ?? bills?.premium ?? share?.premium ?? pol?.premium_total, NaN);
+    const commission = toNumber(l.commission ?? (pol?.gross_billed ? 0 : bills?.commission ?? share?.commission) ?? pol?.commission_amount, 0);
+    const tax = toNumber(l.tax ?? (bills && !pol.gross_billed ? bills.tax : undefined) ?? share?.tax ?? pol?.details?.taxTotal
+      ?? (pol && !pol.gross_billed ? await commissionTaxesOf(pol.id) : 0), 0);
     if (!Number.isFinite(premium)) throw badRequest('Validation failed', [{ path: 'lines', message: 'Each line needs a premium' }]);
     out.push({ policyId: pol?.id || null, policyNo: pol?.policy_number || l.policyNo || null, insuredName: pol?.insured_name || l.insuredName || null,
       product: cap(pol?.product_line) || l.product || null, effectiveDate: pol?.inception_date || isoDate(l.effectiveDate), premium, commission, tax, net: round2(premium - commission - tax),
-      insurerId: share ? share.insurerId : null, sharePercent: share ? share.share : null });
+      insurerId: share ? share.insurerId : null, sharePercent: share ? share.share : null, receivableIds: bills?.ids || null });
   }
   return out;
+}
+
+/** The bills of an open cover not yet on a live direct-bill remittance, summed; null for a policy remitted once. */
+async function openCoverBills(pol) {
+  const lines = await perBillLines();
+  if (!(pol.details?.openCover === true || String(pol.details?.openCover) === 'true' || lines.includes(String(pol.product_line || pol.lob || '').toUpperCase()))) return null;
+  const r = await one(`SELECT COALESCE(array_agg(rv.id ORDER BY rv.created_at), '{}') AS ids, COALESCE(sum(rv.amount), 0) AS premium, COALESCE(sum(rv.commission_amount), 0) AS commission,
+      COALESCE(sum(rv.commission_vat - rv.commission_ewt), 0) AS tax
+    FROM receivables rv WHERE rv.policy_id = $3 AND ${LIVE_BILL} AND ${UNREMITTED_BILL}`, ['direct-bill', RELEASED['direct-bill'], pol.id]);
+  return { ids: r.ids, premium: round2(r.premium), commission: round2(r.commission), tax: round2(r.tax) };
 }
 
 /**
@@ -286,9 +317,9 @@ export async function insertRemittance(c, { kind, insurerId, period, dueDate, li
   const id = r.rows[0].id;
   for (const l of lines) {
     await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date, insurance_company_id, share_percent,
-                     expected_due, variance, insurer_reference, remark)
-                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate,
-      l.insurerId || null, l.sharePercent || null, l.expectedDue ?? null, l.variance ?? null, l.insurerReference || null, l.remark || null]);
+                     expected_due, variance, insurer_reference, remark, receivable_ids)
+                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate,
+      l.insurerId || null, l.sharePercent || null, l.expectedDue ?? null, l.variance ?? null, l.insurerReference || null, l.remark || null, l.receivableIds || null]);
   }
   return id;
 }
@@ -342,6 +373,8 @@ async function policiesOnOtherRemittances(r) {
   return many(`SELECT DISTINCT ON (rl.policy_id) rl.policy_number, o.remittance_number FROM remittance_lines rl
       JOIN remittance_lines ol ON ol.policy_id = rl.policy_id AND ol.remittance_id <> rl.remittance_id
         AND (rl.insurance_company_id IS NULL OR ol.insurance_company_id IS NULL OR ol.insurance_company_id = rl.insurance_company_id)
+        -- the bills of an open cover on two remittances: only the same bill twice is a duplicate
+        AND NOT (rl.receivable_ids IS NOT NULL AND ol.receivable_ids IS NOT NULL AND NOT (rl.receivable_ids && ol.receivable_ids))
       JOIN remittances o ON o.id = ol.remittance_id AND o.kind = $2 AND o.status <> ALL($3)
     WHERE rl.remittance_id = $1 AND rl.policy_id IS NOT NULL ORDER BY rl.policy_id, o.created_at`, [r.id, r.kind, RELEASED[r.kind] || RELEASED['direct-bill']]);
 }
@@ -360,6 +393,9 @@ export async function validateRemittances(ids) {
     if (r.kind === 'direct-bill' && !r.insurance_company_id) errors.push('Insurer is missing');
     if (r.insurance_company_id && !(await one('SELECT 1 FROM insurance_companies WHERE id = $1 AND status = \'active\'', [r.insurance_company_id]))) errors.push('Insurer is not active');
     for (const x of await policiesOnOtherRemittances(r)) errors.push(`${x.policy_number} is also on ${x.remittance_number}`);
+    // a policy cancelled since the remittance was drafted is not remitted (GAP-REMIT-23)
+    for (const x of await many(`SELECT DISTINCT p.policy_number FROM remittance_lines rl JOIN policies p ON p.id = rl.policy_id
+        WHERE rl.remittance_id = $1 AND lower(p.status) = 'cancelled' ORDER BY 1`, [r.id])) errors.push(`${x.policy_number} is cancelled: cancel this remittance and remit the other policies again`);
     results.push({ id: r.id, code: r.remittance_number, valid: !errors.length, errors });
   }
   return { totalValidated: results.length, validCount: results.filter((x) => x.valid).length, invalidCount: results.filter((x) => !x.valid).length, results };

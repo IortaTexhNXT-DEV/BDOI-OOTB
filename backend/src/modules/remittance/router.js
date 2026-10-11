@@ -1,7 +1,7 @@
 import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { canRead, canWrite, sendList } from '../masters/helpers.js';
@@ -21,6 +21,7 @@ import * as register from './register.js';
 import * as documents from './documents.js';
 import * as imports from './imports.js';
 import * as runs from './runs.js';
+import * as lifecycle from './lifecycle.js';
 import { listHeld } from './holds.js';
 import * as billing from './billing.js';
 import * as payments from './payments.js';
@@ -174,14 +175,17 @@ define({
 for (const [ext, doc] of [['xlsx', 'XLSX'], ['pdf', 'PDF']]) {
   define({
     method: 'GET', path: `/remittances/:id/schedule.${ext}`,
-    summary: `Remittance schedule (${doc}${ext === 'pdf' ? ', A4 landscape' : ''}): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.${ext}`,
+    summary: `Remittance schedule (${doc}${ext === 'pdf' ? ', A4 landscape' : ''}): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy in the FRS COMM-06 layout (Motor: premium, remitting and commission per peril OD/TH, AON, PD, BI, PA; other lines: premium and commission sections; then due to insurer; copy=internal adds the variance share and referrer for read:commission), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.${ext}`,
     screen: `${S('Remittances > Download schedule')}; ${S('Remittances > Record > Documents')}`, middleware: read, response: ext === 'pdf' ? 'application/pdf' : '(xlsx file)',
+    query: { copy: 'internal' },
     handler: async (req, res) => {
+      // the internal copy (variance share, referrer) for a commission reader; the insurer's copy otherwise
+      const opts = { internal: req.query.copy === 'internal' && hasPermission(req.user, 'read:commission') };
       if (ext === 'pdf') {
-        const { buffer, fileName } = await documents.schedulePdf(req.params.id, req.user);
+        const { buffer, fileName } = await documents.schedulePdf(req.params.id, req.user, opts);
         return sendPdf(res, buffer, fileName, 'attachment');
       }
-      return sendXlsx(res, await documents.scheduleXlsx(req.params.id, req.user));
+      return sendXlsx(res, await documents.scheduleXlsx(req.params.id, req.user, opts));
     },
   });
 }
@@ -236,6 +240,29 @@ define({
   request: { referenceNo: 'PESONET-889201', paymentMethod: 'bank_transfer', paymentDate: '2026-09-30' }, response: { success: true, data: { ...rem, status: 'Completed', statusCode: 'settled' } },
   handler: async (req, res) => ok(res, await logged('remittance', 'settle', (r) => svc.settleRemittance(r.params.id, r.body || {}, r.user))(req, res), 'Remittance settled'),
 });
+const lifecycleActions = [
+  ['withdraw', 'Withdraw a remittance awaiting approval back to Draft (its submitter or preparer; a remittance_withdraw reason); the pending approval is closed as Withdrawn', write, 'RWD-CORRECT', 'withdrawRemittance'],
+  ['cancel', 'Cancel a draft or returned remittance (a remittance_cancel reason): its policies are free for the next run', write, 'RCN-DUPLICATE', 'cancelRemittance'],
+  ['revoke', 'Revoke the approval of a remittance not yet paid (approve:remittance; a remittance_revoke reason): refused once it is on a settlement, billed, or a commission line it made payable is approved or paid; back to the preparer as Returned', approve, 'RRV-ERROR', 'revokeRemittance'],
+];
+define({
+  method: 'POST', path: '/remittances/:id/send', summary: 'E-mail an approved or settled remittance to the insurer (email, else the insurer contact e-mail) with the insurer copy of its schedule (XLSX) attached while remittance.email_schedule_attachment is on',
+  screen: `${S('Remittances')} > Send to insurer`, middleware: write, request: { email: 'remittance@insurer.ph' }, response: { success: true, data: rem },
+  handler: async (req, res) => {
+    const out = await logged('remittance', 'send', (r) => lifecycle.sendRemittance(r.params.id, r.body || {}, r.user))(req, res);
+    ok(res, await svc.getRemittance(out.id), out.message);
+  },
+});
+for (const [action, summary, middleware, example, fn] of lifecycleActions) {
+  define({
+    method: 'POST', path: `/remittances/:id/${action}`, summary, screen: `${S('Remittances')} > ${action[0].toUpperCase()}${action.slice(1)}`, middleware,
+    request: { reasonCode: example, note: 'Wrong coverage week' }, response: { success: true, data: rem },
+    handler: async (req, res) => {
+      const out = await logged('remittance', action, (r) => lifecycle[fn](r.params.id, r.body || {}, r.user))(req, res);
+      ok(res, await svc.getRemittance(out.id), out.message);
+    },
+  });
+}
 define({
   method: 'GET', path: '/processing-history', summary: 'Processing batches and automated executions', screen: S('Automated Processing > History'), middleware: read,
   response: { success: true, data: [{ batchId: 'BLK-2026-00001', processedAt: '2026-09-28T00:00:00Z', processedBy: 'Finance Officer', itemCount: 3, totalAmount: 120000, status: 'Pending Approval', duration: '1s' }] },

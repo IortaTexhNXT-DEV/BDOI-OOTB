@@ -76,6 +76,7 @@ export const FILE_ROUTES = [
   { module: 'claims', method: 'PUT', path: '/:id', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
   { module: 'claims', method: 'PUT', path: '/settle/:id', noTemplate: 'Settlement documents attached to a claim (single files)' },
   { module: 'endorsements', method: 'POST', path: '/upload-document', noTemplate: 'The endorsement document (single file)' },
+  { module: 'endorsements', method: 'POST', path: '/insurer-commission/upload', templates: ['endorsement-insurer-commission'] },
   { module: 'system-settings', method: 'POST', path: '/logo-presets', noTemplate: 'Logo image (single file)' },
   { module: 'system-settings', method: 'POST', path: '/upload/:field', noTemplate: 'Logo or favicon image (single file)' },
   { module: 'branding', method: 'POST', path: '/upload/:asset', noTemplate: 'Logo, favicon or sign-in picture (single image)' },

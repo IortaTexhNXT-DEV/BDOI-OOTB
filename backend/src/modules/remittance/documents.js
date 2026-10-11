@@ -2,11 +2,10 @@
  * Documents of a remittance (Accounts > Remittance > Remittances: the row menu and the record's Documents tab), all
  * built on the server with the letterhead of the Company master (lib/letterhead.js through printContext) and
  * lib/xlsx.js, named <Ref>_<Document>_<yyyymmdd>.<ext>:
- *   - the remittance schedule, XLSX and PDF (A4 landscape): the header (company, "Remittance Schedule", insurer,
- *     product line, coverage date, remittance no., date), one row per policy with the columns today's data holds
- *     (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium,
- *     commission, taxes, due to insurer), the totals and the note that it is valid without signature. The per-peril premium,
- *     remitting and commission columns of the FRS layout come with the Phase 2 line data;
+ *   - the remittance schedule, XLSX and PDF (A4 landscape; FR-RMT-015): the header (company, "Remittance Schedule",
+ *     insurer, product line, coverage date, remittance no., date), one row per policy in the layout of FRS COMM-06
+ *     chapter 6 (Motor: PREMIUM, REMITTING and COMMISSION per peril from the commission basis of the policy; other
+ *     lines: premium and commission sections), the totals and the note that it is valid without signature;
  *   - the remittance advice (PDF, portrait): addressee, reference and payment blocks and the amounts, the payment
  *     from the voucher the remittance's settlement raised (documents/templates.js#remittanceAdviceDoc).
  */
@@ -31,33 +30,83 @@ export async function documentFileName(ref, document, ext) {
   return `${String(ref).replace(/[^A-Za-z0-9-]+/g, '_')}_${document}_${(await businessToday()).replace(/-/g, '')}.${ext}`;
 }
 
-export const SCHEDULE_COLUMNS = [
-  { key: 'issuedDate', label: 'ISSUED DATE', type: 'date', width: 12 }, { key: 'client', label: 'CLIENT NAME', width: 28 }, { key: 'carModel', label: 'CAR MODEL', width: 22 },
-  { key: 'insurer', label: 'INSURANCE COMPANY', width: 26 }, { key: 'policyNo', label: 'POLICY NO.', width: 20 }, { key: 'businessType', label: 'BUSINESS TYPE', width: 12 },
-  { key: 'inception', label: 'INCEPTION DATE FROM', type: 'date', width: 14 }, { key: 'sumInsured', label: 'SI', type: 'money', width: 14 },
-  { key: 'premium', label: 'TOTAL PREMIUM', type: 'money', width: 15 }, { key: 'commission', label: 'COMMISSION', type: 'money', width: 14 },
-  { key: 'tax', label: 'TAXES', type: 'money', width: 12 }, { key: 'due', label: 'DUE TO INSURER', type: 'money', width: 16 },
-];
+const money = (key, label, width = 13) => ({ key, label, type: 'money', width });
+const POLICY_COLUMNS = [{ key: 'issuedDate', label: 'ISSUED DATE', type: 'date', width: 12 }, { key: 'client', label: 'CLIENT NAME', width: 28 }];
+const PERIL_KEYS = [['OD', 'OD/TH'], ['AON', 'AON'], ['PD', 'PD'], ['BI', 'BI'], ['APPA', 'PA']];
+const COMMISSION_COLUMNS = [money('grossAmount', 'GROSS AMOUNT'), money('commissionVat', 'VAT'), money('netOfVat', 'NET OF VAT'), money('ewt', 'EWT'),
+  money('netPayable', 'NET AMOUNT PAYABLE', 15)];
 
-/** The rows of a remittance's schedule (one per policy line) with the header data and the totals. */
-export async function scheduleData(id, user) {
+/**
+ * The columns of the schedule (FRS COMM-06 chapter 6): Motor, one row per policy with the sections PREMIUM, REMITTING and
+ * COMMISSION per peril (6.1); any other line, the premium and commission sections of 6.2. Both end with the amount due
+ * to the insurer. The internal copy adds the variance share and the referrer (never on the insurer's copy).
+ */
+export function scheduleColumns(motor, internal = false) {
+  const head = motor
+    ? [...POLICY_COLUMNS, { key: 'carModel', label: 'CAR MODEL', width: 22 }, { key: 'insurer', label: 'INSURANCE COMPANY', width: 26 }, { key: 'policyNo', label: 'POLICY NO.', width: 20 },
+      { key: 'businessType', label: 'BUSINESS TYPE / MOTOR TYPE', width: 18 }, { key: 'inception', label: 'INCEPTION DATE FROM', type: 'date', width: 14 }, money('sumInsured', 'SI', 14),
+      ...PERIL_KEYS.map(([c, l]) => money(`premium${c}`, `PREMIUM ${l}`)), money('netPremium', 'PREMIUM AMOUNT'), money('vat', 'VAT'), money('dst', 'DST'), money('lgt', 'LGT'),
+      money('roadside', 'ROADSIDE ASSISTANCE'), money('premium', 'TOTAL PREMIUM', 15),
+      ...PERIL_KEYS.map(([c, l]) => money(`remitting${c}`, `REMITTING ${l}`)), money('remitting', 'TOTAL REMITTING', 15),
+      ...PERIL_KEYS.map(([c, l]) => money(`commission${c}`, `COMMISSION ${l}`))]
+    : [...POLICY_COLUMNS, { key: 'productType', label: 'PRODUCT TYPE', width: 22 }, { key: 'insurer', label: 'INSURANCE COMPANY', width: 26 }, { key: 'policyNo', label: 'POLICY NO.', width: 20 },
+      { key: 'inception', label: 'INCEPTION DATE FROM', type: 'date', width: 14 }, money('sumInsured', 'SI', 14), money('netPremium', 'PREMIUM AMOUNT'), money('vat', 'VAT'),
+      money('dst', 'DST'), money('lgt', 'LGT'), money('others', 'OTHERS'), money('premium', 'TOTAL PREMIUM', 15)];
+  return [...head, ...COMMISSION_COLUMNS, money('due', 'DUE TO INSURER', 16),
+    ...(internal ? [money('varianceShare', 'VARIANCE SHARE'), { key: 'referrer', label: 'REFERRER', width: 24 }] : [])];
+}
+const moneyKeys = (cols) => cols.filter((c) => c.type === 'money' && c.key !== 'sumInsured').map((c) => c.key);
+const amount = (v) => round2(Number(v) || 0);
+
+/**
+ * The rows of a remittance's schedule (one per policy line) with the header data, the columns and the totals: per peril
+ * the premium, the insurer remitting and the commission of the commission basis booked on the policy (FR-RMT-002), the
+ * premium taxes of its bills, the commission with its VAT and EWT, and the amount due to the insurer.
+ */
+export async function scheduleData(id, user, { internal = false } = {}) {
   const row = await registerRow(id, user);
   if (!row) throw notFound('Remittance not found');
-  const lines = await many(`SELECT rl.*, p.issued_date, p.inception_date AS policy_inception, p.sum_insured, p.renewed_from, c.display_name AS client_name,
+  const lines = await many(`SELECT rl.*, p.issued_date, p.inception_date AS policy_inception, p.sum_insured, p.renewed_from, p.net_premium AS policy_net,
+      p.details->'commissionBasis' AS basis, c.display_name AS client_name, pr.name AS product_name,
       NULLIF(concat_ws(' ', COALESCE(q.vehicle->>'brand', q.vehicle->>'make'), q.vehicle->>'model', COALESCE(q.vehicle->>'year', q.vehicle->>'yearModel')), '') AS car_model,
-      COALESCE(li.name, ri.name) AS insurer_name
+      COALESCE(li.name, ri.name) AS insurer_name, b.vat, b.dst, b.lgt, b.commission_vat, b.commission_ewt
     FROM remittance_lines rl JOIN remittances r ON r.id = rl.remittance_id
-    LEFT JOIN policies p ON p.id = rl.policy_id LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN quotes q ON q.id = p.quote_id
+    LEFT JOIN policies p ON p.id = rl.policy_id LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN quotes q ON q.id = p.quote_id LEFT JOIN products pr ON pr.id = p.product_id
     LEFT JOIN insurance_companies li ON li.id = rl.insurance_company_id LEFT JOIN insurance_companies ri ON ri.id = r.insurance_company_id
+    LEFT JOIN LATERAL (SELECT sum(COALESCE(x.vat, 0)) AS vat, sum(COALESCE(x.dst, 0)) AS dst, sum(COALESCE(x.lgt, 0)) AS lgt, sum(COALESCE(x.commission_vat, 0)) AS commission_vat,
+        sum(COALESCE(x.commission_ewt, 0)) AS commission_ewt FROM receivables x WHERE x.policy_id = rl.policy_id AND x.status NOT IN ('cancelled', 'written-off', 'credited')) b ON true
     WHERE rl.remittance_id = $1 ORDER BY rl.id`, [row.id]);
-  const rows = lines.map((l) => ({
-    issuedDate: l.issued_date || null, client: l.client_name || l.insured_name || '', carModel: l.car_model || '', insurer: l.insurer_name || '',
-    policyNo: l.policy_number || '', businessType: l.policy_id ? (l.renewed_from ? 'RENEW' : 'NEW') : '', inception: l.policy_inception || l.effective_date || null,
-    sumInsured: l.sum_insured === null || l.sum_insured === undefined ? null : round2(l.sum_insured), premium: round2(l.premium), commission: round2(l.commission),
-    tax: round2(l.tax), due: round2(l.net),
-  }));
-  const sum = (k) => round2(rows.reduce((s, r) => s + (Number(r[k]) || 0), 0));
-  return { row, rows, totals: { premium: sum('premium'), commission: sum('commission'), tax: sum('tax'), due: sum('due') } };
+  const motor = /motor/i.test(row.productLine || '') || lines.some((l) => l.basis?.rateBasis === 'issuing-remitting');
+  const columns = scheduleColumns(motor, internal);
+  const rows = lines.map((l) => {
+    const basis = l.basis || {};
+    const perils = new Map((basis.perils || []).map((x) => [x.code, x]));
+    const premium = amount(l.premium);
+    const commission = amount(l.commission);
+    const [vat, dst, lgt] = [amount(l.vat), amount(l.dst), amount(l.lgt)];
+    const net = l.policy_net !== null && l.policy_net !== undefined ? amount(l.policy_net) : amount(basis.netPremium ?? premium - vat - dst - lgt);
+    // commission VAT and EWT as booked on the bills, else the line's tax (commission VAT less EWT) as VAT
+    const commissionVat = Number(l.commission_vat) ? amount(l.commission_vat) : Math.max(0, amount(l.tax));
+    const ewt = Number(l.commission_ewt) ? amount(l.commission_ewt) : 0;
+    const out = {
+      issuedDate: l.issued_date || null, client: l.client_name || l.insured_name || '', carModel: l.car_model || '', productType: l.product_name || l.product || '',
+      insurer: l.insurer_name || '', policyNo: l.policy_number || '',
+      businessType: l.policy_id ? [l.renewed_from ? 'RENEW' : 'NEW', basis.motorType].filter(Boolean).join(' / ') : '', inception: l.policy_inception || l.effective_date || null,
+      sumInsured: l.sum_insured === null || l.sum_insured === undefined ? null : round2(l.sum_insured), netPremium: net, vat, dst, lgt,
+      roadside: amount(perils.get('RSA')?.premium), others: round2(Math.max(0, premium - net - vat - dst - lgt)), premium,
+      remitting: amount(basis.insurerRemitting ?? premium - commission), grossAmount: round2(commission + commissionVat), commissionVat, netOfVat: commission, ewt,
+      netPayable: round2(commission + commissionVat - ewt), due: amount(l.net), varianceShare: amount(basis.varianceShare), referrer: basis.referrer?.name || '',
+    };
+    for (const [code] of PERIL_KEYS) {
+      const x = perils.get(code);
+      out[`premium${code}`] = amount(x?.premium);
+      out[`remitting${code}`] = amount(x?.insurerRemitting);
+      out[`commission${code}`] = amount(x?.commission);
+    }
+    return out;
+  });
+  const totals = Object.fromEntries(moneyKeys(columns).map((k) => [k, round2(rows.reduce((s, r) => s + (Number(r[k]) || 0), 0))]));
+  return { row, rows, totals, columns, motor };
 }
 
 /** The header lines of a schedule after the company name: title, insurer, product line, coverage date, number, date. */
@@ -68,32 +117,34 @@ async function scheduleHeader(row, fmt) {
 }
 
 /** The schedule workbook: the letterhead block and header lines above the table, the totals row and the note. */
-export async function scheduleXlsx(id, user) {
-  const { row, rows, totals } = await scheduleData(id, user);
+export async function scheduleXlsx(id, user, opts = {}) {
+  const { row, rows, totals, columns } = await scheduleData(id, user, opts);
   const print = await printContext({ user });
   const lh = print.letterhead || {};
   const brand = excelBrand(print);
   const header = await scheduleHeader(row, print.format);
   const banner = [String(lh.name || '').toUpperCase(), 'Remittance Schedule', ...header.map(([k, v]) => `${k}: ${v}`)];
-  const total = { issuedDate: '', client: 'TOTAL', premium: totals.premium, commission: totals.commission, tax: totals.tax, due: totals.due };
-  const note = { issuedDate: SCHEDULE_NOTE };
-  const data = [...rows, total, note].map((r) => SCHEDULE_COLUMNS.map((c) => r[c.key] ?? ''));
+  const data = [...rows, { client: 'TOTAL', ...totals }, { issuedDate: SCHEDULE_NOTE }].map((r) => columns.map((c) => r[c.key] ?? ''));
   const buffer = writeXlsx({
-    sheets: [{ name: 'Schedule', columns: SCHEDULE_COLUMNS.map((c) => ({ header: c.label, type: c.type, width: c.width })), rows: data, banner, logo: !!brand.logoImage,
+    sheets: [{ name: 'Schedule', columns: columns.map((c) => ({ header: c.label, type: c.type, width: c.width })), rows: data, banner, logo: !!brand.logoImage,
       autoFilter: false }],
     title: `Remittance Schedule ${row.remittanceNo}`, brand, dateFormat: print.format?.dateFormat,
   });
   return { buffer, fileName: await documentFileName(row.remittanceNo, 'Schedule', 'xlsx') };
 }
 
-/** The schedule as a PDF listing (A4 landscape, the font reduced to fit). */
-export async function schedulePdf(id, user) {
-  const { row, rows, totals } = await scheduleData(id, user);
+// the PDF keeps the section totals of the layout so that it stays legible on A4; the per-peril columns are in the XLSX
+const PDF_SKIP = /^(premium|remitting|commission)(OD|AON|PD|BI|APPA)$|^(carModel|insurer|inception|roadside)$/;
+
+/** The schedule as a PDF listing (A4 landscape, the font reduced to fit): the columns of the XLSX less the per-peril ones. */
+export async function schedulePdf(id, user, opts = {}) {
+  const data = await scheduleData(id, user, opts);
+  const { row, rows, totals } = data;
+  const columns = data.columns.filter((c) => !PDF_SKIP.test(c.key));
   const print = await printContext({ user });
   const header = await scheduleHeader(row, print.format);
   const buffer = await renderReportPdf({ title: 'Remittance Schedule', params: header.map(([k, v]) => `${k}: ${v || '-'}`).join('   ·   '),
-    columns: SCHEDULE_COLUMNS.map((c) => ({ key: c.key, label: c.label, type: c.type })), rows,
-    totals: { client: 'TOTAL', premium: totals.premium, commission: totals.commission, tax: totals.tax, due: totals.due },
+    columns: columns.map((c) => ({ key: c.key, label: c.label, type: c.type })), rows, totals: { client: 'TOTAL', ...totals },
     sections: [{ note: SCHEDULE_NOTE }] }, { user });
   return { buffer, fileName: await documentFileName(row.remittanceNo, 'Schedule', 'pdf') };
 }

@@ -18,6 +18,14 @@ import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import { statusLabel } from "../../../utils/statusSeverity";
 import EndorsementWorkflowPanel from "../endorsementWorkflow/EndorsementWorkflowPanel";
+import ImportDialog from "../../../components/ImportDialog";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import { hasPermission } from "../../../utils/canOpen";
+
+// the commission the insurer calculated (TIS-BRD-COMM-07) is recorded until the endorsement is booked
+const COMMISSION_OPEN = ["Draft", "PendingApproval", "PendingCustomer", "InitiateCancel", "Approved"];
+const insurerCommissionUpload = (t) => [{ label: t("endorsement.insurerCommission.file"), templatePath: "/endorsements/insurer-commission/template",
+  uploadPath: "/endorsements/insurer-commission/upload" }];
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -33,6 +41,22 @@ const EndorsementDetailedView = ({ action }) => {
 
   // Check if this is a cancellation endorsement
   const endorsementStatus = endorsementData?.status;
+  const [showUpload, setShowUpload] = useState(false);
+  const canWrite = hasPermission("write:endorsements");
+  const commissionOpen = canWrite && COMMISSION_OPEN.includes(endorsementStatus);
+  const reload = async () => {
+    const response = await endorsementService.getEndorsementById(endorsementData?.endorsementId || endorsementId);
+    if (response.success) setEndorsementData(response.data);
+  };
+  const recordInsurerCommission = async () => {
+    const done = await openConfirm({
+      title: t("endorsement.insurerCommission.title", { reference: endorsementData?.endorsementNumber }), severity: "neutral",
+      input: { type: "amount", label: t("endorsement.insurerCommission.amount"), required: true, defaultValue: endorsementData?.insurerCommission ?? undefined },
+      confirmLabel: t("endorsement.insurerCommission.save"),
+      onConfirm: (amount) => endorsementService.setInsurerCommission(endorsementData?.endorsementId || endorsementId, amount),
+    });
+    if (done !== null) await reload();
+  };
   const endorsementTypeIds = endorsementData?.endorsementTypeIds || [];
   const isCancelled = 
     endorsementStatus === "Cancelled" ||
@@ -191,7 +215,13 @@ const EndorsementDetailedView = ({ action }) => {
               { label: t("endorsement.effectiveDate"), value: endorsementData?.effectiveDate, type: "date" },
               { label: t("endorsement.premiumChange"), value: isCancelled ? null : premiumDelta, type: "amount", hidden: isCancelled },
             ]}
-            actions={<Button className="p-button-outlined" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")} onClick={printEndorsement} />}
+            actions={(
+              <>
+                {commissionOpen ? <Button className="p-button-outlined" icon="pi pi-percentage" label={t("endorsement.insurerCommission.action")} onClick={recordInsurerCommission} /> : null}
+                {canWrite ? <Button className="p-button-outlined" icon="pi pi-upload" label={t("endorsement.insurerCommission.upload")} onClick={() => setShowUpload(true)} /> : null}
+                <Button className="p-button-outlined" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")} onClick={printEndorsement} />
+              </>
+            )}
           />
           <DetailSection title={t("endorsement.details")}>
             <KeyValueGrid columns={3} items={[
@@ -204,6 +234,8 @@ const EndorsementDetailedView = ({ action }) => {
               { label: t("endorsement.issuedDate"), value: completion.issuedDate, type: "date", hidden: !completion.issuedDate },
               { label: t("endorsement.expiry"), value: completion.expiryDate || endorsementData?.policyExpiry, type: "date", hidden: !(completion.expiryDate || endorsementData?.policyExpiry) },
               { label: t("endorsement.premiumChange"), value: premiumDelta, type: "amount", hidden: isCancelled },
+              { label: t("endorsement.insurerCommission.label"), value: endorsementData?.insurerCommission, type: "amount",
+                hidden: endorsementData?.insurerCommission === null || endorsementData?.insurerCommission === undefined },
               { label: t("endorsement.premiumEffectLabel"), value: <span data-testid="endorsement-premium-note">{premiumEffect}</span>, hidden: isCancelled },
               { label: t("endorsement.cancellationReasonLabel"), value: reasonName, hidden: !isCancelled },
               { label: t("endorsement.returnPremium"), value: Math.abs(premiumDelta), type: "amount", hidden: !isCancelled || !premiumDelta },
@@ -211,6 +243,8 @@ const EndorsementDetailedView = ({ action }) => {
             ]} />
           </DetailSection>
 
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title={t("endorsement.insurerCommission.uploadTitle")} targets={insurerCommissionUpload(t)}
+            onDone={reload} />
           <EndorsementWorkflowPanel endorsementId={endorsementData?.endorsementId || endorsementId}
             onChanged={async () => {
               const response = await endorsementService.getEndorsementById(endorsementData?.endorsementId || endorsementId);

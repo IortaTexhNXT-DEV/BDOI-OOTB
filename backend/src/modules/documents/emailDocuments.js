@@ -11,6 +11,7 @@
  *   comparison-report      { reportId }      client comparison and recommendation report
  *   endorsement            { endorsementId } endorsement or cancellation request to the insurer
  *   quotation-slip         { quoteId }       the quotation as printed for the client
+ *   remittance-schedule    { remittanceId }  the remittance schedule to the insurer (XLSX, insurer copy)
  */
 import { pool } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -66,6 +67,12 @@ const GENERATORS = {
     const { quoteDoc } = await import('./templates.js');
     const q = await quoteById(String(quoteId));
     return { fileName: `quotation-${q.quotationNumber}.pdf`, content: buildPdf(await quoteDoc(q)) };
+  },
+  'remittance-schedule': async ({ remittanceId }) => {
+    // the insurer's copy of the remittance schedule (FR-RMT-015): never the variance share or the referrer
+    const { scheduleXlsx } = await import('../remittance/documents.js');
+    const { buffer, fileName } = await scheduleXlsx(remittanceId, { id: null, username: 'system', roles: [], permissions: [] });
+    return { fileName, content: buffer, contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
   },
   'comparison-report': async ({ reportId }) => {
     const { comparisonReportSpec } = await import('../comparison-reports/service.js');

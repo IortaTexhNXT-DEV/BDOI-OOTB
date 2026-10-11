@@ -28,6 +28,7 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare,
 | `summary.js` | `GET /remittance/summary`: the counts of the menu entries per user, the run strip and the landing page. |
 | `eligibility.js` | Which policies a run remits: `inception` (Release 1, by inception date) or `fully-paid` (paid in full within the window, each receipt with its proof of payment when the schedule asks for it); payment positions of policies and the exceptions of a missing proof. |
 | `holds.js` | Instalment hold: part-paid policies on an instalment plan kept out of the fully paid remittance until paid (`remittance_holds`), the daily job and the Held policies list. |
+| `lifecycle.js` | Withdraw (submitter or preparer, back to Draft), cancel (a draft or returned remittance; its policies are free again) and revoke (an approver takes back the approval of a remittance not yet on a settlement, billed or paid; returned to the preparer, its policies no longer remitted), each with a coded reason. |
 | `billing.js` | Insurer billing run: the billing dates (15th and 26th moved off non-working days), the billing statements drafted per insurer, product line and basis from the remittances approved before the billing date, the runs and the job. |
 
 ## Main tables
@@ -92,6 +93,17 @@ The approval of a remittance (`onRemittanceApproved`) marks its lines Remitted, 
 commission lines of the policies become eligible where `commission.eligible_requires_remittance` is on. The approval of
 a remittance cannot be delegated by its initiator or maker, and the settlement voucher needs a reference number and a
 payment date from a user other than the maker and the approver of the remittance.
+
+Withdraw, cancel and revoke (`lifecycle.js`, migration 0646; GAP-REMIT-23): `POST /remittances/:id/withdraw` (the
+submitter or preparer, `write:remittance`, reason `remittance_withdraw`; the pending approval closes Withdrawn and the
+remittance is a Draft again), `POST /remittances/:id/cancel` (a draft or returned remittance, reason
+`remittance_cancel`; status cancelled, its policies `RELEASED` for the next run) and `POST /remittances/:id/revoke`
+(`approve:remittance`, reason `remittance_revoke`, while `remittance.revoke_enabled`): refused once the remittance is on a
+settlement that is not rejected, a line is billed, or a commission line it made payable is approved or paid; the lines
+read Active again, `receivables.remitted_at` / `remittance_id` and `policies.details.remittance` are cleared, the shares
+the approval made Eligible go back to Accrued, and the remittance is Returned to its preparer. The row menu of the
+register carries `cancel`, `withdraw` and `revoke` with their `reasonContext`. `validateRemittances` refuses to submit a
+remittance holding a policy cancelled since it was drafted.
 
 Insurer billing run (`billing.js`, migration 0522): on the billing days (`insurer_billing.run_days`, 15 and 26, moved
 to the previous working day by `insurer_billing.non_working_day` and the Holiday master) the job `insurer-billing-run`,
@@ -199,8 +211,7 @@ status, guards) and submits the ready ones as one processing batch; the result p
 
 Documents (`documents.js`), named `<Ref>_<Document>_<yyyymmdd>.<ext>`: `GET /remittances/:id/schedule.xlsx` and
 `schedule.pdf` (A4 landscape; company, "Remittance Schedule", insurer, product line, coverage date, REM no and date,
-one row per policy with the columns today's lines hold, totals and the note that it is valid without signature; the per-peril premium,
-remitting and commission columns of the FRS layout come with the Phase 2 line data) and `advice.pdf` (portrait letter:
+one row per policy in the FRS COMM-06 layout: Motor premium, remitting and commission per peril from `policies.details.commissionBasis`, other lines premium and commission sections; `copy=internal` adds the variance share and referrer for `read:commission`; the PDF keeps the section totals; totals and the note that it is valid without signature) and `advice.pdf` (portrait letter:
 insurer's name, address and TIN; REM no, coverage week, product line, basis; voucher no, method, value date and bank
 reference of the settlement voucher; total premium, commission, VAT and EWT on commission from the voucher's payables,
 due to insurer, refund credits netted on the voucher, amount paid). `GET /remittances/:id/pdf` of Tracking stays.
@@ -302,7 +313,7 @@ file layout batches insurer vouchers),
 `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels` (TISPH: rejected "Returned", settled "Settled (voucher raised)"),
 `remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
-`remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
+`remittance.revoke_enabled` (true), `remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
 specific matching rule wins), `remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
 `remittance.reconciliation_bank_account`, `remittance.reconciliation_tolerance`, and the `direct_bill.*` group
 (default billing mode, VAT registration, insurer EWT rate, debit note due days, e-mail text, client payment required

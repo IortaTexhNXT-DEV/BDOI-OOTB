@@ -1462,7 +1462,11 @@
         "download-schedule-xlsx": "Download schedule (XLSX)",
         "download-schedule-pdf": "Download schedule (PDF)",
         "download-advice": "Download advice (PDF)",
-        "open-voucher": "Open voucher"
+        "open-voucher": "Open voucher",
+        "withdraw": "Withdraw from approval",
+        "cancel": "Cancel remittance",
+        "revoke": "Revoke approval",
+        "send": "Send to insurer"
       },
       "submit": {
         "title": "Submit for approval",
@@ -1533,7 +1537,29 @@
         "createdOn": "Created on",
         "actions": "Actions"
       },
-      "dueOn": "Due {{date}}"
+      "dueOn": "Due {{date}}",
+      "lifecycle": {
+        "withdraw": {
+          "title": "Withdraw {{reference}} from approval",
+          "message": "The remittance goes back to Draft and its approval is closed. Correct it and submit it again.",
+          "done": "Withdrawn to Draft"
+        },
+        "cancel": {
+          "title": "Cancel {{reference}}",
+          "message": "The remittance is cancelled and its policies are free for the next run or another remittance. This cannot be undone.",
+          "done": "Remittance cancelled"
+        },
+        "revoke": {
+          "title": "Revoke the approval of {{reference}}",
+          "message": "The remittance returns to its preparer as Returned and its policies no longer read remitted. Only a remittance not yet on a settlement, billed or paid can be revoked.",
+          "done": "Approval revoked; the remittance is returned to its preparer"
+        }
+      },
+      "send": {
+        "title": "Send {{reference}} to the insurer",
+        "email": "E-mail (blank: the insurer's contact e-mail)",
+        "done": "E-mailed to the insurer"
+      }
     },
     "import": {
       "title": "Import policy list",
@@ -6186,6 +6212,16 @@
     },
     "types": {
       "cancellation": "Cancellation"
+    },
+    "insurerCommission": {
+      "label": "Insurer commission",
+      "action": "Insurer commission",
+      "title": "Insurer commission on {{reference}}",
+      "amount": "Commission calculated by the insurer",
+      "save": "Save",
+      "upload": "Upload insurer commission",
+      "uploadTitle": "Upload insurer commission",
+      "file": "Insurer commission"
     }
   },
   "endorsementSummary": {
