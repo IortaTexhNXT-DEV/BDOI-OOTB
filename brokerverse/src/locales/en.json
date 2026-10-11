@@ -6206,6 +6206,16 @@
     },
     "types": {
       "cancellation": "Cancellation"
+    },
+    "insurerCommission": {
+      "label": "Insurer commission",
+      "action": "Insurer commission",
+      "title": "Insurer commission on {{reference}}",
+      "amount": "Commission calculated by the insurer",
+      "save": "Save",
+      "upload": "Upload insurer commission",
+      "uploadTitle": "Upload insurer commission",
+      "file": "Insurer commission"
     }
   },
   "endorsementSummary": {
