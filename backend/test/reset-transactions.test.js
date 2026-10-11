@@ -182,7 +182,9 @@ describe('transaction reset', () => {
     expect(r.tables.find((t) => t.table === 'opening_balances').rows).toBe(2);
     expect(await count('opening_balances')).toBe(0);
     expect(await count('fiscal_years')).toBe(0);
-    expect(await count('audit_log')).toBe(1);
+    expect(await count('audit_log', "entity <> 'audit_bypass'")).toBe(1);
+    // the bypass recorded itself (begin, end with the rows deleted) and cannot be removed
+    expect(await count('audit_log', "entity = 'audit_bypass'")).toBe(2);
   });
 
   it('keeps the go-live load history: loaded migration batches and their rows are marked undone, the others stay as they are', async () => {

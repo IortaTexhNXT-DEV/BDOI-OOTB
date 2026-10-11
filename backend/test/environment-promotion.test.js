@@ -57,8 +57,8 @@ describe('promotion path', () => {
     const kits = await as('prom.it', 'get', '/data-load/kits');
     const settings = kits.body.data.kits.find((k) => k.kit === 'configuration').sheets.find((s) => s.key === 'settings');
     expect(settings).toBeTruthy();
-    const { configurationSheets } = await import('../src/modules/data-load/configuration.js');
-    const sheet = (await configurationSheets()).find((s) => s.key === 'settings');
+    const { CONFIGURATION_SHEETS } = await import('../src/modules/data-load/configuration.js');
+    const sheet = CONFIGURATION_SHEETS.settings();
     const keys = (await sheet.exportRows()).map((row) => row.key);
     expect(keys).not.toContain('system.environment');
     expect(keys).toContain('general.timezone');
