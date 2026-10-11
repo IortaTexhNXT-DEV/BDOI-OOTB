@@ -114,14 +114,14 @@ describe("Sales & Marketing menu", () => {
     (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
       .find((i) => i.name === "Sales & Marketing")?.submenu.map((i) => i.name) || [];
 
-  it("follows the TISPH journey: leads, quotation, placement, dealer and bank programmes, promotions", () => {
+  it("follows the TISPH journey: leads, quotation, placement, dealer and bank programmes, promotions, dealer schemes", () => {
     expect(items(["system-admin"])).toEqual(["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports",
-      "Placement Slips", "Dealer Programmes", "Promotions", "Quick Quote", "Campaigns"]);
-    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(11);
+      "Placement Slips", "Dealer Programmes", "Promotions", "Scheme Master", "Scheme Issuance", "Quick Quote", "Campaigns"]);
+    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(13);
   });
   it("gives no TISPH persona the entries without a TISPH requirement (Quick Quote, Campaigns)", () => {
     const journey = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
-      "Promotions"];
+      "Promotions", "Scheme Master", "Scheme Issuance"];
     for (const role of ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-general-manager"]) expect(items([role])).toEqual(journey);
     for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"]) expect(items([role])).toEqual(journey);
     // IT AppSupport has no read:lead-assignment (RBAC v4) and no sales activities or promotions
@@ -133,7 +133,7 @@ describe("Sales & Marketing menu", () => {
   });
   it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
     expect(items(["processing"])).toEqual(["Prospects", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
-      "Promotions"]);
+      "Promotions", "Scheme Master", "Scheme Issuance"]);
     expect(isPathAllowed("/sales/quick-quote", menuList, ["processing"])).toBe(false);
     expect(items(["claims"])).toEqual([]);
   });

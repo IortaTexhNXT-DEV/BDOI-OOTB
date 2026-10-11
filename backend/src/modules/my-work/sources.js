@@ -370,6 +370,27 @@ async function approvals(ctx) {
       due_date: due('COALESCE(pt.submitted_at, pt.updated_at)'), status: 'pt.status', link: "'/product-configurator/templates'", created_at: 'COALESCE(pt.submitted_at, pt.created_at)' })}
       FROM product_templates pt WHERE pt.status = 'Pending Approval' AND ${notMine(ctx, 'pt.created_by')} AND ${notMine(ctx, 'pt.updated_by')} AND ${notMine(ctx, 'pt.submitted_by')}`);
   }
+  // dealer schemes (SCHM-02), checklist waivers of scheme applications (SCHM-01) and lock-in decisions and changes (SCHM-03):
+  // decided by the holders of the approve permission, never by their maker
+  if (ctx.can('approve:schemes') && await has('schemes')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Scheme'", id: 'sc.id', ref: "sc.scheme_no || ' v' || sc.version", title: 'sc.description', due_date: due('COALESCE(sc.submitted_at, sc.created_at)'),
+      status: 'sc.status', link: "'/sales/schemes?scheme=' || sc.id", next_action: "'Approve or return the scheme'", created_at: 'sc.created_at' })}
+      FROM schemes sc WHERE sc.status = 'pending-approval' AND ${notMine(ctx, 'sc.created_by')} AND ${notMine(ctx, 'sc.updated_by')} AND ${notMine(ctx, 'sc.submitted_by')}`);
+  }
+  if (ctx.can('approve:scheme-issuance') && await has('scheme_checklist_items')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Checklist waiver'", id: "'sci-' || ci.id", ref: 'sa.application_number', title: "ci.document || ': ' || COALESCE(ci.waiver_reason, '')",
+      due_date: due('ci.waiver_requested_at'), status: 'ci.status', link: "'/sales/scheme-issuance/' || sa.id", created_at: 'ci.waiver_requested_at' })}
+      FROM scheme_checklist_items ci JOIN scheme_applications sa ON sa.id = ci.application_id WHERE ci.status = 'waiver-requested' AND ${notMine(ctx, 'ci.waiver_requested_by')}`);
+  }
+  if (ctx.can('approve:lock-in') && await has('lock_in_reviews')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Lock-in review'", id: 'lr.id', ref: 'lp.policy_number',
+      title: "CASE lr.decision WHEN 'release' THEN 'Release to standard renewal' ELSE 'Not for renewal' END || COALESCE(': ' || lr.reason, '')", due_date: due('lr.decided_at'),
+      status: 'lr.status', link: "'/renewal/lock-in-review?review=' || lr.id", next_action: "'Approve or return the decision'", created_at: 'lr.decided_at' })}
+      FROM lock_in_reviews lr JOIN policies lp ON lp.id = lr.policy_id WHERE lr.status = 'pending-approval' AND ${notMine(ctx, 'lr.decided_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Lock-in change'", id: 'lc.id', ref: 'cp.policy_number', title: "initcap(lc.action) || ' lock-in: ' || lc.remark", due_date: due('lc.requested_at'),
+      status: 'lc.status', link: "'/agent/policydetail/' || cp.id", created_at: 'lc.requested_at' })}
+      FROM lock_in_changes lc JOIN policies cp ON cp.id = lc.policy_id WHERE lc.status = 'pending' AND ${notMine(ctx, 'lc.requested_by')}`);
+  }
   if (ctx.can('approve:discount-caps') && await has('discount_caps')) {
     out.push(`SELECT ${select({ ...base, kind: "'Discount cap'", id: "'dc-' || dc.id", ref: "'DC-' || dc.id", title: "pr.name || ' - ' || replace(initcap(replace(dc.channel_type, '_', ' ')), 'Agent', 'Agent / referrer')",
       due_date: due('dc.created_at'), status: 'dc.status', link: "'/master/finance/discount-caps'", created_at: 'dc.created_at' })}

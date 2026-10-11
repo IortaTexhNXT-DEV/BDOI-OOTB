@@ -13,6 +13,7 @@ export const REASON_CONTEXTS = [
   "commission_share_change", "commission_rate_change", "commission_reversal", "commission_wht_change", "scheme_end",
   "talkbot_line_remove", "talkbot_list_cancel",
   "policy_correction", "policy_correction_reject", "endorsement_reject", "promotion_return", "promotion_status", "discount_cap_return",
+  "dealer_scheme_return", "dealer_scheme_status", "scheme_application_cancel", "lockin_renew", "lockin_hold", "lockin_release", "lockin_not_renewed", "lockin_end",
 ];
 
 const words = (code) => {

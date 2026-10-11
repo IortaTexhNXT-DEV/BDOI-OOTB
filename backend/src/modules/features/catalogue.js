@@ -175,9 +175,11 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'dealer-programmes', name: 'Dealer programmes', module: 'Sales & Marketing', tier: P1,
-    description: 'Scheme 1 and 2 programmes of brand-new vehicles, dealer sales uploads and bank endorsement letters',
-    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15'],
-    menus: ['Operations > Sales & Marketing > Dealer Programmes'],
+    description: 'Brand-new vehicle programmes with dealer sales uploads and bank endorsement letters; the Scheme Master of the Scheme 1 and 2 bundling schemes with its scheme rating; Scheme Issuance on TFS loan documents with the document checklist, waivers and the direct placement; the lock-in of scheme policies',
+    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15', 'CR-05'],
+    menus: ['Operations > Sales & Marketing > Dealer Programmes', 'Operations > Sales & Marketing > Scheme Master', 'Operations > Sales & Marketing > Scheme Issuance',
+      'Master > Insurance Management > Scheme Document Checklist'],
+    jobs: ['scheme-status'],
   }),
   feature({
     key: 'promotions', name: 'Promotions and discount caps', module: 'Sales & Marketing', tier: P1,
@@ -279,11 +281,11 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'renewals', name: 'Renewals', module: 'Operations', tier: P1,
-    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management and lock-in accounts',
-    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
+    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management, and the 60-day Lock-in Review of lock-in and Scheme 2 accounts with the TFS loan status upload and the Lock-in / Scheme 2 expiry report',
+    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'TIS-BRD-RPT-SLS-05', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
     menus: ['Operations > Renewals > Renewal Policy', 'Operations > Renewals > Renewal Batch', 'Operations > Renewals > Renewal Queue', 'Operations > Renewals > Negotiations',
-      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Accounts'],
-    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue'],
+      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Review'],
+    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue', 'lock-in-review'],
   }),
   feature({
     key: 'talkbot-calls', name: 'Talkbot renewal calls', module: 'Operations', tier: P1,

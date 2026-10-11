@@ -176,6 +176,22 @@ export const menuList = [
             permissions: ["read:promotions"],
           },
           {
+            // Scheme 1 and Scheme 2 bundling schemes agreed with TFSPH, the dealers and the insurers (TIS-BRD-SCHM-02)
+            id: 53,
+            name: "Scheme Master",
+            path: "/sales/scheme-master",
+            includes: ["/sales/scheme-master"],
+            permissions: ["read:schemes"],
+          },
+          {
+            // scheme applications on TFS loan documents, the loan bookings upload, checklist, placement and policy (TIS-BRD-SCHM-01, CR-05)
+            id: 54,
+            name: "Scheme Issuance",
+            path: "/sales/scheme-issuance",
+            includes: ["/sales/scheme-issuance"],
+            permissions: ["read:scheme-issuance"],
+          },
+          {
             id: 31,
             name: "Quick Quote",
             path: "/sales/quick-quote",
@@ -310,11 +326,12 @@ export const menuList = [
             includes: ["/renewal/at-risk"],
           },
           {
+            // 60-day review of lock-in and Scheme 2 accounts, TFS loan status uploads, Lock-in / Scheme 2 expiry report (TIS-BRD-SCHM-03, RPT-SLS-05)
             id: 7,
-            name: "Lock-in Accounts",
-            path: "/renewal/lock-in-accounts",
-            includes: ["/renewal/lock-in-accounts"],
-            permissions: ["read:renewals"],
+            name: "Lock-in Review",
+            path: "/renewal/lock-in-review",
+            includes: ["/renewal/lock-in-review", "/renewal/lock-in-accounts"],
+            permissions: ["read:lock-in"],
           },
           {
             id: 4,
@@ -1074,6 +1091,7 @@ export const menuList = [
           { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
           { id: 36, name: "Endorsement Types", path: "/master/insurance/endorsement-types", includes: ["/master/insurance/endorsement-types"] },
           { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
+          { id: 37, name: "Scheme Document Checklist", path: "/master/insurance/scheme-document-checklist", includes: ["/master/insurance/scheme-document-checklist"] },
           { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
           // the Source of a prospect and the coded reasons of decisions without a master of their own
           { id: 34, name: "Lead Sources", path: "/master/insurance/lead-sources", includes: ["/master/insurance/lead-sources"] },
