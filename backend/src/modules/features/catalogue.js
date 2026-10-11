@@ -174,6 +174,12 @@ export const FEATURES = Object.freeze([
     menus: ['Operations > Sales & Marketing > Request for Quotation', 'Operations > Sales & Marketing > Quotations', 'Operations > Sales & Marketing > Placement Slips'],
   }),
   feature({
+    key: 'credit-life', name: 'Credit Life batches', module: 'Operations', tier: P1,
+    description: 'Monthly Credit Life batches of the financing bank: members uploaded or encoded and checked against the Credit Life rules, one master policy per customer, certificates of cover e-mailed as password-protected PDFs, the batch forwarded to the insurer',
+    requirements: ['TIS-BRD-PJRN-01', 'TIS-BRD-PJRN-02', 'CL-01', 'CL-02', 'CL-03', 'CL-04'],
+    menus: ['Operations > Credit Life'], permissions: ['read:credit-life', 'write:credit-life'],
+  }),
+  feature({
     key: 'dealer-programmes', name: 'Dealer programmes', module: 'Sales & Marketing', tier: P1,
     description: 'Brand-new vehicle programmes with dealer sales uploads and bank endorsement letters; the Scheme Master of the Scheme 1 and 2 bundling schemes with its scheme rating; Scheme Issuance on TFS loan documents with the document checklist, waivers and the direct placement; the lock-in of scheme policies',
     requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15', 'CR-05'],

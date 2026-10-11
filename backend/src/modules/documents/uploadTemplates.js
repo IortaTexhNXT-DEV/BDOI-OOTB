@@ -32,6 +32,7 @@ import { SCHEME_LINE_COLUMNS } from '../schemes/service.js';
 import { LOAN_BOOKING_COLUMNS } from '../scheme-issuance/upload.js';
 import { LOAN_STATUS_COLUMNS } from '../lock-in/upload.js';
 import { PARCEL_COLUMNS, SHIPMENT_COLUMNS } from '../marine/parcel.js';
+import { CREDIT_LIFE_COLUMNS } from '../credit-life/service.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -330,6 +331,19 @@ export function staticUploads() {
       ],
       notes: ['The covers, the premium and the charge come from the open cover in force on the parcel date; they are not in the file.',
         'A certificate is e-mailed to EMAIL as a password-protected PDF (parcel.certificate_password); the others are printed with Print certificates of the day.'],
+    },
+    {
+      id: 'credit-life-members', file: 'Credit_Life_Members_Upload_Template.xlsx', title: 'Credit Life members (monthly batch of the financing bank)',
+      menu: 'Operations > Credit Life > Batch > Upload Members', route: 'POST /api/credit-life/batches/:id/upload (multipart field "file")',
+      columns: CREDIT_LIFE_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 10,000 rows per file (Configuration setting credit_life.max_upload_rows) and 10 MB.',
+      onError: 'Every row is kept on the batch: valid, or with the checks it failed (age, number of accounts, loan tenor, sum insured, a loan account already covered, data format) listed with its row number. Only valid members are issued; remove a failed member and encode it again once corrected.',
+      samples: [
+        { customerNo: 'TFS-C-0045821', lastName: 'Dela Cruz', firstName: 'Juan', birthDate: '14/03/1980', loanAccount: '8005123456', loanAmount: '1250000', loanTermMonths: '60', releaseDate: '05/10/2026',
+          accountCount: '1', sumInsured: '1000000', email: 'juan.delacruz@example.ph', mobile: '09175550123', address: '18 Sampaguita St., Bel-Air', city: 'Makati City', province: 'Metro Manila' },
+      ],
+      notes: ['The loans of one customer (same CUSTOMER_NO, else the same name and birth date) share one master policy; each loan gets its own certificate of cover.',
+        'The certificate is e-mailed to EMAIL as a password-protected PDF (credit_life.certificate_password, delivered: the birth date as DDMMYYYY).'],
     },
     {
       id: 'cargo-shipments', file: 'Cargo_Shipments_Upload_Template.xlsx', title: 'Cargo shipment list (Marine Cargo inland declarations)',

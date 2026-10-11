@@ -242,6 +242,13 @@ const PARCEL_PERMS = { sales: ['parcel-certificates:write'], processing: ['parce
   'tis-sales-unit-head': ['parcel-certificates:write'], 'tis-ops-associate': ['parcel-certificates:write'], 'tis-ops-officer': ['parcel-certificates:write'],
   'tis-ops-unit-head': ['parcel-certificates:write'], 'tis-finance': ['marine:read', 'marine:approve'], 'tis-general-manager': ['parcel-certificates:write', 'marine:approve'] };
 for (const [role, items] of Object.entries(PARCEL_PERMS)) ROLE_PERMS[role].push(...items);
+// Credit Life batches (migration 0680, PJRN-01, PJRN-02): Operations and the Processing Team run the monthly batches,
+// Sales reads them; TISPH personas (proposal until TISPH names the users): the Operations personas run them, the Sales
+// personas and the General Manager read them.
+const CREDIT_LIFE_PERMS = { processing: ['credit-life'], operations: ['credit-life'], sales: ['credit-life:read'], 'tis-ops-associate': ['credit-life'], 'tis-ops-officer': ['credit-life'],
+  'tis-ops-unit-head': ['credit-life'], 'tis-sales-associate': ['credit-life:read'], 'tis-sales-officer': ['credit-life:read'], 'tis-sales-unit-head': ['credit-life:read'],
+  'tis-general-manager': ['credit-life:read'] };
+for (const [role, items] of Object.entries(CREDIT_LIFE_PERMS)) ROLE_PERMS[role].push(...items);
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**
