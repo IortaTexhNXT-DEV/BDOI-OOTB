@@ -25,6 +25,7 @@ import { formatDate } from "../../utility/dateFormat";
 import { formatPercent } from "../../utility/numberFormat";
 import { hasPermission } from "../../utils/canOpen";
 import { WRITE, batchFacts, decisionBlock, formatMeasure, programNames } from "./common";
+import TelesalesPolicies from "./TelesalesPolicies";
 
 /**
  * The decision on a batch, approve or reject, in one layout: the facts of the batch, then optional remarks (approve) or
@@ -165,6 +166,9 @@ AdjustLineDialog.defaultProps = { batchId: null, line: null };
  * the agent results and the activity log; the actions of its status in the footer. Approve and Reject are disabled,
  * with the reason shown, for a user without the approval permission or who created or submitted the batch.
  */
+/** The withholding tax % of a telesales batch (the version of its lines). */
+const r0 = (lines) => Number(lines.find((l) => l.whtPct !== null && l.whtPct !== undefined)?.whtPct ?? 0).toFixed(2);
+
 const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
   const { t } = useTranslation();
   const [deciding, setDeciding] = useState(null);
@@ -197,6 +201,21 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
     onConfirm: () => incentiveService.submitCalculation(shown.batchId),
   }).then((done) => done && refresh(t("incentive.batch.submitted", { batchId: shown.batchId })));
 
+  const telesales = !!shown?.isTelesales;
+  const [working, setWorking] = useState(false);
+  const recalculate = async () => {
+    setWorking(true);
+    try {
+      await incentiveService.recalculate(shown.batchId);
+      await refresh(t("incentive.telesales.recalculated", { batchId: shown.batchId }));
+    } catch (e) {
+      onChanged(shown, readableError(e?.message) || t("confirmDialog.failed"));
+    } finally {
+      setWorking(false);
+    }
+  };
+  const exportBatch = () => incentiveService.exportBatch(shown.batchId).catch((e) => onChanged(shown, readableError(e?.message) || t("confirmDialog.failed")));
+
   const markPaid = () => openConfirm({
     title: t("incentive.batch.payTitle"),
     message: t("incentive.batch.payMessage"),
@@ -221,6 +240,8 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
         </span>
       ) : null}
       <Button type="button" label={t("incentive.close")} outlined onClick={onHide} />
+      {telesales ? <Button type="button" label={t("incentive.telesales.export")} icon="pi pi-file-excel" outlined onClick={exportBatch} /> : null}
+      {telesales && editable && canWrite ? <Button type="button" label={t("incentive.telesales.recalculate")} icon="pi pi-refresh" outlined loading={working} onClick={recalculate} /> : null}
       {editable && canWrite ? <Button type="button" label={t("incentive.batch.submitForApproval")} disabled={empty} onClick={submit} /> : null}
       {pending ? (
         <>
@@ -254,6 +275,8 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
                   { label: t("incentive.batch.periodDates"), value: `${formatDate(shown.periodFrom)} - ${formatDate(shown.periodTo)}` },
                   { label: t("incentive.batch.calculatedOn"), value: shown.createdAt || shown.calculationDate, type: shown.createdAt ? "datetime" : "date" },
                   { label: t("incentive.batch.createdBy"), value: shown.createdBy },
+                  { label: t("incentive.telesales.grossTotal"), value: shown.grossTotal, type: "amount", hidden: !telesales },
+                  { label: t("incentive.telesales.taxTotal"), value: shown.taxTotal, type: "amount", hidden: !telesales },
                   { label: t("incentive.batch.adjustedBy"), value: (shown.adjustedBy || []).join(", "), hidden: !(shown.adjustedBy || []).length },
                   { label: t("incentive.batch.submittedBy"), value: shown.submittedBy, hidden: !shown.submittedBy },
                   { label: t("incentive.batch.submittedOn"), value: shown.submittedAt, type: "datetime", hidden: !shown.submittedAt },
@@ -271,9 +294,20 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
                 <DataTable value={lines} dataKey="id" size="small" emptyMessage={t("incentive.batch.noResults")} scrollable className="inc-table">
                   <Column header={t("incentive.batch.agent")} body={(r) => <span>{r.agentName}<span className="inc-muted"> {r.agentCode}</span></span>} />
                   <Column header={t("incentive.batch.program")} field="program" />
-                  <Column header={t("incentive.batch.achieved")} body={(r) => formatMeasure(r.achieved, r.metric)} className="inc-num" headerClassName="inc-num" />
-                  <Column header={t("incentive.batch.achievementPct")} body={(r) => formatPercent(r.achievementPercent, { decimals: 2 })} className="inc-num" headerClassName="inc-num" />
-                  <Column header={t("incentive.batch.tier")} body={(r) => r.tier || "-"} />
+                  {telesales ? [
+                    <Column key="c" header={t("incentive.telesales.counted")} body={(r) => `${r.counted} (${r.nbCount ?? 0} / ${r.renewalCount ?? 0})`} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="anc" header={t("incentive.telesales.anc")} body={(r) => formatCurrency(r.anc)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="lvl" header={t("incentive.telesales.level")} body={(r) => r.level || "-"} />,
+                    <Column key="b" header={t("incentive.telesales.base")} body={(r) => formatCurrency(r.baseAmount)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="a" header={t("incentive.telesales.additional")} body={(r) => formatCurrency(r.additionalAmount)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="r" header={t("incentive.telesales.recovery")} body={(r) => formatCurrency(r.recoveryAmount)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="tx" header={t("incentive.telesales.tax", { pct: r0(lines) })} body={(r) => formatCurrency(r.taxAmount)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="res" header={t("incentive.telesales.result")} field="result" />,
+                  ] : [
+                    <Column key="ach" header={t("incentive.batch.achieved")} body={(r) => formatMeasure(r.achieved, r.metric)} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="pct" header={t("incentive.batch.achievementPct")} body={(r) => formatPercent(r.achievementPercent, { decimals: 2 })} className="inc-num" headerClassName="inc-num" />,
+                    <Column key="tier" header={t("incentive.batch.tier")} body={(r) => r.tier || "-"} />,
+                  ]}
                   <Column header={t("incentive.batch.adjustment")} body={(r) => (Number(r.adjustments) ? formatCurrency(r.adjustments) : "-")} className="inc-num" headerClassName="inc-num" />
                   <Column header={t("incentive.batch.payout")} body={(r) => formatCurrency(r.finalAmount)} className="inc-num" headerClassName="inc-num" />
                   {editable && canWrite ? (
@@ -283,6 +317,16 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
                   ) : null}
                 </DataTable>
               </DetailSection>
+              {telesales ? (
+                <DetailSection title={t("incentive.telesales.policies")} flush>
+                  <TelesalesPolicies batch={shown} editable={!!editable && canWrite} onChanged={(message) => refresh(message)} />
+                </DetailSection>
+              ) : null}
+              {telesales && (shown.executionLog || []).length ? (
+                <DetailSection title={t("incentive.telesales.executionLog")}>
+                  <ul className="inc-log">{shown.executionLog.map((l, i) => <li key={i}>{formatDate(l.at)} {l.step}{l.detail ? `: ${l.detail}` : ""}</li>)}</ul>
+                </DetailSection>
+              ) : null}
               <DetailSection title={t("incentive.batch.activity")}>
                 <ActivityLog entries={(activity.data || []).map(toEntry)} loading={activity.loading} error={activity.error} onRetry={activity.reload} />
               </DetailSection>

@@ -31,6 +31,8 @@ export const TRANSACTION_TABLES = [
   'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs', 'insurer_billing_runs', 'commission_line_requests',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
+  // telesales incentive: call-out endorsements of prospects, telesales policies, the policies of a batch
+  'callout_endorsements', 'telesales_policies', 'incentive_batch_policies',
   // claims and renewals
   'claims', 'claim_history', 'claim_field_changes',
   'renewals', 'renewal_quotes', 'renewal_notices', 'renewal_activities', 'renewal_batches', 'renewal_batch_policies', 'winback_campaigns',
@@ -148,7 +150,7 @@ export const MASTER_CONFIG_TABLES = [
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages
   'products', 'policy_types', 'coverages', 'product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections',
   'commission_rates', 'sharing_schemes', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
-  'incentive_programs', 'payment_gateways',
+  'incentive_programs', 'incentive_program_versions', 'incentive_callers', 'payment_gateways',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
   'gl_accounts', 'fs_versions', 'fs_version_lines', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',

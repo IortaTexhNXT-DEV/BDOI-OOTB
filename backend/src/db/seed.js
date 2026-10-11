@@ -238,6 +238,9 @@ for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) 
 for (const role of ['sales', 'processing', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-general-manager']) {
   ROLE_PERMS[role].push('quotation-rates:override', 'motor-fmv:override');
 }
+// Team Leaders (the Sales Officers) and the Sales Head endorse prospects as call-out leads of the telesales callers
+// (FRS COMM-08 3.3, migration 0610); the System Administrator holds every permission
+for (const role of ['tis-sales-officer', 'tis-sales-unit-head']) ROLE_PERMS[role].push('callout-endorsement:write');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**

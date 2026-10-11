@@ -44,8 +44,8 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  ('remittance.reconciliation_tolerance', '0.5', 'remittance', 'Auto-match tolerance (amount, PHP)', 'number', true),
  -- incentive
  ('incentive.eligible_roles', $j$["sales"]$j$, 'incentive', 'Roles that take part in incentive programs', 'json', true),
- ('incentive.metric_map', $j${"Premium Volume":"premium","Policy Count":"policies","Renewal Rate":"renewal-rate","Conversion Rate":"conversion","New Business":"policies"}$j$, 'incentive', 'Target metric to measure', 'json', true),
- ('incentive.program_types', $j$["Target Based","Commission Based","Hybrid","Contest"]$j$, 'incentive', 'Incentive program types', 'json', true),
+ ('incentive.metric_map', $j${"Premium Volume":"premium","Policy Count":"policies","Renewal Rate":"renewal-rate","Conversion Rate":"conversion","New Business":"policies","Average Net Commission (ANC)":"anc"}$j$, 'incentive', 'Target metric to measure', 'json', true),
+ ('incentive.program_types', $j$["Target Based","Commission Based","Hybrid","Contest","Telesales"]$j$, 'incentive', 'Incentive program types', 'json', true),
  ('incentive.calculation_frequencies', $j$["Monthly","Quarterly","Semi-Annual","Annual"]$j$, 'incentive', 'Calculation frequencies', 'json', true)
 ON CONFLICT (key) DO NOTHING;
 

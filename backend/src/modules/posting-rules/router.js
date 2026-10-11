@@ -25,9 +25,12 @@ const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:mast
 const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules')];
 // Configuration Approvals also lists commission rule and sharing scheme changes, decided by their own approvers
 // (service.js changePermission, checked again per change) and withdrawn by their makers
-const changesRead = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings', 'read:commission-rules', 'read:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes')];
-const changesWrite = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules', 'write:commission-rules', 'write:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes')];
-const approve = [requireAuth, requirePermission('approve:posting-rules', 'approve:commission-rules', 'approve:sharing-schemes')];
+// (and Telesales incentive program versions, decided with approve:incentive)
+const changesRead = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings', 'read:commission-rules', 'read:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes',
+  'approve:incentive')];
+const changesWrite = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules', 'write:commission-rules', 'write:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes',
+  'approve:incentive')];
+const approve = [requireAuth, requirePermission('approve:posting-rules', 'approve:commission-rules', 'approve:sharing-schemes', 'approve:incentive')];
 // Configuration Approvals (Master > Finance): a change waiting for approval goes to approve:posting-rules, the decision to the requester.
 const APPROVALS = '/master/finance/configuration-approvals';
 const changeLabel = (c) => `${c.kindLabel}: ${c.target}${c.kind === 'posting-rule-version' && c.payload?.version ? ` version ${c.payload.version}` : ''}`;
