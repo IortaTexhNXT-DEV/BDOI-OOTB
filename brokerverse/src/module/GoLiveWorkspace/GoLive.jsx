@@ -12,6 +12,7 @@ import goLiveService from "../../services/goLiveService";
 import { Chip, dateOf, dateTimeOf, makerOf, myId, useAccess, useDownload, useWorkspace } from "./shared";
 import DecisionBlock from "./DecisionBlock";
 import LockBlock from "./LockBlock";
+import SettingsBlock from "./SettingsBlock";
 
 /** The one-time SAP opening file of the opening balance journal: request, approval by another user, download of its files. */
 const SapOpeningBlock = ({ sap, onChanged }) => {
@@ -135,6 +136,7 @@ const GoLive = () => {
       </SectionCard>
       <DecisionBlock run={run} />
       <LockBlock state={state} requests={requests} restorePoint={run?.restorePoint} onChanged={changed} />
+      <SettingsBlock state={state} onChanged={changed} />
       {state.settings?.sapGlIncludeOpening ? <SapOpeningBlock sap={sap} onChanged={changed} /> : null}
     </div>
   );

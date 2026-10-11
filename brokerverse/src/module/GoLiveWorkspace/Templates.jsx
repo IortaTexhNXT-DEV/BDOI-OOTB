@@ -19,7 +19,7 @@ import { SectionCard, FilterBar } from "../../components/RecordPage";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import goLiveService from "../../services/goLiveService";
-import { dateTimeOf, num, count, useAccess, useDownload, useWorkspace } from "./shared";
+import { dateTimeOf, num, count, useAccess, useDownload, useMigrationOpen, useWorkspace } from "./shared";
 
 const EMPTY_MAP = { id: null, object: null, legacyValue: "", targetCode: "", note: "" };
 
@@ -95,11 +95,14 @@ const ValueMapDialog = ({ value, objects, onHide, onSaved }) => {
   );
 };
 
+const KIT_PLACEHOLDERS = [{ kit: "configuration", sheets: [] }, { kit: "migration", sheets: [] }];
+
 /** Templates: the two kits in load order, the policy templates per product, the value maps and the document naming convention. */
 const Templates = () => {
   const { t } = useTranslation();
   const { notify } = useWorkspace();
   const { canWrite } = useAccess();
+  const migration = useMigrationOpen();
   const download = useDownload();
   const kitsLoader = useCallback(() => goLiveService.kits(), []);
   const { data: catalogue, loading } = useStableLoad(kitsLoader);
@@ -112,7 +115,8 @@ const Templates = () => {
   const [names, setNames] = useState(null);
 
   const objects = maps.data?.extra?.objects || [];
-  const kits = useMemo(() => catalogue?.kits || [], [catalogue]);
+  // the two kit cards are laid out before the catalogue arrives, so the page does not move when it does
+  const kits = useMemo(() => catalogue?.kits || KIT_PLACEHOLDERS, [catalogue]);
   const policySheets = useMemo(() => (kits.find((k) => k.kit === "migration")?.sheets || []).filter((s) => s.policyKind), [kits]);
   const naming = catalogue?.naming;
   const mapTargets = useMemo(() => [{ label: t("goLive.templates.valueMaps"), templatePath: goLiveService.paths.valueMapsTemplate, uploadPath: goLiveService.paths.valueMapsUpload }], [t]);
@@ -156,7 +160,8 @@ const Templates = () => {
 
       <SectionCard title={t("goLive.templates.valueMaps")} className="bv-loading-host"
         actions={(
-          <PageActions onUpload={canWrite ? () => setUploadMaps(true) : null} onAdd={canWrite ? () => setEditing(EMPTY_MAP) : null} addLabel={t("goLive.templates.addMap")}>
+          <PageActions onUpload={canWrite ? () => setUploadMaps(true) : null} onAdd={canWrite ? () => setEditing(EMPTY_MAP) : null} addLabel={t("goLive.templates.addMap")}
+            disabledReason={migration.reason}>
             <Button type="button" icon="pi pi-download" label={t("goLive.common.download")} outlined onClick={() => download(() => goLiveService.valueMapsWorkbook())} />
           </PageActions>
         )}>
@@ -176,7 +181,7 @@ const Templates = () => {
           <Column field="targetCode" header={t("goLive.templates.targetCode")} />
           <Column field="note" header={t("goLive.templates.note")} body={(m) => m.note || "—"} />
           <Column header={t("goLive.templates.updatedBy")} body={(m) => `${m.updatedBy || m.createdBy || "—"} · ${dateTimeOf(m.updatedAt || m.createdAt)}`} />
-          {canWrite ? (
+          {canWrite && migration.open ? (
             <Column body={(m) => (
               <RowActions onEdit={() => setEditing({ ...m })} editLabel={t("goLive.templates.editMap")}>
                 <Button type="button" icon="pi pi-trash" text rounded severity="danger" aria-label={t("goLive.templates.removeMap")} tooltip={t("goLive.templates.removeMap")}

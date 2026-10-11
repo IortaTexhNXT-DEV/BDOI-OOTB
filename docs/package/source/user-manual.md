@@ -862,7 +862,7 @@ This chapter is for the System Administrator, the migration lead, the approvers 
 | **Templates** | The configuration and migration workbooks per object, blank or with current data; the policy sheets per product (Motor, CTPL, Personal Accident, Credit Life, Travel, Other Lines); value maps of legacy codes; the document file naming convention and its checker |
 | **Loads** | Upload and validate, review each row (New, Changed with old and new values, Unchanged, Duplicate, Error), resolve duplicates, submit, approve or reject, load, history, undo before go-live |
 | **Reconciliation** | Control totals per object against the legacy figures, receivables against the GL, the trial balance, the difference list and the sign-off, with the report |
-| **Mock Runs** | Mock 1, Mock 2, the dress rehearsal and the production run with their timings, results and defects |
+| **Runs** | Mock 1, Mock 2, the dress rehearsal and the production run with their timings, results and defects |
 | **Cutover** | The runbook checklist of the run: owner, planned and actual start and end, status and evidence of each step |
 | **Go-Live** | Go / No-Go against the criteria with the named approvers, cutover date, lock and unlock by two people |
 | **Hypercare** | After the lock: business issued since go-live, migrated items worked, edits to migrated records, daily checks and defects |

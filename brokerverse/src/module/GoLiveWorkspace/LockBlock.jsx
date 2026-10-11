@@ -16,6 +16,7 @@ import { SectionCard } from "../../components/RecordPage";
 import { openConfirm } from "../../components/ConfirmDialog";
 import goLiveService from "../../services/goLiveService";
 import { Chip, dateTimeOf, makerOf, myId, useAccess, useWorkspace } from "./shared";
+import { settingLabel, settingText } from "./SettingsBlock";
 
 export const REASON_MIN = 5;
 
@@ -117,6 +118,9 @@ const LockBlock = ({ state, requests, restorePoint, onChanged }) => {
   }, [unlock]);
 
   const label = (r) => t(`goLive.lock.actions.${r.action}`);
+  const defOf = (field) => (state.settingDefinitions || []).find((d) => d.field === field) || { field, label: field, type: "text" };
+  /** The settings a request changes: "Label: before → after", one per setting. */
+  const changesOf = (r) => (r.settings || []).map((c) => `${settingLabel(t, defOf(c.field))}: ${settingText(t, defOf(c.field), c.before)} → ${settingText(t, defOf(c.field), c.after)}`);
   const requestLock = () => openConfirm({
     title: t("goLive.lock.lockTitle"), severity: "warning", message: t("goLive.lock.lockMessage"),
     facts: state.conditions.map((c) => ({ label: t(`goLive.lock.conditions.${c.code}`, { defaultValue: c.label }), value: c.met ? t("goLive.common.yes") : t("goLive.common.no") })),
@@ -128,8 +132,12 @@ const LockBlock = ({ state, requests, restorePoint, onChanged }) => {
   });
   const approve = () => openConfirm({
     title: t(`goLive.lock.approveTitle.${pending.action}`), severity: "danger",
-    message: pending.action === "lock" ? t("goLive.lock.approveLockMessage") : t("goLive.lock.approveUnlockMessage", { hours: pending.hours, imports: pending.scopeLabels.join(", ") }),
+    message: pending.action === "lock" ? t("goLive.lock.approveLockMessage")
+      : pending.action === "settings" ? t("goLive.settings.approveMessage")
+        : t("goLive.lock.approveUnlockMessage", { hours: pending.hours, imports: pending.scopeLabels.join(", ") }),
     facts: [{ label: t("goLive.lock.requestedBy"), value: pending.requestedBy }, { label: t("goLive.lock.reason"), value: pending.reason },
+      ...(pending.settings || []).map((c) => ({ label: settingLabel(t, defOf(c.field)),
+        value: `${settingText(t, defOf(c.field), c.before)} → ${settingText(t, defOf(c.field), c.after)}` })),
       { label: t("goLive.lock.decisionRef"), value: pending.decisionRef, hidden: !pending.decisionRef }],
     confirmLabel: t(`goLive.lock.approve.${pending.action}`),
     onConfirm: async () => {
@@ -195,11 +203,12 @@ const LockBlock = ({ state, requests, restorePoint, onChanged }) => {
               { label: t("goLive.lock.requestedBy"), value: `${pending.requestedBy} · ${dateTimeOf(pending.requestedAt)}` },
               { label: t("goLive.lock.imports"), value: pending.scope.map((s) => t(`goLive.lock.scopes.${s}`)).join(", "), hidden: pending.action !== "unlock" },
               { label: t("goLive.lock.hours"), value: pending.hours, type: "number", hidden: pending.action !== "unlock" },
+              { label: t("goLive.settings.changes"), value: changesOf(pending).join("; "), span: 2, hidden: pending.action !== "settings" },
               { label: t("goLive.lock.reason"), value: pending.reason, span: 2 },
               { label: t("goLive.lock.decisionRef"), value: pending.decisionRef, hidden: !pending.decisionRef },
             ]} />
             <div className="go-live__actions">
-              {canWrite && pending.requestedById === myId() ? <Button type="button" label={t("goLive.lock.withdrawRequest")} outlined onClick={withdraw} /> : null}
+              {(canWrite || canApprove) && pending.requestedById === myId() ? <Button type="button" label={t("goLive.lock.withdrawRequest")} outlined onClick={withdraw} /> : null}
               {canApprove ? (
                 <ApprovalActions initiator={makerOf([pending.requestedById])} approveLabel={t(`goLive.lock.approve.${pending.action}`)} rejectLabel={t("goLive.lock.rejectRequest")}
                   onApprove={approve} onReject={reject} />
@@ -210,7 +219,8 @@ const LockBlock = ({ state, requests, restorePoint, onChanged }) => {
         <DataTable value={requests || []} dataKey="id" size="small" emptyMessage={t("goLive.lock.noRequests")} paginator rows={10}>
           <Column header={t("goLive.lock.request")} body={label} />
           <Column header={t("goLive.loads.status")} body={(r) => <Chip kind="lock" code={r.status} />} />
-          <Column header={t("goLive.lock.imports")} body={(r) => (r.scope.length ? r.scope.map((s) => t(`goLive.lock.scopes.${s}`)).join(", ") : "—")} />
+          <Column header={t("goLive.lock.scopeOrSettings")} body={(r) => (r.action === "settings" ? changesOf(r).join("; ")
+            : r.scope.length ? r.scope.map((s) => t(`goLive.lock.scopes.${s}`)).join(", ") : "—")} />
           <Column header={t("goLive.lock.requestedBy")} body={(r) => `${r.requestedBy} · ${dateTimeOf(r.requestedAt)}`} />
           <Column header={t("goLive.lock.decidedBy")} body={(r) => (r.decidedBy ? `${r.decidedBy} · ${dateTimeOf(r.decidedAt)}` : "—")} />
           <Column header={t("goLive.lock.relockedAt")} body={(r) => dateTimeOf(r.relockedAt)} />

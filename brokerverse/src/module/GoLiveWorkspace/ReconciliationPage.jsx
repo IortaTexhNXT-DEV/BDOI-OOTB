@@ -23,12 +23,14 @@ import { openConfirm } from "../../components/ConfirmDialog";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import { numberLocale } from "../../utility/currencyConverter";
 import goLiveService from "../../services/goLiveService";
-import { Chip, ROOT, amount, chipOf, count, dateTimeOf, makerOf, myId, num, useAccess, useDownload, useWorkspace } from "./shared";
+import { Chip, ROOT, amount, chipOf, count, dateTimeOf, makerOf, myId, myRoles, num, useAccess, useDownload, useWorkspace } from "./shared";
 
 /** A count line is compared exactly; every other measure is an amount in pesos. */
 export const isCount = (l) => /count/i.test(String(l.measure || ""));
 const figure = (l, v) => (v === null || v === undefined ? "—" : isCount(l) ? count(v) : amount(v));
-const lineName = (l) => [l.label || l.measure, l.group].filter(Boolean).join(" · ");
+/** Name of a line: the tie-out, or the measure in words ("Gross premium"), and its group ("Corporate", "MOTOR"). */
+export const lineName = (t, l) => [l.label || t(`goLive.recon.measures.${l.measure}`, { defaultValue: l.measureLabel || l.measure }), l.groupLabel || l.group]
+  .filter(Boolean).join(" · ");
 const DIFF_KINDS = ["measure", "check", "not-loaded", "extra"];
 
 /** Legacy figure of a line (write) and its tolerance with the reason (approve; never on a count). */
@@ -60,7 +62,7 @@ const LineDialog = ({ recon, line, canWrite, canApprove, onHide, onSaved }) => {
     }
   };
   return (
-    <DetailDialog visible onHide={onHide} size="md" header={`${line.object} · ${lineName(line)}`} footer={(
+    <DetailDialog visible onHide={onHide} size="md" header={`${line.object} · ${lineName(t, line)}`} footer={(
       <>
         <Button type="button" label={t("goLive.common.cancel")} text onClick={onHide} disabled={busy} />
         <Button type="button" label={t("goLive.recon.saveLine")} icon="pi pi-check" onClick={save} loading={busy} />
@@ -206,6 +208,8 @@ const ReconciliationPage = () => {
   const unsigned = open && !r.signoffs.some((s) => s.signedAt);
   const maker = makerOf(r.makers);
   const signedOther = r.signoffs.some((s) => s.signedById === myId());
+  // a slot named for roles (Finance Head) is signed by a holder of one of them
+  const slotOpenToMe = (s) => !(s.roles || []).length || (s.roles || []).some((x) => myRoles().includes(x));
   const measures = r.lines.filter((l) => l.kind === "measure");
   const checks = r.lines.filter((l) => l.kind !== "measure");
   const saved = (message) => {
@@ -225,7 +229,7 @@ const ReconciliationPage = () => {
     title: t("goLive.recon.acceptTitle"), severity: "warning", message: t("goLive.recon.acceptMessage"),
     facts: [{ label: t("goLive.recon.difference"), value: d.description }, { label: t("goLive.recon.amount"), value: d.amount, type: "amount", hidden: d.amount === null },
       { label: t("goLive.recon.explanation"), value: d.explanation }],
-    input: { type: "textarea", label: t("goLive.recon.acceptance"), required: true, defaultValue: d.explanation || "" },
+    input: { type: "textarea", label: t("goLive.recon.acceptance"), required: true },
     confirmLabel: t("goLive.recon.acceptDifference"),
     onConfirm: async (text) => {
       await goLiveService.acceptDifference(r.id, d.id, text);
@@ -249,7 +253,7 @@ const ReconciliationPage = () => {
     <RowActions onEdit={() => setLine(l)} editLabel={t("goLive.recon.editLine")} />
   ) : null);
   const lineColumns = (withActions) => [
-    <Column key="name" header={t("goLive.recon.line")} body={lineName} />,
+    <Column key="name" header={t("goLive.recon.line")} body={(l) => lineName(t, l)} />,
     <Column key="sys" header={t("goLive.recon.brokerVerse")} body={(l) => figure(l, l.systemValue)} {...num} />,
     <Column key="leg" header={t("goLive.recon.legacy")} body={(l) => figure(l, l.legacyValue)} {...num} />,
     <Column key="diff" header={t("goLive.recon.difference")} body={(l) => figure(l, l.difference)} {...num} />,
@@ -304,23 +308,28 @@ const ReconciliationPage = () => {
             {lineColumns(true)}
           </DataTable>
         </TabPanel>
-        <TabPanel header={t("goLive.recon.tabs.differences", { count: r.summary.openDifferences })}>
+        <TabPanel header={t("goLive.recon.tabs.differencesOpen", { count: r.differences.length, open: r.summary.openDifferences })}>
           <DataTable value={r.differences} dataKey="id" size="small" emptyMessage={t("goLive.recon.noDifferences")} sortField="kind">
             <Column header={t("goLive.recon.kind")} body={(d) => (DIFF_KINDS.includes(d.kind) ? t(`goLive.recon.diffKinds.${d.kind}`) : d.kind)} />
             <Column field="description" header={t("goLive.recon.description")} />
             <Column header={t("goLive.recon.amount")} body={(d) => (d.amount === null ? "—" : amount(d.amount))} {...num} />
             <Column header={t("goLive.loads.status")} body={(d) => <Chip kind="difference" code={d.status} />} />
-            <Column header={t("goLive.recon.explanation")} body={(d) => d.explanation || "—"} />
+            <Column header={t("goLive.recon.explanation")} body={(d) => (d.explanation ? (
+              <span className="go-live__stamp go-live__stamp--wrap">{d.explanation}{d.explainedBy ? <span className="go-live__muted">{d.explainedBy}</span> : null}</span>
+            ) : "—")} />
             <Column header={t("goLive.recon.action")} body={(d) => d.action || "—"} />
             <Column header={t("goLive.recon.owner")} body={(d) => d.owner || "—"} />
-            <Column header={t("goLive.recon.acceptedBy")} body={(d) => (d.acceptedBy ? `${d.acceptedBy} · ${dateTimeOf(d.acceptedAt)}` : "—")} />
+            <Column header={t("goLive.recon.acceptedBy")} body={(d) => (d.acceptedBy ? (
+              <span className="go-live__stamp go-live__stamp--wrap"><span>{`${d.acceptedBy} · ${dateTimeOf(d.acceptedAt)}`}</span>
+                {d.acceptanceNote ? <span className="go-live__muted">{d.acceptanceNote}</span> : null}</span>
+            ) : "—")} />
             <Column body={(d) => (open && d.status !== "accepted" ? (
               <RowActions>
                 {canWrite ? <Button type="button" icon="pi pi-pencil" text rounded aria-label={t("goLive.recon.explain")} tooltip={t("goLive.recon.explain")}
                   tooltipOptions={{ position: "top" }} onClick={() => setDiff(d)} /> : null}
                 {canApprove ? <Button type="button" icon="pi pi-check-circle" text rounded aria-label={t("goLive.recon.acceptDifference")}
                   tooltip={maker ? t("makerChecker.ownRecord") : t("goLive.recon.acceptDifference")} tooltipOptions={{ position: "top" }}
-                  disabled={!!maker || !d.explanation} onClick={() => accept(d)} /> : null}
+                  disabled={!!maker || !d.explanation || d.explainedById === myId()} onClick={() => accept(d)} /> : null}
               </RowActions>
             ) : null)} {...actionsColumn} />
           </DataTable>
@@ -336,8 +345,9 @@ const ReconciliationPage = () => {
             {canApprove && open ? (
               <Column body={(s) => (s.signedAt ? null : (
                 <Button type="button" icon="pi pi-pen-to-square" label={t("goLive.recon.sign")} size="small" onClick={() => sign(s)}
-                  disabled={!!maker || signedOther || r.summary.openDifferences > 0 || r.summary.missingLegacy.length > 0}
-                  tooltip={maker ? t("makerChecker.ownRecord") : signedOther ? t("goLive.recon.signedOther") : undefined} tooltipOptions={{ position: "top", showOnDisabled: true }} />
+                  disabled={!!maker || signedOther || !slotOpenToMe(s) || r.summary.openDifferences > 0 || r.summary.missingLegacy.length > 0}
+                  tooltip={maker ? t("makerChecker.ownRecord") : signedOther ? t("goLive.recon.signedOther") : !slotOpenToMe(s) ? t("goLive.recon.slotRole") : undefined}
+                  tooltipOptions={{ position: "top", showOnDisabled: true }} />
               ))} {...actionsColumn} />
             ) : null}
           </DataTable>

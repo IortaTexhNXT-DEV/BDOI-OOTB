@@ -156,6 +156,7 @@ const goLiveService = {
   approveLock: (id) => post(`/golive/lock-requests/${id}/approve`),
   rejectLock: (id, remarks) => post(`/golive/lock-requests/${id}/reject`, { remarks }),
   withdrawLock: (id) => post(`/golive/lock-requests/${id}/withdraw`),
+  requestSettings: (settings, reason) => put("/golive/settings", { settings, reason }),
   sapOpening: () => get("/golive/sap-opening-file"),
   requestSapOpening: (reason) => post("/golive/sap-opening-file", { reason }),
   approveSapOpening: () => post("/golive/sap-opening-file/approve"),

@@ -48,12 +48,12 @@ describe("reconciliation sign-off", () => {
     signIn(APPROVE, { userId: "usr_approver" });
     goLiveService.reconciliation.mockResolvedValue(reconciliation({ differences: [{ id: 9, kind: "extra", description: "DN-OLD-77 outside the loads", amount: null, status: "explained",
       explanation: "Single-object import", action: null, owner: null }], summary: { lines: 1, matched: 1, differences: 1, openDifferences: 0, missingLegacy: [], signed: 0, slots: 2 } }));
-    const { unmount } = renderPage();
+    let { unmount } = renderPage();
     await screen.findByText("REC-000007");
     openTab("goLive.recon.tabs.signoff");
     const signs = await screen.findAllByRole("button", { name: "goLive.recon.sign" });
     signs.forEach((b) => expect(b).toBeDisabled());
-    openTab("goLive.recon.tabs.differences");
+    openTab("goLive.recon.tabs.differencesOpen");
     expect(await screen.findByRole("button", { name: "goLive.recon.acceptDifference" })).toBeDisabled();
     unmount();
 
@@ -62,10 +62,25 @@ describe("reconciliation sign-off", () => {
       { slot: "data-owner", label: "Data owner", signedBy: "Owner", signedById: "usr_owner", signedAt: "2026-11-01T03:00:00Z", remarks: "OK" },
       { slot: "finance-head", label: "Finance Head", signedBy: null, signedById: null, signedAt: null, remarks: null }], summary: { lines: 1, matched: 1, differences: 0,
       openDifferences: 0, missingLegacy: [], signed: 1, slots: 2 } }));
+    ({ unmount } = renderPage());
+    await screen.findByText("REC-000007");
+    openTab("goLive.recon.tabs.signoff");
+    expect(await screen.findByRole("button", { name: "goLive.recon.sign" })).toBeDisabled();
+    unmount();
+
+    // a slot named for a role the user does not hold, and a difference the user explained
+    signIn(APPROVE, { userId: "usr_other", roles: ["tis-ops-unit-head"] });
+    goLiveService.reconciliation.mockResolvedValue(reconciliation({
+      signoffs: [{ slot: "finance-head", label: "Finance Head", roles: ["tis-finance"], signedBy: null, signedById: null, signedAt: null, remarks: null }],
+      differences: [{ id: 9, kind: "extra", description: "DN-OLD-77 outside the loads", amount: null, status: "explained", explanation: "Single-object import",
+        explainedById: "usr_other", action: null, owner: null }],
+      summary: { lines: 1, matched: 1, differences: 1, openDifferences: 0, missingLegacy: [], signed: 0, slots: 1 } }));
     renderPage();
     await screen.findByText("REC-000007");
     openTab("goLive.recon.tabs.signoff");
     expect(await screen.findByRole("button", { name: "goLive.recon.sign" })).toBeDisabled();
+    openTab("goLive.recon.tabs.differencesOpen");
+    expect(await screen.findByRole("button", { name: "goLive.recon.acceptDifference" })).toBeDisabled();
   });
 
   it("asks for the reason of a tolerance other than zero", async () => {

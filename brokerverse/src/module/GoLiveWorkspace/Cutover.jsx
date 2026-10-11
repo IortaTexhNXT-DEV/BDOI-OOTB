@@ -149,6 +149,11 @@ const StepDialog = ({ runId, step, users, onHide, onDone }) => {
   );
 };
 
+/** A start and an end, one per line (the end muted); "—" when neither is known. */
+export const TimeRange = ({ from, to }) => (from || to ? (
+  <span className="go-live__stamp"><span>{from ? dateTimeOf(from) : "—"}</span><span className="go-live__muted">{to ? dateTimeOf(to) : "—"}</span></span>
+) : "—");
+
 /** Cutover: the runbook checklist of a run by phase, with owner, planned and actual times, status, evidence and notes. */
 const Cutover = () => {
   const { t } = useTranslation();
@@ -214,7 +219,8 @@ const Cutover = () => {
   const p = data?.progress;
   const kpis = [
     { key: "progress", label: t("goLive.cutover.progress"), value: p ? `${p.percent}%` : undefined, note: p ? t("goLive.overview.checklistNote", { done: p.done, total: p.total }) : null },
-    { key: "elapsed", label: t("goLive.cutover.elapsedVsPlan"), value: p ? duration(p.elapsedMs) : undefined, note: p ? t("goLive.cutover.planned", { time: duration(p.plannedMs) }) : null },
+    { key: "elapsed", label: t("goLive.cutover.elapsedVsPlan"), value: p ? duration(p.elapsedMs) : undefined,
+      note: p ? (p.plannedMs ? t("goLive.cutover.planned", { time: duration(p.plannedMs) }) : t("goLive.cutover.notPlanned")) : null },
     { key: "next", label: t("goLive.cutover.next"), value: p?.next ? p.next.code : "—", note: p?.next?.title || null },
     { key: "late", label: t("goLive.cutover.late"), value: p ? p.late.length : undefined, note: p?.late.join(", ") || null,
       status: p?.late.length ? { severity: "warning", label: t("goLive.cutover.lateSteps") } : undefined },
@@ -236,20 +242,19 @@ const Cutover = () => {
             <LoadingBar active={refreshing} />
             <DataTable value={data?.steps || []} dataKey="id" size="small" loading={loading} rowGroupMode="subheader" groupRowsBy="phase"
               rowGroupHeaderTemplate={(s) => <strong>{t(`goLive.cutoverPhase.${s.phase}`, { defaultValue: s.phaseLabel })}</strong>} emptyMessage={t("goLive.cutover.none")} scrollable>
-              <Column field="code" header={t("goLive.cutover.code")} />
-              <Column header={t("goLive.cutover.step")} body={(s) => (
-                <span>{s.title}{s.waitingFor?.length ? <small className="go-live__muted"> · {t("goLive.cutover.waitsFor", { steps: s.waitingFor.join(", ") })}</small> : null}</span>
+              <Column field="code" header={t("goLive.cutover.code")} bodyClassName="go-live__nowrap" />
+              <Column header={t("goLive.cutover.step")} style={{ minWidth: "16rem" }} body={(s) => (
+                <span className="go-live__stamp go-live__stamp--wrap">{s.title}
+                  {s.waitingFor?.length ? <small className="go-live__muted">{t("goLive.cutover.waitsFor", { steps: s.waitingFor.join(", ") })}</small> : null}</span>
               )} />
               <Column header={t("goLive.cutover.owner")} body={(s) => s.ownerName || s.ownerRole || "—"} />
-              <Column header={t("goLive.cutover.plannedStart")} body={(s) => dateTimeOf(s.plannedStart)} />
-              <Column header={t("goLive.cutover.plannedEnd")} body={(s) => dateTimeOf(s.plannedEnd)} />
-              <Column header={t("goLive.cutover.actualStart")} body={(s) => dateTimeOf(s.actualStart)} />
-              <Column header={t("goLive.cutover.actualEnd")} body={(s) => dateTimeOf(s.actualEnd)} />
+              <Column header={t("goLive.cutover.plannedTime")} body={(s) => <TimeRange from={s.plannedStart} to={s.plannedEnd} />} />
+              <Column header={t("goLive.cutover.actualTime")} body={(s) => <TimeRange from={s.actualStart} to={s.actualEnd} />} />
               <Column header={t("goLive.loads.status")} body={(s) => (
                 <span className="go-live__chips"><Chip kind="step" code={s.status} />{s.late ? <StatusChip label={t("goLive.cutover.late")} severity="danger" /> : null}</span>
               )} />
               <Column header={t("goLive.cutover.evidence")} body={(s) => (
-                <Button type="button" icon="pi pi-paperclip" text size="small" label={String(s.evidenceCount)} onClick={() => setEvidenceOf(s)}
+                <Button type="button" icon="pi pi-paperclip" text size="small" label={t("goLive.cutover.files", { count: s.evidenceCount })} onClick={() => setEvidenceOf(s)}
                   aria-label={t("goLive.cutover.evidenceOf", { code: s.code, count: s.evidenceCount })} />
               )} />
               <Column header={t("goLive.cutover.notes")} body={(s) => s.notes || "—"} />

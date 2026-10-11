@@ -26,6 +26,13 @@ import { RunDialog } from "./Runs";
 import Evidence from "./Evidence";
 
 const OPEN = ["planned", "running"];
+
+/** A period as "start – end", "from start" while it has no end; null (shown as a dash) when it has no start. */
+export const periodOf = (from, to, t) => {
+  if (!from && !to) return null;
+  if (!to) return t("goLive.runs.since", { at: dateTimeOf(from) });
+  return `${from ? dateTimeOf(from) : "—"} – ${dateTimeOf(to)}`;
+};
 const RESULTS = ["passed", "passed-with-issues", "failed"];
 const DEFECT_STATUSES = ["open", "fixed", "retest", "closed", "deferred"];
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -234,7 +241,7 @@ const RunPage = () => {
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { notify, reloadOverview } = useWorkspace();
+  const { notify, reloadOverview, overview } = useWorkspace();
   const { canWrite } = useAccess();
   const loader = useCallback(async () => {
     const [run, defects, checklist] = await Promise.all([goLiveService.run(id), goLiveService.defects(id), goLiveService.steps(id)]);
@@ -265,7 +272,7 @@ const RunPage = () => {
   const cancel = () => openConfirm({
     title: t("goLive.runs.cancelTitle"), severity: "danger", message: t("goLive.runs.cancelMessage", { number: run.runNumber }),
     input: { type: "textarea", label: t("goLive.runs.cancelReason"), required: true },
-    confirmLabel: t("goLive.runs.cancelRun"),
+    confirmLabel: t("goLive.runs.cancelRun"), cancelLabel: t("goLive.runs.keepRun"),
     onConfirm: async (reason) => {
       await goLiveService.cancelRun(run.id, reason);
       done(t("goLive.runs.cancelled", { number: run.runNumber }));
@@ -277,7 +284,9 @@ const RunPage = () => {
       {open ? <Button type="button" icon="pi pi-pencil" label={t("goLive.runs.editRun")} outlined onClick={() => setEditing(true)} /> : null}
       {run.status === "planned" ? <Button type="button" icon="pi pi-play" label={t("goLive.runs.startRun")} onClick={start} /> : null}
       {run.status === "running" ? <Button type="button" icon="pi pi-flag-fill" label={t("goLive.runs.completeRun")} onClick={() => setCompleting(true)} /> : null}
-      {open ? <Button type="button" icon="pi pi-times" label={t("goLive.runs.cancelRun")} severity="danger" outlined onClick={cancel} /> : null}
+      {open && !(run.kind === "production" && overview?.locked) ? (
+        <Button type="button" icon="pi pi-times" label={t("goLive.runs.cancelRun")} severity="danger" outlined onClick={cancel} />
+      ) : null}
     </div>
   ) : null;
 
@@ -289,8 +298,8 @@ const RunPage = () => {
         <DetailHeader title={`${run.runNumber} · ${run.title}`} status={chipOf(t, "run", run.status)} subtitle={t(`goLive.runKind.${run.kind}`)} actions={actions} meta={[
           { label: t("goLive.runs.environment"), value: t(`goLive.environment.${run.environment}`, { defaultValue: String(run.environment || "").toUpperCase() }) },
           { label: t("goLive.header.cutover"), value: run.cutoverDate, type: "date" },
-          { label: t("goLive.runs.planned"), value: `${dateTimeOf(run.plannedStart)} – ${dateTimeOf(run.plannedEnd)}` },
-          { label: t("goLive.runs.actual"), value: `${dateTimeOf(run.actualStart)} – ${dateTimeOf(run.actualEnd)}` },
+          { label: t("goLive.runs.planned"), value: periodOf(run.plannedStart, run.plannedEnd, t) },
+          { label: t("goLive.runs.actual"), value: periodOf(run.actualStart, run.actualEnd, t) },
           { label: t("goLive.runs.personalData"), value: run.personalData ? t(`goLive.personalData.${run.personalData}`) : null },
           { label: t("goLive.runs.dpoApproval"), value: run.dpoApprovalRef, hidden: run.personalData !== "production-extract" },
           { label: t("goLive.runs.restorePoint"), value: run.restorePoint, type: "datetime" },
@@ -302,6 +311,7 @@ const RunPage = () => {
           <div className="go-live__stack">
             <KeyValueGrid columns={4} items={[
               { label: t("goLive.runs.elapsed"), value: duration(run.timings.elapsedMs) },
+              { label: t("goLive.runs.plannedDuration"), value: run.timings.plannedMs ? duration(run.timings.plannedMs) : t("goLive.cutover.notPlanned") },
               { label: t("goLive.load.validateTime"), value: duration(run.timings.validateMs) },
               { label: t("goLive.load.loadTime"), value: duration(run.timings.loadMs) },
               { label: t("goLive.load.undoTime"), value: duration(run.timings.undoMs) },

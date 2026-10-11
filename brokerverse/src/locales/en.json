@@ -14456,7 +14456,7 @@
       "templates": "Templates",
       "loads": "Loads",
       "reconciliation": "Reconciliation",
-      "runs": "Mock Runs",
+      "runs": "Runs",
       "cutover": "Cutover",
       "decision": "Go-Live",
       "hypercare": "Hypercare"
@@ -14481,7 +14481,8 @@
       "locked": "Locked",
       "unlocked": "Unlocked for named imports",
       "open": "Open",
-      "run": "Run"
+      "run": "Run",
+      "lockedReason": "Go-live is locked: migration imports are closed"
     },
     "common": {
       "activity": "Activity",
@@ -14577,7 +14578,8 @@
         "matched": "Matched",
         "difference": "Difference",
         "missing": "Legacy figure missing",
-        "no-legacy": "No legacy figure"
+        "no-legacy": "No legacy figure",
+        "accepted": "Difference accepted"
       },
       "difference": {
         "open": "Open",
@@ -14750,7 +14752,8 @@
       "loadedAt": "Loaded At",
       "undoneAt": "Undone At",
       "none": "No loads.",
-      "rowsRead": "Rows Read"
+      "rowsRead": "Rows Read",
+      "approvedBy": "Approved by {{name}}"
     },
     "load": {
       "tabs": {
@@ -14926,7 +14929,9 @@
         "checks": "Checks and Tie-Outs",
         "differences_one": "Differences ({{count}})",
         "differences_other": "Differences ({{count}})",
-        "signoff": "Sign-Off"
+        "signoff": "Sign-Off",
+        "differencesOpen_one": "Differences ({{count}}, {{open}} open)",
+        "differencesOpen_other": "Differences ({{count}}, {{open}} open)"
       },
       "kinds": {
         "check": "Check",
@@ -14998,10 +15003,26 @@
       "legacyLoaded": "Legacy figures loaded.",
       "reportPdf": "Report PDF",
       "reportXlsx": "Report Excel",
-      "signedReport": "Signed Report"
+      "signedReport": "Signed Report",
+      "slotRole": "Signed by a user of the role named for this sign-off",
+      "measures": {
+        "count": "Count",
+        "gross premium": "Gross premium",
+        "net premium": "Net premium",
+        "sum insured": "Sum insured",
+        "expiring within 90 days": "Expiring within 90 days",
+        "original amount": "Original amount",
+        "open balance": "Open balance",
+        "amount": "Amount",
+        "outstanding estimate": "Outstanding estimate",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance",
+        "trial balance": "Trial balance"
+      }
     },
     "runs": {
-      "title": "Mock Runs",
+      "title": "Runs",
       "new": "New Run",
       "create": "Create Run",
       "save": "Save Run",
@@ -15070,7 +15091,9 @@
       "archiveRef": "Archive Reference",
       "recordArchive": "Record Archive",
       "shaInvalid": "The fingerprint has 64 characters 0-9 and a-f.",
-      "archiveSaved": "Archive recorded."
+      "archiveSaved": "Archive recorded.",
+      "since": "Since {{at}}",
+      "keepRun": "Keep Run"
     },
     "defects": {
       "add": "Add Defect",
@@ -15116,7 +15139,7 @@
     },
     "cutover": {
       "chooseRun": "Choose a run",
-      "noRun": "No run yet. Create one on Mock Runs.",
+      "noRun": "No run yet. Create one on Runs.",
       "checklist": "Checklist",
       "none": "No steps.",
       "code": "Code",
@@ -15163,7 +15186,12 @@
           "confirm": "Skip Step",
           "done": "{{code}} skipped."
         }
-      }
+      },
+      "notPlanned": "Not planned",
+      "plannedTime": "Planned",
+      "actualTime": "Actual",
+      "files_one": "{{count}} file",
+      "files_other": "{{count}} files"
     },
     "cutoverDate": {
       "title": "Cutover Date",
@@ -15180,7 +15208,7 @@
       "title": "Go / No-Go",
       "titleOf": "Go / No-Go of {{number}}",
       "none": "No decision yet.",
-      "noProductionRun": "No production run yet. Create it on Mock Runs.",
+      "noProductionRun": "No production run yet. Create it on Runs.",
       "new": "New Decision",
       "newTitle": "Go / No-Go of {{number}}",
       "create": "Create Decision",
@@ -15260,7 +15288,8 @@
       },
       "actions": {
         "lock": "Go-live lock",
-        "unlock": "Go-live unlock"
+        "unlock": "Go-live unlock",
+        "settings": "Go-live settings change"
       },
       "scopes": {
         "migration": "Migration workbook",
@@ -15272,7 +15301,7 @@
       "requestUnlock": "Request Unlock",
       "lockTitle": "Request the go-live lock?",
       "lockMessage": "Once approved by a second user, every migration import is closed.",
-      "unlockTitle": "Request unlock",
+      "unlockTitle": "Request Unlock",
       "imports": "Imports to Reopen",
       "hours": "Hours",
       "reason": "Reason",
@@ -15289,11 +15318,13 @@
       "relockedAt": "Relocked At",
       "approveTitle": {
         "lock": "Lock go-live now?",
-        "unlock": "Unlock the named imports?"
+        "unlock": "Unlock the named imports?",
+        "settings": "Apply the settings change?"
       },
       "approve": {
         "lock": "Approve Lock",
-        "unlock": "Approve Unlock"
+        "unlock": "Approve Unlock",
+        "settings": "Approve Settings"
       },
       "approveLockMessage": "Every migration import closes; loads can no longer be undone.",
       "approveUnlockMessage": "{{imports}} reopen for {{hours}} hours, then relock.",
@@ -15305,7 +15336,8 @@
       "withdrawRequest": "Withdraw Request",
       "withdrawTitle": "Withdraw the {{what}} request?",
       "withdrawn": "{{what}} request withdrawn.",
-      "noRequests": "No lock or unlock requests."
+      "noRequests": "No lock or unlock requests.",
+      "scopeOrSettings": "Imports or Settings"
     },
     "sap": {
       "title": "SAP Opening File",
@@ -15383,6 +15415,42 @@
         "sap-gl-file": "SAP GL file of yesterday",
         "numbering": "Numbering above the legacy numbers",
         "lock": "Go-live lock on"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "requestChange": "Request Change",
+      "requestTitle": "Request Settings Change",
+      "setting": "Setting",
+      "value": "Value",
+      "afterLock": "After the Lock",
+      "frozenShort": "Fixed",
+      "changeable": "Changeable",
+      "frozen": "No longer changes once go-live is locked",
+      "none": "None",
+      "forEver": "Kept for ever",
+      "range": "A whole number from {{min}} to {{max}}.",
+      "oneOrMore": "Choose one or more.",
+      "waiting": "A request of the Go-Live tab is waiting for approval",
+      "approveMessage": "The settings change as listed, from now on.",
+      "changes": "Changes",
+      "choices": {
+        "issued": "Issued since go-live",
+        "all": "All business"
+      },
+      "fields": {
+        "loadApprovalRequired": "Approval of each load by a second user",
+        "kpiIncludeMigrated": "Migrated policies in dashboards and KPIs",
+        "commissionIncludeMigrated": "Migrated policies in commission figures",
+        "incentiveIncludeMigrated": "Migrated policies in incentives",
+        "sapGlIncludeOpening": "Opening balances sent to SAP once",
+        "dashboardDefaultOrigin": "Business the dashboards open on",
+        "duplicateRules": "Duplicate checks of each load",
+        "unlockMaxHours": "Hours an unlock lasts at most",
+        "unlockWindowDays": "Days after the lock without a steering committee reference",
+        "evidenceRetentionYears": "Years the production load files and rows are kept",
+        "documentTypes": "Document types of the file naming convention",
+        "numberingMaskSeries": "Numbering series with the numbering mask"
       }
     }
   },

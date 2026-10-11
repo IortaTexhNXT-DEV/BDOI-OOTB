@@ -122,7 +122,7 @@ export const RunDialog = ({ run, onHide, onSaved }) => {
   );
 };
 
-/** Mock Runs: Mock 1, Mock 2, the dress rehearsal and the production run with their timings, loads and defects. */
+/** Runs: Mock 1, Mock 2, the dress rehearsal and the production run with their timings, loads and defects. */
 const Runs = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();

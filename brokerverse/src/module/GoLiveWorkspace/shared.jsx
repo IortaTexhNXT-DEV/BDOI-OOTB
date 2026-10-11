@@ -20,7 +20,20 @@ export const useAccess = () => ({
   canViewPii: hasPermission("view:pii"),
 });
 
+/**
+ * Whether the migration imports are open (not locked, or an unlock reopens them): from the overview of the shell. With
+ * the lock on, the actions the server refuses are shown disabled with the reason.
+ */
+export const useMigrationOpen = () => {
+  const { t } = useTranslation();
+  const { overview } = useWorkspace();
+  const open = !overview?.locked || !!overview?.unlock?.scope?.includes("migration");
+  return { open, reason: open ? null : t("goLive.header.lockedReason") };
+};
+
 export const myId = () => currentUser().userId;
+/** Role codes of the signed-in user (a sign-off slot named for roles). */
+export const myRoles = () => currentUser().roles || [];
 /** The maker id of a record that is the signed-in user (for ApprovalActions), or null: the user may decide. */
 export const makerOf = (ids) => ((ids || []).map(String).includes(String(myId())) ? myId() : null);
 
@@ -49,7 +62,7 @@ const SEVERITY = {
     running: "info", loaded: "success", "undo-pending": "warning", undoing: "info", undone: "secondary",
   },
   result: { new: "info", changed: "warning", unchanged: "secondary", duplicate: "warning", error: "danger", skipped: "secondary" },
-  line: { matched: "success", difference: "danger", missing: "warning", "no-legacy": "secondary" },
+  line: { matched: "success", difference: "danger", accepted: "info", missing: "warning", "no-legacy": "secondary" },
   difference: { open: "danger", explained: "warning", accepted: "success", fixed: "success" },
   recon: { open: "warning", signed: "success", superseded: "secondary" },
   run: { planned: "secondary", running: "info", completed: "success", failed: "danger", cancelled: "secondary" },

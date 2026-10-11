@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import GoLive from "./GoLive";
 import { approverProblems, noGoProblems } from "./DecisionBlock";
 import { timeLeft, unlockProblems } from "./LockBlock";
+import { settingText, settingsProblems } from "./SettingsBlock";
 import { WorkspaceContext } from "./shared";
 import goLiveService from "../../services/goLiveService";
 import { APPROVE, WRITE, decision, goLiveState, runRecord, signIn } from "./testData";
@@ -144,5 +145,31 @@ describe("go-live lock", () => {
     expect(within(dialog).getByText("goLive.lock.approveUnlockMessage")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "goLive.lock.approve.unlock" }));
     await waitFor(() => expect(goLiveService.approveLock).toHaveBeenCalledWith(3));
+  });
+});
+
+describe("settings of the Go-Live tab", () => {
+  const defs = [
+    { field: "kpiIncludeMigrated", label: "KPIs", type: "boolean", beforeLock: false },
+    { field: "unlockMaxHours", label: "Hours", type: "integer", min: 1, max: 24, allowZero: false, beforeLock: false },
+    { field: "evidenceRetentionYears", label: "Years", type: "integer", min: 10, max: 50, allowZero: true, beforeLock: false },
+    { field: "documentTypes", label: "Types", type: "codes", beforeLock: false },
+  ];
+  it("checks the bounds, the lists and the reason of a change", () => {
+    expect(settingsProblems(defs, { kpiIncludeMigrated: true, unlockMaxHours: 4, evidenceRetentionYears: 0, documentTypes: ["COC"] }, "Steering committee", t)).toEqual({});
+    expect(Object.keys(settingsProblems(defs, { unlockMaxHours: 720, evidenceRetentionYears: 5, documentTypes: [] }, "", t)).sort())
+      .toEqual(["documentTypes", "evidenceRetentionYears", "reason", "unlockMaxHours"]);
+    expect(settingText(t, defs[0], true)).toBe("goLive.common.yes");
+    expect(settingText(t, defs[2], 0)).toBe("goLive.settings.forEver");
+  });
+
+  it("asks another approver to approve a settings change; the requester only withdraws it", async () => {
+    signIn(APPROVE, { userId: "usr_req" });
+    goLiveService.goLive.mockResolvedValue(goLiveState({ settingDefinitions: defs, settings: { kpiIncludeMigrated: false, unlockMaxHours: 4, evidenceRetentionYears: 10, documentTypes: ["COC"] },
+      pendingRequest: lockRequest({ action: "settings", scope: [], scopeLabels: [], hours: null, settings: [{ field: "kpiIncludeMigrated", label: "KPIs", before: false, after: true }] }) }));
+    renderPage();
+    expect(await screen.findByText("goLive.settings.title")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "goLive.lock.withdrawRequest" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "goLive.settings.requestChange" })).toBeDisabled();
   });
 });

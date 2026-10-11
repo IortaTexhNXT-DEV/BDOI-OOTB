@@ -22,6 +22,9 @@ const PHONE = /^(?:\+?63|0)\d{9,10}$/;
 const MIN_SHARE = 0.6;
 
 const cellText = (td) => (td.innerText || "").replace(/\s+/g, " ").trim();
+// the placeholder of an empty cell ("—", "-") says nothing about the column: a column of amounts with some empty cells
+// stays a column of amounts
+const PLACEHOLDER = /^[—–-]$/;
 /** A column whose heading names a code ("Cost Centre Code", "Rank Code") holds identifiers, never amounts. */
 export const isCodeHeading = (text) => /\bcode\b/i.test(text || "");
 const onlyControls = (td) => !cellText(td) && !!td.querySelector("button, a, .pi, svg");
@@ -47,7 +50,7 @@ const markTable = (table) => {
       s.cells += 1;
       if (onlyControls(td)) s.controls += 1;
       const text = cellText(td);
-      if (!text) return;
+      if (!text || PLACEHOLDER.test(text)) return;
       s.filled += 1;
       const kind = kindOfText(text);
       if (kind) s[kind] += 1;

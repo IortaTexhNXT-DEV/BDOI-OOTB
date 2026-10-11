@@ -167,7 +167,7 @@ const LoadPage = () => {
         <Button type="button" icon="pi pi-download" label={t("goLive.load.downloadErrors")} outlined onClick={() => download(() => goLiveService.errorsFile(batch.id))} />
       ) : null}
       {canWrite && canViewPii && batch.fileStored ? (
-        <Button type="button" icon="pi pi-file-excel" label={t("goLive.load.uploadedFile")} text onClick={() => download(() => goLiveService.uploadedFile(batch.id))} />
+        <Button type="button" icon="pi pi-file-excel" label={t("goLive.load.uploadedFile")} outlined onClick={() => download(() => goLiveService.uploadedFile(batch.id))} />
       ) : null}
       {canWrite && (batch.status === "validated" || (batch.status === "failed" && batch.validatedAt && batch.rowsError > 0)) ? (
         <Button type="button" icon="pi pi-send" label={t("goLive.load.submit")} onClick={submit} />
@@ -186,7 +186,6 @@ const LoadPage = () => {
   );
 
   const meta = [
-    { label: t("goLive.loads.kit"), value: t(`goLive.kit.${batch.kit}`) },
     { label: t("goLive.loads.legacySystem"), value: batch.legacySystem, hidden: batch.kit !== "migration" },
     { label: t("goLive.loads.uploaded"), value: `${batch.createdBy} · ${dateTimeOf(batch.createdAt)}` },
     { label: t("goLive.header.cutover"), value: batch.cutoverDate, type: "date" },
@@ -197,7 +196,8 @@ const LoadPage = () => {
     <div className="go-live__stack">
       <SectionCard className="bv-loading-host">
         <Button type="button" icon="pi pi-arrow-left" text label={t("goLive.loads.title")} onClick={() => navigate(`${ROOT}/loads`)} className="go-live__back" />
-        <DetailHeader title={batch.loadNumber} status={chipOf(t, "batch", batch.status)} subtitle={batch.fileName} meta={meta} actions={actions} />
+        <DetailHeader title={batch.loadNumber} status={chipOf(t, "batch", batch.status)} subtitle={`${t(`goLive.kit.${batch.kit}`)} · ${batch.fileName}`} meta={meta}
+          actions={actions} />
         {working ? (
           <div className="go-live__progress" role="status" aria-live="polite">
             <LoadingBar active inline label={t(`goLive.load.step.${progress.step || "validate"}`)} />
