@@ -74,12 +74,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Period End | Year-End Close | View |
 | Accounts > Period End | Financial Statements | View |
 | Accounts > Incentive | My Programs | View |
-| Accounts > Incentive | Calculations | View |
-| Accounts > Incentive | Approvals | View |
+| Accounts > Incentive | Calculations | Approve |
+| Accounts > Incentive | Approvals | Approve |
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Agents/Referrer Accounts | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -105,6 +106,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Role Permissions | View |
 | Master > Users and Access | Authority Matrix | View |
 | Master > Users and Access | Segregation of Duties | View |
+| Master > Finance | Configuration Approvals | View |
+| Master > Finance | Commission Rate Matrix | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
 | Product Configurator | Dashboard | View |
@@ -160,10 +163,11 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, Sales Invoices, CAS Books and Documents, Period Management, Month-End Close, Year-End Close and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
+| Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts and Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
-| Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
+| Master data and configuration | Reference masters | View | See reference masters | Commission Rate Matrix |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
@@ -173,18 +177,27 @@ Where: the screens of your menus that show the module. A module without a screen
 | Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews | Authority Matrix and Segregation of Duties |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
+| Other | Commission | View | Open Commission > Sharing Schemes; see the share of a policy | Commission Dashboard, Agents/Referrer Accounts and Sharing Schemes |
+| Other | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change requested on a commission line (never your own request) |  |
+| Other | Commission | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
+| Other | Commission rates | View | Open the Commission Rate Matrix and Test rate; see the commission of a policy and what TISPH keeps | No screen of its own |
+| Other | Commission rates | Approve | Approve or return commission rule changes on Configuration Approvals (never one you made) |  |
 
 ## Approvals {#tis-general-manager-approvals}
 
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject a rate change, reversal or withholding tax change requested on a commission line (never your own request)
+- Approve or return commission rule changes on Configuration Approvals (never one you made)
+- Approve or reject an incentive calculation batch submitted by another user
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 - Approve or return renewal terms of another user
+- Approve or return sharing schemes and assignments; suspend, resume and end schemes
 
 Approval limits of this role on the Authority Matrix:
 

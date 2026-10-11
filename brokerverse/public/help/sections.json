@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "1390d099d3420bf2b1e102deea6a348dba31d26b2566217a83209c3f9f69368c",
+ "sourceHash": "5aeb59ce1650ae2e939db2cad785cbfc1a38191a1ea4e2f13634d5e11b7d6d41",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -2337,6 +2337,13 @@
    "id": "commission-to-agents-and-referrers",
    "number": "19.4",
    "title": "Commission to agents and referrers",
+   "level": 2,
+   "chapter": "Screen reference: Dashboards and Commission"
+  },
+  {
+   "id": "sharing-schemes",
+   "number": "19.5",
+   "title": "Sharing Schemes",
    "level": 2,
    "chapter": "Screen reference: Dashboards and Commission"
   },

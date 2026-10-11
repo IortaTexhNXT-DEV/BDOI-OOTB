@@ -335,7 +335,7 @@ const CommissionRateMatrix = () => {
         header={edit?.id ? (edit.amend ? k("amendTitle", { version: (edit.version || 1) + 1 }) : k("editTitle")) : k("addTitle")}
         visible={!!edit}
         onHide={() => setEdit(null)}
-        style={{ width: "min(900px, 96vw)" }}
+        style={{ width: "min(1100px, 96vw)" }}
         footer={
           <div>
             <Button label={t("numberingMasters.cancel")} text onClick={() => setEdit(null)} />

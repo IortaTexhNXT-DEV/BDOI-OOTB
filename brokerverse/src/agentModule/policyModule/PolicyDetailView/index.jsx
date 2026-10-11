@@ -2144,6 +2144,12 @@ const PolicyDetailView = () => {
                 )}
               </SectionCard>
 
+              {(hasPermission("read:commission-rules") || hasPermission("read:remittance") || hasPermission("read:commission")) && (
+                <SectionCard title={t("commissionBreakdown.title")} className="commission-breakdown-section">
+                  <CommissionBreakdown policyId={policyId} />
+                </SectionCard>
+              )}
+
               <SectionCard title={t("policyDetail.history", { defaultValue: "History" })} className="policy-history-section">
                 <AuditTimeline entity="policy" recordId={rawPolicyData?.id || policyId} limit={10} />
               </SectionCard>
@@ -2184,12 +2190,6 @@ const PolicyDetailView = () => {
               {isDirectBill && (
                 <SidebarSection title={t("policyDetail.directBill")} icon="pi pi-building">
                   <p className="payment-description">{t("policyDetail.directBillDescription")}</p>
-                </SidebarSection>
-              )}
-
-              {(hasPermission("read:commission-rules") || hasPermission("read:remittance") || hasPermission("read:commission")) && (
-                <SidebarSection title={t("commissionBreakdown.title")} icon="pi pi-percentage" className="commission-breakdown-section">
-                  <CommissionBreakdown policyId={policyId} />
                 </SidebarSection>
               )}
 

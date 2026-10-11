@@ -41,6 +41,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -137,7 +138,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
@@ -161,6 +162,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Users and access | Access control | Create and edit | Propose authority limits, record delegations, maintain segregation of duties, run access reviews |  |
 | Users and access | Access control | Approve | Approve role access changes and authority limits of another administrator |  |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
+| Other | Commission | View | Open Commission > Sharing Schemes; see the share of a policy | Commission Dashboard and Sharing Schemes |
+| Other | Commission rates | View | Open the Commission Rate Matrix and Test rate; see the commission of a policy and what TISPH keeps | No screen of its own |
 
 ## Approvals {#tis-it-appsupport-admin-approvals}
 

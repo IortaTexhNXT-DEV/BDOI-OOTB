@@ -56,6 +56,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | Create and edit |
 | Commission | Agents/Referrer Accounts | Create and edit |
+| Commission | Sharing Schemes | Create and edit |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
@@ -127,7 +128,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Period end and tax | Create and edit | Run the month-end and year-end steps and BIR tax returns |  |
 | Accounts | Period end and tax | Approve | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close |  |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts and Sharing Schemes |
 | Commission | Commission | Create and edit | Process commission and insurer overrides |  |
 | Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
@@ -140,12 +141,19 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
+| Other | Commission | View | Open Commission > Sharing Schemes; see the share of a policy | Commission Dashboard, Agents/Referrer Accounts and Sharing Schemes |
+| Other | Commission | Create and edit | Change the share of a commission line inside the minimum and maximum of its scheme, with a reason |  |
+| Other | Commission | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
+| Other | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change requested on a commission line (never your own request) |  |
+| Other | Commission rates | View | Open the Commission Rate Matrix and Test rate; see the commission of a policy and what TISPH keeps | No screen of its own |
+| Other | Commission rates | Create and edit | Add, amend, end and upload commission rules (sent to Configuration Approvals) |  |
 
 ## Approvals {#tis-finance-and-general-accounting-approvals}
 
 This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
+- Approve or reject a rate change, reversal or withholding tax change requested on a commission line (never your own request)
 - Approve premium warranty extensions and client credit limits (not the requester)
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
@@ -168,6 +176,9 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
+| Commission rates | Approve or return commission rule changes on Configuration Approvals (never one you made) | TIS General Manager |
+| Commission | Approve or reject a rate change, reversal or withholding tax change requested on a commission line (never your own request) | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
+| Commission | Approve or return sharing schemes and assignments; suspend, resume and end schemes | TIS General Manager |
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |

@@ -34,6 +34,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Statement | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -85,7 +86,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -94,6 +95,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
+| Other | Commission | View | Open Commission > Sharing Schemes; see the share of a policy | Commission Dashboard and Sharing Schemes |
 
 ## Approvals {#tis-sales-officer-approvals}
 
