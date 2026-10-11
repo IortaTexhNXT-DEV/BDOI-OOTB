@@ -18,6 +18,7 @@ import FieldError from "../../../components/FieldError";
 import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel } from "../../../components/RecordPage";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { ExpiryCell, PolicyCell, RenewalHeader, StageChip, useRenewalParam } from "../shared";
 import "./index.scss";
 
@@ -162,17 +163,28 @@ const NegotiationWorkspace = () => {
       setSaving(false);
     }
   };
+  const changeText = (row) => (row.premiumVariancePct === null || row.premiumVariancePct === undefined ? null
+    : t("negotiations.change", { pct: `${row.premiumVariancePct > 0 ? "+" : ""}${Number(row.premiumVariancePct).toFixed(1)}` }));
+
   const decide = async (row, decision) => {
-    setSaving(true);
-    try {
-      await renewalsWorkspaceService.decide(row.id, decision);
-      done(decision === "approve" ? t("negotiations.approved") : t("negotiations.rejected"), row.policyNumber);
-      load();
-    } catch (e) {
-      showError(e);
-    } finally {
-      setSaving(false);
-    }
+    const approve = decision === "approve";
+    const note = await openConfirm({
+      title: approve ? t("negotiations.approveTitle") : t("negotiations.rejectTitle"),
+      severity: approve ? "neutral" : "danger",
+      facts: [
+        { label: t("negotiations.col.policy"), value: row.policyNumber },
+        { label: t("negotiations.client"), value: row.clientName || "—" },
+        { label: t("negotiations.col.current"), value: row.currentPremium, type: "amount" },
+        { label: t("negotiations.col.proposed"), value: row.quotedPremium, type: "amount" },
+        ...(changeText(row) ? [{ label: t("negotiations.premiumChange"), value: changeText(row) }] : []),
+      ],
+      input: { type: "textarea", label: approve ? t("negotiations.noteOptional") : t("negotiations.rejectNote"), required: !approve, maxLength: 2000, rows: 3 },
+      confirmLabel: approve ? t("negotiations.approveTerms") : t("negotiations.rejectTerms"),
+      onConfirm: (value) => renewalsWorkspaceService.decide(row.id, decision, value || undefined),
+    });
+    if (note === null) return;
+    done(approve ? t("negotiations.approved") : t("negotiations.rejected"), row.policyNumber);
+    load();
   };
 
   /** The actions a negotiation allows in its state; `primary` is the main one. */
@@ -183,9 +195,6 @@ const NegotiationWorkspace = () => {
     { key: "reject", label: t("negotiations.reject"), icon: "pi pi-times", onClick: () => decide(row, "reject"), hidden: row.statusCode !== "pending-approval" || !canApprove, danger: true },
     { key: "approve", label: t("negotiations.approve"), icon: "pi pi-check", onClick: () => decide(row, "approve"), hidden: row.statusCode !== "pending-approval" || !canApprove, primary: true },
   ].filter((a) => !a.hidden);
-
-  const changeText = (row) => (row.premiumVariancePct === null || row.premiumVariancePct === undefined ? null
-    : t("negotiations.change", { pct: `${row.premiumVariancePct > 0 ? "+" : ""}${Number(row.premiumVariancePct).toFixed(1)}` }));
 
   const premiumBody = (row) => (
     <span className="bv-cell-stack">
@@ -241,7 +250,7 @@ const NegotiationWorkspace = () => {
           </>
         ) : null}
         footer={selected ? actionsOf(selected).map((a) => (
-          <Button key={a.key} label={a.label} icon={a.icon} onClick={a.onClick} loading={saving && (a.key === "approve" || a.key === "reject")}
+          <Button key={a.key} label={a.label} icon={a.icon} onClick={a.onClick}
             outlined={!a.primary} severity={a.danger ? "danger" : undefined} />
         )) : null}>
         {selected ? (
