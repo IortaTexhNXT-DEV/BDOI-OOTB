@@ -214,6 +214,11 @@ ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
+/**
+ * Enabling of Phase 2 by TISPH (migration 0597, modules/features/tenant.js): SUPERID holds the permission in its own
+ * right (not only through the System Administrator it includes); it counts with a role of features.tenant_enable_roles.
+ */
+export const TENANT_ENABLE_GRANTS = { 'tis-superid': ['enable:phase2-features', 'read:features'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */
 export const permissionCodes = (items) => [...new Set(items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`])))];
 export const ROLE_PERMISSIONS = Object.fromEntries(Object.entries(ROLE_PERMS).map(([role, items]) => [role, permissionCodes(items)]));
@@ -338,6 +343,7 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
     AND p.code = ANY($1) AND r.code <> $2`, [PLATFORM_PERMISSIONS, PLATFORM_ROLE]);
   for (const [role, codes] of Object.entries(ROLE_PERMISSIONS)) await grant(role, codes);
   for (const [role, inherits] of Object.entries(ROLE_INHERITS)) await query('UPDATE roles SET inherits = $2 WHERE code = $1', [role, inherits]);
+  for (const [role, codes] of Object.entries(TENANT_ENABLE_GRANTS)) if (roleIds[role]) await grant(role, codes);
   // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
   // An existing administrator keeps the password it has.
   const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');
