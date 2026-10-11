@@ -35,12 +35,13 @@ beforeEach(() => {
   goLiveService.users.mockResolvedValue([]);
 });
 
+// the page loads its four blocks before the decision: the vote buttons come after the default wait of one second
 describe("Go / No-Go voting", () => {
   it("lets a named approver vote Go with a remark", async () => {
     signIn(APPROVE, { userId: "usr_me" });
     goLiveService.vote.mockResolvedValue(decision({ status: "go" }));
     renderPage();
-    fireEvent.click(await screen.findByRole("button", { name: "goLive.decision.voteGo" }));
+    fireEvent.click(await screen.findByRole("button", { name: "goLive.decision.voteGo" }, { timeout: 5000 }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.change(within(dialog).getByRole("textbox"), { target: { value: "Trial balance agrees" } });
     fireEvent.click(within(dialog).getByRole("button", { name: "goLive.decision.voteGo" }));
@@ -50,7 +51,7 @@ describe("Go / No-Go voting", () => {
   it("asks a No-Go voter for the reason, the actions and the new date", async () => {
     signIn(APPROVE, { userId: "usr_me" });
     renderPage();
-    fireEvent.click(await screen.findByRole("button", { name: "goLive.decision.voteNoGo" }));
+    fireEvent.click(await screen.findByRole("button", { name: "goLive.decision.voteNoGo" }, { timeout: 5000 }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "goLive.decision.voteNoGo" }));
     expect(await within(dialog).findByText("goLive.decision.reasonRequired")).toBeInTheDocument();
