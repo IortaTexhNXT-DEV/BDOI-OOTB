@@ -14,7 +14,9 @@ import { formatPercent } from "../../../utility/numberFormat";
 import { ConfiguratorPage, FilterBar, RowActions, StatusTag, pagingFor, productText } from "../shared/ConfiguratorPage";
 import { useChartTheme } from "../../../theme/chartTheme";
 import StatCards from "../../../components/StatCards";
-import { ChartCard, ShareChart, ThemedChart, formatValue } from "../../../components/Dashboard";
+import { ChartCard, ShareChart, ThemedChart, ViewState, formatValue } from "../../../components/Dashboard";
+import { ChartSkeleton } from "../../../components/Skeletons";
+import { useStableLoad } from "../../../hooks/useStableLoad";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { canOpen, hasPermission } from "../../../utils/canOpen";
 import "./style.scss";
@@ -24,31 +26,24 @@ const ProductDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const chart = useChartTheme();
-  const [templates, setTemplates] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({});
   const toast = useRef(null);
   const navigate = useNavigate();
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [rows, dash] = await Promise.all([productConfiguratorService.getProductTemplates(), productConfiguratorService.getDashboard()]);
-      setTemplates(rows);
-      setSummary(dash.summary);
-      setAnalytics(dash.analytics);
-    } catch (error) {
-      toast.current?.show({ severity: "error", summary: t("productConfiguratorDashboard.error"), detail: error?.message || t("productConfiguratorDashboard.errorLoadFailed") });
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
+  // four states (hooks/useStableLoad): skeletons on the first load only (no "No data" before the answer), the reason
+  // with Retry when it failed, the figures kept under a veil while a refresh runs
+  const view = useStableLoad(useCallback(async () => {
+    const [rows, dash] = await Promise.all([productConfiguratorService.getProductTemplates(), productConfiguratorService.getDashboard()]);
+    return { rows: rows || [], summary: dash?.summary || null, analytics: dash?.analytics || null };
+  }, []), { isEmpty: (d) => !d });
+  const templates = view.data?.rows || [];
+  const summary = view.data?.summary || null;
+  const analytics = view.data?.analytics || null;
+  const loading = view.loading || view.refreshing;
+  const refreshError = view.status === "loaded" ? view.error : null;
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (refreshError) toast.current?.show({ severity: "error", summary: t("productConfiguratorDashboard.error"), detail: refreshError || t("productConfiguratorDashboard.errorLoadFailed") });
+  }, [refreshError, t]);
 
   // a new draft version copies the template; the confirm names it, its next version and any draft already open
   const cloneProduct = async (row) => {
@@ -100,19 +95,24 @@ const ProductDashboard = () => {
   const canChange = hasPermission("write:products");
   const opens = (path) => (canOpen(path) ? () => navigate(path) : undefined);
 
+  const kpiItems = [
+    { key: "active", label: t("productConfiguratorDashboard.activeProducts"), value: summary ? summary.active ?? 0 : null, onClick: opens("/product-configurator/templates") },
+    { key: "rules", label: t("productConfiguratorDashboard.rulesInForce"), value: summary ? components["underwriting-rules"] ?? 0 : null, onClick: opens("/product-configurator/underwriting") },
+    { key: "premium", label: t("productConfiguratorDashboard.totalPremium"), value: analytics ? formatValue("currency", analytics.totals?.premium ?? 0, { compact: true }) : null },
+    { key: "loss", label: t("productConfiguratorDashboard.avgLossRatio"), value: analytics ? formatPercent(avgLossRatio) : null, note: t("productConfiguratorDashboard.premiumWeighted") },
+  ];
+
   return (
     <ConfiguratorPage screen="dashboard" actions={canChange ? <Button label={t("productConfiguratorDashboard.createNewProduct")} icon="pi pi-plus" onClick={() => navigate("/product-configurator/create")} /> : null}>
       <Toast ref={toast} />
-      <StatCards className="pc-stat-cards" items={[
-        { key: "active", label: t("productConfiguratorDashboard.activeProducts"), value: summary ? summary.active ?? 0 : null, onClick: opens("/product-configurator/templates") },
-        { key: "rules", label: t("productConfiguratorDashboard.rulesInForce"), value: summary ? components["underwriting-rules"] ?? 0 : null, onClick: opens("/product-configurator/underwriting") },
-        { key: "premium", label: t("productConfiguratorDashboard.totalPremium"), value: analytics ? formatValue("currency", analytics.totals?.premium ?? 0, { compact: true }) : null },
-        { key: "loss", label: t("productConfiguratorDashboard.avgLossRatio"), value: analytics ? formatPercent(avgLossRatio) : null, note: t("productConfiguratorDashboard.premiumWeighted") },
-      ]} />
+      <ViewState state={view} skeleton={<StatCards className="pc-stat-cards" loading items={kpiItems} />}>
+        <StatCards className="pc-stat-cards" refreshing={view.refreshing} items={kpiItems} />
+      </ViewState>
       <TabView className="pc-tabs">
         <TabPanel header={t("productConfiguratorDashboard.productTemplates")} leftIcon="pi pi-list mr-2">
           <FilterBar value={filters} onChange={setFilters} show={["lob", "status"]} options={{ lobs }} />
-          <DataTable value={rows} loading={loading} dataKey="id" {...pagingFor(rows.length)} emptyMessage={t("productConfigurator.empty")} size="small">
+          <DataTable value={rows} loading={loading} dataKey="id" {...pagingFor(rows.length)} size="small"
+            emptyMessage={view.status === "error" ? view.error : t("productConfigurator.empty")}>
             <Column field="templateCode" header={t("productConfiguratorDashboard.productCode")} sortable />
             <Column field="name" header={t("productConfiguratorDashboard.productName")} sortable />
             <Column header={t("productTemplateManager.product")} body={(r) => productText(r) || "—"} />
@@ -133,6 +133,7 @@ const ProductDashboard = () => {
           </DataTable>
         </TabPanel>
         <TabPanel header={t("productConfiguratorDashboard.performanceAnalytics")} leftIcon="pi pi-chart-line mr-2">
+          <ViewState state={view} minHeight={240} skeleton={<ChartSkeleton height="240px" />}>
           {top.length === 0 ? (
             <div className="pc-empty">{t("productAnalytics.noData")}</div>
           ) : (
@@ -159,6 +160,7 @@ const ProductDashboard = () => {
               </DataTable>
             </>
           )}
+          </ViewState>
         </TabPanel>
         <TabPanel header={t("productConfiguratorDashboard.quickActions")} leftIcon="pi pi-bolt mr-2">
           <div className="pc-quick-links">

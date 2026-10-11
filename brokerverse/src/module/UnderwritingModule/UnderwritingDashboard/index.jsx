@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
@@ -10,7 +10,8 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../../../services/dashboardService";
 import StatCards from "../../../components/StatCards";
-import { ChartCard, DashboardToolbar, LISTS, ThemedChart, drillDown, formatValue } from "../../../components/Dashboard";
+import { ChartCard, DashboardToolbar, LISTS, ThemedChart, ViewState, drillDown, formatValue } from "../../../components/Dashboard";
+import { useStableLoad } from "../../../hooks/useStableLoad";
 import { businessDate, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { useChartTheme } from "../../../theme/chartTheme";
 import StatusChip from "../../../components/StatusChip";
@@ -37,18 +38,16 @@ const UnderwritingDashboard = () => {
   const navigate = useNavigate();
   const chart = useChartTheme();
   const toast = useRef(null);
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(() => {
-    setLoading(true);
-    dashboardService
-      .getProcessing()
-      .then(setDashboard)
-      .catch((error) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: error.message }))
-      .finally(() => setLoading(false));
-  }, [t]);
-  useEffect(() => { load(); }, [load]);
+  // four states (hooks/useStableLoad): the list's spinner and the refresh spinner stop when the request settles,
+  // also when it fails (the list was on loading={!dashboard}, turning for ever after an error)
+  const view = useStableLoad(useCallback(() => dashboardService.getProcessing(), []), { isEmpty: (d) => !d });
+  const dashboard = view.data;
+  const loading = view.loading || view.refreshing;
+  const load = view.reload;
+  const refreshError = view.status === "loaded" ? view.error : null;
+  useEffect(() => {
+    if (refreshError) toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: refreshError });
+  }, [refreshError, t]);
 
   const metrics = dashboard?.workbenchMetrics;
   const alerts = metrics?.openAlerts || {};
@@ -142,29 +141,32 @@ const UnderwritingDashboard = () => {
         <span className="underwriting-dashboard__snapshot">{t("underwritingDashboard.snapshot")}</span>
       </DashboardToolbar>
 
-      <StatCards items={kpis} className="bv-stat-cards--wide underwriting-dashboard__kpis" />
+      <ViewState state={view} skeleton={<StatCards items={kpis} loading className="bv-stat-cards--wide underwriting-dashboard__kpis" />}>
+        <StatCards items={kpis} refreshing={view.refreshing} className="bv-stat-cards--wide underwriting-dashboard__kpis" />
+      </ViewState>
 
       <div className="bv-dash-grid">
         <ChartCard title={t("underwritingDashboard.workloadMetrics")} subtitle={t("underwritingDashboard.workloadHint")}
           table={{ columns: [{ field: "agent", header: t("underwritingDashboard.agent") }, ...workload.stages.map((st) => ({ field: st, header: statusLabel(st), format: "count" }))], rows: workload.rows }}
-          exportName="processing-workload">
+          exportName="processing-workload" state={view} height={Math.max(180, workload.data.labels.length * 40 + 80)}>
           <ThemedChart type="bar" data={workload.data} options={stacked} height={Math.max(180, workload.data.labels.length * 40 + 80)} directLabels={false} />
         </ChartCard>
 
         <ChartCard title={t("underwritingDashboard.inProgressVsOverdue")} subtitle={t("underwritingDashboard.byDueMonth")}
           table={{ columns: [{ field: "month", header: t("underwritingDashboard.dueMonth") }, { field: "onTime", header: t("underwritingDashboard.inProgressTasks"), format: "count" }, { field: "overdue", header: t("underwritingDashboard.overdueTasks"), format: "count" }], rows: due.rows }}
-          exportName="processing-due-by-month">
+          exportName="processing-due-by-month" state={view} height={240}>
           <ThemedChart type="bar" data={due.data} options={{ scales: { x: { stacked: true }, y: { stacked: true } } }} directLabels={false} height={240} />
         </ChartCard>
 
         <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.volumeByLob")}
           table={{ columns: [{ field: "label", header: t("underwritingDashboard.productType") }, { field: "count", header: t("underwritingDashboard.submissions"), format: "count" }], rows: lobRows }}
-          exportName="processing-volume-by-lob">
+          exportName="processing-volume-by-lob" state={view} height={Math.max(120, lobRows.length * 34 + 40)}>
           <ThemedChart type="bar" data={lobData} options={{ indexAxis: "y" }} height={Math.max(120, lobRows.length * 34 + 40)} />
         </ChartCard>
 
         <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.submissionsList")}>
-          <DataTable value={myCases} paginator rows={20} rowsPerPageOptions={[20, 50, 100]} className="submissions-table" loading={!dashboard} size="small">
+          <DataTable value={myCases} paginator rows={20} rowsPerPageOptions={[20, 50, 100]} className="submissions-table" loading={loading} size="small"
+            emptyMessage={view.status === "error" ? view.error : t("dashboards.noData", "No data for this period")}>
             <Column field="caseId" header={t("underwritingDashboard.caseId")} />
             <Column field="proposedInsured" header={t("underwritingDashboard.proposedInsured")} />
             <Column field="agent" header={t("underwritingDashboard.agent")} body={(row) => row.agent || "-"} />
@@ -178,7 +180,8 @@ const UnderwritingDashboard = () => {
           </DataTable>
         </ChartCard>
 
-        <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.openTasks")}>
+        <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.openTasks")} state={view} height={120}>
+          {openTasks.length ? null : <div className="bv-viz-empty" style={{ minHeight: 120 }}><span>{t("underwritingDashboard.noOpenTasks", "No requirement falls due: nothing to follow up.")}</span></div>}
           <div className="tasks-list">
             {openTasks.map((task) => (
               <div className="task-item" key={task.caseId}>

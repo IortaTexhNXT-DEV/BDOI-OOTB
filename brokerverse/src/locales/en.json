@@ -74,7 +74,9 @@
     "loadFailedTitle": "This record could not be loaded",
     "notFoundTitle": "Record not found",
     "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list.",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "loadTimeout": "This is taking too long to load.",
+    "loadFailed": "This could not be loaded."
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -5178,7 +5180,9 @@
     "month": "Month",
     "inForceBook": "Whole book, sorted by premium",
     "claimsByStage": "Claims by stage, all open and closed",
-    "estimate": "Estimate"
+    "estimate": "Estimate",
+    "claimsRatioNa": "No premium written yet: the claims ratio does not apply",
+    "retentionNa": "No renewal renewed or lapsed yet: the retention rate does not apply"
   },
   "productConfiguratorDashboard": {
     "title": "Product Configurator Dashboard",
@@ -7512,7 +7516,8 @@
       "medium": "Medium",
       "low": "Low"
     },
-    "riskScoreOf": "{{score}} of 100"
+    "riskScoreOf": "{{score}} of 100",
+    "noOpenTasks": "No requirement falls due: nothing to follow up."
   },
   "policyTable": {
     "search": "Search",
@@ -15440,7 +15445,13 @@
       "title": "Issued Since Go-Live",
       "note": "{{count}} policies since {{date}}"
     },
-    "home": "Dashboards"
+    "home": "Dashboards",
+    "notApplicable": "Does not apply to this figure",
+    "emptyIssued": {
+      "since": "No policies issued since go-live ({{date}}).",
+      "none": "No policies issued in BrokerVerse yet.",
+      "switch": "Switch to All business to see the sample data."
+    }
   },
   "confirmDialog": {
     "cancel": "Cancel",
@@ -19125,7 +19136,8 @@
       "changes": "Changes",
       "choices": {
         "issued": "Issued since go-live",
-        "all": "All business"
+        "all": "All business",
+        "auto": "Issued since go-live once a policy is issued, else All business"
       },
       "fields": {
         "loadApprovalRequired": "Approval of each load by a second user",

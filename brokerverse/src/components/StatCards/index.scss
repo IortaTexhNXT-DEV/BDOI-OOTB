@@ -45,6 +45,22 @@
       border-color: $color-heading;
       box-shadow: inset 0 0 0 1px $color-heading;
     }
+
+    // a refresh keeps the figure under a light veil (after 400 ms, so a quick refresh does not flicker)
+    &.bv-stat-card--refreshing::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: rgba(255, 255, 255, 0.55);
+      animation: bv-reveal 150ms ease-out 400ms both;
+    }
+
+    // the skeleton takes the line height of the figure, so the card does not grow when the figure arrives
+    &.bv-stat-card--loading .bv-stat-value {
+      display: flex;
+      align-items: center;
+    }
   }
 
   .bv-stat-label {

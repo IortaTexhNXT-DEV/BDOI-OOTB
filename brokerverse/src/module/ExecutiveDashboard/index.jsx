@@ -10,8 +10,8 @@ import { useNavigate } from "react-router-dom";
 import dashboardService from "../../services/dashboardService";
 import reportsService from "../../services/reportsService";
 import StatCards from "../../components/StatCards";
-import { ChartCard, DashboardToolbar, LISTS, ThemedChart, drillDown, formatValue, useDashboardOrigin } from "../../components/Dashboard";
-import { ChartSkeleton } from "../../components/Skeletons";
+import { ChartCard, DashboardToolbar, LISTS, OriginEmpty, ThemedChart, ViewState, drillDown, formatValue, useDashboardOrigin } from "../../components/Dashboard";
+import { useStableLoad } from "../../hooks/useStableLoad";
 import { useChartTheme } from "../../theme/chartTheme";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
@@ -61,22 +61,24 @@ const ExecutiveDashboard = () => {
   const [canOpenSettings] = useState(() => isPathAllowed(SETTINGS_PATH, menuList, getUserRoles()));
   const [period, setPeriod] = useState("month");
   const [compare, setCompare] = useState("previous");
-  const { origin, setOrigin, ready } = useDashboardOrigin();
-  const [dashboard, setDashboard] = useState(null);
-  const [claimsSummary, setClaimsSummary] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const { origin, setOrigin, ready, cutoverDate } = useDashboardOrigin();
+  // four states each (hooks/useStableLoad): the figures and the claims summary load on their own, so one failing
+  // never leaves the other on its skeleton; the refresh spinner turns until both have settled
+  const execLoad = useStableLoad(useCallback(() => dashboardService.getExecutive(period, compare, origin), [period, compare, origin]), { enabled: ready });
+  const claimsLoad = useStableLoad(useCallback(() => dashboardService.getClaims(), []));
+  const dashboard = execLoad.data;
+  const claimsSummary = claimsLoad.data;
+  const loading = execLoad.loading || execLoad.refreshing || claimsLoad.loading || claimsLoad.refreshing;
+  const { reload } = execLoad;
+  const reloadClaims = claimsLoad.reload;
+  const load = useCallback(() => { reload(); reloadClaims(); }, [reload, reloadClaims]);
 
   const showError = (error) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: error.message });
-
-  const load = useCallback(() => {
-    if (!ready) return;
-    setLoading(true);
-    Promise.all([
-      dashboardService.getExecutive(period, compare, origin).then(setDashboard),
-      dashboardService.getClaims().then(setClaimsSummary),
-    ]).catch(showError).finally(() => setLoading(false));
-  }, [period, compare, origin, ready]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { load(); }, [load]);
+  // a refresh that fails keeps the figures on screen and says so; a first load that fails shows the reason with Retry
+  const refreshError = (execLoad.status === "loaded" && execLoad.error) || (claimsLoad.status === "loaded" && claimsLoad.error) || null;
+  useEffect(() => {
+    if (refreshError) toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: refreshError });
+  }, [refreshError, t]);
 
   const range = dashboard?.period ? {
     from: dashboard.period.from, to: dashboard.period.to, previousFrom: dashboard.period.comparedFrom, previousTo: dashboard.period.comparedTo,
@@ -119,8 +121,10 @@ const ExecutiveDashboard = () => {
     { key: "activePolicies", label: t("executiveDashboard.activePolicies"), value: k.activePolicies?.value ?? null, change: k.activePolicies?.change, comparison, note: targetNote("activePolicies", "count"),
       onClick: opens("/agent/policy", () => navigate("/agent/policy")) },
     { key: "claimsRatio", label: t("executiveDashboard.claimsRatio"), value: dashboard ? formatPercent(k.claimsRatio?.value) : null, note: k.claimsRatio?.target ? t("dashboards.targetMax", { target: formatPercent(k.claimsRatio.target), defaultValue: "Target at most {{target}}" }) : null,
+      naReason: t("executiveDashboard.claimsRatioNa", "No premium written yet: the claims ratio does not apply"),
       status: targetStatus(t, k.claimsRatio?.value, k.claimsRatio?.target, true), onClick: opens("/agent/claim", () => drillDown(navigate, LISTS.claims(""))) },
     { key: "retentionRate", label: t("executiveDashboard.retentionRate"), value: dashboard ? formatPercent(k.retentionRate?.value) : null, note: k.retentionRate?.target ? t("dashboards.targetMin", { target: formatPercent(k.retentionRate.target), defaultValue: "Target {{target}}" }) : null,
+      naReason: t("executiveDashboard.retentionNa", "No renewal renewed or lapsed yet: the retention rate does not apply"),
       status: targetStatus(t, k.retentionRate?.value, k.retentionRate?.target, false), onClick: retentionAnalytics.on ? opens("/renewal/analytics", () => navigate("/renewal/analytics")) : undefined },
     { key: "receivableClients", label: t("executiveDashboard.premiumReceivable", "Premium receivable"), value: receivables ? money(receivables.premiumFromClients) : null,
       note: receivables ? t("executiveDashboard.overdueNote", { amount: money(receivables.premiumOverdue), defaultValue: "{{amount}} overdue" }) : null,
@@ -142,6 +146,12 @@ const ExecutiveDashboard = () => {
   const products = (dashboard?.revenueByProduct?.labels || []).map((label, i) => ({ label, premium: dashboard.revenueByProduct.data[i], policies: dashboard.revenueByProduct.policies?.[i] }))
     .sort((a, b) => b.premium - a.premium);
   const productData = { labels: products.map((p) => p.label), datasets: [{ label: t("executiveDashboard.premium"), data: products.map((p) => p.premium), backgroundColor: chart.primary }] };
+
+  // "Issued since go-live" with nothing issued since: say why and offer All business, instead of a page of zeros
+  const nothingIssued = origin === "issued" && !!dashboard && !(dashboard.monthlyTrend?.premium || []).some((v) => Number(v))
+    && !Number(k.activePolicies?.value) && !(dashboard.revenueByProduct?.labels || []).length;
+  const goLive = sinceGoLive?.cutoverDate || cutoverDate;
+  const emptyChart = nothingIssued ? <OriginEmpty inline cutoverDate={goLive} onOrigin={setOrigin} /> : null;
 
   const claimsByStatus = [...(claimsSummary?.claimsByStatus || [])].map((r) => ({ ...r, status: statusLabel(r.status) })).sort((a, b) => b.count - a.count);
   const claimsData = { labels: claimsByStatus.map((r) => r.status), datasets: [{ label: t("executiveDashboard.claimsCount", "Claims"), data: claimsByStatus.map((r) => r.count), backgroundColor: chart.primary }] };
@@ -175,37 +185,35 @@ const ExecutiveDashboard = () => {
           </>
         )} />
 
-      <StatCards items={kpis} className="bv-stat-cards--wide executive-kpis" />
+      {nothingIssued ? <OriginEmpty cutoverDate={goLive} onOrigin={setOrigin} /> : null}
+
+      <ViewState state={execLoad} skeleton={<StatCards items={kpis} loading className="bv-stat-cards--wide executive-kpis" />}>
+        <StatCards items={kpis} refreshing={execLoad.refreshing} className="bv-stat-cards--wide executive-kpis" />
+      </ViewState>
 
       <div className="bv-dash-grid">
         <ChartCard className="bv-dash-grid__wide" title={t("executiveDashboard.premiumByMonth", "Premium written by month")} subtitle={t("executiveDashboard.last12Months", "Last 12 months")}
           table={{ columns: [{ field: "label", header: t("executiveDashboard.month", "Month") }, { field: "premium", header: t("executiveDashboard.premium"), format: "currency" }],
             rows: (trend.labels || []).map((label, i) => ({ label: trend.months?.[i] || label, premium: trend.premium?.[i] })) }}
-          exportName="premium-by-month">
-          {!dashboard ? <ChartSkeleton height="280px" /> : (
-            <ThemedChart type="bar" data={trendData} format="currency" reference={monthTarget} directLabels={false} ariaLabel={t("executiveDashboard.premiumByMonth", "Premium written by month")} />
-          )}
+          exportName="premium-by-month" state={execLoad}>
+          <ThemedChart type="bar" data={trendData} format="currency" reference={monthTarget} directLabels={false} ariaLabel={t("executiveDashboard.premiumByMonth", "Premium written by month")} emptyText={emptyChart} />
         </ChartCard>
 
         <ChartCard title={t("executiveDashboard.revenueByProductLine")} subtitle={t("executiveDashboard.inForceBook", "Whole book, sorted by premium")}
           table={{ columns: [{ field: "label", header: t("executiveDashboard.product") }, { field: "premium", header: t("executiveDashboard.premium"), format: "currency" }, { field: "policies", header: t("executiveDashboard.policies"), format: "count" }], rows: products }}
-          exportName="premium-by-product-line">
-          {!dashboard ? <ChartSkeleton height="280px" /> : (
-            <ThemedChart type="bar" data={productData} format="currency" options={{ indexAxis: "y" }} height={Math.max(200, products.length * 34 + 40)} />
-          )}
+          exportName="premium-by-product-line" state={execLoad} height={Math.max(200, products.length * 34 + 40)}>
+          <ThemedChart type="bar" data={productData} format="currency" options={{ indexAxis: "y" }} height={Math.max(200, products.length * 34 + 40)} emptyText={emptyChart} />
         </ChartCard>
 
         <ChartCard title={t("executiveDashboard.claimsStatusDistribution")} subtitle={t("executiveDashboard.claimsByStage", "Claims by stage, all open and closed")}
           table={{ columns: [{ field: "status", header: t("claimsDashboard.status") }, { field: "count", header: t("executiveDashboard.claimsCount", "Claims"), format: "count" }, { field: "estimate", header: t("executiveDashboard.estimate", "Estimate"), format: "currency" }], rows: claimsByStatus }}
-          exportName="claims-by-stage">
-          {!claimsSummary ? <ChartSkeleton height="280px" /> : (
-            <ThemedChart type="bar" data={claimsData} options={{ indexAxis: "y" }} height={Math.max(200, claimsByStatus.length * 34 + 40)} />
-          )}
+          exportName="claims-by-stage" state={claimsLoad} height={Math.max(200, claimsByStatus.length * 34 + 40)}>
+          <ThemedChart type="bar" data={claimsData} options={{ indexAxis: "y" }} height={Math.max(200, claimsByStatus.length * 34 + 40)} />
         </ChartCard>
 
         <Feature name="executive-regional">
         <ChartCard title={t("executiveDashboard.regionalPerformance")}>
-          <DataTable value={dashboard?.regionalPerformance || []} size="small" loading={!dashboard} className="regional-table">
+          <DataTable value={dashboard?.regionalPerformance || []} size="small" loading={execLoad.status === "loading" || execLoad.refreshing} emptyMessage={execLoad.status === "error" ? execLoad.error : t("dashboards.noData", "No data for this period")} className="regional-table">
             <Column field="region" header={t("executiveDashboard.region")} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => full(row.premium)} {...num} />
             <Column field="policies" header={t("executiveDashboard.policies")} {...num} />
@@ -216,7 +224,7 @@ const ExecutiveDashboard = () => {
         </Feature>
 
         <ChartCard title={t("executiveDashboard.topPerformingProducts")}>
-          <DataTable value={dashboard?.topProducts || []} size="small" loading={!dashboard} className="products-table"
+          <DataTable value={dashboard?.topProducts || []} size="small" loading={execLoad.status === "loading" || execLoad.refreshing} emptyMessage={execLoad.status === "error" ? execLoad.error : t("dashboards.noData", "No data for this period")} className="products-table"
             onRowClick={(e) => drillDown(navigate, LISTS.policiesIssued(null, null, e.data.product, listOrigin))} rowClassName={() => "bv-clickable-row"}>
             <Column field="product" header={t("executiveDashboard.product")} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => full(row.premium)} {...num} />
@@ -227,7 +235,7 @@ const ExecutiveDashboard = () => {
 
         <Feature name="sales-dashboard">
         <ChartCard className="bv-dash-grid__wide" title={t("executiveDashboard.topAgentsPerformance")}>
-          <DataTable value={dashboard?.agentPerformance || []} size="small" loading={!dashboard} className="agents-table">
+          <DataTable value={dashboard?.agentPerformance || []} size="small" loading={execLoad.status === "loading" || execLoad.refreshing} emptyMessage={execLoad.status === "error" ? execLoad.error : t("dashboards.noData", "No data for this period")} className="agents-table">
             <Column field="name" header={t("executiveDashboard.agent")} />
             <Column field="branch" header={t("executiveDashboard.branch")} body={(row) => row.branch || "-"} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => full(row.premium)} {...num} />
