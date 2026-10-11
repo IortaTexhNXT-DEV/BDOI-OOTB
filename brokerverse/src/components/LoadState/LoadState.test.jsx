@@ -28,7 +28,7 @@ describe("LoadState", () => {
 
   it("says when the record of the link does not exist", () => {
     render(<LoadState loading={false} notFound onBack={() => {}} />);
-    expect(screen.getByText("Record Not Found")).toBeInTheDocument();
+    expect(screen.getByText("Record not found")).toBeInTheDocument();
     expect(screen.getByText("Back")).toBeInTheDocument();
   });
 });

@@ -53,7 +53,7 @@ export const sourceProblems = (file, source) => {
 export const PROPER_NOUNS = new Set(`Toyota Lexus Excel Microsoft Word PowerPoint Google Gmail Outlook Viber WhatsApp BrokerVerse Talkbot TechNXT Philippines
 Philippine Filipino Manila Makati Cebu Davao Luzon Visayas Mindanao Metro January February March April May June July August September October November
 December Monday Tuesday Wednesday Thursday Friday Saturday Sunday PhilHealth Pag IBIG GCash Maya PayMaya Visa Mastercard Amex AppSupport SharePoint
-Teams Slack Zoom Docker AWS Azure Bancnet BancNet Guidewire Sapiens SAP Fiori English Tagalog Thai Unicode Bureau Internal Revenue Insurance Commission`.split(/\s+/));
+Teams Slack Zoom Docker AWS Azure Bancnet BancNet Guidewire Sapiens SAP Fiori English Tagalog Thai Unicode`.split(/\s+/));
 
 const LABEL_WORD = /[A-Za-z][A-Za-z'’]*/g;
 const SMALL_WORDS = new Set(["a", "an", "the", "of", "to", "for", "and", "or", "in", "on", "by", "with", "from", "per", "at", "vs", "as"]);
@@ -80,7 +80,7 @@ export const NAMED_TERMS = [
   "Request for Quotation", "Placement Slip", "Quotation Slip", "Broker Slip", "Official Receipt", "Acknowledgement Receipt", "Provisional Receipt",
   "Collection Receipt", "Statement of Account", "Certificate of Cover", "Cover Note", "Policy Schedule", "Endorsement Slip", "Debit Note", "Credit Note",
   "Scheme Master", "Product Configurator", "Journal Voucher", "Payment Voucher", "Auto Renewal Agreement", "Placement Report", "Comparison Report",
-  "Chart of Accounts", "Trial Balance", "General Ledger",
+  "Chart of Accounts", "Trial Balance", "General Ledger", "Bureau of Internal Revenue", "Insurance Commission",
 ];
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -137,10 +137,34 @@ export const toTitleCase = (text) => {
 export const isReportName = (key, text) => /^[A-Za-z][\w &/'’-]{2,60}\b(report|register|ledger|listing)s?$/i.test(String(text).trim())
   && !/(generat|fail|error|select|loading|no[A-Z]|empty)/.test(key.split(".").pop());
 
+/**
+ * A message headline (an error, empty-state, confirmation or toast title such as "This record could not be loaded",
+ * "No records found", "Changes saved"): sentence case even under a title key. Known by its key or by reading as a
+ * statement rather than a name.
+ */
+const MESSAGE_KEY = /(^|\.)(errors?|empty|toast|toasts|confirm|confirmation|notFound)(\.|$)|(error|empty|notFound|loadFailed|failed|success|saved|deleted|confirm|warning|noResults|noData|noRecords)[A-Z]?\w*Title$|^(error|empty|toast|confirm)/i;
+const STATEMENT = /^(no|this|these|that|there|your|you|we|nothing|something)\b|\b(could|cannot|can't|couldn't|is|are|was|were|has|have|had|will|won't|not|been|did|does|do)\b|[.!?]$/i;
+export const isMessageHeadline = (key, text) => MESSAGE_KEY.test(key) || STATEMENT.test(String(text).replace(/\{\{[^}]*\}\}/g, "").trim());
+
+/** Sentence case: the first word and proper nouns, acronyms and named terms keep their capitals. */
+export const toSentenceCase = (text) => {
+  let first = true;
+  const lowered = String(text).replace(/\{\{[^}]*\}\}|<[^>]+>|[A-Za-z][A-Za-z'’]*|[.:!?]\s|\s-\s|>/g, (tok) => {
+    if (/^([.:!?]\s|\s-\s|>)$/.test(tok)) { first = true; return tok; }
+    if (!/^[A-Za-z]/.test(tok)) return tok;
+    const out = first || keepsCapital(tok) ? tok : tok.charAt(0).toLowerCase() + tok.slice(1);
+    first = false;
+    return out;
+  });
+  return capitaliseTerms(lowered);
+};
+
+export const isTitleLevel = (key, text, titleKeys = new Set()) => (isTitleLevelKey(key, titleKeys) || isReportName(key, text)) && !isMessageHeadline(key, text);
+
 export const caseProblems = (bundle, titleKeys = new Set(), allow = []) => flatten(bundle)
   .filter(([key]) => !allow.some((a) => key === a || (a.endsWith(".") && key.startsWith(a))))
   .flatMap(([key, text]) => {
-    if (isTitleLevelKey(key, titleKeys) || isReportName(key, text)) return isTitleCase(text) ? [] : [`${key}: not Title Case: ${text}`];
+    if (isTitleLevel(key, text, titleKeys)) return isTitleCase(text) ? [] : [`${key}: not Title Case: ${text}`];
     if (isTitleCaseLabel(maskTerms(text))) return [`${key}: not sentence case: ${text}`];
     if (capitaliseTerms(text) !== text) return [`${key}: named term not in Title Case: ${text}`];
     return [];

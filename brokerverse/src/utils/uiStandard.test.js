@@ -5,7 +5,7 @@
  */
 import fs from "fs";
 import path from "path";
-import { bundleProblems, capitaliseTerms, caseProblems, copyProblems, isTitleCaseLabel, isTitleLevelKey, sourceProblems, titleKeysOf, toTitleCase } from "./uiStandard";
+import { bundleProblems, capitaliseTerms, caseProblems, copyProblems, isTitleCaseLabel, isTitleLevel, isTitleLevelKey, sourceProblems, titleKeysOf, toTitleCase } from "./uiStandard";
 import allow from "./uiStandard.allow.json";
 
 const SRC = path.join(__dirname, "..");
@@ -95,6 +95,9 @@ describe("two case levels", () => {
     expect(toTitleCase("loan bookings upload")).toBe("Loan Bookings Upload");
     expect(isTitleLevelKey("sidebar.Petty Cash")).toBe(true);
     expect(isTitleLevelKey("schemeIssuance.save")).toBe(false);
+    expect(isTitleLevel("common.loadFailedTitle", "This record could not be loaded")).toBe(false);
+    expect(isTitleLevel("claimDocs.emptyTitle", "No documents on the checklist")).toBe(false);
+    expect(isTitleLevel("schemeMaster.title", "Scheme Master")).toBe(true);
     expect(titleKeysOf('<TabPanel header={t("a.tab")}><Column header={t("a.col")} />')).toEqual(["a.tab"]);
   });
 
