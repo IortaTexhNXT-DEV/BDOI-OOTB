@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutCommissionTaxes, withDirectSend, enableFeatures } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes, withDirectSend, withReferenceCommissionControls, enableFeatures } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
@@ -27,6 +27,7 @@ async function waitForJob(jobId) {
 beforeAll(async () => {
   ctx = await setup();
   await withDirectSend();
+  await withReferenceCommissionControls();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['renewal-analytics', 'renewal-at-risk', 'win-back', 'quote-online-approval']);
   await withoutCommissionTaxes();

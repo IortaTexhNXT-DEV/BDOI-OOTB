@@ -57,6 +57,8 @@ export const SAMPLE_MASTERS = [
   { table: 'promotions', label: 'sample promotions', where: "id LIKE 'prm\\_sample\\_%'" },
   { table: 'discount_caps', label: 'sample discount caps', where: "remarks = 'Affinity partners of the Toyota owners club'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
+  { table: 'commission_rates', label: 'sample commission rules (TISPH panel)', where: "remarks = 'TISPH sample'" },
+  { table: 'sharing_schemes', label: 'sample sharing schemes', where: "remarks = 'TISPH sample'" },
   // fictional insurers of releases before the TISPH sample (migration 0365 removes them from a database in use)
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },

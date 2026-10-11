@@ -1501,6 +1501,90 @@ small.p-error {
   overflow-wrap: anywhere;
 }
 
+// A list that folds to cards on a phone: the screen passes responsiveLayout="stack" (PrimeReact then writes the
+// column heading into every cell) and this class. Under the breakpoint the heading row is hidden, each row becomes a
+// card of "heading: value" lines, the selection box and the row actions sit on its first line, and a two-line cell
+// (reference over its secondary text) reads left to right.
+@media (max-width: 640px) {
+  #{$shell} .p-datatable.bv-table--cards {
+    // the table and its body flow as blocks, so a row takes the height of its lines
+    > .p-datatable-wrapper > table,
+    > .p-datatable-wrapper > table > tbody {
+      display: block;
+    }
+
+    > .p-datatable-wrapper > table > thead,
+    > .p-datatable-wrapper > table > tfoot {
+      display: none;
+    }
+
+    > .p-datatable-wrapper > table > tbody > tr {
+      display: block;
+      height: auto;
+      margin: 0 0 10px;
+      padding: 6px 12px;
+      border: 1px solid $color-border;
+      border-radius: $radius-md;
+      background: $color-surface;
+
+      // the cell padding of the row rules above is forced, so it is forced back here
+      > td {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 0 !important;
+        gap: 12px;
+        border: 0;
+        font-size: 13px;
+        line-height: 18px;
+
+        > .p-column-title {
+          display: block;
+          flex: 0 0 38%;
+          font-size: 12px;
+          font-weight: 600;
+          color: $color-text-muted;
+        }
+
+        &.p-selection-column,
+        &.bv-actions {
+          justify-content: flex-end;
+          position: static;
+          box-shadow: none;
+        }
+      }
+    }
+
+    > .p-datatable-wrapper > table > tbody > tr.p-datatable-emptymessage {
+      border: 0;
+      background: transparent;
+    }
+
+    .bv-cell-stack {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0 6px;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// a cell with its reference on the first line and the secondary text, muted, under it
+#{$shell} .bv-cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  white-space: nowrap;
+  line-height: 18px;
+
+  &__sub {
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+}
+
 // a TabView used as a tab bar over one shared list (no panel content)
 .bv-tabbar .p-tabview-panels {
   display: none;

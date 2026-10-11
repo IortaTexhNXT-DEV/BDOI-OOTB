@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { loginAs, setup } from './helpers.js';
+import { loginAs, setup, withReferenceCommissionControls } from './helpers.js';
 import { many, one, pool, query } from '../src/db/pool.js';
 import { nextDocumentNumber } from '../src/lib/numbering.js';
 import { clearSettingsCache, setSetting } from '../src/lib/settings.js';
@@ -21,6 +21,7 @@ const num = (code, date, branch = null, lob = null) => one('SELECT next_document
 
 beforeAll(async () => {
   ctx = await setup();
+  await withReferenceCommissionControls();
   await ctx.api('post', '/users').send({ username: 'dn.claims', password: 'Welcome@123', displayName: 'DN Claims', roles: ['claims'] });
   claimsToken = await loginAs(ctx.app, 'dn.claims', 'Welcome@123');
 });
@@ -233,6 +234,8 @@ describe('commission rate matrix', () => {
   beforeAll(async () => {
     [ins, other] = await many("SELECT id, commission_rate FROM insurance_companies WHERE status = 'active' ORDER BY id LIMIT 2");
     motor = await one("SELECT id FROM products WHERE code = 'MOTOR'");
+    // the matrix mechanics on their own, without the sample rules of the TISPH panel (seeds/sample/96_commission_rules.sql)
+    await query('DELETE FROM commission_rates');
     await query('UPDATE insurance_companies SET commission_rate = 0.2 WHERE id = $1', [other.id]);
   });
   const add = (body) => ctx.api('post', '/commission-rates').send(body);

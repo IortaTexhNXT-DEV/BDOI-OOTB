@@ -356,6 +356,15 @@ export async function issuePolicy(db, src, body, userId) {
   // a policy brought by a distribution channel linked to a referrer earns the referrer's comsub (channels module)
   const { channelReferral } = await import('../channels/service.js');
   const details = { commissionDetails: src.doc?.commissionDetails || (await channelReferral(db, policyId)) || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
+  // the commission basis of the policy (commission/breakdown.js): the rates of the commission rules register frozen
+  // at booking; a Motor policy rated per peril is booked at its gross commission (net premium less insurer remitting)
+  const { computeBasis, policyForBasis } = await import('../commission/breakdown.js');
+  details.commissionBasis = await computeBasis(db, await policyForBasis(db, policyId), { details });
+  if (details.commissionBasis.rateBasis === 'issuing-remitting' && details.commissionBasis.status === 'ok') {
+    src.commissionAmount = details.commissionBasis.grossCommission;
+    if (num(src.netPremium) > 0) src.commissionRate = Math.round((details.commissionBasis.grossCommission / num(src.netPremium)) * 1e6) / 1e6;
+    await db.query('UPDATE policies SET commission_amount = $2 WHERE id = $1', [policyId, src.commissionAmount]);
+  }
   // Go-live migration of an in-force policy: no bill, booking journal or commission accrual (the old system billed it;
   // its open premium is loaded as an open item and the GL balances as opening balances). An open cover's policy
   // (src.billLater, marine module) is billed on its declarations instead.

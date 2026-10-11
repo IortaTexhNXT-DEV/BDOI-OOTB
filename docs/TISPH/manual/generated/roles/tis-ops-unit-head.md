@@ -43,6 +43,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
+| Accounts > Incentive | My Programs | View |
+| Accounts > Incentive | Calculations | Approve |
+| Accounts > Incentive | Approvals | Approve |
+| Accounts > Incentive | Statement | View |
+| Accounts > Incentive | Reports | View |
+| Commission | Commission Dashboard | Approve |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -101,8 +108,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
+| Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
@@ -119,6 +130,8 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
+- Approve or reject an incentive calculation batch submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user

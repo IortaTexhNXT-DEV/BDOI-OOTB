@@ -6,8 +6,8 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO currencies(code, name, symbol, decimals, is_base) VALUES
  ('PHP','Philippine Peso','₱',2,true),('USD','US Dollar','$',2,false),('EUR','Euro','€',2,false),('SGD','Singapore Dollar','S$',2,false),('JPY','Japanese Yen','¥',0,false)
 ON CONFLICT (code) DO NOTHING;
-INSERT INTO banks(code, name, swift_code) VALUES
- ('BDO','BDO Unibank, Inc.','BNORPHMM'),('BPI','Bank of the Philippine Islands','BOPIPHMM'),('MBT','Metropolitan Bank and Trust Company','MBTCPHMM'),('LBP','Land Bank of the Philippines','TLBPPHMM'),('SECB','Security Bank Corporation','SETCPHMM'),('CBC','China Banking Corporation','CHBKPHMM')
+INSERT INTO banks(code, name, short_name, swift_code) VALUES
+ ('BDO','BDO Unibank, Inc.','BDO','BNORPHMM'),('BPI','Bank of the Philippine Islands','BPI','BOPIPHMM'),('MBT','Metropolitan Bank and Trust Company','Metrobank','MBTCPHMM'),('LBP','Land Bank of the Philippines','Landbank','TLBPPHMM'),('SECB','Security Bank Corporation','Security Bank','SETCPHMM'),('CBC','China Banking Corporation','Chinabank','CHBKPHMM')
 ON CONFLICT (code) DO NOTHING;
 INSERT INTO insurance_companies(code, name, short_name, commission_rate, contact_email, status) VALUES
  ('MAPFRE','MAPFRE Insurance Corporation','MAPFRE',0.15,'uw@mapfre.example','active'),

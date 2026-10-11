@@ -82,9 +82,25 @@ A commission line reversed after payment (for example on a cancellation that ret
 3. Approve the eligible lines. The approval is made by {{roles:write:commission}} other than the user who prepared the lines.
 4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
 
-A new referrer is added with its type, level, tax details and bank account; the withholding tax can be switched off for a referrer, which recomputes its unpaid lines.
+A new referrer is added with its type (Agent, Sub-agent, External agent, TFS team member, Referral, Dealer), level, tax details and bank account, and the sharing scheme that pays it. The list shows the **SCHEME** of each payee.
+
+Where the **review of line changes** is on (TISPH), a rate change, a reversal or a withholding tax change on a line is a request with a reason: the line shows **Pending request** until {{roles:approve:commission}} other than the requester approves or rejects it on the **Requests** panel at the top of the list. Where the **remitted** rule is on (TISPH), a line becomes eligible once the premium is fully paid and the policy is on an approved remittance; a receipt reversed before that returns the line to accrued.
+
+A line of a policy on a sharing scheme shows its **Share** (basis, value and the minimum and maximum of the scheme); {{roles:write:commission-share}} can change the value within those limits with a reason.
 
 ![Commission > Agents/Referrer Accounts](images/screens-dashboards-and-commission/referrer-accounts.png)
+
+## Sharing Schemes {#sharing-schemes}
+
+{{screen:/commission/sharing-schemes}}
+
+A sharing scheme says how the commission of a policy is shared with the agent, dealer or referrer that brought it in. A scheme has a **Code** (3 to 20 capitals, digits or hyphens), a **Name**, the **Party types** it pays (external agents, TFS team members, referrals, dealers, sub-agents), the **Products** and **Insurers** it covers (all when empty), the **Policy type**, **Effective from** and **Effective to**, and its **Lines**: one line per payee, with the **Basis** (percent of the commission, percent of the net premium, a fixed amount or the variance share in points), the **Value** and the **Minimum** and **Maximum** a user may set on a policy. A scheme is paid once the policy is fully paid (**Pay when fully paid**) and may be combined with the referrer's own share.
+
+**New scheme** adds a draft; **Example** shows the shares of a sample policy. A scheme is submitted and decided on [Configuration Approvals](#posting-configuration-configuration-approvals-posting-rules-account-determination) by {{roles:approve:sharing-schemes}} other than its maker; it is **Scheduled** until its effective date and **Active** from then. A change to an active scheme is a new version that supersedes it on approval. {{roles:approve:sharing-schemes}} can **Suspend**, **Resume** and **End** a scheme with a reason; an ended scheme names its replacement or confirms that its payees are no longer shared with. **Assign** attaches a scheme to a referrer or a distribution channel, with an override within the scheme's limits; the assignment is approved in the same way. The **Assignments** tab lists the payees and channels on the scheme.
+
+The commission of a policy and its shares are shown on the policy record (**Commission** section): per peril the premium, the issuing, insurer net and TIS remitting rates, the commission and the variance share; the gross commission, the shares of the scheme and what TISPH keeps; the remittance and billing statement that carry the policy. A Motor policy booked without rates on the register is marked **Rates missing** and raised as an exception by the remittance run; once the rates are added, **Recompute** ({{roles:write:remittance}}) reads the register again while the policy is on no approved remittance.
+
+![Commission > Sharing Schemes](images/screens-dashboards-and-commission/sharing-schemes.png)
 
 ## Overriding, profit and contingent commission from insurers {#overriding-profit-and-contingent-commission-from-insurers}
 
