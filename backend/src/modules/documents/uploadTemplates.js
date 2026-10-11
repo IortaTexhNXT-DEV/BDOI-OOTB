@@ -244,6 +244,19 @@ export function staticUploads() {
       notes: ['These lines are matched to approved remittances on the same screen (Auto Match or Match).'],
     },
     {
+      id: 'endorsement-insurer-commission', file: 'Endorsement_Insurer_Commission_Template.xlsx', csv: 'Endorsement_Insurer_Commission_Template.csv',
+      title: 'Endorsement commission calculated by the insurer (TIS-BRD-COMM-07)',
+      menu: 'Operations > Policy > Endorsement > Upload insurer commission', route: 'POST /api/endorsements/insurer-commission/upload',
+      fileTypes: 'XLSX or CSV.', maxRows: 'No fixed limit.',
+      onError: 'Row by row: each valid row is recorded on its endorsement; a row with an unknown or already booked endorsement, or no number, is listed with its message. Upload the corrected rows again.',
+      columns: [
+        { key: 'endorsementNumber', header: 'Endorsement No', aliases: ['endorsement number'], required: true, format: 'BrokerVerse endorsement number, not yet booked', example: 'END-2026-00012' },
+        { key: 'commission', header: 'Commission', aliases: ['service fee', 'insurer commission'], required: true, format: 'Amount in PHP, 0 or more', example: '1200.50' },
+      ],
+      samples: [{ endorsementNumber: 'END-2026-00012', commission: '1200.50' }],
+      notes: ['Booking the endorsement takes this commission on its premium change instead of the commission ratio of the policy.'],
+    },
+    {
       id: 'users', file: 'Users_Provisioning_Template.xlsx', csv: 'Users_Provisioning_Template.csv', title: 'Users (named users and their roles)',
       menu: 'Not a screen upload: run by the System Administrator on the server with backend/scripts/provision-users.js (dry run first, then CONFIRM_PROVISION=yes). Single users are added in Master > Generals > User Management > User.',
       screen: 'Server script backend/scripts/provision-users.js, run by the System Administrator (single users: Master > Generals > User Management > User)', button: false,

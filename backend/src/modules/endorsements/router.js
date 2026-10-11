@@ -32,6 +32,11 @@ const completeBody = z.object({
 }).passthrough();
 
 define({
+  method: 'GET', path: '/insurer-commission/template', summary: 'Template of the insurer commission file: Endorsement No, Commission (XLSX)', screen: `${SCREEN} > Upload insurer commission`,
+  middleware: canWrite, response: '(xlsx file)',
+  handler: async (_req, res) => (await import('../documents/uploadTemplates.js')).sendTemplate(res, 'endorsement-insurer-commission'),
+});
+define({
   method: 'POST', path: '/insurer-commission/upload', summary: 'Bulk file of the commission / service fee the insurer calculated on endorsements (TIS-BRD-COMM-07): CSV or XLSX with the columns Endorsement No and Commission; a result per row, the valid rows recorded on endorsements not yet booked',
   screen: `${SCREEN} > Insurer commission upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
   response: { success: true, data: { message: 'Processed 2 rows: 1 created, 1 failed', total: 2, created: 1, failed: 1, errors: [{ row: 3, message: 'Endorsement END-X not found' }] } },
