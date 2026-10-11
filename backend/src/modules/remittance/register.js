@@ -133,6 +133,14 @@ export function actionsFor(r, user) {
   if (['draft', 'rejected'].includes(r.status) && hasPermission(user, 'write:remittance')) {
     const blocked = submitBlock(r);
     out.push({ code: 'submit', label: 'Submit for approval', allowed: !blocked, ...(blocked ? { blockedCode: 'INVALID', blockedReason: blocked } : {}) });
+    out.push({ code: 'cancel', label: 'Cancel remittance', allowed: true, reasonContext: 'remittance_cancel' });
+  }
+  // withdraw: the submitter or preparer of a remittance awaiting approval; revoke: an approver, before it is paid (lifecycle.js)
+  if (r.status === 'for-approval' && hasPermission(user, 'write:remittance') && [r.submitted_by, r.created_by].includes(user?.id)) {
+    out.push({ code: 'withdraw', label: 'Withdraw from approval', allowed: true, reasonContext: 'remittance_withdraw' });
+  }
+  if (r.status === 'approved' && !r.voucher_id && hasPermission(user, 'approve:remittance')) {
+    out.push({ code: 'revoke', label: 'Revoke approval', allowed: true, reasonContext: 'remittance_revoke' });
   }
   if (r.status !== 'cancelled') {
     out.push({ code: 'download-schedule-xlsx', label: 'Download schedule (XLSX)', allowed: true, href: `/remittance/remittances/${r.id}/schedule.xlsx` },

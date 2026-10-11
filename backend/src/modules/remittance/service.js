@@ -360,6 +360,9 @@ export async function validateRemittances(ids) {
     if (r.kind === 'direct-bill' && !r.insurance_company_id) errors.push('Insurer is missing');
     if (r.insurance_company_id && !(await one('SELECT 1 FROM insurance_companies WHERE id = $1 AND status = \'active\'', [r.insurance_company_id]))) errors.push('Insurer is not active');
     for (const x of await policiesOnOtherRemittances(r)) errors.push(`${x.policy_number} is also on ${x.remittance_number}`);
+    // a policy cancelled since the remittance was drafted is not remitted (GAP-REMIT-23)
+    for (const x of await many(`SELECT DISTINCT p.policy_number FROM remittance_lines rl JOIN policies p ON p.id = rl.policy_id
+        WHERE rl.remittance_id = $1 AND lower(p.status) = 'cancelled' ORDER BY 1`, [r.id])) errors.push(`${x.policy_number} is cancelled: cancel this remittance and remit the other policies again`);
     results.push({ id: r.id, code: r.remittance_number, valid: !errors.length, errors });
   }
   return { totalValidated: results.length, validCount: results.filter((x) => x.valid).length, invalidCount: results.filter((x) => !x.valid).length, results };

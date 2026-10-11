@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
 import { remittanceService, masterService } from "../../../services/remittanceService";
+import opsAccountingService from "../../../services/opsAccountingService";
 import { setDateFormat, setTimeZone } from "../../../utility/dateFormat";
 import Remittances from ".";
 import { mondayOf, recentWeeks, segmentOf, sortOf, sortParam, submittable, weekParam, weekText } from "./worklist";
@@ -12,6 +13,7 @@ jest.mock("../../../services/remittanceService", () => ({
   __esModule: true,
   remittanceService: {
     listRegister: jest.fn(), summary: jest.fn(), listSchedules: jest.fn(), submitRemittances: jest.fn(), download: jest.fn(),
+    withdrawRemittance: jest.fn(), cancelRemittance: jest.fn(), revokeRemittance: jest.fn(),
     exportRegisterPath: jest.fn(() => "/remittance/remittances/export.xlsx"), listImports: jest.fn(), importLimits: jest.fn(), getImport: jest.fn(),
   },
   masterService: { options: jest.fn() },
@@ -114,6 +116,28 @@ describe("Remittances worklist", () => {
     fireEvent.click(screen.getByRole("menuitem", { name: "Submit for approval" }));
     fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Submit 1 remittance" }));
     expect(await screen.findAllByText("REM-2026-00021 was submitted by J. Cruz at 10:12.")).not.toHaveLength(0);
+  });
+
+  it("cancels a draft from its row menu with a coded reason, then reloads the list", async () => {
+    opsAccountingService.masterRecords.mockResolvedValue({ rows: [{ code: "RCN-DUPLICATE", name: "Duplicate of another remittance", context: "remittance_cancel", requiresNote: false, sortOrder: 1, status: "Active" }] });
+    const CANCEL = { code: "cancel", label: "Cancel remittance", allowed: true, reasonContext: "remittance_cancel" };
+    remittanceService.listRegister.mockResolvedValue(page([row(31, { actions: [VIEW, CANCEL, ...DOWNLOADS] })]));
+    remittanceService.cancelRemittance.mockResolvedValue({ status: "Cancelled" });
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for REM-2026-00031" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Cancel remittance" }));
+    const dialog = within(await screen.findByRole("dialog"));
+    expect(dialog.getByText("Cancel REM-2026-00031")).toBeInTheDocument();
+    // no reason, no call
+    fireEvent.click(dialog.getByRole("button", { name: "Cancel remittance" }));
+    expect(await screen.findByText("Choose the reason")).toBeInTheDocument();
+    expect(remittanceService.cancelRemittance).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByLabelText(/Reason/), { key: "ArrowDown", code: "ArrowDown", keyCode: 40, which: 40, altKey: true });
+    fireEvent.click(await screen.findByRole("option", { name: /Duplicate of another remittance/, hidden: true }));
+    const calls = remittanceService.listRegister.mock.calls.length;
+    fireEvent.click(dialog.getByRole("button", { name: "Cancel remittance" }));
+    await waitFor(() => expect(remittanceService.cancelRemittance).toHaveBeenCalledWith("rm_31", { reasonCode: "RCN-DUPLICATE", note: undefined }));
+    await waitFor(() => expect(remittanceService.listRegister.mock.calls.length).toBeGreaterThan(calls));
   });
 
   it("a General Manager views only: no tick box, primary button, Run now or Import; the row menu has View and downloads", async () => {
