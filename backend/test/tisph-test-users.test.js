@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import bcrypt from 'bcryptjs';
 import { migrate } from '../src/db/migrate.js';
-import { seed, seedTisphTestUsers } from '../src/db/seed.js';
+import { isProductionEnvironment, seed, seedTisphTestUsers } from '../src/db/seed.js';
 import { pool, query } from '../src/db/pool.js';
+import { setSetting } from '../src/lib/settings.js';
 
 const PASSWORD = 'Tisph#Uat2026!';
 const EXPECTED = {
@@ -41,18 +42,35 @@ describe('TISPH test users', () => {
     expect(await testUsers()).toEqual([]);
   });
 
-  it('refuses to run in production', async () => {
-    const warnings = [];
-    const created = await seedTisphTestUsers({ log: () => {}, warn: (l) => warnings.push(l), source: { TISPH_TEST_USERS_PASSWORD: PASSWORD, NODE_ENV: 'production' } });
-    expect(created).toEqual([]);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toMatch(/^WARNING: TISPH_TEST_USERS_PASSWORD is set in production/);
+  it('refuses to run in the production environment (APP_ENVIRONMENT)', async () => {
+    for (const APP_ENVIRONMENT of ['Production', 'prod']) {
+      const warnings = [];
+      const created = await seedTisphTestUsers({ log: () => {}, warn: (l) => warnings.push(l), source: { TISPH_TEST_USERS_PASSWORD: PASSWORD, NODE_ENV: 'production', APP_ENVIRONMENT } });
+      expect(created).toEqual([]);
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toMatch(/^WARNING: TISPH_TEST_USERS_PASSWORD is set in production/);
+    }
     expect(await testUsers()).toEqual([]);
+  });
+
+  it('refuses to run when the environment name of Help > About is Production and APP_ENVIRONMENT is not set', async () => {
+    await setSetting('release.environment_label', 'Production');
+    try {
+      const warnings = [];
+      const created = await seedTisphTestUsers({ log: () => {}, warn: (l) => warnings.push(l), source: { TISPH_TEST_USERS_PASSWORD: PASSWORD, NODE_ENV: 'production' } });
+      expect(created).toEqual([]);
+      expect(warnings).toHaveLength(1);
+      expect(await testUsers()).toEqual([]);
+      // the name set for the deployment wins over the setting
+      expect(await isProductionEnvironment({ APP_ENVIRONMENT: 'UAT' })).toBe(false);
+    } finally {
+      await setSetting('release.environment_label', 'UAT');
+    }
   });
 
   it('creates one user per TISPH role with the password of the environment, to be changed at the first sign-in', async () => {
     const lines = [];
-    const created = await seedTisphTestUsers({ log: (l) => lines.push(l), source: { TISPH_TEST_USERS_PASSWORD: PASSWORD } });
+    const created = await seedTisphTestUsers({ log: (l) => lines.push(l), source: { TISPH_TEST_USERS_PASSWORD: PASSWORD, NODE_ENV: 'production', APP_ENVIRONMENT: 'UAT' } });
     expect(created.sort()).toEqual([...NAMES].sort());
     expect(lines).toEqual(['TISPH test users: 13 created, 0 already present']);
     const rows = await testUsers();
