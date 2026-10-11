@@ -99,13 +99,15 @@ define({
     const rows = parseUploadedRows(req.file);
     const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
     if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
-    const created = await withTransaction((db) => svc.uploadVouchers(db, rows.map((r) => mapColumns(r, svc.JV_UPLOAD_COLUMNS)), req.user));
+    const mode = String(await getSetting('journal.upload_mode', 'partial')) === 'all-or-nothing' ? 'all-or-nothing' : 'partial';
+    const created = await withTransaction((db) => svc.uploadVouchers(db, rows.map((r) => mapColumns(r, svc.JV_UPLOAD_COLUMNS)), req.user, { mode }));
     for (const jv of created) {
       await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'upload', after: { voucherRef: jv.voucher_ref, file: req.file.originalname, lines: jv.line_count } });
       await askApproval(jv, req);
     }
     const vouchers = created.map((jv) => ({ voucherRef: jv.voucher_ref, ...svc.headerRow(jv), lineCount: jv.line_count }));
-    ok(res, { total: rows.length, vouchers }, `${vouchers.length} journal voucher${vouchers.length === 1 ? '' : 's'} uploaded for approval`);
+    const failed = created.failed || [];
+    ok(res, { total: rows.length, mode, vouchers, failed }, `${vouchers.length} journal voucher${vouchers.length === 1 ? '' : 's'} uploaded for approval${failed.length ? `; ${failed.length} row error(s), those vouchers were not saved` : ''}`);
   },
 });
 define({
