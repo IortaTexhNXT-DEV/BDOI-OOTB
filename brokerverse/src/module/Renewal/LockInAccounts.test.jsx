@@ -81,7 +81,8 @@ describe("Renewal link", () => {
     }]);
     service.getRenewal.mockResolvedValue({ activities: [], notices: [] });
     wrap(<AtRiskAnalysis />, "/renewal/at-risk?renewal=rnw_1");
-    expect(await screen.findByRole("heading", { name: "Score breakdown" })).toBeInTheDocument();
+    // the deep link opens the renewal after the at-risk list and the renewal itself have loaded
+    expect(await screen.findByRole("heading", { name: "Score breakdown" }, { timeout: 3000 })).toBeInTheDocument();
     await waitFor(() => expect(service.getRenewal).toHaveBeenCalledWith("rnw_1"));
   });
 });
