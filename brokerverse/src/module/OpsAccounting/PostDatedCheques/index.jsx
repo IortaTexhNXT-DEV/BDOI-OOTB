@@ -14,6 +14,7 @@ import PageActions from "../../../components/PageActions";
 import RowActions from "../../../components/RowActions";
 import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
+import { KeyFacts } from "../../../components/RecordPage";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import service from "../../../services/opsAccountingService";
@@ -47,6 +48,7 @@ const PostDatedCheques = () => {
   const [action, setAction] = useState(null);
   const [chequeId, setChequeId] = useState(params.get("cheque"));
   const [transmittalId, setTransmittalId] = useState(null);
+  const [bucket, setBucket] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const write = hasPermission("write:pdc");
 
@@ -65,7 +67,10 @@ const PostDatedCheques = () => {
   useEffect(() => {
     Promise.all([service.banks(), service.insurers()]).then(([b, i]) => { setBanks(b); setInsurers(i); }).catch(() => {});
   }, []);
-  useEffect(() => setSelected([]), [tab, filters]);
+  useEffect(() => {
+    setSelected([]);
+    setBucket(null);
+  }, [tab, filters]);
 
   const refresh = () => {
     setRefreshKey((k) => k + 1);
@@ -142,40 +147,61 @@ const PostDatedCheques = () => {
 
   const log = data?.log;
   const rows = useMemo(() => {
-    if (tab === "follow-up") return data?.followUp?.rows || [];
-    return log?.rows || [];
-  }, [tab, data, log]);
+    const list = tab === "follow-up" ? data?.followUp?.rows || [] : log?.rows || [];
+    return bucket ? list.filter((r) => r.ageing?.code === bucket) : list;
+  }, [tab, data, log, bucket]);
+  // the AR column is shown only when a cheque of the list has its receipt (an open cheque never has one)
+  const withAr = useMemo(() => rows.some((r) => r.receiptNumber), [rows]);
   const ageing = log?.ageing;
   const bucketLabels = ageing ? [t("opsAcc.pdc.current"), `1-${ageing.buckets[0]}`, `${ageing.buckets[0] + 1}-${ageing.buckets[1]}`,
     `${ageing.buckets[1] + 1}-${ageing.buckets[2]}`, t("opsAcc.pdc.over", { days: ageing.buckets[2] })] : [];
+  const ageingFacts = ageing ? ["current", "b1", "b2", "b3", "b4"].map((k, i) => {
+    const amount = Number(ageing.amounts[k] || 0);
+    return { key: k, label: bucketLabels[i], value: amount ? money(amount) : "–", muted: !amount, active: bucket === k,
+      onClick: amount ? () => setBucket(bucket === k ? null : k) : undefined };
+  }) : [];
 
   const tabLabel = (key) => {
     const n = key === "follow-up" ? data?.followUp?.rows.length : log?.counts?.[key];
     return n === undefined || n === null || key === "transmittals" ? t(`opsAcc.pdc.tabs.${key}`) : `${t(`opsAcc.pdc.tabs.${key}`)} (${n})`;
   };
 
+  const partnerOf = (r) => (r.payee === "tisph" ? <span title={t("opsAcc.pdc.payees.tisph")}>{t("opsAcc.pdc.tis")}</span>
+    : <span title={r.insurerName || undefined}>{r.insurerShortName || r.insurerName || ""}</span>);
   const table = (
     <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={20} emptyMessage={t("opsAcc.none")}
+      className="pdc-table bv-table--cards" responsiveLayout="stack" breakpoint="640px"
       selection={write ? selected : undefined} onSelectionChange={(e) => setSelected(e.value)} selectionMode={write ? "checkbox" : undefined}>
       {write ? <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} /> : null}
       <Column header={t("opsAcc.pdc.number")} body={(r) => (
-        <>
+        <span className="bv-cell-stack">
           <Button link className="pdc-link" label={r.pdcNumber} onClick={() => openCheque(r.id)} />
-          {r.setNumber ? <div className="pe-muted text-sm">{r.setNumber}</div> : null}
-        </>
+          {r.setNumber ? <span className="bv-cell-stack__sub">{r.setNumber}</span> : null}
+        </span>
       )} />
-      <Column header={t("opsAcc.pdc.clientPolicy")} body={(r) => <>{r.clientName}<div className="pe-muted text-sm">{r.policyNumber}</div></>} />
-      <Column header={t("opsAcc.pdc.inst")} body={(r) => r.instalmentText || "—"} />
-      <Column field="insurerName" header={t("opsAcc.pdc.insurancePartner")} />
-      <Column header={t("opsAcc.pdc.bankCheque")} body={(r) => <>{r.bankName}<div className="pe-muted text-sm">{r.chequeNumber}</div></>} />
-      <Column header={t("opsAcc.pdc.chequeDate")} body={(r) => date(r.chequeDate)} />
+      <Column header={t("opsAcc.pdc.clientPolicy")} body={(r) => (
+        <span className="bv-cell-stack">
+          <span className="pdc-client" title={r.clientName || undefined}>{r.clientName}</span>
+          <span className="bv-cell-stack__sub">{r.policyNumber}</span>
+        </span>
+      )} />
+      <Column header={t("opsAcc.pdc.inst")} body={(r) => (r.instalmentSeq ? `${r.instalmentSeq}/${r.instalmentCount || r.instalmentSeq}` : "—")} />
+      <Column header={t("opsAcc.pdc.insurancePartner")} body={partnerOf} />
+      <Column header={t("opsAcc.pdc.bankCheque")} body={(r) => (
+        <span className="pdc-nowrap" title={r.bankName || undefined}>{r.bankShortName || r.bankName}{r.bankShortName || r.bankName ? " " : ""}{r.chequeNumber}</span>
+      )} />
+      <Column header={t("opsAcc.pdc.chequeDate")} body={(r) => <span className="pdc-nowrap">{date(r.chequeDate)}</span>} />
       <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
-      <Column header={t("opsAcc.pdc.custody")} body={(r) => r.custodyText} />
+      <Column header={t("opsAcc.pdc.custody")} body={(r) => <span className="pdc-nowrap" title={r.custodyText || undefined}>{r.custodyShort || r.custodyText}</span>} />
       <Column header={t("opsAcc.statusLabel")} body={(r) => <StatusChip code={r.status} label={r.statusText} />} />
       {tab === "follow-up" ? <Column field="followUpReason" header={t("opsAcc.pdc.followUpReason")} />
-        : <Column header={t("opsAcc.pdc.ageing")} body={(r) => r.ageing?.label || ""} />}
-      <Column header={t("opsAcc.pdc.ar")} body={(r) => (r.receiptNumber ? `${r.receiptNumber}${r.receiptCancelled ? ` (${t("opsAcc.status.cancelled")})` : ""}` : "")} />
-      <Column body={(r) => (
+        : <Column header={t("opsAcc.pdc.ageing")} body={(r) => <span className="pdc-nowrap">{r.ageing?.label || ""}</span>} />}
+      {withAr ? (
+        <Column header={t("opsAcc.pdc.ar")} body={(r) => (
+          <span className="pdc-nowrap">{r.receiptNumber ? `${r.receiptNumber}${r.receiptCancelled ? ` (${t("opsAcc.status.cancelled")})` : ""}` : ""}</span>
+        )} />
+      ) : null}
+      <Column header={<span className="p-sr-only">{t("opsAcc.pdc.actions")}</span>} className="bv-actions" headerClassName="bv-actions" body={(r) => (
         <RowActions label={t("opsAcc.pdc.actionsFor", { number: r.pdcNumber })} actions={chequeActions(r).map((a) => ({ ...a, label: t(`opsAcc.pdc.menu.${a.code}`) }))}
           onAction={(a) => run(a.code, r)} />
       )} />
@@ -212,7 +238,7 @@ const PostDatedCheques = () => {
           ) : null}
         </PageActions>
       </PageHeader>
-      <StatCards items={[
+      <StatCards className="bv-stat-cards--wide" items={[
         { key: "atTis", label: t("opsAcc.pdc.atTis"), value: s ? money(s.atTisAmount) : undefined, note: s ? t("opsAcc.pdc.chequesCount", { count: s.atTis }) : null, onClick: () => setTab("at-tis"), active: tab === "at-tis" },
         { key: "partners", label: t("opsAcc.pdc.withPartners"), value: s ? money(s.withPartnersAmount) : undefined, note: s ? t("opsAcc.pdc.chequesCount", { count: s.withPartners }) : null,
           onClick: () => setTab("with-partners"), active: tab === "with-partners" },
@@ -234,18 +260,18 @@ const PostDatedCheques = () => {
             <>
               <Dropdown value={filters.payee} options={["insurance-partner", "tisph"].map((v) => ({ label: t(`opsAcc.pdc.payees.${v}`), value: v }))} showClear
                 placeholder={t("opsAcc.pdc.payee")} onChange={(e) => setFilters({ ...filters, payee: e.value })} aria-label={t("opsAcc.pdc.payee")} />
-              <DateField id="pdc-from" value={filters.chequeFrom} placeholder={t("opsAcc.pdc.chequeFrom")} onChange={(e) => setFilters({ ...filters, chequeFrom: e.target.value })} />
-              <DateField id="pdc-to" value={filters.chequeTo} placeholder={t("opsAcc.pdc.chequeTo")} onChange={(e) => setFilters({ ...filters, chequeTo: e.target.value })} />
+              <span className="pdc-filters__date">
+                <DateField id="pdc-from" value={filters.chequeFrom} placeholder={t("opsAcc.pdc.chequeFrom")} onChange={(e) => setFilters({ ...filters, chequeFrom: e.target.value })} />
+              </span>
+              <span className="pdc-filters__date">
+                <DateField id="pdc-to" value={filters.chequeTo} placeholder={t("opsAcc.pdc.chequeTo")} onChange={(e) => setFilters({ ...filters, chequeTo: e.target.value })} />
+              </span>
               <InputText className="pdc-filters__search" value={filters.search} placeholder={t("opsAcc.pdc.searchHint")} aria-label={t("opsAcc.search")}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })} />
             </>
           ) : null}
         </div>
-        {tab !== "transmittals" && ageing ? (
-          <div className="pdc-ageing" aria-label={t("opsAcc.pdc.ageing")}>
-            {["current", "b1", "b2", "b3", "b4"].map((k, i) => <span key={k}>{bucketLabels[i]}<b>{money(ageing.amounts[k])}</b></span>)}
-          </div>
-        ) : null}
+        {tab !== "transmittals" && ageing ? <KeyFacts className="bv-key-facts--plain bv-key-facts--strip pdc-ageing" items={ageingFacts} /> : null}
         {tab === "transmittals" ? transmittalTable : table}
       </div>
 

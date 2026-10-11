@@ -25,7 +25,7 @@ const chequeFacts = (t, c) => [
   { label: t("opsAcc.pdc.billLabel"), value: c.billNumber },
   { label: t("opsAcc.pdc.inst"), value: c.instalmentText },
   { label: t("opsAcc.pdc.payee"), value: c.payeeText },
-  { label: t("opsAcc.pdc.insurancePartner"), value: c.insurerName },
+  { label: t("opsAcc.pdc.insurancePartner"), value: c.payee === "tisph" ? t("opsAcc.pdc.tis") : c.insurerName },
   { label: t("opsAcc.pdc.bank"), value: c.bankName },
   { label: t("opsAcc.pdc.branch"), value: c.branch },
   { label: t("opsAcc.pdc.accountNumber"), value: c.accountNumber },
@@ -119,7 +119,9 @@ const ChequeDetail = ({ chequeId, refreshKey, onHide, onAction }) => {
                 <DataTable value={data.set.cheques} dataKey="id" size="small" rowClassName={(r) => (r.id === c.id ? "font-semibold" : "")}>
                   <Column header={t("opsAcc.pdc.inst")} body={(r) => r.instalmentText || "—"} />
                   <Column field="pdcNumber" header={t("opsAcc.pdc.number")} />
-                  <Column header={t("opsAcc.pdc.bankCheque")} body={(r) => `${r.bankName || ""} ${r.chequeNumber}`} />
+                  <Column header={t("opsAcc.pdc.bankCheque")} body={(r) => (
+                    <span className="pdc-nowrap" title={r.bankName || undefined}>{`${r.bankShortName || r.bankName || ""} ${r.chequeNumber}`.trim()}</span>
+                  )} />
                   <Column header={t("opsAcc.pdc.chequeDate")} body={(r) => date(r.chequeDate)} />
                   <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
                   <Column header={t("opsAcc.statusLabel")} body={(r) => <StatusChip code={r.status} label={r.statusText} />} />

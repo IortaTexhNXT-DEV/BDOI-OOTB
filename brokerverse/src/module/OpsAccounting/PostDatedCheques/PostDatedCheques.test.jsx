@@ -16,9 +16,10 @@ jest.mock("../../../services/opsAccountingService", () => ({
 }));
 
 const cheque = (over = {}) => ({
-  id: "pdc_1", pdcNumber: "PDC-2026-00121", setId: "pds_1", setNumber: "PCS-2026-00031", clientName: "Andrea Villanueva", policyNumber: "POL-2026-90004", instalmentText: "1 of 4",
-  payee: "insurance-partner", payeeText: "Insurance Partner", insurerId: 3, insurerName: "Standard Insurance Co., Inc.", bankName: "BPI", chequeNumber: "0045121",
-  chequeDate: "2026-10-15", amount: 12787.5, custody: "tis-vault", custodyText: "TIS vault, Vault A-12", status: "on-hand", statusText: "Received at TIS",
+  id: "pdc_1", pdcNumber: "PDC-2026-00121", setId: "pds_1", setNumber: "PCS-2026-00031", clientName: "Andrea Villanueva", policyNumber: "POL-2026-90004", instalmentSeq: 1, instalmentCount: 4, instalmentText: "1 of 4",
+  payee: "insurance-partner", payeeText: "Insurance Partner", insurerId: 3, insurerName: "Standard Insurance Co., Inc.", insurerShortName: "Standard",
+  bankName: "Bank of the Philippine Islands", bankShortName: "BPI", chequeNumber: "0045121", chequeDate: "2026-10-15", amount: 12787.5,
+  custody: "tis-vault", custodyText: "TIS vault, Vault A-12", custodyShort: "TIS vault", status: "on-hand", statusText: "Received at TIS",
   ageing: { code: "current", label: "Current" }, receiptNumber: null, ...over,
 });
 const LOG = (rows) => ({
@@ -34,7 +35,8 @@ describe("post-dated cheque log", () => {
     localStorage.setItem("USER_ROLES", JSON.stringify(["tis-ccd-pdu"]));
     service.banks.mockResolvedValue([{ label: "BPI", value: "2" }]);
     service.insurers.mockResolvedValue([{ label: "Standard Insurance Co., Inc.", value: 3 }]);
-    service.pdcs.mockResolvedValue(LOG([cheque(), cheque({ id: "pdc_2", pdcNumber: "PDC-2026-00122", instalmentText: "2 of 4", chequeNumber: "0045122", chequeDate: "2026-11-15" })]));
+    service.pdcs.mockResolvedValue(LOG([cheque(), cheque({ id: "pdc_2", pdcNumber: "PDC-2026-00122", instalmentSeq: 2, instalmentText: "2 of 4", chequeNumber: "0045122", chequeDate: "2026-11-15", payee: "tisph", insurerId: null,
+      insurerName: null, insurerShortName: null })]));
   });
   afterEach(() => localStorage.clear());
 
@@ -61,18 +63,27 @@ describe("post-dated cheque log", () => {
     expect(nextCheque("abc")).toBe("");
   });
 
-  it("lists the cheques with their set, instalment, partner, custody and ageing, and forwards the ticked ones", async () => {
+  it("lists the cheques with their set, instalment, partner, bank and custody in short, the ageing by bucket, and forwards the ticked ones", async () => {
     service.forwardPdcs.mockResolvedValue({ transmittal: { transmittalNumber: "PT-2026-00008", insurerName: "Standard Insurance Co., Inc." } });
     render(<MemoryRouter initialEntries={["/accounts/post-dated-cheques"]}><PostDatedCheques /></MemoryRouter>);
     expect(await screen.findByText("PDC-2026-00121")).toBeInTheDocument();
-    expect(screen.getAllByText("PCS-2026-00031", { selector: "div" })).toHaveLength(2);
-    expect(screen.getAllByText("TIS vault, Vault A-12")).toHaveLength(2);
+    expect(screen.getAllByText("PCS-2026-00031", { selector: "span" })).toHaveLength(2);
+    expect(screen.getAllByText("TIS vault")).toHaveLength(2);
+    expect(screen.getAllByText("TIS vault")[0]).toHaveAttribute("title", "TIS vault, Vault A-12");
+    expect(screen.getByText("BPI 0045121")).toHaveAttribute("title", "Bank of the Philippine Islands");
+    expect(screen.getByText("1/4")).toBeInTheDocument();
+    expect(screen.getByText("Standard")).toHaveAttribute("title", "Standard Insurance Co., Inc.");
+    expect(screen.getByText("TIS")).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "AR" })).not.toBeInTheDocument();
+    // the ageing strip: a zero bucket is a dash, a bucket with cheques filters the list
+    expect(screen.getAllByText("–")).toHaveLength(4);
+    fireEvent.click(screen.getByRole("button", { name: "₱25,575.00" }));
+    expect(screen.getByRole("button", { name: "₱25,575.00" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("tab", { name: "All open (2)" })).toBeInTheDocument();
     const forward = screen.getByRole("button", { name: "Forward to Insurance Partner" });
     expect(forward).toBeDisabled();
     const boxes = screen.getAllByRole("checkbox");
     fireEvent.click(boxes[1]);
-    fireEvent.click(boxes[2]);
     await waitFor(() => expect(forward).toBeEnabled());
     fireEvent.click(forward);
     const dialog = await screen.findByRole("dialog");
