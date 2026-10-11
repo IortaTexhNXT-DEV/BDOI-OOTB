@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import FileField from "../../../components/FileField";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -17,7 +18,6 @@ import { DOC_TYPES, isoDay, showDate, showDateTime } from "./common";
 const KycDocuments = ({ clientId, documents = [], signatories = [], owners = [], onUploaded }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
-  const fileRef = useRef(null);
   const docTypes = DOC_TYPES.map((value) => ({ value, label: t(`onboarding.docType.${value}`, { defaultValue: value }) }));
   const related = [
     { value: "client", label: t("onboarding.relatedClient") },
@@ -34,7 +34,6 @@ const KycDocuments = ({ clientId, documents = [], signatories = [], owners = [],
       const r = await onboardingService.uploadDocument(clientId, form.file, { docType: form.docType, relatedType, relatedId, description: form.description, expiryDate: isoDay(form.expiryDate) });
       toast.current?.show({ severity: "success", summary: r.message });
       setForm((f) => ({ ...f, description: "", expiryDate: null, file: null }));
-      if (fileRef.current) fileRef.current.value = "";
       onUploaded?.();
     } catch (e) {
       toast.current?.show({ severity: "error", summary: errorMessage(e, t("onboarding.uploadFailed")) });
@@ -65,7 +64,7 @@ const KycDocuments = ({ clientId, documents = [], signatories = [], owners = [],
           <Dropdown value={form.related} options={related} onChange={(e) => setForm((f) => ({ ...f, related: e.value }))} placeholder={t("onboarding.colRelated")} />
           <InputText value={form.description} placeholder={t("onboarding.colDescription")} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
           <Calendar value={form.expiryDate} placeholder={t("onboarding.colExpiry")} onChange={(e) => setForm((f) => ({ ...f, expiryDate: e.value }))} showIcon dateFormat="dd M yy" />
-          <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" aria-label={t("onboarding.chooseFile")} onChange={(e) => setForm((f) => ({ ...f, file: e.target.files?.[0] || null }))} />
+          <FileField accept=".pdf,.jpg,.jpeg,.png" value={form.file || null} chooseLabel={t("onboarding.chooseFile")} onChange={(file) => setForm((f) => ({ ...f, file }))} />
           <Button icon="pi pi-upload" label={t("onboarding.upload")} loading={saving} disabled={!form.file} onClick={save} />
         </div>
       ) : null}

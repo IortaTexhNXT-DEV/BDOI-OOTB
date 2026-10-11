@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
+import FileField from "../../components/FileField";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -1150,7 +1151,7 @@ export const DocumentManager = () => {
               </div>
               <div className="field col-12">
                 <label htmlFor="dm-file">{t("documentManager.uploadLayout")}</label>
-                <input id="dm-file" type="file" accept={(merge.extensions || [".txt", ".md"]).join(",")} onChange={(e) => readLayout(e.target.files?.[0])} />
+                <FileField id="dm-file" accept={(merge.extensions || [".txt", ".md"]).join(",")} value={null} onChange={(f) => f && readLayout(f)} />
                 <small className="block mt-1 pc-muted">{t("documentManager.uploadHelp", { extensions: (merge.extensions || []).join(", ") })}</small>
                 <FieldError error={errors.layout} />
                 {(selected.layoutChanged || selected.hasLayout) && !selected.removeLayout && (

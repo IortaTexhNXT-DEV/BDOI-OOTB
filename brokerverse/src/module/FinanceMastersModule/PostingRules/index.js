@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
@@ -12,7 +11,8 @@ import { InputSwitch } from "primereact/inputswitch";
 import { SelectButton } from "primereact/selectbutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import SvgDot from "../../../assets/icons/SvgDot";
+import PageHeader from "../../../components/PageHeader";
+import TechnicalDetails from "../../../components/TechnicalDetails";
 import DetailDialog from "../../../components/DetailDialog";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { ActivityLog, fromPostingRuleHistory, humanize } from "../../../components/ActivityLog";
@@ -221,13 +221,7 @@ const PostingRules = () => {
   return (
     <div className="posting-rules">
       <Toast ref={toast} />
-      <div className="grid m-0">
-        <div className="col-12 p-0">
-          <div className="posting-rules__title">{t("postingRules.title")}</div>
-          <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
-            model={[{ label: t("postingRules.finance") }, { label: t("postingRules.title"), url: "/master/finance/posting-rules" }]} />
-        </div>
-      </div>
+      <PageHeader title={t("postingRules.title")} home={t("postingRules.master")} section={t("postingRules.finance")} trail={[t("postingRules.title")]} />
 
       <div className="grid">
         <div className="col-12 xl:col-5">
@@ -241,7 +235,7 @@ const PostingRules = () => {
             </div>
             <DataTable value={shown} loading={loading} selectionMode="single" selection={selected} onSelectionChange={(e) => choose(e.value)} dataKey="eventCode"
               size="small" stripedRows scrollable scrollHeight="560px" emptyMessage={t("postingRules.noEvents")}>
-              <Column header={t("postingRules.event")} body={(e) => (<div><div className="font-semibold">{e.label}</div><code className="text-500">{e.eventCode}</code> <span className="text-500 text-sm">· {e.module}</span></div>)} />
+              <Column header={t("postingRules.event")} body={(e) => (<div title={e.eventCode}><div className="font-semibold">{e.label}</div><span className="text-500 text-sm">{e.module}</span></div>)} />
               <Column header={t("postingRules.version")} style={{ width: "5.5rem" }} body={(e) => (
                 <span className="flex flex-column gap-1">
                   {e.activeVersion ? <Tag value={`v${e.activeVersion}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />}
@@ -259,7 +253,6 @@ const PostingRules = () => {
               <div className="flex justify-content-between align-items-start flex-wrap gap-2">
                 <div>
                   <div className="posting-rules__event">{selected.label}</div>
-                  <code>{selected.eventCode}</code>
                   {selected.perParticipant && <Tag className="ml-2" value={t("postingRules.coInsuranceAware")} severity="warning" icon="pi pi-users" />}
                   {rule?.description && <p className="text-600 mt-2 mb-0">{rule.description}</p>}
                 </div>
@@ -271,10 +264,16 @@ const PostingRules = () => {
 
               <div className="posting-rules__chips">
                 <span className="text-600 mr-2">{t("postingRules.amounts")}:</span>
-                {(selected.amountKeys || []).map((k) => <Tag key={k} value={k} severity="info" className="mr-1 mb-1" />)}
+                {(selected.amountKeys || []).map((k) => <Tag key={k} value={amountName(k)} severity="info" className="mr-1 mb-1" />)}
                 <span className="text-600 mx-2">{t("postingRules.variables")}:</span>
-                {(selected.vars || []).map((k) => <code key={k} className="mr-2">{`{{${k}}}`}</code>)}
+                <span>{(selected.vars || []).map((k) => humanize(k)).join(", ")}</span>
               </div>
+              <TechnicalDetails className="mb-2" permission="write:posting-rules" blocks={[
+                { label: t("postingRules.eventCode", "Event code"), text: selected.eventCode },
+                { label: t("postingRules.amountKeys", "Amount keys"), text: (selected.amountKeys || []).join(", ") },
+                { label: t("postingRules.variableKeys", "Narration fields"), text: (selected.vars || []).map((k) => `{{${k}}}`).join(" ") },
+                ...(rule ? [{ label: t("postingRules.narrationTemplate", "Narration template"), text: rule.narration || "" }] : []),
+              ]} />
 
               {!edit && rule && (
                 <>
