@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
+import FileField from "../../components/FileField";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
@@ -121,7 +122,7 @@ const DirectPlacementForm = () => {
         {needsLto && !blocked && (
           <div className="mt-3">
             <label htmlFor="lto-file">{t("placement.placementSlip.ltoDocument")} *</label>
-            <input id="lto-file" type="file" accept="application/pdf,image/*" onChange={(e) => setLtoFile(e.target.files?.[0] || null)} />
+            <FileField id="lto-file" accept="application/pdf,image/*" value={ltoFile} onChange={setLtoFile} />
             <small className="hint">{t("placement.placementSlip.ltoDocumentHint")}</small>
           </div>
         )}

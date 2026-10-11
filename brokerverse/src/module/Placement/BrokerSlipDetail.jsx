@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
+import OffersTable from "./OffersTable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
@@ -152,27 +153,6 @@ const BrokerSlipDetail = () => {
     }
   };
 
-  const offerRow = (o) => (
-    <tr key={o.id} className={o.isBest ? "best-row" : ""}>
-      <td><strong>{o.insuranceCompanyName}</strong><div className="muted small">{o.offerNumber}</div></td>
-      <td><StatusTag status={o.status} /></td>
-      <td className="num">{o.premium == null ? "-" : formatCurrency(o.premium)}</td>
-      <td className="num">{o.rate == null ? "-" : `${o.rate}%`}</td>
-      <td className="num">{o.taxes == null ? "-" : formatCurrency(o.taxes)}</td>
-      <td className="num">{o.premiumTotal == null ? "-" : <strong>{formatCurrency(o.premiumTotal)}</strong>}</td>
-      <td className="num">{o.status === "offered" ? `${o.offeredShare}%` : "-"}</td>
-      <td>{o.deductibles || (o.declineReason ? <span className="muted">{o.declineReason}</span> : "-")}</td>
-      <td>{o.terms || "-"}</td>
-      <td>{formatDate(o.validityDate)}</td>
-      <td>{o.insurerReference || "-"}{o.attachmentKey && <Button icon="pi pi-paperclip" text rounded onClick={() => openAttachment(o.attachmentKey)} tooltip={o.attachmentName} aria-label={o.attachmentName} />}</td>
-      <td className="actions-cell">
-        {canSelect && <Button label={o.status === "pending" ? t("placement.actions.recordResponse") : t("placement.actions.edit")} size="small" text icon="pi pi-pencil"
-          onClick={() => setOfferForm({ ...o, status: o.status === "pending" ? "offered" : o.status, validityDate: fromIso(o.validityDate) })} />}
-        <Button icon="pi pi-print" text rounded size="small" onClick={() => printSlip(o.insuranceCompanyId)} aria-label={t("placement.actions.printSlip")} tooltip={t("placement.actions.printSlip")} />
-      </td>
-    </tr>
-  );
-
   return (
     <div className="placement-page">
       <Toast ref={toast} />
@@ -210,20 +190,13 @@ const BrokerSlipDetail = () => {
       <div className="placement-card">
             <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)}>
               <TabPanel header={t("placement.brokerSlip.tabResponsesTitle")}>
-                <div className="table-scroll">
-                  <table className="participant-table readonly offers">
-                    <thead><tr>
-                      <th>{t("placement.fields.insurer")}</th><th>{t("placement.fields.status")}</th><th className="num">{t("placement.fields.premium")}</th><th className="num">{t("placement.fields.rate")}</th>
-                      <th className="num">{t("placement.fields.taxes")}</th><th className="num">{t("placement.fields.grossPremium")}</th><th className="num">{t("placement.fields.line")}</th>
-                      <th>{t("placement.fields.deductibles")}</th><th>{t("placement.fields.terms")}</th><th>{t("placement.fields.validUntil")}</th><th>{t("placement.fields.reference")}</th><th />
-                    </tr></thead>
-                    <tbody>{slip.offers.map((o) => offerRow(slip.comparison.rows.find((r) => r.id === o.id) || o))}</tbody>
-                  </table>
-                </div>
+                <OffersTable offers={slip.offers.map((o) => slip.comparison.rows.find((r) => r.id === o.id) || o)} statusOf={(st) => <StatusTag status={st} />}
+                  money={formatCurrency} date={formatDate} canEdit={canSelect} onPrint={(o) => printSlip(o.insuranceCompanyId)} onAttachment={(o) => openAttachment(o.attachmentKey)}
+                  onEdit={(o) => setOfferForm({ ...o, status: o.status === "pending" ? "offered" : o.status, validityDate: fromIso(o.validityDate) })} />
               </TabPanel>
               {offered.length > 0 && (
                 <TabPanel header={t("placement.brokerSlip.tabCompare")}>
-                  <div className="table-scroll"><table className="participant-table compare">
+                  <div className="table-fit"><table className="participant-table compare">
                     <thead><tr>
                       <th className="center">{t("placement.compare.select")}</th><th className="center">{t("placement.participants.lead")}</th><th>{t("placement.fields.insurer")}</th>
                       <th className="num">{t("placement.fields.grossPremium")}</th><th className="num">{t("placement.compare.vsBest")}</th><th className="num">{t("placement.fields.rate")}</th>
@@ -242,12 +215,7 @@ const BrokerSlipDetail = () => {
                           <td className="num">{o.differenceFromBest ? `+${formatCurrency(o.differenceFromBest)}` : "—"}</td>
                           <td className="num">{o.rate == null ? "—" : `${o.rate}%`}</td>
                           <td className="terms-cell">
-                            {o.deductibles || o.terms ? (
-                              <>
-                                {o.deductibles ? <span>{o.deductibles}</span> : null}
-                                {o.terms ? <span className="muted">{o.terms}</span> : null}
-                              </>
-                            ) : "—"}
+                            <span className="clamp-2" title={[o.deductibles, o.terms].filter(Boolean).join(" · ") || undefined}>{[o.deductibles, o.terms].filter(Boolean).join(" · ") || "—"}</span>
                           </td>
                           <td className="num">{o.offeredShare}%</td>
                           <td className="num share-cell">

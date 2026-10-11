@@ -226,11 +226,28 @@
   td { white-space: nowrap; }
 }
 
-.participant-table.offers {
-  min-width: 68rem;
+// market responses fit their card at 1366px: no sideways scroll, no sticky column over the dates
+.table-fit { width: 100%; }
 
-  td:first-child strong, td:nth-child(4) { white-space: nowrap; }
-  td:nth-child(8), td:nth-child(9) { min-width: 11rem; }
+.participant-table .clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+
+.participant-table.offers {
+  table-layout: auto;
+
+  .insurer-cell { min-width: 12rem; }
+  .insurer-line { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .muted { color: $color-text-muted; }
+  .small { font-size: 0.8125rem; }
+  td.num { white-space: nowrap; }
+  .nowrap { white-space: nowrap; }
+  .terms-cell { max-width: 20rem; }
+  .actions-head, .actions-cell { width: 1%; white-space: nowrap; text-align: right; }
 }
 
 // the comparison fits its card: deductibles and terms share one wrapping column, the rank sits with the insurer
@@ -238,28 +255,18 @@
   .insurer-cell { min-width: 12rem; }
   .insurer-cell .rank { color: $color-text-muted; }
   .terms-cell { min-width: 12rem; max-width: 22rem; white-space: normal; }
-  .terms-cell span { display: block; }
-  .terms-cell .muted { color: $color-text-muted; font-size: 0.8125rem; }
+  td.num { white-space: nowrap; }
   .share-cell { width: 8rem; }
 }
 
 .participant-table.readonly td:first-child { min-width: 12rem; }
 .participant-table.readonly .participant-role { display: block; color: $color-text-muted; font-size: 12px; }
 
-// the row actions stay in view when the table scrolls sideways on narrower screens
+// read-only tables fit their card: a narrow actions column that never overlaps the other columns
 .participant-table.readonly {
   td.num { white-space: nowrap; }
-
-  .actions-cell {
-    position: sticky;
-    right: 0;
-    width: 1%;
-    background: $color-surface;
-    box-shadow: inset 1px 0 0 $color-border;
-  }
-
-  th:last-child:empty { position: sticky; right: 0; background: $color-surface-muted; }
-  tr.lead-row .actions-cell { background: $brand-blue-050; }
+  .insurer-line { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .actions-head, .actions-cell { width: 1%; white-space: nowrap; text-align: right; }
 }
 
 .journey-timeline {
