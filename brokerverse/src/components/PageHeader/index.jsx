@@ -24,7 +24,7 @@ const Crumbs = ({ items, navigate }) => {
     return onClick ? { label: item.label, command: onClick, className: "bv-crumb-link" } : { label: label(item) };
   });
   const classes = `bv-page-header__crumbs${model.length === 1 ? " bv-page-header__crumbs--single" : ""}`;
-  return <BreadCrumb home={model[0]} model={model.slice(1)} separatorIcon={<SvgDot color="currentColor" />} className={classes} />;
+  return <BreadCrumb home={model[0]} model={model.slice(1)} separatorIcon={<SvgDot color="currentColor" />} className={classes} aria-label="Breadcrumb" />;
 };
 
 /** Breadcrumb with items that open another screen (needs the router). */

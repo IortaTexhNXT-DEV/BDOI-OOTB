@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AutoComplete } from "primereact/autocomplete";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
 import { statusLabel } from "../../utils/statusSeverity";
-import SvgDot from "../../assets/icons/SvgDot";
 import clientService from "../../services/clientService";
 import mastersService from "../../services/mastersService";
 import { printPdf } from "../../components/Print";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
+import SharedPageHeader from "../../components/PageHeader";
 import "./index.scss";
 
 export { date, dateTime, money, showError, showSuccess };
@@ -28,18 +27,9 @@ export const StatusTag = ({ status }) => {
   return <Tag className="pe-tag pe-tag--label" value={t(`distribution.status.${status}`, { defaultValue: statusLabel(status) })} severity={SEVERITY[status] || "info"} />;
 };
 
-/** Page header: title, breadcrumb (`home` > `section` > trail), a one-line purpose and the action buttons. */
+/** Page header of the distribution screens: the shared header; the one-line purpose sits behind the title's info icon. */
 export const PageHeader = ({ home, section, title, trail = [], subtitle, children }) => (
-  <div className="pe-header">
-    <div>
-      <h1 className="pe-title">{title}</h1>
-      {/* the page itself ends the trail when no section or trail is given, so the last separator always leads somewhere */}
-      <BreadCrumb home={{ label: home }} model={[...(section ? [{ label: section }] : []), ...(trail.length ? trail : [title]).map((label) => ({ label }))]}
-        separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-      {subtitle && <p className="pe-subtitle">{subtitle}</p>}
-    </div>
-    <div className="pe-header-actions">{children}</div>
-  </div>
+  <SharedPageHeader home={home} section={section} title={title} trail={trail.length ? trail : section ? [] : [title]} help={subtitle} actions={children} />
 );
 
 /** A labelled form field of the two-column form grid (htmlFor: the id of its input); a required field is starred and its error replaces the help line. */
