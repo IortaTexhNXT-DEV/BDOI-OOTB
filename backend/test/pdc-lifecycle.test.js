@@ -331,6 +331,9 @@ describe('sets, retained cheques and access (FR-PDC-003, 004, 020, 021, 060)', (
     const r = (await ctx.as('maker')('get', `/pdc?tab=all&insurerId=${standard}&chequeFrom=${addDays(asOf, 1)}&chequeTo=${addDays(asOf, 400)}`)).body.data;
     expect(r.rows.length).toBeGreaterThan(0);
     expect(r.rows.every((x) => x.insurerId === standard && x.chequeDate > asOf)).toBe(true);
+    // the log shows the short names and custody in a few words; the full text stays on the row
+    expect(r.rows[0]).toMatchObject({ bankShortName: 'BPI', insurerShortName: 'Standard', custodyShort: expect.any(String) });
+    expect(r.rows.map((x) => x.custodyShort)).toEqual(expect.arrayContaining(['With Standard']));
     expect(r.counts).toMatchObject({ open: expect.any(Number), 'with-partners': expect.any(Number) });
     expect((await ctx.as('maker')('get', '/pdc?tab=open&format=xlsx')).status).toBe(200);
   });

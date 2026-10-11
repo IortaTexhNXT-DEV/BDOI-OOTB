@@ -36,7 +36,7 @@ export const TABS = {
 };
 
 const SELECT = `SELECT d.*, c.display_name AS client_name, c.client_code, c.email AS client_email, p.policy_number, r.bill_number, r.balance AS bill_balance,
-  b.name AS bank_name, rc.receipt_number, rc.receipt_status, s.set_number, t.transmittal_number, pt.transmittal_number AS pullout_transmittal_number, ic.name AS insurer_name,
+  b.name AS bank_name, b.short_name AS bank_short_name, b.code AS bank_code, ic.short_name AS insurer_short_name, rc.receipt_number, rc.receipt_status, s.set_number, t.transmittal_number, pt.transmittal_number AS pullout_transmittal_number, ic.name AS insurer_name,
   (SELECT u.display_name FROM users u WHERE u.id = d.created_by) AS created_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = d.cancel_requested_by) AS cancel_requested_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = d.cancel_approved_by) AS cancel_approved_by_name,
@@ -73,6 +73,15 @@ function custodyText(r) {
   return r.storage_location ? `TIS vault, ${r.storage_location}` : 'TIS vault';
 }
 
+/** The custody in a few words for the log (the full text stays on hover): "TIS vault", "With Standard", "To Standard", "Returned". */
+function custodyShort(r) {
+  const partner = r.insurer_short_name || r.insurer_name || 'Insurance Partner';
+  if (r.custody === 'partner') return `With ${partner}`;
+  if (r.custody === 'in-transit') return `To ${partner}`;
+  if (r.custody === 'returned') return 'Returned';
+  return 'TIS vault';
+}
+
 const out = (r, asOf, bucketDays) => r && ({
   id: r.id, pdcNumber: r.pdc_number, setId: r.set_id, setNumber: r.set_number || null, clientId: r.client_id, clientCode: r.client_code || null, clientName: r.client_name || null,
   policyId: r.policy_id, policyNumber: r.policy_number || null, receivableId: r.receivable_id, billNumber: r.bill_number || null,
@@ -80,9 +89,10 @@ const out = (r, asOf, bucketDays) => r && ({
   instalmentSeq: r.instalment_seq, instalmentCount: r.instalment_count, instalmentDueDate: isoDate(r.instalment_due_date),
   instalmentText: r.instalment_seq ? `${r.instalment_seq} of ${r.instalment_count || r.instalment_seq}` : null,
   payee: r.payee, payeeText: PAYEE_TEXT[r.payee] || r.payee, insurerId: r.insurance_company_id, insurerName: r.insurer_name || null,
-  bankId: r.bank_id, bankName: r.bank_name || r.drawee_bank || null, draweeBank: r.drawee_bank, branch: r.branch, accountNumber: r.account_number, brstn: r.brstn,
+  insurerShortName: r.insurer_short_name || r.insurer_name || null,
+  bankId: r.bank_id, bankName: r.bank_name || r.drawee_bank || null, bankShortName: r.bank_short_name || r.bank_code || r.bank_name || r.drawee_bank || null, draweeBank: r.drawee_bank, branch: r.branch, accountNumber: r.account_number, brstn: r.brstn,
   chequeNumber: r.cheque_number, chequeDate: isoDate(r.cheque_date), amount: Number(r.amount), receivedDate: isoDate(r.received_date), storageLocation: r.storage_location,
-  custody: r.custody, custodyText: custodyText(r), status: r.status, statusText: STATUS_TEXT[r.status] || r.status,
+  custody: r.custody, custodyText: custodyText(r), custodyShort: custodyShort(r), status: r.status, statusText: STATUS_TEXT[r.status] || r.status,
   ageing: ageingOf(r.status, isoDate(r.cheque_date), asOf, bucketDays),
   dueInDays: asOf && ['on-hand', 'forwarded', 'warehoused'].includes(r.status) ? Math.round((Date.parse(isoDate(r.cheque_date)) - Date.parse(asOf)) / 86400000) : null,
   transmittalId: r.transmittal_id, transmittalNumber: r.transmittal_number || null, forwardedOn: isoDate(r.forwarded_on), warehousedOn: isoDate(r.warehoused_on),

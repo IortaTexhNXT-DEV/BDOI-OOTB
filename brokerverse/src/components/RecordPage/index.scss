@@ -46,6 +46,55 @@
     border: 0;
     background: transparent;
   }
+
+  // a strip of figures over a list: label and value side by side, each fact as wide as its text
+  &.bv-key-facts--strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    margin: 0 0 12px;
+
+    .bv-key-facts__item {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    dd {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+  }
+
+  .bv-key-facts__value--muted {
+    color: $color-text-muted;
+  }
+
+  // a fact that filters the list: a plain button in the text of the value, underlined on hover, bold when applied
+  .bv-key-facts__button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+    }
+  }
+
+  &__item--active dd {
+    font-weight: 700;
+    color: $color-heading;
+  }
 }
 
 .bv-section-card {

@@ -25,8 +25,8 @@ const S = 'Accounts > Post-Dated Cheques';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const tx = (fn) => withTransaction(fn);
 const example = { id: 'pdc_1', pdcNumber: 'PDC-2026-00121', setNumber: 'PCS-2026-00031', clientName: 'Andrea Villanueva', policyNumber: 'POL-2026-90004', billNumber: 'INV-2026-00104',
-  instalmentText: '1 of 4', payee: 'insurance-partner', insurerName: 'Standard Insurance Co., Inc.', bankName: 'BPI', chequeNumber: '0045121', chequeDate: '2026-10-15', amount: 12787.5,
-  status: 'warehoused', statusText: 'Warehoused', custodyText: 'Standard Insurance Co., Inc.', ageing: { code: 'current', label: 'Current', days: -6 }, receiptNumber: null };
+  instalmentText: '1 of 4', payee: 'insurance-partner', insurerName: 'Standard Insurance Co., Inc.', insurerShortName: 'Standard', bankName: 'Bank of the Philippine Islands', bankShortName: 'BPI', chequeNumber: '0045121', chequeDate: '2026-10-15', amount: 12787.5,
+  status: 'warehoused', statusText: 'Warehoused', custodyText: 'Standard Insurance Co., Inc.', custodyShort: 'With Standard', ageing: { code: 'current', label: 'Current', days: -6 }, receiptNumber: null };
 const HEADER = [{ key: 'pdcNumber', label: 'PDC No.' }, { key: 'setNumber', label: 'Set' }, { key: 'clientName', label: 'Client' }, { key: 'policyNumber', label: 'Policy' },
   { key: 'billNumber', label: 'Bill' }, { key: 'instalmentText', label: 'Instalment' }, { key: 'payeeText', label: 'Payee' }, { key: 'insurerName', label: 'Insurance Partner' },
   { key: 'bankName', label: 'Drawee Bank' }, { key: 'branch', label: 'Branch' }, { key: 'accountNumber', label: 'Account No.' }, { key: 'brstn', label: 'BRSTN' },

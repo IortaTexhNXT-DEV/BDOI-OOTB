@@ -55,6 +55,7 @@ const BankMaster = () => {
       id: rowData?.id,
       bankCode: rowData?.bankCode ?? "",
       bankName: rowData?.bankName ?? "",
+      shortName: rowData?.shortName ?? "",
       bankBranch: rowData?.bankBranch ?? "",
       ifscCode: rowData?.ifscCode ?? "",
       addressLine1: rowData?.AddressLine1 ?? "",
@@ -100,6 +101,7 @@ const BankMaster = () => {
   const initialState = {
     bankCode: "",
     bankName: "",
+    shortName: "",
     bankBranch: "",
     ifscCode: "",
     addressLine1: "",
@@ -290,6 +292,13 @@ const BankMaster = () => {
               body={(rowData) => rowData.bankName}
             ></Column>
             <Column
+              field="shortName"
+              header={t("financeMasters.bankShortName")}
+              sortable
+              headerStyle={headerStyle}
+              className="fieldvalue_container"
+            ></Column>
+            <Column
               field="bankBranch"
               header={t("financeMasters.bankBranch")}
               sortable
@@ -361,6 +370,15 @@ const BankMaster = () => {
               placeholder={t("financeMasters.enter")}
               value={formik.values.bankName}
               onChange={formik.handleChange("bankName")}
+            />
+          </div>
+          <div class="col-12 md:col-3 lg:col-3">
+            <InputField
+              classNames="field__container"
+              label={t("financeMasters.bankShortName")}
+              placeholder={t("financeMasters.enter")}
+              value={formik.values.shortName}
+              onChange={formik.handleChange("shortName")}
             />
           </div>
           <div class="col-12 md:col-3 lg:col-3">

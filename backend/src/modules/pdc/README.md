@@ -18,7 +18,16 @@ cancellation another user asked for).
 
 ## Main tables
 
-`post_dated_cheques`, `pdc_sets`, `pdc_transmittals` (migration 0520).
+`post_dated_cheques`, `pdc_sets`, `pdc_transmittals` (migration 0520). The log reads the bank's short name
+(`banks.short_name`, migration 0541, edited on Master > Finance > Bank) and the Insurance Partner's.
+
+## The log
+
+One compact row per cheque: PDC number over its set number, client over the policy, instalment as `1/3`, the Insurance
+Partner's short name (`TIS` for a cheque payable to TISPH), the bank's short name with the cheque number, custody in a
+few words (`custodyShort`: TIS vault, With / To the partner, Returned), status, ageing bucket and the AR when a cheque
+of the list has one. The full bank name, partner name and custody text (`bankName`, `insurerName`, `custodyText`) stay
+on the row for hover and for the detail. The ageing strip above the log filters the rows by bucket on the screen.
 
 ## Main flows
 
