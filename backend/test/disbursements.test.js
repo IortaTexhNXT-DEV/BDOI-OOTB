@@ -23,9 +23,12 @@ describe('disbursements / payment vouchers', () => {
     const m = await makePolicy({ net: 30000 });
     client = m.client;
     const c = await ctx.as('maker')('post', '/disbursements').send({ voucherDate: new Date().toISOString().slice(0, 10), departmentCode: 'FI', branchCode: 'PHP', payeeType: 'Customer',
-      criteria: 'Specific', customerCode: client.client_code, policyNumber: m.policy.policy_number, transactionCode: 'REFUND', transactionDescription: 'Cancellation refund', instrumentCurrency: 'PHP', amount: '0.00' });
+      criteria: 'Specific', customerCode: client.client_code, policyNumber: m.policy.policy_number, transactionCode: 'REFUND', transactionDescription: 'Cancellation refund', instrumentCurrency: 'PHP', amount: '0.00', refundReasonCode: 'REF-CANCEL', refundNote: 'Mid-term cancellation' });
     expect(c.status).toBe(201);
     d = c.body.data;
+    // GAP-CASH-17: the refund carries its reason of the refund context; another context is refused
+    expect(d).toMatchObject({ refundReasonCode: 'REF-CANCEL', refundReason: 'Cancellation refund: Mid-term cancellation', refundNotifiedAt: null });
+    expect((await ctx.as('maker')('post', '/disbursements').send({ payeeType: 'Customer', customerCode: client.client_code, amount: '1', refundReasonCode: 'LAP-FUNDS', refundNote: 'x' })).status).toBe(400);
     expect(d.voucherNumber).toMatch(/^PV-/);
     expect(d.payeeName).toBe(client.display_name);
     const il = await ctx.as('sales')('post', '/disbursements/invoice-list').send({ customerCode: client.client_code, payables: '5000.00', outstanding: '0.00', fcAmount: '0.00', lcAmount: '5000.00',
@@ -50,6 +53,11 @@ describe('disbursements / payment vouchers', () => {
     const ap = await ctx.as('checker')('put', `/disbursements/checkbook/${id}`).send({ status: 'Approved', totaleAmount: '5000' });
     expect(ap.status).toBe(200);
     expect(ap.body.data.journalId).toBeTruthy();
+    // the client is told the refund amount once the refund is paid (Refund Amount Notification)
+    const mail = (await query("SELECT to_address, subject FROM email_outbox WHERE template = 'refund_notice' AND entity_id = $1", [d.disbursementId])).rows;
+    expect(mail).toHaveLength(1);
+    expect(mail[0].subject).toMatch(/refund of PHP 5,000.00/);
+    expect((await ctx.as('maker')('get', `/disbursements/${d.disbursementId}`)).body.data.refundNotifiedAt).toBeTruthy();
     const lines = (await query('SELECT account_code, debit, credit FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [ap.body.data.journalId])).rows;
     expect(lines.map((l) => l.account_code)).toEqual(['210230', '1102001']);
     const pr = await ctx.as('checker')('put', `/disbursements/checkbook/${id}`).send({ status: 'Printed' });

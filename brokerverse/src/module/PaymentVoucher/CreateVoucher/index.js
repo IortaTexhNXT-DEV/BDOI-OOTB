@@ -26,6 +26,7 @@ import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import ReasonPicker from "../../../components/ReasonPicker";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -481,6 +482,8 @@ function Createvoucher() {
     return TRANSACTION_OPTIONS_BY_PAYEE[payeeCode] || [];
   }, [formik.values.PayeeType]);
 
+  const isCustomerPayee = (typeof formik.values.PayeeType === "object" ? formik.values.PayeeType?.code : formik.values.PayeeType) === "Customer";
+
   const isInsurerPayee = useMemo(() => {
     const payeeCode =
       typeof formik.values.PayeeType === "object"
@@ -620,6 +623,12 @@ function Createvoucher() {
               )}
             </div>
           </div>
+          {isCustomerPayee && (
+            <div className="sm-col-12 col-12 md:col-3 lg-col-4">
+              <ReasonPicker context="refund" required={false} label={t("paymentVoucher.refundReason")}
+                value={formik.values.RefundReason} onChange={(v) => formik.setFieldValue("RefundReason", v)} />
+            </div>
+          )}
           <div class="sm-col-12 col-12 md:col-3 lg-col-4">
             <div>
               <DropDowns

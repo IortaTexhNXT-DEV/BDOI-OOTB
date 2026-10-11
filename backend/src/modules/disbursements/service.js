@@ -15,6 +15,11 @@ import { payLines, lineView } from '../commission/service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postingDate } from '../../lib/dates.js';
 import { assertAuthority } from '../access-control/service.js';
+import { requiredReason } from '../ops-masters/records.js';
+import { queueEmail } from '../../lib/mailer.js';
+import { companyName } from '../../lib/letterhead.js';
+import { formatMoney } from '../../lib/money.js';
+import { emailTemplate, renderTemplate } from '../documents/common.js';
 
 const AGENT = 'Agent/Referrer';
 /** Payee types of a payment voucher. */
@@ -57,7 +62,7 @@ export const disbursementRow = (d) => ({
   transactionCode: d.transaction_code, transactionDescription: d.transaction_description, departmentCode: d.department_code, branchCode: d.branch_code,
   payeeType: d.payee_type, payeeId: d.payee_id, payeeName: d.payee_name, criteria: d.criteria, customerCode: d.customer_code, clientId: d.client_id,
   referrerId: d.referrer_id, referrerName: d.referrer_name, insuranceCompanyId: d.insurance_company_id, insurerName: d.insurer_name,
-  policyId: d.policy_id, policyNumber: d.policy_number, instrumentCurrency: d.instrument_currency, remarks: d.remarks, purpose: d.purpose,
+  policyId: d.policy_id, policyNumber: d.policy_number, refundReasonCode: d.refund_reason_code || null, refundReason: d.refund_reason || null, refundNotifiedAt: d.refund_notified_at || null, instrumentCurrency: d.instrument_currency, remarks: d.remarks, purpose: d.purpose,
   amount: Number(d.amount), grossAmount: Number(d.gross_amount), whtAmount: Number(d.wht_amount), paymentMode: d.payment_mode, bankId: d.bank_id,
   status: d.status, source: d.source, journalId: d.journal_id, approvedBy: d.approved_by, approvedAt: d.approved_at, paidAt: d.paid_at,
   createdBy: d.created_by, createdAt: d.created_at, updatedAt: d.updated_at, disbursementDate: d.voucher_date,
@@ -107,7 +112,30 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
     str(b.customerCode) || (referrer ? referrer.id : null), client?.id || null, referrer?.id || str(b.referrerId), referrer?.name || str(b.referrerName),
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
     b.instrumentCurrency || (await baseCurrency()), str(b.remarks), source, user?.id ?? null])).rows[0];
+  // a refund to a customer carries its reason (context refund, e.g. REF-CANCEL; GAP-CASH-17)
+  if (payeeType === 'Customer' && b.refundReasonCode) {
+    const reason = await requiredReason(db, 'refund', { reasonCode: b.refundReasonCode, note: b.refundNote });
+    return (await db.query('UPDATE disbursements SET refund_reason_code = $2, refund_reason = $3 WHERE id = $1 RETURNING *', [d.id, reason.code, reason.text])).rows[0];
+  }
   return d;
+}
+
+/**
+ * Refund Amount Notification (Pre-BSM M16): once a refund voucher to a customer is paid, the client is e-mailed the
+ * amount, the policy and the refund reason (template refund_notice), once. Returns the address e-mailed or null.
+ */
+export async function notifyRefund(db, disbursementId) {
+  const d = (await db.query('SELECT * FROM disbursements WHERE id = $1', [disbursementId])).rows[0];
+  if (!d || d.payee_type !== 'Customer' || d.refund_notified_at || !d.client_id) return null;
+  if ((await getSetting('disbursements.refund_notify_client', true)) === false) return null;
+  const c = (await db.query('SELECT email, display_name FROM clients WHERE id = $1', [d.client_id])).rows[0];
+  if (!c?.email) return null;
+  const t = await emailTemplate('refund_notice');
+  const v = { customerName: c.display_name, amount: (await formatMoney(d.amount)).replace(/^[^0-9-]+/, ''), currency: d.instrument_currency || (await getSetting('currency.default', 'PHP')),
+    policyNumber: d.policy_number || '', reason: d.refund_reason || 'refund', voucherNumber: d.voucher_number, companyName: await companyName() };
+  await queueEmail({ db, to: c.email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'refund_notice', entity: 'disbursement', entityId: d.id });
+  await db.query('UPDATE disbursements SET refund_notified_at = now() WHERE id = $1', [d.id]);
+  return c.email;
 }
 
 /** Voucher for commission lines of one referrer (used by bulk agent disburse and single-line pay). */
@@ -287,6 +315,7 @@ async function approveCheque(db, c, amount, user) {
     // A cheque drawn on the whole voucher (no single payable named) pays the voucher's payables once the approved cheques
     // cover the voucher, so they no longer show as open payables to the insurer (aged payables, remittances due)
     if (!inv) await settleVoucherPayables(db, d.id);
+    if (payeeType === 'Customer') await notifyRefund(db, d.id);
   }
 }
 

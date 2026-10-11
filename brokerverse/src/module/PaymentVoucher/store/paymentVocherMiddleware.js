@@ -128,6 +128,9 @@ export const postpaymentVocherCreateDataMiddleware = createAsyncThunk(
         departmentCode: payload.DepartmentCode?.code || payload.DepartmentCode,
         branchCode: payload.BranchCode?.code || payload.BranchCode,
         payeeType: payload.PayeeType?.name || payload.PayeeType,
+        // the refund reason of a customer refund (context refund, e.g. REF-CANCEL)
+        refundReasonCode: payload.RefundReason?.reasonCode || undefined,
+        refundNote: String(payload.RefundReason?.note || "").trim() || undefined,
         criteria: payload.Criteria?.name || payload.Criteria,
         customerCode:
           payload.CustomerCode?.code ||

@@ -1058,7 +1058,8 @@
     },
     "bulkUploadTitle": "Bulk upload disbursements",
     "printVouchers": "Print vouchers",
-    "customerCodeFromRequired": "Customer code from is required"
+    "customerCodeFromRequired": "Customer code from is required",
+    "refundReason": "Refund reason"
   },
   "renewal": {
     "renewals": "Renewals",
