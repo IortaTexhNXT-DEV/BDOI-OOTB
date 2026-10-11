@@ -32,6 +32,8 @@ const OPERATIONS_ALL = [
   // fleet schedules and marine open covers (read:fleet / read:marine; processing and operations also write)
   "Fleet Schedules",
   "Marine Open Covers",
+  // monthly Credit Life batches of the financing bank (read:credit-life; Operations and the Processing Team also write)
+  "Credit Life",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -262,7 +264,7 @@ Object.assign(roleMenuPermissions, {
     "my work": true,
     // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, promotions, fleet
     // schedules and open covers (read:campaigns, read:sales-activities, read:promotions, read:fleet, read:marine)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities", "Promotions")],
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers", "Credit Life"), ...salesMarketingWithout("Sales Activities", "Promotions")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance", ...INCENTIVE_READER],
     commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],

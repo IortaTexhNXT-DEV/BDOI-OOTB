@@ -276,6 +276,13 @@ export const menuList = [
         includes: ["/operations/open-covers"],
         permissions: ["read:marine"],
       },
+      // monthly Credit Life batches of the financing bank, master policies and certificates of cover (PJRN-01, PJRN-02)
+      {
+        name: "Credit Life",
+        path: "/operations/credit-life",
+        includes: ["/operations/credit-life"],
+        permissions: ["read:credit-life"],
+      },
 
       {
         name: "Claims",

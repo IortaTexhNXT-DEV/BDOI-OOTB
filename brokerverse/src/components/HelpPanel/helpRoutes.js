@@ -198,6 +198,7 @@ export const HELP_ROUTES = [
   ["/sales/scheme-issuance", "dealer-programmes"],
   ["/operations/fleet-schedules", "fleet-schedules"],
   ["/operations/open-covers", "marine-open-covers"],
+  ["/operations/credit-life", "credit-life-batches", "credit-life-quotation"],
   ["/sales/comparison-reports", "comparison-reports", "screens-operations"],
   ["/sales/campaigns", "campaigns", "screens-operations"],
   ["/reports/run/dealer-production", "distribution-channels"],

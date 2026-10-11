@@ -5,7 +5,7 @@ import { printPdf } from "../components/Print/printPdf";
 
 /**
  * Distribution, programmes and products API: lead assignment (/lead-assignment), distribution channels (/channels),
- * brand-new vehicle programmes (/motor-programmes), fleet schedules (/fleet), marine open covers (/marine), comparison
+ * brand-new vehicle programmes (/motor-programmes), fleet schedules (/fleet), marine open covers (/marine), Credit Life batches (/credit-life), comparison
  * reports (/comparison-reports), campaigns (/campaigns) and the Report Builder (/report-builder).
  */
 const qs = (params = {}) => {
@@ -165,6 +165,22 @@ const distributionService = {
   sendDeclaration: (declarationId) => post(`${MA}/declarations/${id(declarationId)}/send`),
   recordAcceptance: (declarationId, body) => post(`${MA}/declarations/${id(declarationId)}/acceptance`, body),
   declarationRegister: (declarationId) => fileFrom(`${MA}/declarations/${id(declarationId)}/register`, "certificate-register.xlsx"),
+
+  // Credit Life batches (/credit-life)
+  creditLifeBatches: (params) => request(`/credit-life/batches${qs(params)}`),
+  creditLifeChoices: () => request("/credit-life/choices"),
+  createCreditLifeBatch: (body) => post("/credit-life/batches", body),
+  creditLifeBatch: (batchId, params) => request(`/credit-life/batches/${id(batchId)}${qs(params)}`),
+  creditLifeTemplate: () => fileFrom("/credit-life/template", "Credit_Life_Members_Upload_Template.xlsx"),
+  uploadCreditLife: (batchId, file) => uploadWith(`/credit-life/batches/${id(batchId)}/upload`, file),
+  addCreditLifeMember: (batchId, body) => post(`/credit-life/batches/${id(batchId)}/members`, body),
+  removeCreditLifeMember: (memberId) => remove(`/credit-life/members/${id(memberId)}`),
+  issueCreditLifeBatch: (batchId) => post(`/credit-life/batches/${id(batchId)}/issue`),
+  sendCreditLifeBatch: (batchId, to) => post(`/credit-life/batches/${id(batchId)}/send`, to ? { to } : {}),
+  creditLifeBatchList: (batchId) => fileFrom(`/credit-life/batches/${id(batchId)}/list`, "credit-life-batch.xlsx"),
+  cancelCreditLifeMember: (memberId, reason) => post(`/credit-life/members/${id(memberId)}/cancel`, { reason }),
+  creditLifeMasterPolicies: (params) => request(`/credit-life/master-policies${qs(params)}`),
+  creditLifeMasterPolicy: (masterId) => request(`/credit-life/master-policies/${id(masterId)}`),
 
   // comparison reports
   comparisonReports: (params) => request(`${CR}${qs(params)}`),
