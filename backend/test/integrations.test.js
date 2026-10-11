@@ -11,7 +11,7 @@ import { pool, query, one, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { config } from '../src/config.js';
-import { withStarterMasters, withoutCommissionTaxes, enableFeatures } from './helpers.js';
+import { withStarterMasters, withoutCommissionTaxes, enableFeatures, withReferenceCommissionControls } from './helpers.js';
 
 let ctx; let admin; let maker; let checker;
 let outbox; let messaging; let layouts;
@@ -20,6 +20,7 @@ const msgRow = (id) => one('SELECT * FROM integration_outbox WHERE id = $1', [id
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withReferenceCommissionControls();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['ctpl-authentication', 'sms-messaging', 'insurer-api', 'integration-inbound']);
   await withStarterMasters();

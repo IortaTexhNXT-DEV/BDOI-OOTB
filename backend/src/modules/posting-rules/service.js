@@ -10,11 +10,12 @@
  * type, the cash account per payment mode and the write-off reasons. What this screen shows is what posting uses.
  */
 import { getSetting, setSetting } from '../../lib/settings.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { ALWAYS_POSTED, AMOUNT_KEYS, EVENTS, RESOLVERS, activeRule, ruleOut, simulate } from '../accounting/lib/posting.js';
 import { today } from '../accounting/lib/http.js';
 import { commissionTaxSetup } from '../accounting/lib/commissionTax.js';
 import { assertChecker } from '../../lib/makerChecker.js';
+import { hasPermission } from '../../lib/auth.js';
 
 const SIDES = ['Dr', 'Cr'];
 const ACCOUNT_TYPES = ['role', 'gl', 'resolver', 'context'];
@@ -319,16 +320,23 @@ export async function setCommissionTaxes(db, b, user) {
 export const configurationReview = async () => (await getSetting('accounting.configuration_maker_checker', true)) !== false;
 
 export const CHANGE_LABELS = { 'posting-rule-version': 'New posting rule version', 'posting-rule-status': 'Posting rule version (de)activated',
-  'account-role': 'Account role', 'account-map': 'Account map', 'commission-taxes': 'Commission taxes' };
+  'account-role': 'Account role', 'account-map': 'Account map', 'commission-taxes': 'Commission taxes',
+  'commission-rule': 'Commission rule', 'sharing-scheme': 'Sharing scheme', 'scheme-assignment': 'Sharing scheme assignment' };
 // the same table holds the changes of access (access-control/changes.js): they are listed and decided there
 const KINDS = Object.keys(CHANGE_LABELS);
+// commission rules and sharing schemes (commission-rates/changes.js, commission/schemes.js) are decided by their own approvers
+const KIND_PERMISSION = { 'commission-rule': 'approve:commission-rules', 'sharing-scheme': 'approve:sharing-schemes', 'scheme-assignment': 'approve:sharing-schemes' };
+export const changePermission = (kind) => KIND_PERMISSION[kind] || 'approve:posting-rules';
+const assertKindPermission = (user, kind) => {
+  if (!hasPermission(user, changePermission(kind))) throw forbidden(`Requires permission: ${changePermission(kind)}`);
+};
 
 async function assertNoPending(db, kind, target) {
   const p = (await db.query('SELECT id FROM accounting_config_changes WHERE kind = $1 AND target = $2 AND status = \'pending\'', [kind, target])).rows[0];
   if (p) throw conflict(`A change of ${target} (${CHANGE_LABELS[kind].toLowerCase()}) is already awaiting approval (request ${p.id}); approve, reject or withdraw it first`);
 }
 
-async function requestChange(db, { kind, target, ruleId = null, payload, before = null, note = null, user }) {
+export async function requestChange(db, { kind, target, ruleId = null, payload, before = null, note = null, user }) {
   await assertNoPending(db, kind, target);
   const r = (await db.query(`INSERT INTO accounting_config_changes(kind, target, rule_id, payload, before, change_note, requested_by) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
     [kind, target, ruleId, JSON.stringify(payload || {}), before === null ? null : JSON.stringify(before), note || null, user?.id ?? null])).rows[0];
@@ -339,7 +347,8 @@ const CHANGE_SELECT = `SELECT c.*, (SELECT display_name FROM users u WHERE u.id 
   (SELECT display_name FROM users u WHERE u.id = c.decided_by) AS decided_by_name FROM accounting_config_changes c`;
 
 async function changeOut(db, c) {
-  return { id: Number(c.id), kind: c.kind, kindLabel: CHANGE_LABELS[c.kind], target: c.target, ruleId: c.rule_id, payload: c.payload, before: c.before, changeNote: c.change_note,
+  return { id: Number(c.id), kind: c.kind, kindLabel: CHANGE_LABELS[c.kind], target: c.payload?.label || c.target, targetKey: c.target, ruleId: c.rule_id, payload: c.payload, before: c.before, changeNote: c.change_note,
+    permission: changePermission(c.kind),
     status: c.status, requestedBy: c.requested_by_name || c.requested_by, requestedById: c.requested_by, requestedAt: c.requested_at,
     decidedBy: c.decided_by_name || c.decided_by, decidedAt: c.decided_at, decisionRemarks: c.decision_remarks, rule: c.rule_id ? await getRule(db, c.rule_id) : null };
 }
@@ -367,9 +376,14 @@ export async function decideChange(db, id, action, remarks, user) {
   const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 AND kind = ANY($2) FOR UPDATE', [Number(id) || 0, KINDS])).rows[0];
   if (!c) throw notFound('Configuration change not found');
   if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
-  await assertChecker(user, c.requested_by, 'posting rule or account determination change', { configurable: false });
-  if (action === 'reject') {
-    if (!String(remarks || '').trim()) throw badRequest('Validation failed', [{ path: 'remarks', message: 'A reason is required to reject' }]);
+  assertKindPermission(user, c.kind);
+  await assertChecker(user, c.requested_by, KIND_PERMISSION[c.kind] ? CHANGE_LABELS[c.kind].toLowerCase() : 'posting rule or account determination change', { configurable: false });
+  if (action === 'reject' && !String(remarks || '').trim()) throw badRequest('Validation failed', [{ path: 'remarks', message: 'A reason is required to reject' }]);
+  if (c.kind === 'commission-rule') {
+    await (await import('../commission-rates/service.js')).applyRuleDecision(db, c, action, user);
+  } else if (c.kind === 'sharing-scheme' || c.kind === 'scheme-assignment') {
+    await (await import('../commission/schemes.js')).applySchemeDecision(db, c, action, user);
+  } else if (action === 'reject') {
     if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
   } else if (c.kind === 'posting-rule-version') {
     await db.query(`UPDATE posting_rules SET approval_status = 'approved', active = true, approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1`, [c.rule_id, user?.id ?? null]);
@@ -394,9 +408,11 @@ export async function withdrawChange(db, id, user) {
   const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 AND kind = ANY($2) FOR UPDATE', [Number(id) || 0, KINDS])).rows[0];
   if (!c) throw notFound('Configuration change not found');
   if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
-  const approver = user?.permissions?.includes('approve:posting-rules') || user?.roles?.includes('system-admin');
+  const approver = hasPermission(user, changePermission(c.kind));
   if (c.requested_by !== user?.id && !approver) throw conflict('Only the requester or an approver can withdraw the change');
   if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
+  if (c.kind === 'commission-rule') await db.query("UPDATE commission_rates SET approval_status = 'withdrawn', updated_at = now() WHERE id = $1 AND approval_status = 'pending'", [Number(c.payload?.ruleId) || 0]);
+  if (c.kind === 'sharing-scheme' || c.kind === 'scheme-assignment') await (await import('../commission/schemes.js')).applySchemeDecision(db, c, 'withdraw', user);
   await db.query('UPDATE accounting_config_changes SET status = \'withdrawn\', decided_by = $2, decided_at = now() WHERE id = $1', [c.id, user?.id ?? null]);
   return getChange(db, c.id);
 }

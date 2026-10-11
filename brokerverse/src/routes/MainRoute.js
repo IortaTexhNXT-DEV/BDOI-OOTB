@@ -315,6 +315,7 @@ import SapGlExport from "../module/Integrations/SapGlExport";
 import CommissionDashboard from "../module/Commission/CommissionDashboard";
 import ReferrerAccounts from "../module/Commission/ReferrerAccounts";
 import ReferrerAccountDetail from "../module/Commission/ReferrerAccountDetail";
+import SharingSchemes from "../module/Commission/SharingSchemes";
 
 // Product Configurator Module Imports
 import ProductDashboard from "../module/ProductConfigurator/ProductDashboard";
@@ -1140,6 +1141,7 @@ const Maincomponent = () => {
             path="commission/referrer-accounts/:id"
             element={<ReferrerAccountDetail />}
           />
+          <Route path="commission/sharing-schemes" element={<SharingSchemes />} />
 
           {/* Product Configurator Module Routes */}
           <Route

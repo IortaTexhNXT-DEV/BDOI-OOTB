@@ -159,7 +159,7 @@ export const roleMenuPermissions = {
       "Finance > Asset Classes",
       // cost centres of the journal lines (write:journal-vouchers)
       "Finance > Cost Centres"],
-    commission: ["Commission Dashboard", "Agents/Referrer Accounts",
+    commission: ["Commission Dashboard", "Agents/Referrer Accounts", "Sharing Schemes",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
       "Insurer Overrides"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)
@@ -179,7 +179,8 @@ const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], acco
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
 // the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE] };
+// Sales and Operations read the sharing schemes behind the share of a quotation (read:sharing-schemes, migration 0570)
+const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE], commission: [...(roleMenuPermissions.sales.commission || []), "Sharing Schemes"] };
 // Sales & Marketing item by item, for the personas that lack the permission of some of its screens
 const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
   "Comparison Reports", "Campaigns", "Sales Activities"];
@@ -192,6 +193,7 @@ const TIS_OPERATIONS = {
   // campaigns are Sales' (read:campaigns)
   operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
+  commission: ["Commission Dashboard", "Sharing Schemes"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };
@@ -203,7 +205,8 @@ Object.assign(roleMenuPermissions, {
   "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
-  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
+  // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572)
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables", "Incentive"] },
   // Receipting (RBAC v4): CCD-PDU has no access to the receipts
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
@@ -229,7 +232,7 @@ Object.assign(roleMenuPermissions, {
     // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
     operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Quick Quote", "Campaigns", "Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
-    commission: ["Commission Dashboard"],
+    commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["Organization", "Insurance Management", "Location", "Employee Management", "User Management", "System Configuration", "Finance > Currency",
       "Finance > Exchange Rate", "Finance > Bank", "Finance > Transaction Code", "Finance > Premium Taxes & LGU Rates", "Finance > Insurer Rate Tables",
@@ -248,7 +251,8 @@ Object.assign(roleMenuPermissions, {
       ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Settlement")],
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
-    master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
+    // decides the commission rules and sharing schemes of Finance on Configuration Approvals (approve:commission-rules, approve:sharing-schemes)
+    master: ["Finance > Commission Rate Matrix", "Finance > Configuration Approvals", "User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
       "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
       "Insurance Management > Distribution Channels"],
   },

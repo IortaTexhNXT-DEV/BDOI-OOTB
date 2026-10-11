@@ -10,6 +10,7 @@ export const REASON_CONTEXTS = [
   "exception_escalate", "exception_resolve", "exception_reopen", "reconciliation_difference", "reconciliation_unmatch", "confirmation_difference",
   "payment_duplicate_override", "billing_reject", "billing_cancel", "pdc_cancel", "pdc_bounce", "receipt_reversal", "receipt_reversal_reject", "unapplied_refund",
   "feature_change", "feature_reject",
+  "commission_share_change", "commission_rate_change", "commission_reversal", "commission_wht_change", "scheme_end",
   "talkbot_line_remove", "talkbot_list_cancel",
 ];
 

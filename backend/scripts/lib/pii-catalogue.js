@@ -412,6 +412,12 @@ export const TABLE_ACTIONS = {
  * "table.*" keeps every column of a table (configuration and master tables without personal data).
  */
 export const ALLOW_LIST = {
+  'sharing_schemes.change_note': 'maker note of a scheme version, business text',
+  'sharing_schemes.remarks': 'remarks of a sharing scheme, business text',
+  'sharing_schemes.suspension_note': 'reason note of a suspended scheme, business text',
+  'commissions.share_note': 'reason note of a share change, business text',
+  'commission_line_requests.note': 'reason note of a line change request, business text',
+  'commission_line_requests.decision_note': 'decision note of a line change request, business text',
   'pdc_sets.payee': 'payee code of the cheques (insurance-partner or tisph), not a person',
   'post_dated_cheques.payee': 'payee code of the cheque (insurance-partner or tisph), not a person',
   // people tables: what testing needs and is not personal once names, contacts and identifiers are masked

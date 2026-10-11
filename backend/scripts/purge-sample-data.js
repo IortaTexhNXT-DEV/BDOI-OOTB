@@ -54,6 +54,8 @@ export const SAMPLE_MASTERS = [
   { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
+  { table: 'commission_rates', label: 'sample commission rules (TISPH panel)', where: "remarks = 'TISPH sample'" },
+  { table: 'sharing_schemes', label: 'sample sharing schemes', where: "remarks = 'TISPH sample'" },
   // fictional insurers of releases before the TISPH sample (migration 0365 removes them from a database in use)
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },

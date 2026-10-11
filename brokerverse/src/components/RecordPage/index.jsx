@@ -40,19 +40,29 @@ PageHeader.propTypes = {
 };
 PageHeader.defaultProps = { crumbs: [], meta: null, actions: null };
 
-/** Key facts of a record in one row: label above value; an empty value shows a dash. */
+/**
+ * Key facts of a record in one row: label above value; an empty value shows a dash, a `muted` one (a zero in a strip of
+ * figures) is greyed. A fact with `onClick` is a filter on the list under it (`active` marks the one applied).
+ */
 export const KeyFacts = ({ items, className }) => (
   <dl className={`bv-key-facts ${className}`}>
-    {items.filter(Boolean).map((f) => (
-      <div key={f.key || f.label} className="bv-key-facts__item">
-        <dt>{f.label}</dt>
-        <dd>{f.value === null || f.value === undefined || f.value === "" ? "—" : f.value}</dd>
-      </div>
-    ))}
+    {items.filter(Boolean).map((f) => {
+      const value = f.value === null || f.value === undefined || f.value === "" ? "—" : f.value;
+      return (
+        <div key={f.key || f.label} className={`bv-key-facts__item${f.onClick ? " bv-key-facts__item--clickable" : ""}${f.active ? " bv-key-facts__item--active" : ""}`}>
+          <dt>{f.label}</dt>
+          <dd className={f.muted ? "bv-key-facts__value--muted" : undefined}>
+            {f.onClick ? <button type="button" className="bv-key-facts__button" aria-pressed={!!f.active} onClick={f.onClick}>{value}</button> : value}
+          </dd>
+        </div>
+      );
+    })}
   </dl>
 );
 KeyFacts.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.shape({ key: PropTypes.string, label: PropTypes.node, value: PropTypes.node })).isRequired,
+  items: PropTypes.arrayOf(PropTypes.shape({
+    key: PropTypes.string, label: PropTypes.node, value: PropTypes.node, muted: PropTypes.bool, onClick: PropTypes.func, active: PropTypes.bool,
+  })).isRequired,
   className: PropTypes.string,
 };
 KeyFacts.defaultProps = { className: "" };

@@ -39,6 +39,8 @@ export const FILE_ROUTES = [
   { module: 'masters', method: 'POST', path: '/:type/upload', templates: ['master:*'] },
   { module: 'accounting', method: 'POST', path: '/accounts/upload', templates: ['chart-of-accounts'] },
   { module: 'journal-vouchers', method: 'POST', path: '/upload', templates: ['journal-vouchers'] },
+  { module: 'commission-rates', method: 'POST', path: '/upload',
+    noTemplate: 'Commission rules: the template is downloaded from the screen (GET /commission-rates/upload/template), one row per peril of a rule' },
   { module: 'access-control', method: 'POST', path: '/authority-matrix/uploads',
     noTemplate: 'Authority Matrix: the template is the matrix as it is, downloaded from the screen (GET /access-control/authority-matrix/template)' },
   { module: 'leads', method: 'POST', path: '/bulk-upload', templates: ['leads'] },

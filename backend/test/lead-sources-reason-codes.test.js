@@ -43,7 +43,7 @@ describe('masters', () => {
       AND data->>'context' NOT IN ('period_close', 'period_reopen', 'year_end_reverse', 'year_end_cancel', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject',
       'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review',
       'renewal_reassign', 'non_renewal', 'claim_cancel', 'claim_cash_reversal', 'pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject',
-      'unapplied_refund')
+      'unapplied_refund', 'commission_rate_change', 'commission_reversal', 'commission_share_change', 'commission_wht_change', 'scheme_end')
       AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|talkbot|feature)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
       { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);

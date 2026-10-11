@@ -23,7 +23,11 @@ const ad = moduleRouter('Account Determination', '/account-determination');
 // approve:posting-rules (Accounting Manager, System Administrator) approves them.
 const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings')];
 const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules')];
-const approve = [requireAuth, requirePermission('approve:posting-rules')];
+// Configuration Approvals also lists commission rule and sharing scheme changes, decided by their own approvers
+// (service.js changePermission, checked again per change) and withdrawn by their makers
+const changesRead = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings', 'read:commission-rules', 'read:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes')];
+const changesWrite = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules', 'write:commission-rules', 'write:sharing-schemes', 'approve:commission-rules', 'approve:sharing-schemes')];
+const approve = [requireAuth, requirePermission('approve:posting-rules', 'approve:commission-rules', 'approve:sharing-schemes')];
 // Configuration Approvals (Master > Finance): a change waiting for approval goes to approve:posting-rules, the decision to the requester.
 const APPROVALS = '/master/finance/configuration-approvals';
 const changeLabel = (c) => `${c.kindLabel}: ${c.target}${c.kind === 'posting-rule-version' && c.payload?.version ? ` version ${c.payload.version}` : ''}`;
@@ -106,12 +110,12 @@ define({
 const changeExample = { id: 3, kind: 'account-role', kindLabel: 'Account role', target: 'premium_receivable', payload: { glCode: '1202002' }, before: { glCode: '1202001' }, status: 'pending',
   requestedBy: 'Accounting user', requestedAt: '2026-09-30T02:00:00Z' };
 define({
-  method: 'GET', path: '/changes', summary: 'Posting rule and account determination changes (status pending by default, approved, rejected, withdrawn or all)', screen: `${S} > Approvals`,
-  middleware: read, query: { status: 'pending' }, response: { success: true, data: [changeExample] },
+  method: 'GET', path: '/changes', summary: 'Posting rule, account determination, commission rule and sharing scheme changes (status pending by default, approved, rejected, withdrawn or all)', screen: `${S} > Approvals`,
+  middleware: changesRead, query: { status: 'pending' }, response: { success: true, data: [changeExample] },
   handler: async (req, res) => ok(res, await svc.listChanges(pool, req.query)),
 });
 define({
-  method: 'GET', path: '/changes/:changeId', summary: 'One configuration change with the rule version it concerns', screen: `${S} > Approvals`, middleware: read,
+  method: 'GET', path: '/changes/:changeId', summary: 'One configuration change with the rule version it concerns', screen: `${S} > Approvals`, middleware: changesRead,
   response: { success: true, data: changeExample }, handler: async (req, res) => ok(res, await svc.getChange(pool, req.params.changeId)),
 });
 for (const action of ['approve', 'reject']) {
@@ -130,7 +134,7 @@ for (const action of ['approve', 'reject']) {
   });
 }
 define({
-  method: 'POST', path: '/changes/:changeId/withdraw', summary: 'Withdraw a pending change (the requester or an approver)', screen: `${S} > Approvals`, middleware: write,
+  method: 'POST', path: '/changes/:changeId/withdraw', summary: 'Withdraw a pending change (the requester or an approver)', screen: `${S} > Approvals`, middleware: changesWrite,
   response: { success: true, data: { ...changeExample, status: 'withdrawn' } },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.withdrawChange(db, req.params.changeId, req.user));

@@ -75,7 +75,8 @@ export async function paymentPositions(policyIds) {
  */
 export async function sortForRun(pols, w, basis) {
   if (!basis.fullyPaid) {
-    return { ready: pols.filter((p) => !w.to || isoDate(p.inception_date) <= w.to), held: [], exceptions: [], catchUpFrom: null };
+    const inWindow = pols.filter((p) => !w.to || isoDate(p.inception_date) <= w.to);
+    return { ready: inWindow.filter((p) => !ratesMissing(p)), held: [], exceptions: inWindow.filter(ratesMissing).map((p) => ({ ...p, reason: 'rates-missing' })), catchUpFrom: null };
   }
   const positions = await paymentPositions(pols.map((p) => p.id));
   const earliest = addDays(w.from, -basis.catchUpDays);
@@ -91,11 +92,15 @@ export async function sortForRun(pols, w, basis) {
       if (pos.fullyPaidOn > w.to || pos.fullyPaidOn < earliest) continue;
       if (pos.fullyPaidOn < w.from && (!catchUpFrom || pos.fullyPaidOn < catchUpFrom)) catchUpFrom = pos.fullyPaidOn;
       if (basis.proofRequired && pos.missingProof.length) exceptions.push(row);
+      else if (ratesMissing(p)) exceptions.push({ ...row, reason: 'rates-missing' });
       else ready.push(row);
     } else if (basis.hold && pos.paidToDate > EPS) held.push(row);
   }
   return { ready, held, exceptions, catchUpFrom };
 }
+
+/** A policy booked without rates on the commission rules register (FRS FR-RMT-001): not remitted until recomputed. */
+export const ratesMissing = (p) => p.details?.commissionBasis?.status === 'rates-missing';
 
 /** Product line of a policy as the runs group it ("Motor", "Accident"); "Other" when the product names none. */
 export const lineOf = (p) => {
@@ -110,10 +115,17 @@ export const lineOf = (p) => {
 export async function raiseProofExceptions(rows, insurer, createException, user) {
   const opened = [];
   for (const p of rows) {
-    const open = await one(`SELECT id FROM remittance_items WHERE kind = 'exception' AND status <> 'Resolved' AND data->>'type' = 'No proof of payment' AND data->>'sysRef' = $1`,
-      [p.policy_number]);
+    const type = p.reason === 'rates-missing' ? 'Rates missing' : 'No proof of payment';
+    const open = await one(`SELECT id FROM remittance_items WHERE kind = 'exception' AND status <> 'Resolved' AND data->>'type' = $2 AND data->>'sysRef' = $1`,
+      [p.policy_number, type]);
     if (open) continue;
-    opened.push(await createException({ type: 'No proof of payment', severity: 'Medium', sysRef: p.policy_number, assignedTo: 'Cash Control', amount: Number(p.premium_total) || 0,
+    if (type === 'Rates missing') {
+      opened.push(await createException({ type, severity: 'Medium', sysRef: p.policy_number, assignedTo: 'Operations', amount: Number(p.premium_total) || 0,
+        description: `${p.policy_number} has no commission rates on the commission rules register. The policy is not remitted to ${insurer.name} until the rates are added and the commission recomputed.`,
+        action: 'Add the rates on the commission rules register, then recompute the commission of the policy' }, user));
+      continue;
+    }
+    opened.push(await createException({ type, severity: 'Medium', sysRef: p.policy_number, assignedTo: 'Cash Control', amount: Number(p.premium_total) || 0,
       description: `Receipt ${p.position.missingProof.join(', ')} of ${p.policy_number} has no proof of payment. The policy is not remitted to ${insurer.name} until the proof is attached.`,
       action: 'Attach the proof of payment to the receipt' }, user));
   }

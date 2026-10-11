@@ -7,6 +7,7 @@ import { baseCurrency } from '../../lib/currency.js';
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { HttpError, badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { assertChecker } from '../../lib/makerChecker.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
@@ -521,6 +522,7 @@ async function applyDecision(c, a, decision, user, remarks) {
     await c.query(`UPDATE remittances SET status = $2, approved_by = CASE WHEN $2 = 'approved' THEN $3 ELSE approved_by END, approved_at = CASE WHEN $2 = 'approved' THEN now() ELSE approved_at END,
                    rejected_by = CASE WHEN $2 = 'rejected' THEN $3 ELSE rejected_by END, rejected_at = CASE WHEN $2 = 'rejected' THEN now() ELSE rejected_at END,
                    remarks = COALESCE($4, remarks), updated_by = $3, updated_at = now() WHERE id = $1`, [a.entity_id, status, user.id, remarks || null]);
+    if (decision === 'approve') await onRemittanceApproved(c, a.entity_id);
     return;
   }
   const item = (await c.query('SELECT * FROM remittance_items WHERE id = $1 FOR UPDATE', [a.entity_id])).rows[0];
@@ -545,6 +547,24 @@ async function applyDecision(c, a, decision, user, remarks) {
     const amt = toNumber(item.data.adjustmentAmount, 0);
     await c.query('UPDATE remittances SET adjustments = adjustments + $2, net_due = net_due + $2, updated_by = $3, updated_at = now() WHERE id = $1', [item.remittance_id, amt, user.id]);
   }
+}
+
+/**
+ * An approved remittance (TIS-BRD-COMM-04, FGA-PR-04, FR-RMT-014): its lines read Remitted, the client's payment
+ * records of the policies carry the remittance (receivables.remitted_at / remittance_id, policies.details.remittance)
+ * and the variance shares of the remitted policies become Eligible once fully paid (commission/service.js).
+ */
+async function onRemittanceApproved(c, remittanceId) {
+  const r = (await c.query('SELECT id, remittance_number, kind FROM remittances WHERE id = $1', [remittanceId])).rows[0];
+  if (!r || r.kind !== 'direct-bill') return;
+  await c.query("UPDATE remittance_lines SET status = 'Remitted' WHERE remittance_id = $1 AND COALESCE(status, '') NOT IN ('Settled')", [r.id]);
+  const policyIds = (await c.query('SELECT DISTINCT policy_id FROM remittance_lines WHERE remittance_id = $1 AND policy_id IS NOT NULL', [r.id])).rows.map((x) => x.policy_id);
+  if (!policyIds.length) return;
+  await c.query(`UPDATE receivables SET remitted_at = now(), remittance_id = $2 WHERE policy_id = ANY($1) AND remitted_at IS NULL AND status NOT IN ('cancelled', 'written-off')`, [policyIds, r.id]);
+  await c.query(`UPDATE policies SET details = COALESCE(details, '{}'::jsonb) || jsonb_build_object('remittance', jsonb_build_object('id', $2::text, 'number', $3::text, 'approvedAt', now())) WHERE id = ANY($1)`,
+    [policyIds, r.id, r.remittance_number]);
+  const { onPoliciesRemitted } = await import('../commission/service.js');
+  await onPoliciesRemitted(c, policyIds);
 }
 
 export const APPROVAL_SELECT = `SELECT a.*, (SELECT display_name FROM users u WHERE u.id = a.initiator_id) AS initiator_name,
@@ -614,6 +634,8 @@ async function delegateApproval(a, body, user) {
     throw conflict('Approvals are not delegated one by one. An absent approver is covered by a dated delegation of authority.');
   }
   if (a.delegated_to && a.delegated_to !== user.id && !isAdmin(user)) throw forbidden('This approval has been delegated to another user');
+  // the maker never chooses the checker (TIS-BRD-SEC-03)
+  if (a.initiator_id === user.id || a.maker_id === user.id) throw forbidden('Maker-checker: the user who submitted or prepared the remittance cannot hand its approval to another user');
   const to = await one('SELECT id FROM users WHERE (id = $1 OR lower(username) = lower($1)) AND status = \'active\'', [String(body.delegateTo || '')]);
   if (!to) throw badRequest('Validation failed', [{ path: 'delegateTo', message: 'Delegate user was not found' }]);
   if (to.id === a.initiator_id) throw badRequest('Cannot delegate to the initiator');
@@ -718,6 +740,10 @@ export async function settleRemittance(id, b, user) {
   if ((await getSetting('remittance.direct_settle_enabled')) === false) throw new HttpError(409, SETTLE_OFF, [{ path: 'remittance', code: 'SETTLE_OFF', message: SETTLE_OFF }]);
   const r = await getRemittanceRow(id);
   if (r.status !== 'approved') throw conflict('Only approved remittances can be settled');
+  // proof of the payment and a second user (TIS-BRD-SEC-03, FR-RMT-014): never the maker or the approver of the remittance
+  if (!String(b.referenceNo || '').trim() || !isoDate(b.paymentDate)) throw badRequest('Validation failed', [{ path: 'referenceNo', message: 'The payment reference and the payment date are required to mark a remittance settled' }]);
+  await assertChecker(user, r.created_by, 'remittance settlement', { configurable: false });
+  await assertChecker(user, r.approved_by, 'remittance settlement', { configurable: false });
   await query(`UPDATE remittances SET status = 'settled', settled_at = now(), remarks = COALESCE($2, remarks), data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1`,
     [r.id, b.remarks || null, JSON.stringify({ paymentReference: b.referenceNo || null, paymentMethod: b.paymentMethod || null, paymentDate: isoDate(b.paymentDate) }), user.id]);
   return getRemittance(r.id);

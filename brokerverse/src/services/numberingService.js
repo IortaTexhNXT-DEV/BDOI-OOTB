@@ -37,10 +37,16 @@ const numberingService = {
   setNextNumber: (code, nextNumber) =>
     call(`/document-numbering/${enc(code)}/next-number`, { method: "PUT", body: JSON.stringify({ nextNumber }) }).then((r) => r.data),
 
-  // Commission Rate Matrix
+  // Commission Rate Matrix (the commission rules register)
   listRates: (params) => call(`/commission-rates${qs(params)}`).then((r) => r.data || []),
+  getRate: (id) => call(`/commission-rates/${enc(id)}`).then((r) => r.data),
+  rateOptions: () => call("/commission-rates/options").then((r) => r.data),
+  rateHistory: (id) => call(`/commission-rates/${enc(id)}/history`).then((r) => r.data || []),
   createRate: (body) => call("/commission-rates", { method: "POST", body: JSON.stringify(body) }).then((r) => r.data),
   updateRate: (id, body) => call(`/commission-rates/${enc(id)}`, { method: "PUT", body: JSON.stringify(body) }).then((r) => r.data),
+  submitRate: (id, body = {}) => call(`/commission-rates/${enc(id)}/submit`, { method: "POST", body: JSON.stringify(body) }).then((r) => r.data),
+  withdrawRate: (id) => call(`/commission-rates/${enc(id)}/withdraw`, { method: "POST" }).then((r) => r.data),
+  endRate: (id, body) => call(`/commission-rates/${enc(id)}/end`, { method: "POST", body: JSON.stringify(body) }).then((r) => r.data),
   deleteRate: (id) => call(`/commission-rates/${enc(id)}`, { method: "DELETE" }).then((r) => r.data),
   resolveRate: (params) => call(`/commission-rates/resolve${qs(params)}`).then((r) => r.data),
   creditTerms: (insurerId) => call(`/commission-rates/credit-terms/${enc(insurerId)}`).then((r) => r.data),

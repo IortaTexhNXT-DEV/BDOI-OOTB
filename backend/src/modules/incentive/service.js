@@ -517,7 +517,11 @@ export async function decideCalculation(batchId, action, b, user) {
 export async function payCalculation(batchId, b, user = null) {
   const c = await calcRow(batchId);
   if (c.status !== 'Approved') throw conflict('Only approved batches can be paid');
-  const date = isoDate(b.paymentDate) || (await today());
+  // the batch is paid by a third user, never by its approver (RBAC v4 release step), and never on a future date
+  await assertChecker(user, c.approved_by, 'incentive batch payment');
+  const businessDate = await today();
+  const date = isoDate(b.paymentDate) || businessDate;
+  if (date > businessDate) throw badRequest(`The payment date cannot be after today (${businessDate})`);
   await withTransaction(async (tx) => {
     // payout of the accrued incentives from the chosen bank account (posting rule incentive.payout)
     const total = round2((await tx.query('SELECT COALESCE(sum(payout), 0) AS t FROM incentive_results WHERE calculation_id = $1', [c.batch_id])).rows[0].t);
