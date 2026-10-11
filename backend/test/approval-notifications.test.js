@@ -83,7 +83,7 @@ describe('payment voucher and cheque', () => {
   it('a voucher submitted for approval goes to write:disbursements; sending it back is a rejection for the maker', async () => {
     const m = await makePolicy({ net: 30000 });
     client = m.client;
-    const c = await maker('post', '/disbursements').send({ payeeType: 'Customer', criteria: 'Specific', customerCode: client.client_code, transactionCode: 'REFUND', amount: '5000.00' });
+    const c = await maker('post', '/disbursements').send({ payeeType: 'Customer', criteria: 'Specific', customerCode: client.client_code, transactionCode: 'REFUND', amount: '5000.00', refundReasonCode: 'REF-CANCEL', refundNote: 'Mid-term cancellation' });
     expect(c.status).toBe(201);
     d = c.body.data;
     expect(await approvalRequests('disbursement', d.disbursementId)).toHaveLength(0);

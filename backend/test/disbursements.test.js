@@ -98,6 +98,36 @@ describe('disbursements / payment vouchers', () => {
     expect(created.body.data.amount).toBe(1250);
   });
 
+  it('refuses a customer refund voucher without its refund reason on create, update and bulk upload (GAP-CASH-17)', async () => {
+    const base = { payeeType: 'Customer', criteria: 'Specific', customerCode: client.client_code, transactionCode: 'REFUND', amount: '100.00' };
+    const none = await ctx.as('maker')('post', '/disbursements').send(base);
+    expect(none.status).toBe(400);
+    expect(JSON.stringify(none.body.errors)).toMatch(/refund reason/);
+    // REF-CANCEL asks for its note
+    expect((await ctx.as('maker')('post', '/disbursements').send({ ...base, refundReasonCode: 'REF-CANCEL' })).status).toBe(400);
+    const csv = 'Voucher Date,Payee Type,Customer Code,Amount,Transaction Code,Refund Reason,Refund Note\n'
+      + `2026-09-01,Customer,${client.client_code},100,REFUND,,\n`
+      + `2026-09-01,Customer,${client.client_code},100,REFUND,REF-CANCEL,Mid-term cancellation\n`;
+    const up = await ctx.as('maker')('post', '/disbursements/bulk-upload').attach('file', Buffer.from(csv), 'refunds.csv');
+    expect(up.body.data).toMatchObject({ created: 1, failed: 1 });
+    expect(up.body.data.errors[0]).toMatchObject({ row: 2, message: expect.stringMatching(/refund reason/) });
+    const made = (await ctx.as('maker')('get', `/disbursements/${up.body.data.ids[0]}`)).body.data;
+    expect(made).toMatchObject({ refundReasonCode: 'REF-CANCEL' });
+    // a voucher without a reason (made before the rule, or with the rule off) cannot be updated until it has one
+    const { query: q } = await import('../src/db/pool.js');
+    await q("UPDATE app_settings SET value = 'false' WHERE key = 'disbursements.refund_reason_required'");
+    const { clearSettingsCache } = await import('../src/lib/settings.js');
+    clearSettingsCache();
+    const old = (await ctx.as('maker')('post', '/disbursements').send(base)).body.data;
+    expect(old.refundReasonCode).toBeNull();
+    await q("UPDATE app_settings SET value = 'true' WHERE key = 'disbursements.refund_reason_required'");
+    clearSettingsCache();
+    expect((await ctx.as('maker')('put', `/disbursements/${old.disbursementId}`).send({ remarks: 'x' })).status).toBe(400);
+    const fixed = await ctx.as('maker')('put', `/disbursements/${old.disbursementId}`).send({ remarks: 'x', refundReasonCode: 'REF-CANCEL', refundNote: 'Mid-term cancellation' });
+    expect(fixed.status, JSON.stringify(fixed.body)).toBe(200);
+    expect(fixed.body.data.refundReasonCode).toBe('REF-CANCEL');
+  });
+
   it('validation and permissions', async () => {
     expect((await ctx.as('maker')('post', '/disbursements').send({ payeeType: 'Martian' })).status).toBe(400);
     expect((await ctx.as('maker')('post', '/disbursements/checkbook').send({ totaleAmount: 0 })).status).toBe(400);

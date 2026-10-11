@@ -41,7 +41,25 @@ export const DISBURSEMENT_UPLOAD_COLUMNS = [
   { key: 'transactionCode', header: 'Transaction Code', format: 'Transaction code master', example: '' },
   { key: 'transactionDescription', header: 'Transaction Description', format: 'Text; printed on the voucher', example: 'Premium remittance September 2026' },
   { key: 'remarks', header: 'Remarks', format: 'Text', example: 'Net of commission' },
+  { key: 'refundReasonCode', header: 'Refund Reason', aliases: ['refundReason'], format: 'Customer refund: reason code of the refund context (e.g. REF-CANCEL); required with disbursements.refund_reason_required', example: '' },
+  { key: 'refundNote', header: 'Refund Note', format: 'Note of the refund reason, when the reason asks for one', example: '' },
 ];
+
+/**
+ * The refund reason of a customer refund voucher (GAP-CASH-17): a reason of the refund context, with its note when the
+ * reason asks for one; required with disbursements.refund_reason_required (create, update, bulk upload). Returns the
+ * reason { code, text } or null when none is given and none is required.
+ */
+async function refundReasonOf(db, b, { required }) {
+  if (!b.refundReasonCode) {
+    if (required && (await getSetting('disbursements.refund_reason_required', true)) !== false) {
+      const message = 'A refund to a customer needs its refund reason (e.g. REF-CANCEL)';
+      throw badRequest(message, [{ path: 'refundReasonCode', message }]);
+    }
+    return null;
+  }
+  return requiredReason(db, 'refund', { reasonCode: b.refundReasonCode, note: b.refundNote });
+}
 
 export const checkbookRow = (c) => ({
   checkbookId: c.id, id: c.id, invoiceListRefId: c.invoice_list_id, disbursementId: c.disbursement_id, customerCode: c.customer_code, customerName: c.customer_name,
@@ -94,6 +112,7 @@ async function resolveInsurer(db, ref) {
 /** Create a voucher from the Create Voucher screen payload (or bulk upload row). */
 export async function createDisbursement(db, b, user, { source = 'manual', status = 'draft' } = {}) {
   const payeeType = b.payeeType || 'Customer';
+  const refund = payeeType === 'Customer' ? await refundReasonOf(db, b, { required: true }) : null;
   const client = await findClient(db, b.customerCode);
   const insurer = await resolveInsurer(db, b.insurerName || b.insuranceCompanyId);
   const policy = await findPolicy(db, b.policyNumber || b.policyId);
@@ -113,9 +132,8 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
     b.instrumentCurrency || (await baseCurrency()), str(b.remarks), source, user?.id ?? null])).rows[0];
   // a refund to a customer carries its reason (context refund, e.g. REF-CANCEL; GAP-CASH-17)
-  if (payeeType === 'Customer' && b.refundReasonCode) {
-    const reason = await requiredReason(db, 'refund', { reasonCode: b.refundReasonCode, note: b.refundNote });
-    return (await db.query('UPDATE disbursements SET refund_reason_code = $2, refund_reason = $3 WHERE id = $1 RETURNING *', [d.id, reason.code, reason.text])).rows[0];
+  if (refund) {
+    return (await db.query('UPDATE disbursements SET refund_reason_code = $2, refund_reason = $3 WHERE id = $1 RETURNING *', [d.id, refund.code, refund.text])).rows[0];
   }
   return d;
 }
@@ -197,6 +215,11 @@ export async function updateDisbursement(db, id, b, user) {
   const sets = []; const p = [d.id];
   for (const [k, col] of Object.entries(EDITABLE)) if (b[k] !== undefined) { p.push(col === 'voucher_date' ? isoDate(b[k]) : b[k]); sets.push(`${col} = $${p.length}`); }
   if (b.amount !== undefined) { p.push(round2(num(b.amount))); sets.push(`amount = $${p.length}`); }
+  if (d.payee_type === 'Customer') {
+    // a customer refund keeps a reason: a new one replaces it; one is required while the voucher has none
+    const refund = await refundReasonOf(db, b, { required: !d.refund_reason_code && b.status !== 'cancelled' });
+    if (refund) { p.push(refund.code, refund.text); sets.push(`refund_reason_code = $${p.length - 1}`, `refund_reason = $${p.length}`); }
+  }
   if (b.status !== undefined) {
     if (!['draft', 'for-approval', 'cancelled'].includes(b.status)) throw badRequest('Status can only be set to draft, for-approval or cancelled here; use the cheque / payout approval for the rest');
     p.push(b.status); sets.push(`status = $${p.length}`);
