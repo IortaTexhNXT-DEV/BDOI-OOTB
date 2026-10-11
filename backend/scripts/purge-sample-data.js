@@ -55,6 +55,8 @@ export const SAMPLE_MASTERS = [
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
   // sample promotions (their lines go with them) and the sample discount cap of seeds/sample/95_tisph_quote_policy.sql
   { table: 'promotions', label: 'sample promotions', where: "id LIKE 'prm\\_sample\\_%'" },
+  // sample dealer schemes of seeds/sample/99_schemes.sql (their vehicle lines go with them)
+  { table: 'schemes', label: 'sample dealer schemes', where: "id LIKE 'sch\\_sample\\_%'" },
   { table: 'discount_caps', label: 'sample discount caps', where: "remarks = 'Affinity partners of the Toyota owners club'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
   { table: 'commission_rates', label: 'sample commission rules (TISPH panel)', where: "remarks = 'TISPH sample'" },
