@@ -75,8 +75,8 @@ export async function queueCertificateEmail(db, m) {
   const rule = String((await getSetting('credit_life.certificate_password', 'birth_ddmmyyyy')) || 'none');
   const vars = { certificateNumber: m.certificate_number, borrowerName: name(m), loanAccount: m.loan_account, passwordHint: PASSWORD_HINTS[rule] || '' };
   const id = await queueEmail({ db, to: m.email, template: 'credit-life-certificate', entity: 'credit_life_member', entityId: m.id,
-    subject: renderTemplate(await getSetting('credit_life.certificate_email_subject', 'Your Credit Life certificate of cover {{certificateNumber}}'), vars),
-    html: renderTemplate(await getSetting('credit_life.certificate_email_body', '<p>Your certificate {{certificateNumber}} is attached.</p>'), vars),
+    subject: renderTemplate((await getSetting('credit_life.certificate_email_subject', null)) || '', vars, { html: false }),
+    html: renderTemplate((await getSetting('credit_life.certificate_email_body', null)) || '', vars),
     attachments: [documentAttachment('credit-life-certificate', { memberId: m.id }, `credit-life-certificate-${m.certificate_number}.pdf`)] });
   await db.query('UPDATE credit_life_members SET email_id = $2, emailed_at = now() WHERE id = $1', [m.id, id]);
   return id;
@@ -122,9 +122,46 @@ export async function sendBatch(batchId, to, user) {
   const list = await batchList(b.id);
   const vars = { batchNumber: b.batch_number, period: b.period, members: String(list.rows), insurerName: b.insurer_name, bankName: b.bank_name, premium: Number(b.total_premium).toFixed(2) };
   const id = await queueEmail({ to: address, template: 'credit-life-batch', entity: 'credit_life_batch', entityId: b.id,
-    subject: renderTemplate(await getSetting('credit_life.insurer_email_subject', 'Credit Life batch {{batchNumber}}'), vars),
-    html: renderTemplate(await getSetting('credit_life.insurer_email_body', '<p>Batch {{batchNumber}} attached.</p>'), vars),
+    subject: renderTemplate((await getSetting('credit_life.insurer_email_subject', null)) || '', vars, { html: false }),
+    html: renderTemplate((await getSetting('credit_life.insurer_email_body', null)) || '', vars),
     attachments: [documentAttachment('credit-life-batch-list', { batchId: b.id }, list.fileName, list.contentType)] });
   await one("UPDATE credit_life_batches SET status = 'sent', sent_at = now(), sent_to = $2, email_id = $3, updated_at = now() WHERE id = $1 RETURNING id", [b.id, address, id]);
   return { emailId: id, to: address, accounts: list.rows, message: `Batch ${b.batch_number} queued for e-mail to ${address}`, by: user?.id };
+}
+
+/** Statement of account of a batch to the financing bank (PJRN-01): the issued accounts with their premium, and the total. */
+export async function batchSoaPdf(batchId) {
+  const b = await batchRow(batchId);
+  const rows = await many("SELECT * FROM credit_life_members WHERE batch_id = $1 AND status = 'issued' ORDER BY row_no NULLS LAST", [b.id]);
+  const ctx = await printContext();
+  const f = formatters(ctx);
+  const total = rows.reduce((s, m) => s + Number(m.premium), 0);
+  return { number: b.batch_number, total, accounts: rows.length, pdf: buildPdf({ ...ctx, title: 'Credit Life Statement of Account', number: b.batch_number,
+    meta: kv([['Financing bank', b.bank_name], ['Insurer', b.insurer_name], ['Product', b.product_name], ['Month', b.period], ['Insurer SOA reference', b.insurer_soa_reference]]),
+    sections: [{ heading: 'Accounts covered', table: {
+      columns: [{ key: 'certificate', label: 'Certificate' }, { key: 'loan', label: 'Loan account' }, { key: 'borrower', label: 'Borrower' }, { key: 'period', label: 'Period of cover' },
+        { key: 'sumInsured', label: 'Sum insured', type: 'money' }, { key: 'premium', label: 'Premium', type: 'money' }],
+      rows: rows.map((m) => ({ certificate: m.certificate_number, loan: m.loan_account, borrower: name(m), period: `${f.date(m.cover_from)} to ${f.date(m.cover_to)}`,
+        sumInsured: Number(m.sum_insured), premium: Number(m.premium) })),
+      totals: { certificate: `${rows.length} account(s)`, premium: total } } },
+    { heading: 'Amount due', rows: [['Total premium due', f.ccy(total)]] }] }) };
+}
+
+/** Send the statement of account of a sent batch to the financing bank (e-mail with the PDF); the insurer's SOA reference may be recorded. */
+export async function sendSoa(batchId, { to = null, insurerSoaReference = null } = {}) {
+  const { conflict, badRequest } = await import('../../lib/errors.js');
+  const b = await batchRow(batchId);
+  if (b.status !== 'sent') throw conflict(`Batch ${b.batch_number} is ${b.status}: send it to the insurer before the statement of account goes to the bank`);
+  const bank = await one('SELECT email FROM clients WHERE id = $1', [b.financing_client_id]);
+  const address = String(to || bank?.email || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(address)) throw badRequest('Validation failed', [{ path: 'to', message: "Enter the bank's e-mail address" }]);
+  if (insurerSoaReference) await one('UPDATE credit_life_batches SET insurer_soa_reference = $2 WHERE id = $1 RETURNING id', [b.id, insurerSoaReference]);
+  const soa = await batchSoaPdf(b.id);
+  const vars = { batchNumber: b.batch_number, period: b.period, bankName: b.bank_name, insurerName: b.insurer_name, members: String(soa.accounts), premium: soa.total.toFixed(2) };
+  const id = await queueEmail({ to: address, template: 'credit-life-soa', entity: 'credit_life_batch', entityId: b.id,
+    subject: renderTemplate((await getSetting('credit_life.soa_email_subject', null)) || '', vars, { html: false }),
+    html: renderTemplate((await getSetting('credit_life.soa_email_body', null)) || '', vars),
+    attachments: [documentAttachment('credit-life-soa', { batchId: b.id }, `credit-life-soa-${b.batch_number}.pdf`)] });
+  await one('UPDATE credit_life_batches SET soa_sent_at = now(), soa_sent_to = $2, soa_email_id = $3, updated_at = now() WHERE id = $1 RETURNING id', [b.id, address, id]);
+  return { emailId: id, to: address, accounts: soa.accounts, total: soa.total, message: `Statement of account ${b.batch_number} queued for e-mail to ${address}` };
 }

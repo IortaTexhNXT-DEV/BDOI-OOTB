@@ -315,7 +315,7 @@ Object.assign(roleMenuPermissions["tis-finance"], {
 });
 // Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
 // Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).
-const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
+const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing", "CLI Generated Report"].map((item) => `Operational Reports > ${item}`);
 ["accounting", "tis-finance"].forEach((role) => { roleMenuPermissions[role].reports = [...roleMenuPermissions[role].reports, ...SALES_REPORTS]; });
 // the report catalogue gives TIS Finance the dealer production report as well (report_definitions roles)
 roleMenuPermissions["tis-finance"].reports.push("Operational Reports > Dealer Production");

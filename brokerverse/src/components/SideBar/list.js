@@ -905,6 +905,14 @@ export const menuList = [
             includes: ["/reports/run/renewal-notice-listing"],
             permissions: ["read:reports"],
           },
+          {
+            // Credit Life certificates generated from the financing bank's batches (TIS-BRD-RPT-OPS-01, CR-14)
+            id: 11,
+            name: "CLI Generated Report",
+            path: "/reports/run/cli-generated",
+            includes: ["/reports/run/cli-generated"],
+            permissions: ["read:reports"],
+          },
         ],
       },
       {

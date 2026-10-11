@@ -14,6 +14,7 @@ import { CHANNEL_QUERIES } from './channelQueries.js';
 import { NON_PAYMENT_SQL } from '../collections/nonpayment.js';
 import { SALES_QUERIES } from './salesQueries.js';
 import { TISPH_QUERIES } from './tisphQueries.js';
+import { CREDIT_LIFE_QUERIES } from './creditLifeQueries.js';
 
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
@@ -248,6 +249,7 @@ export const QUERIES = {
   ...CHANNEL_QUERIES,
   ...SALES_QUERIES,
   ...TISPH_QUERIES,
+  ...CREDIT_LIFE_QUERIES,
   production: {
     sql: production, filters: PRODUCTION_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Origin: { groupBy: 'origin' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',

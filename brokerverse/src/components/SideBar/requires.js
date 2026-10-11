@@ -141,6 +141,7 @@ export const screenRequires = {
   "/reports/run/production-by-line": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
   "/reports/run/agent-pipeline": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
   "/reports/run/renewal-notice-listing": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
+  "/reports/run/cli-generated": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
   "/reports/financialreports/soapremiumreceivable": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
   "/reports/financialreports/collectionreport": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],
   "/reports/financialreports/Payables": [["read:masters", "read:profile", "write:masters"], ["read:reports"]],

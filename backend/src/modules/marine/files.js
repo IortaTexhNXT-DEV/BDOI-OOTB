@@ -172,8 +172,8 @@ export async function sendDeclaration(declarationId, user) {
   const attachments = [documentAttachment('marine-declaration-file', { declarationId: row.id }, file.fileName, XLSX),
     documentAttachment('marine-declaration-summary', { declarationId: row.id }, `declaration-summary-${d.declarationNumber}.pdf`)];
   if (cover.cover_type === 'parcel') attachments.push(documentAttachment('parcel-certificate-register', { declarationId: row.id }, `certificate-register-${d.declarationNumber}.xlsx`, XLSX));
-  const id = await queueEmail({ to: row.declaration_email, subject: renderTemplate(await getSetting('marine.declaration_email_subject', 'Declaration {{declarationNumber}}'), vars),
-    html: renderTemplate(await getSetting('marine.declaration_email_body', '<p>Declaration {{declarationNumber}} attached.</p>'), vars), template: 'marine-declaration',
+  const id = await queueEmail({ to: row.declaration_email, subject: renderTemplate((await getSetting('marine.declaration_email_subject', null)) || '', vars, { html: false }),
+    html: renderTemplate((await getSetting('marine.declaration_email_body', null)) || '', vars), template: 'marine-declaration',
     entity: 'marine_declaration', entityId: row.id, attachments });
   const status = ['accepted', 'accepted-with-differences'].includes(row.file_status) ? row.file_status : 'sent';
   await one('UPDATE open_cover_declarations SET file_status = $2, file_sent_at = now(), file_sent_to = $3, email_id = $4, updated_at = now() WHERE id = $1 RETURNING id',

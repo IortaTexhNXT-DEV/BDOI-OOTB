@@ -240,6 +240,13 @@ const BatchDetail = ({ id }) => {
     confirmLabel: t("creditLife.send", "Send"),
     onConfirm: async (to) => { const r = await service.sendCreditLifeBatch(batch.id, to || undefined); showSuccess(toast, r.message); },
   }).then((ok) => ok !== null && load());
+  const sendSoa = () => openConfirm({
+    title: t("creditLife.sendSoa", "Send SOA to bank"),
+    facts: [{ label: t("creditLife.batch", "Batch"), value: batch.batchNumber }, { label: t("creditLife.premium", "Premium"), value: batch.totalPremium, type: "amount" }],
+    input: { type: "text", label: t("creditLife.bankEmail", "Bank e-mail (empty: the bank's e-mail)"), required: false },
+    confirmLabel: t("creditLife.send", "Send"),
+    onConfirm: async (to) => { const r = await service.sendCreditLifeSoa(batch.id, to || undefined); showSuccess(toast, r.message); },
+  }).then((ok) => ok !== null && load());
   const cancel = (m) => openConfirm({
     title: t("creditLife.cancelTitle", "Cancel certificate"), severity: "danger",
     facts: [{ label: t("creditLife.certificate", "Certificate"), value: m.certificateNumber }, { label: t("creditLife.borrower", "Borrower"), value: m.borrowerName },
@@ -264,6 +271,9 @@ const BatchDetail = ({ id }) => {
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         {write && draft ? <Button label={t("creditLife.issue", "Issue certificates")} icon="pi pi-check" disabled={busy || !batch.valid} onClick={issue} /> : null}
         {write && ["issued", "sent"].includes(batch.status) ? <Button label={t("creditLife.sendTitle", "Send to insurer")} icon="pi pi-envelope" outlined disabled={busy} onClick={send} /> : null}
+        {write && batch.status === "sent" ? <Button label={t("creditLife.sendSoa", "Send SOA to bank")} icon="pi pi-send" outlined disabled={busy} onClick={sendSoa} /> : null}
+        {!draft ? <Button label={t("creditLife.soa", "Statement of account")} icon="pi pi-print" text
+          onClick={() => printFile(toast, `/credit-life/batches/${encodeURIComponent(batch.id)}/soa`, `${batch.batchNumber}-soa.pdf`)} /> : null}
         {!draft ? <Button label={t("creditLife.accountsList", "Accounts list")} icon="pi pi-file-excel" text onClick={() => service.creditLifeBatchList(batch.id).catch((e) => showError(toast, e))} /> : null}
       </PageHeader>
       <div className="pe-kpis">

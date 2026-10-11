@@ -176,8 +176,9 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'credit-life', name: 'Credit Life batches', module: 'Operations', tier: P1,
     description: 'Monthly Credit Life batches of the financing bank: members uploaded or encoded and checked against the Credit Life rules, one master policy per customer, certificates of cover e-mailed as password-protected PDFs, the batch forwarded to the insurer',
-    requirements: ['TIS-BRD-PJRN-01', 'TIS-BRD-PJRN-02', 'CL-01', 'CL-02', 'CL-03', 'CL-04'],
-    menus: ['Operations > Credit Life'], permissions: ['read:credit-life', 'write:credit-life'],
+    requirements: ['TIS-BRD-PJRN-01', 'TIS-BRD-PJRN-02', 'TIS-BRD-PJRN-03', 'CL-01', 'CL-02', 'CL-03', 'CL-04', 'TIS-BRD-RPT-OPS-01', 'CR-14'],
+    menus: ['Operations > Credit Life', 'Reports > Operational Reports > CLI Generated Report'], reports: ['cli-generated'],
+    permissions: ['read:credit-life', 'write:credit-life'],
   }),
   feature({
     key: 'dealer-programmes', name: 'Dealer programmes', module: 'Sales & Marketing', tier: P1,

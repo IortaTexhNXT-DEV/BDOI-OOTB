@@ -29,7 +29,7 @@ export const CREDIT_LIFE_COLUMNS = [
   { key: 'lastName', header: 'LAST_NAME', aliases: ['last name', 'surname'], required: true, format: 'Text', example: 'Dela Cruz' },
   { key: 'firstName', header: 'FIRST_NAME', aliases: ['first name'], required: true, format: 'Text', example: 'Juan' },
   { key: 'birthDate', header: 'BIRTH_DATE', aliases: ['birth date', 'birthday', 'date of birth'], required: true, format: 'Date DD/MM/YYYY or YYYY-MM-DD; under the age limit of credit_life.rules', example: '14/03/1980' },
-  { key: 'loanAccount', header: 'LOAN_ACCOUNT', aliases: ['loan account', 'tfs loan account'], required: true, format: 'Text 30; one active certificate per loan account', example: '8005123456' },
+  { key: 'loanAccount', header: 'LOAN_ACCOUNT', aliases: ['loan account', 'tfs loan account'], required: true, format: 'TFS loan number, 10 digits (credit_life.loan_account_pattern); one active certificate per loan account', example: '8005123456' },
   { key: 'loanAmount', header: 'LOAN_AMOUNT', aliases: ['loan amount', 'amount financed'], format: 'Amount', example: '1250000' },
   { key: 'loanTermMonths', header: 'LOAN_TERM_MONTHS', aliases: ['loan term', 'term'], required: true, format: 'Whole number of months; the cover follows the loan tenor (credit_life.rules termYears)', example: '60' },
   { key: 'releaseDate', header: 'RELEASE_DATE', aliases: ['release date', 'booking date'], required: true, format: 'Date DD/MM/YYYY or YYYY-MM-DD, not in the future', example: '05/10/2026' },
@@ -64,7 +64,8 @@ export const batchOut = (b) => b && ({
   productId: b.product_id, productName: b.product_name ?? null, period: b.period, fileName: b.file_name, status: b.status, notes: b.notes,
   members: b.members ?? 0, valid: b.valid ?? 0, errors: b.error_count ?? 0, issued: b.issued ?? 0, cancelled: b.cancelled ?? 0,
   totalSumInsured: Number(b.total_sum_insured || 0), totalPremium: Number(b.total_premium || 0),
-  issuedAt: b.issued_at, issuedBy: b.issued_by_name ?? b.issued_by, sentAt: b.sent_at, sentTo: b.sent_to, createdAt: b.created_at, createdBy: b.created_by_name ?? b.created_by,
+  issuedAt: b.issued_at, issuedBy: b.issued_by_name ?? b.issued_by, sentAt: b.sent_at, sentTo: b.sent_to, soaSentAt: b.soa_sent_at ?? null, soaSentTo: b.soa_sent_to ?? null,
+  insurerSoaReference: b.insurer_soa_reference ?? null, createdAt: b.created_at, createdBy: b.created_by_name ?? b.created_by,
 });
 export const memberOut = (m) => ({
   id: m.id, batchId: m.batch_id, batchNumber: m.batch_number ?? null, masterPolicyId: m.master_policy_id, masterNumber: m.master_number ?? null, rowNo: m.row_no,
@@ -156,7 +157,7 @@ export async function checkMember(db, batch, v, siblings = []) {
   const coverFrom = (await getSetting('credit_life.cover_start', 'release_date')) === 'batch_period' ? `${batch.period}-01` : release;
   if (birth && coverFrom) {
     const age = ageOn(birth, coverFrom);
-    if (age >= rules.maxAge) errors.push(`The borrower is ${age}: Credit Life excludes borrowers aged ${rules.maxAge} and over`);
+    if (age > rules.maxAge) errors.push(`The borrower is ${age}: Credit Life covers borrowers aged up to ${rules.maxAge}`);
     if (age < 18) errors.push(`The borrower is ${age}: a borrower must be of age`);
   }
   const months = Number(v.loanTermMonths);
@@ -166,6 +167,8 @@ export async function checkMember(db, batch, v, siblings = []) {
   }
   const account = String(v.loanAccount || '').trim();
   if (account && account.length > 30) errors.push('The loan account is at most 30 characters');
+  const pattern = String((await getSetting('credit_life.loan_account_pattern', '^[0-9]{10}$')) || '');
+  if (account && pattern && !new RegExp(pattern).test(account)) errors.push(`Loan account ${account} is not a TFS loan number (${pattern === '^[0-9]{10}$' ? '10 digits' : pattern})`);
   if (account && siblings.some((s) => s.loan_account === account)) errors.push(`Loan account ${account} is already in this batch`);
   const active = account ? (await db.query(`SELECT m.certificate_number FROM credit_life_members m WHERE m.loan_account = $1 AND m.status = 'issued'
     AND (m.cover_to IS NULL OR m.cover_to >= $2::date) LIMIT 1`, [account, coverFrom || now])).rows[0] : null;

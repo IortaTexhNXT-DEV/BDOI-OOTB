@@ -60,7 +60,7 @@ describe('batch and members (PJRN-01, CL-01, CL-02)', () => {
       loanAccount: '8005000001', loanAmount: 1250000, loanTermMonths: 60, releaseDate: addDays(T, -5), email: 'juan@example.ph', mobile: '09175550123', ...o });
     const old = await add({ birthDate: '1950-01-01', loanAccount: '8005000099' });
     expect(old.status).toBe(400);
-    expect(old.body.message).toMatch(/^The borrower is \d+: Credit Life excludes borrowers aged 65 and over$/);
+    expect(old.body.message).toMatch(/^The borrower is \d+: Credit Life covers borrowers aged up to 65$/);
     expect((await add({ loanTermMonths: 84, loanAccount: '8005000098' })).body.message).toBe('The term follows the loan tenor: 1 to 5 years');
     expect((await add({ email: 'juan@', loanAccount: '8005000097' })).body.message).toBe('Enter a valid e-mail address');
     expect((await add({ releaseDate: addDays(T, 3), loanAccount: '8005000096' })).body.message).toBe('The release date cannot be after today');
@@ -70,6 +70,13 @@ describe('batch and members (PJRN-01, CL-01, CL-02)', () => {
     expect(r.body.data).toMatchObject({ status: 'valid', sumInsured: 1000000, premium: 2000, mobile: '+639175550123', coverFrom: addDays(T, -5) });
     expect(r.body.data.coverTo).toBe(addDays(`${String(Number(addDays(T, -5).slice(0, 4)) + 5)}${addDays(T, -5).slice(4)}`, -1));
     expect((await add({ firstName: 'Juana' })).body.message).toBe('Loan account 8005000001 is already in this batch');
+    // age limit inclusive (BRD QUOT-06 / PJRN-01): 65 on the start of cover passes, 66 is refused
+    const start = addDays(T, -5);
+    const yearsBefore = (n) => `${Number(start.slice(0, 4)) - n}${start.slice(4)}`;
+    const at65 = await add({ customerNo: 'C-065', firstName: 'Senior', lastName: 'Sixtyfive', birthDate: yearsBefore(65), loanAccount: '8005000065', email: '' });
+    expect(at65.status, JSON.stringify(at65.body)).toBe(201);
+    expect((await add({ customerNo: 'C-066', birthDate: addDays(yearsBefore(66), 0), loanAccount: '8005000066' })).body.message).toBe('The borrower is 66: Credit Life covers borrowers aged up to 65');
+    await as['cl.ops']('delete', `/credit-life/members/${at65.body.data.id}`);
   });
 
   it('uploads the bank\'s file: every row kept, valid or with its messages; .xlsx only; required columns', async () => {
@@ -134,6 +141,13 @@ describe('issue, certificates and the insurer (PJRN-02, CL-03, CL-04)', () => {
     const list = await generateDocument(mail.attachments[0].document, mail.attachments[0].params);
     expect(readWorkbook(list.content)[0].rows.length).toBe(4);
     expect((await as['cl.ops']('get', `/credit-life/batches/${batch.id}`)).body.data.status).toBe('sent');
+    // the statement of account goes back to the financing bank (PJRN-01)
+    const soa = await as['cl.ops']('post', `/credit-life/batches/${batch.id}/soa/send`).send({ to: 'insurance@tfs.example.ph', insurerSoaReference: 'SOA-2026-0001' });
+    expect(soa.status, JSON.stringify(soa.body)).toBe(200);
+    expect(soa.body.data).toMatchObject({ to: 'insurance@tfs.example.ph', accounts: 3, total: 6000 });
+    const soaMail = (await q('SELECT attachments FROM email_outbox WHERE id = $1', [soa.body.data.emailId]))[0];
+    expect((await generateDocument(soaMail.attachments[0].document, soaMail.attachments[0].params)).content.subarray(0, 4).toString()).toBe('%PDF');
+    expect((await as['cl.ops']('get', `/credit-life/batches/${batch.id}`)).body.data).toMatchObject({ soaSentTo: 'insurance@tfs.example.ph', insurerSoaReference: 'SOA-2026-0001' });
     const masters = (await as['cl.sales']('get', '/credit-life/master-policies?search=Dela Cruz')).body.data;
     expect(masters).toHaveLength(1);
     expect(masters[0]).toMatchObject({ certificates: 2, sumInsured: 2000000 });
@@ -154,6 +168,16 @@ describe('issue, certificates and the insurer (PJRN-02, CL-03, CL-04)', () => {
     const c = await as['cl.ops']('post', `/credit-life/members/${x.id}/cancel`).send({ reason: 'Loan cancelled before release' });
     expect(c.body.data.status).toBe('cancelled');
     expect((await as['cl.ops']('post', `/credit-life/members/${x.id}/cancel`).send({ reason: 'again' })).status).toBe(409);
+    const short = await as['cl.ops']('post', `/credit-life/batches/${b2.id}/members`).send({ lastName: 'Short', firstName: 'Loan', birthDate: '1980-03-14', loanAccount: '12345',
+      loanTermMonths: 24, releaseDate: T });
+    expect(short.body.message).toBe('Loan account 12345 is not a TFS loan number (10 digits)');
+    // CLI Generated Report (RPT-OPS-01, CR-14): the certificates generated, with the TFS 10-digit loan number
+    const rep = await as['cl.ops']('post', '/reports/cli-generated/run').send({ ReportCriteria: 'In force', FromDate: addDays(T, -1), ToDate: T });
+    expect(rep.status, JSON.stringify(rep.body)).toBe(200);
+    expect(rep.body.data.rows.map((x) => x.loanAccount).sort()).toEqual(['8005000001', '8005000002']);
+    expect(rep.body.data.rows[0]).toMatchObject({ batchNumber: batch.batchNumber, status: 'In force', sumInsured: 1000000 });
+    const all = await as['cl.ops']('post', '/reports/cli-generated/run').send({ ReportCriteria: 'Cancelled', FromDate: addDays(T, -1), ToDate: T });
+    expect(all.body.data.rows.map((x) => x.loanAccount)).toEqual(['8005000003']);
     const audit = await q("SELECT action FROM audit_log WHERE entity IN ('credit_life_batch', 'credit_life_member') ORDER BY id");
     expect(audit.map((a) => a.action)).toEqual(expect.arrayContaining(['create', 'upload', 'issue', 'send', 'cancel']));
   });

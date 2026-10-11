@@ -433,6 +433,7 @@ export const CATALOGUE = {
   'credit_life_batches.file_name': 'fileName',
   'credit_life_batches.notes': 'freeText',
   'credit_life_batches.sent_to': 'email',
+  'credit_life_batches.soa_sent_to': 'email',
   'credit_life_master_policies.customer_key': 'idNumber',
   'credit_life_master_policies.customer_no': 'idNumber',
   'credit_life_master_policies.first_name': 'firstName',

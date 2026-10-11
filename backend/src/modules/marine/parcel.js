@@ -137,8 +137,8 @@ async function queueCertificateEmail(db, x) {
   if (!x.email || (await getSetting('parcel.email_certificate', true)) === false) return null;
   const rule = String((await getSetting('parcel.certificate_password', 'loan_last6')) || 'none');
   const vars = { certificateNumber: x.certificate_number, customerName: x.customer_name, waybillNo: x.waybill_no, passwordHint: PASSWORD_HINTS[rule] || '' };
-  const subject = renderTemplate(await getSetting('parcel.certificate_email_subject', 'Your parcel insurance certificate {{certificateNumber}}'), vars);
-  const html = renderTemplate(await getSetting('parcel.certificate_email_body', '<p>Your certificate {{certificateNumber}} is attached.</p>'), vars);
+  const subject = renderTemplate((await getSetting('parcel.certificate_email_subject', null)) || '', vars, { html: false });
+  const html = renderTemplate((await getSetting('parcel.certificate_email_body', null)) || '', vars);
   const id = await queueEmail({ db, to: x.email, subject, html, template: 'parcel-certificate', entity: 'marine_certificate', entityId: x.id,
     attachments: [documentAttachment('parcel-certificate', { certificateId: x.id }, `parcel-certificate-${x.certificate_number}.pdf`)] });
   await db.query('UPDATE open_cover_certificates SET email_id = $2, emailed_at = now() WHERE id = $1', [x.id, id]);

@@ -19298,6 +19298,9 @@
       "error": "Failed",
       "issued": "Issued",
       "cancelled": "Cancelled"
-    }
+    },
+    "sendSoa": "Send SOA to bank",
+    "bankEmail": "Bank e-mail (empty: the bank's e-mail)",
+    "soa": "Statement of account"
   }
 }

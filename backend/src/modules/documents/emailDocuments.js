@@ -16,6 +16,7 @@
  *   marine-declaration-summary { declarationId } Declaration summary (parcel) or Declaration of Shipments (cargo)
  *   parcel-certificate-register { declarationId } certificate register of a parcel declaration (Excel)
  *   credit-life-certificate { memberId }     Credit Life certificate of cover, protected by credit_life.certificate_password
+ *   credit-life-soa        { batchId }       statement of account of a Credit Life batch to the financing bank
  *   credit-life-batch-list { batchId }       the issued accounts of a Credit Life batch forwarded to the insurer (Excel)
  */
 import { pool } from '../../db/pool.js';
@@ -104,6 +105,11 @@ const GENERATORS = {
     const { certificatePdf } = await import('../credit-life/certificates.js');
     const { pdf, row } = await certificatePdf(memberId, { protect: true });
     return { fileName: `credit-life-certificate-${row.certificate_number}.pdf`, content: pdf };
+  },
+  'credit-life-soa': async ({ batchId }) => {
+    const { batchSoaPdf } = await import('../credit-life/certificates.js');
+    const { pdf, number } = await batchSoaPdf(batchId);
+    return { fileName: `credit-life-soa-${number}.pdf`, content: pdf };
   },
   'credit-life-batch-list': async ({ batchId }) => {
     const { batchList } = await import('../credit-life/certificates.js');

@@ -115,6 +115,24 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/batches/:id/soa', summary: 'Statement of account of a batch to the financing bank (PDF): the issued accounts and the premium due', screen: `${SCREEN} > Batch > Statement of Account`,
+  middleware: canRead, response: 'application/pdf',
+  handler: async (req, res) => {
+    const { pdf, number } = await docs.batchSoaPdf(req.params.id);
+    sendPdf(res, pdf, `credit-life-soa-${number}.pdf`);
+  },
+});
+define({
+  method: 'POST', path: '/batches/:id/soa/send', summary: 'Send the statement of account of a sent batch to the financing bank (to: the bank client e-mail unless given; the insurer SOA reference may be recorded)',
+  screen: `${SCREEN} > Batch > Send SOA to Bank`, middleware: [...canWrite, validate(z.object({ to: text(200), insurerSoaReference: text(80) }))],
+  request: { to: 'insurance@tfs.example.ph', insurerSoaReference: 'SOA-2026-10-0012' }, response: { success: true, data: { emailId: 32, to: 'insurance@tfs.example.ph', accounts: 7980, total: 15960000 } },
+  handler: async (req, res) => {
+    const out = await docs.sendSoa(req.params.id, req.body);
+    await audit(req, { entity: 'credit_life_batch', entityId: req.params.id, action: 'send-soa', after: out });
+    res.json({ success: true, message: out.message, data: out });
+  },
+});
+define({
   method: 'GET', path: '/batches/:id/list', summary: 'The issued accounts of a batch (Excel), as forwarded to the insurer', screen: `${SCREEN} > Batch > Accounts List`, middleware: canRead, response: 'binary file',
   handler: async (req, res) => {
     const out = await docs.batchList(req.params.id);
