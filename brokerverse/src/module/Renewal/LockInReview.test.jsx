@@ -61,6 +61,6 @@ describe("Lock-in Review", () => {
     fireEvent.click(await screen.findByText("Loan status uploads"));
     expect(await screen.findByText("LS-2026-90001")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Failed rows" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Upload loan status" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload loan status" })).toBeEnabled();
   });
 });

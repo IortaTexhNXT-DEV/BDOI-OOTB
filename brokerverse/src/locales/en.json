@@ -73,7 +73,8 @@
     "deactivate": "Deactivate",
     "loadFailedTitle": "This record could not be loaded",
     "notFoundTitle": "Record not found",
-    "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list."
+    "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list.",
+    "moreActions": "More actions"
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -9626,7 +9627,11 @@
       "deactivateAction": "Deactivate rule",
       "approvalNote": "Where configuration changes need a second user, the change waits in Configuration Approvals."
     },
-    "historyOf": "History: {{event}}"
+    "historyOf": "History: {{event}}",
+    "eventCode": "Event code",
+    "amountKeys": "Amount keys",
+    "variableKeys": "Narration fields",
+    "narrationTemplate": "Narration template"
   },
   "bankReconciliation": {
     "downloadTemplate": "Download template",
@@ -17018,7 +17023,8 @@
         "inactive": "Inactive",
         "locked": "Locked"
       }
-    }
+    },
+    "selectFirst": "Select features in the list first"
   },
   "renewalDisposition": {
     "reassign": "Reassign",
@@ -18983,7 +18989,7 @@
     "file": "TFS account status file",
     "upload": "Upload loan status",
     "template": "Download template",
-    "noUploads": "No uploads yet",
+    "noUploads": "No uploads yet. Upload the TFS account status file.",
     "batch": "Batch",
     "fileName": "File",
     "rows": "Rows",
@@ -19015,7 +19021,8 @@
       "hold": "Hold",
       "release": "Release to standard renewal",
       "not-renewed": "Not for renewal"
-    }
+    },
+    "fileTypes": "Excel workbook (.xlsx)"
   },
   "schemeIssuance": {
     "number": "Application",
@@ -19118,7 +19125,7 @@
     "upload": "Upload",
     "template": "Download template",
     "uploaded": "{{created}} of {{total}} rows created, {{failed}} failed",
-    "noBatches": "No uploads yet",
+    "noBatches": "No uploads yet. Upload the day's loan bookings file.",
     "batch": "Batch",
     "fileName": "File",
     "rows": "Rows",
@@ -19136,7 +19143,14 @@
       "cancelled": "Cancelled"
     },
     "addConfirm": "Add",
-    "vehicleTab": "Dealer and vehicle"
+    "vehicleTab": "Dealer and vehicle",
+    "uploadBookings": "Upload loan bookings",
+    "uploadedBy": "Uploaded by",
+    "fileTypes": "Excel workbook (.xlsx)",
+    "uploadHelp": "Each row is checked and priced on its own; a failed row creates nothing.",
+    "noFailedRows": "No failed rows.",
+    "row": "Row",
+    "problem": "Problem"
   },
   "schemeMaster": {
     "whoPays": "Who pays",
@@ -19273,7 +19287,12 @@
     "yearFrom": "Year from",
     "yearTo": "Year to",
     "siFrom": "Sum insured from",
-    "siTo": "Sum insured to"
+    "siTo": "Sum insured to",
+    "scheme": "Scheme",
+    "appliesTo": "Applies to",
+    "approval": "Approval",
+    "fileTypes": "Excel workbook (.xlsx)",
+    "uploadLinesOf": "Upload vehicle lines to {{schemeNo}} v{{version}}"
   },
   "motorRating": {
     "title": "Market value and rates",

@@ -84,11 +84,11 @@ test("My Work: the role subtitle, the role figures next to the My Work figures a
   myWorkService.summary.mockResolvedValue(summary());
   renderAt("/my-work");
   expect(await screen.findByText("Sales | 04/10/2026 | Makati", {}, { timeout: 5000 })).toBeInTheDocument();
-  expect(screen.getByText("Quotes this month")).toBeInTheDocument();
+  expect(screen.getByText("Quotations this month")).toBeInTheDocument();
   expect(screen.getByText("12")).toBeInTheDocument();
   expect(screen.getByText("38%")).toBeInTheDocument();
   // one primary action: a sales user opens a new quote; refresh and New task stay secondary
-  fireEvent.click(screen.getByRole("button", { name: /New quote/ }));
+  fireEvent.click(screen.getByRole("button", { name: /New quotation/ }));
   expect(await screen.findByTestId("elsewhere")).toBeInTheDocument();
 });
 
