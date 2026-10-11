@@ -61,10 +61,10 @@ const Loads = () => {
   })), [t]);
   const fields = { runId: chosenRun || undefined, legacySystem: legacySystem.trim() || undefined };
   const steps = [
-    { id: "load-run", label: t("goLive.loads.run"), control: (
+    { key: "load-run", label: t("goLive.loads.run"), node: (
       <Dropdown inputId="load-run" value={chosenRun} options={openRuns} onChange={(e) => setRunId(e.value)} showClear placeholder={t("goLive.loads.noRun")} className="w-full" />
     ) },
-    { id: "load-legacy", label: t("goLive.loads.legacySystem"), control: (
+    { key: "load-legacy", label: t("goLive.loads.legacySystem"), node: (
       <InputText id="load-legacy" value={legacySystem} onChange={(e) => setLegacySystem(e.target.value)} maxLength={100} placeholder={t("goLive.loads.legacyDefault")} className="w-full" />
     ) },
   ];

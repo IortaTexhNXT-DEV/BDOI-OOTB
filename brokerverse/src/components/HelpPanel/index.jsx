@@ -11,13 +11,13 @@ import { findActiveTrail } from "../SideBar/menuTree";
 import { ADMIN_ROLES, getUserRoles } from "../../utils/menuPermissions";
 import { currentUser } from "../../utility/userIdentity";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../utility/systemCurrencies";
+import { getBusinessTimeZone } from "../../utility/dateFormat";
 import { helpSectionFor } from "./helpRoutes";
 import { OPEN_HELP_EVENT, isTyping } from "./helpEvents";
 import "./index.scss";
 
 const HELP_BASE = `${process.env.PUBLIC_URL || ""}/help`;
 export const MANUAL_URL = `${HELP_BASE}/user-manual.html`;
-export const MANUAL_PDF_URL = `${HELP_BASE}/BrokerVerse_User_Manual.pdf`;
 const WEB_VERSION = process.env.REACT_APP_VERSION || "";
 const BUILD_DATE = process.env.REACT_APP_BUILD_DATE || "";
 
@@ -36,25 +36,75 @@ export const supportContacts = (rows) => {
   };
 };
 
-/** The details a support desk needs to look into a problem, as plain text. */
-export const ticketDetails = ({ screen, url, user, version, environment, at }) =>
+/**
+ * The chapters of the user manual for the user's roles ([{ code, id, title }]), from the edition record of
+ * public/help/sections.json (roles: { code: { id, title } }), in the order of the manual.
+ */
+export const roleChapters = (manual, roles) => {
+  const held = new Set((roles || []).map((r) => String(r).toLowerCase()));
+  return Object.entries(manual?.roles || {})
+    .filter(([code]) => held.has(code))
+    .map(([code, chapter]) => ({ code, id: chapter.id, title: chapter.title }));
+};
+
+/** Address of a file of the published manual (the PDF or the Word file named in sections.json), or null. */
+export const manualFile = (manual, kind) => (manual?.files?.[kind] ? `${HELP_BASE}/${encodeURIComponent(manual.files[kind])}` : null);
+
+/** The details a support desk needs to look into a problem, as plain text: the screen, the user, the release facts of About ([{ label, value }]), the commit and the time. */
+export const ticketDetails = ({ screen, url, user, facts = [], commit, at }) =>
   [
     `Screen: ${screen}`,
     `Address: ${url}`,
     `User: ${user.username || ""}${user.displayName ? ` (${user.displayName})` : ""}`,
     `Roles: ${(user.roles || []).join(", ")}`,
-    `Version: ${version}`,
-    environment ? `Environment: ${environment}` : null,
+    ...facts.map((f) => `${f.label}: ${f.value || "-"}`),
+    commit ? `Commit: ${String(commit).slice(0, 7)}` : null,
     `Time: ${at}`,
   ]
     .filter(Boolean)
     .join("\n");
 
-const formatBuildDate = (iso) => {
+/** Build and release date and time in the business time zone, as "Oct 10, 2026, 06.34 PM"; "" when unknown. */
+export const formatReleaseDate = (iso, timeZone = getBusinessTimeZone()) => {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleString("en-PH", { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true })
+      .formatToParts(d)
+      .map((x) => [x.type, x.value]),
+  );
+  return `${p.month} ${p.day}, ${p.year}, ${p.hour}.${p.minute} ${p.dayPeriod}`;
+};
+
+/** Edition of the user manual as "PH Version 1.3 - 10 October 2026 Draft" (versionLabel of the edition, else "Version"); "" without a version. */
+export const manualEdition = (manual, versionLabel) => {
+  if (!manual?.version) return "";
+  const issue = [manual.date, manual.status && manual.status !== "Approved" ? manual.status : null].filter(Boolean).join(" ");
+  return [`${manual.versionLabel || versionLabel} ${manual.version}`, issue].filter(Boolean).join(" - ");
+};
+
+/**
+ * Release facts of About, in order ([{ key, label, value }]): version (web and API release of GET /api/version,
+ * else the versions of the builds), environment, build and release date, user manual edition, and the approvers of
+ * the release; an approver or a manual edition that is not set is left out.
+ */
+export const aboutFacts = ({ t, version, manual, webVersion = WEB_VERSION, buildDate = BUILD_DATE }) => {
+  const release = version?.release || {};
+  const versions = [
+    release.webVersion || (webVersion && `${t("help.webApp")} ${webVersion}`),
+    release.apiVersion || (version?.version && `${t("help.api")} ${version.version}`),
+  ].filter(Boolean);
+  return [
+    { key: "version", label: t("help.version"), value: versions.join(" · ") },
+    { key: "environment", label: t("help.environment"), value: release.environment || version?.environment || "" },
+    { key: "buildDate", label: t("help.buildDate"), value: formatReleaseDate(buildDate) },
+    { key: "manual", label: t("help.manual"), value: manualEdition(manual, t("help.version")), optional: true },
+    { key: "requirementsApproval", label: t("help.requirementsApproval"), value: release.requirementsApprover || "", optional: true },
+    { key: "versionApproval", label: t("help.versionApproval"), value: release.versionApprover || "", optional: true },
+  ]
+    .filter((f) => !f.optional || f.value)
+    .map(({ key, label, value }) => ({ key, label, value }));
 };
 
 const HelpSection = ({ icon, title, children }) => (
@@ -69,8 +119,10 @@ const HelpSection = ({ icon, title, children }) => (
 
 /**
  * Help panel (avatar menu > Help, F1, or "?" outside a text field): the user manual section of the current screen,
- * the manual as PDF, the support desk (Master > Configuration, group support), a support ticket with the screen,
- * user, version and time filled in, the keyboard shortcuts, and About BrokerVerse.
+ * the chapter of the user's role, the manual as PDF and Word, the support desk (Master > Configuration, group
+ * support), a support ticket with the screen, user, release facts and time filled in, the keyboard shortcuts, and
+ * About with the release facts (Master > Configuration, group release).
+ * The manual is the edition published in public/help (sections.json names it, its files and its role chapters).
  */
 const HelpPanel = () => {
   const { t } = useTranslation();
@@ -78,11 +130,12 @@ const HelpPanel = () => {
   const navigate = useNavigate();
   const systemName = useSelector((s) => s.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName);
   const [visible, setVisible] = useState(false);
-  const [sections, setSections] = useState(null);
+  const [manual, setManual] = useState(null);
   const [support, setSupport] = useState(null);
   const [version, setVersion] = useState(null);
   const [copied, setCopied] = useState(false);
-  const isAdmin = useMemo(() => getUserRoles().some((r) => ADMIN_ROLES.includes(r)), []);
+  const userRoles = useMemo(() => getUserRoles(), []);
+  const isAdmin = userRoles.some((r) => ADMIN_ROLES.includes(r));
 
   const open = useCallback(() => setVisible(true), []);
 
@@ -106,11 +159,11 @@ const HelpPanel = () => {
   useEffect(() => {
     if (!visible) return;
     setCopied(false);
-    if (!sections) {
+    if (!manual) {
       fetch(`${HELP_BASE}/sections.json`)
         .then((r) => (r.ok ? r.json() : null))
-        .then((d) => setSections(d?.sections || []))
-        .catch(() => setSections([]));
+        .then((d) => setManual(d && Array.isArray(d.sections) ? d : { sections: [] }))
+        .catch(() => setManual({ sections: [] }));
     }
     if (!support) {
       adminService
@@ -124,7 +177,7 @@ const HelpPanel = () => {
         .then((v) => setVersion(v || {}))
         .catch(() => setVersion({}));
     }
-  }, [visible, sections, support, version]);
+  }, [visible, manual, support, version]);
 
   // the screen the user is on: its menu label, else the page title
   const screen = useMemo(() => {
@@ -135,24 +188,25 @@ const HelpPanel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, visible, t, systemName]);
 
-  const section = helpSectionFor(location.pathname);
+  const sections = manual?.sections || null;
+  const knownIds = useMemo(() => (manual ? new Set(manual.sections.map((s) => s.id)) : null), [manual]);
+  const section = helpSectionFor(location.pathname, knownIds);
   const sectionTitle = sections?.find((s) => s.id === section.id)?.title;
   const sectionUrl = `${MANUAL_URL}#${section.id}`;
-
-  const versionText = [
-    WEB_VERSION && `${t("help.webApp")} ${WEB_VERSION}`,
-    version?.version && `${t("help.api")} ${version.version}${version.commit ? ` (${String(version.commit).slice(0, 7)})` : ""}`,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const pdfUrl = manualFile(manual, "pdf");
+  const wordUrl = manualFile(manual, "word");
+  const chapters = roleChapters(manual, userRoles);
+  const facts = aboutFacts({ t, version, manual });
+  // the version and the environment come from the API: shown loading until it answers
+  const loadingFact = (key) => version === null && (key === "version" || key === "environment");
 
   const details = () =>
     ticketDetails({
       screen,
       url: window.location.href,
       user: currentUser(),
-      version: versionText || "-",
-      environment: version?.environment,
+      facts,
+      commit: version?.commit,
       at: new Date().toISOString(),
     });
 
@@ -194,15 +248,38 @@ const HelpPanel = () => {
             <i className="pi pi-external-link" aria-hidden="true" />
             <span>{t("help.openSection")}</span>
           </a>
-          <a className="p-button p-component p-button-outlined bv-help__button" href={MANUAL_PDF_URL} download>
-            <i className="pi pi-download" aria-hidden="true" />
-            <span>{t("help.downloadPdf")}</span>
-          </a>
+          {pdfUrl && (
+            <a className="p-button p-component p-button-outlined bv-help__button" href={pdfUrl} download>
+              <i className="pi pi-download" aria-hidden="true" />
+              <span>{t("help.downloadPdf")}</span>
+            </a>
+          )}
+          {wordUrl && (
+            <a className="p-button p-component p-button-outlined bv-help__button" href={wordUrl} download>
+              <i className="pi pi-download" aria-hidden="true" />
+              <span>{t("help.downloadWord")}</span>
+            </a>
+          )}
         </div>
         <a className="bv-help__link" href={MANUAL_URL} target="_blank" rel="noopener noreferrer">
           {t("help.browseManual")}
         </a>
       </HelpSection>
+
+      {chapters.length > 0 && (
+        <HelpSection icon="pi-id-card" title={t("help.yourRole")}>
+          <ul className="bv-help__roles">
+            {chapters.map((c) => (
+              <li key={c.code}>
+                <span>{c.title}</span>
+                <a className="bv-help__link" href={`${MANUAL_URL}#${c.id}`} target="_blank" rel="noopener noreferrer">
+                  {t("help.openRoleChapter")}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </HelpSection>
+      )}
 
       <HelpSection icon="pi-phone" title={t("help.contactSupport")}>
         {support === null ? (
@@ -295,15 +372,15 @@ const HelpPanel = () => {
       </HelpSection>
 
       <HelpSection icon="pi-info-circle" title={t("help.about", { name: systemName })}>
-        <dl className="bv-help__about">
-          <dt>{t("help.version")}</dt>
-          <dd>{versionText || (version === null ? <Skeleton width="8rem" height="0.9rem" /> : "-")}</dd>
-          <dt>{t("help.environment")}</dt>
-          <dd>{version === null ? <Skeleton width="6rem" height="0.9rem" /> : version.environment || "-"}</dd>
-          <dt>{t("help.buildDate")}</dt>
-          <dd>{formatBuildDate(BUILD_DATE) || "-"}</dd>
+        <dl className="bv-help__about" aria-label={t("help.about", { name: systemName })}>
+          {facts.map((f) => (
+            <React.Fragment key={f.key}>
+              <dt>{f.label}</dt>
+              <dd>{loadingFact(f.key) ? <Skeleton width="8rem" height="0.9rem" /> : f.value || "-"}</dd>
+            </React.Fragment>
+          ))}
         </dl>
-        <p className="bv-help__muted bv-help__vendor">{t("help.vendor")}</p>
+        {manual && !manual.brandPack && <p className="bv-help__muted bv-help__vendor">{t("help.vendor")}</p>}
       </HelpSection>
     </Sidebar>
   );

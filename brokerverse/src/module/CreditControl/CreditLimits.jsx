@@ -12,12 +12,29 @@ import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { PageHeader, dateTime, money, showError, showSuccess } from "./common";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import DetailSection from "../../components/DetailSection";
+import { ActivityLog, useRecordActivity } from "../../components/ActivityLog";
 
 /**
  * Accounts > Credit Control > Client Credit Limits: each client's limit against its open broker-billed premium, and the
  * policies issued over a limit (issued anyway, flagged to Accounting) to acknowledge. Limits are set by an Accounting
  * Manager (approve:credit-control).
  */
+/** The credit limit changes of a client, from its audit trail (who set which limit, when, from what). */
+// the changes of the client's limit, shown once there is one
+const LimitHistory = ({ clientId }) => {
+  const { t } = useTranslation();
+  const { entries, loading, error, reload } = useRecordActivity("client", clientId);
+  const changes = entries.filter((e) => e.actionCode === "set-credit-limit");
+  if (!loading && !error && !changes.length) return null;
+  return (
+    <DetailSection title={t("creditControl.limitHistory")}>
+      <ActivityLog entries={changes} loading={loading} error={error} onRetry={reload} />
+    </DetailSection>
+  );
+};
+
 const CreditLimits = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
@@ -113,14 +130,23 @@ const CreditLimits = () => {
         </TabView>
       </div>
 
-      <Dialog className="pe-dialog" header={edit ? `${t("creditControl.setLimit")} · ${edit.row.clientName}` : ""} visible={!!edit} style={{ width: "min(460px, 96vw)" }} onHide={() => setEdit(null)}
-        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setEdit(null)} /><Button label={t("creditControl.save")} icon="pi pi-save" onClick={saveLimit} /></div>}>
+      <Dialog className="pe-dialog bv-centered" header={edit ? `${t("creditControl.setLimit")} · ${edit.row.clientName}` : ""} visible={!!edit} style={{ width: "min(640px, 96vw)" }} onHide={() => setEdit(null)}
+        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setEdit(null)} /><Button label={t("creditControl.setLimitAction")} icon="pi pi-check" onClick={saveLimit} /></div>}>
         {edit && (
-          <div>
-            <p className="mt-0">{t("creditControl.exposure")}: <b>{money(edit.row.exposure)}</b></p>
-            <label>{t("creditControl.creditLimit")}</label>
-            <InputNumber value={edit.value} mode="decimal" minFractionDigits={2} min={0} placeholder={t("creditControl.noLimit")} onValueChange={(e) => setEdit({ ...edit, value: e.value })} className="w-full" />
-            <small className="pe-muted">{t("creditControl.limitHelp")}</small>
+          <div className="flex flex-column gap-3">
+            <KeyValueGrid columns={2} items={[
+              { label: t("creditControl.currentLimit"), value: edit.row.creditLimit === null ? t("creditControl.noLimit") : edit.row.creditLimit, type: edit.row.creditLimit === null ? "text" : "amount" },
+              { label: t("creditControl.exposure"), value: edit.row.exposure, type: "amount" },
+              edit.row.available === null
+                ? { label: t("creditControl.available"), value: t("creditControl.noLimit") }
+                : { label: t("creditControl.available"), value: edit.row.available, type: "amount" },
+              { label: t("creditControl.lastChanged"), value: edit.row.updatedAt ? `${dateTime(edit.row.updatedAt)}${edit.row.updatedBy ? ` · ${edit.row.updatedBy}` : ""}` : null },
+            ]} />
+            <div>
+              <label htmlFor="cc-limit">{t("creditControl.newLimit")}</label>
+              <InputNumber inputId="cc-limit" value={edit.value} mode="decimal" minFractionDigits={2} min={0} placeholder={t("creditControl.noLimit")} onValueChange={(e) => setEdit({ ...edit, value: e.value })} className="w-full" />
+            </div>
+            <LimitHistory clientId={edit.row.clientId} />
           </div>
         )}
       </Dialog>

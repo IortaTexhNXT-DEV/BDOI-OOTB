@@ -12,6 +12,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import bankReconciliationService from "../../services/bankReconciliationService";
 import { Amount, BrTag, PageHeader, date, showError, showSuccess } from "./common";
+import FileField from "../../components/FileField";
 
 const EMPTY = { code: "", name: "", bankCode: "", description: "", fileType: "any", skipRows: 0, hasHeader: true, columns: {}, dateFormat: "MM/DD/YYYY", amountSign: "credit-positive", skipPattern: "", active: true };
 
@@ -56,11 +57,12 @@ const StatementFormats = () => {
       showError(toast, e);
     }
   };
-  const runTest = async (file) => {
+  const runTest = async () => {
+    setTest({ ...test, busy: true, error: null });
     try {
-      setTest({ ...test, result: await bankReconciliationService.testFormat(test.code, file) });
+      setTest({ ...test, busy: false, error: null, result: await bankReconciliationService.testFormat(test.code, test.file) });
     } catch (e) {
-      setTest({ ...test, result: null, error: e.message });
+      setTest({ ...test, busy: false, result: null, error: e.message });
     }
   };
 
@@ -87,7 +89,7 @@ const StatementFormats = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addFormat") : v.code) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addFormat") : t("bankReconciliation.editFormat", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setEditing(null)} />
@@ -127,10 +129,17 @@ const StatementFormats = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={test ? `${t("bankReconciliation.testFile")} · ${test.code}` : ""} visible={!!test} style={{ width: "min(900px, 96vw)" }} onHide={() => setTest(null)}>
+      <Dialog className="pe-dialog bv-centered" header={test ? `${t("bankReconciliation.testFile")} · ${test.code}` : ""} visible={!!test} style={{ width: "min(900px, 96vw)" }} onHide={() => setTest(null)}
+        footer={test ? (
+          <div>
+            <Button label={t("bankReconciliation.close")} outlined onClick={() => setTest(null)} />
+            <Button label={t("bankReconciliation.readFile")} icon="pi pi-eye" loading={!!test.busy} disabled={!test.file} onClick={runTest} />
+          </div>
+        ) : null}>
         {test && (
           <div>
-            <input type="file" accept=".csv,.xlsx" className="p-inputtext w-full mb-3" onChange={(e) => e.target.files?.[0] && runTest(e.target.files[0])} />
+            <label htmlFor="bf-test-file">{t("bankReconciliation.statementFile")} *</label>
+            <FileField id="bf-test-file" accept=".csv,.xlsx" value={test.file || null} className="mb-3" onChange={(f) => setTest({ code: test.code, file: f })} />
             {test.error && <div className="br-notice br-notice-bad">{test.error}</div>}
             {test.result && (
               <>

@@ -52,6 +52,15 @@ describe("activity log adapters", () => {
     expect(p.changes[0]).toMatchObject({ label: "Version", after: "2" });
   });
 
+  it("reads prints of the same document by the same person on one day as one entry", () => {
+    const print = (id, time) => ({ id, at: `2026-10-10T01:${time.slice(3)}:00Z`, day: "2026-10-10", date: "10/10/2026", time, action: "print", title: "Fleet schedule printed",
+      user: { displayName: "Ana Ops", roles: ["Operations"] }, changes: [] });
+    const entries = fromAuditEvents([print(3, "09:23"), print(2, "09:15"), print(1, "09:10"),
+      { id: 0, at: "2026-10-10T00:00:00Z", day: "2026-10-10", time: "08:00", action: "create", title: "Fleet schedule created", user: { displayName: "Ana Ops" }, changes: [] }]);
+    expect(entries.map((e) => e.actionLabel)).toEqual(["Fleet schedule printed", "Fleet schedule created"]);
+    expect(entries[0]).toMatchObject({ id: 3, remarks: "Printed 3 times between 09:10 and 09:23" });
+  });
+
   it("reads status histories with their labels and source, the system for a job", () => {
     const [h] = fromStatusHistory([{ from: "open", to: "soft-closed", remarks: "August", changedBy: "system", changedAt: "2026-09-05T02:00:00Z", source: "close-run" }],
       { statusLabels: { "soft-closed": "Soft closed" } });
@@ -63,17 +72,28 @@ describe("activity log adapters", () => {
     const [la] = fromAssignmentHistory([{ id: 1, action: "auto", reason: null, assignedAt: "2026-10-01T00:00:00Z", fromName: null, toName: "Ana Sales", ruleName: "Motor leads", assignedBy: null }]);
     expect(la).toMatchObject({ actionCode: "auto", user: { displayName: null } });
     expect(la.changes.map((c) => [c.label, c.after])).toEqual([["Assigned to", "Ana Sales"], ["Rule", "Motor leads"]]);
+    const [first, moved] = fromAssignmentHistory([
+      { id: 5, action: "manual", reason: null, assignedAt: "2026-10-01T00:00:00Z", fromName: null, toName: "Ana Sales", assignedBy: "Lina Ops", assignedByRoles: ["Operations"] },
+      { id: 6, action: "manual", reason: "Territory or branch change: Moved to Cebu", assignedAt: "2026-10-02T00:00:00Z", fromUserId: 4, fromName: "Ana Sales",
+        toName: "Ben Sales", assignedBy: "Lina Ops", assignedByRoles: ["Operations", "Sales"] },
+    ]);
+    expect(first).toMatchObject({ actionCode: "assign", user: { displayName: "Lina Ops", role: "Operations" } });
+    expect(moved).toMatchObject({ actionCode: "manual", remarks: "Territory or branch change: Moved to Cebu", user: { role: "Operations, Sales" } });
     const [w] = fromWarrantyActions([{ id: 2, action: "request-cancellation", notes: "Unpaid", endorsementNumber: "END-1", createdBy: "Rosa Finance", createdAt: "2026-10-01T00:00:00Z" }],
       { actionLabels: { "request-cancellation": "Cancellation requested" } });
     expect(w).toMatchObject({ actionLabel: "Cancellation requested", user: { displayName: "Rosa Finance" }, remarks: "Unpaid" });
+    const [sms] = fromWarrantyActions([{ id: "col-4", action: "collection-sms", createdBy: "Rosa Finance", createdByRoles: ["Accounting", "Collections"],
+      commitmentDate: "2026-10-20", createdAt: "2026-10-02T00:00:00Z" }]);
+    expect(sms).toMatchObject({ user: { displayName: "Rosa Finance", role: "Accounting, Collections" } });
+    expect(sms.changes.map((c) => c.after)).toEqual(["20/10/2026"]);
     const [f] = fromCollectionActions([{ id: 3, actionType: "Call", actionDate: "2026-10-01T03:00:00Z", actionBy: "c.agent", actionByName: "Carla Agent", actionByRoles: ["Collections"],
       callOutcome: "WrongNumber", notes: "No answer", commitmentDate: "2026-10-15" }]);
     expect(f).toMatchObject({ actionCode: "Call", user: { displayName: "Carla Agent", username: "c.agent", role: "Collections" } });
     expect(f.changes.map((c) => c.after)).toEqual(["Wrong number", "15/10/2026"]);
     const [r] = fromJobRuns([{ id: 9, startedAt: "2026-10-01T22:00:00Z", status: "failed", error: "SMTP refused", triggeredBy: "schedule" }]);
-    expect(r).toMatchObject({ actionCode: "run", toStatus: "Failed", remarks: "SMTP refused", user: { displayName: null }, source: { channel: "job", label: "Scheduled job" } });
-    const [manual] = fromJobRuns([{ id: 10, startedAt: "2026-10-02T01:00:00Z", status: "success", triggeredBy: "r.finance", triggeredByName: "Rosa Finance" }]);
-    expect(manual).toMatchObject({ toStatus: "Success", user: { displayName: "Rosa Finance", username: "r.finance" }, source: null });
+    expect(r).toMatchObject({ actionCode: "run", toStatus: "Failed", remarks: "SMTP refused", user: { displayName: null }, source: { channel: "job", label: "Scheduled run" } });
+    const [manual] = fromJobRuns([{ id: 10, startedAt: "2026-10-02T01:00:00Z", status: "success", triggeredBy: "r.finance", triggeredByName: "Rosa Finance", triggeredByRoles: ["TIS Finance"] }]);
+    expect(manual).toMatchObject({ toStatus: "Success", user: { displayName: "Rosa Finance", username: "r.finance", role: "TIS Finance" }, source: { channel: "screen", label: "Run now (manual)" } });
   });
 
   it("builds the lifecycle of a record from its own fields, the steps that happened only", () => {

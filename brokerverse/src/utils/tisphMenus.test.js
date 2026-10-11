@@ -3,6 +3,7 @@ import path from "path";
 import { filterMenuForRoles, isPathAllowed, roleMenuPermissions } from "./menuPermissions";
 import { menuList } from "../components/SideBar/list";
 import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
+import { flattenLeaves } from "../components/SideBar/menuTree";
 
 const TIS_ROLES = ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-ccd-pdu",
   "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager", "tis-auditor"];
@@ -63,7 +64,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
       "/master/configuration/settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
     expect(isPathAllowed("/master/configuration/settings", menuList, ["tis-general-manager"])).toBe(false);
-    expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
+    // every menu but the platform section of the iorta TechNXT platform administrator (features and releases)
+    const tenantMenu = menuList.map((m) => (m.submenu ? { ...m, submenu: m.submenu.filter((s) => !s.platform) } : m));
+    expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(tenantMenu);
   });
 
   it("Data Migration & Go-Live opens to the roles of the migration and to the auditor, every tab by its address", () => {
@@ -115,5 +118,63 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(layouts.filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);
     expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
+  });
+
+  describe("Accounts > Remittance (spec §1.1 to §1.3)", () => {
+    const ALL = ["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Setup", "Settlement"];
+    const remittanceOf = (role) => {
+      const accounts = filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts");
+      return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
+    };
+    const sees = (role) => (path) => isPathAllowed(path, menuList, [role]);
+
+    it("Finance sees the eight entries plus Settlement; IT reads them all", () => {
+      expect(remittanceOf("tis-finance")).toEqual(ALL);
+      expect(remittanceOf("tis-it-admin")).toEqual(ALL);
+    });
+
+    it("gives each persona the entries of its grants", () => {
+      expect(remittanceOf("tis-general-manager")).toEqual(ALL.filter((e) => e !== "Setup"));
+      expect(remittanceOf("tis-ccd-recon")).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-bp")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
+      expect(remittanceOf("tis-ccd-pdc")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
+      expect(remittanceOf("tis-ops-associate")).toEqual(["Remittances"]);
+      expect(remittanceOf("tis-ops-officer")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-pdu")).toEqual([]);
+      expect(remittanceOf("tis-sales-officer")).toEqual([]);
+      expect(sees("tis-general-manager")("/finance/remittance/setup/schedules")).toBe(false);
+      expect(sees("tis-ccd-recon")("/finance/remittance/reconciliation/statements/7")).toBe(true);
+      expect(sees("tis-ops-officer")("/finance/remittance/payments")).toBe(false);
+    });
+
+    it("no TISPH persona has the Insurer Reconciliation menu: its statements open under Remittance > Reconciliation", () => {
+      const withIt = TIS_ROLES.filter((role) => filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts")?.submenu.some((s) => s.name === "Insurer Reconciliation"));
+      expect(withIt).toEqual([]);
+      expect(helpSectionFor("/finance/remittance/reconciliation/insurer-statements").id).toBe("insurer-statement-reconciliation");
+      expect(helpSectionFor("/finance/remittance/setup/schedules").id).toBe("remittance-schedules");
+    });
+  });
+
+  it("opens the department and policy type masters only to the roles that see the Organization and Insurance Management masters", () => {
+    for (const p of ["/master/finance/department", "/master/finance/department/departmentadding", "/master/generals/insurancemanagement/policytype",
+      "/master/generals/insurancemanagement/policytype/edit/3"]) {
+      expect(isPathAllowed(p, menuList, ["tis-it-admin"])).toBe(true);
+      for (const role of TIS_ROLES.filter((r) => r !== "tis-it-admin")) expect(isPathAllowed(p, menuList, [role])).toBe(false);
+    }
+  });
+
+  it("ships the TISPH edition of the user manual, with a chapter per role and a section for every screen of its menus", () => {
+    const config = JSON.parse(fs.readFileSync(path.join(__dirname, "../../help.config.json"), "utf8"));
+    const manual = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/help/sections.json"), "utf8"));
+    expect(config.edition).toBe("tisph");
+    expect(manual.edition).toBe("tisph");
+    expect(manual.brandPack).toBe("toyota-insurance-services");
+    const ids = new Set(manual.sections.map((s) => s.id));
+    expect(Object.keys(manual.roles).sort()).toEqual([...TIS_ROLES].sort());
+    expect(Object.values(manual.roles).filter((r) => !ids.has(r.id))).toEqual([]);
+    const uncovered = TIS_ROLES.flatMap((role) => flattenLeaves(filterMenuForRoles(menuList, [role])).map((l) => l.item.path))
+      .filter((p) => !ids.has(helpSectionFor(p, ids).id));
+    expect([...new Set(uncovered)]).toEqual([]);
   });
 });

@@ -29,3 +29,16 @@ body {
   font-weight: normal;
   font-style: normal;
 }
+
+// Text read by screen readers only (a column header of row menus, the current step of a stepper, a check's result).
+.p-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

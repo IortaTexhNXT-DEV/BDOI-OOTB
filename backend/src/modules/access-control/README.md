@@ -38,6 +38,13 @@ checks (`write:audit`, `read:roles`, `write:profile`, `read:notifications`, `wri
 A permission added by a migration needs its entry in `catalogue.js`: until then it shows under Other with its
 database description, and `test/role-permissions.test.js` fails.
 
+## Platform role and permissions
+
+The vendor role `iorta-platform-admin` and its permission `manage:feature-entitlements` (`src/lib/platform.js`,
+module features) are not the tenant's: the role is not listed on the access screens, the permission is not in the
+catalogue, a change of a role's access or the Role form that grants it is refused, and the administrator role does not
+hold it.
+
 ## Role directory
 
 `roleDirectory(db)` reads the settings that also group the roles of the user form and the Role list (migration 0362;
@@ -147,7 +154,11 @@ access of a role changes. The default access rules (seed `91_role_access.sql`) w
   `pending`, `rejected`, `withdrawn`. `GET /delegations?view=current|pending|ended|all`.
 - `POST /delegations/:id/end` (reason of `delegation_end`): stops at once, both people are told.
 - A delegation never lowers authority: under `access.authority_without_limit = allow` a person without a limit of his
-  or her own is not restricted and a delegated limit is not applied (`effectiveAuthority`).
+  or her own is not restricted and a delegated limit is not applied (`effectiveAuthority`). A step that refuses an
+  approver without a limit whatever that setting says (remittance approvals with `remittance.require_authority_limit`)
+  asks with `requireLimit`, and the delegated limit applies.
+- Remittance approvals (types `remittance` and `remittance_settlement`) are decided with `approve:remittance` on
+  Accounts > Remittance > Approvals, so the person covering needs that permission.
 
 ## Segregation of duties: conflicts and exceptions
 

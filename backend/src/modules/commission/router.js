@@ -122,8 +122,9 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/referrer-accounts/:id/wht', summary: 'Toggle withholding tax for a referrer (recomputes unpaid lines)', screen: SCREEN, middleware: [...write, validate(z.object({ whtApplicable: z.boolean() }))],
-  request: { whtApplicable: false }, response: { success: true, data: accountExample },
+  method: 'POST', path: '/referrer-accounts/:id/wht', summary: 'Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail', screen: SCREEN,
+  middleware: [...write, validate(z.object({ whtApplicable: z.boolean(), reason: z.string().trim().min(3) }))],
+  request: { whtApplicable: false, reason: 'BIR certificate of exemption received' }, response: { success: true, data: accountExample },
   handler: async (req, res) => {
     const data = await withTransaction((db) => svc.setWht(db, req.params.id, req.body.whtApplicable));
     await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'wht', after: req.body });
@@ -142,7 +143,7 @@ define({
 });
 const LINE_ACTIONS = {
   approve: 'Approve an Eligible line (maker-checker; posts Dr Commission Expense / Cr Commission Payable)',
-  reverse: 'Reverse a line (reverses the accrual; clawback journal if already paid)',
+  reverse: 'Reverse a line, with the reason (reverses the accrual; clawback journal if already paid)',
   'mark-eligible': 'Mark an Accrued line Eligible once the premium is fully collected',
   pay: 'Pay one Approved line (creates a paid voucher; Dr Commission Payable / Cr Cash / Cr WHT Payable)',
   rate: 'Override comsub rate (pct and / or fixed) before approval',
@@ -150,8 +151,9 @@ const LINE_ACTIONS = {
 for (const [action, summary] of Object.entries(LINE_ACTIONS)) {
   define({
     method: 'POST', path: `/referrer-accounts/:id/lines/:lineId/${action}`, summary, screen: `${SCREEN} > Line drawer`,
-    middleware: [...write, validate(action === 'rate' ? z.object({ comsubPct: z.coerce.number().min(0).max(100).optional(), comsubFixed: z.coerce.number().min(0).optional() }) : z.object({}).passthrough())],
-    request: action === 'rate' ? { comsubPct: 7.5, comsubFixed: 0 } : {}, response: { success: true, data: { account: accountExample, line: lineExample } },
+    middleware: [...write, validate(action === 'rate' ? z.object({ comsubPct: z.coerce.number().min(0).max(100).optional(), comsubFixed: z.coerce.number().min(0).optional() })
+      : action === 'reverse' ? z.object({ reason: z.string().trim().min(3) }).passthrough() : z.object({}).passthrough())],
+    request: action === 'rate' ? { comsubPct: 7.5, comsubFixed: 0 } : action === 'reverse' ? { reason: 'Policy cancelled from inception' } : {}, response: { success: true, data: { account: accountExample, line: lineExample } },
     handler: async (req, res) => {
       const makers = action === 'approve' ? await svc.eligibleMakers(pool, req.params.id, req.params.lineId) : [];
       const data = await withTransaction((db) => svc.lineAction(db, req.params.id, req.params.lineId, action, req.user, req.body));

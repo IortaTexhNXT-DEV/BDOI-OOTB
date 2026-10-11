@@ -9,9 +9,16 @@
  * fails the transaction that asked for it.
  */
 import { logger } from '../../lib/logger.js';
+import { one } from '../../db/pool.js';
 import { approvalNotificationsOn, notify } from './service.js';
 
 export { approvalNotificationsOn };
+
+/** The display name of a user given by login name or id; the given text when there is no such user. */
+async function displayName(who) {
+  if (!who) return who;
+  return (await one('SELECT display_name FROM users WHERE username = $1 OR id = $1', [String(who)]).catch(() => null))?.display_name || who;
+}
 
 async function safely(title, fn) {
   try {
@@ -30,8 +37,10 @@ async function safely(title, fn) {
  */
 export function notifyApprovers({ audience = null, users = null, document, number, by, detail = null, title = null, message = null, link = null, entity = null, entityId = null }) {
   const t = title || `${document} ${number} awaiting approval`;
-  const n = { type: 'approval', title: t, message: message || `${by} submitted ${number}${detail ? ` (${detail})` : ''}`, link, entity, entityId };
   return safely(t, async () => {
+    // the maker by the name people know them by (callers pass the login name)
+    const who = await displayName(by);
+    const n = { type: 'approval', title: t, message: message || `${who} submitted ${number}${detail ? ` (${detail})` : ''}`, link, entity, entityId };
     if (!users) return notify({ ...n, audience });
     for (const userId of users) await notify({ ...n, userId });
     return null;
@@ -46,6 +55,9 @@ export function notifyDecision({ userId, decidedBy = null, document, number, app
   if (!userId || (decidedBy && userId === decidedBy)) return Promise.resolve(null);
   const word = status || (approved ? 'approved' : 'rejected');
   const t = title || `${document} ${number} ${word}`;
-  const m = message || `${word.charAt(0).toUpperCase()}${word.slice(1)} by ${by}${reason ? `: ${reason}` : ''}`;
-  return safely(t, () => notify({ userId, type: type || (approved ? 'info' : 'alert'), title: t, message: m, link, entity, entityId }));
+  return safely(t, async () => {
+    // the decider by display name, as the approvers' notification names the maker (callers pass the login name)
+    const m = message || `${word.charAt(0).toUpperCase()}${word.slice(1)} by ${await displayName(by || decidedBy)}${reason ? `: ${reason}` : ''}`;
+    return notify({ userId, type: type || (approved ? 'info' : 'alert'), title: t, message: m, link, entity, entityId });
+  });
 }

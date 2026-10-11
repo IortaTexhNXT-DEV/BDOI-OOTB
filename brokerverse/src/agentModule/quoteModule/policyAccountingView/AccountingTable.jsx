@@ -85,7 +85,7 @@ const AccountingTable = ({ type }) => {
                 rows={20}
                 style={{
                     textAlign: "left",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--surface-border)",
                     borderWidth: "0 0 1px 0",
                     padding: "0"
                 }}

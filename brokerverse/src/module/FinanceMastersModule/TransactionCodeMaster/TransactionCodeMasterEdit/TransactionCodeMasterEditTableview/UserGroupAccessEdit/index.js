@@ -161,7 +161,7 @@ const UserGroupAccess = () => {
           value={UserGroupAccessList}
           tableStyle={{
             minWidth: "50rem",
-            color: "#2e2e2e",
+            color: "var(--text-color)",
           }}
           scrollable={true}
           scrollHeight="40vh"
@@ -225,7 +225,7 @@ const UserGroupAccess = () => {
               className="inputdialog__fieled"
               label="User Role"
               placeholder="Select"
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.UserRole}
@@ -260,7 +260,7 @@ const UserGroupAccess = () => {
               classNames="input__filed"
               label="Minimum Transaction"
               placeholder="Enter"
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.MinimumTransaction}
@@ -276,7 +276,7 @@ const UserGroupAccess = () => {
               classNames="input__filed"
               label="Maximum Transaction"
               placeholder="Enter"
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.MaximumTransaction}

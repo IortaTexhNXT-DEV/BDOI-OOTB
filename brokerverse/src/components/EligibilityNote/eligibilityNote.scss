@@ -1,0 +1,21 @@
+// Neutral line saying why a decision is not the user's (components/EligibilityNote). Theme CSS variables only.
+
+.bv-eligibility {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.bv-eligibility__icon {
+  margin-top: 2px;
+  color: var(--color-text-muted);
+}
+
+.bv-eligibility__reason + .bv-eligibility__approvers::before {
+  content: " · ";
+  color: var(--color-text-muted);
+}

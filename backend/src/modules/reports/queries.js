@@ -11,6 +11,7 @@
 import { PERIOD_END_QUERIES } from './periodEndQueries.js';
 import { BANK_REC_QUERIES } from './bankRecQueries.js';
 import { CHANNEL_QUERIES } from './channelQueries.js';
+import { TISPH_QUERIES } from './tisphQueries.js';
 
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
@@ -57,15 +58,22 @@ const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALE
   FROM policies p ${POLICY_JOINS}
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
-const claims = `SELECT cl.claim_number AS "claimNumber", p.policy_number AS "policyNumber", ${POLICY_DIMS},
-    cl.loss_date AS "lossDate", cl.reported_date AS "reportedDate", cl.loss_type AS "lossType", cl.status,
-    cl.estimate_amount AS "estimateAmount", cl.approved_amount AS "approvedAmount", cl.settled_amount AS "settledAmount",
+const claimRows = `SELECT cl.claim_number AS "claimNumber", p.policy_number AS "policyNumber", ${POLICY_DIMS},
+    cl.loss_date AS "lossDate", cl.reported_date AS "reportedDate", cl.loss_type AS "lossType", cl.claim_type AS "claimType", cl.lob, cl.status,
+    cl.estimate_amount AS "estimateAmount", cl.insurer_offer_amount AS "offerAmount", cl.approved_amount AS "approvedAmount",
+    cl.settled_amount AS "settledAmount", cl.settled_at::date AS "settledDate", cl.due_date AS "followUpDate",
+    (SELECT CASE WHEN count(*) = 0 THEN NULL ELSE (count(*) FILTER (WHERE i.status <> 'pending')) || ' of ' || count(*) END
+       FROM claim_document_items i WHERE i.claim_id = cl.id AND i.required) AS requirements,
     (COALESCE(cl.settled_at::date, $7::date) - cl.reported_date) AS "ageDays",
     rpt_age_bucket(COALESCE(cl.settled_at::date, $7::date) - cl.reported_date, $3::int[]) AS "ageBucket",
     -- an open claim of the old system loaded at go-live, or a claim registered in BrokerVerse
     ${ORIGIN_LABEL('cl')} AS origin, cl.origin AS _origin
-  FROM claims cl JOIN policies p ON p.id = cl.policy_id ${POLICY_JOINS}
+  FROM claims cl JOIN policies p ON p.id = cl.policy_id ${POLICY_JOINS}`;
+const claims = `${claimRows}
   WHERE cl.reported_date BETWEEN $1 AND $2`;
+// settled claims over their settlement date
+const claimsSettled = `${claimRows}
+  WHERE cl.status = ANY($5::text[]) AND cl.settled_at::date BETWEEN $1 AND $2`;
 const claimExtras = [setting('reports.claim_ageing_buckets', [30, 60, 90, 180], 'int[]'),
   setting('reports.claim_open_statuses', ['registered', 'in-review', 'approved'], 'text[]'),
   setting('reports.claim_settled_statuses', ['settled', 'closed'], 'text[]'),
@@ -229,6 +237,7 @@ export const QUERIES = {
   },
   ...BANK_REC_QUERIES,
   ...CHANNEL_QUERIES,
+  ...TISPH_QUERIES,
   production: {
     sql: production, filters: PRODUCTION_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Origin: { groupBy: 'origin' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
@@ -249,9 +258,15 @@ export const QUERIES = {
     sql: claims, extras: claimExtras, filters: ORIGIN_FILTERS,
     criteria: {
       All: {}, Open: { where: 't.status = ANY($4::text[])' }, Settled: { where: 't.status = ANY($5::text[])' },
-      Rejected: { where: 't.status = ANY($6::text[])' }, Aging: { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' }, ...ORIGIN_CRITERIA,
+      Rejected: { where: 't.status = ANY($6::text[])' }, Aging: { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' },
+      Partial: { where: 't.status = \'partially-settled\'' }, Cancelled: { where: 't.status = \'cancelled\'' }, 'Claim Type': { groupBy: 'claimType' }, ...ORIGIN_CRITERIA,
     },
     orderBy: 'f."reportedDate", f."claimNumber"',
+  },
+  claimsSettled: {
+    sql: claimsSettled, extras: claimExtras, filters: POLICY_FILTERS,
+    criteria: { Overall: {}, 'Principal Insurer': { groupBy: 'insurer' }, 'Claim Type': { groupBy: 'claimType' } },
+    orderBy: 'f."settledDate", f."claimNumber"',
   },
   claimsAgeing: {
     sql: `${claims} AND cl.status = ANY($4::text[])`, extras: claimExtras, filters: ORIGIN_FILTERS,

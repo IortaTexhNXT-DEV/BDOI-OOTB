@@ -1,20 +1,41 @@
 // Integration screens (Master > System Configuration > Integrations and the screens built on the framework):
 // the pe-* page frame of the Period End screens, plus the payload / file previews.
-.pe-page {
-  .pe-pre {
-    background: #f8fafc;
-    border: 1px solid #e5e9f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    max-height: 22rem;
-    overflow: auto;
-    font-size: 0.8rem;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
 
+// payload and message previews, on the page and in the edit panels (which open outside the page)
+.pe-page .pe-pre,
+.pe-dialog .pe-pre {
+  max-width: 100%;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  max-height: 22rem;
+  overflow: auto;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pe-page {
   .int-mono {
     font-family: monospace;
+  }
+}
+
+// insurer mapping: each JSON map in a box tall enough to read it, wrapping inside the dialog
+.pe-dialog {
+  .int-map {
+    min-height: 10rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .int-map-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 }
 
@@ -58,4 +79,15 @@
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-muted);
+}
+
+// SAP GL export runs: the file names in full, one under the other
+.sap-gl-file.p-button {
+  padding: 0.25rem 0.25rem;
+  white-space: nowrap;
+
+  // the theme sets every button label to 16px with !important
+  .p-button-label {
+    font-size: 0.85rem !important;
+  }
 }

@@ -1,7 +1,7 @@
 .container__corrections__jv {
   .label_header {
 
-    color: #111927;
+    color: var(--color-heading);
     font-family: "Nunito", Arial, sans-serif;
     font-size: 30px;
     // font-style: normal;
@@ -13,7 +13,7 @@
   .correction__title__reversal {
     display: flex;
     align-items: center;
-    color: #111927;
+    color: var(--color-heading);
     font-size: 30px;
     font-style: normal;
     font-weight: 600;
@@ -27,16 +27,16 @@
     padding: 0;
   }
   .p-breadcrumb .p-breadcrumb-list li .p-menuitem-link .p-menuitem-text {
-    color: #000;
+    color: var(--color-heading);
     font-size: 16px;
     font-weight: 400;
     font-family: "Nunito", Arial, sans-serif;
   }
   .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
-    color: #b1b1b1 !important;
+    color: var(--color-placeholder) !important;
   }
   .card__container {
-    background: #fff;
+    background: var(--color-surface);
     filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08));
     padding: 10px 0;
     border-radius: 10px;
@@ -44,7 +44,7 @@
   }
 
   .input__field__reversal {
-    color: #111927;
+    color: var(--color-heading);
     width: 100%;
     border-radius: 10px;
     font-family: "Nunito", Arial, sans-serif;
@@ -53,14 +53,14 @@
     font-weight: 400;
     line-height: normal;
     .p-dropdown-label {
-      // color: #111927;
+      // color: var(--color-heading);
       font-family: "Nunito", Arial, sans-serif;
       font-size: 14px;
       font-weight: 400;
     }
   }
   .input__field__reversal__inactive {
-    color: #b1b1b1;
+    color: var(--color-placeholder);
     width: 100%;
     border-radius: 10px;
     font-family: "Nunito", Arial, sans-serif;
@@ -69,7 +69,7 @@
     font-weight: 400;
     line-height: normal;
     .p-inputtext {
-      color: #b1b1b1 !important;
+      color: var(--color-placeholder) !important;
     }
     .p-component:disabled {
       opacity: 1 !important;
@@ -77,7 +77,7 @@
   }
 
   .input__label__reversal {
-    color: #111927 !important;
+    color: var(--color-heading) !important;
     font-size: 16px !important;
     font-style: normal !important;
     font-weight: 500 !important;
@@ -85,7 +85,7 @@
     font-family: "Nunito", Arial, sans-serif;
   }
   .input__label__reversal__inactive {
-    color: #b1b1b1 !important;
+    color: var(--color-placeholder) !important;
     font-size: 16px !important;
     font-style: normal !important;
     font-weight: 500 !important;
@@ -108,7 +108,7 @@
   }
 
   .custom-modal {
-    background-color: #fff;
+    background-color: var(--color-surface);
     overflow-y: auto;
     position: relative;
     width: 22%;
@@ -127,7 +127,7 @@
   }
 
   .popup__text {
-    color: #111927;
+    color: var(--color-heading);
     text-align: center;
     font-size: 20px;
     font-weight: 500;
@@ -138,7 +138,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #fff;
+    color: var(--color-surface);
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 20px;
@@ -146,7 +146,7 @@
   }
 
   .modal-body {
-    color: #fff;
+    color: var(--color-surface);
   }
 
   .yes__no__view {
@@ -178,7 +178,7 @@
   }
 
   .custom-modal__delete {
-    background-color: #fff;
+    background-color: var(--color-surface);
     overflow-y: auto;
     position: relative;
     width: 30%;
@@ -192,7 +192,7 @@
 
   .no__view {
     background-color: transparent;
-    color: #0072d8;
+    color: var(--bv-primary);
     height: 45px;
     width: 135px;
     border-radius: 35px;
@@ -202,8 +202,8 @@
   }
 
   .yes__view {
-    background-color: #0072d8;
-    color: #fff;
+    background-color: var(--bv-primary);
+    color: var(--color-surface);
     height: 45px;
     width: 135px;
     border-radius: 35px;
@@ -223,13 +223,13 @@
 
   .p-dropdown:hover {
     background: none;
-    border-color: #e5e7eb;
+    border-color: var(--color-border);
     padding: 0px !important;
   }
 
   .p-datatable .p-datatable-tbody > tr > td {
     text-align: left;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-border);
     border-width: 0 0 1px 0;
     padding: 0 0.6rem;
   }
@@ -237,7 +237,7 @@
   .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
     background: transparent;
     border-color: transparent;
-    color: #111927;
+    color: var(--color-heading);
   }
 
   .button__view__corrections__reversal {
@@ -246,10 +246,10 @@
     align-items: center;
 
     .correction__btn__reversal {
-      color: #fff;
+      color: var(--color-surface);
       font-size: 18px;
       font-weight: 500;
-      background-color: #0072d8;
+      background-color: var(--bv-primary);
       border-radius: 6px;
       height: 45px;
       padding: 0 40px;

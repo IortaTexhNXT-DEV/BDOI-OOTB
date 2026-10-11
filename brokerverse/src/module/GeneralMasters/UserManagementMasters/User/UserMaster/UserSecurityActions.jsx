@@ -122,7 +122,7 @@ const LoginHistoryDialog = ({ user, onHide }) => {
   const reason = (r) => t(`security.reasons.${r.reason}`, { defaultValue: r.reason || "-" });
   return (
     <Dialog
-      header={t("security.signInHistoryOf", { user: user?.userName || "" })}
+      header={t("security.signInHistoryOf", { user: user?.displayName || user?.fullUserData?.displayName || user?.userName || "" })}
       visible={!!user}
       onHide={onHide}
       style={{ width: "60rem" }}
@@ -172,7 +172,9 @@ const UserSecurityActions = ({ row, onChanged }) => {
   const status = String(row.status || "").toLowerCase();
   const twoFactorOn = !!(row.twoFactorEnabled ?? row.fullUserData?.twoFactorEnabled);
 
-  const roles = (row.fullUserData?.roles || row.roles || []).map((r) => humanize(r)).join(", ");
+  // role names as the Role master shows them; codes only for a row loaded without them
+  const roleNames = row.fullUserData?.roleNames || row.roleNames;
+  const roles = (roleNames?.length ? roleNames : (row.fullUserData?.roles || row.roles || []).map((r) => humanize(r))).join(", ");
   const facts = [
     { label: t("security.user"), value: row.displayName || row.fullUserData?.displayName || name },
     { label: t("security.userName"), value: name },

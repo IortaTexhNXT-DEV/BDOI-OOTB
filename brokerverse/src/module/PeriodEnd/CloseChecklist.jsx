@@ -97,7 +97,7 @@ const CloseChecklist = () => {
           )} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("periodEnd.addItem") : v.code) : ""} visible={!!editing} style={{ width: "min(620px, 95vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("periodEnd.addItem") : t("periodEnd.editItem", { name: v.label || v.code })) : ""} visible={!!editing} style={{ width: "min(620px, 95vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("periodEnd.cancel")} text onClick={() => setEditing(null)} />

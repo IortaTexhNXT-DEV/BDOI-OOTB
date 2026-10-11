@@ -57,5 +57,13 @@ export async function userNames(db, ids) {
   return new Map((await db.query('SELECT id, COALESCE(display_name, username) AS n FROM users WHERE id = ANY($1)', [list])).rows.map((u) => [u.id, u.n]));
 }
 
+/** Role names of users by id, for the history entries (who acted, in which role). */
+export async function userRoles(db, ids) {
+  const list = [...new Set(ids.filter(Boolean))];
+  if (!list.length) return new Map();
+  return new Map((await db.query(`SELECT ur.user_id AS id, array_agg(r.name ORDER BY r.name) AS roles FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+    WHERE ur.user_id = ANY($1) GROUP BY ur.user_id`, [list])).rows.map((u) => [u.id, u.roles]));
+}
+
 /** Normalised reference: upper case letters and digits only. */
 export const normRef = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');

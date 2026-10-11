@@ -9,6 +9,9 @@
  * routine (CTPL from the tariff of the vehicle class), and in issue mode 'policy' the client and the policy with the
  * bank as mortgagee. The premium is billed to who pays: the buyer, the dealer or the bank (subsidy), each through its
  * own bill (policies/service.js#issuePolicy payers).
+ *
+ * The premium preview prices a car exactly as the upload's quotation does (programmeQuote builds the one quotation
+ * document both use) and lists each cover, tax and CTPL line with the part the dealer or bank and the buyer pay.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
@@ -19,6 +22,9 @@ import { num, round2 } from '../documents/common.js';
 import { mapColumns } from '../documents/tabular.js';
 import { createLead } from '../leads/service.js';
 import { createQuote } from '../quotations/service.js';
+import { premiumBreakdown } from '../quotations/premium.js';
+import { motorTariff, vehicleClass } from '../quotations/motorTariff.js';
+import { listLgus, lguFor } from '../premium-charges/service.js';
 import { clientFromLead } from '../clients/service.js';
 import { issuePolicy } from '../policies/service.js';
 import { participantInputs } from '../placement/participants.js';
@@ -74,6 +80,14 @@ async function validateProgramme(cols, id = null) {
   if (cols.subsidy_payer === 'bank' && cols.bank_channel_id === null) errors.push({ path: 'bankChannelId', message: 'A bank-paid subsidy needs the financing bank' });
   if (cols.subsidy_type === 'percent' && num(cols.subsidy_value) > 100) errors.push({ path: 'subsidyValue', message: 'A percentage subsidy cannot exceed 100' });
   if (cols.effective_from && cols.effective_to && cols.effective_to < cols.effective_from) errors.push({ path: 'effectiveTo', message: 'effectiveTo is before effectiveFrom' });
+  const tariff = await motorTariff();
+  const cls = cols.vehicle_type ? vehicleClass(tariff, cols.vehicle_type) : null;
+  if (cols.vehicle_type && tariff.vehicleTypes.length && !cls) {
+    errors.push({ path: 'vehicleType', message: `${cols.vehicle_type} is not an Insurance Commission vehicle class of the motor tariff` });
+  }
+  if (cls && cols.include_ctpl !== false && Number(cols.ctpl_term_years) === 3 && cls.ctplPremium3Year === null) {
+    errors.push({ path: 'ctplTermYears', message: `No 3-year CTPL tariff is configured for ${cls.label}: choose 1 year` });
+  }
   if (cols.code && await one('SELECT 1 FROM motor_programmes WHERE lower(code) = lower($1) AND ($2::int IS NULL OR id <> $2)', [cols.code, id])) {
     errors.push({ path: 'code', message: `Programme code ${cols.code} is already used` });
   }
@@ -83,6 +97,7 @@ async function validateProgramme(cols, id = null) {
 const columnsFrom = (b) => {
   const cols = {};
   for (const [k, c] of Object.entries(FIELDS)) if (b[k] !== undefined) cols[c] = b[k] === '' ? null : b[k];
+  if (cols.vehicle_type) cols.vehicle_type = String(cols.vehicle_type).trim();
   if (cols.effective_from) cols.effective_from = isoDate(cols.effective_from);
   if (cols.effective_to) cols.effective_to = isoDate(cols.effective_to);
   return cols;
@@ -90,7 +105,7 @@ const columnsFrom = (b) => {
 
 export async function createProgramme(b, userId) {
   const cols = columnsFrom(b);
-  await validateProgramme({ bank_channel_id: null, ...cols });
+  await validateProgramme({ bank_channel_id: null, include_ctpl: true, ctpl_term_years: 3, ...cols });
   const data = { ...cols, created_by: userId, updated_by: userId };
   const keys = Object.keys(data);
   const r = await one(`INSERT INTO motor_programmes(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
@@ -100,7 +115,8 @@ export async function createProgramme(b, userId) {
 export async function updateProgramme(id, b, userId) {
   const before = await getProgrammeRow(id);
   const cols = columnsFrom(b);
-  await validateProgramme({ bank_channel_id: before.bank_channel_id, subsidy_type: before.subsidy_type, ...cols }, before.id);
+  await validateProgramme({ bank_channel_id: before.bank_channel_id, subsidy_type: before.subsidy_type, vehicle_type: before.vehicle_type, include_ctpl: before.include_ctpl,
+    ctpl_term_years: before.ctpl_term_years, ...cols }, before.id);
   const data = { ...cols, updated_by: userId, updated_at: new Date() };
   const keys = Object.keys(data);
   await query(`UPDATE motor_programmes SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
@@ -152,16 +168,120 @@ const SALE_SELECT = `SELECT s.*, b.batch_number, d.name AS dealer_name, k.name A
   LEFT JOIN dealer_sales_batches b ON b.id = s.batch_id LEFT JOIN distribution_channels d ON d.id = s.dealer_channel_id
   LEFT JOIN distribution_channels k ON k.id = s.bank_channel_id LEFT JOIN quotes q ON q.id = s.quote_id LEFT JOIN policies p ON p.id = s.policy_id`;
 
-/** How the gross premium is shared: { buyer, payer, payerType } (payer: the dealer or the bank paying a subsidy). */
-export function premiumShares(programme, gross) {
+/**
+ * How the gross premium is shared: { buyer, payer, payerType } (payer: the dealer or the bank paying a subsidy). A bank
+ * pays only for the cars it finances: a cash sale under a bank-subsidised programme is paid by the buyer.
+ */
+export function premiumShares(programme, gross, { financed = true } = {}) {
   const g = round2(gross);
   const payerType = programme.subsidy_payer === 'none' ? (programme.free_first_year ? 'dealer' : null) : programme.subsidy_payer;
-  if (!payerType) return { buyer: g, payer: 0, payerType: null };
+  if (!payerType || (payerType === 'bank' && !financed)) return { buyer: g, payer: 0, payerType: null };
   let payer = 0;
   if (programme.free_first_year || programme.subsidy_type === 'full') payer = g;
   else if (programme.subsidy_type === 'percent') payer = round2((g * num(programme.subsidy_value)) / 100);
   else payer = Math.min(round2(num(programme.subsidy_value)), g);
   return { buyer: round2(g - payer), payer, payerType };
+}
+
+/**
+ * The motor quotation document of a car sold under a programme (sum insured: the invoice price of the brand-new car, no
+ * depreciation in year 1): the upload's quotation and the premium preview are priced from it, so they cannot differ.
+ * LGT is at the rate of the LGU of lguCode or lguCity (the buyer's city), else the LGT rule rate.
+ */
+export const programmeQuote = (p, { price, vehicleType = null, lguCode = null, lguCity = null }) => ({
+  productType: 'Motor', lob: 'MOTOR', productId: p.product_id || undefined, insuranceCompanyId: p.insurance_company_id || undefined,
+  vehicleType: vehicleType || p.vehicle_type || null, includeCTPL: p.include_ctpl, ctplTermYears: p.ctpl_term_years,
+  lossAndDamageCoverage: price, lossAndDamageCoverageRate: Number(p.own_damage_rate), actsOfNatureRate: Number(p.acts_of_nature_rate),
+  bodilyInjury: Number(p.bodily_injury) || undefined, propertyDamage: Number(p.property_damage) || undefined, totalSumInsured: price, brandNew: true,
+  ...(lguCode ? { lguCode } : {}), ...(lguCity ? { lguCity } : {}),
+});
+
+/** Cover premiums of a motor breakdown in the order of the schedule: [premium field, sum-insured field, rate, default name]. */
+const COVER_LINES = [
+  ['lossAndDamageCoveragePremium', 'lossAndDamageCoverage', 'own_damage_rate', 'Own Damage / Theft'],
+  ['actsOfNaturePremium', 'lossAndDamageCoverage', 'acts_of_nature_rate', 'Acts of Nature'],
+  ['bodilyInjuryCoveragePremium', 'bodilyInjury', null, 'Excess Bodily Injury'],
+  ['propertyDamageCoveragePremium', 'propertyDamage', null, 'Property Damage'],
+  ['roadsideAssistancePremium', 'lossAndDamageCoverage', null, 'Roadside Assistance'],
+  ['personalAccidentCoverPremium', 'lossAndDamageCoverage', null, 'Personal Accident of the Driver'],
+  ['APPAcoveragePremium', 'APPAtotalCoverage', null, 'Auto Personal Accident'],
+];
+
+/**
+ * The lines of a premium breakdown: each cover (named as the product's covers priced on it, Own Damage and Theft share
+ * one rate), any rating adjustment, each tax and charge of the charge engine, and CTPL; they add up to the gross premium.
+ */
+export function premiumLines(b, p, sumInsured) {
+  const names = new Map();
+  for (const c of b.coverSelection?.covers || []) if (c.quoteField) names.set(c.quoteField, [...(names.get(c.quoteField) || []), c.name]);
+  const limits = { lossAndDamageCoverage: sumInsured, bodilyInjury: num(p.bodily_injury), propertyDamage: num(p.property_damage), APPAtotalCoverage: num(b.APPAtotalCoverage) };
+  const lines = [];
+  for (const [field, siField, rateCol, name] of COVER_LINES) {
+    const amount = round2(num(b[field]));
+    if (!amount && field !== 'lossAndDamageCoveragePremium') continue;
+    const base = limits[siField];
+    lines.push({ code: field, kind: 'cover', name: names.get(field)?.join(' / ') || name, base, rate: rateCol ? num(p[rateCol]) : base ? round2((amount / base) * 100 * 1e4) / 1e4 : null, amount });
+  }
+  const covers = round2(lines.reduce((s, l) => s + l.amount, 0));
+  const adjustment = round2(num(b.netPremium) - covers);
+  if (adjustment) lines.push({ code: 'adjustment', kind: 'cover', name: 'Rating adjustment', base: null, rate: null, amount: adjustment });
+  for (const c of b.charges?.lines || []) lines.push({ code: c.code, kind: 'tax', name: c.name, base: c.base, rate: c.rate, amount: round2(c.amount) });
+  if (num(b.ctplCoveragePremium)) lines.push({ code: 'CTPL', kind: 'ctpl', name: 'CTPL', base: null, rate: null, years: b.ctplTermYears ?? null, amount: round2(num(b.ctplCoveragePremium)) });
+  return lines;
+}
+
+/**
+ * The payer's share spread over the lines in proportion to their amounts (the rounding difference on the largest line), so
+ * each line shows what the dealer or bank and the buyer pay of it and the columns add up to the shares.
+ */
+export function splitLines(lines, { payer }) {
+  const gross = round2(lines.reduce((s, l) => s + l.amount, 0));
+  const out = lines.map((l) => ({ ...l, payer: gross ? round2((l.amount * payer) / gross) : 0 }));
+  const diff = round2(payer - out.reduce((s, l) => s + l.payer, 0));
+  if (diff && out.length) {
+    const big = out.reduce((m, l) => (Math.abs(l.amount) > Math.abs(m.amount) ? l : m), out[0]);
+    big.payer = round2(big.payer + diff);
+  }
+  return out.map((l) => ({ ...l, buyer: round2(l.amount - l.payer) }));
+}
+
+/** Choices of the premium preview: the vehicle classes of the motor tariff and the LGUs with a tax rate. */
+export async function previewOptions() {
+  const tariff = await motorTariff();
+  const lgus = await listLgus({ active: true });
+  return {
+    vehicleTypes: tariff.vehicleTypes.map((c) => ({ value: c.value, label: c.label, ctplPremium: c.ctplPremium, ctplPremium3Year: c.ctplPremium3Year })),
+    lgus: lgus.map((l) => ({ code: l.code, name: l.name, province: l.province, rate: l.rate })),
+  };
+}
+
+/**
+ * Premium of a car under a programme and who pays what, nothing saved: priced as the upload's quotation (programmeQuote),
+ * for the vehicle class given (else the programme's), the LGU given (else the LGT rule rate) and, for a bank subsidy, a car
+ * financed by the bank unless financed is false.
+ */
+export async function previewPremium(id, { invoicePrice, vehicleType = null, lguCode = null, financed = null }) {
+  const p = await getProgrammeRow(id);
+  const price = round2(num(invoicePrice));
+  if (lguCode && !(await lguFor({ lguCode }))) throw badRequest('Validation failed', [{ path: 'lguCode', message: `No LGU tax rate in force for ${lguCode}` }]);
+  const isFinanced = financed ?? Boolean(p.bank_channel_id);
+  const b = await premiumBreakdown(programmeQuote(p, { price, vehicleType, lguCode }), { insurerId: p.insurance_company_id });
+  const shares = premiumShares(p, b.grossPremium, { financed: isFinanced });
+  const lines = splitLines(premiumLines(b, p, price), shares);
+  const cls = vehicleClass(await motorTariff(), b.vehicleType);
+  const lgt = (b.charges?.lines || []).find((c) => c.kind === 'lgt');
+  return {
+    netPremium: b.netPremium, taxes: round2(lines.filter((l) => l.kind === 'tax').reduce((s, l) => s + l.amount, 0)), ctplPremium: b.ctplCoveragePremium,
+    grossPremium: b.grossPremium, commissionAmount: b.commissionAmount, ...shares, lines,
+    basis: {
+      programmeCode: p.code, programmeName: p.name, insurerName: p.insurer_name ?? null, dealerName: p.dealer_name ?? null, bankName: p.bank_name ?? null,
+      payerName: shares.payerType === 'bank' ? p.bank_name ?? null : shares.payerType === 'dealer' ? p.dealer_name ?? null : null,
+      sumInsured: price, ownDamageRate: num(p.own_damage_rate), actsOfNatureRate: num(p.acts_of_nature_rate), vehicleType: b.vehicleType || null,
+      vehicleTypeLabel: cls?.label || null, includeCtpl: p.include_ctpl, ctplTermYears: b.ctplTermYears ?? null, lgu: b.charges?.lgu || null, lgtRate: lgt ? lgt.rate : null,
+      financed: isFinanced, freeFirstYear: p.free_first_year, subsidyPayer: p.subsidy_payer,
+      subsidyType: p.subsidy_type, subsidyValue: num(p.subsidy_value),
+    },
+  };
 }
 
 /** A channel by code, of the given types (null when the code is empty). */
@@ -209,24 +329,21 @@ async function processSale(db, p, v, userId) {
   const vehicle = { vehicleBrand: v.make, vehicleModel: v.model, modelVariant: v.variant || null, modelYear: v.yearModel || null, vehicleColor: v.color || null,
     vehicleType: v.vehicleType || p.vehicle_type || null };
   const quote = await createQuote({
-    leadRefId: lead.id, productType: 'Motor', lob: 'MOTOR', productId: p.product_id || undefined, insuranceCompanyId: p.insurance_company_id || undefined,
-    vehicleType: vehicle.vehicleType, includeCTPL: p.include_ctpl, ctplTermYears: p.ctpl_term_years,
-    lossAndDamageCoverage: price, lossAndDamageCoverageRate: Number(p.own_damage_rate), actsOfNatureRate: Number(p.acts_of_nature_rate),
-    bodilyInjury: Number(p.bodily_injury) || undefined, propertyDamage: Number(p.property_damage) || undefined, totalSumInsured: price,
+    leadRefId: lead.id, ...programmeQuote(p, { price, vehicleType: vehicle.vehicleType, lguCity: v.buyerCity || null }),
     insuranceVehicleDetails: [vehicle], plateNumber: v.plateNumber || v.conductionSticker || null, conductionSticker: v.conductionSticker || null,
-    chassisNumber: v.chassisNumber, motorNumber: v.engineNumber, channelId: dealer.id, brandNew: true,
+    chassisNumber: v.chassisNumber, motorNumber: v.engineNumber, channelId: dealer.id,
     mortgage: bankRow ? bankRow.name : null, mortgageeClause: clause, mortgageeChannelId: bank?.id || null, loanAmount: loan || null,
     dealerProgramme: { programmeId: p.id, code: p.code, invoiceNumber: v.invoiceNumber || null, saleDate: isoDate(v.saleDate) },
     remarks: `Brand-new vehicle programme ${p.code}`,
   }, userId, db);
-  const shares = premiumShares(p, Number(quote.premium_total));
+  const shares = premiumShares(p, Number(quote.premium_total), { financed: Boolean(bank) });
   const out = { lead_id: lead.id, quote_id: quote.id, gross_premium: Number(quote.premium_total), buyer_share: shares.buyer, payer_share: shares.payer,
     dealer_channel_id: dealer.id, bank_channel_id: bank?.id || null, policy_id: null };
   // issue mode 'quotation': the draft quotation is followed up with the buyer like any other
   if (p.issue_mode !== 'policy') return out;
   // issue at once: the buyer becomes a client, the policy starts on the sale date, each payer gets its bill
   const clientId = await clientFromLead(db, lead.id, {}, userId);
-  const payerChannel = shares.payerType === 'bank' ? (bankRow?.id || p.bank_channel_id) : p.dealer_channel_id;
+  const payerChannel = shares.payerType === 'bank' ? bankRow.id : p.dealer_channel_id;
   const payers = [];
   if (shares.payer > 0) payers.push({ clientId: await billingClient(db, payerChannel, userId), amount: shares.payer, reference: `${p.code} subsidy` });
   if (shares.buyer > 0) payers.push({ clientId, amount: shares.buyer });

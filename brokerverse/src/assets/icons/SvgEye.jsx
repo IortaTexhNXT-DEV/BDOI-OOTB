@@ -8,7 +8,7 @@ const SvgEye = (props) => (
     {...props}
   >
     <g
-      stroke="#6C737F"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}

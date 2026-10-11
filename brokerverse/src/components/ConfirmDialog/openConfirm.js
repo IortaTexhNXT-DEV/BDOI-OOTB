@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import ConfirmDialogHost from "./ConfirmDialogHost";
 import { enqueue, hasHost } from "./confirmQueue";
 
-const PROPS = ["title", "severity", "icon", "message", "facts", "note", "input", "confirmLabel", "confirmIcon", "cancelLabel", "onConfirm", "onCancel", "className"];
+const PROPS = ["title", "severity", "icon", "message", "facts", "note", "input", "confirmLabel", "confirmIcon", "cancelLabel", "onConfirm", "onCancel", "className", "reason"];
 
 // the names of PrimeReact's confirmDialog(), so that a call can move over with its callbacks
 const LEGACY = { header: "title", acceptLabel: "confirmLabel", rejectLabel: "cancelLabel", accept: "onConfirm", reject: "onCancel" };
@@ -39,9 +39,10 @@ const mountHost = () => {
  *   if (!(await openConfirm({ title, message, facts, confirmLabel }))) return;
  *   await openConfirm({ ..., onConfirm: () => service.process(ids) });   // runs inside the dialog, errors shown there
  *   const reason = await openConfirm({ ..., input: { type: "textarea", label: reasonLabel, required: true } });
+ *   const coded = await openConfirm({ ..., reason: { context: "remittance_cancel" } });   // { reasonCode, note }
  *
- * Resolves true once confirmed (and the action, when given, has succeeded), false when cancelled; with `input`, the
- * value entered instead of true and null when cancelled.
+ * Resolves true once confirmed (and the action, when given, has succeeded), false when cancelled; with `input` or
+ * `reason`, the value entered instead of true and null when cancelled.
  * @param {object} options
  * @returns {Promise<boolean|*>}
  */
@@ -49,7 +50,7 @@ export const openConfirm = async (options = {}) => {
   const props = propsOf(options);
   if (!hasHost()) mountHost();
   const result = await enqueue(props);
-  if (props.input) return result.confirmed ? result.value : null;
+  if (props.input || props.reason) return result.confirmed ? result.value : null;
   return !!result.confirmed;
 };
 

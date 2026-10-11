@@ -29,9 +29,10 @@ const Reversals = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [created, setCreated] = useState(null);
   const { transactionCodesData } = useJvMasterData();
-  const { reversalJVList, loading, reversalJVGetDataList } = useSelector(
+  const { reversalJVList, loading, reversalJVGetDataList, originalVoucher } = useSelector(
     ({ reversalMainReducers }) => ({
       loading: reversalMainReducers?.loading,
+      originalVoucher: reversalMainReducers?.originalVoucher || {},
       reversalJVList: reversalMainReducers?.reversalJVList,
       reversalJVGetDataList: reversalMainReducers?.reversalJVGetDataList || [],
     })
@@ -96,16 +97,17 @@ const Reversals = () => {
 
   const handleApproval = async () => {
     const number = formik.values.transactionNumber.trim();
-    const first = reversalJVGetDataList[0] || {};
+    // the date and total of the voucher reversed come from the voucher, not from its lines
+    const voucher = originalVoucher;
     const ok = await openConfirm({
       title: t("accounts.correctionJVForm.reverseTitle", { number }),
       message: t("accounts.correctionJVForm.reverseMessage"),
       facts: [
         { label: t("accounts.correctionJVForm.originalVoucher"), value: number },
-        { label: t("accounts.correctionJVForm.voucherDate"), value: first.date, type: "date", hidden: !first.date },
+        { label: t("accounts.correctionJVForm.voucherDate"), value: voucher.date || voucher.voucherDate, type: "date", hidden: !(voucher.date || voucher.voucherDate) },
         { label: t("accounts.correctionJVForm.reversalCode"), value: `${formik.values.reversalJVTransactionCode} ${describeCode(formik.values.reversalJVTransactionCode)}`.trim() },
         { label: t("accounts.correctionJVForm.entries"), value: reversalJVGetDataList.length, type: "number" },
-        { label: t("accounts.correctionJVForm.amount"), value: first.totalDebit, type: "amount", hidden: first.totalDebit === undefined },
+        { label: t("accounts.correctionJVForm.amount"), value: voucher.totalDebit, type: "amount", hidden: voucher.totalDebit === undefined || voucher.totalDebit === null },
       ],
       note: t("accounts.correctionJVForm.submitNote"),
       confirmLabel: t("accounts.correctionJVForm.reverse"),

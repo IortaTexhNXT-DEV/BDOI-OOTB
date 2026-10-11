@@ -355,6 +355,31 @@ export async function acknowledgementReceiptDoc(c) {
 }
 
 /**
+ * Acknowledgement receipt of the post-dated cheques of a set (TIS-BRD-RPT-CCD-07): the cheques received from the client
+ * for the instalments of a policy, payable to the Insurance Partner or to the broker. No journal is posted on receipt;
+ * each cheque is accounted for when it is collected. `set` is pdc/lifecycle.js#getSet.
+ */
+export async function pdcAcknowledgementDoc(set) {
+  const h = await header('Acknowledgment Receipt - Post-Dated Cheques', set.setNumber);
+  const f = formatters(h);
+  const currency = h.format?.currency || 'PHP';
+  const cheques = set.cheques.filter((c) => !['cancelled', 'replaced', 'returned'].includes(c.status));
+  const note = (await getSetting('documents.pdc_acknowledgement_note', 'Received the post-dated cheques below, subject to clearing. This is not an official receipt; a receipt is issued for each cheque once it is paid.')) || '';
+  const sig = await signatures(h, 'pdc-acknowledgement', { status: 'issued', date: set.receivedDate, names: { 'issuing-user': set.receivedBy } },
+    { blocks: [{ slot: 'received-by', label: 'Received by', name: set.receivedBy || null }, { label: 'Received from (client)' }], perRow: 2 });
+  return { ...h, footerNote: note,
+    meta: kv([['Date received', f.date(set.receivedDate)], ['Received from', set.clientName], ['Policy', set.policyNumber], ['Bill', set.billNumber],
+      ['Payable to', set.payee === 'insurance-partner' ? set.insurerName : brokerName(h)], ['Cheques', String(cheques.length)], ['Total', f.ccy(set.total, currency), { bold: true }]]),
+    sections: [
+      { heading: 'Amount in words', text: amountInWords(set.total, currency), bold: true },
+      { heading: `Cheques received (${currency})`, table: { columns: ['Instalment', 'Bank', 'Cheque no.', 'Cheque date', { label: 'Amount', type: 'money' }],
+        rows: [...cheques.map((c) => [c.instalmentSeq ? `${c.instalmentSeq} of ${c.instalmentCount || cheques.length}` : '', val(c.bankName), val(c.chequeNumber), f.date(c.chequeDate),
+          money(c.amount)]), ['Total', '', '', '', money(set.total)]], totalRow: true } },
+      sig.section,
+    ] };
+}
+
+/**
  * Commission debit note to an insurer (direct bill), or commission billing statement (gross remittance, basis gross):
  * one line per policy / endorsement, commission, VAT, total due, the expanded withholding tax the insurer deducts and
  * the net amount payable. `dn` and `lines` are the API shapes (remittance/directbill.js#debitNoteOut).
@@ -391,8 +416,11 @@ export async function commissionDebitNoteDoc(dn, lines) {
  * Remittance advice to an insurer (Accounts > Remittance > Tracking > Print), or the agency bill of an agent: the
  * remittance, the policies it pays with premium, commission, tax and net amount, the amount due and the signatures.
  * `rem` and `lines` are the API shapes (remittance/service.js#remittanceDetails and its policies).
+ * With `advice` (remittance/documents.js#adviceData) it is the advice letter sent with the schedule: addressee,
+ * reference block, payment block and the amounts paid, portrait, without the policy list (the schedule is attached).
  */
-export async function remittanceAdviceDoc(rem, lines) {
+export async function remittanceAdviceDoc(rem, lines, advice = null) {
+  if (advice) return remittanceAdviceLetter(rem, advice);
   const agency = rem.kind === 'agency-bill';
   const title = agency ? await getSetting('remittance.agency_bill_title', 'Agency Bill') : await getSetting('remittance.advice_title', 'Remittance Advice');
   const h = await header(title || (agency ? 'Agency Bill' : 'Remittance Advice'), rem.remittanceNo);
@@ -423,6 +451,31 @@ export async function remittanceAdviceDoc(rem, lines) {
     ] };
 }
 
+/** The advice letter of remittanceAdviceDoc (Accounts > Remittance > Remittances > Download advice). */
+async function remittanceAdviceLetter(rem, a) {
+  const title = (await getSetting('remittance.advice_title', 'Remittance Advice')) || 'Remittance Advice';
+  const h = await header(title, rem.remittanceNo);
+  const f = formatters(h);
+  const currency = rem.currency || h.format?.currency || 'PHP';
+  const lh = h.letterhead || {};
+  const amount = (v) => (v === null || v === undefined ? '-' : money(v));
+  const contact = [lh.email, lh.phone].filter(present).join(' · ');
+  return { ...h, orientation: 'portrait',
+    meta: kv([['Date', f.date(a.date)], ['To', a.insurer.name], ['Address', a.insurer.address], ['TIN', a.insurer.tin]]),
+    sections: [
+      { heading: 'Reference', rows: kv([['Remittance no.', rem.remittanceNo], ['Coverage week', a.coverage ? `${f.date(a.coverage.from)} to ${f.date(a.coverage.to)}` : ''],
+        ['Product line', a.productLine], ['Basis', a.basis]]) },
+      { heading: 'Payment', rows: kv([['Voucher no.', a.payment?.voucherNo], ['Method', paymentModeLabel(a.payment?.method)], ['Value date', f.date(a.payment?.valueDate)],
+        ['Bank reference', a.payment?.bankReference]]) },
+      { heading: `Amounts (${currency})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: [
+        ['Total premium', amount(a.amounts.premium)], ['Commission', amount(a.amounts.commission)], ['VAT on commission', amount(a.amounts.commissionVat)],
+        ['EWT on commission', amount(a.amounts.commissionEwt)], ['Due to insurer', amount(a.amounts.dueToInsurer)], ['Refund credits netted', amount(a.amounts.refundCredits)],
+        ['Amount paid', amount(a.amounts.amountPaid)]] } },
+      { text: 'Schedule attached.' },
+      ...(contact ? [{ note: `${lh.name ? `${lh.name} Finance` : 'Finance'}: ${contact}` }] : []),
+    ] };
+}
+
 /**
  * Endorsement (Operations > Endorsement > Print): the policy, the type and effective date, the premium change, every
  * change group recorded on the endorsement (personal details, vehicle, coverage, extension ...) and the authorised
@@ -434,16 +487,30 @@ export async function endorsementDoc(e, row = {}) {
   const skip = new Set(['summary', 'completionDetails', 'documentKey', 'documentUrl', 'endorsementTypeIds', 'id', 'endorsementId', 'policyId', 'clientId', 'receivableId', 'remarks']);
   const scalar = (v) => v !== null && v !== undefined && typeof v !== 'object' && String(v).trim() !== '';
   const changes = Object.entries(row.changes || {}).filter(([k]) => !skip.has(k));
+  // stored values are printed as words: a code (FULL, short-period) as a phrase, a date as a date, an amount as money and
+  // a yes/no as Yes or No; a "changed" flag only marks that the group was edited and is not a fact of the endorsement
+  const shown = (k, v) => scalar(v) && !(typeof v === 'boolean' && /^(changed|is_?changed|has_?changes?)$/i.test(k));
+  const words = (k, v) => {
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (typeof v === 'number' && /(premium|amount|tax|refund|charge|fee|vat|dst|lgt)/i.test(k)) return f.ccy(v);
+    const text = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2}(T|$)/.test(text)) return f.date(text);
+    if (/^[A-Z][A-Z_-]{3,}$/.test(text) || /^[a-z]+([_-][a-z]+)+$/.test(text)) {
+      const phrase = text.replace(/[_-]+/g, ' ').toLowerCase();
+      return phrase.charAt(0).toUpperCase() + phrase.slice(1);
+    }
+    return v;
+  };
   const groups = changes.filter(([, v]) => v && typeof v === 'object' && !Array.isArray(v))
-    .map(([k, v]) => ({ heading: humanize(k), rows: kv(Object.entries(v).filter(([, x]) => scalar(x)).map(([a, x]) => [humanize(a), x])).slice(0, 40) }))
+    .map(([k, v]) => ({ heading: humanize(k), rows: kv(Object.entries(v).filter(([a, x]) => shown(a, x)).map(([a, x]) => [humanize(a), words(a, x)])).slice(0, 40) }))
     .filter((g) => g.rows.length);
-  const loose = kv(changes.filter(([, v]) => scalar(v)).map(([k, v]) => [humanize(k), v])).slice(0, 30);
+  const loose = kv(changes.filter(([k, v]) => shown(k, v)).map(([k, v]) => [humanize(k), words(k, v)])).slice(0, 30);
   const sig = await signatures(h, 'endorsement', { status: row.status || e.status, date: e.completedAt || e.effectiveDate || e.createdAt, issuedBy: row.created_by },
     { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
   return { ...h, watermark: sig.watermark,
     meta: kv([['Policy no.', e.policyNumber], ['Insured', e.insuredName || e.clientName], ['Customer code', e.clientCode],
       ['Endorsement type', humanize(String(e.endorsementType || '').replace(/,/g, ', '))], ['Effective date', f.date(e.effectiveDate)], ['Policy expiry', f.date(e.policyExpiry)],
-      ['Status', e.status], ['Premium change', num(e.premiumDelta) ? f.ccy(e.premiumDelta) : 'None'], ['Cancellation', e.isCancelPolicy ? humanize(e.cancellationType || 'yes') : '']]),
+      ['Status', e.status], ['Premium change', num(e.premiumDelta) ? f.ccy(e.premiumDelta) : 'None'], ['Cancellation', e.isCancelPolicy ? words('cancellationType', e.cancellationType || 'Yes') : '']]),
     sections: [...(loose.length ? [{ heading: 'Changes', rows: loose }] : []), ...groups,
       { heading: 'Declaration', text: 'All other terms, conditions and warranties of the policy remain unchanged. This endorsement forms part of the policy.' },
       ...(present(e.remarks) ? [{ heading: 'Remarks', text: e.remarks }] : []), sig.section] };

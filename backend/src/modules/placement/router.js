@@ -275,7 +275,8 @@ define({
   response: { success: true, data: { ...placementExample, status: 'sent' }, sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }] },
   handler: async (req, res) => {
     const r = await plc.sendPlacement(req.params.id, req.user, req.body || {});
-    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'send', after: { status: r.placement.status, sent: r.sent.map((s) => s.insurer), failed: r.failed } });
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'send', before: { status: r.previousStatus },
+      after: { status: r.placement.status, sent: r.sent.map((s) => s.insurer), failed: r.failed.map((f) => f.insurer) } });
     res.json({ success: true, message: `Placement slip sent to ${r.sent.length} insurer(s)`, sent: r.sent, failed: r.failed, data: r.placement });
   },
 });

@@ -18,6 +18,7 @@ import { toIsoDate } from "../../utility/dateFormat";
 import { BirTag, date, money, showError, showSuccess } from "./common";
 import { dateTime } from "../PeriodEnd/common";
 import "./tax.scss";
+import { useFeature } from "../../features/Feature";
 
 export const PAYMENT_MODES = ["bank-transfer", "check", "cash", "online"];
 
@@ -120,6 +121,7 @@ const CancelDialog = ({ invoice, payment, onHide, onDone, toast }) => {
  */
 const InvoiceDetail = ({ invoice, onHide, onChanged, toast, canWrite }) => {
   const { t } = useTranslation();
+  const eis = useFeature("bir-eis");
   const [paying, setPaying] = useState(false);
   const [cancelling, setCancelling] = useState(null);
   const s = invoice.seller || {};
@@ -145,7 +147,7 @@ const InvoiceDetail = ({ invoice, onHide, onChanged, toast, canWrite }) => {
           { label: t("birTax.invoiceDate"), value: invoice.invoiceDate, type: "date" },
           { label: t("birTax.totalAmount"), value: invoice.totalAmount, type: "amount" },
           { label: t("birTax.balance"), value: invoice.balance, type: "amount" },
-          { label: t("birTax.eisStatus"), value: invoice.eisStatus ? <BirTag status={invoice.eisStatus} /> : null },
+          { label: t("birTax.eisStatus"), value: invoice.eisStatus ? <BirTag status={invoice.eisStatus} /> : null, hidden: !eis.visible },
         ]} />
       <DetailSection title={t("birTax.parties")}>
         <KeyValueGrid columns={3} items={[

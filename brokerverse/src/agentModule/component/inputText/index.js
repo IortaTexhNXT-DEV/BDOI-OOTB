@@ -55,7 +55,7 @@ const InputTextField = ({
         <div
           id={`${fieldId}-hint`}
           className="input__hint"
-          style={{ color: "#6c737f", fontSize: "12px", marginTop: "4px" }}
+          style={{ color: "var(--text-color-secondary)", fontSize: "12px", marginTop: "4px" }}
         >
           {hint}
         </div>

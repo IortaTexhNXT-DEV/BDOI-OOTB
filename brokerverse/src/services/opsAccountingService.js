@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
+import { printPdf } from "../components/Print/printPdf";
 
 /**
  * Operations and accounting API: cover notes (/cover-notes), policy cancellation (/cancellations), post-dated cheques
@@ -30,21 +31,18 @@ const put = (path, payload = {}) => request(path, { method: "PUT", body: JSON.st
 const patch = (path, payload = {}) => request(path, { method: "PATCH", body: JSON.stringify(payload) });
 const id = (v) => encodeURIComponent(v);
 
-/** Fetch a file with the session token and open it (PDF in a new tab) or save it (spreadsheets). */
-const openFile = async (path, fileName, { download = false } = {}) => {
+/** Print a PDF of the API (components/Print printPdf), or fetch a spreadsheet with the session token and save it. */
+const openFile = async (path, fileName = "document.pdf", { download = false } = {}) => {
+  if (!download) return printPdf(path, { fileName });
   const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
   if (!response.ok) await handle(response);
   const url = URL.createObjectURL(await response.blob());
-  if (download) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } else {
-    window.open(url, "_blank", "noopener");
-  }
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 
@@ -79,6 +77,23 @@ const opsAccountingService = {
   registerPdc: (payload) => post("/pdc", payload),
   pdcAction: (pdcId, action, payload = {}) => post(`/pdc/${id(pdcId)}/${action}`, payload),
   downloadPdcs: (params) => openFile(`/pdc${qs({ ...params, format: "xlsx" })}`, "post-dated-cheques.xlsx", { download: true }),
+  pdc: (pdcId) => request(`/pdc/${id(pdcId)}`),
+  updatePdc: (pdcId, payload) => put(`/pdc/${id(pdcId)}`, payload),
+  pdcEncode: (policy, bill) => request(`/pdc/encode${qs({ policy, bill })}`),
+  encodePdcSet: (payload) => post("/pdc/sets", payload),
+  // acknowledgement receipt (PDF) of the cheques of a set, for printPdf
+  pdcAcknowledgementPath: (setId) => `/pdc/sets/${id(setId)}/acknowledgement`,
+  pdcSet: (setId) => request(`/pdc/sets/${id(setId)}`),
+  pdcFollowUp: () => request("/pdc/follow-up"),
+  pdcTransmittals: (params) => request(`/pdc/transmittals${qs(params)}`),
+  pdcTransmittal: (tId) => request(`/pdc/transmittals/${id(tId)}`),
+  forwardPdcs: (payload) => post("/pdc/transmittals", payload),
+  pdcPartnerReceived: (tId, payload) => post(`/pdc/transmittals/${id(tId)}/received`, payload),
+  downloadTransmittal: (tId, number) => openFile(`/pdc/transmittals/${id(tId)}?format=xlsx`, `transmittal-${number || tId}.xlsx`, { download: true }),
+  insurers: async () => {
+    const body = await raw("/masters/insurance-company/options");
+    return body.data || [];
+  },
   // claim documents
   claimsAwaitingDocuments: (params) => request(`/claim-documents/awaiting${qs(params)}`),
   claimChecklist: (claimRef) => request(`/claim-documents/claims/${id(claimRef)}`),

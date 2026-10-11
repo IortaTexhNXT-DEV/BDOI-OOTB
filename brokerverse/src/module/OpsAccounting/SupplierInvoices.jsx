@@ -16,9 +16,11 @@ import DetailDialog from "../../components/DetailDialog";
 import DetailHeader from "../../components/DetailHeader";
 import DetailSection from "../../components/DetailSection";
 import KeyValueGrid from "../../components/KeyValueGrid";
-import ApprovalActions from "../../components/ApprovalActions";
+import ApprovalActions, { useMakerChecker } from "../../components/ApprovalActions";
+import EligibilityNote from "../../components/EligibilityNote";
 import { RecordActivityLog } from "../../components/ActivityLog";
 import { printPdf } from "../../components/Print";
+import { formatInstant } from "../../utility/dateFormat";
 import { Field, OpsTag, PageHeader, blank, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 
 const STATUSES = ["all", "draft", "for-approval", "open", "approved", "partially-paid", "paid", "rejected", "cancelled"];
@@ -40,6 +42,7 @@ const SupplierInvoices = () => {
   const [classes, setClasses] = useState([]);
   const [form, setForm] = useState(null);
   const [view, setView] = useState(null);
+  const checker = useMakerChecker({ id: view?.createdById });
   const { errors, check, fromApi, clear } = useFieldErrors();
   const openForm = (value) => { clear(); setForm(value); };
 
@@ -142,25 +145,26 @@ const SupplierInvoices = () => {
             {["draft", "rejected", "for-approval", "approved"].includes(view.status) && (
               <Button label={t("opsAcc.confirmations.invoice.cancel")} text severity="danger" onClick={() => decide("cancel")} />
             )}
-            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
             <Button label={t("opsAcc.print")} icon="pi pi-print" outlined onClick={() => print(view)} />
             {["draft", "rejected"].includes(view.status) && <Button label={t("opsAcc.confirmations.invoice.submit")} icon="pi pi-send" onClick={() => decide("submit")} />}
-            {view.status === "for-approval" && (
+            {view.status === "for-approval" && !checker.blocked && (
               <ApprovalActions initiator={{ id: view.createdById }} approveLabel={t("opsAcc.confirmations.invoice.approve")} rejectLabel={t("opsAcc.confirmations.invoice.reject")}
                 onApprove={() => decide("approve")} onReject={() => decide("reject")} />
             )}
+            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
           </>
         )}>
         {view && (
           <>
+            {/* the header names the invoice; the decision sits with the other actions in the footer, the figures in Amounts */}
             <DetailHeader title={view.voucherNumber} subtitle={view.supplierName} status={{ code: view.status, label: t(`opsAcc.status.${view.status}`, { defaultValue: view.status }) }}
               meta={[
                 { label: t("opsAcc.ap.supplierInvoice"), value: view.supplierInvoiceNo },
                 { label: t("opsAcc.ap.invoiceDate"), value: view.invoiceDate, type: "date" },
                 { label: t("opsAcc.ap.dueDate"), value: view.dueDate, type: "date" },
-                { label: t("opsAcc.ap.payable"), value: view.payableAmount, type: "amount" },
-                { label: t("opsAcc.ap.balance"), value: view.balance, type: "amount" },
               ]} />
+            {/* the maker sees why the decision is not theirs here, so the footer keeps its actions on one line */}
+            {view.status === "for-approval" && checker.blocked && <EligibilityNote reason={checker.reason} className="mb-3" />}
             {view.status === "rejected" && view.rejectReason && <p className="pe-error">{t("opsAcc.confirmations.rejectedBecause", { reason: view.rejectReason })}</p>}
             {view.status === "cancelled" && view.cancelReason && <p className="pe-error">{t("opsAcc.confirmations.cancelledBecause", { reason: view.cancelReason })}</p>}
             <DetailSection title={t("opsAcc.confirmations.amounts")}>
@@ -170,10 +174,10 @@ const SupplierInvoices = () => {
                 { label: t("opsAcc.ap.gross"), value: view.grossAmount, type: "amount" },
                 { label: view.ewtCode ? `${t("opsAcc.ap.ewt")} (${view.ewtCode} ${view.ewtRate}%)` : t("opsAcc.ap.ewt"), value: view.ewtAmount, type: "amount" },
                 { label: t("opsAcc.ap.payable"), value: view.payableAmount, type: "amount" },
+                { label: t("opsAcc.ap.balance"), value: view.balance, type: "amount" },
                 { label: t("opsAcc.confirmations.journal"), value: view.journalNumber },
                 { label: t("opsAcc.confirmations.preparedBy"), value: view.createdBy },
-                { label: t("opsAcc.confirmations.approvedBy"), value: view.approvedBy },
-                { label: t("opsAcc.confirmations.approvedAt"), value: view.approvedAt, type: "datetime" },
+                { label: t("opsAcc.confirmations.approvedBy"), value: view.approvedBy ? `${view.approvedBy} · ${formatInstant(view.approvedAt)}` : null },
                 { label: t("opsAcc.description"), value: view.description, span: "full", hidden: !view.description },
               ]} />
             </DetailSection>

@@ -1,6 +1,6 @@
 .referrer-accounts-page {
   padding: 1.5rem 2rem 2.5rem;
-  background: #f7f8fa;
+  background: var(--color-surface-muted);
   min-height: 100%;
 
   .page-header {
@@ -10,7 +10,7 @@
       margin: 0 0 0.5rem;
       font-size: 1.75rem;
       font-weight: 700;
-      color: #1a202c;
+      color: var(--color-heading);
     }
 
     .page-desc {
@@ -18,13 +18,13 @@
       max-width: 920px;
       font-size: 0.9rem;
       line-height: 1.55;
-      color: #718096;
+      color: var(--color-text-muted);
     }
   }
 
   .referrer-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--bv-primary-050);
     border-radius: 12px;
     padding: 1rem 1.25rem 0.5rem;
   }
@@ -43,7 +43,7 @@
       .search-input {
         width: 100%;
         border-radius: 8px;
-        border: 1px solid #cbd5e0;
+        border: 1px solid var(--bv-primary);
       }
     }
 
@@ -52,15 +52,15 @@
       flex-wrap: wrap;
       gap: 1.5rem;
       font-size: 0.9rem;
-      color: #718096;
+      color: var(--color-text-muted);
 
       .due {
-        color: #e53e3e;
+        color: var(--color-danger);
         font-weight: 700;
       }
 
       .ready {
-        color: #1a202c;
+        color: var(--color-heading);
         font-weight: 700;
       }
     }
@@ -69,28 +69,28 @@
   .referrer-table {
     .p-datatable-thead > tr > th {
       background: transparent;
-      color: #718096;
+      color: var(--color-text-muted);
       font-size: 0.7rem;
       letter-spacing: 0.04em;
       font-weight: 600;
-      border-color: #e2e8f0;
+      border-color: var(--bv-primary-050);
       padding: 0.75rem 0.85rem;
     }
 
     .p-datatable-tbody > tr > td {
-      border-color: #e2e8f0;
+      border-color: var(--bv-primary-050);
       padding: 0.95rem 0.85rem;
-      color: #4a5568;
+      color: var(--color-heading);
       font-size: 0.9rem;
     }
 
     .name-cell {
-      color: #1a202c;
+      color: var(--color-heading);
       font-weight: 700;
     }
 
     .net-payable {
-      color: #e53e3e;
+      color: var(--color-danger);
       font-weight: 600;
     }
 
@@ -98,7 +98,7 @@
       cursor: pointer;
 
       &:hover {
-        background: #f7fafc !important;
+        background: var(--bv-primary-050) !important;
       }
     }
   }
@@ -111,13 +111,13 @@
     font-weight: 600;
 
     &.active {
-      background: #c6f6d5;
-      color: #22543d;
+      background: var(--color-success);
+      color: var(--color-success);
     }
 
     &.on-hold {
-      background: #edf2f7;
-      color: #4a5568;
+      background: var(--bv-primary-050);
+      color: var(--color-heading);
     }
   }
 }

@@ -18,7 +18,7 @@ import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { kpiOriginWhere, originOf, originParam, originWhere, withoutOriginFields } from '../src/lib/origin.js';
-import { goLiveSetup, validatedBatch } from './helpers.js';
+import { enableFeatures, goLiveSetup, validatedBatch } from './helpers.js';
 
 const MIGRATION_0440 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/db/migrations/0440_migration_origin.sql');
 
@@ -44,6 +44,7 @@ beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   app = await createApp();
+  await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
   admin = (await one("SELECT id, display_name FROM users WHERE username = 'BrokerVerse'"));

@@ -139,11 +139,19 @@ describe('commission debit note', () => {
     // the item is billed: not offered again, and cannot be put on a second note
     expect((await ctx.as('maker')('get', '/remittance/direct-bill/policies?insurerCode=FPG')).body.data.some((x) => x.id === item.id)).toBe(false);
     expect((await ctx.as('maker')('post', '/remittance/direct-bill').send({ insurerCode: 'FPG', itemIds: [item.id] })).status).toBe(400);
-    // maker-checker
+    // maker-checker: the maker reads why instead of Approve and Reject, the checker may decide
+    const decision = async (who) => (await ctx.as(who)('get', `/remittance/direct-bill/${raised.body.data.id}`)).body.data.decision;
+    expect(await decision('maker')).toEqual({ canDecide: false, blockedCode: 'MAKER', blockedReason: `You raised ${raised.body.data.dnNumber}. Another user must approve it.` });
+    expect(await decision('checker')).toEqual({ canDecide: true, blockedCode: null, blockedReason: null });
+    const listed = (await ctx.as('maker')('get', '/remittance/direct-bill?insurerCode=FPG')).body.data.find((x) => x.id === raised.body.data.id);
+    expect(listed.decision.blockedCode).toBe('MAKER');
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${raised.body.data.id}/approve`).send({})).status).toBe(403);
     expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({})).status).toBe(400);
-    const rej = await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reason: 'Wrong period' });
-    expect(rej.body.data).toMatchObject({ statusCode: 'rejected', rejectionReason: 'Wrong period' });
+    // a coded reason must be one of billing_reject, with the note it asks for
+    expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'RRJ-AMOUNT' })).status).toBe(400);
+    expect((await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'BRJ-OTHER' })).status).toBe(400);
+    const rej = await ctx.as('checker')('post', `/remittance/direct-bill/${raised.body.data.id}/reject`).send({ reasonCode: 'BRJ-AMOUNT', note: 'Wrong period' });
+    expect(rej.body.data).toMatchObject({ statusCode: 'rejected', rejectionReason: 'Amount to be corrected: Wrong period' });
     expect((await ctx.as('maker')('get', '/remittance/direct-bill/policies?insurerCode=FPG')).body.data.some((x) => x.id === item.id)).toBe(true);
     // raise again as a draft, submit, approve
     const again = await ctx.as('maker')('post', '/remittance/direct-bill').send({ insurerCode: 'FPG', itemIds: [item.id], dnDate: '2026-02-01' });
@@ -154,6 +162,7 @@ describe('commission debit note', () => {
     const ap = await ctx.as('checker')('post', `/remittance/direct-bill/${again.body.data.id}/approve`).send({ remarks: 'Checked' });
     expect(ap.status).toBe(200);
     expect(ap.body.data).toMatchObject({ statusCode: 'open', status: 'Open' });
+    expect((await ctx.as('checker')('get', `/remittance/direct-bill/${again.body.data.id}`)).body.data.decision).toMatchObject({ canDecide: false, blockedCode: 'WRONG_STATUS' });
     expect((await query('SELECT count(*)::int AS n FROM journal_vouchers')).rows[0].n).toBe(journals);
     dn = ap.body.data;
     const list = await ctx.as('maker')('get', '/remittance/direct-bill?status=Open&insurerCode=FPG');
@@ -246,7 +255,7 @@ describe('billing mode change', () => {
 
   it('refuses the change once premium was collected or the commission is on a debit note', async () => {
     const b = await issue({ billingMode: 'broker', insurer: 'STANDARD', net: 1000, gross: 1252.5 });
-    const pay = await ctx.as('maker')('post', `/policies/${b.policyId}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-1', amount: 500, paymentDate: '2026-01-05' });
+    const pay = await ctx.as('maker')('post', `/policies/${b.policyId}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-1', amount: 500, paymentDate: '2026-01-05', proofKey: 'payment-proofs/slip.jpg' });
     expect(pay.status).toBe(201);
     expect((await ctx.as('maker')('post', '/remittance/direct-bill/billing-mode').send({ policyNumber: b.policy.policy_number, billingMode: 'direct' })).status).toBe(409);
     const dnPol = (await query('SELECT policy_id FROM direct_bill_items WHERE debit_note_id IS NOT NULL LIMIT 1')).rows[0];

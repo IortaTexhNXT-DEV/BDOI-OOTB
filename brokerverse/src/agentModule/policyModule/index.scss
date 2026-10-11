@@ -554,3 +554,22 @@
     }
   }
 }
+
+// Create Policy (a choice of line of business) reads as the page's primary action, beside Bulk Upload
+.p-dropdown.policies-create-dropdown {
+  min-height: 40px;
+  border-color: var(--bv-primary);
+  background: var(--bv-primary);
+  border-radius: var(--bv-radius-sm, 8px);
+
+  .p-dropdown-label,
+  .p-dropdown-label.p-placeholder {
+    color: var(--bv-primary-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .p-dropdown-trigger svg path {
+    fill: var(--bv-primary-text);
+  }
+}

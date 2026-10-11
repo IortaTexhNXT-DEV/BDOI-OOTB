@@ -12,7 +12,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgIconeye from "../../assets/icons/SvgIconeye";
+import RowActions, { actionsColumn } from "../../components/RowActions";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import DropDowns from "../../components/DropDowns";
@@ -41,6 +41,7 @@ const Index = () => {
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [code, setCode] = useState("");
   const [codeTo, setCodeTo] = useState("");
+  const [bulkErrors, setBulkErrors] = useState({});
   // Set dateFrom to yesterday (t-1 day) and dateTo to today
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -77,16 +78,7 @@ const Index = () => {
       payload: disbursementId,
     });
 
-    // A voucher still being prepared (agent payout lines, or an insurer voucher raised by a settlement)
-    // opens its invoice list so the cheque / payout can be raised and approved
-    const status = String(columnData?.status || "").toLowerCase();
-    const inPreparation =
-      ["draft", "for-approval"].includes(status) &&
-      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId || columnData?.payeeType === "Insurer");
-    if (inPreparation) {
-      navigate(`/accounts/paymentvoucher/invoicelist/${disbursementId}`);
-      return;
-    }
+    // the voucher's own page: lines, figures, payments and activity; a draft offers there to issue its payment
     navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`);
   };
 
@@ -99,16 +91,11 @@ const Index = () => {
     }));
   };
 
+  // the required fields are marked; an empty one is named under its field rather than in a toast
   const handleBulkPrint = async () => {
-    if (!code || !dateFrom || !dateTo) {
-      toast.current?.show({
-        severity: "warn",
-        summary: t("common.error"),
-        detail: t("paymentVoucher.fillRequiredFields"),
-        life: 4000,
-      });
-      return;
-    }
+    const missing = { code: !code, dateFrom: !dateFrom, dateTo: !dateTo };
+    setBulkErrors(missing);
+    if (Object.values(missing).some(Boolean)) return;
 
     // Force string conversion to ensure we always get a string value
     let customerCodeString;
@@ -140,6 +127,7 @@ const Index = () => {
     const filters = {
       customerCodeFrom: customerCodeString,
       customerCodeTo: customerCodeToString,
+      // the local calendar day chosen (toISOString would move Manila midnight to the previous UTC day)
       createdAtFrom: toIsoDate(dateFrom),
       createdAtTo: toIsoDate(dateTo),
     };
@@ -386,6 +374,7 @@ const Index = () => {
     navigate("/accounts/paymentvoucher/createvoucher");
   };
   const handleModal = (rowData) => {
+    setBulkErrors({});
     setVisiblePopup(true);
   };
 
@@ -539,7 +528,7 @@ const Index = () => {
                   ? paymentVocherFilterList
                   : paymentVocherList
               }
-              tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+              tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
               rowClassName={(row) =>
                 recorded && ((recorded.disbursementId && (row.id || row.disbursementId) === recorded.disbursementId) || (recorded.voucherNumber && row.VoucherNumber === recorded.voucherNumber))
                   ? "voucher-row--recorded"
@@ -627,14 +616,10 @@ const Index = () => {
                 }
               ></Column>
               <Column
-                body={(columnData) => (
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                )}
+                body={(columnData) => <RowActions onView={() => handleView(columnData)} viewLabel={t("common.view")} />}
                 header={t("paymentVoucher.action")}
-                style={{ textAlign: "center", width: "5rem" }}
-                headerStyle={headerStyle}
-                className="fieldvalue_container"
-              ></Column>
+                {...actionsColumn}
+              />
             </DataTable>
           </div>
         </div>
@@ -650,7 +635,7 @@ const Index = () => {
           footer={(
             <>
               <Button type="button" label={t("common.cancel")} text onClick={() => setVisiblePopup(false)} />
-              <Button type="button" icon="pi pi-print" label={t("paymentVoucher.generate")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
+              <Button type="button" icon="pi pi-print" label={t("paymentVoucher.printVouchers")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
             </>
           )}
         >
@@ -659,14 +644,16 @@ const Index = () => {
             <div className="col-12 md:col-6 lg:col-6">
               <DropDowns
                 value={code}
-                onChange={(e) => setCode(e.value)}
+                onChange={(e) => { setCode(e.value); setBulkErrors((x) => ({ ...x, code: false })); }}
                 className="dropdown__container"
                 label={t("paymentVoucher.customerCodeFrom")}
+                required
+                error={bulkErrors.code ? t("paymentVoucher.customerCodeFromRequired") : null}
                 options={getCustomerCodeOptions()}
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -680,7 +667,7 @@ const Index = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -689,32 +676,30 @@ const Index = () => {
           {/* Date From and Date To */}
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("paymentVoucher.dateFrom")}
+              <LabelWrapper label={t("paymentVoucher.dateFrom")} required>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("paymentVoucher.dateTo")}
+              <LabelWrapper label={t("paymentVoucher.dateTo")} required>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
           </div>
 

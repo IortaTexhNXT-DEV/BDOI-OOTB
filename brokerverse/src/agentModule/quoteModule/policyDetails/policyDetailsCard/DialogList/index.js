@@ -10,12 +10,16 @@ import useInsuranceCompanyOptions from "../../../../component/useInsuranceCompan
 import { useDispatch, useSelector } from "react-redux";
 import { postModleDetailsMiddleware } from '../../store/policyDetailsMiddleware'
 import { useFormik } from 'formik';
+import { useFeature } from "../../../../../features/Feature";
 
 const DialogList = ({ setVisible, visible }) => {
   const { t } = useTranslation();
   // Participants from the Insurance Company master; currencies from the Currency master (default: display currency)
   const InsurancePolicycontainer = useInsuranceCompanyOptions();
-  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const allCurrencies = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  // a premium in another currency than the display one is a future-release feature (features/entitlements.js)
+  const multiCurrency = useFeature("multi-currency").on;
+  const currencyOptions = multiCurrency ? allCurrencies : allCurrencies.filter((o) => o.code === getDisplayCurrencyConfig().currency);
   const pesoTypes = currencyOptions;
   const PremiumCurrency = currencyOptions;
 

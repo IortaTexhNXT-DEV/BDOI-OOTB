@@ -20,6 +20,8 @@ import './index.scss';
 
 const LeadDetail = () => {
   const { t } = useTranslation();
+  // a fact's label as the other detail views show it: no trailing colon
+  const label = (key, fallback) => t(key, fallback).replace(/\s*:\s*$/, "");
   const { leadId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -185,53 +187,48 @@ const LeadDetail = () => {
           <Card className="detail-card">
             <h3>{t('leadDetail.personalInformation')}</h3>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.leadIdLabel')}</span>
+              <span className="label">{label('leadDetail.leadIdLabel')}</span>
               <span className="value">{currentLeadDetails.generatedLeadId || currentLeadDetails.leadId || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.category')}</span>
+              <span className="label">{label('leadDetail.category')}</span>
               <span className="value">{currentLeadDetails.leadCategory || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('productPicker.lineAndProduct')}</span>
+              <span className="label">{label('productPicker.lineAndProduct')}</span>
               <span className="value">
                 {currentLeadDetails.lob
-                  ? [currentLeadDetails.lob, currentLeadDetails.productName || currentLeadDetails.productType].filter(Boolean).join(' - ')
+                  ? [...new Set([currentLeadDetails.lob, currentLeadDetails.productName || currentLeadDetails.productType].filter(Boolean)
+                    .map((v) => String(v).trim()).map((v, i, all) => (all.findIndex((x) => x.toLowerCase() === v.toLowerCase()) === i ? v : null)).filter(Boolean))].join(' · ')
                   : t('productPicker.untagged')}
               </span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.firstName')}</span>
+              <span className="label">{label('leadDetail.firstName')}</span>
               <span className="value">{currentLeadDetails.firstName || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.lastName')}</span>
+              <span className="label">{label('leadDetail.lastName')}</span>
               <span className="value">{currentLeadDetails.lastName || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.preferredName')}</span>
+              <span className="label">{label('leadDetail.preferredName')}</span>
               <span className="value">{currentLeadDetails.preferredName || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.dateOfBirth')}</span>
+              <span className="label">{label('leadDetail.dateOfBirth')}</span>
               <span className="value">{formatDate(currentLeadDetails.DOB)}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.gender')}</span>
+              <span className="label">{label('leadDetail.gender')}</span>
               <span className="value">{currentLeadDetails.gender || t('policyDetail.nA')}</span>
             </div>
-          </Card>
-        </div>
-
-        <div className="col-12 md:col-6">
-          <Card className="detail-card">
-            <h3>{t('leadDetail.contactInformation')}</h3>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.email')}</span>
+              <span className="label">{label('leadDetail.email')}</span>
               <span className="value">{currentLeadDetails.emailId || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.contactNumber')}</span>
+              <span className="label">{label('leadDetail.contactNumber')}</span>
               <span className="value">{currentLeadDetails.contactNumber || t('policyDetail.nA')}</span>
             </div>
           </Card>
@@ -241,35 +238,35 @@ const LeadDetail = () => {
           <Card className="detail-card">
             <h3>{t('leadDetail.addressInformation')}</h3>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.houseNo')}</span>
+              <span className="label">{label('leadDetail.houseNo')}</span>
               <span className="value">{currentLeadDetails.houseNo || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('address.street')}</span>
+              <span className="label">{label('address.street')}</span>
               <span className="value">{currentLeadDetails.street || currentLeadDetails.roadThanon || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.barangay')}</span>
+              <span className="label">{label('leadDetail.barangay')}</span>
               <span className="value">{currentLeadDetails.barangay || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.city')}</span>
+              <span className="label">{label('leadDetail.city')}</span>
               <span className="value">{currentLeadDetails.city || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.province')}</span>
+              <span className="label">{label('leadDetail.province')}</span>
               <span className="value">{currentLeadDetails.province || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('address.region')}</span>
+              <span className="label">{label('address.region')}</span>
               <span className="value">{currentLeadDetails.region || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.country')}</span>
+              <span className="label">{label('leadDetail.country')}</span>
               <span className="value">{currentLeadDetails.country || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
-              <span className="label">{t('leadDetail.zipCode')}</span>
+              <span className="label">{label('leadDetail.zipCode')}</span>
               <span className="value">{currentLeadDetails.zipCode || t('policyDetail.nA')}</span>
             </div>
           </Card>
@@ -280,11 +277,11 @@ const LeadDetail = () => {
             <Card className="detail-card">
               <h3>{t('leadDetail.companyInformation')}</h3>
               <div className="detail-row">
-                <span className="label">{t('leadDetail.companyName')}</span>
+                <span className="label">{label('leadDetail.companyName')}</span>
                 <span className="value">{currentLeadDetails.companyName || t('policyDetail.nA')}</span>
               </div>
               <div className="detail-row">
-                <span className="label">{t('leadDetail.taxInfoNumber')}</span>
+                <span className="label">{label('leadDetail.taxInfoNumber')}</span>
                 <span className="value">{currentLeadDetails.taxInformationNumber || t('policyDetail.nA')}</span>
               </div>
             </Card>
@@ -295,15 +292,15 @@ const LeadDetail = () => {
             <Card className="detail-card">
               <h3>{t('leadDetail.systemInformation')}</h3>
               <div className="detail-row">
-                <span className="label">{t('leadDetail.createdDate')}</span>
+                <span className="label">{label('leadDetail.createdDate')}</span>
                 <span className="value">{formatInstant(currentLeadDetails.createdAt, { empty: t('policyDetail.nA') })}</span>
               </div>
               <div className="detail-row">
-                <span className="label">{t('leadDetail.lastUpdated')}</span>
+                <span className="label">{label('leadDetail.lastUpdated')}</span>
                 <span className="value">{formatInstant(currentLeadDetails.updatedAt, { empty: t('policyDetail.nA') })}</span>
               </div>
               <div className="detail-row">
-                <span className="label">{t('leadDetail.numberOfQuotes')}</span>
+                <span className="label">{label('leadDetail.numberOfQuotes')}</span>
                 <span className="value">{currentLeadDetails.quotationsCount || '0'}</span>
               </div>
             </Card>

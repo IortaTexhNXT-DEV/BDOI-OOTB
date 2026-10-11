@@ -50,6 +50,11 @@ const ACTION_KEYS = {
   adjust: "adjust", adjusted: "adjust",
   "sign-off": "signOff", signoff: "signOff",
   collect: "collect", collection: "collect",
+  revoke: "revoke", revoked: "revoke",
+  // the steps of a remittance (Accounts > Remittance) and the codes of its earlier releases
+  "exclude-line": "excludeLine", "include-line": "includeLine", "raise-voucher": "raiseVoucher", "in-payment": "inPayment",
+  "payment-failed": "paymentFailed", "send-advice": "sendAdvice", "record-confirmation": "recordConfirmation",
+  "create-agency-bill": "createAgencyBill", "send-bill": "sendBill",
   status: "status", "status-change": "status",
   note: "note", call: "call", email: "email", commitment: "commitment",
   // Data Migration & Go-Live: loads, undo, reconciliation, checklist, Go / No-Go and the go-live lock
@@ -63,11 +68,13 @@ const ACTION_KEYS = {
 };
 
 const TONES = {
-  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect", "load", "migrate", "accept"],
-  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch", "undo", "refused", "block"],
+  positive: ["create", "approve", "post", "settle", "complete", "issue", "activate", "pay", "resolve", "match", "generate", "collect", "includeLine",
+    "raiseVoucher", "recordConfirmation", "createAgencyBill", "load", "migrate", "accept"],
+  negative: ["reject", "return", "cancel", "void", "delete", "reverse", "fail", "deactivate", "withdraw", "unmatch", "revoke", "excludeLine", "paymentFailed",
+    "undo", "refused", "block"],
   status: ["submit", "send", "acknowledge", "process", "assign", "reassign", "delegate", "escalate", "close", "reopen", "status", "signOff",
     "validate", "undoRequest", "request", "relock", "explain", "start", "skip", "waive", "openVoting", "vote",
-    "assignAuto", "assignQueued", "assignManual", "assignBulk", "assignTaken"],
+    "assignAuto", "assignQueued", "assignManual", "assignBulk", "assignTaken", "inPayment", "sendAdvice", "sendBill"],
 };
 
 const norm = (code) => String(code ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");

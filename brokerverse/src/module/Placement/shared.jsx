@@ -13,6 +13,7 @@ import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
 import { statusSeverity as sharedSeverity } from "../../utils/statusSeverity";
+import { useFeature } from "../../features/Feature";
 
 export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 export const formatDate = (d) => formatConfiguredDate(d, { empty: "-" });
@@ -78,6 +79,8 @@ export const participantProblem = (parts, t) => {
 export const ParticipantEditor = ({ value, onChange, insurers, totals = {}, showReference = false, disabled = false }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  // co-insurance (several insurers on one risk) is a future-release feature: one insurer per client
+  const coinsurance = useFeature("coinsurance").on;
   const parts = useMemo(() => value || [], [value]);
   const preview = useMemo(() => splitPreview(parts, { sumInsured: totals.sumInsured, premium: totals.netPremium, premiumTotal: totals.grossPremium, commissionAmount: totals.commissionAmount }), [parts, totals]);
   const total = shareTotal(parts);
@@ -131,7 +134,7 @@ export const ParticipantEditor = ({ value, onChange, insurers, totals = {}, show
         </tbody>
         <tfoot>
           <tr>
-            <td>{!disabled && <Button label={t("placement.participants.add")} icon="pi pi-plus" text onClick={add} />}</td>
+            <td>{!disabled && (coinsurance || !parts.length) && <Button label={t("placement.participants.add")} icon="pi pi-plus" text onClick={add} />}</td>
             <td className="num"><strong className={problem ? "total-bad" : "total-ok"}>{Number(total.toFixed(4))}%</strong></td>
             <td colSpan={showReference ? 7 : 6}>
               {problem ? <span className="total-bad"><i className="pi pi-exclamation-triangle mr-1" />{problem}</span>
@@ -181,7 +184,11 @@ export const ParticipantsTable = ({ participants, currency, actions }) => {
   );
 };
 
-/** Journey steps Broker Slip -> Quotation Slip -> Placement Slip -> Policy with links to each document. */
+/**
+ * Journey steps Broker Slip -> Quotation Slip -> Placement Slip -> Policy with links to each document.
+ * Each step: { key, done, stopped, current, mode ("required" | "optional" | "skip"), reference, id, at, label }.
+ * A stopped step (a rejected quotation) ends the journey there: its marker is a cross and no connector runs on from it.
+ */
 export const JourneyTimeline = ({ steps }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -190,14 +197,14 @@ export const JourneyTimeline = ({ steps }) => {
   return (
     <ol className="journey-timeline" aria-label={t("placement.journey.title")}>
       {steps.map((s, i) => {
-        const state = s.done ? "done" : s.mode === "skip" ? "skipped" : s.current ? "current" : "todo";
+        const state = s.stopped ? "stopped" : s.done ? "done" : s.mode === "skip" ? "skipped" : s.current ? "current" : "todo";
         const to = s.id && link[s.key] ? link[s.key](s.id) : null;
         return (
           <li key={s.key} className={`journey-step ${state}`}>
-            <span className="journey-marker">{s.done ? <i className="pi pi-check" /> : i + 1}</span>
+            <span className="journey-marker">{state === "stopped" ? <i className="pi pi-times" /> : s.done ? <i className="pi pi-check" /> : i + 1}</span>
             <div className="journey-body">
-              <div className="journey-label">{t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}</div>
-              {s.reference ? (to ? <button type="button" className="journey-link" onClick={() => navigate(to)}>{s.reference}</button> : <span className="journey-ref">{s.reference}</span>)
+              <div className="journey-label" title={t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}>{t(`placement.journey.steps.${s.key}`, { defaultValue: s.label })}</div>
+              {s.reference ? (to ? <button type="button" className="journey-link" onClick={() => navigate(to)}>{s.reference}</button> : <span className="journey-ref" title={s.reference}>{s.reference}</span>)
                 : <span className="journey-ref muted">{s.mode && s.mode !== "required" && !s.done ? t(`placement.journey.mode.${s.mode}`) : s.done ? formatDate(s.at) : "-"}</span>}
             </div>
           </li>
@@ -300,12 +307,13 @@ export const RiskDetailsEditor = ({ value, onChange }) => {
   );
 };
 
-export const PageHeader = ({ title, subtitle, children, onBack }) => (
+/** Page title with an optional back button; `status` (a status pill) sits beside the title, `children` are the actions. */
+export const PageHeader = ({ title, subtitle, status, children, onBack }) => (
   <div className="placement-header">
     <div className="placement-header-text">
       {onBack && <Button icon="pi pi-arrow-left" text rounded onClick={onBack} className="mr-2" aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />}
       <div>
-        <h2>{title}</h2>
+        <div className="placement-header-title"><h2>{title}</h2>{status}</div>
         {subtitle && <p className="subtitle">{subtitle}</p>}
       </div>
     </div>
@@ -313,8 +321,9 @@ export const PageHeader = ({ title, subtitle, children, onBack }) => (
   </div>
 );
 
-export const Field = ({ label, children }) => (
-  <div className="placement-field">
+/** A label and its value on one line; `wide` puts a long text (remarks, a reason) under its label across the grid. */
+export const Field = ({ label, children, wide = false }) => (
+  <div className={wide ? "placement-field placement-field--wide" : "placement-field"}>
     <span className="placement-field-label">{label}</span>
     <span className="placement-field-value">{children ?? "-"}</span>
   </div>

@@ -16,7 +16,7 @@ import { addDays, today } from '../src/lib/dates.js';
 import { cocClash, cocCollisions, collidingNumber, collidingNumbers, seriesClash, seriesShapes } from '../src/modules/data-load/numbering.js';
 import { registerForPolicy } from '../src/modules/integrations/ctpl.js';
 import { findPolicy } from '../src/modules/receipts/receivables.js';
-import { goLiveSetup, validatedBatch } from './helpers.js';
+import { enableFeatures, goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -41,6 +41,7 @@ beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   const app = await createApp();
+  await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
   kits = (await api('get', '/data-load/kits')).body.data.kits;

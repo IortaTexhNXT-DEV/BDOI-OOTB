@@ -142,7 +142,7 @@ const RequestForm = ({ action }) => {
                 classNames="input__filed"
                 label={t("pettyCash.transactionCode")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
               />
@@ -152,7 +152,7 @@ const RequestForm = ({ action }) => {
                 classNames="input__filed"
                 label={t("pettyCash.transactionNumber")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.TransactionNumber}
@@ -184,7 +184,7 @@ const RequestForm = ({ action }) => {
                 className="input__filed"
                 label={t("pettyCash.requesterName")}
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -204,7 +204,7 @@ const RequestForm = ({ action }) => {
                 className="input__filed"
                 label={t("pettyCash.pettyCashCode")}
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -298,7 +298,7 @@ const RequestForm = ({ action }) => {
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.totalAmount")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
               />
@@ -328,7 +328,7 @@ const RequestForm = ({ action }) => {
         style={{ width: "50vw" }}
         onHide={() => setVisible(false)}
         headerStyle={{
-          color: "#343434",
+          color: "var(--text-color)",
           fontFamily: "Nunito, Arial, sans-serif",
           fontSize: 16,
           fontWeight: 500,
@@ -343,7 +343,7 @@ const RequestForm = ({ action }) => {
                 classNames="fielduniqueone__container"
                 label={t("pettyCash.narration")}
                 placeholder={t("pettyCash.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Narration}
@@ -356,7 +356,7 @@ const RequestForm = ({ action }) => {
                 classNames="fielduniqueone__container"
                 label={t("pettyCash.amount")}
                 placeholder={t("pettyCash.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Amount}

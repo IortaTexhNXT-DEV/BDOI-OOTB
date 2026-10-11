@@ -1,7 +1,7 @@
 @import "../../../theme/bdoi/tokens";
 .referrer-detail-page {
   padding: 1.5rem 2rem 2.5rem;
-  background: #f7f8fa;
+  background: var(--color-bg);
   min-height: 100%;
 
   .back-btn {
@@ -10,7 +10,7 @@
   }
 
   .loading-msg {
-    color: #718096;
+    color: var(--color-text-muted);
   }
 
   .identity {
@@ -27,20 +27,20 @@
       border-radius: 6px;
       font-size: 0.72rem;
       font-weight: 600;
-      background: #edf2f7;
-      color: #4a5568;
+      background: var(--color-surface-muted);
+      color: var(--color-text-muted);
     }
 
     h1 {
       margin: 0 0 0.35rem;
       font-size: 1.85rem;
       font-weight: 700;
-      color: #1a202c;
+      color: var(--color-heading);
     }
 
     .meta {
       margin: 0;
-      color: #718096;
+      color: var(--color-text-muted);
       font-size: 0.9rem;
     }
 
@@ -52,7 +52,7 @@
       margin-top: 0.85rem;
       font-size: 0.875rem;
       font-weight: 600;
-      color: #1a202c;
+      color: var(--color-heading);
       cursor: pointer;
     }
   }
@@ -68,8 +68,8 @@
     }
 
     .summary-card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 1rem 1.15rem;
       display: flex;
@@ -77,29 +77,29 @@
       gap: 0.35rem;
 
       .label {
-        color: #718096;
+        color: var(--color-text-muted);
         font-size: 0.85rem;
       }
 
       .value {
         font-size: 1.35rem;
         font-weight: 700;
-        color: #1a202c;
+        color: var(--color-heading);
 
         &.due {
-          color: #e53e3e;
+          color: var(--color-danger);
         }
 
         &.paid {
-          color: #16a34a;
+          color: var(--color-success);
         }
       }
     }
   }
 
   .cycle-section {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1rem 1.15rem 0.75rem;
     margin-bottom: 1rem;
@@ -127,15 +127,15 @@
     }
 
     &.current .section-head h2 {
-      color: #d69e2e;
+      color: var(--color-warning);
     }
 
     &.future .section-head h2 {
-      color: #718096;
+      color: var(--color-text-muted);
     }
 
     &.past .section-head h2 {
-      color: #16a34a;
+      color: var(--color-success);
     }
 
     // one filled action (generate payout); approve and mark are outlined
@@ -149,11 +149,11 @@
     .payout-btn {
       background: $brand-blue !important;
       border-color: $brand-blue !important;
-      color: #fff !important;
+      color: var(--color-surface) !important;
     }
 
     .empty-past {
-      color: #718096;
+      color: var(--color-text-muted);
       font-size: 0.9rem;
       padding: 0.5rem 0 0.75rem;
       margin: 0;
@@ -162,18 +162,18 @@
 
   .cycle-table {
     .p-datatable-thead > tr > th {
-      background: #f7fafc;
-      color: #4a5568;
+      background: var(--color-surface-muted);
+      color: var(--color-text-muted);
       font-size: 0.68rem;
       letter-spacing: 0.04em;
       font-weight: 700;
-      border-color: #e2e8f0;
+      border-color: var(--color-border);
     }
 
     .p-datatable-tbody > tr > td {
-      border-color: #e2e8f0;
+      border-color: var(--color-border);
       font-size: 0.88rem;
-      color: #2d3748;
+      color: var(--color-text);
       vertical-align: top;
     }
 
@@ -182,19 +182,19 @@
       flex-direction: column;
 
       .comsub-amt {
-        color: #e53e3e;
+        color: var(--color-text);
         font-weight: 600;
       }
 
       .comsub-rate {
-        color: #a0aec0;
+        color: var(--color-text-muted);
         font-size: 0.75rem;
       }
     }
 
     .net-amt {
       font-weight: 700;
-      color: #1a202c;
+      color: var(--color-heading);
     }
   }
 
@@ -202,7 +202,7 @@
     cursor: pointer;
 
     &:hover {
-      background: #f7fafc !important;
+      background: var(--color-surface-muted) !important;
     }
   }
 }
@@ -212,6 +212,13 @@
 
   .p-sidebar-header {
     padding: 1.25rem 1.5rem 0;
+  }
+
+  // a plain close icon, as on the other drawers
+  .p-sidebar-close {
+    border: 0;
+    box-shadow: none;
+    color: var(--color-text-muted);
   }
 
   .p-sidebar-content {
@@ -285,8 +292,14 @@
         font-weight: 600;
         color: var(--color-text-muted);
 
+        // the input fills its 110px box instead of keeping the browser's own width (it ran under Apply rate)
         .p-inputnumber {
           width: 110px;
+        }
+
+        .p-inputnumber-input {
+          width: 100%;
+          min-width: 0;
         }
       }
     }

@@ -35,8 +35,7 @@ const TagProductDialog = ({ lead, visible, onHide, onTagged, forQuote = false })
       onHide={onHide}
       onSelect={save}
       busy={busy}
-      header={forQuote ? t("productPicker.quoteTitle") : t("productPicker.tagTitle", { name })}
-      hint={forQuote ? t("productPicker.quoteHint", { name }) : t("productPicker.tagHint")}
+      header={forQuote ? `${t("productPicker.quoteTitle")} · ${name}` : t("productPicker.tagTitle", { name })}
       confirmLabel={forQuote ? t("productPicker.continue") : t("productPicker.tagProduct")}
       value={lead ? { lob: lead.lob || null, productId: lead.productId ?? null } : null}
     />

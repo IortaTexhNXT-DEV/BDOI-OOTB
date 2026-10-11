@@ -429,7 +429,7 @@ export async function createInsurerRemittance(db, b, user) {
       AND ($4::text[] IS NULL OR p.id = ANY($4)) FOR UPDATE OF a`, filter)).rows;
   if (!apps.length && !coApps.length) throw conflict(`No collected premium awaiting remittance to ${insurer.name}`);
   const d = await createDisbursement(db, { payeeType: 'Insurer', insurerName: insurer.name, transactionCode: b.transactionCode || 'REMT', criteria: 'Payall',
-    transactionDescription: `Premium remittance – ${insurer.name}`, remarks: b.remarks }, user, { source: 'insurer-remittance', status: 'draft' });
+    transactionDescription: `Premium remittance – ${insurer.name}`, remarks: b.remarks, paymentMode: b.paymentMode }, user, { source: 'insurer-remittance', status: 'draft' });
   const byPolicy = new Map();
   for (const a of apps) byPolicy.set(a.policy_id, [...(byPolicy.get(a.policy_id) || []), a]);
   let total = 0;

@@ -21,7 +21,7 @@ export const AttachEvidence = ({ visible, onHide, ownerType, ownerId, title, onA
   return (
     <ImportDialog visible={visible} onHide={onHide} title={title || t("goLive.evidence.attach")} targets={targets} accept={EVIDENCE_TYPES} fileTypes={t("goLive.evidence.fileTypes")}
       fields={{ ownerType, ownerId, note: note.trim() || undefined }} loadLabel={t("goLive.evidence.attach")}
-      steps={[{ id: "evidence-note", label: t("goLive.evidence.note"), control: (
+      steps={[{ key: "evidence-note", label: t("goLive.evidence.note"), node: (
         <InputText id="evidence-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} className="w-full" />
       ) }]}
       onUploaded={() => { setNote(""); onHide(); onAttached(); }} />

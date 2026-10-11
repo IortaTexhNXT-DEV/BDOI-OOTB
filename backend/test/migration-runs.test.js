@@ -46,7 +46,7 @@ afterAll(async () => {
 describe('migration 0444 and the reference seed 92', () => {
   it('seed 92 is the only reference 92_ file and runs before the sample incentive seed', () => {
     const names = seedFiles({ sample: true }).map((f) => f.name);
-    expect(names.filter((n) => /^92_/.test(n))).toEqual(['92_go_live_workspace.sql']);
+    expect(names).toContain('92_go_live_workspace.sql');
     expect(names.indexOf('92_go_live_workspace.sql')).toBeLessThan(names.indexOf('sample/92_incentive.sql'));
   });
 

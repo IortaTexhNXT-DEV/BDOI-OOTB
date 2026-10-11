@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { AutoComplete } from "primereact/autocomplete";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
+import { statusLabel } from "../../utils/statusSeverity";
 import SvgDot from "../../assets/icons/SvgDot";
 import clientService from "../../services/clientService";
 import mastersService from "../../services/mastersService";
@@ -24,7 +25,7 @@ const SEVERITY = {
 export const StatusTag = ({ status }) => {
   const { t } = useTranslation();
   if (!status) return null;
-  return <Tag className="pe-tag" value={t(`distribution.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
+  return <Tag className="pe-tag pe-tag--label" value={t(`distribution.status.${status}`, { defaultValue: statusLabel(status) })} severity={SEVERITY[status] || "info"} />;
 };
 
 /** Page header: title, breadcrumb (`home` > `section` > trail), a one-line purpose and the action buttons. */
@@ -32,7 +33,8 @@ export const PageHeader = ({ home, section, title, trail = [], subtitle, childre
   <div className="pe-header">
     <div>
       <h1 className="pe-title">{title}</h1>
-      <BreadCrumb home={{ label: home }} model={[...(section ? [{ label: section }] : []), ...trail.map((label) => ({ label }))]}
+      {/* the page itself ends the trail when no section or trail is given, so the last separator always leads somewhere */}
+      <BreadCrumb home={{ label: home }} model={[...(section ? [{ label: section }] : []), ...(trail.length ? trail : [title]).map((label) => ({ label }))]}
         separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
       {subtitle && <p className="pe-subtitle">{subtitle}</p>}
     </div>

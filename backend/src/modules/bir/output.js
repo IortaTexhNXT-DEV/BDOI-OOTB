@@ -3,7 +3,7 @@
  * in BIR order, the schedules (per ATC, alphalists, working papers), the reconciliation and the filing record.
  * Also a generic table PDF / workbook for the other BIR outputs.
  */
-import { renderPdf } from '../../lib/pdf/index.js';
+import { formatDate, printFormat, renderPdf } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { DEFAULT_FORMAT, formatDatesIn } from '../../lib/pdf/format.js';
 
@@ -35,26 +35,28 @@ function reconciliationSection(r) {
     rows: r.reconciliation.checks.map((c) => [c.label, c.returnAmount, c.otherAmount, c.difference, c.reconciled ? 'Reconciled' : 'Difference to explain']) } };
 }
 
-function filingSection(r) {
+function filingSection(r, fmt) {
   const f = r.filing;
   if (!f) return { heading: 'Filing record', text: 'Not yet filed.' };
-  return { heading: 'Filing record', rows: [['Date filed', f.dateFiled], ['Filing reference', f.filingReference || '-'], ['Amount paid', f.amountPaid.toFixed(2)],
-    ['Penalties', f.penalties.toFixed(2)], ['Payment date', f.paymentDate || '-'], ['Payment reference', f.paymentReference || '-'], ['Payment channel', f.paymentChannel || '-'],
+  return { heading: 'Filing record', rows: [['Date filed', formatDate(f.dateFiled, fmt)], ['Filing reference', f.filingReference || '-'], ['Amount paid', f.amountPaid.toFixed(2)],
+    ['Penalties', f.penalties.toFixed(2)], ['Payment date', f.paymentDate ? formatDate(f.paymentDate, fmt) : '-'], ['Payment reference', f.paymentReference || '-'], ['Payment channel', f.paymentChannel || '-'],
     ['Amended return', f.amended ? 'Yes' : 'No']], columns: 2 };
 }
 
 /** PDF of a return in the BIR form layout. */
-export function returnPdf(r) {
+export async function returnPdf(r) {
+  const fmt = await printFormat();
+  // the period goes with the dates; the number slot of the header is for document numbers, which a return has not
   return renderPdf({
-    title: `BIR Form No. ${r.form}`, subtitle: r.title, number: r.period.label, orientation: r.schedules.some((s) => s.columns.length > 8) ? 'landscape' : 'portrait',
-    meta: [['Period', `${r.period.from} to ${r.period.to}`], ['Form version', r.formVersion]],
+    title: `BIR Form No. ${r.form}`, subtitle: r.title, orientation: r.schedules.some((s) => s.columns.length > 8) ? 'landscape' : 'portrait',
+    meta: [['Period', `${r.period.label} (${formatDate(r.period.from, fmt)} to ${formatDate(r.period.to, fmt)})`], ['Form version', r.formVersion]],
     footerNote: 'Figures computed by the system from the books of accounts. Transfer them to the eBIRForms / eFPS return; the filed return is the official record.',
     sections: [
       { heading: 'Part I: background information', rows: r.header.map(([k, v]) => [k, v || '-']), columns: 2 },
       itemsSection(r),
       ...r.schedules.map(scheduleSection),
       reconciliationSection(r),
-      filingSection(r),
+      filingSection(r, fmt),
     ].filter(Boolean),
   });
 }

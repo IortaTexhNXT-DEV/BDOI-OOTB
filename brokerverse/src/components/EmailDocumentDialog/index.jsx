@@ -10,9 +10,10 @@ import { notifySuccess, notifyWarn } from "../../utility/dialogs";
 import { isSendingOff, withQueuedNotice } from "../../utility/emailNotice";
 
 /**
- * Side panel to e-mail a client document (official receipt, premium invoice) with its PDF attached: confirm the
- * recipient (the client's address by default), add Cc and a note, then queue it. `send(body)` is the emailService call
- * ({ success, data } | { success: false, error }); `onSent(result)` runs after the e-mail is queued.
+ * Centred dialog to e-mail a client document (official receipt, premium invoice) with its PDF attached, laid out like
+ * the other e-mail actions (payment reminder): confirm the recipient (the client's address by default), add Cc and a
+ * note, then queue it. `send(body)` is the emailService call ({ success, data } | { success: false, error });
+ * `onSent(result)` runs after the e-mail is queued.
  */
 const EmailDocumentDialog = ({ visible, onHide, title, defaultTo = "", fileName, send, onSent }) => {
   const { t } = useTranslation();
@@ -56,23 +57,22 @@ const EmailDocumentDialog = ({ visible, onHide, title, defaultTo = "", fileName,
   const footer = (
     <div className="flex justify-content-end gap-2">
       <Button type="button" label={t("emailDocument.cancel")} outlined onClick={onHide} disabled={busy} />
-      <Button type="button" label={t("emailDocument.send")} icon="pi pi-send" onClick={submit} loading={busy} />
+      <Button type="button" label={t("emailDocument.sendEmail")} icon="pi pi-send" onClick={submit} loading={busy} />
     </div>
   );
 
   return (
-    <Dialog header={title} visible={visible} onHide={onHide} footer={footer} style={{ width: "36rem" }} breakpoints={{ "640px": "100vw" }} draggable={false}>
+    <Dialog header={title} visible={visible} onHide={onHide} footer={footer} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }} draggable={false}
+      className="bv-centered">
       <div className="flex flex-column gap-3">
         <div className="field mb-0">
           <label htmlFor="email-doc-to">{t("emailDocument.to")}</label>
           <InputText id="email-doc-to" type="email" className="w-full" value={to} placeholder={t("emailDocument.toPlaceholder")}
-            onChange={(e) => setTo(e.target.value)} aria-describedby="email-doc-to-help" />
-          <small id="email-doc-to-help" className="block mt-1">{t("emailDocument.toHelp")}</small>
+            onChange={(e) => setTo(e.target.value)} />
         </div>
         <div className="field mb-0">
-          <label htmlFor="email-doc-cc">{t("emailDocument.cc")}</label>
-          <InputText id="email-doc-cc" className="w-full" value={cc} onChange={(e) => setCc(e.target.value)} aria-describedby="email-doc-cc-help" />
-          <small id="email-doc-cc-help" className="block mt-1">{t("emailDocument.ccHelp")}</small>
+          <label htmlFor="email-doc-cc">{t("emailDocument.ccOptional")}</label>
+          <InputText id="email-doc-cc" className="w-full" value={cc} placeholder={t("emailDocument.ccPlaceholder")} onChange={(e) => setCc(e.target.value)} />
         </div>
         <div className="field mb-0">
           <label htmlFor="email-doc-note">{t("emailDocument.note")}</label>

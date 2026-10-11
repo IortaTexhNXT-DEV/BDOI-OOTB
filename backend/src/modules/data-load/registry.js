@@ -50,6 +50,8 @@ const CONFIGURATION = [
   // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
   own('payee-bank-accounts', 'integrations', ['master:bank', 'master:insurance-company', 'master:supplier']),
   own('coc-series', 'integrations', ['master:insurance-company', 'master:branch']),
+  // the releases this environment runs: compared, never loaded
+  own('features', 'features'),
 ].map((e) => ({ ...e, kit: 'configuration', channels: CONFIGURATION_CHANNELS, promotable: true }));
 
 const migrated = (key, module, dependsOn, origin, duplicateRules = [], extra = {}) => ({

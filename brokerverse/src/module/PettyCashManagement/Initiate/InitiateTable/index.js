@@ -8,8 +8,12 @@ import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 import "./index.scss";
+import StatusChip from "../../../../components/StatusChip";
+import { openConfirm } from "../../../../components/ConfirmDialog";
+import { isInitiator } from "../../../../components/ApprovalActions";
+import pettyCashService from "../../../../services/pettyCashService";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInitiateDetailsMiddleware,
@@ -90,14 +94,41 @@ const InitiateTable = () => {
     },
   };
 
+  // a fund waiting for approval is established or rejected by a user other than the one who initiated it
+  const decide = async (rowData, action) => {
+    const approve = action === "approve";
+    const answer = await openConfirm({
+      title: t(approve ? "pettyCash.fundApproval.approveTitle" : "pettyCash.fundApproval.rejectTitle"),
+      severity: approve ? "neutral" : "danger",
+      facts: [
+        { label: t("pettyCash.pettyCashCode"), value: rowData.Pettycashcode },
+        { label: t("pettyCash.pettyCashDescription"), value: rowData.PettyCashdescription },
+        { label: t("pettyCash.branchCode"), value: rowData.Branchcode },
+        { label: t("pettyCash.pettyCashSize"), value: rowData.Pettycashsize, type: "amount", emphasis: true },
+      ],
+      input: approve ? undefined : { type: "textarea", label: t("pettyCash.fundApproval.rejectReason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t(approve ? "pettyCash.fundApproval.approve" : "pettyCash.fundApproval.reject"),
+      onConfirm: (reason) => pettyCashService.decideFund(rowData.id, action, reason),
+    });
+    if (answer === false || answer === null || answer === undefined) return;
+    dispatch(getInitiateListMiddleware());
+  };
+
   const renderViewButton = (rowData) => {
+    const own = isInitiator({ id: rowData.createdBy });
     return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
+      <RowActions onView={() => handleView(rowData)} viewLabel={t("common.view")}>
+        {rowData.status === "pending" && (
+          <>
+            <Button type="button" icon="pi pi-check" text rounded disabled={own} onClick={() => decide(rowData, "approve")}
+              aria-label={t("pettyCash.fundApproval.approve")} tooltip={own ? t("makerChecker.ownRecord") : t("pettyCash.fundApproval.approve")}
+              tooltipOptions={{ position: "top", showOnDisabled: true }} />
+            <Button type="button" icon="pi pi-times" text rounded severity="danger" disabled={own} onClick={() => decide(rowData, "reject")}
+              aria-label={t("pettyCash.fundApproval.reject")} tooltip={own ? t("makerChecker.ownRecord") : t("pettyCash.fundApproval.reject")}
+              tooltipOptions={{ position: "top", showOnDisabled: true }} />
+          </>
+        )}
+      </RowActions>
     );
   };
 
@@ -114,17 +145,6 @@ const InitiateTable = () => {
     paddingLeft: 6,
     color: "#000",
     border: "none",
-  };
-  const ViewheaderStyle = {
-    justifyContent: "center",
-    // textalign: center,
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: " none",
-    display: "flex",
   };
   useEffect(() => {
     if (globalFilter?.length > 0) {
@@ -173,7 +193,7 @@ const InitiateTable = () => {
           <DataTable
             value={search ? InitiateListSearch : InitiateList}
             tableStyle={{
-              color: "#2e2e2e",
+              color: "var(--text-color)",
             }}
             scrollable={true}
             scrollHeight="40vh"
@@ -240,11 +260,13 @@ const InitiateTable = () => {
               sortable
             ></Column>
             <Column
-              body={renderViewButton}
-              header="View"
-              headerStyle={ViewheaderStyle}
-              className="fieldvalue_container centered"
+              field="status"
+              header={t("pettyCash.status")}
+              headerStyle={headerStyle}
+              className="fieldvalue_container"
+              body={(rowData) => <StatusChip code={rowData.status} label={t(`pettyCash.fundStatus.${rowData.status}`, { defaultValue: rowData.status })} />}
             ></Column>
+            <Column body={renderViewButton} header={t("pettyCash.actions")} {...actionsColumn} />
           </DataTable>
         </div>
       </Card>

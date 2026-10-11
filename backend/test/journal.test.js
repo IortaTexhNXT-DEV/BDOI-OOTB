@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, ledgerIntegrity } from './accounting.fixtures.js';
+import { withStarterMasters } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+beforeAll(async () => {
+  ctx = await setupFinance();
+  await withStarterMasters();
+});
 afterAll(async () => { await pool.end(); });
 
 const entries = (amount = 25000) => [

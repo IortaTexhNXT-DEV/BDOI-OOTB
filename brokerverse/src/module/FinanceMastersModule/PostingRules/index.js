@@ -15,13 +15,24 @@ import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DetailDialog from "../../../components/DetailDialog";
 import { openConfirm } from "../../../components/ConfirmDialog";
-import { ActivityLog, fromPostingRuleHistory } from "../../../components/ActivityLog";
+import { ActivityLog, fromPostingRuleHistory, humanize } from "../../../components/ActivityLog";
 import postingRulesService from "../../../services/postingRulesService";
 import DateField from "../../../components/DateField";
+import { formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+
+const TAX_WORDS = new Set(["vat", "dst", "lgt", "fst", "ewt", "wht", "cwt"]);
+// an amount key in words with its tax acronyms in capitals: "commission_ewt" -> "Commission EWT", "vat" -> "VAT"
+const amountName = (key) => String(key || "").replace(/([a-z0-9])([A-Z])/g, "$1 $2").split(/[\s_-]+/).filter(Boolean).map((w) => w.toLowerCase())
+  .map((w, i) => (TAX_WORDS.has(w) ? w.toUpperCase() : i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
 
 const money = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const today = () => new Date().toISOString().slice(0, 10);
+// a narration as the journal will read it: each {{field}} it fills in is shown as the field's name ("‹Insurer›")
+const readableNarration = (text) => (text
+  ? String(text).replace(/\{\{\s*([a-zA-Z_]+)\s*\}\}/g, (_, key) => ` ‹${humanize(key)}›`).replace(/\s+/g, " ").trim()
+  : "—");
+
 const blankLine = (amountKey) => ({ side: "Dr", accountType: "role", account: "", fallbackRole: null, amountKey, perParticipant: false, narration: "" });
 const editable = (l) => ({ side: l.side, accountType: l.accountType, account: l.account, fallbackRole: l.fallbackRole || null, amountKey: l.amountKey, perParticipant: !!l.perParticipant, narration: l.narration || "" });
 
@@ -174,7 +185,6 @@ const PostingRules = () => {
         { label: t("postingRules.version"), value: `v${rule.version}` },
         { label: t("postingRules.effectiveFrom"), value: rule.effectiveFrom, type: "date" },
       ],
-      note: t("postingRules.confirm.approvalNote"),
       confirmLabel: t(deactivate ? "postingRules.confirm.deactivateAction" : "postingRules.confirm.activateAction"),
       onConfirm: async () => {
         out = await postingRulesService.setActive(rule.id, !rule.active);
@@ -206,7 +216,7 @@ const PostingRules = () => {
     return <InputText value={l.account} onChange={(e) => setLine(i, { account: e.target.value })} placeholder={(selected?.contextAccounts || []).join(", ") || "account key"} className="w-full" />;
   };
 
-  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${v.effectiveFrom}${v.approvalStatus && v.approvalStatus !== "approved" ? ` (${t(`postingRules.approval.${v.approvalStatus}`)})` : v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
+  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${formatDate(v.effectiveFrom)}${v.approvalStatus && v.approvalStatus !== "approved" ? ` (${t(`postingRules.approval.${v.approvalStatus}`)})` : v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
 
   return (
     <div className="posting-rules">
@@ -269,16 +279,16 @@ const PostingRules = () => {
               {!edit && rule && (
                 <>
                   <div className="text-sm text-600 mb-2">
-                    {t("postingRules.narration")}: <code>{rule.narration || "—"}</code> · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {rule.effectiveFrom}
+                    {t("postingRules.narration")}: {readableNarration(rule.narration)} · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {formatDate(rule.effectiveFrom)}
                     {rule.changeNote ? ` · ${rule.changeNote}` : ""}
                   </div>
                   <DataTable value={rule.lines} size="small" dataKey="lineNo" className="posting-rules__lines">
                     <Column field="lineNo" header="#" style={{ width: "3rem" }} />
                     <Column header={t("postingRules.side")} style={{ width: "5rem" }} body={(l) => <Tag value={l.side} severity={l.side === "Dr" ? "success" : "info"} />} />
                     <Column header={t("postingRules.account")} body={accountLabel} />
-                    <Column field="amountKey" header={t("postingRules.amount")} style={{ width: "9rem" }} />
+                    <Column header={t("postingRules.amount")} style={{ width: "9rem" }} body={(l) => amountName(l.amountKey)} />
                     <Column header={t("postingRules.perParticipant")} style={{ width: "6rem" }} body={(l) => (l.perParticipant ? <i className="pi pi-users" /> : null)} />
-                    <Column field="narration" header={t("postingRules.lineNarration")} />
+                    <Column header={t("postingRules.lineNarration")} body={(l) => readableNarration(l.narration)} bodyClassName="posting-rules__narration" />
                   </DataTable>
                   <div className="flex gap-2 mt-3 flex-wrap align-items-center">
                     <Button label={t("postingRules.simulate")} icon="pi pi-play" className="p-button-outlined" onClick={() => runSimulation(null)} />
@@ -384,7 +394,7 @@ const PostingRules = () => {
 
       {history ? (
         <DetailDialog visible onHide={() => setHistory(null)} header={t("postingRules.historyOf", { event: selected?.label || selected?.eventCode || "" })} size="md">
-          <ActivityLog entries={fromPostingRuleHistory(history.rows)} loading={history.loading} error={history.error} onRetry={openHistory} emptyText={t("postingRules.noHistory")} />
+          <ActivityLog entries={fromPostingRuleHistory(history.rows)} loading={history.loading} error={history.error} onRetry={openHistory} />
         </DetailDialog>
       ) : null}
     </div>

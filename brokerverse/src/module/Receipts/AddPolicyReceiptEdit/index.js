@@ -691,7 +691,7 @@ function PolicyReceipts() {
               .join("-")}`}
             value={allReceiptsList}
             tableStyle={{
-              color: "#2e2e2e",
+              color: "var(--text-color)",
             }}
             selection={selectedRows}
             onSelectionChange={(e) => {

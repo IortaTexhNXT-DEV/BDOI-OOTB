@@ -46,6 +46,7 @@ import { namingConvention } from './naming.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
 import { runForLoad } from './runs.js';
 import { comparable, fail, isDate, keyText, numberText } from './common.js';
+import { assertFeature } from '../features/service.js';
 
 export { KITS };
 const LOCK = "hashtext('brokerverse.data-load'), hashtext('data_load_batches')";
@@ -522,6 +523,8 @@ function resultCounts(results) {
  * reopens it (lib/goLiveLock.js). req: the request refused, recorded in the audit trail.
  */
 async function assertKitAllowed(kit, { req = null } = {}) {
+  // the legacy book migration is a Phase 2 feature (modules/features)
+  if (kit === 'migration') await assertFeature('legacy-migration', { write: true });
   const state = await goLiveState();
   if (kit === 'migration') {
     await assertMigrationOpen('migration', { req });

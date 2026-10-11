@@ -13,7 +13,7 @@ import { one, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
-import { goLiveSetup, loginAs, settledBatch, validatedBatch } from './helpers.js';
+import { enableFeatures, goLiveSetup, loginAs, settledBatch, validatedBatch } from './helpers.js';
 
 /** Permissions of the test roles: loader (uploads, submits), approver (decides), both (a cutover administrator), reader (an auditor). */
 export const ROLES = {
@@ -31,6 +31,8 @@ export async function startMigrationSuite({ users = {}, approval = true } = {}) 
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   const app = await createApp();
+  // the legacy book migration is a Phase 2 feature (modules/features): enabled for the suites of the workspace
+  await enableFeatures(app, ['legacy-migration']);
   const login = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   const as = (token) => (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
   const api = as(login.body.accessToken);

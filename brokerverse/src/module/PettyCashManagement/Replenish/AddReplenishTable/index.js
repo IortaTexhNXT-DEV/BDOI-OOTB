@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { openConfirm } from "../../../../components/ConfirmDialog";
 import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
@@ -21,6 +22,7 @@ import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReplenishTable = () => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
@@ -180,37 +182,39 @@ const AddReplenishTable = () => {
             ></Column>
             <Column
               field="Transactioncode"
-              header="Transaction Code"
+              header={t("pettyCash.transactionCode")}
               headerStyle={headerStyle}
             ></Column>
             <Column
               field="DocNumber"
-              header="Disbursement Doc Number"
+              header={t("pettyCash.disbursementNumber")}
               headerStyle={headerStyle}
             ></Column>
 
             <Column
               field="Narration"
-              header="Narration"
+              header={t("pettyCash.narration")}
               headerStyle={headerStyle}
             ></Column>
 
             <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
-              header="Date"
+              header={t("pettyCash.date")}
               headerStyle={headerStyle}
               sortable
             ></Column>
             <Column
               field="Remarks"
-              header="Remarks"
+              header={t("pettyCash.requestNumber")}
               headerStyle={headerStyle}
             ></Column>
             <Column
               field="Amount"
-              header="Amount"
+              header={t("pettyCash.amount")}
               headerStyle={headerStyle}
-              sortable
+              body={(row) => formatCurrency(row.Amount)}
+              bodyClassName="bv-num"
+              headerClassName="bv-num"
             ></Column>
           </DataTable>
         </div>
@@ -219,34 +223,34 @@ const AddReplenishTable = () => {
         <div className="col-12 md:col-3 lg:col-3">
           <InputField
             classNames="input__filed"
-            label="Disbursed Amount"
+            label={t("pettyCash.disbursedAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
-            value={totalAmount}
+            value={formatCurrency(totalAmount)}
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3">
           <InputField
             classNames="input__filed"
-            label="Reimbursement Amount"
+            label={t("pettyCash.reimbursementAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
-            value={totalAmount}
+            value={formatCurrency(totalAmount)}
           />
         </div>
         <div className="col-12 md:col-3 lg:col-3">
           <InputField
             classNames="input__filed"
-            label="Current balance"
+            label={t("pettyCash.currentBalance")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
-            value={ReplenishFund.availableCash ?? ""}
+            value={ReplenishFund.availableCash == null ? "" : formatCurrency(ReplenishFund.availableCash)}
           />
         </div>
       </div>

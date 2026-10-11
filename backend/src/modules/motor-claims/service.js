@@ -7,7 +7,8 @@
  * authority (LOA) to the shop: approved repair cost, the insured's participation (deductible, motor_claims.participation:
  * fixed amount and / or percent of the sum insured), depreciation on parts (motor_claims.parts_depreciation_percent),
  * what the insurer pays and what the insured settles with the shop. The release of the repaired vehicle closes the
- * repair. Each step is written to the claim history.
+ * repair. Each step is written to the claim history, and the client is told of every estimate recorded or decided by
+ * e-mail (template claim_estimate_update, TIS-BRD-CLAIM-05).
  */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -15,12 +16,15 @@ import { addDays, isoDate, today } from '../../lib/dates.js';
 import { num, round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { activeRecord, activeRecords } from '../ops-masters/records.js';
+import { queueEmail } from '../../lib/mailer.js';
+import { companyName } from '../../lib/letterhead.js';
+import { emailTemplate, renderTemplate } from '../documents/common.js';
 
-const CLOSED = ['rejected', 'closed'];
+const CLOSED = ['rejected', 'closed', 'cancelled'];
 
 async function loadClaim(db, ref, lock = false) {
   const c = (await db.query(`SELECT c.*, p.policy_number, p.sum_insured, p.lob AS policy_lob, p.doc AS policy_doc, p.insured_name, pr.line AS product_line,
-      cl.display_name AS client_name, ic.name AS insurer_name
+      cl.display_name AS client_name, cl.email AS client_email, ic.name AS insurer_name
     FROM claims c JOIN policies p ON p.id = c.policy_id LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN clients cl ON cl.id = COALESCE(c.client_id, p.client_id)
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE c.id = $1 OR c.claim_number = $1 ${lock ? 'FOR UPDATE OF c' : ''}`, [String(ref)])).rows[0];
   if (!c) throw notFound('Claim not found');
@@ -28,6 +32,14 @@ async function loadClaim(db, ref, lock = false) {
 }
 const isMotor = (c) => [c.lob, c.policy_lob, c.product_line].some((v) => String(v || '').toUpperCase().includes('MOTOR'));
 const history = (db, claimId, user, status, note) => db.query('INSERT INTO claim_history(claim_id, by_user, status, note) VALUES ($1,$2,$3,$4)', [claimId, user?.username ?? null, status, note]);
+
+/** Tell the client of an estimate update by e-mail (when the client has an address); never blocks the step. */
+async function tellClient(db, c, update) {
+  if (!c.client_email) return null;
+  const t = await emailTemplate('claim_estimate_update');
+  const v = { claimantName: c.client_name || c.insured_name || '', claimNumber: c.claim_number, policyNumber: c.policy_number, update, companyName: await companyName() };
+  return queueEmail({ db, to: c.client_email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'claim_estimate_update', entity: 'claim', entityId: c.id });
+}
 
 const vehicleOf = (c) => {
   const v = c.policy_doc?.insuranceVehicleDetails || c.policy_doc?.vehicle || {};
@@ -118,6 +130,7 @@ export async function addEstimate(db, ref, b, user) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`, [c.id, kind, seq, shop.code, shop.name, b.shopReference || null, isoDate(b.estimateDate) || (await today()),
     parts.parts, parts.labour, parts.paint, parts.other, parts.vat, total, user?.id ?? null])).rows[0];
   await history(db, c.id, user, c.status, `${kind === 'initial' ? 'Repair' : 'Supplementary'} estimate ${seq} of ${shop.name}: ${total.toFixed(2)}`);
+  await tellClient(db, c, `${kind === 'initial' ? 'the repair' : 'a supplementary'} estimate of ${shop.name} for PHP ${total.toLocaleString('en-PH', { minimumFractionDigits: 2 })} was received and sent to the insurer's adjuster`);
   return estimateOut(r);
 }
 
@@ -137,6 +150,7 @@ export async function decideEstimate(db, ref, estimateId, b, user) {
   [e.id, c.id, approve ? 'approved' : 'rejected', amount, b.adjusterName.trim(), b.adjusterCompany || null, isoDate(b.decidedOn) || (await today()), b.approvalReference || null,
     b.remarks || null, user?.id ?? null])).rows[0];
   await history(db, c.id, user, c.status, `Estimate ${e.seq} ${approve ? `approved at ${amount.toFixed(2)}` : 'rejected'} by adjuster ${b.adjusterName.trim()}${b.approvalReference ? ` (${b.approvalReference})` : ''}`);
+  await tellClient(db, c, approve ? `the insurer's adjuster approved PHP ${amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })} of estimate ${e.seq}` : `the insurer's adjuster did not approve estimate ${e.seq}: ${b.remarks}`);
   return estimateOut(r);
 }
 

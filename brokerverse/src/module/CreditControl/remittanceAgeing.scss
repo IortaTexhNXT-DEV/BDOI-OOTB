@@ -1,0 +1,5 @@
+// Remittance Ageing summary: the totals line keeps the cell padding of the rows above it, so the insurer label and
+// every total amount line up with their columns.
+.cc-ageing-summary .p-datatable-tfoot > tr > td {
+  padding: var(--bv-cell-pad-y, 10px) 14px !important;
+}

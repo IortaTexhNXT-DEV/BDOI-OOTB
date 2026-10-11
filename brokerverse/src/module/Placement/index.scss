@@ -41,8 +41,17 @@
     display: flex;
     align-items: flex-start;
 
-    h2 {
+    .placement-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
       margin: 0 0 0.2rem;
+      .placement-status { font-size: 0.85rem; padding: 0.35rem 0.75rem; }
+    }
+
+    h2 {
+      margin: 0;
       font-size: 1.45rem;
       font-weight: 600;
       color: $color-heading;
@@ -217,11 +226,21 @@
   td { white-space: nowrap; }
 }
 
-.participant-table.offers, .participant-table.compare {
+.participant-table.offers {
   min-width: 68rem;
 
   td:first-child strong, td:nth-child(4) { white-space: nowrap; }
   td:nth-child(8), td:nth-child(9) { min-width: 11rem; }
+}
+
+// the comparison fits its card: deductibles and terms share one wrapping column, the rank sits with the insurer
+.participant-table.compare {
+  .insurer-cell { min-width: 12rem; }
+  .insurer-cell .rank { color: $color-text-muted; }
+  .terms-cell { min-width: 12rem; max-width: 22rem; white-space: normal; }
+  .terms-cell span { display: block; }
+  .terms-cell .muted { color: $color-text-muted; font-size: 0.8125rem; }
+  .share-cell { width: 8rem; }
 }
 
 .participant-table.readonly td:first-child { min-width: 12rem; }
@@ -253,7 +272,7 @@
 
   .journey-step {
     flex: 1 1 0;
-    min-width: 9rem;
+    min-width: 7.5rem;
     display: flex;
     align-items: flex-start;
     gap: 0;
@@ -293,6 +312,7 @@
   .done .journey-marker { background: $color-success; border-color: $color-success; color: $color-surface; }
   .current .journey-marker { background: $color-surface; border-color: $brand-blue; color: $brand-blue; }
   .skipped .journey-marker { border-style: dashed; }
+  .stopped .journey-marker { background: $color-danger; border-color: $color-danger; color: $color-surface; }
 
   .journey-body {
     display: flex;
@@ -303,6 +323,18 @@
     padding: 0 0.5rem 0 0.6rem;
   }
 
+  // the label wraps onto a second line so every step stays readable and all of them fit the card;
+  // the reference keeps one line with the full text in its title
+  .journey-body { min-width: 0; }
+  .journey-label {
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+  .journey-ref {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .journey-label { font-weight: 600; font-size: 0.85rem; color: $color-heading; }
   .journey-ref { font-size: 0.8rem; color: $color-text; }
   .journey-ref.muted { color: $color-placeholder; }
@@ -311,6 +343,7 @@
     background: none;
     border: none;
     padding: 0;
+    white-space: nowrap;
     font: inherit;
     font-size: 0.8rem;
     color: $brand-blue;
@@ -329,9 +362,20 @@
   gap: 0.75rem;
   font-size: 0.875rem;
 
-  .placement-field-label { color: $color-text-muted; }
-  .placement-field-value { color: $color-heading; text-align: right; }
+  .placement-field-label { color: $color-text-muted; flex: 0 0 auto; }
+  .placement-field-value { color: $color-heading; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 }
+
+.placement-field.placement-field--wide {
+  grid-column: 1 / -1;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .placement-field-value { text-align: left; }
+}
+
+// the offer tables scroll inside their tab instead of running past the card
+.placement-card .p-tabview-panels { overflow-x: auto; }
 
 .field-grid {
   display: grid;
@@ -339,15 +383,6 @@
   gap: 0.5rem 1.5rem;
 
   .placement-field { border-bottom: 1px dashed $color-border; padding: 0.35rem 0; }
-}
-
-.compare-summary {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: $color-text;
 }
 
 .form-actions {
@@ -391,7 +426,6 @@
 }
 .slip-comparison tr.check-mismatch td { background: $color-danger-050; }
 .slip-comparison tr.check-mismatch td:first-child { box-shadow: inset 3px 0 0 $color-danger; }
-.empty-note { padding: 1rem; color: $color-text-muted; }
 .attachment-line { display: flex; align-items: center; gap: 0.5rem; }
 
 // Journey panel on the quotation detail (Quotation Slip)
@@ -410,7 +444,6 @@
     margin-bottom: 0.6rem;
 
     .journey-title { font-weight: 600; font-size: 0.95rem; color: $color-heading; }
-    .journey-note { font-size: 0.8rem; color: $color-warning; }
   }
 
   .journey-timeline .journey-body { background: $color-surface-muted; }

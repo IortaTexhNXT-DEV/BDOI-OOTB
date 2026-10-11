@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import service from "../../services/insurerReconciliationService";
 import { openConfirm } from "../../components/ConfirmDialog";
 import ApprovalActions from "../../components/ApprovalActions";
+import RowActions from "../../components/RowActions";
 import { ActivityLog, fromLifecycle, useRecordActivity } from "../../components/ActivityLog";
 import { Diff, IrTag, PageHeader, date, money, showError, showSuccess } from "./common";
 
@@ -181,15 +182,13 @@ const Workspace = () => {
       )}
     </div>
   ) : null);
-  const lineActions = (l) => (draft ? (
-    <div className="flex gap-1">
-      {l.matchStatus !== "matched" && <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(l)} aria-label={t("insurerRec.resolve")} />}
-      {l.matchStatus === "unmatched"
-        ? <Button icon="pi pi-link" text size="small" tooltip={t("insurerRec.matchByHand")} onClick={() => searchCandidates(l, l.policyNumber)} aria-label={t("insurerRec.matchByHand")} />
-        : <Button icon="pi pi-times" text size="small" tooltip={t("insurerRec.unmatch")} onClick={() => unmatch(l)} aria-label={t("insurerRec.unmatch")} />}
-      {l.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => removeResolution(l)} aria-label={t("insurerRec.removeResolution")} />}
-    </div>
-  ) : null);
+  // a labelled menu per line (no icon cluster): resolve, match by hand or unmatch, remove the resolution
+  const lineMenu = (l, codes) => {
+    const actions = codes.filter(Boolean).map((code) => ({ code, label: t(`insurerRec.${code}`), allowed: true }));
+    const run = { resolve: () => openResolve(l), matchByHand: () => searchCandidates(l, l.policyNumber), unmatch: () => unmatch(l), removeResolution: () => removeResolution(l) };
+    return <RowActions label={t("insurerRec.lineActions", { line: l.policyNumber || l.lineNo || "" })} actions={actions} onAction={(a) => run[a.code]()} />;
+  };
+  const lineActions = (l) => (draft ? lineMenu(l, [l.matchStatus !== "matched" && "resolve", l.matchStatus === "unmatched" ? "matchByHand" : "unmatch", l.resolution && "removeResolution"]) : null);
 
   const lineTable = (rows, { differencesOnly = false } = {}) => (
     <DataTable value={rows} dataKey="id" size="small" stripedRows scrollable loading={loading} emptyMessage={t("insurerRec.none")}>
@@ -206,7 +205,7 @@ const Workspace = () => {
       <Column header={t("insurerRec.amountPaid")} body={(l) => money(l.amountPaid)} className="bv-num" headerClassName="bv-num" />
       <Column header={t("insurerRec.amountDiff")} body={(l) => <Diff value={l.differences?.amountPaid} />} className="bv-num" headerClassName="bv-num" />
       <Column header={t("insurerRec.resolution")} body={resolutionBody} style={{ minWidth: "14rem" }} />
-      <Column body={lineActions} />
+      <Column align="center" style={{ width: "3.5rem" }} body={lineActions} />
     </DataTable>
   );
 
@@ -257,12 +256,7 @@ const Workspace = () => {
               <Column header={t("insurerRec.brokerCommission")} body={(r) => money(r.commission)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("insurerRec.brokerAmount")} body={(r) => money(r.amount)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("insurerRec.resolution")} body={resolutionBody} style={{ minWidth: "14rem" }} />
-              <Column body={(r) => (draft ? (
-                <div className="flex gap-1">
-                  <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(r)} aria-label={t("insurerRec.resolve")} />
-                  {r.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => removeResolution(r)} aria-label={t("insurerRec.removeResolution")} />}
-                </div>
-              ) : null)} />
+              <Column align="center" style={{ width: "3.5rem" }} body={(r) => (draft ? lineMenu(r, ["resolve", r.resolution && "removeResolution"]) : null)} />
             </DataTable>
           </TabPanel>
           <TabPanel header={`${t("insurerRec.tab.all")} (${st.lines.length})`}>{lineTable(st.lines)}</TabPanel>
@@ -307,7 +301,7 @@ const Workspace = () => {
           <div>
             <div className="flex gap-2 mb-2">
               <InputText value={match.search} onChange={(e) => setMatch({ ...match, search: e.target.value })} placeholder={t("insurerRec.searchCandidates")} className="w-full" />
-              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label={t("common.search")} tooltip={t("common.search")} tooltipOptions={{ position: "top" }} />
+              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label={t("common.search")} />
             </div>
             <DataTable value={match.candidates} dataKey="id" size="small" stripedRows scrollable scrollHeight="360px" emptyMessage={t("insurerRec.none")}>
               <Column header={t("insurerRec.brokerRecord")} body={(r) => t(`insurerRec.record.${r.type}`)} />

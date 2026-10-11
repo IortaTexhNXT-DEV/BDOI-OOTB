@@ -101,6 +101,7 @@ const receiptsReducer = createSlice({
         receiptNumber: action.payload.receiptNumber || null,
         clientEmail: action.payload.clientEmail || null,
         receiptStatus: action.payload.receiptStatus || null,
+        header: action.payload.header || null,
       };
       state.receiptDetailList = (action.payload.receiptDetailList || []).map((item) => ({
         ...item,

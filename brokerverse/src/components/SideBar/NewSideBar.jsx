@@ -15,6 +15,8 @@ import {
 } from "../../module/Commission/utils/commissionViewMode";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../utility/systemCurrencies";
 import { useBranding } from "../../theme/runtime/BrandingProvider";
+import { useFeatureList } from "../../features/Feature";
+import { withoutFeatures } from "../../features/entitlements";
 
 // Open groups are remembered in this browser between sessions (a convenience only).
 const EXPANDED_KEY = "bv.sidebar.expanded";
@@ -91,12 +93,14 @@ const NewSideBar = ({ onNavigate }) => {
 
   // Roles do not change during a session, so read them once.
   const userRoles = useMemo(() => getUserRoles(), []);
+  // the features of this environment (the entries of features that are off are left out)
+  const features = useFeatureList();
 
   // Deny-by-default role filter shared with the route guard (utils/menuPermissions.js); Agents/Referrer Accounts is
   // hidden when the Commission view is Management.
   const menu = useMemo(() => {
     const base = userRoles.length
-      ? filterMenuForRoles(menuList, userRoles)
+      ? filterMenuForRoles(withoutFeatures(menuList, features), userRoles)
       : menuList.filter((m) => m.name === "Dashboard");
     if (commissionViewMode !== "management") return base;
     return base.map((m) =>
@@ -104,7 +108,7 @@ const NewSideBar = ({ onNavigate }) => {
         ? { ...m, submenu: m.submenu.filter((s) => s.name !== "Agents/Referrer Accounts") }
         : m,
     );
-  }, [userRoles, commissionViewMode]);
+  }, [userRoles, commissionViewMode, features]);
 
   const activeTrail = useMemo(() => findActiveTrail(menu, pathname), [menu, pathname]);
   const activeKey = keyOf(activeTrail);

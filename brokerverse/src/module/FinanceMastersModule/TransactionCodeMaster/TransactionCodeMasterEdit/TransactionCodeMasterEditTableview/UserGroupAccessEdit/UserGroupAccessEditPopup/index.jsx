@@ -92,7 +92,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                             className="inputdialog__fieled"
                             label="User Role"
                             placeholder="Select"
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={formik.values.UserRole}
@@ -132,7 +132,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                             classNames="input__filed"
                             label="Minimum Transaction"
                             placeholder="Enter"
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={formik.values.MinimumTransaction}
@@ -148,7 +148,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                             classNames="input__filed"
                             label="Maximum Transaction"
                             placeholder="Enter"
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={formik.values.MaximumTransaction}

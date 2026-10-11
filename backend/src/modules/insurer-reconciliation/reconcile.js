@@ -10,7 +10,7 @@ import { badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { assertChecker } from '../../lib/makerChecker.js';
 import { round2 } from '../../lib/money.js';
-import { DEFAULT_FORMAT, formatDateTime } from '../../lib/pdf/format.js';
+import { DEFAULT_FORMAT, formatDate, formatDateTime } from '../../lib/pdf/format.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { account } from '../accounting/lib/ledger.js';
 import { STATEMENT_TYPES } from './statements.js';
@@ -128,8 +128,8 @@ export function reportRows(st) {
 export const REPORT_HEADER = ['Line', 'Policy No', 'Insured', 'Date', 'Reference', 'Status', 'Insurer gross premium', 'Broker gross premium', 'Premium difference',
   'Insurer commission', 'Broker commission', 'Commission difference', 'Insurer amount paid', 'Broker amount', 'Amount difference', 'Broker record', 'Resolution'];
 
-/** Document spec (documents/pdf.js buildPdf) of the differences report (times in the business time zone of fmt). */
-export function reportPdfSpec(st, company, fmt = DEFAULT_FORMAT) {
+/** Document spec (documents/pdf.js buildPdf) of the differences report. */
+export function reportPdfSpec(st, fmt = DEFAULT_FORMAT) {
   const m = (v) => round2(v || 0);
   const s = st.summary;
   const diffTable = (list, columns, row) => ({ columns, rows: list.map(row) });
@@ -155,11 +155,9 @@ export function reportPdfSpec(st, company, fmt = DEFAULT_FORMAT) {
   sections.push({ heading: 'Sign-off', rows: [['Prepared by', st.createdBy || '-'], ['Submitted by', st.submittedBy || '-'], ['Approved by', st.approvedBy || '-'], ['Approved at', st.approvedAt ? formatDateTime(st.approvedAt, fmt) : '-']] });
   return {
     title: 'Insurer Statement Reconciliation',
-    subtitle: `${company.name || ''}${company.name ? ' - ' : ''}${st.statementNumber}`,
-    meta: [['Insurer', st.insurerName], ['Statement', `${st.statementTypeLabel}${st.statementRef ? ` ${st.statementRef}` : ''}`], ['Period', `${st.periodFrom} to ${st.periodTo}`],
+    subtitle: st.statementNumber,
+    meta: [['Insurer', st.insurerName], ['Statement', `${st.statementTypeLabel}${st.statementRef ? ` ${st.statementRef}` : ''}`], ['Period', `${formatDate(st.periodFrom, fmt)} to ${formatDate(st.periodTo, fmt)}`],
       ['Tolerance', `PHP ${Number(st.tolerance).toFixed(2)}`], ['Status', st.status.toUpperCase()]],
     sections,
-    // the generated date and user are printed by the layout in the business time zone
-    footer: company.system || company.name || '',
   };
 }

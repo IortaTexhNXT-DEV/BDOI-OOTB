@@ -150,6 +150,18 @@ export async function withProducts(codes = null) {
 }
 
 /**
+ * Switch back on the starter records TISPH does not use (seed 93_tisph_master_data.sql), as an administrator would: the
+ * insurers MAPFRE, FPG and Mercantile, the foreign currencies and the bank file layouts other than Metrobank. For suites
+ * that test other insurers, foreign currencies or other banks' payment files.
+ */
+export async function withStarterMasters() {
+  const { query } = await import('../src/db/pool.js');
+  await query("UPDATE insurance_companies SET status = 'active', updated_by = 'test' WHERE code IN ('MAPFRE', 'FPG', 'MERCANTILE')");
+  await query("UPDATE currencies SET status = 'active', updated_by = 'test' WHERE code IN ('USD', 'EUR', 'SGD', 'JPY')");
+  await query("UPDATE bank_file_layouts SET active = true, updated_by = 'test' WHERE code IN ('BDO-BULK', 'BPI-BULK', 'LBP-BULK', 'UBP-BULK', 'GENERIC-CSV')");
+}
+
+/**
  * The packaged products the package suites price (test/fixtures/packaged-products.sql: insurer rate tables and the SME
  * Shield and Home Protect bundles, on lines TISPH does not sell), loaded before withProducts() switches those lines on.
  */
@@ -233,4 +245,90 @@ export async function goLiveSetup(api, cutover, { approval = false } = {}) {
   }
   await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'migration.load_approval_required\'', [JSON.stringify(approval)]);
   clearSettingsCache();
+}
+
+/**
+ * A remittance body whose lines name a policy number with the amounts the test needs: each such policy is issued to
+ * the remittance's insurer at those amounts (premium, commission, tax) unless it exists, so the remittance is built at
+ * the system amounts as BrokerVerse requires. Lines naming a policy id are kept as they are.
+ */
+export async function remittanceBody(body) {
+  const { pool } = await import('../src/db/pool.js');
+  const ins = (await pool.query('SELECT id FROM insurance_companies WHERE id::text = $1 OR lower(code) = lower($1) ORDER BY id LIMIT 1', [String(body.insurerCode ?? body.insurerId)])).rows[0];
+  const lines = [];
+  for (const l of body.lines || []) {
+    if (l.policyId || l.premium === undefined) { lines.push(l); continue; }
+    await pool.query(`INSERT INTO policies(policy_number, status, insurance_company_id, premium_total, commission_amount, details, expiry_date)
+      VALUES ($1, 'issued', $2, $3, $4, $5, current_date + 365) ON CONFLICT (policy_number) DO NOTHING`,
+    [l.policyNo, ins?.id ?? null, l.premium, l.commission ?? 0, JSON.stringify({ taxTotal: l.tax ?? 0 })]);
+    lines.push({ policyNo: l.policyNo });
+  }
+  return { ...body, lines };
+}
+const secondAdministrators = new WeakMap();
+/**
+ * A delegation of approval authority in force, as Access Control grants it: requested by the administrator of `ctx`
+ * for the next 30 days on annual leave (DLG-LEAVE) and approved by a second administrator, created once per app.
+ * `body` names the delegator, the delegate and the transaction types. Returns { id, dateTo } of the delegation.
+ */
+export async function delegateAuthority(ctx, body) {
+  const { addDays, today } = await import('../src/lib/dates.js');
+  if (!secondAdministrators.has(ctx.app)) {
+    await ctx.api('post', '/users').send({ username: 'test.admin2', password: 'Welcome@123', displayName: 'Second administrator', roles: ['system-admin'],
+      email: 'test.admin2@example.ph' });
+    const token = await loginAs(ctx.app, 'test.admin2', 'Welcome@123');
+    secondAdministrators.set(ctx.app, (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`));
+  }
+  const day = await today();
+  const d = await ctx.api('post', '/access-control/delegations').send({ dateFrom: day, dateTo: addDays(day, 30), reasonCode: 'DLG-LEAVE', ...body });
+  if (d.status !== 201) throw new Error(`delegation: ${d.status} ${JSON.stringify(d.body)}`);
+  const approved = await secondAdministrators.get(ctx.app)('post', `/access-control/changes/${d.body.data.change.id}/decision`).send({ decision: 'approve' });
+  if (approved.status !== 200) throw new Error(`delegation approval: ${approved.status} ${JSON.stringify(approved.body)}`);
+  const { query } = await import('../src/db/pool.js');
+  const { rows: [delegation] } = await query('SELECT id FROM user_delegations WHERE change_id = $1', [d.body.data.change.id]);
+  return { id: Number(delegation.id), dateTo: addDays(day, 30) };
+}
+
+/**
+ * Two iorta TechNXT platform administrators signed in with their second factor (maker and checker of the feature
+ * changes, modules/features), as api(method, path) functions. Created once per app (the accounts come from the same
+ * seed function PLATFORM_ADMIN_EMAIL / PLATFORM_ADMIN_PASSWORD use).
+ */
+const platformSessions = new WeakMap();
+export const PLATFORM_ADMINS = [['platform.maker@iorta.test', 'Platform#Maker2026'], ['platform.checker@iorta.test', 'Platform#Checker2026']];
+export async function platformAdmins(app) {
+  if (platformSessions.has(app)) return platformSessions.get(app);
+  const { query } = await import('../src/db/pool.js');
+  const { seedPlatformAdmin } = await import('../src/db/seed.js');
+  const { encryptSecret } = await import('../src/lib/secrets.js');
+  const { generateSecret, totp } = await import('../src/lib/totp.js');
+  const sessions = [];
+  for (const [email, password] of PLATFORM_ADMINS) {
+    const id = await seedPlatformAdmin({ log: () => {}, source: { PLATFORM_ADMIN_EMAIL: email, PLATFORM_ADMIN_PASSWORD: password } });
+    const secret = generateSecret();
+    await query('UPDATE users SET totp_secret = $2, totp_enabled = true, totp_enabled_at = now(), totp_last_step = NULL WHERE id = $1', [id, encryptSecret(secret)]);
+    const first = await request(app).post('/api/auth/login').send({ username: email, password });
+    const done = await request(app).post('/api/auth/login/2fa').send({ challengeToken: first.body.challengeToken, code: totp(secret) });
+    if (!done.body.accessToken) throw new Error(`platform administrator ${email}: ${done.status} ${JSON.stringify(done.body)}`);
+    const token = done.body.accessToken;
+    sessions.push({ id, email, token, api: (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`) });
+  }
+  const out = { maker: sessions[0], checker: sessions[1] };
+  platformSessions.set(app, out);
+  return out;
+}
+
+/**
+ * Enable Phase 2 or future-release features for a suite that tests them: requested by one platform administrator,
+ * approved by the other, through the API. `what`: feature keys, or { tier: 'PHASE_2' | 'FUTURE' }.
+ */
+export async function enableFeatures(app, what) {
+  const { maker, checker } = await platformAdmins(app);
+  const body = Array.isArray(what) ? { features: what } : what;
+  const r = await maker.api('post', '/platform/features/changes').send({ action: 'enable', ...body, reasonCode: 'FTR-CONTRACT', releaseRef: 'TEST-SUITE', effective: 'immediate' });
+  if (r.status === 400 && /Nothing to change/.test(r.body.message)) return null;
+  if (r.status !== 201) throw new Error(`enable features: ${r.status} ${JSON.stringify(r.body)}`);
+  const d = await checker.api('post', `/platform/features/changes/${r.body.data.change.id}/decision`).send({ decision: 'approve' });
+  if (d.status !== 200) throw new Error(`approve features: ${d.status} ${JSON.stringify(d.body)}`);
+  return d.body.data;
 }

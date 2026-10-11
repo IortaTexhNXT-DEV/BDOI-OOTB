@@ -11,7 +11,7 @@ import { pool, query, one, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { config } from '../src/config.js';
-import { withoutCommissionTaxes } from './helpers.js';
+import { withStarterMasters, withoutCommissionTaxes, enableFeatures } from './helpers.js';
 
 let ctx; let admin; let maker; let checker;
 let outbox; let messaging; let layouts;
@@ -20,6 +20,9 @@ const msgRow = (id) => one('SELECT * FROM integration_outbox WHERE id = $1', [id
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['ctpl-authentication', 'sms-messaging', 'insurer-api', 'integration-inbound']);
+  await withStarterMasters();
   await withoutCommissionTaxes();
   admin = ctx.api; maker = ctx.as('maker'); checker = ctx.as('checker');
   outbox = await import('../src/modules/integrations/framework/outbox.js');
@@ -405,7 +408,13 @@ describe('bank payment files', () => {
     expect(batch).toMatchObject({ status: 'draft', lineCount: 2 });
     expect((await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-PAY', channel: 'pesonet', disbursementIds: [rem.disbursementId] })).status).toBe(400);
     expect((await maker('post', `/bank-payments/batches/${batch.id}/generate`)).status).toBe(409);
+    expect((await maker('get', `/bank-payments/batches/${batch.id}`)).body.data.decision).toMatchObject({ canDecide: false, blockedCode: 'WRONG_STATUS' });
     expect((await maker('post', `/bank-payments/batches/${batch.id}/submit`)).status).toBe(200);
+    // the decision block says beforehand what the approval refuses
+    expect((await maker('get', `/bank-payments/batches/${batch.id}`)).body.data.decision).toEqual({ canDecide: false, blockedCode: 'MAKER',
+      blockedReason: 'You prepared this batch. Another user must approve it.' });
+    expect((await checker('get', `/bank-payments/batches/${batch.id}`)).body.data.decision).toEqual({ canDecide: true, blockedCode: null, blockedReason: null });
+    expect((await checker('get', '/bank-payments/batches?status=for-approval')).body.data.find((b) => b.id === batch.id).decision.canDecide).toBe(true);
     expect((await maker('post', `/bank-payments/batches/${batch.id}/approve`)).status).toBe(403);
     expect((await checker('post', `/bank-payments/batches/${batch.id}/approve`)).body.data.status).toBe('approved');
     const gen = await maker('post', `/bank-payments/batches/${batch.id}/generate`);

@@ -1,0 +1,5 @@
+// Premium Warranty Monitor list: the status chip keeps its whole label ("Warranty breached") next to the actions.
+.cc-status-col .p-tag {
+  max-width: none;
+  white-space: nowrap;
+}

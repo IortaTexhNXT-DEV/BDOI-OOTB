@@ -74,9 +74,15 @@ const RecurringJournals = () => {
     }
   };
 
-  const runDue = async (row) => {
+  // templates whose next run date has come (all of them, or the one row)
+  const dueOf = (list) => {
     const today = toIsoDate(new Date());
-    const due = (row ? [row] : rows).filter((r) => r.kind === "recurring" && r.status === "active" && r.nextRunDate && r.nextRunDate <= today);
+    return list.filter((r) => r.kind === "recurring" && r.status === "active" && r.nextRunDate && r.nextRunDate <= today);
+  };
+  const dueCount = dueOf(rows).length;
+
+  const runDue = async (row) => {
+    const due = dueOf(row ? [row] : rows);
     const ok = await openConfirm({
       title: row ? t("periodEnd.confirmations.postTemplateTitle", { code: row.code }) : t("periodEnd.confirmations.postDueTitle"),
       message: t("periodEnd.confirmations.postDueMessage"),
@@ -89,10 +95,9 @@ const RecurringJournals = () => {
         ]
         : [
           { label: t("periodEnd.confirmations.dueTemplates"), value: due.length, type: "number" },
-          { label: t("periodEnd.asOf"), value: today, type: "date" },
+          { label: t("periodEnd.asOf"), value: toIsoDate(new Date()), type: "date" },
           { label: t("periodEnd.amount"), value: due.reduce((sum, r) => sum + Number(r.totalDebit || 0), 0), type: "amount", emphasis: true },
         ],
-      note: t("periodEnd.confirmations.postDueNote"),
       confirmLabel: t("periodEnd.confirmations.postDue"),
     });
     if (!ok) return;
@@ -114,7 +119,8 @@ const RecurringJournals = () => {
       <Toast ref={toast} />
       <PageHeader title={t("periodEnd.recurringJournals")} trail={[t("periodEnd.recurringJournals")]}>
         <Dropdown value={kind} options={kindOptions} onChange={(e) => setKind(e.value)} placeholder={t("periodEnd.allKinds")} showClear style={{ minWidth: 180 }} />
-        <Button icon="pi pi-bolt" outlined label={t("periodEnd.postDueNow")} onClick={() => runDue(null)} />
+        <Button icon="pi pi-bolt" outlined label={t("periodEnd.postDueNow")} onClick={() => runDue(null)} disabled={!dueCount}
+          tooltip={dueCount ? undefined : t("periodEnd.nothingDue")} tooltipOptions={{ showOnDisabled: true, position: "bottom" }} />
         <Button icon="pi pi-plus" label={t("periodEnd.newTemplate")} onClick={() => open(null)} />
       </PageHeader>
 
@@ -134,7 +140,8 @@ const RecurringJournals = () => {
             <div className="flex gap-1">
               <Button icon="pi pi-pencil" text size="small" tooltip={t("periodEnd.edit")} onClick={() => open(r)} aria-label={t("periodEnd.edit")} />
               <Button icon="pi pi-list" text size="small" tooltip={t("periodEnd.generated")} onClick={async () => { try { setDetail(await periodEndService.recurringJournal(r.id)); } catch (e) { showError(toast, e); } }} aria-label={t("periodEnd.generated")} />
-              {r.kind === "recurring" && r.status === "active" && <Button icon="pi pi-bolt" text size="small" tooltip={t("periodEnd.postDueNow")} onClick={() => runDue(r)} aria-label={t("periodEnd.postDueNow")} />}
+              {r.kind === "recurring" && r.status === "active" && <Button icon="pi pi-bolt" text size="small" disabled={!dueOf([r]).length} tooltip={dueOf([r]).length ? t("periodEnd.postDueNow") : t("periodEnd.notDueYet")}
+                tooltipOptions={{ showOnDisabled: true }} onClick={() => runDue(r)} aria-label={t("periodEnd.postDueNow")} />}
             </div>
           )} />
         </DataTable>

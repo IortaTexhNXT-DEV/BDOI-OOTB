@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import { Tag } from "primereact/tag";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -38,7 +39,8 @@ const ConnectorDialog = ({ connector, adapters, onHide, onSaved, toast }) => {
     setV({ ...connector, endpoint: connector.endpoint || "", options: pretty(connector.options),
       credentialRows: Object.entries(connector.credentialEnv || {}).map(([key, envName]) => ({ key, envName })) });
   }, [connector]);
-  if (!v) return null;
+  // closing clears the connector one render before the effect clears the form
+  if (!v || !connector) return null;
   const set = (patch) => setV((x) => ({ ...x, ...patch }));
   const setCred = (i, patch) => set({ credentialRows: v.credentialRows.map((r, j) => (j === i ? { ...r, ...patch } : r)) });
   const save = async () => {
@@ -81,7 +83,9 @@ const ConnectorDialog = ({ connector, adapters, onHide, onSaved, toast }) => {
             <div className="flex gap-2 mb-2 align-items-center" key={i}>
               <InputText value={r.key} placeholder={t("integrations.credentialKey")} onChange={(e) => setCred(i, { key: e.target.value })} style={{ width: "12rem" }} aria-label={t("integrations.credentialKey")} />
               <InputText value={r.envName} placeholder="ENVIRONMENT_VARIABLE" onChange={(e) => setCred(i, { envName: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, "") })} className="flex-1" aria-label={t("integrations.envName")} />
-              <IntTag status={(connector.credentials || []).find((c) => c.envName === r.envName)?.present ? "sent" : "not-sent"} />
+              {(connector.credentials || []).find((c) => c.envName === r.envName)?.present
+                ? <Tag className="pe-tag" value={t("integrations.credentialSet")} severity="success" />
+                : <Tag className="pe-tag" value={t("integrations.credentialNotSet")} severity="warning" />}
               <Button icon="pi pi-trash" text severity="danger" aria-label={t("integrations.remove")} onClick={() => set({ credentialRows: v.credentialRows.filter((_, j) => j !== i) })} />
             </div>
           ))}

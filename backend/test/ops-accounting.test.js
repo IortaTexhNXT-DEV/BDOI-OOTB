@@ -16,7 +16,9 @@ import { straightLine, depreciationStep } from '../src/modules/fixed-assets/serv
 import { ensureCalendar, getPeriod } from '../src/modules/period-end/fiscal.js';
 import { coverNoteExpiry } from '../src/modules/cover-notes/jobs.js';
 import { pdcDepositDue } from '../src/modules/pdc/jobs.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { claimDocumentReminders } from '../src/modules/claim-documents/jobs.js';
+import { enableFeatures } from './helpers.js';
 
 let ctx; let admin; let manager; let asOf;
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -27,6 +29,8 @@ const bill = async (m, amount = m.gross) => withTransaction(async (db) => create
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['claims-settlements', 'payables', 'fixed-assets']);
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
   await ctx.api('post', '/users').send({ username: 'ops.manager', password: 'Welcome@123', displayName: 'AP manager', roles: ['accounting-manager'], email: 'ops.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'ops.manager', password: 'Welcome@123' })).body.accessToken;
@@ -159,6 +163,17 @@ describe('cancellation return premium', () => {
     expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(r2(610.4 - expected));
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
   });
+  it('a motor policy kept with its gross premium alone returns its premium taxes on the net taken out of the gross', async () => {
+    // a loaded motor own damage policy: gross premium only; it is not a CTPL tariff policy
+    const m = await makePolicy({ net: 0, product: 'MOTOR', inceptionOffset: -10 });
+    await query("UPDATE policies SET premium_total = 35650, net_premium = 0, details = '{}' WHERE id = $1", [m.policy.id]);
+    const quote = await ctx.api('post', '/cancellations/quote').send({ policyId: m.policy.id, effectiveDate: asOf, reason: 'NON_PAYMENT' });
+    expect(quote.status, JSON.stringify(quote.body)).toBe(200);
+    expect(quote.body.data.tariffOnly).toBe(false);
+    expect(quote.body.data.policyNetPremium).toBeLessThan(35650);
+    expect(quote.body.data.policyNetPremium).toBeGreaterThan(25000);
+    expect(quote.body.data.taxes.vat).toBeGreaterThan(0);
+  });
 });
 
 // ---------------------------------------------------------------- 8.12 post-dated cheques
@@ -183,6 +198,8 @@ describe('post-dated cheque register', () => {
     expect((await pdcDepositDue()).due).toBeGreaterThanOrEqual(1);
   });
   it('deposits a cheque on its date: the receipt is created and posted; not before its date', async () => {
+    await query('UPDATE app_settings SET value = $1 WHERE key = \'pdc.default_deposit_account\'', [JSON.stringify('ACC-MBT-001')]);
+    clearSettingsCache();
     expect((await ctx.as('maker')('post', `/pdc/${second.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' })).status).toBe(409);
     const r = await ctx.as('maker')('post', `/pdc/${first.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' });
     expect(r.status).toBe(200);

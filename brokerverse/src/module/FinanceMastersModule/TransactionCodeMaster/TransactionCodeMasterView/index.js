@@ -145,7 +145,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.transactionCode")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.TransactionCode}
@@ -161,7 +161,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.transactionName")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.TransactionName}
@@ -179,7 +179,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label="Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Description}
@@ -195,7 +195,7 @@ const TransactionCodeMasterView = () => {
                 className="input__filed"
                 label={t("financeMasters.transactionBasis")}
                 placeholder={t("financeMasters.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -218,7 +218,7 @@ const TransactionCodeMasterView = () => {
                 className="input__filed"
                 label={t("financeMasters.mainAccountCode")}
                 placeholder={t("financeMasters.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -240,7 +240,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.mainAccountDescription")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={
@@ -258,7 +258,7 @@ const TransactionCodeMasterView = () => {
                 className="input__filed"
                 label="Sub Account Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -279,7 +279,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.subAccountDescription")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={
@@ -297,7 +297,7 @@ const TransactionCodeMasterView = () => {
                 className="input__filed"
                 label={t("financeMasters.branchCode")}
                 placeholder={t("financeMasters.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -316,7 +316,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.branchDescription")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={
@@ -334,7 +334,7 @@ const TransactionCodeMasterView = () => {
                 className="input__filed"
                 label={t("financeMasters.departmentCodeLabel")}
                 placeholder={t("financeMasters.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -353,7 +353,7 @@ const TransactionCodeMasterView = () => {
                 classNames="input__filed"
                 label={t("financeMasters.departmentDescription")}
                 placeholder={t("financeMasters.enter")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={

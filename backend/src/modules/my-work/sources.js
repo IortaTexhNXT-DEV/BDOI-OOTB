@@ -20,6 +20,7 @@ import { KYC_ITEMS, KYC_DEFAULT_REQUIRED } from '../policies/kyc.js';
 import { effectiveAuthority } from '../access-control/service.js';
 import { CHANGE_LABELS } from '../posting-rules/service.js';
 import { APPROVER as ACCESS_APPROVER } from '../access-control/changes.js';
+import { isFeatureOn } from '../features/service.js';
 
 /** Categories in screen order: code, label, icon, permission needed to see it. */
 export const CATEGORIES = [
@@ -84,13 +85,19 @@ const daysSetting = async (key, fallback) => Math.max(1, Number(await getSetting
 /** Last day of the month after a YYYY-MM period plus a number of days: the due date of the work that closes the period. */
 const afterPeriod = (period, days) => `((to_date(${period}, 'YYYY-MM') + interval '1 month')::date + ${days}::int - 1)`;
 
-/** Approval limit of the user for an Authority Matrix transaction type: SQL condition on `amountExpr`. */
-async function withinAuthority(ctx, type, amountExpr) {
-  if (!(await getSetting('access.authority_enforced', true))) return 'TRUE';
+/**
+ * Approval limit of the user for an Authority Matrix transaction type: SQL condition on `amountExpr`. `requireLimit`:
+ * a user without a limit for the type sees nothing, whatever access.authority_without_limit says (remittance approvals
+ * with remittance.require_authority_limit, as remittance/decision.js decides).
+ */
+async function withinAuthority(ctx, type, amountExpr, { requireLimit = false } = {}) {
+  const enforced = await getSetting('access.authority_enforced', true);
+  if (!enforced && !requireLimit) return 'TRUE';
   const exists = (await ctx.db.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok;
   if (!exists) return 'TRUE';
-  const a = await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.today);
-  if (!a.found) return String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse' ? 'FALSE' : 'TRUE';
+  const a = await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.today, { requireLimit });
+  if (!a.found) return requireLimit || String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse' ? 'FALSE' : 'TRUE';
+  if (!enforced) return 'TRUE';
   if (a.unlimited) return 'TRUE';
   return `(COALESCE(${amountExpr}, 0) <= ${ctx.P(a.limit)})`;
 }
@@ -154,7 +161,7 @@ async function renewals(ctx) {
     next_action: `CASE WHEN r.status = 'pipeline' THEN 'Prepare the renewal terms' WHEN r.status = 'quoted' THEN 'Submit the renewal for approval'
       WHEN r.status = 'pending-approval' THEN 'Awaiting approval' WHEN r.status = 'approved' THEN 'Complete the renewal' ELSE 'Follow up the client' END`,
     owner_id: 'COALESCE(r.owner_user_id, p.owner_user_id)',
-    link: "CASE WHEN r.status IN ('quoted', 'pending-approval', 'approved') THEN '/renewal/negotiations' ELSE '/renewal/queue' END",
+    link: "CASE WHEN r.status IN ('quoted', 'pending-approval', 'approved') THEN '/renewal/negotiations?renewal=' ELSE '/renewal/queue?renewal=' END || r.id",
     amount: 'COALESCE(r.premium_new, r.premium_old)', created_at: 'r.created_at',
   })} FROM renewals r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   WHERE r.status = ANY(${open}::text[]) AND ${rec(ctx, 'renewal', 'r')}`;
@@ -195,7 +202,18 @@ function collections(ctx) {
     AND (ci.assigned_to IS NOT NULL OR ci.commitment_date IS NOT NULL OR rv.due_date < ${ctx.T}::date)
     -- a promise to pay already followed up by a task of the collector who recorded it is listed through that task
     AND NOT EXISTS (SELECT 1 FROM work_tasks wt WHERE wt.source = 'collection' AND wt.entity_id = ci.id AND wt.status = 'open')
-    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`;
+    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`
+    + (ctx.can('write:receipts') ? ` UNION ALL ${unappliedCollections()}` : '');
+}
+
+/** Unapplied collections (On Account, floating, advance) to allocate by their SLA date (collections.unapplied_sla_days). */
+function unappliedCollections() {
+  return `SELECT ${select({
+    category: "'collections'", kind: "'Unapplied collection'", id: 'uc.id', ref: 'COALESCE(ucr.receipt_number, uc.reference_no, uc.id)',
+    title: "initcap(uc.kind) || ' payment' || COALESCE(' - ' || ucp.policy_number, '')", client_name: 'COALESCE(ucc.display_name, uc.payer_name)', due_date: 'uc.allocate_by',
+    status: "'open'", queue: 'true', next_action: "'Allocate it to a bill or refund it'", link: "'/accounts/unapplied-collections?item=' || uc.id", amount: 'uc.balance', created_at: 'uc.created_at',
+  })} FROM unapplied_collections uc LEFT JOIN receipts ucr ON ucr.id = uc.receipt_id LEFT JOIN clients ucc ON ucc.id = uc.client_id LEFT JOIN policies ucp ON ucp.id = uc.policy_id
+  WHERE uc.status = 'open'`;
 }
 
 function endorsements(ctx) {
@@ -219,11 +237,11 @@ function claims(ctx) {
     id: 'cl.id', ref: 'cl.claim_number', title: "COALESCE(p.policy_number, '') || COALESCE(' - ' || cl.loss_type, '')", client_name: CLIENT('c'),
     due_date: 'cl.due_date', status: 'cl.status', priority: prio('cl.priority'),
     next_action: `CASE cl.status WHEN 'registered' THEN 'Review the claim and notify the insurer' WHEN 'in-review' THEN 'Follow up the insurer and adjuster'
-      WHEN 'approved' THEN 'Record the settlement' ELSE 'Awaiting settlement approval' END`,
+      WHEN 'approved' THEN 'Record the settlement' WHEN 'partially-settled' THEN 'Complete the settlement' ELSE 'Awaiting settlement approval' END`,
     owner_id: 'cl.handler_user_id', queue, link: "'/agent/claimdetail/' || cl.id", amount: 'COALESCE(cl.approved_amount, cl.estimate_amount)', created_at: 'cl.created_at',
     reassign: "CASE WHEN cl.status IN ('registered', 'in-review') THEN 'claim' END",
   })} FROM claims cl LEFT JOIN policies p ON p.id = cl.policy_id LEFT JOIN clients c ON c.id = COALESCE(cl.client_id, p.client_id)
-  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval') AND ${rec(ctx, 'claim', 'cl')}`;
+  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval', 'partially-settled') AND ${rec(ctx, 'claim', 'cl')}`;
 }
 
 /** Approval queues (maker-checker) the user can decide. */
@@ -247,27 +265,36 @@ async function approvals(ctx) {
       amount: 'k.totale_amount', created_at: 'k.created_at' })}
       FROM checkbooks k LEFT JOIN disbursements d ON d.id = k.disbursement_id WHERE k.status = 'Pending' AND ${notMine(ctx, 'k.created_by')}
         AND ${await withinAuthority(ctx, 'payment_voucher', 'k.totale_amount')}`);
-    if (await has('petty_cash_requests')) {
+    // petty cash is a future-release feature (modules/features): no approval of it while it is not enabled
+    if (await has('petty_cash_requests') && await isFeatureOn('petty-cash')) {
       out.push(`SELECT ${select({ ...base, kind: "'Petty cash request'", id: 'pc.id', ref: 'pc.request_number', title: "COALESCE(pc.purpose, pc.requester_name, 'Petty cash')", due_date: due('pc.created_at'),
         status: 'pc.status', link: "'/accounts/pettycash/editrequestform/view/' || pc.id", amount: 'pc.total_amount', created_at: 'pc.created_at' })}
         FROM petty_cash_requests pc WHERE pc.status = 'submitted' AND ${notMine(ctx, 'pc.created_by')}`);
     }
   }
-  if (ctx.can('write:remittance')) {
-    const remit = await withinAuthority(ctx, 'remittance', 'a.amount');
-    const settle = await withinAuthority(ctx, 'remittance_settlement', 'a.amount');
+  // remittance approvals are decided with approve:remittance (migration 0400), by the rules of remittance/decision.js:
+  // not the submitter nor the remittance's maker, not an earlier-level approver, within the user's limit (a limit is
+  // required with remittance.require_authority_limit); debit notes stay with write:remittance
+  if (ctx.can('approve:remittance')) {
+    const requireLimit = !!(await getSetting('remittance.require_authority_limit'));
+    const remit = await withinAuthority(ctx, 'remittance', 'a.amount', { requireLimit });
+    const settle = await withinAuthority(ctx, 'remittance_settlement', 'a.amount', { requireLimit });
     out.push(`SELECT ${select({ ...base, kind: "COALESCE(a.transaction_type, 'Remittance')", id: 'a.id', ref: 'a.reference_no', title: "COALESCE(a.description, a.transaction_type, 'Remittance')",
       due_date: `${localDate(ctx, "a.created_at + make_interval(hours => COALESCE(a.sla_hours, 48))")}`, status: 'a.status', priority: prio('a.priority'),
-      owner_id: 'a.delegated_to', queue: 'a.delegated_to IS NULL', link: "'/finance/remittance/approval'", amount: 'a.amount', created_at: 'a.created_at' })}
-      FROM remittance_approvals a WHERE a.status = 'Pending' AND ${notMine(ctx, 'a.initiator_id')}
+      owner_id: 'a.delegated_to', queue: 'a.delegated_to IS NULL', link: "'/finance/remittance/approvals?approval=' || a.id", amount: 'a.amount', created_at: 'a.created_at' })}
+      FROM remittance_approvals a LEFT JOIN remittances rm ON a.entity = 'remittance' AND rm.id = a.entity_id
+      WHERE a.status = 'Pending' AND ${notMine(ctx, 'a.initiator_id')} AND ${notMine(ctx, 'rm.created_by')}
         AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(a.history, '[]'::jsonb)) h WHERE h->>'action' = 'Approved' AND h->>'by' = ANY(${ctx.ME}::text[]))
         AND (CASE WHEN a.entity = 'remittance' THEN ${remit} ELSE ${settle} END)`);
-    if (await has('commission_debit_notes')) {
-      out.push(`SELECT ${select({ ...base, kind: "'Commission debit note'", id: 'dn.id', ref: 'dn.dn_number', title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
-        status: 'dn.status', link: "'/finance/remittance/directbill'", amount: 'dn.amount', created_at: 'dn.created_at' })}
-        FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
-        WHERE dn.status = 'for-approval' AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
-    }
+  }
+  // commission debit notes are decided with write:remittance, billing statements with approve:insurer-billing
+  const bases = [...(ctx.can('write:remittance') ? ['direct'] : []), ...(ctx.can('approve:insurer-billing') ? ['gross', 'net'] : [])];
+  if (bases.length && await has('commission_debit_notes')) {
+    out.push(`SELECT ${select({ ...base, kind: "CASE WHEN dn.basis = 'direct' THEN 'Commission debit note' ELSE 'Billing statement' END", id: 'dn.id', ref: 'dn.dn_number',
+      title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
+      status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
+      FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
+      WHERE dn.status = 'for-approval' AND dn.basis = ANY(${ctx.P(bases)}::text[]) AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
   }
   if (ctx.can('approve:access-control') && await has('authority_limits')) {
     out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(r.name, al.role_code, u.display_name, '')",
@@ -320,6 +347,22 @@ async function approvals(ctx) {
       FROM premium_warranty_extensions wx JOIN policies p ON p.id = wx.policy_id LEFT JOIN clients c ON c.id = p.client_id
       WHERE wx.status = 'pending' AND ${notMine(ctx, 'wx.requested_by')}`);
   }
+  // post-dated cheque cancellations: decided by the holders of approve:pdc, never by the user who requested them
+  if (ctx.can('approve:pdc') && await has('post_dated_cheques')) {
+    out.push(`SELECT ${select({ ...base, kind: "'PDC cancellation'", id: 'pd.id', ref: 'pd.pdc_number', title: "'Cheque ' || pd.cheque_number || COALESCE(' - ' || rc.name, '')",
+      client_name: CLIENT('c'), due_date: due('pd.cancel_requested_at'), status: 'pd.status', link: "'/accounts/post-dated-cheques?cheque=' || pd.id", amount: 'pd.amount',
+      created_at: 'pd.cancel_requested_at' })}
+      FROM post_dated_cheques pd LEFT JOIN clients c ON c.id = pd.client_id
+      LEFT JOIN master_records rc ON rc.type_code = 'reason-code' AND rc.code = pd.cancel_reason_code
+      WHERE pd.status = 'cancellation-pending' AND pd.cancel_approved_at IS NULL AND ${notMine(ctx, 'pd.cancel_requested_by')}`);
+  }
+  // receipt reversals: decided by the holders of approve:receipt-reversal, never by the user who requested them
+  if (ctx.can('approve:receipt-reversal')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Receipt reversal'", id: 'rr.id', ref: 'rr.receipt_number', title: "'Reverse ' || rr.receipt_number || COALESCE(' - ' || rr.reversal_reason, '')",
+      client_name: 'rr.customer_name', due_date: due('rr.reversal_requested_at'), status: "'pending'", link: "'/accounts/receipts/receiptdetailview?receipt=' || rr.id", amount: 'rr.amount',
+      created_at: 'rr.reversal_requested_at' })}
+      FROM receipts rr WHERE rr.reversal_status = 'pending' AND ${notMine(ctx, 'rr.reversal_requested_by')}`);
+  }
   // incentive batches: decided by the holders of approve:incentive, never by the user who ran or submitted the batch
   if (ctx.can('approve:incentive') && await has('incentive_calculations')) {
     out.push(`SELECT ${select({ ...base, kind: "'Incentive calculation'", id: 'ic.batch_id', ref: 'ic.batch_id', title: "'Incentives of ' || ic.period", due_date: due('COALESCE(ic.submitted_date, ic.created_at)'),
@@ -353,7 +396,7 @@ async function approvals(ctx) {
   if (ctx.can('approve:renewals') && (isAdmin(ctx.user) || ctx.roles.some((r) => renewalApprovers.includes(r)))) {
     out.push(`SELECT ${select({ ...base, kind: "'Renewal premium'", id: 'ra.id', ref: 'ra.renewal_number', title: 'p.policy_number', client_name: CLIENT('c'),
       due_date: `LEAST(COALESCE(ra.due_date, p.expiry_date), ${due('COALESCE(ra.submitted_at, ra.updated_at)')})`, status: 'ra.status', priority: prio('ra.priority'),
-      link: "'/renewal/negotiations'", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
+      link: "'/renewal/negotiations?renewal=' || ra.id", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
       FROM renewals ra JOIN policies p ON p.id = ra.policy_id LEFT JOIN clients c ON c.id = COALESCE(ra.client_id, p.client_id)
       WHERE ra.status = 'pending-approval' AND ${notMine(ctx, 'ra.submitted_by')} AND ${rec(ctx, 'renewal', 'ra')}`);
   }

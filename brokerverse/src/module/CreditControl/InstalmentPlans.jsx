@@ -95,8 +95,10 @@ const InstalmentPlans = () => {
       title: t("creditControl.confirmations.cancelPlanTitle"),
       severity: "danger",
       message: t("creditControl.confirmations.cancelPlanMessage", { bill: plan.billNumber }),
-      note: t("creditControl.confirmations.cancelPlanNote"),
-      facts: planFacts(plan),
+      facts: [...planFacts(plan), {
+        label: t("creditControl.billDueAfterCancel"), type: "date",
+        value: (plan.instalments || []).find((i) => Number(i.outstanding) > 0)?.dueDate || null,
+      }],
       input: { type: "textarea", label: t("creditControl.cancelPlanReason"), maxLength: 500 },
       confirmLabel: t("creditControl.cancelPlan"),
       cancelLabel: t("creditControl.confirmations.keepPlan"),

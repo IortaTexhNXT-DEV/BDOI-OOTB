@@ -447,7 +447,7 @@ export const CoverageBuilder = () => {
               </div>
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
-            <div className="flex justify-content-end"><Button label={t("coverageBuilder.saveCoverage")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("coverageBuilder.saveCoverage")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -619,9 +619,24 @@ export const RatingEngine = () => {
         <Column field="type" header={t("ratingEngine.type")} body={(r) => <Tag value={r.type} severity={r.type === "Discount" ? "success" : "info"} />} />
         <Column header={t("ratingEngine.bands")} body={(r) => r.rules?.length || 0} />
         <Column field="status" header={t("productConfigurator.filters.status")} body={statusBody} />
-        <Column header={t("productConfigurator.actions.title")} body={(r) => <RowActions row={r} onView={(row) => setExpandedRows({ ...(expandedRows || {}), [row.id]: true })} onEdit={open} onToggle={toggle} onHistory={(row) => s.setHistory({ ...row, label: row.factorCode })} />} />
+        <Column header={t("productConfigurator.actions.title")} body={(r) => <RowActions row={r} onView={s.setViewing} onEdit={open} onToggle={toggle} onHistory={(row) => s.setHistory({ ...row, label: row.factorCode })} />} />
       </DataTable>
       <HistoryDialog kind="rating-factors" row={s.history} onHide={() => s.setHistory(null)} />
+      {/* the factor as a record, like the other configurator screens: its facts, its bands and its history */}
+      <ViewDialog header={t("productConfigurator.view.ratingFactor")} title={s.viewing?.factorCode} subtitle={s.viewing?.factorName} status={s.viewing?.status}
+        visible={Boolean(s.viewing)} onHide={() => s.setViewing(null)}
+        onHistory={() => { s.setHistory({ ...s.viewing, label: s.viewing.factorCode }); s.setViewing(null); }} rows={s.viewing ? [
+        [t("productConfigurator.template"), templateText(s.viewing)], [t("productTemplateManager.product"), productText(s.viewing)],
+        [t("ratingEngine.ratesOn"), fieldName(s.viewing.field)], [t("ratingEngine.type"), typeOptions.find((o) => o.value === s.viewing.type)?.label || s.viewing.type],
+      ] : []}>
+        {s.viewing && (
+          <DataTable value={s.viewing.rules || []} size="small" className="mt-3" emptyMessage={t("productConfigurator.empty")}>
+            <Column field="condition" header={t("ratingEngine.band")} />
+            <Column field="factor" header={t("ratingEngine.factor")} bodyClassName="bv-num" headerClassName="bv-num" />
+            <Column field="description" header={t("ratingEngine.description")} />
+          </DataTable>
+        )}
+      </ViewDialog>
       <TestRiskDialog visible={testing} onHide={() => setTesting(false)} templates={templateCodeOptions(s.options.templates)} insurers={s.options.insurers} fields={uw.fields} />
 
       <Dialog header={t("ratingEngine.configureFactor")} visible={Boolean(selected)} style={{ width: "50rem" }} breakpoints={{ "960px": "95vw" }} onHide={() => setSelected(null)}>
@@ -664,7 +679,7 @@ export const RatingEngine = () => {
             <FieldError error={errors.rules} />
             <Button label={t("ratingEngine.addBand")} icon="pi pi-plus" className="p-button-text w-auto mb-3" onClick={() => setSelected({ ...selected, rules: [...(selected.rules || []), { condition: "", factor: 1 }] })} />
             <div className="formgrid grid"><div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div></div>
-            <div className="flex justify-content-end"><Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -842,7 +857,7 @@ export const UnderwritingRules = () => {
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
             <p className="pc-muted">{t("underwritingRules.preview")}: {conditionText(selected, uw.fields) || "—"} → {outcomeText(selected, t)}</p>
-            <div className="flex justify-content-end"><Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -914,7 +929,7 @@ export const MarketMapping = () => {
         [t("marketMapping.overridePercent"), s.viewing.overrideRate == null ? null : `${s.viewing.overrideRate}%`],
         [t("marketMapping.profitShare"), s.viewing.profitShare == null ? null : `${s.viewing.profitShare}%`],
         [t("marketMapping.target"), s.viewing.targetPremium || null, { type: "amount" }],
-        [t("marketMapping.ytdPerformance"), `${formatCurrency(s.viewing.ytdPremium ?? 0)} (${s.viewing.ytdPolicies ?? 0} ${t("marketMapping.policies")})`],
+        [t("marketMapping.ytdPerformance"), `${formatCurrency(s.viewing.ytdPremium ?? 0)} (${t("marketMapping.policyCount", { count: Number(s.viewing.ytdPolicies ?? 0) })})`],
         [t("marketMapping.valid"), `${formatDate(s.viewing.validFrom)} – ${formatDate(s.viewing.validTo)}`],
         [t("marketMapping.specialTerms"), s.viewing.specialTerms, { span: "full" }],
       ] : []} />
@@ -952,8 +967,7 @@ export const MarketMapping = () => {
               </div>
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
-            <small className="block mb-3 pc-muted">{t("marketMapping.commissionNote")}</small>
-            <div className="flex justify-content-end"><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -1104,7 +1118,7 @@ export const DocumentManager = () => {
                 {used.length > 0 && <small className="block mt-1">{t("documentManager.fieldsUsed", { fields: used.join(", ") })}</small>}
               </div>
             </div>
-            <div className="flex justify-content-end"><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>

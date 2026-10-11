@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { notify } from '../src/modules/notifications/service.js';
 import { nextRunOf } from '../src/modules/remittance/items.js';
@@ -27,6 +27,8 @@ async function makeUser(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['win-back']);
   // Account Executives restricted to their own book (security.scoped_roles = sales): the producers of this walk.
   expect((await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['sales'] } })).status).toBe(200);
   await makeUser('pw.agent', ['sales']);
@@ -150,7 +152,7 @@ describe('empty forms are refused with field messages', () => {
       ['/product-configurator/coverages', 'coverageCode'], ['/product-configurator/rating-factors', 'factorCode'], ['/product-configurator/underwriting-rules', 'ruleCode'],
       ['/renewals/campaigns', 'campaignName'], [`/renewals/${rn}/activities`, 'type'], ['/remittance/adjustments', 'adjustmentType'],
       ['/masters/remittance-automated', 'code'], ['/incentive/programs', 'programName'], ['/remittance/exceptions', 'type'],
-      ['/remittance/schedules', 'code'],
+      ['/remittance/schedules', 'name'],
     ];
     for (const [p, field] of cases) {
       const r = await ctx.api('post', p).send({});
@@ -242,7 +244,9 @@ describe('notifications reach only the roles that can act on them', () => {
     const src = (f) => fs.readFileSync(path.join(here, '../src/modules', f), 'utf8');
     expect(src('journal-vouchers/router.js')).toMatch(/audience: 'write:journal-vouchers'/);
     expect(src('payments/pettycash.js')).toMatch(/audience: 'write:disbursements'/);
-    expect(src('remittance/service.js')).toMatch(/audience: 'write:remittance'/);
+    // remittance approvals go to the eligible approvers by name (remittance/decision.js), never to a permission
+    expect(src('remittance/service.js')).toMatch(/notifyApprovers\(\{ users/);
+    expect(src('remittance/service.js')).not.toMatch(/audience: '/);
   });
 });
 

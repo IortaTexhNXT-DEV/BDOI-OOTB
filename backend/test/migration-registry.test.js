@@ -11,6 +11,7 @@ import { createApp } from '../src/app.js';
 import { pool, query } from '../src/db/pool.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { kitObjects, loadOrder, objects, registryEntries } from '../src/modules/data-load/registry.js';
+import { enableFeatures } from './helpers.js';
 
 /** The configuration kit as it was built by hand before the registry: sheet keys in load order. */
 const CONFIGURATION_ORDER = ['master:company', 'settings', 'master:country', 'master:region', 'master:state', 'master:city', 'master:barangay', 'master:branch',
@@ -18,7 +19,7 @@ const CONFIGURATION_ORDER = ['master:company', 'settings', 'master:country', 'ma
   'master:bank-account', 'master:signatory', 'master:transaction-code', 'master:write-off-reason', 'master:insurance-company', 'master:line-of-business',
   'master:product', 'master:policy-type', 'master:cover', 'master:vehicle-brand', 'master:vehicle-model', 'master:vehicle-variant', 'master:vehicle',
   'master:supplier', 'master:asset-class', 'master:short-period-rate', 'master:cancellation-reason', 'master:claim-document-requirement', 'master:repair-shop',
-  'master:lead-source', 'master:reason-code', 'commission-rates', 'premium-charges', 'lgu-rates', 'authority-limits', 'numbering', 'payee-bank-accounts', 'coc-series'];
+  'master:lead-source', 'master:reason-code', 'commission-rates', 'premium-charges', 'lgu-rates', 'authority-limits', 'numbering', 'payee-bank-accounts', 'coc-series', 'features'];
 /**
  * Migration kit (specification 5.2): clients, the policy sheets per product (Fire only with an active fire product), the
  * single Policies sheet of the earlier layout (read, never downloaded), open items, post-dated cheques, open claims,
@@ -40,6 +41,7 @@ beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   const app = await createApp();
+  await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
 });
@@ -48,7 +50,7 @@ afterAll(async () => {
 });
 
 describe('object registry', () => {
-  it('builds the configuration kit in the order and with the sheets it had: 44 objects', async () => {
+  it('builds the configuration kit in the order and with the sheets it had: 45 objects', async () => {
     const sheets = await kitObjects('configuration');
     expect(sheets.map((s) => s.key)).toEqual(CONFIGURATION_ORDER);
     for (const s of sheets) {

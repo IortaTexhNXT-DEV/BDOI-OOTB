@@ -41,6 +41,9 @@ UPDATE app_settings s
 -- gives one user both personas, so the rule warns instead of blocking.
 INSERT INTO sod_rules(code, name, role_a, role_b, action, reason)
 SELECT 'SOD-TIS-BP-RECON', 'Receipting and reversals', 'tis-ccd-bp', 'tis-ccd-recon', 'warn',
-       'RBAC v4: CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon'
+       'CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon'
 WHERE EXISTS (SELECT 1 FROM roles WHERE code = 'tis-ccd-bp') AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-ccd-recon')
 ON CONFLICT (code) DO NOTHING;
+-- the reason of an earlier seed named the workbook sheet; a reason changed on the screen is kept
+UPDATE sod_rules SET reason = 'CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon'
+ WHERE code = 'SOD-TIS-BP-RECON' AND reason = 'RBAC v4: CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon';

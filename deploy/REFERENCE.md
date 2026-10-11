@@ -10,6 +10,7 @@ The front end is in `brokerverse/`, the Node.js + PostgreSQL backend in `backend
 export JWT_SECRET=$(openssl rand -hex 32)
 export DATA_ENCRYPTION_KEY=$(openssl rand -hex 32)
 export PII_ENCRYPTION_KEY=$(openssl rand -hex 32)
+export ENTITLEMENT_SIGNING_KEY=$(openssl rand -hex 32)
 export ADMIN_PASSWORD='<first administrator password>'
 export DB_PASSWORD='<database password>'
 export PUBLIC_BASE_URL=https://brokerverse.example.ph      # the public HTTPS address (the web container forwards /api)
@@ -60,6 +61,7 @@ stops the start.
 | Variable | Default | Meaning |
 |---|---|---|
 | `SEED_SAMPLE_DATA` | `true` in development and test, `false` with `NODE_ENV=production` | Seed the sample / demo data. An explicit `true` / `false` wins (e.g. `true` on a UAT or demo site). The API logs a warning when it is on in production. |
+| `TISPH_TEST_USERS_PASSWORD` | unset | Non-production only (UAT and demo sites). When set, the seed creates one test user per TISPH role (`backend/src/db/seeds/README.md` lists the 13 user names) with this password, to be changed at the first sign-in; an existing user keeps its password and roles. In the production environment (`APP_ENVIRONMENT` Production or Prod, any case; without `APP_ENVIRONMENT`, the environment name of Help > About being Production) the API logs a warning and creates nobody; `NODE_ENV` does not decide this, every deployed site runs with `NODE_ENV=production`. |
 
 Removing demo data from a database that was started with it (for example a UAT database promoted to production):
 stop the API instances, take a backup, then
@@ -132,7 +134,7 @@ job that is running elsewhere answers `Job skipped`.
 |---|---|---|
 | `GET /api/health` | load balancer / readiness check (Docker `HEALTHCHECK`) | `200` with `{"status":"ok","ready":true,"database":{"reachable":true,"latencyMs":1},"pendingMigrations":0,...}` when start-up (migrations and seed) has finished, PostgreSQL answers and no migration is pending; otherwise `503` with `ready: false` and `status` `starting` or `unavailable` (e.g. `database.reachable: false`). It also answers `503` once the instance starts shutting down, so traffic drains. |
 | `GET /api/health/live` | liveness (restart) probe | `200` while the process serves HTTP; no database check |
-| `GET /api/version` | monitoring, post-deploy smoke test | version, `commit` and `buildTime` (from `GIT_COMMIT` / `BUILD_TIME`, else the release artefact's `build-info.json`), `ref`, `appEnvironment` (`APP_ENVIRONMENT`), start time, database reachability, pending migrations |
+| `GET /api/version` | monitoring, post-deploy smoke test | version, `commit` and `buildTime` (from `GIT_COMMIT` / `BUILD_TIME`, else the release artefact's `build-info.json`), `ref`, `appEnvironment` (`APP_ENVIRONMENT`), start time, database reachability, pending migrations, `release` (Help > About: web and API release, environment name, and for a signed-in user the approvers of the release; settings `release.*` on Master > Configuration > Release, `APP_ENVIRONMENT` wins over the environment name) |
 
 Health endpoints need no sign-in, are not rate limited and are not logged. The database check times out after
 `HEALTH_DB_TIMEOUT_MS` (default 2000 ms).
@@ -146,9 +148,17 @@ With `NODE_ENV=production` (the Docker image sets it) the API refuses to start, 
 | `JWT_SECRET` | set, at least 32 characters, not a placeholder (signs every session token and signed file link) |
 | `DATA_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` (encrypts two-factor secrets at rest and keys the reset-code hashes) |
 | `PII_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` (encrypts TIN, government ID and bank account numbers at rest and keys their blind indexes) |
+| `ENTITLEMENT_SIGNING_KEY` | set, at least 32 characters, different from the three keys above (signs the feature entitlements of the environment; an entitlement without a valid signature counts as off) |
 | `CORS_ORIGINS` | set to the web application origin(s), comma separated; `*` is refused |
 | `PUBLIC_BASE_URL` | set to the public address of the API (file links are built from it); `localhost` / `127.0.0.1` are refused |
 | `ENTRA_*` | either none or all four of `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`, `ENTRA_REDIRECT_URI` (an `https://` address) |
+
+The iorta TechNXT platform administrator (Master > Platform > Features & Releases, the only role that enables Phase 2
+and future-release features) is created at a start where both `PLATFORM_ADMIN_EMAIL` (also the user name) and
+`PLATFORM_ADMIN_PASSWORD` are set; there is no default account or password. Two-factor authentication is set up at the
+first sign-in. The second platform administrator, who approves the changes of the first, is added on that screen. Keep
+`ENTITLEMENT_SIGNING_KEY` with the environment: with another key every enabled feature counts as off until the platform
+administrators enable it again.
 
 Keep `DATA_ENCRYPTION_KEY` with the database backups: without the same key, users with two-factor authentication
 cannot sign in (an administrator can turn their two-factor off under User Management and they enrol again).

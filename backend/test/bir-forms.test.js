@@ -15,6 +15,7 @@ import { alphalist1604EDat, qapDat, sawtDat, slspPurchasesDat, slspSalesDat, spl
 import { invoicingSetup } from '../src/modules/bir/invoices.js';
 import { buildPayload, canonical, signPayload } from '../src/modules/bir/eis.js';
 import { splitTin } from '../src/modules/bir/common.js';
+import { enableFeatures } from './helpers.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (name) => fs.readFileSync(path.join(here, 'fixtures', 'bir', name), 'latin1');
@@ -23,6 +24,8 @@ let ctx;
 let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['bir-returns', 'bir-2551q', 'bir-eis', 'bir-reports']);
   maker = ctx.as('maker');
 });
 afterAll(async () => { await pool.end(); });
@@ -66,7 +69,8 @@ describe('0619-E and 1601-EQ (13.07)', () => {
     const r1 = (await maker('get', `/bir/returns/0619-E?year=${q.year}&month=${m1}`)).body.data;
     const r2 = (await maker('get', `/bir/returns/0619-E?year=${q.year}&month=${m2}`)).body.data;
     expect(r1.items.find((i) => i.no === '14').amount).toBeCloseTo(await whtBetween(r1.period.from, r1.period.to), 2);
-    expect(r1.header.find(([k]) => k === 'Due date')[1]).toBe(`${r1.period.to.slice(0, 4) === String(q.year) && m1 === 12 ? q.year + 1 : q.year}-${String(m1 + 1).padStart(2, '0')}-10`);
+    // the due date is shown in the configured date format (DD/MM/YYYY)
+    expect(r1.header.find(([k]) => k === 'Due date')[1]).toBe(`10/${String(m1 + 1).padStart(2, '0')}/${r1.period.to.slice(0, 4) === String(q.year) && m1 === 12 ? q.year + 1 : q.year}`);
 
     const f1 = await maker('post', '/bir/returns/0619-E/filings').send({ year: q.year, month: m1, dateFiled: r1.period.to, filingReference: 'EFPS-0001', amountPaid: r1.taxDue, paymentReference: 'LBP-1' });
     expect(f1.status, JSON.stringify(f1.body)).toBe(201);
@@ -266,6 +270,11 @@ describe('2551Q percentage tax working paper (13.04)', () => {
     expect((await file('get', `/bir/returns/2551Q/xlsx?year=${q.year}&quarter=${q.quarter}`)).body.subarray(0, 2).toString()).toBe('PK');
     await setSetting('bir.percentage_tax_rate', 3);
     await setSetting('direct_bill.broker_vat_registered', true);
+    // a VAT-registered broker files no percentage tax: the working paper keeps the sales with no tax due
+    const vat = (await maker('get', `/bir/returns/2551Q?year=${q.year}&quarter=${q.quarter}`)).body.data;
+    expect(vat).toMatchObject({ applicable: false, taxDue: 0 });
+    expect(vat.schedules[0].totals.grossSales).toBeCloseTo(gross, 2);
+    expect((await maker('post', '/bir/returns/2551Q/filings').send({ year: q.year, quarter: q.quarter, dateFiled: vat.period.to, amountPaid: 0 })).status).toBe(409);
   });
 });
 

@@ -18,7 +18,7 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook, readZip } from '../src/modules/documents/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { renewalPrefill } from '../src/modules/renewals/service.js';
-import { loginAs, goLiveSetup, validatedBatch } from './helpers.js';
+import { enableFeatures, goLiveSetup, loginAs, validatedBatch } from './helpers.js';
 
 let app;
 let api;
@@ -53,6 +53,7 @@ beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   app = await createApp();
+  await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
   kits = (await api('get', '/data-load/kits')).body.data.kits;

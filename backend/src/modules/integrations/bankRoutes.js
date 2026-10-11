@@ -27,6 +27,7 @@ const layoutExample = { code: 'BDO-BULK', name: 'BDO bulk credit (example)', ban
 const batchExample = { id: 'bpb_0123456789abcdef', batchNumber: 'BPB-2026-00001', layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-001', channel: 'pesonet', valueDate: '2026-10-05',
   status: 'file-generated', lineCount: 2, totalAmount: 153250.5, paidCount: 0, rejectedCount: 0, pendingCount: 2, fileName: 'BDO_BPB-2026-00001_20261005.csv',
   lines: [{ id: 1, seq: 1, voucherNumber: 'PV-2026-00011', payeeName: 'Malayan Insurance Co., Inc.', bankCode: 'MBT', accountNumber: '0012345678', amount: 125000, status: 'pending' }] };
+const decisionExample = { canDecide: false, blockedCode: 'SUBMITTER', blockedReason: 'You submitted this batch. Another user must approve it.' };
 
 // ------------------------------------------------------------------ layouts
 define({
@@ -111,17 +112,22 @@ define({
   handler: async (req, res) => ok(res, await bat.eligibleVouchers(req.query)),
 });
 define({
-  method: 'GET', path: '/batches', summary: 'Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)', screen: BATCHES, middleware: read, query: { status: 'approved,file-generated' },
-  response: { success: true, data: [batchExample], total: 1 },
+  method: 'GET', path: '/batches', summary: 'Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging), each with the caller\'s decision block (canDecide, blockedCode, blockedReason)',
+  screen: BATCHES, middleware: read, query: { status: 'approved,file-generated' },
+  response: { success: true, data: [{ ...batchExample, decision: decisionExample }], total: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 20 });
     const { total, rows } = await bat.listBatches(req.query, pg);
-    ok(res, rows, 'OK', { total, page: pg.page, perPage: pg.perPage, totalPages: Math.ceil(total / pg.perPage) });
+    const out = [];
+    for (const b of rows) out.push(await bat.withDecision(b, req.user));
+    ok(res, out, 'OK', { total, page: pg.page, perPage: pg.perPage, totalPages: Math.ceil(total / pg.perPage) });
   },
 });
 define({
-  method: 'GET', path: '/batches/:id', summary: 'One batch with its lines', screen: `${BATCHES} > Batch`, middleware: read, response: { success: true, data: batchExample },
-  handler: async (req, res) => ok(res, await bat.getBatch(req.params.id)),
+  method: 'GET', path: '/batches/:id',
+  summary: 'One batch with its lines and the caller\'s decision block: Approve and Reject are offered only when canDecide; otherwise blockedCode (MAKER, SUBMITTER, VOUCHER_MAKER, NO_AUTHORITY, ABOVE_LIMIT, NO_PERMISSION, WRONG_STATUS) and the reason',
+  screen: `${BATCHES} > Batch`, middleware: read, response: { success: true, data: { ...batchExample, decision: decisionExample } },
+  handler: async (req, res) => ok(res, await bat.withDecision(await bat.getBatch(req.params.id), req.user)),
 });
 define({
   method: 'POST', path: '/batches', summary: 'New batch (draft) from payment vouchers: layout, bank account paid from, channel (bulk_credit, instapay, pesonet), value date',

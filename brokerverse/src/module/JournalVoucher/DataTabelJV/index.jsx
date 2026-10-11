@@ -11,6 +11,8 @@ import { useDispatch } from "react-redux";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import StatusChip from "../../../components/StatusChip";
 import { originColumnBody } from "../../../components/OriginChip";
+import { useTranslation } from "react-i18next";
+import { statusLabel } from "../../../utils/statusSeverity";
 
 const DataTabelJV = ({ 
   handleEdit, 
@@ -24,6 +26,7 @@ const DataTabelJV = ({
 }) => {
   const navigate = useNavigate();
   const translate = t || ((key) => key);
+  const { t: tr } = useTranslation();
 
   const headerStyle = {
     // width: "19%",
@@ -147,9 +150,9 @@ const DataTabelJV = ({
           className="fieldvalue_container"
           headerStyle={headerStyle}
           body={(r) => {
-            const labels = { draft: "Draft", "for-approval": "Awaiting approval", approved: "Approved", posted: "Posted", rejected: "Rejected", reversed: "Reversed" };
             if (r.status === "opening") return <StatusChip label={translate("origin.openingBalance")} severity="info" />;
-            return labels[r.status] || r.status || "-";
+            // named as on the voucher's own page and its print
+            return r.status ? tr(`accounts.journalVoucherDetails.statuses.${r.status}`, { defaultValue: statusLabel(r.status) }) : "—";
           }}
         ></Column>
         <Column header={translate("origin.title")} body={originColumnBody} className="fieldvalue_container" headerStyle={headerStyle}></Column>

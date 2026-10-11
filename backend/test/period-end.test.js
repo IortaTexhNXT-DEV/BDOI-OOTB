@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
-import { withCalendarFiscalYear, withoutManualSignOffs } from './helpers.js';
+import { withCalendarFiscalYear, withoutManualSignOffs, enableFeatures } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { createJournal, cancelJournal } from '../src/modules/accounting/lib/ledger.js';
@@ -18,6 +18,8 @@ let admin;
 let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['recurring-journals', 'bir-reports']);
   await withCalendarFiscalYear();
   admin = ctx.api;
   maker = ctx.as('maker');
@@ -182,6 +184,10 @@ describe('month-end close run', () => {
     expect(r3.body.data.created.map((c) => c.occurrence)).toEqual(['2026-03-31']);
     const tpl = (await maker('get', `/period-end/recurring-journals/${t.id}`)).body.data;
     expect(tpl.status).toBe('completed');
+    // a change of the template lists only what changed
+    await maker('put', `/period-end/recurring-journals/${t.id}`).send({ description: 'Head office rent' });
+    const changed = (await maker('get', `/audit/records/recurring_journal/${t.id}`)).body.data.find((e) => e.action === 'update');
+    expect(changed.changes.map((c) => c.key)).toEqual(['description']);
     expect(tpl.runs.every((x) => x.journalStatus === 'posted')).toBe(true);
     expect(await bal('4402001', '2026-03-31', '2026-01-01')).toBe(255000);
   });
@@ -232,6 +238,13 @@ describe('month-end close run', () => {
     const cancel = await maker('post', `/period-end/close-runs/${r.id}/cancel`).send({ reason: 'test' });
     expect(cancel.body.data.status).toBe('cancelled');
     expect(await bal('3301003', '2026-03-31')).toBe(0);
+    // the history of the run says the status it left and the reason, not its number and period as if new
+    const trail = (await maker('get', `/audit/records/period_close_run/${r.id}`)).body.data;
+    const cancelled = trail.find((e) => e.action === 'cancel');
+    expect(cancelled.note).toBe('test');
+    expect(cancelled.changes.map((c) => c.key)).toEqual(['status']);
+    expect(cancelled.changes[0].to).toMatch(/cancelled/i);
+    expect(cancelled.changes[0].from).not.toBe('—');
   });
 
   it('the checklist master is configurable', async () => {

@@ -379,7 +379,7 @@ const OpenEntryUnmatching = () => {
             <div className="filter__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Sub Account Code</label>
+                  <label>{t("openEntryFilters.subAccountCode")}</label>
 
                   <Dropdown
                     value={filters.subAccountCode}
@@ -389,33 +389,33 @@ const OpenEntryUnmatching = () => {
                     options={subAccountOptions}
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="Sub Account Code"
+                    placeholder={t("openEntryFilters.subAccountCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Division</label>
+                  <label>{t("openEntryFilters.division")}</label>
                   <InputText
                     value={filters.division}
                     onChange={(e) =>
                       setFilters({ ...filters, division: e.target.value })
                     }
-                    placeholder="Division"
+                    placeholder={t("openEntryFilters.division")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Department</label>
+                  <label>{t("openEntryFilters.department")}</label>
                   <InputText
                     value={filters.department}
                     onChange={(e) =>
                       setFilters({ ...filters, department: e.target.value })
                     }
-                    placeholder="Department"
+                    placeholder={t("openEntryFilters.department")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -424,39 +424,39 @@ const OpenEntryUnmatching = () => {
             <div className="filter__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Anly Code 1</label>
+                  <label>{t("openEntryFilters.analysisCode1")}</label>
                   <InputText
                     value={filters.analysisCode1}
                     onChange={(e) =>
                       setFilters({ ...filters, analysisCode1: e.target.value })
                     }
-                    placeholder="Analysis Code 1"
+                    placeholder={t("openEntryFilters.analysisCode1")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Anly Code 2</label>
+                  <label>{t("openEntryFilters.analysisCode2")}</label>
                   <InputText
                     value={filters.analysisCode2}
                     onChange={(e) =>
                       setFilters({ ...filters, analysisCode2: e.target.value })
                     }
-                    placeholder="Analysis Code 2"
+                    placeholder={t("openEntryFilters.analysisCode2")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Currency Code</label>
+                  <label>{t("openEntryFilters.currencyCode")}</label>
                   <InputText
                     value={filters.currencyCode}
                     onChange={(e) =>
                       setFilters({ ...filters, currencyCode: e.target.value })
                     }
-                    placeholder="Currency Code"
+                    placeholder={t("openEntryFilters.currencyCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -477,7 +477,7 @@ const OpenEntryUnmatching = () => {
                 className="action__button__open__entry__matching"
               />
               <div className="radio__group__open__entry__matching">
-                <div>Pull By Criteria</div>
+                <div>{t("openEntryActions.side")}</div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
                     inputId="debit"
@@ -485,7 +485,7 @@ const OpenEntryUnmatching = () => {
                     checked={debitCredit === "DEBIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="debit">Debit</label>
+                  <label htmlFor="debit">{t("openEntryActions.debit")}</label>
                 </div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
@@ -494,7 +494,7 @@ const OpenEntryUnmatching = () => {
                     checked={debitCredit === "CREDIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="credit">Credit</label>
+                  <label htmlFor="credit">{t("openEntryActions.credit")}</label>
                 </div>
               </div>
               <div className="checkbox__group__open__entry__matching">
@@ -503,12 +503,8 @@ const OpenEntryUnmatching = () => {
                   checked={selectAll}
                   onChange={(e) => handleSelectAll(debitCredit.toLowerCase())}
                 />
-                <label htmlFor="selectAll">Select All ?</label>
+                <label htmlFor="selectAll">{t("openEntryActions.selectAll")}</label>
               </div>
-              <Button
-                label="Cash Discount"
-                className="action__button__open__entry__matching"
-              />
             </div>
           </div>
 
@@ -530,7 +526,7 @@ const OpenEntryUnmatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Ctrl Acnt Code</label>
+                  <label>{t("openEntryFilters.controlAccountCode")}</label>
                   <InputText
                     value={footerData.ctrlAcntCode}
                     onChange={(e) =>
@@ -539,33 +535,33 @@ const OpenEntryUnmatching = () => {
                         ctrlAcntCode: e.target.value,
                       })
                     }
-                    placeholder="Control Account Code"
+                    placeholder={t("openEntryFilters.controlAccountCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Divn Code</label>
+                  <label>{t("openEntryFilters.divisionCode")}</label>
                   <InputText
                     value={footerData.divnCode}
                     onChange={(e) =>
                       setFooterData({ ...footerData, divnCode: e.target.value })
                     }
-                    placeholder="Division Code"
+                    placeholder={t("openEntryFilters.divisionCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Dept Code</label>
+                  <label>{t("openEntryFilters.departmentCode")}</label>
                   <InputText
                     value={footerData.deptCode}
                     onChange={(e) =>
                       setFooterData({ ...footerData, deptCode: e.target.value })
                     }
-                    placeholder="Department Code"
+                    placeholder={t("openEntryFilters.departmentCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -574,20 +570,20 @@ const OpenEntryUnmatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Doc Ref</label>
+                  <label>{t("openEntryFilters.documentReference")}</label>
                   <InputText
                     value={footerData.docRef}
                     onChange={(e) =>
                       setFooterData({ ...footerData, docRef: e.target.value })
                     }
-                    placeholder="Document Reference"
+                    placeholder={t("openEntryFilters.documentReference")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Narration</label>
+                  <label>{t("openEntryFilters.narration")}</label>
                   <InputText
                     value={footerData.narration}
                     onChange={(e) =>
@@ -596,14 +592,14 @@ const OpenEntryUnmatching = () => {
                         narration: e.target.value,
                       })
                     }
-                    placeholder="Narration"
+                    placeholder={t("openEntryFilters.narration")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Acty Code 1</label>
+                  <label>{t("openEntryFilters.activityCode1")}</label>
                   <InputText
                     value={footerData.actyCode1}
                     onChange={(e) =>
@@ -612,7 +608,7 @@ const OpenEntryUnmatching = () => {
                         actyCode1: e.target.value,
                       })
                     }
-                    placeholder="Activity Code 1"
+                    placeholder={t("openEntryFilters.activityCode1")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -621,7 +617,7 @@ const OpenEntryUnmatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Write off Code</label>
+                  <label>{t("openEntryFilters.writeOffCode")}</label>
                   <InputText
                     value={footerData.writeOffCode}
                     onChange={(e) =>
@@ -630,14 +626,14 @@ const OpenEntryUnmatching = () => {
                         writeOffCode: e.target.value,
                       })
                     }
-                    placeholder="Write off Code"
+                    placeholder={t("openEntryFilters.writeOffCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Write off Amount</label>
+                  <label>{t("openEntryFilters.writeOffAmount")}</label>
                   <InputText
                     value={footerData.writeOffAmount}
                     onChange={(e) =>
@@ -653,7 +649,7 @@ const OpenEntryUnmatching = () => {
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Net</label>
+                  <label>{t("openEntryFilters.net")}</label>
                   <InputText
                     value={footerData.net}
                     onChange={(e) =>

@@ -136,9 +136,9 @@ const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
         </div>
         <div className="bv-audit-filters__end">
           <span className="bv-audit-count">
-            {state.error ? state.error : filtering
+            {state.error || (filtering
               ? t("auditTrail.eventsShown", { shown: matching.length, count: state.events.length, defaultValue: `${matching.length} of ${state.events.length} events` })
-              : t("auditTrail.eventCount", { count: state.events.length, defaultValue: state.events.length === 1 ? "1 event" : `${state.events.length} events` })}
+              : null)}
           </span>
           <Menu popup ref={exportMenu} model={[
             { label: t("auditTrail.excel", { defaultValue: "Excel" }), icon: "pi pi-file-excel", command: () => download("excel") },

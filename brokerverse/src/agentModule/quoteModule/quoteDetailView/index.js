@@ -6,7 +6,6 @@ import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { TabView, TabPanel } from "primereact/tabview";
 import SvgRightarrow from "../../../assets/agentIcon/SvgRightArrow";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -28,7 +27,6 @@ import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorseme
 import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
-import { numberLocale } from "../../../utility/currencyConverter";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { notifyError } from "../../../utility/dialogs";
@@ -37,6 +35,7 @@ import CustomerResponseActions from "../customerResponse/CustomerResponseActions
 import UnderwritingReferralPanel from "../underwritingReferral/UnderwritingReferralPanel";
 import ActivityPanel from "../../../components/SalesActivities/ActivityPanel";
 import logger from "../../../utility/logger";
+import DetailSection from "../../../components/DetailSection";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -66,7 +65,6 @@ const QuoteDetailView = ({ action }) => {
   const [relatedPolicy, setRelatedPolicy] = useState(null);
   const [checkingPolicy, setCheckingPolicy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
 
   // Get quotation ID from URL path parameter, navigation state, or query params
   const quotationIdFromParams = quotationIdFromUrl || state?.quotationId;
@@ -141,10 +139,27 @@ const QuoteDetailView = ({ action }) => {
   const firePremiumDetails = quotationData?.firePremiumDetails || quotationData?.firePremium || {};
   const iarPremiumDetails = quotationData?.iarPremiumDetails || {};
   const iarSections = quotationData?.iarSections || [];
-  const iarScheduleSections =
-    iarPremiumDetails?.sections ||
-    (Array.isArray(iarSections) ? iarSections : []);
-  const fireSumInsured = firePremiumDetails?.sumInsured || {};
+  const iarSectionsGiven = iarPremiumDetails?.sections || (Array.isArray(iarSections) ? iarSections : []);
+  // a quotation priced on its sums insured alone (sample data, a migrated quotation) shows one row per sum insured,
+  // priced at the quotation's rate, as its printed quotation does
+  const iarScheduleSections = iarSectionsGiven.length
+    ? iarSectionsGiven
+    : Object.entries(quotationData?.fireRiskDetails?.sumInsured || {}).filter(([, si]) => Number(si) > 0).map(([key, si]) => ({
+      sectionCode: key, sectionLabel: t(`endorsementSummary.${key.charAt(0).toLowerCase()}${key.slice(1)}`, { defaultValue: key.replace(/([a-z])([A-Z])/g, "$1 $2") }),
+      sectionSumInsured: Number(si), sectionPremium: quotationData?.firePremiumDetails?.rate ? (Number(si) * Number(quotationData.firePremiumDetails.rate)) / 100 : null, items: [],
+    }));
+  // the sums insured are kept with the risk details on most quotations; only the items insured are listed
+  const fireSumInsured = Object.keys(firePremiumDetails?.sumInsured || {}).length
+    ? firePremiumDetails.sumInsured
+    : quotationData?.fireRiskDetails?.sumInsured || {};
+  const fireSumInsuredRows = [
+    ["Building", "quoteDetailView.building"],
+    ["PlantAndMachinery", "quoteDetailView.plantAndMachinery"],
+    ["OtherContents", "quoteDetailView.otherContents"],
+    ["GrossProfit", "quoteDetailView.grossProfit"],
+    ["Wages", "quoteDetailView.wages"],
+    ["LossOfRent", "quoteDetailView.lossOfRent"],
+  ].map(([key, labelKey]) => [key, labelKey, Number(fireSumInsured[key]) || 0]).filter(([, , amount]) => amount > 0);
   // a fire quotation priced outside the fire wizard (a renewal, an imported policy) has no premium schedule: its
   // premium and sum insured are the quotation's own figures
   const hasFireSchedule = Object.keys(firePremiumDetails).length > 0;
@@ -173,13 +188,14 @@ const QuoteDetailView = ({ action }) => {
 
     // Fire LOB: Use firePremiumDetails
     if (isFireLOB && hasFireSchedule) {
-      const total = firePremiumDetails.totalPremium ?? 0;
+      // the stored quotation figures (net, taxes, gross) are the ones the list and the printed quotation show
+      const total = firePremiumDetails.totalPremium ?? quotationData.grossPremium ?? firePremiumDetails.totalCoverPremium ?? 0;
       return {
-        netPremium: firePremiumDetails.totalCoverPremium ?? total,
-        documentaryStampTax: "0.00",
-        valueAddedTax: "0.00",
-        localGovernmentTax: "0.00",
-        accountPremiumOthers: "0.00",
+        netPremium: firePremiumDetails.totalCoverPremium ?? quotationData.netPremium ?? total,
+        documentaryStampTax: quotationData.documentaryStampTax || "0.00",
+        valueAddedTax: quotationData.valueAddedTax || "0.00",
+        localGovernmentTax: quotationData.localGovernmentTax || "0.00",
+        accountPremiumOthers: quotationData.accountPremiumOthers || "0.00",
         discount: firePremiumDetails.totalDiscount ?? "0.00",
         grossPremium: total,
       };
@@ -234,6 +250,8 @@ const QuoteDetailView = ({ action }) => {
       };
     }
   );
+
+  const relatedPolicyIssued = Boolean(relatedPolicy?.policyData?.policyNumber) && !["Draft", "Submitted"].includes(relatedPolicy?.policyData?.status || relatedPolicy?.policyData?.policyStatus);
 
   const fetchRelatedPolicy = async (quoteIdFromData) => {
     if (!quoteIdFromData) {
@@ -371,9 +389,9 @@ const QuoteDetailView = ({ action }) => {
     : null;
   const joinName = (p) => [p?.firstName, p?.lastName].filter(Boolean).join(" ");
   const assured = {
-    name: joinName(quoteLead) || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
-    email: quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
-    phone: quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
+    name: quotationData?.insured?.name || joinName(quoteLead) || quoteLead?.companyName || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
+    email: quotationData?.insured?.emailId || quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
+    phone: quotationData?.insured?.contactNumber || quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
   };
 
   // Send quote for customer approval
@@ -490,14 +508,9 @@ const QuoteDetailView = ({ action }) => {
       </div>
       <UnderwritingReferralPanel quotation={quotationData} onDecided={loadQuotation} />
       <Card className="mt-4">
-        <TabView
-          activeIndex={activeTab}
-          onTabChange={(e) => setActiveTab(e.index)}
-        >
-          <TabPanel header={t("quoteDetailView.details")}>
+        <div>
             <div className="table_header">{t("quoteDetailView.quoteDetails")}</div>
             <div className="quote_details">
-              <label>{t("quoteDetailView.pleaseCheckQuoteDetails")}</label>
               <div
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
@@ -702,20 +715,17 @@ const QuoteDetailView = ({ action }) => {
 
                 <div className="sub_title">
                   <label className="policy_text">
-                    {t("iarLead.scheduleOfCover", "Schedule of Cover")}
+                    {t("quoteDetailView.scheduleOfCover")}
                   </label>
                   <div className="qdv-iar-schedule-wrap">
                     <table className="qdv-iar-schedule-table w-full">
                       <thead>
                         <tr>
                           <th>
-                            {t(
-                              "iarLead.sectionItemPerils",
-                              "SECTION / ITEM / PERILS"
-                            )}
+                            {t("quoteDetailView.scheduleSection")}
                           </th>
-                          <th>{t("iarLead.sumInsured", "SUM INSURED")}</th>
-                          <th>{t("iarLead.premium", "PREMIUM")}</th>
+                          <th>{t("quoteDetailView.scheduleSumInsured")}</th>
+                          <th>{t("quoteDetailView.schedulePremium")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -866,52 +876,18 @@ const QuoteDetailView = ({ action }) => {
                 </div>
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.sumInsured")}</label>
-                  {Object.keys(fireSumInsured).length === 0 ? (
+                  {fireSumInsuredRows.length === 0 ? (
                     <div className="quote_details">
                       <label className="insurance_text">{t("quoteDetailView.totalSumInsured")}</label>
-                      <label className="alpha_text">
-                        {Number(quotationData?.totalSumInsured || 0).toLocaleString(numberLocale())}
-                      </label>
+                      <label className="alpha_text">{formatCurrency(quotationData?.totalSumInsured || 0)}</label>
                     </div>
                   ) : (
-                    <>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.building")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
-                        </label>
+                    fireSumInsuredRows.map(([key, labelKey, amount]) => (
+                      <div key={key} className="quote_details">
+                        <label className="insurance_text">{t(labelKey)}</label>
+                        <label className="alpha_text">{formatCurrency(amount)}</label>
                       </div>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
-                        </label>
-                      </div>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
-                        </label>
-                      </div>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
-                        </label>
-                      </div>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.wages")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
-                        </label>
-                      </div>
-                      <div className="quote_details">
-                        <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
-                        <label className="alpha_text">
-                          {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
-                        </label>
-                      </div>
-                    </>
+                    ))
                   )}
                 </div>
                 {fireCoverBreakup.length > 0 && (
@@ -1032,11 +1008,7 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.totalSumInsured")}</label>
                     <label className="alpha_text">
-                      {quotationData?.totalSumInsured
-                        ? `${parseFloat(
-                            quotationData.totalSumInsured
-                          ).toLocaleString(numberLocale())}.00`
-                        : "N/A"}
+                      {quotationData?.totalSumInsured ? formatCurrency(quotationData.totalSumInsured) : "—"}
                     </label>
                   </div>
                   {/* Priced covers of the quote: the detail showed the sum insured, CTPL and APPA only */}
@@ -1107,6 +1079,16 @@ const QuoteDetailView = ({ action }) => {
                       {formatCurrency(calculatedPremiums?.valueAddedTax)}
                     </label>
                   </div>
+                  {[
+                    ["documentaryStampTax", t("quoteDetailView.dst", "Documentary stamp tax")],
+                    ["localGovernmentTax", t("quoteDetailView.lgt", "Local government tax")],
+                    ["fireServiceTax", t("quoteDetailView.fst", "Fire service tax")],
+                  ].filter(([key]) => Number(quotationData?.[key]) > 0).map(([key, label]) => (
+                    <div className="quote_details" key={key}>
+                      <label className="insurance_text">{label}</label>
+                      <label className="alpha_text">{formatCurrency(quotationData[key])}</label>
+                    </div>
+                  ))}
                   <div className="quote_details">
                     <label className="insurance_text">
                       {t("quoteDetailView.discount", "Discount")}
@@ -1169,6 +1151,17 @@ const QuoteDetailView = ({ action }) => {
                       </label>
                     </div>
                   )}
+                  {[
+                    ["valueAddedTax", t("quoteDetailView.vat")],
+                    ["documentaryStampTax", t("quoteDetailView.dst")],
+                    ["localGovernmentTax", t("quoteDetailView.lgt")],
+                    ["fireServiceTax", t("quoteDetailView.fst", "Fire service tax")],
+                  ].filter(([key]) => Number(quotationData?.[key]) > 0).map(([key, label]) => (
+                    <div className="quote_details" key={key}>
+                      <label className="insurance_text">{label}</label>
+                      <label className="alpha_text">{formatCurrency(quotationData[key])}</label>
+                    </div>
+                  ))}
                   <div className="quote_details">
                     <label className="gross_text">{t("quoteDetailView.grossPremium")}</label>
                     <label className="gross_count">
@@ -1243,25 +1236,14 @@ const QuoteDetailView = ({ action }) => {
                 </>
               )}
             </div>
-          </TabPanel>
-          <TabPanel header={t("salesActivities.title")}>
-            {(quotationData?.quotationId || quotationIdFromParams) && (
-              <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
-            )}
-          </TabPanel>
-          <TabPanel header={t("quoteDetailView.auditTrail")}>
-            <QuotationAuditTrail
-              quotationId={quotationData?.quotationId || quotationIdFromParams}
-            />
-          </TabPanel>
-        </TabView>
+        </div>
       </Card>
-      {activeTab === 0 && (
+      {(
         <div className="button_component">
           <Button
             label={t("quoteDetailView.share")}
-            text
-            className="download_button"
+            icon="pi pi-share-alt"
+            outlined
             onClick={() => setModalVisible(true)}
           />
           {(quotationData?.quotationStatus === "CustomerAccepted" ||
@@ -1276,12 +1258,20 @@ const QuoteDetailView = ({ action }) => {
             </Button>
           ) : null}
 
-          {quotationData?.quotationStatus ===
-            QuotationStatus.CONVERTED_TO_POLICY &&
-            relatedPolicy?.paymentStatus !== "Completed" && (
+          {quotationData?.quotationStatus === QuotationStatus.CONVERTED_TO_POLICY && (
+            // an issued policy is opened; one still being completed goes back to its approval step
+            relatedPolicy?.policyId && (relatedPolicyIssued || relatedPolicy.paymentStatus === "Completed") ? (
+              <Button
+                label={t("quoteDetailView.viewPolicy")}
+                icon="pi pi-external-link"
+                onClick={() => navigate(`/agent/policydetail/${relatedPolicy.policyId}`)}
+              />
+            ) : (
               <Button
                 label={
-                  checkingPolicy ? t("quoteDetailView.checkingPolicy") : t("quoteDetailView.waitingForPolicy")
+                  checkingPolicy
+                    ? t("quoteDetailView.checkingPolicy")
+                    : relatedPolicy?.policyId ? t("quoteDetailView.completePolicy") : t("quoteDetailView.waitingForPolicy")
                 }
                 disabled={checkingPolicy || !relatedPolicy?.policyId}
                 onClick={() => {
@@ -1307,7 +1297,8 @@ const QuoteDetailView = ({ action }) => {
               >
                 <SvgRightarrow />
               </Button>
-            )}
+            )
+          )}
 
           {/* Status-based action buttons - Hide when CustomerAccepted or Approved since main Proceed button is shown */}
           {quotationData?.quotationStatus !== "CustomerAccepted" &&
@@ -1342,6 +1333,13 @@ const QuoteDetailView = ({ action }) => {
             )}
         </div>
       )}
+      {/* the sales activities (their own titled card) and the audit trail of the quotation are sections of the page */}
+      {(quotationData?.quotationId || quotationIdFromParams) && (
+        <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
+      )}
+      <DetailSection title={t("quoteDetailView.auditTrail")} className="mt-4">
+        <QuotationAuditTrail quotationId={quotationData?.quotationId || quotationIdFromParams} />
+      </DetailSection>
       <ShareOption
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}

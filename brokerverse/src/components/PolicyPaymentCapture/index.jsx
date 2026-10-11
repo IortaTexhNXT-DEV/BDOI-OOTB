@@ -89,6 +89,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
     if (Number(form.amount) > payable) return `The amount cannot exceed ${formatCurrency(payable)}`;
     if (!form.paymentDate) return "Enter the payment date";
     if (form.paymentDate > todayIso()) return "The payment date cannot be in the future";
+    if (summary?.proofRequired && !form.proofKey) return "Attach the proof of payment";
     return null;
   };
 
@@ -300,7 +301,9 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                   <InputTextarea id="pay-remarks" className="w-full" rows={1} autoResize value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} />
                 </div>
                 <div className="col-12">
-                  <label className="block mb-2">Proof of payment (deposit slip, cheque image, screenshot), optional</label>
+                  <label className="block mb-2">
+                    {summary.proofRequired ? "Proof of payment (deposit slip, cheque image, screenshot) *" : "Proof of payment (deposit slip, cheque image, screenshot), optional"}
+                  </label>
                   <S3FileUpload
                     accept=".pdf,.png,.jpg,.jpeg"
                     maxFileSize={10 * 1024 * 1024}

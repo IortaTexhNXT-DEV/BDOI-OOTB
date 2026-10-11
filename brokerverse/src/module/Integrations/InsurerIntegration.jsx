@@ -13,6 +13,8 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
+import { HelpTip } from "../../components/PageHeader";
+import TechnicalDetails from "../../components/TechnicalDetails";
 import { IntTag, PageHeader, dateTime, insurerOptions, parseJson, pretty, showError, showSuccess } from "./common";
 
 const REQUEST_TYPES = ["insurer.policy_issue", "insurer.policy_data", "insurer.claim_status"];
@@ -222,11 +224,14 @@ const InsurerIntegration = () => {
               <label htmlFor="map-enabled" className="m-0">{t("integrations.enabled")}</label></div>
             <div className="col-12 md:col-4 flex align-items-center gap-2 mt-4"><Checkbox inputId="map-auto" checked={editing.autoIssueRequest} onChange={(e) => setEditing({ ...editing, autoIssueRequest: e.checked })} />
               <label htmlFor="map-auto" className="m-0">{t("integrations.autoIssue")}</label></div>
-            {MAP_FIELDS.map((k) => (
-              <div className="col-12 md:col-6" key={k}><label>{t(`integrations.maps.${k}`)}</label>
-                <InputTextarea value={editing[k]} rows={6} onChange={(e) => setEditing({ ...editing, [k]: e.target.value })} className="w-full int-mono" /></div>
+            {MAP_FIELDS.map((k, i) => (
+              <div className="col-12 md:col-6" key={k}>
+                <label className="int-map-label">{t(`integrations.maps.${k}`)}{i === 0 ? <HelpTip text={t("integrations.mapHelp")} label={t("integrations.maps.help")} /> : null}</label>
+                <InputTextarea value={editing[k]} rows={8} autoResize={false} onChange={(e) => setEditing({ ...editing, [k]: e.target.value })} className="w-full int-mono int-map" /></div>
             ))}
-            <div className="col-12 pe-muted">{t("integrations.mapHelp")} {t("integrations.defaultRequestMap")}: <span className="int-mono">{JSON.stringify(defaultMap)}</span></div>
+            <div className="col-12">
+              <TechnicalDetails title={t("integrations.defaultRequestMap")} text={pretty(defaultMap)} />
+            </div>
             <div className="col-12 md:col-8 flex gap-2 align-items-end">
               <span className="flex-1"><label>{t("integrations.previewPolicy")}</label><InputText value={editing.policyNumber} onChange={(e) => setEditing({ ...editing, policyNumber: e.target.value })} className="w-full" /></span>
               <Button label={t("integrations.preview")} icon="pi pi-eye" outlined disabled={editing.isNew || !editing.policyNumber.trim()} onClick={runPreview} />

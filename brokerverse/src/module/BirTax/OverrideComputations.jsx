@@ -22,7 +22,7 @@ import { RecordActivityLog } from "../../components/ActivityLog";
 import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, Kpis, PageHeader, YearPicker, date, money, showError, showSuccess } from "./common";
 
-const pct = (v) => (v === null || v === undefined ? "-" : `${Number(v).toLocaleString("en-PH", { maximumFractionDigits: 2 })}%`);
+const pct = (v) => (v === null || v === undefined ? "—" : `${Number(v).toLocaleString("en-PH", { maximumFractionDigits: 2 })}%`);
 
 /** One computation: figures, per line production, settlements, its activity and the actions of its status. */
 const ComputationDetail = ({ comp, onHide, onChanged, toast }) => {
@@ -257,21 +257,37 @@ const OverrideComputations = () => {
         </DataTable>
       </div>
       {compute && (
-        <Dialog className="pe-dialog bv-centered" visible header={`${t("birTax.compute")} ${compute.period.label}`} style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setCompute(null)} /><Button label={t("birTax.compute")} icon="pi pi-calculator" onClick={doCompute} /></div>}>
+        <Dialog className="pe-dialog bv-centered" visible
+          header={t("birTax.computeTitle", { period: compute.period.label, agreement: ag ? `${ag.agreementCode} · ${ag.insurerName}` : "" })}
+          style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
+          footer={(
+            <div>
+              {compute.preview && !Number(compute.preview.production) && !Number(compute.preview.policies)
+                ? <span className="pe-muted mr-3">{t("birTax.nothingToCompute")}</span> : null}
+              <Button label={t("periodEnd.cancel")} outlined onClick={() => setCompute(null)} />
+              <Button label={t("birTax.compute")} icon="pi pi-calculator" onClick={doCompute}
+                disabled={!compute.preview || (!Number(compute.preview.production) && !Number(compute.preview.policies))} />
+            </div>
+          )}>
           {compute.preview && (
             <>
-              <Kpis items={[{ label: t("birTax.production"), value: money(compute.preview.production) }, { label: t("birTax.policies"), value: compute.preview.policies },
-                { label: t("birTax.claimsIncurred"), value: money(compute.preview.claimsIncurred) }, { label: t("birTax.lossRatio"), value: pct(compute.preview.lossRatioPct) },
-                { label: t("birTax.growth"), value: pct(compute.preview.growthPct) }]} />
-              <Kpis items={[{ label: t("birTax.tierRate"), value: compute.preview.tierNo ? `${compute.preview.tierNo}: ${compute.preview.rate}%` : "-" },
-                { label: t("birTax.commissionAmount"), value: money(compute.preview.commission) }, { label: "VAT", value: money(compute.preview.vat) },
-                { label: t("birTax.receivable"), value: money(compute.preview.receivable) }]} />
+              <DetailSection title={t("birTax.previewFigures")}>
+                <KeyValueGrid columns={3} items={[
+                  { label: t("birTax.production"), value: compute.preview.production, type: "amount" },
+                  { label: t("birTax.policies"), value: compute.preview.policies, type: "number", decimals: 0 },
+                  { label: t("birTax.claimsIncurred"), value: compute.preview.claimsIncurred, type: "amount" },
+                  { label: t("birTax.lossRatio"), value: pct(compute.preview.lossRatioPct) },
+                  { label: t("birTax.growth"), value: pct(compute.preview.growthPct) },
+                  { label: t("birTax.tierRate"), value: compute.preview.tierNo ? `${compute.preview.tierNo}: ${compute.preview.rate}%` : null },
+                  { label: t("birTax.commissionAmount"), value: compute.preview.commission, type: "amount" },
+                  { label: t("birTax.vatAmount"), value: compute.preview.vat, type: "amount" },
+                  { label: t("birTax.receivable"), value: compute.preview.receivable, type: "amount" },
+                ]} />
+              </DetailSection>
             </>
           )}
-          <Message severity="info" className="w-full mb-2" text={t("birTax.insurerClaimsNote")} />
-          <div className="grid">
-            <div className="col-12 md:col-5"><label>{t("birTax.insurerClaims")}</label><InputNumber value={compute.claims ?? null} onValueChange={(e) => setCompute({ ...compute, claims: e.value })}
+          <div className="grid mt-2">
+            <div className="col-12 md:col-5"><label>{t("birTax.insurerClaims")}</label><InputNumber value={compute.claims ?? null} placeholder={t("birTax.claimsFromSystem")} onValueChange={(e) => setCompute({ ...compute, claims: e.value })}
               onBlur={() => preview(compute.period, compute.claims)} minFractionDigits={2} className="w-full" /></div>
             <div className="col-12 md:col-7"><label>{t("birTax.claimsNote")}</label><InputText value={compute.note || ""} onChange={(e) => setCompute({ ...compute, note: e.target.value })} className="w-full" /></div>
           </div>

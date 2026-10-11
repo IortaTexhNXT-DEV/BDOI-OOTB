@@ -77,7 +77,7 @@ const Formats = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("insurerRec.addFormat") : v.code) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("insurerRec.addFormat") : t("insurerRec.editFormat", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("insurerRec.cancel")} text onClick={() => setEditing(null)} />

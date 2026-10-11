@@ -10,24 +10,6 @@ import { today } from '../lib/dates.js';
 
 const tableExists = async (t) => !!(await one('SELECT 1 FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = $1', [t]));
 
-export async function renewalNotices() {
-  if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
-  if (!(await getSetting('notification.renewal_reminder', true))) return { skipped: 'renewal reminders are switched off (notification.renewal_reminder)' };
-  const days = (await getSetting('limits.renewal_notice_days', [60, 30, 15])) || [60, 30, 15];
-  const now = await today();
-  let created = 0;
-  for (const d of days) {
-    const rows = await many(`SELECT p.id, p.policy_number, p.expiry_date, p.owner_user_id FROM policies p
-      WHERE p.status IN ('active','issued') AND p.expiry_date = $2::date + $1::int
-      AND NOT EXISTS (SELECT 1 FROM notifications n WHERE n.entity = 'policy' AND n.entity_id = p.id AND n.type = 'reminder' AND n.title LIKE 'Renewal due in ' || $1::text || '%')`, [d, now]);
-    for (const p of rows) {
-      await query('INSERT INTO notifications(user_id, type, title, message, link, entity, entity_id) VALUES ($1,\'reminder\',$2,$3,$4,\'policy\',$5)',
-        [p.owner_user_id || null, `Renewal due in ${d} days`, `Policy ${p.policy_number} expires on ${p.expiry_date}`, `/policy/view/${p.id}`, p.id]);
-      created += 1;
-    }
-  }
-  return { notifications: created };
-}
 export async function policyExpiry() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
   const r = await query('UPDATE policies SET status = \'expired\' WHERE status IN (\'active\',\'issued\') AND expiry_date < $1::date', [await today()]);
@@ -70,8 +52,11 @@ export async function emailOutbox() {
 /** Scheduled report jobs created from Reports > Schedules (code report-<id>). */
 export const scheduledReport = async (p) => (await import('../modules/reports/service.js')).scheduledReport(p);
 
-/** Renewal batch notices queue and the daily renewal pipeline (enrol expiring policies, lapse overdue renewals). */
-export { processRenewalQueue, renewalPipeline } from '../modules/renewals/jobs.js';
+/**
+ * Renewal batch notices queue, the daily renewal pipeline (enrol expiring policies, lapse overdue renewals), the renewal
+ * notices at the marks before expiry and the staff reminders "Renewal due in n days".
+ */
+export { processRenewalQueue, renewalPipeline, renewalNoticeRun, renewalNotices } from '../modules/renewals/jobs.js';
 
 /** Due-date reminders to clients with bills falling due (e-mail + notification, no repeats within the configured window). */
 export async function collectionReminders() {
@@ -104,12 +89,23 @@ export const dormantUsers = async () => {
 };
 
 /**
- * Remittance schedules (Accounts > Remittance > Scheduling): run the active schedules whose next run date has come
- * (draft remittances per insurer up to the cut-off date) and move their next run date on. Daily, disabled by default.
+ * Remittance schedules (Accounts > Remittance > Setup > Schedules): run the active schedules whose next run date has
+ * come (draft remittances per insurer for the window of the run, recorded as remittance runs) and move their next run
+ * date on. Daily, disabled by default.
  */
 export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
-  return (await import('../modules/remittance/items.js')).runDueSchedules();
+  return (await import('../modules/remittance/runs.js')).runDueSchedules();
+}
+/** Insurer billing run: on a billing date (15th and 26th, moved off non-working days) draft the billing statements of the remitted policies (remittance/billing.js). */
+export async function insurerBillingRun() {
+  if (!(await tableExists('insurer_billing_runs'))) return { skipped: 'insurer_billing_runs table missing' };
+  return (await import('../modules/remittance/billing.js')).billingJob();
+}
+/** Instalment hold check: record the part-paid policies held from remittance and release those now fully paid (remittance/holds.js). */
+export async function remittanceHoldCheck() {
+  if (!(await tableExists('remittance_holds'))) return { skipped: 'remittance_holds table missing' };
+  return (await import('../modules/remittance/holds.js')).holdCheckJob();
 }
 
 /**
@@ -133,10 +129,12 @@ export async function eisOutbox() {
   if (!(await tableExists('eis_submissions'))) return { skipped: 'eis_submissions table missing' };
   return (await import('../modules/bir/eis.js')).processOutbox();
 }
-// operations and accounting: cover note expiry, post-dated cheques due for deposit, missing claim documents
+// operations and accounting: cover note expiry, post-dated cheques due for deposit and their follow-up, missing claim documents
 export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
-export { pdcDepositDue } from '../modules/pdc/jobs.js';
+export { pdcDepositDue, pdcFollowUp } from '../modules/pdc/jobs.js';
 export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
+/** End-of-day claim service levels: FNOL not submitted to the insurer, authorisation code overdue, follow-ups past their date. */
+export const claimServiceLevels = async () => (await import('../modules/claims/insurer.js')).serviceLevels();
 // Distribution and reporting: prospects not worked in time go to the reassignment queue (lead assignment), scheduled
 // marketing campaigns are sent, the BI extract is written to the storage folder (all disabled until switched on)
 export { leadAssignmentSla } from '../modules/leads/assignment.js';

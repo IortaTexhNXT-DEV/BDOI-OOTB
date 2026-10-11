@@ -14,6 +14,16 @@ import { PageHeader, StatusTag, dateTime, previousPeriod, showError } from "./co
 /** Run statuses of a close still in progress (the API allows one per period). */
 const ACTIVE_RUN = ["draft", "in-progress", "blocked", "ready", "pending-approval", "soft-closed"];
 
+/** "Name, dd/mm/yyyy HH:mm" of a step, the name alone when its time is not kept; an em dash before it happens. */
+// who and, under the name, when: one name per line, so the column keeps its width
+const byOn = (name, at) => (name ? <span className="nowrap">{name}{at ? <span className="bv-cell-sub">{dateTime(at)}</span> : null}</span> : "—");
+// "2026-09" as the month it names: Sep 2026
+const periodText = (period) => {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(period || ""));
+  if (!m) return period || "—";
+  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, 1)));
+};
+
 /** Accounts > Period End > Month-End Close: close runs per period (MEC numbers) and a new run for an open period. */
 const MonthEndClose = () => {
   const { t } = useTranslation();
@@ -82,14 +92,14 @@ const MonthEndClose = () => {
         <DataTable value={runs} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={t("periodEnd.noRuns")} onRowClick={(e) => navigate(`/accounts/period-end/close/${e.data.id}`)}
           rowClassName={() => "cursor-pointer"}>
           <Column header={t("periodEnd.runNumber")} body={(r) => <span className="pe-link">{r.runNumber}</span>} />
-          <Column field="period" header={t("periodEnd.period")} />
+          <Column header={t("periodEnd.period")} body={(r) => <span className="nowrap">{periodText(r.period)}</span>} />
           <Column header={t("periodEnd.runStatus")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("periodEnd.periodStatus")} body={(r) => <StatusTag status={r.periodStatus} />} />
           <Column field="failedChecks" header={t("periodEnd.blockingFailures")} className="bv-num" headerClassName="bv-num" />
           <Column field="warnings" header={t("periodEnd.warnings")} className="bv-num" headerClassName="bv-num" />
           <Column field="journalCount" header={t("periodEnd.journals")} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("periodEnd.preparedBy")} body={(r) => (r.preparedByName ? `${r.preparedByName}, ${dateTime(r.preparedAt)}` : "-")} />
-          <Column header={t("periodEnd.approvedBy")} body={(r) => (r.approvedByName ? `${r.approvedByName}, ${dateTime(r.approvedAt)}` : "-")} />
+          <Column header={t("periodEnd.preparedBy")} body={(r) => byOn(r.preparedByName, r.preparedAt || r.openedAt)} />
+          <Column header={t("periodEnd.approvedBy")} body={(r) => byOn(r.approvedByName, r.approvedAt)} />
         </DataTable>
       </div>
 

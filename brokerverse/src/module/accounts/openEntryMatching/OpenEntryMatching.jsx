@@ -57,11 +57,11 @@ const OpenEntryMatching = () => {
   const items = [
     {
       id: 1,
-      label: "Open Entry Matching",
+      label: t("openEntryMatching.title"),
       to: "/accounts/open-entry-matching",
     },
   ];
-  const home = { label: "Accounts" };
+  const home = { label: t("openEntryMatching.accounts") };
 
   const handlePull = async () => {
     setLoading(true);
@@ -71,7 +71,7 @@ const OpenEntryMatching = () => {
         currency: filters.currencyCode,
       });
       if (!response.success) {
-        notifyError(response.error || "Failed to fetch unmatched entries");
+        notifyError(response.error || t("openEntryMatching.failedToFetchUnmatchedEntries"));
       } else {
         const entries = response.data || [];
         const debitEntries = entries.filter(
@@ -84,7 +84,7 @@ const OpenEntryMatching = () => {
         setCreditEntries(creditEntries);
       }
     } catch (error) {
-      notifyError("Failed to fetch unmatched entries");
+      notifyError(t("openEntryMatching.failedToFetchUnmatchedEntries"));
     } finally {
       setLoading(false);
     }
@@ -142,7 +142,7 @@ const OpenEntryMatching = () => {
       });
 
       if (!response.success) {
-        notifyError(response.error || "Failed to match entries");
+        notifyError(response.error || t("openEntryMatching.failedToMatchEntries"));
       } else {
         notifySuccess(`Successfully matched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
@@ -150,7 +150,7 @@ const OpenEntryMatching = () => {
         handlePull();
       }
     } catch (error) {
-      notifyError(error.message || "Failed to match entries");
+      notifyError(error.message || t("openEntryMatching.failedToMatchEntries"));
     } finally {
       setLoading(false);
     }
@@ -207,47 +207,47 @@ const OpenEntryMatching = () => {
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
             <Column
               field="transactionCode"
-              header="Document No"
+              header={t("openEntryMatching.documentNo")}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="documentDate"
-              header="Doc Dt"
+              header={t("openEntryMatching.docDt")}
               body={(rowData) => formatDate(rowData.documentDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="dueDate"
-              header="Due Dt"
+              header={t("openEntryMatching.dueDt")}
               body={(rowData) => formatDate(rowData.dueDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="amount"
-              header="FC Amount"
+              header={t("openEntryMatching.fcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="LC Amount"
+              header={t("openEntryMatching.lcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="Balance FC Amt"
+              header={t("openEntryMatching.balanceFcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
               field="amount"
-              header="Balance LC Amt"
+              header={t("openEntryMatching.balanceLcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
-              header="Adjustment Amt"
+              header={t("openEntryMatching.adjustmentAmt")}
               body={() => (
                 <InputText className="adjustment__input__open__entry__matching" />
               )}
@@ -265,7 +265,7 @@ const OpenEntryMatching = () => {
             />
           </DataTable>
           <div className="total__row__open__entry__matching">
-            <span>Total:</span>
+            <span>{t("openEntryMatching.total")}:</span>
             <span>{formatCurrency(debitTotal)}</span>
             <span>{formatCurrency(debitTotal)}</span>
             <span>{formatCurrency(debitTotal)}</span>
@@ -294,47 +294,47 @@ const OpenEntryMatching = () => {
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
             <Column
               field="transactionCode"
-              header="Document No"
+              header={t("openEntryMatching.documentNo")}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="documentDate"
-              header="Doc Dt"
+              header={t("openEntryMatching.docDt")}
               body={(rowData) => formatDate(rowData.documentDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="dueDate"
-              header="Due Dt"
+              header={t("openEntryMatching.dueDt")}
               body={(rowData) => formatDate(rowData.dueDate)}
               style={{ minWidth: "100px" }}
             />
             <Column
               field="amount"
-              header="FC Amount"
+              header={t("openEntryMatching.fcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="LC Amount"
+              header={t("openEntryMatching.lcAmount")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "120px" }}
             />
             <Column
               field="amount"
-              header="Balance FC Amt"
+              header={t("openEntryMatching.balanceFcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
               field="amount"
-              header="Balance LC Amt"
+              header={t("openEntryMatching.balanceLcAmt")}
               body={(rowData) => formatCurrency(rowData.amount)}
               style={{ minWidth: "130px" }}
             />
             <Column
-              header="Adjustment Amt"
+              header={t("openEntryMatching.adjustmentAmt")}
               body={() => (
                 <InputText className="adjustment__input__open__entry__matching" />
               )}
@@ -352,7 +352,7 @@ const OpenEntryMatching = () => {
             />
           </DataTable>
           <div className="total__row__open__entry__matching">
-            <span>Total:</span>
+            <span>{t("openEntryMatching.total")}:</span>
             <span>{formatCurrency(creditTotal)}</span>
             <span>{formatCurrency(creditTotal)}</span>
             <span>{formatCurrency(creditTotal)}</span>
@@ -386,7 +386,7 @@ const OpenEntryMatching = () => {
             <div className="filter__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Sub Account Code</label>
+                  <label>{t("openEntryFilters.subAccountCode")}</label>
                   <Dropdown
                     value={filters.subAccountCode}
                     onChange={(e) =>
@@ -395,33 +395,33 @@ const OpenEntryMatching = () => {
                     options={subAccountOptions}
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="Sub Account Code"
+                    placeholder={t("openEntryFilters.subAccountCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Division</label>
+                  <label>{t("openEntryFilters.division")}</label>
                   <InputText
                     value={filters.division}
                     onChange={(e) =>
                       setFilters({ ...filters, division: e.target.value })
                     }
-                    placeholder="Division"
+                    placeholder={t("openEntryFilters.division")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Department</label>
+                  <label>{t("openEntryFilters.department")}</label>
                   <InputText
                     value={filters.department}
                     onChange={(e) =>
                       setFilters({ ...filters, department: e.target.value })
                     }
-                    placeholder="Department"
+                    placeholder={t("openEntryFilters.department")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -430,39 +430,39 @@ const OpenEntryMatching = () => {
             <div className="filter__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Anly Code 1</label>
+                  <label>{t("openEntryFilters.analysisCode1")}</label>
                   <InputText
                     value={filters.analysisCode1}
                     onChange={(e) =>
                       setFilters({ ...filters, analysisCode1: e.target.value })
                     }
-                    placeholder="Analysis Code 1"
+                    placeholder={t("openEntryFilters.analysisCode1")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Anly Code 2</label>
+                  <label>{t("openEntryFilters.analysisCode2")}</label>
                   <InputText
                     value={filters.analysisCode2}
                     onChange={(e) =>
                       setFilters({ ...filters, analysisCode2: e.target.value })
                     }
-                    placeholder="Analysis Code 2"
+                    placeholder={t("openEntryFilters.analysisCode2")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="filter__group__open__entry__matching">
-                  <label>Currency Code</label>
+                  <label>{t("openEntryFilters.currencyCode")}</label>
                   <InputText
                     value={filters.currencyCode}
                     onChange={(e) =>
                       setFilters({ ...filters, currencyCode: e.target.value })
                     }
-                    placeholder="Currency Code"
+                    placeholder={t("openEntryFilters.currencyCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -470,20 +470,20 @@ const OpenEntryMatching = () => {
             </div>
             <div className="action__row__open__entry__matching">
               <Button
-                label="Pull"
+                label={t("openEntryActions.pull")}
                 onClick={handlePull}
                 disabled={loading}
                 outlined
                 className="action__button__open__entry__matching"
               />
               <Button
-                label="Match"
+                label={t("openEntryActions.match")}
                 onClick={handleMatch}
                 disabled={loading}
                 className="action__button__open__entry__matching"
               />
               <div className="radio__group__open__entry__matching">
-                <div>Pull By Criteria</div>
+                <div>{t("openEntryActions.side")}</div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
                     inputId="debit"
@@ -491,7 +491,7 @@ const OpenEntryMatching = () => {
                     checked={debitCredit === "DEBIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="debit">Debit</label>
+                  <label htmlFor="debit">{t("openEntryActions.debit")}</label>
                 </div>
                 <div className="radio__item__open__entry__matching">
                   <RadioButton
@@ -500,7 +500,7 @@ const OpenEntryMatching = () => {
                     checked={debitCredit === "CREDIT"}
                     onChange={(e) => setDebitCredit(e.value)}
                   />
-                  <label htmlFor="credit">Credit</label>
+                  <label htmlFor="credit">{t("openEntryActions.credit")}</label>
                 </div>
               </div>
               <div className="checkbox__group__open__entry__matching">
@@ -509,12 +509,8 @@ const OpenEntryMatching = () => {
                   checked={selectAll}
                   onChange={(e) => handleSelectAll(debitCredit.toLowerCase())}
                 />
-                <label htmlFor="selectAll">Select All ?</label>
+                <label htmlFor="selectAll">{t("openEntryActions.selectAll")}</label>
               </div>
-              <Button
-                label="Cash Discount"
-                className="action__button__open__entry__matching"
-              />
             </div>
           </div>
 
@@ -523,68 +519,6 @@ const OpenEntryMatching = () => {
               <>
                 {debitEntriesTable(debitEntries)}
                 {creditEntriesTable(creditEntries)}
-                <Column
-                  selectionMode="multiple"
-                  headerStyle={{ width: "3rem" }}
-                />
-                <Column
-                  field="transactionCode"
-                  header="Document No"
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="documentDate"
-                  header="Doc Dt"
-                  body={(rowData) => formatDate(rowData.documentDate)}
-                  style={{ minWidth: "100px" }}
-                />
-                <Column
-                  field="dueDate"
-                  header="Due Dt"
-                  body={(rowData) => formatDate(rowData.dueDate)}
-                  style={{ minWidth: "100px" }}
-                />
-                <Column
-                  field="amount"
-                  header="FC Amount"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="amount"
-                  header="LC Amount"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "120px" }}
-                />
-                <Column
-                  field="amount"
-                  header="Balance FC Amt"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  field="amount"
-                  header="Balance LC Amt"
-                  body={(rowData) => formatCurrency(rowData.amount)}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  header="Adjustment Amt"
-                  body={() => (
-                    <InputText className="adjustment__input__open__entry__matching" />
-                  )}
-                  style={{ minWidth: "130px" }}
-                />
-                <Column
-                  header="Cr"
-                  body={() => <Checkbox />}
-                  style={{ minWidth: "50px" }}
-                />
-                <Column
-                  header="Ok"
-                  body={() => <Checkbox />}
-                  style={{ minWidth: "50px" }}
-                />
               </>
             ) : (
               <>
@@ -598,7 +532,7 @@ const OpenEntryMatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Ctrl Acnt Code</label>
+                  <label>{t("openEntryFilters.controlAccountCode")}</label>
                   <InputText
                     value={footerData.ctrlAcntCode}
                     onChange={(e) =>
@@ -607,33 +541,33 @@ const OpenEntryMatching = () => {
                         ctrlAcntCode: e.target.value,
                       })
                     }
-                    placeholder="Control Account Code"
+                    placeholder={t("openEntryFilters.controlAccountCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Divn Code</label>
+                  <label>{t("openEntryFilters.divisionCode")}</label>
                   <InputText
                     value={footerData.divnCode}
                     onChange={(e) =>
                       setFooterData({ ...footerData, divnCode: e.target.value })
                     }
-                    placeholder="Division Code"
+                    placeholder={t("openEntryFilters.divisionCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Dept Code</label>
+                  <label>{t("openEntryFilters.departmentCode")}</label>
                   <InputText
                     value={footerData.deptCode}
                     onChange={(e) =>
                       setFooterData({ ...footerData, deptCode: e.target.value })
                     }
-                    placeholder="Department Code"
+                    placeholder={t("openEntryFilters.departmentCode")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -642,20 +576,20 @@ const OpenEntryMatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Doc Ref</label>
+                  <label>{t("openEntryFilters.documentReference")}</label>
                   <InputText
                     value={footerData.docRef}
                     onChange={(e) =>
                       setFooterData({ ...footerData, docRef: e.target.value })
                     }
-                    placeholder="Document Reference"
+                    placeholder={t("openEntryFilters.documentReference")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Narration</label>
+                  <label>{t("openEntryFilters.narration")}</label>
                   <InputText
                     value={footerData.narration}
                     onChange={(e) =>
@@ -664,14 +598,14 @@ const OpenEntryMatching = () => {
                         narration: e.target.value,
                       })
                     }
-                    placeholder="Narration"
+                    placeholder={t("openEntryFilters.narration")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Acty Code 1</label>
+                  <label>{t("openEntryFilters.activityCode1")}</label>
                   <InputText
                     value={footerData.actyCode1}
                     onChange={(e) =>
@@ -680,7 +614,7 @@ const OpenEntryMatching = () => {
                         actyCode1: e.target.value,
                       })
                     }
-                    placeholder="Activity Code 1"
+                    placeholder={t("openEntryFilters.activityCode1")}
                     className="input__field__open__entry__matching"
                   />
                 </div>
@@ -689,7 +623,7 @@ const OpenEntryMatching = () => {
             <div className="footer__row__open__entry__matching">
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Write off Code</label>
+                  <label>{t("openEntryFilters.writeOffCode")}</label>
                   <Dropdown
                     value={footerData.writeOffCode}
                     options={writeOffReasons.map((r) => ({ label: `${r.code} – ${r.name} (${r.glAccount})`, value: r.code }))}
@@ -700,14 +634,14 @@ const OpenEntryMatching = () => {
                       })
                     }
                     showClear
-                    placeholder="Write off reason"
+                    placeholder={t("openEntryFilters.writeOffReason")}
                     className="input__field__open__entry__matching w-full"
                   />
                 </div>
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Write off Amount</label>
+                  <label>{t("openEntryFilters.writeOffAmount")}</label>
                   <InputText
                     value={footerData.writeOffAmount}
                     onChange={(e) =>
@@ -723,7 +657,7 @@ const OpenEntryMatching = () => {
               </div>
               <div className="col-12 md:col-4 lg:col-4">
                 <div className="footer__group__open__entry__matching">
-                  <label>Net</label>
+                  <label>{t("openEntryFilters.net")}</label>
                   <InputText
                     value={footerData.net}
                     onChange={(e) =>

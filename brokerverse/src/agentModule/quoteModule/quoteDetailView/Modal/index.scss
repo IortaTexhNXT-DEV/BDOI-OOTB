@@ -277,9 +277,32 @@ $tablet-md: 1024px;
 }
 
 .share-modal {
-  .share__option_icon {
-    font-size: 1.5rem;
+  // each option is a button: icon in a 40px circle like the others, caption under it
+  .share__option {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    text-align: center;
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .share__option_round {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: $color-surface-muted;
     color: $brand-blue;
+
+    .pi {
+      font-size: 1.1rem;
+    }
   }
 
   .share__link {

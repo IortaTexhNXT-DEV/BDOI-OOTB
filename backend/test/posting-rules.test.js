@@ -7,11 +7,13 @@ import { allocate, policyParticipants } from '../src/modules/accounting/lib/coin
 import { returnPremium, findPolicy } from '../src/modules/receipts/receivables.js';
 import { bookDirectBill } from '../src/modules/remittance/directbill.js';
 import { eligiblePolicies } from '../src/modules/remittance/service.js';
-import { withStarterInsurerAccounts, withoutCommissionTaxes, withoutConfigurationApproval } from './helpers.js';
+import { withStarterInsurerAccounts, withoutCommissionTaxes, withoutConfigurationApproval, enableFeatures } from './helpers.js';
 
 let ctx;
 // these suites check the journals of the original rules; commission taxes (rule version 2) are in commission-taxes.test.js
-beforeAll(async () => { ctx = await setupFinance(); await withoutCommissionTaxes(); await withoutConfigurationApproval(); await withStarterInsurerAccounts(); });
+beforeAll(async () => { ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['petty-cash', 'coinsurance', 'coinsurance-reports']); await withoutCommissionTaxes(); await withoutConfigurationApproval(); await withStarterInsurerAccounts(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -277,6 +279,9 @@ describe('return premium, cancellation and write-off', () => {
     expect(simple(await linesOf(item.journal_id)).map((l) => l.slice(0, 3))).toEqual([['4409002', 2500, 0], ['2201001', 0, 2500]]);
     const f = await ctx.as('maker')('post', '/petty-cash/funds').send({ code: 'PCF-REV', fundSize: 5000 });
     expect(f.status).toBe(201);
+    expect(f.body.data.status).toBe('pending');
+    expect((await ctx.as('maker')('post', '/petty-cash/funds/PCF-REV/approve').send({})).status).toBe(403);
+    expect((await ctx.as('checker')('post', '/petty-cash/funds/PCF-REV/approve').send({})).status).toBe(200);
     const pr = await ctx.as('maker')('post', '/petty-cash/receipts').send({ pettyCashCode: 'PCF-REV', amount: 0.01 });
     expect(pr.status).toBe(409);
     const d = await ctx.as('maker')('post', '/petty-cash/disbursements').send({ pettyCashCode: 'PCF-REV', expenseAccount: '4401007', amount: 1000, vat: 107.14, wht: 10, remarks: 'Courier' });

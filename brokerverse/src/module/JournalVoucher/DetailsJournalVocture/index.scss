@@ -343,3 +343,16 @@
 .bv-jv-rejection {
     color: var(--color-danger);
 }
+
+// Journal voucher header actions: the decision and Print in one row at the right, whatever the status
+.bv-jv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  .bv-approval-actions__reason {
+    margin-right: 0;
+  }
+}

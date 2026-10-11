@@ -13,6 +13,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import numberingService from "../../services/numberingService";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import "./index.scss";
 
 const RESET_RULES = ["yearly", "fiscal_yearly", "monthly", "never"];
@@ -368,7 +369,11 @@ const DocumentNumbering = () => {
       >
         {nextDialog && (
           <div className="admin__grid admin__grid--single">
-            <p className="dn__help">{k("setNextHelp", { issued: nextRow.currentValue, period: nextRow.periodKey, min: nextRow.nextNumber })}</p>
+            <KeyValueGrid columns={3} items={[
+              { label: k("period"), value: nextRow.periodKey },
+              { label: k("issuedCount"), value: nextRow.currentValue, type: "number", decimals: 0 },
+              { label: k("lowestNext"), value: nextRow.nextNumber, type: "number", decimals: 0 },
+            ]} />
             <div className="admin__field">
               <label htmlFor="dn-next">{k("nextNumber")}</label>
               <InputNumber

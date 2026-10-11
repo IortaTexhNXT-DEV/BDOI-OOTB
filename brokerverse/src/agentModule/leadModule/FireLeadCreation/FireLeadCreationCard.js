@@ -1173,14 +1173,14 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         <div className="col-12 overflow-x-auto">
           <table className="w-full" style={{ borderCollapse: "collapse", fontFamily: "Nunito, Arial, sans-serif", fontSize: 14 }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
+              <tr style={{ borderBottom: "2px solid var(--surface-border)" }}>
                 <th style={{ padding: "10px", textAlign: "left" }}>{t("fireLead.cover")}</th>
                 <th style={{ padding: "10px", textAlign: "right" }}>{t("fireLead.premium")}</th>
               </tr>
             </thead>
             <tbody>
               {coverRows.filter((r) => r.showCover).map((r, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <tr key={i} style={{ borderBottom: "1px solid var(--surface-border)" }}>
                   <td style={{ padding: "10px" }}>{r.coverDescKey ? t(r.coverDescKey) : r.coverDesc}</td>
                   <td style={{ padding: "10px", textAlign: "right" }}>{formatCurrency(r.premium ?? 0)}</td>
                 </tr>
@@ -1307,7 +1307,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
               <span>-{totalDiscount.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-content-between mt-3" style={{ fontSize: 16, fontWeight: 600, borderTop: "1px solid #e5e7eb", paddingTop: 8 }}>
+          <div className="flex justify-content-between mt-3" style={{ fontSize: 16, fontWeight: 600, borderTop: "1px solid var(--surface-border)", paddingTop: 8 }}>
             <span className="labeltxt_container">{t("fireLead.totalPremium")}</span>
             <span>{totalPremium.toFixed(2)}</span>
           </div>

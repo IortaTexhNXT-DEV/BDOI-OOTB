@@ -87,6 +87,8 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
 | Official receipts upload | Accounts > Receipts > Bulk upload | `POST /api/receipts/bulk-upload` | `Receipts_Upload_Template.xlsx` |
+| Bank payments upload | Accounts > Receipts > Bulk Upload > Bank payments (matched by reference) | `POST /api/receipts/bank-payments` | `Bank_Payments_Upload_Template.xlsx` |
+| Payments made directly to the insurer | Accounts > Receipts > Bulk Upload > Payments made to the insurer | `POST /api/receipts/insurer-direct` | `Insurer_Direct_Payments_Template.xlsx` |
 | Payment vouchers upload | Accounts > Disbursement > Bulk upload | `POST /api/disbursements/bulk-upload` | `Disbursements_Upload_Template.xlsx` |
 | Journal vouchers upload (manual adjusting entries) | Accounts > Journal Voucher > Upload | `POST /api/journal-vouchers/upload` | `Journal_Vouchers_Upload_Template.xlsx` |
 | GL opening balances (go-live trial balance) | Accounts > Period End > Period Management > Import opening balances | `POST /api/period-end/opening-balances/import` | `Opening_Balances_Upload_Template.xlsx` |
@@ -98,6 +100,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Bank statement (Generic (Date, Description, Reference, Debit, Credit, Balance)) | Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement (format GENERIC) | `POST /api/bank-reconciliation/statements/import` | `Bank_Statement_Generic_Upload_Template.xlsx` |
 | Insurer statement (Generic statement of account) | Accounts > Insurer Reconciliation > Insurer Statements > Import statement (format GENERIC) | `POST /api/insurer-reconciliation/statements/import` | `Insurer_Statement_Generic_Upload_Template.xlsx` |
 | Remittance bulk processing (configuration BFM-001) | Accounts > Remittance > Bulk Processing > Upload / Validate, then Process | `POST /api/remittance/bulk/upload` | `Remittance_Bulk_Upload_Template.xlsx` |
+| Remittance policy list | Accounts > Remittance > Remittances > Import policy list | `POST /api/remittance/imports/validate` | `Remittance_Policy_List_Template.xlsx` |
 | Go-live configuration workbook | API (go-live scripts) | `POST /api/data-load/batches` | `GoLive_Configuration_Workbook.xlsx` |
 | Go-live migration workbook | API (go-live scripts) | `POST /api/data-load/batches` | `GoLive_Migration_Workbook.xlsx` |
 <!-- coverage:end -->

@@ -23,7 +23,7 @@ export const BRANCH_SOURCES = ['policy_owner', 'user', 'context', 'none'];
 /** Account Determination sections (the former Premium / Customer / Miscellaneous / Claims account setup screens). */
 export const ROLE_SECTIONS = {
   premium: ['premium_receivable', 'due_to_insurer', 'premium_vat_payable', 'premium_dst_payable', 'premium_lgt_payable', 'commission_income', 'commission_receivable', 'insurer_refund_receivable', 'output_vat', 'creditable_wht'],
-  customer: ['cash_in_bank', 'cash_on_hand', 'client_refund_payable', 'agent_receivable', 'commission_payable', 'commission_expense', 'wht_payable', 'incentive_expense', 'incentive_payable'],
+  customer: ['cash_in_bank', 'cash_on_hand', 'client_refund_payable', 'unapplied_collections', 'agent_receivable', 'commission_payable', 'commission_expense', 'wht_payable', 'incentive_expense', 'incentive_payable'],
   miscellaneous: ['petty_cash_fund', 'employee_advances', 'input_vat', 'supplier_payable', 'write_off', 'remittance_adjustment'],
   claims: ['claims_receivable', 'claims_payable'],
 };
@@ -193,6 +193,13 @@ export async function setActive(db, id, active, user) {
   }
   await db.query('UPDATE posting_rules SET active = $2, updated_by = $3, updated_at = now() WHERE id = $1', [r.id, !!active, user?.id ?? null]);
   return { before: await getRule(db, r.id).then((x) => ({ ...x, active: r.active })), after: await getRule(db, r.id), change: null };
+}
+
+const TAX_WORDS = new Set(['vat', 'dst', 'lgt', 'fst', 'ewt', 'wht', 'cwt']);
+/** An amount key in words with its tax acronyms in capitals: "commission_ewt" -> "Commission EWT", "vat" -> "VAT". */
+export function amountName(key) {
+  const words = String(key || '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').split(/[\s_-]+/).filter(Boolean).map((w) => w.toLowerCase());
+  return words.map((w, i) => (TAX_WORDS.has(w) ? w.toUpperCase() : i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(' ');
 }
 
 // ---------- account determination ----------

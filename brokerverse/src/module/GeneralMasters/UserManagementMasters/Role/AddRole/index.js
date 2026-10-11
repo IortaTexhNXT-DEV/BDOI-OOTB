@@ -20,7 +20,8 @@ import {
   postAddRoleMiddleware,
 } from "../store/roleMiddleware";
 import userService from "../../../../../services/userService";
-import { accessOptions, toRoleCode } from "../store/roleMapping";
+import { accessOptions, roleModules, toRoleCode } from "../store/roleMapping";
+import { RecordValue } from "../../../../../components/RecordView";
 
 const AddRole = ({ action }) => {
   const { t } = useTranslation();
@@ -226,6 +227,21 @@ const AddRole = ({ action }) => {
                 placeholder={t("generalMasters.enter")}
               />
             </div>
+            {/* a role's view lists every module it reaches and its level; the form edits one menu and sub-menu */}
+            {action === "view" ? (
+              <>
+                <div className="col-12 md:col-6 lg:col-6">
+                  <RecordValue label={t("generalMasters.menuAccess")} value={roleModules(roleViewData)} />
+                </div>
+                <div className="col-12 md:col-3 lg:col-3">
+                  <RecordValue label={t("generalMasters.permissions")} value={roleViewData.permissions ? t(`generalMasters.accessLevel.${roleViewData.permissions}`) : null} />
+                </div>
+                <div className="col-12 md:col-3 lg:col-3">
+                  <RecordValue label={t("generalMasters.createdOn")} value={roleViewData.modifiedOn} />
+                </div>
+              </>
+            ) : (
+              <>
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
                 required
@@ -272,8 +288,10 @@ const AddRole = ({ action }) => {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
             </div>
+              </>
+            )}
           </div>
-          {(action === "view" || action === "edit") && (
+          {action === "edit" && (
             <div className="grid ">
               <div className="col-12 md:col-3 lg:col-3">
                 <InputField

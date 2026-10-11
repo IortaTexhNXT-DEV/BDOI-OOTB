@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts } from './helpers.js';
+import { setup, loginAs, withProducts, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
 let salesToken;
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['product-analytics']);
   await withProducts();
   await ctx.api('post', '/users').send({ username: 'p.sales', password: 'Welcome@123', displayName: 'P Sales', roles: ['sales'] });
   salesToken = await loginAs(ctx.app, 'p.sales', 'Welcome@123');
@@ -59,8 +61,8 @@ describe('product templates', () => {
     expect((await ctx.api('post', `/product-configurator/products/${id}/reactivate`)).body.data.status).toBe('Active');
   });
   it('manages the insurer panel and calculates a premium illustration', async () => {
-    const p = await ctx.api('put', `/product-configurator/products/${id}/insurers`).send({ insurers: ['MALAYAN', 'FPG'] });
-    expect(p.body.data.insurers).toEqual(['Malayan Insurance Co., Inc.', 'FPG Insurance Co., Inc.']);
+    const p = await ctx.api('put', `/product-configurator/products/${id}/insurers`).send({ insurers: ['MALAYAN', 'STANDARD'] });
+    expect(p.body.data.insurers).toEqual(['Malayan Insurance Co., Inc.', 'Standard Insurance Co., Inc.']);
     expect((await ctx.api('put', `/product-configurator/products/${id}/insurers`).send({ insurers: ['Nobody Insurance'] })).status).toBe(400);
     const panel = await ctx.api('get', `/product-configurator/products/${id}/insurers`);
     expect(panel.body.data[0]).toMatchObject({ insurerCode: 'MALAYAN', onPanel: true });

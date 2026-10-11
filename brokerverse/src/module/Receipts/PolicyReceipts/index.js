@@ -15,7 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgEye from "../../../assets/icons/SvgEye";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 import { useDispatch, useSelector } from "react-redux";
 import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import {
@@ -27,22 +27,18 @@ import {
 import { clearBulkPrintError } from "../store/receiptsReducers";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import DropDowns from "../../../components/DropDowns";
-import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../components/LabelWrapper";
 import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import clientService from "../../../services/clientService";
 import ImportDialog from "../../../components/ImportDialog";
+import ReceiptBatches from "./ReceiptBatches";
 import { printPdf } from "../../../components/Print";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
 import { hasPermission } from "../../../utils/canOpen";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
-const UPLOAD_TARGETS = [{ label: "Official receipts", templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" }];
-
 const CONVERTED = "Converted";
 
 const PolicyReceipts = () => {
@@ -417,7 +413,7 @@ const PolicyReceipts = () => {
     if (!code || !dateFrom || !dateTo) {
       toast.current?.show({
         severity: "warn",
-        summary: t("common.error"),
+        summary: t("accounts.receipts.requiredTitle"),
         detail: t("accounts.receipts.fillRequiredFields"),
         life: 3000,
       });
@@ -574,6 +570,7 @@ const PolicyReceipts = () => {
   // Real buttons (keyboard focus, Enter / Space) for the header actions; rendered for desktop and mobile layouts.
   // Recording and uploading receipts are for the collection users (write:receipts); the others only read them.
   const canRecord = hasPermission("write:receipts");
+  const [batchesOpen, setBatchesOpen] = useState(false);
   const headerActions = (
     <>
       <div className="filter_bulk_button_container">
@@ -586,6 +583,11 @@ const PolicyReceipts = () => {
           <div className="filter_bulk_button_container">
             <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
               <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
+            </Button>
+          </div>
+          <div className="filter_bulk_button_container">
+            <Button type="button" className="bulk_button_container" outlined onClick={() => setBatchesOpen(true)}>
+              <span className="addtext">{t("accounts.receiptBatches.open")}</span>
             </Button>
           </div>
           <div className="filterbutton_container">
@@ -731,7 +733,7 @@ const PolicyReceipts = () => {
               }
               tableStyle={{
                 minWidth: "50rem",
-                color: "#2e2e2e",
+                color: "var(--text-color)",
                 maxHeight: "50vh",
                 overflowy: "auto",
               }}
@@ -841,7 +843,7 @@ const PolicyReceipts = () => {
                       <div style={{ fontWeight: "600", color: "var(--color-success)" }}>
                         {t("accounts.receipts.total")} {formatCurrency(totalPaid)}
                       </div>
-                      <div style={{ fontSize: "11px", color: "#6b7280" }}>
+                      <div style={{ fontSize: "11px", color: "var(--text-color-secondary)" }}>
                         {paymentsList.map((payment, idx) => (
                           <div key={idx}>
                             #{idx + 1}: {formatCurrency(parseFloat(payment.paid || "0"))}
@@ -897,14 +899,10 @@ const PolicyReceipts = () => {
               ></Column>
 
               <Column
-                // sortable
-                body={(rowData) => (
-                  <SvgEye onClick={() => handleArrowClick(rowData)} />
-                )}
+                body={(rowData) => <RowActions onView={() => handleArrowClick(rowData)} viewLabel={t("common.view")} />}
                 header={t("accounts.receipts.action")}
-                headerStyle={headerStyle}
-                className="fieldvalue_containers"
-              ></Column>
+                {...actionsColumn}
+              />
             </DataTable>
           </div>
         </div>
@@ -925,160 +923,40 @@ const PolicyReceipts = () => {
             </div>
           }
         >
-          {/* Division Code From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={division}
-                onChange={(e) => setDivision(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.divisionCodeFrom")}
-                options={divisionOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
+          <div className="receipt-print-criteria" role="group" aria-label={t("accounts.receipts.bulkPrint")}>
+            <div className="receipt-print-criteria__head" aria-hidden="true">
+              <span />
+              <span>{t("accounts.receipts.printCriteria.from")}</span>
+              <span>{t("accounts.receipts.printCriteria.to")}</span>
             </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={divisionTo}
-                onChange={(e) => setDivisionTo(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.divisionCodeTo")}
-                options={divisionOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-          </div>
-
-          {/* OR Number From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={number}
-                onChange={(e) => setNumber(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.orNumberFrom")}
-                options={orNumberOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={numberto}
-                onChange={(e) => setNumberTo(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.orNumberTo")}
-                options={orNumberOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
+            {[
+              { key: "division", options: divisionOptions, from: [division, setDivision], to: [divisionTo, setDivisionTo] },
+              { key: "orNumber", options: orNumberOptions, from: [number, setNumber], to: [numberto, setNumberTo], filter: true },
+              { key: "customerCode", options: getCustomerCodeOptions(), from: [code, setCode], to: [codeTo, setCodeTo], filter: true, required: true, loading: clientsLoading },
+              { key: "cashier", options: cashierOptions, from: [cashier, setCashier], to: [cashierto, setCashierto] },
+            ].map((c) => {
+              const label = t(`accounts.receipts.printCriteria.${c.key}`);
+              const pick = ([value, set], end) => (
+                <Dropdown value={value} onChange={(e) => set(e.value)} options={c.options} optionLabel="name" optionValue="code" filter={c.filter} showClear={!!value}
+                  disabled={c.loading} className="w-full" aria-label={`${label} ${t(`accounts.receipts.printCriteria.${end}`)}`}
+                  placeholder={c.loading ? t("common.loading") : t("accounts.receipts.printCriteria.any")} />
+              );
+              return (
+                <div key={c.key} className="receipt-print-criteria__row">
+                  <span className="receipt-print-criteria__label">{label}{c.required ? " *" : ""}</span>
+                  {pick(c.from, "from")}
+                  {pick(c.to, "to")}
+                </div>
+              );
+            })}
+            <div className="receipt-print-criteria__row">
+              <span className="receipt-print-criteria__label">{t("accounts.receipts.printCriteria.receiptDate")} *</span>
+              <Calendar showIcon className="w-full" value={dateFrom} onChange={(e) => setDateFrom(e.value)} dateFormat={calendarDateFormat()}
+                aria-label={`${t("accounts.receipts.printCriteria.receiptDate")} ${t("accounts.receipts.printCriteria.from")}`} />
+              <Calendar showIcon className="w-full" value={dateTo} onChange={(e) => setDateTo(e.value)} dateFormat={calendarDateFormat()}
+                aria-label={`${t("accounts.receipts.printCriteria.receiptDate")} ${t("accounts.receipts.printCriteria.to")}`} />
             </div>
           </div>
-
-          {/* Customer Code From and To - Dynamic values from API data */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={code}
-                onChange={(e) => setCode(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.customerCodeFrom")}
-                options={getCustomerCodeOptions()}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={clientsLoading ? t("common.loading") : t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                disabled={clientsLoading}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={codeTo}
-                onChange={(e) => setCodeTo(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.customerCodeTo")}
-                options={getCustomerCodeOptions()}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={clientsLoading ? t("common.loading") : t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                disabled={clientsLoading}
-              />
-            </div>
-          </div>
-
-          {/* Cashier ID From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={cashier}
-                onChange={(e) => setCashier(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.cashierIdFrom")}
-                options={cashierOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={cashierto}
-                onChange={(e) => setCashierto(e.value)}
-                className="dropdown__container"
-                label={t("accounts.receipts.cashierIdTo")}
-                options={cashierOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-          </div>
-
-          {/* Date From and Date To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("accounts.receipts.dateFrom")}
-              </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("accounts.receipts.dateTo")}
-              </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
-            </div>
-          </div>
-
         </Dialog>
       </div>
 
@@ -1086,11 +964,16 @@ const PolicyReceipts = () => {
       <ImportDialog
         visible={visibleBulkUploadPopup}
         onHide={() => setVisibleBulkUploadPopup(false)}
-        title={"Bulk upload receipts"}
-        targets={UPLOAD_TARGETS}
+        title={t("accounts.receipts.bulkUploadTitle")}
+        targets={[
+          { label: t("accounts.receipts.officialReceipts"), templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" },
+          { label: t("accounts.receipts.bankPayments"), templatePath: "/receipts/bank-payments/template", uploadPath: "/receipts/bank-payments" },
+          { label: t("accounts.receipts.insurerDirectPayments"), templatePath: "/receipts/insurer-direct/template", uploadPath: "/receipts/insurer-direct" },
+        ]}
         onDone={handleBulkUploadSuccess}
       />
 
+      <ReceiptBatches visible={batchesOpen} onHide={() => setBatchesOpen(false)} />
       <Toast ref={toast} />
     </div>
   );

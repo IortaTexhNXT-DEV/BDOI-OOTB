@@ -4,7 +4,8 @@
  * app_settings (limits.receivable_ageing_buckets, collections.*).
  */
 import { getSetting } from '../../lib/settings.js';
-import { formatMoney } from '../../lib/money.js';
+import { formatMoney, num } from '../../lib/money.js';
+import { chargesFor } from '../premium-charges/service.js';
 import { today } from '../../lib/dates.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -27,7 +28,7 @@ async function thresholds() {
 const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.due_date, r.status AS receivable_status, r.net_premium, r.vat, r.dst, r.lgt, r.other_charges,
     r.discount, r.source AS receivable_source, r.reference AS receivable_reference, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
     r.origin, r.legacy_system, r.legacy_number, r.migrated_at, r.load_batch_id, ${originColumns('r')}, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
-    p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
+    p.policy_number, p.status AS policy_status, p.product_id, p.lob AS policy_lob, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
     (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
     CASE WHEN r.balance <= 0 OR r.status IN ('paid','written-off') THEN 'Paid'
@@ -103,7 +104,24 @@ export async function listCollections(db, q, pg) {
   const sort = SORTS[q.sortField] || 'due_date';
   const dir = String(q.sortOrder).toLowerCase() === 'desc' ? 'DESC' : 'ASC';
   const rows = (await db.query(`SELECT * FROM (${BASE}) y ${f.where} ORDER BY ${sort} ${dir} NULLS LAST, id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset])).rows;
-  return { rows: rows.map(itemRow), total };
+  return { rows: rows.map(itemRow), total, overdueLevels: [t.l1, t.l2] };
+}
+
+/**
+ * Net premium and taxes of a bill kept with its gross amount alone (a loaded or migrated bill): the gross split at the
+ * premium tax rates in force for the policy's product, so the breakdown adds up to the gross. {} when the bill has them.
+ */
+async function premiumParts(db, x) {
+  const gross = Number(x.amount);
+  if (Number(x.net_premium) > 0 || !(gross > 0)) return {};
+  const c = await chargesFor({ premium: gross, productId: x.product_id || null, lob: x.policy_lob || null, includeFlat: false }, db);
+  const rate = num(c.totalCharges) / gross;
+  if (!(rate > 0)) return { netPremium: gross };
+  const net = round2(gross / (1 + rate));
+  const share = (v) => round2((num(v) * net) / gross);
+  const parts = { valueAddedTax: share(c.vat), documentaryStampTax: share(c.dst), localGovernmentTax: share(c.lgt) };
+  const others = round2(gross - net - parts.valueAddedTax - parts.documentaryStampTax - parts.localGovernmentTax);
+  return { netPremium: net, ...parts, accountPremiumOthers: others };
 }
 
 export async function getCollection(db, id) {
@@ -119,6 +137,7 @@ export async function getCollection(db, id) {
   const coRows = x.participant_count > 1 ? await coInsuranceRows(db, x) : [];
   return {
     ...itemRow(x),
+    ...(await premiumParts(db, x)),
     isCoInsurancePolicy: coRows.length > 0, coInsuranceCollectionRows: coRows,
     followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, actionByName: a.action_by_name || a.action_by,
       actionByRoles: a.action_by_roles || [], callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
@@ -174,12 +193,39 @@ export async function sendEmail(db, id, body, user) {
  * Due-date reminders: items due within collections.reminder_days_before days or overdue, not reminded within
  * collections.reminder_repeat_days. Queues a client e-mail and notifies the policy owner.
  */
-export async function sendDueDateReminders(db, user) {
+async function reminderCandidates(db) {
   const t = await thresholds();
   const before = Number(await getSetting('collections.reminder_days_before', 7));
   const repeat = Number(await getSetting('collections.reminder_repeat_days', 7));
-  const rows = (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - $7::date <= $8
+  return (await db.query(`SELECT * FROM (${BASE}) y WHERE collection_status NOT IN ('Paid','Committed') AND due_date - $7::date <= $8
     AND (last_reminder_at IS NULL OR last_reminder_at < now() - ($9 || ' days')::interval)`, [...baseParams(t), before, String(repeat)])).rows;
+}
+
+/**
+ * What sendDueDateReminders would send now, for its confirmation: the items, the clients (and those without an
+ * e-mail address), the amount outstanding and the items by overdue level.
+ */
+export async function dueDateReminderPreview(db) {
+  const t = await thresholds();
+  const items = (await reminderCandidates(db)).map(itemRow);
+  const byLevel = {};
+  for (const x of items) {
+    const level = x.overdueLevel || 'Current';
+    byLevel[level] ||= { level, count: 0, amount: 0 };
+    byLevel[level].count += 1;
+    byLevel[level].amount = round2(byLevel[level].amount + x.outstandingAmount);
+  }
+  return {
+    items: items.length, clients: new Set(items.map((x) => x.clientId)).size,
+    withoutEmail: new Set(items.filter((x) => !x.client.email).map((x) => x.clientId)).size,
+    totalOutstanding: round2(items.reduce((sum, x) => sum + x.outstandingAmount, 0)), byLevel: Object.values(byLevel),
+    // the day bands of the levels (collections.overdue_levels): level 1 up to the first, level 2 up to the second, level 3 beyond
+    overdueLevels: [t.l1, t.l2],
+  };
+}
+
+export async function sendDueDateReminders(db, user) {
+  const rows = await reminderCandidates(db);
   const subjectTpl = await getSetting('collections.email_subject');
   const bodyTpl = await getSetting('collections.email_template');
   let emails = 0; let notifications = 0; const skipped = [];

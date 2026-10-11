@@ -64,7 +64,7 @@ const DetailsJournalVocture = () => {
   const home = { label: t("accounts.journalVoucherDetails.account") };
 
   const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const isInitialMount = useRef(true);
 
@@ -213,14 +213,13 @@ const DetailsJournalVocture = () => {
           )}
           status={voucher?.status ? { code: voucher.status, label: statusLabel(voucher.status), severity: voucher.status === "opening" ? "info" : undefined } : null}
           meta={[
-            { label: t("accounts.journalVoucherDetails.transactionCode"), value: voucher?.transactionCode },
             { label: t("accounts.journalVoucherDetails.date"), value: voucher?.date, type: "date" },
             { label: t("accounts.journalVoucherDetails.totalDebit"), value: voucher?.totalDebit, type: "amount" },
             { label: t("accounts.journalVoucherDetails.totalCredit"), value: voucher?.totalCredit, type: "amount" },
           ]}
           actions={(
-            <>
-              <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
+            // one action row at the right in every status: the decision (with its maker-checker reason) and Print last
+            <div className="bv-jv-actions">
               {voucher?.status === AWAITING_APPROVAL && (
                 <ApprovalActions
                   initiator={{ id: voucher.createdBy }}
@@ -230,7 +229,8 @@ const DetailsJournalVocture = () => {
                   onReject={() => decide("reject")}
                 />
               )}
-            </>
+              <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
+            </div>
           )}
         />
       </div>
@@ -244,8 +244,9 @@ const DetailsJournalVocture = () => {
       <div className="col-12">
         <DetailSection title={t("accounts.journalVoucherDetails.confirm.details")}>
           <KeyValueGrid
-            columns={4}
+            columns={3}
             items={[
+              { label: t("accounts.journalVoucherDetails.transactionCode"), value: voucher?.transactionCode },
               { label: t("accounts.journalVoucherDetails.confirm.kind"), value: kind ? t(`accounts.journalVoucherDetails.kinds.${kind}`, { defaultValue: kind }) : null },
               { label: t("accounts.journalVoucherDetails.confirm.source"), value: voucher?.source ? t(`accounts.journalVoucherDetails.sources.${voucher.source}`, { defaultValue: voucher.source }) : null },
               { label: t("accounts.journalVoucherDetails.confirm.createdAt"), value: voucher?.createdAt, type: "datetime" },

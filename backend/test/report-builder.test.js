@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, createOwnBookRole } from './helpers.js';
+import { setup, loginAs, createOwnBookRole, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { biExtract } from '../src/modules/report-builder/service.js';
 import { resolveKey } from '../src/modules/uploads/storage.js';
@@ -20,6 +20,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['bi-extract']);
   sales = await persona('rb.sales', ['sales']);
   accounting = await persona('rb.accounting', ['accounting']);
   await createOwnBookRole(ctx.api);

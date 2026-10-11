@@ -728,7 +728,7 @@ const UploadPolicyCard = ({
         </div>
 
         {!policyDocumentUrl && (
-          <div className="text-sm text-600 mb-2" style={{ color: "#6c757d" }}>
+          <div className="text-sm text-600 mb-2" style={{ color: "var(--text-color-secondary)" }}>
             {t("agent.uploadPolicyDocumentHint")}
           </div>
         )}

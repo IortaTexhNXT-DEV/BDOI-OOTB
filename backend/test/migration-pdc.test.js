@@ -13,7 +13,7 @@ import { one, pool, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
-import { goLiveSetup, validatedBatch } from './helpers.js';
+import { enableFeatures, goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -39,6 +39,7 @@ beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
   await seed({ log: () => {}, sampleData: false });
   const app = await createApp();
+  await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
   kits = (await api('get', '/data-load/kits')).body.data.kits;
@@ -46,6 +47,8 @@ beforeAll(async () => {
   day = await today();
   cutover = `${day.slice(0, 7)}-01`;
   await goLiveSetup(api, cutover);
+  // retained cheques are deposited to the one TISPH collection account (FR-PDC-004)
+  await query('UPDATE app_settings SET value = $2 WHERE key = $1', ['pdc.default_deposit_account', JSON.stringify('ACC-MIG-001')]);
   clearSettingsCache();
   await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by)
     SELECT 'bank-account', 'ACC-MIG-001', 'Operating Account', jsonb_build_object('accountCode', 'ACC-MIG-001', 'glAccount',
@@ -74,7 +77,7 @@ describe('Post-Dated Cheques sheet', () => {
     ] }));
     expect(r.body.data.errors.map((e) => [e.row, e.column, e.message])).toEqual([
       [2, 'Cheque Date', expect.stringMatching(/before the cutover date .*deposited in the legacy system/)],
-      [3, 'Amount', expect.stringMatching(/has 10000\.00 left after the cheques already on hand; this cheque is 10000\.01/)],
+      [3, 'Amount', expect.stringMatching(/has 10000\.00 left after the cheques already encoded; this cheque is 10000\.01/)],
       [4, 'Bill Reference', expect.stringMatching(/not in the Open Items sheet/)],
     ]);
   });
@@ -104,7 +107,7 @@ describe('Post-Dated Cheques sheet', () => {
   it('a deposit after go-live creates the official receipt; the open item can then no longer be changed by a load', async () => {
     const pdc = await one("SELECT id FROM post_dated_cheques WHERE cheque_number = '9101'");
     const d = await api('post', `/pdc/${pdc.id}/deposit`).send({ depositAccount: 'ACC-MIG-001', depositDate: day });
-    expect(d.status).toBe(200);
+    expect(d.status, JSON.stringify(d.body)).toBe(200);
     expect(d.body.data.pdc.status).toBe('deposited');
     expect(d.body.data.receiptNumber).toBeTruthy();
     const bill = await one("SELECT balance FROM receivables WHERE reference = 'PD-DN-1'");

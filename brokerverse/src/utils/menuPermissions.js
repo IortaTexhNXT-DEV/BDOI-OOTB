@@ -8,8 +8,11 @@
  * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as My Work).
  *
  * The server enforces the same personas through permissions on every endpoint; this file only
- * decides what the user sees and which screens the router lets them open.
+ * decides what the user sees and which screens the router lets them open. Entries of features this environment does
+ * not run (features/entitlements.js) are left out for every role, and entries marked `platform: true` are shown to the
+ * iorta TechNXT platform administrator only.
  */
+import { withoutFeatures } from "../features/entitlements.js";
 
 const OPERATIONS_ALL = [
   "Sales & Marketing",
@@ -46,6 +49,8 @@ const OPERATIONS_PROCESSING = [
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
 export const ADMIN_ROLE = "system-admin";
 export const ADMIN_ROLES = [ADMIN_ROLE];
+/** The iorta TechNXT platform administrator (vendor): Features & Releases only, never a menu of the tenant. */
+export const PLATFORM_ROLE = "iorta-platform-admin";
 
 export const roleMenuPermissions = {
   // The administrator sees every menu.
@@ -107,6 +112,7 @@ export const roleMenuPermissions = {
     operations: ["Payments"],
     accounts: [
       "Receipts",
+      "Unapplied Collections",
       "Collections",
       "Accounting Query",
       "All Clients Accounting",
@@ -143,6 +149,8 @@ export const roleMenuPermissions = {
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
+      // the financial statement versions of the FS reports (write:journal-vouchers)
+      "Finance > Financial Statement Versions",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
       // bank payment file layouts and payee bank accounts (write:disbursements)
@@ -163,10 +171,15 @@ export const roleMenuPermissions = {
 // it, and the server's permissions decide what it may change (an Associate sees the approval screens but cannot
 // approve). SUPERID includes the System Administrator, so the server returns system-admin among its roles: every menu.
 const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receivable", "Financial Reports > Collection Report"];
+// Accounts > Remittance entry by entry (spec §1.3). Finance and IT keep the whole menu; Insurer Reconciliation is not a
+// TISPH menu (its statements open under Remittance > Reconciliation).
+const REMITTANCE = (...items) => items.map((item) => `Remittance > ${item}`);
+const withoutInsurerRec = (items) => items.filter((item) => item !== "Insurer Reconciliation");
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", ...INCENTIVE_SELF_SERVICE] };
+// the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
+const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE] };
 // Sales & Marketing item by item, for the personas that lack the permission of some of its screens
 const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
   "Comparison Reports", "Campaigns", "Sales Activities"];
@@ -178,28 +191,36 @@ const TIS_OPERATIONS = {
   "my work": true,
   // campaigns are Sales' (read:campaigns)
   operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
-  accounts: ["Receipts", "Collections"],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };
+// Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
+const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Held policies", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
   "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
   "tis-ops-associate": TIS_OPERATIONS,
-  "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets"] },
+  "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   // the data owner of policies, clients and claims approves the migration loads (approve:data-load)
-  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"],
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"],
     master: [...TIS_OPERATIONS.master, "System Configuration > Data Migration & Go-Live"] },
-  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
-  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", "Insurer Reconciliation"]),
-  // the claim settlement funds an insurer remits are banked by Cash Control (write:receipts)
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation"]),
-  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation", "Open Entry Matching",
-    "Open Entry Unmatching", "Disbursement"]),
+  // Receipting (RBAC v4): CCD-PDU has no access to the receipts
+  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
+  // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
+  // instalment plans and the follow-ups of Credit Control (write:collections); Recon also decides
+  // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
+  // insurer remits are banked by Cash Control (write:receipts).
+  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+    ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+    "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,
+    accounts: withoutInsurerRec(roleMenuPermissions.accounting.accounts),
     master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules",
       "System Configuration > Data Migration & Go-Live"],
   },
@@ -219,17 +240,20 @@ Object.assign(roleMenuPermissions, {
     "product configurator": roleMenuPermissions.processing["product configurator"],
   },
   // TIS General Manager: the front office with its approvals; accounting, commission and administration read only
+  [PLATFORM_ROLE]: { master: ["Platform > Features & Releases"] },
   "tis-general-manager": {
     dashboard: ["Executive Dashboard", "Sales Dashboard", "Processing Dashboard", "Claims Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     "my work": true,
     operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
-    accounts: roleMenuPermissions.accounting.accounts,
+    // Remittance without Setup; Approvals to decide what approve:remittance gives it
+    accounts: [...withoutInsurerRec(roleMenuPermissions.accounting.accounts).filter((item) => item !== "Remittance"),
+      ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Settlement")],
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
-      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels",
-      "System Configuration > Data Migration & Go-Live"],
+      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
+      "Insurance Management > Distribution Channels", "System Configuration > Data Migration & Go-Live"],
   },
   // TIS Audit: the migration workspace and the audit trail, read only (read:data-load, read:audit)
   "tis-auditor": { master: ["System Configuration > Data Migration & Go-Live", "System Configuration > Audit Trail"] },
@@ -289,9 +313,17 @@ export const hasMenuAccess = (role, menuName, submenuName = null) => {
 };
 
 /** The menu tree reduced to what any of the given roles may see. */
-export const filterMenuForRoles = (menuList, roles) => {
+const withoutPlatformEntries = (items) =>
+  (items || [])
+    .filter((item) => !item.platform)
+    .map((item) => (item.submenu ? { ...item, submenu: withoutPlatformEntries(item.submenu) } : item))
+    .filter((item) => !item.submenu || item.submenu.length);
+
+export const filterMenuForRoles = (fullMenu, roles) => {
   const list = (roles || []).map(norm).filter(Boolean);
   if (!list.length) return [];
+  const edition = withoutFeatures(fullMenu);
+  const menuList = list.includes(PLATFORM_ROLE) ? edition : withoutPlatformEntries(edition);
   if (list.some((r) => roleMenuPermissions[r]?.all)) return menuList;
   return menuList
     .map((menu) => {

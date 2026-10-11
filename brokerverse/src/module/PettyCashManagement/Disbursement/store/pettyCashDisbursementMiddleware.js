@@ -31,6 +31,7 @@ export const toDisbursementRow = (d) => ({
   WHTMainAccount: d.whtAccount || "",
   WHTSubAccount: "",
   Remarks: d.remarks || "",
+  status: d.status || "",
   line: {
     id: d.id,
     RequestNumber: d.requestNumber || "",

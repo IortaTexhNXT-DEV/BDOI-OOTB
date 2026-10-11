@@ -336,7 +336,7 @@ const QuoteListingCard = () => {
 
         // IAR / Fire: go to quotation detail view
         if (isIarLOB || isFireLOB) {
-          navigate("/agent/quotedetailview", {
+          navigate(`/agent/quotedetailview/${quotationData?.quotationId || rowData.quotationId}`, {
             state: { quotationData },
           });
           return;
@@ -406,7 +406,7 @@ const QuoteListingCard = () => {
         const quotationData = result.payload;
 
         // Navigate to quote detail view with full data
-        navigate("/agent/quotedetailview", {
+        navigate(`/agent/quotedetailview/${quotationData?.quotationId || rowData.quotationId}`, {
           state: { quotationData: quotationData },
         });
       } else {

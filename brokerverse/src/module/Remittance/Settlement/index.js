@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
+import { TabMenu } from "primereact/tabmenu";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -11,15 +11,15 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Tag } from "primereact/tag";
 import { Timeline } from "primereact/timeline";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import remittanceService from "../../../services/remittanceService";
-import { calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
-import SvgDot from "../../../assets/icons/SvgDot";
+import { REMITTANCE_ROUTES, calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
+import PageHeader from "../../../components/PageHeader";
+import "../remittance.scss";
 import "./index.scss";
 
 const initialSettlement = () => ({
@@ -102,13 +102,7 @@ const SettlementProcessing = () => {
     { label: "Adjustment", value: "Adjustment" }
   ];
 
-  const items = [
-    { label: t("remittance.finance"), url: "#" },
-    { label: t("remittance.remittance"), url: "#" },
-    { label: t("remittance.settlement"), url: "#" }
-  ];
 
-  const home = { icon: <SvgDot />, url: "#" };
 
   const calculateSummary = () => {
     const totalPremium = policies.reduce((acc, p) => acc + Number(p.premium || 0), 0);
@@ -202,19 +196,11 @@ const SettlementProcessing = () => {
     if (!validateSettlement(true)) return;
 
     const summary = calculateSummary();
-    confirmDialog({
-      message: (
-        <div>
-          <p>{t("remittance.submitSettlementApproval")}</p>
-          <p>{t("remittance.settlementNo")}: <strong>{settlementData.settlementNo}</strong></p>
-          <p>{t("remittance.netAmount")}: <strong>
-            {formatCurrency(summary.netSettlement)}
-          </strong></p>
-        </div>
-      ),
-      header: t("remittance.confirmSubmission"),
-      icon: 'pi pi-send',
-      accept: () => submitForApproval()
+    openConfirm({
+      title: t("remittance.settlementScreen.submitTitle", { reference: settlementData.settlementNo }),
+      facts: [{ label: t("remittance.settlementNo"), value: settlementData.settlementNo }, { label: t("remittance.netAmount"), value: summary.netSettlement, type: "amount" }],
+      confirmLabel: t("remittance.submitForApproval"),
+      onConfirm: () => submitForApproval(),
     });
   };
 
@@ -243,10 +229,6 @@ const SettlementProcessing = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleCalculate = async () => {
@@ -280,31 +262,19 @@ const SettlementProcessing = () => {
 
   const unselectedPolicies = availablePolicies.filter((p) => !policies.some((x) => x.id === p.id));
 
-  const handleImport = () => {
-    confirmDialog({
-      message: `Add all ${unselectedPolicies.length} available policies for ${settlementData.insurerName || "the insurer"}?`,
-      header: 'Import Policies',
-      icon: 'pi pi-upload',
-      accept: () => setPolicies((prev) => [...prev, ...unselectedPolicies])
-    });
-  };
+  const handleImport = () => openConfirm({
+    title: t("remittance.settlementScreen.importTitle", { count: unselectedPolicies.length }),
+    facts: [{ label: t("remittance.settlementScreen.insurer"), value: settlementData.insurerName }, { label: t("remittance.settlementScreen.policies"), value: unselectedPolicies.length, type: "number" }],
+    confirmLabel: t("remittance.settlementScreen.importAction", { count: unselectedPolicies.length }),
+    onConfirm: () => setPolicies((prev) => [...prev, ...unselectedPolicies]),
+  });
 
-  const handleDeletePolicy = (rowData) => {
-    confirmDialog({
-      message: `Remove policy ${rowData.policyNo} from settlement?`,
-      header: 'Confirm Delete',
-      icon: 'pi pi-trash',
-      accept: () => {
-        setPolicies(prev => prev.filter(p => p.id !== rowData.id));
-        toast.current.show({
-          severity: 'success',
-          summary: 'Policy Removed',
-          detail: `${rowData.policyNo} removed from settlement`,
-          life: 2000
-        });
-      }
-    });
-  };
+  const handleDeletePolicy = (rowData) => openConfirm({
+    title: t("remittance.settlementScreen.removeTitle", { policy: rowData.policyNo }), severity: "warning",
+    facts: [{ label: t("remittance.policyNo"), value: rowData.policyNo }, { label: t("remittance.insuredName"), value: rowData.insuredName }],
+    confirmLabel: t("remittance.settlementScreen.remove"),
+    onConfirm: () => setPolicies((prev) => prev.filter((p) => p.id !== rowData.id)),
+  });
 
   const confirmAddPolicies = () => {
     if (selectedPolicies.length === 0) {
@@ -348,11 +318,8 @@ const SettlementProcessing = () => {
 
   const actionBodyTemplate = (rowData) => {
     return (
-      <Button
-        icon="pi pi-trash"
-        className="p-button-danger p-button-text p-button-sm"
-        onClick={() => handleDeletePolicy(rowData)}
-        disabled={!editable} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
+      <Button type="button" link size="small" className="rm-link" label={t("remittance.settlementScreen.remove")}
+        onClick={() => handleDeletePolicy(rowData)} disabled={!editable} />
     );
   };
 
@@ -372,12 +339,11 @@ const SettlementProcessing = () => {
   );
 
   return (
-    <div className="container__settlement__processing__master">
+    <div className="container__settlement__processing__master rm-page">
         <Toast ref={toast} />
-        <ConfirmDialog />
+        <PageHeader title={t("remittance.settlementScreen.title")} home={t("remittance.common.accounts")} section={{ label: t("remittance.common.remittance"), to: REMITTANCE_ROUTES.landing }}
+          trail={[t("remittance.settlementScreen.title")]} help={t("remittance.settlementScreen.help")} />
         <div className="top__container">
-          <h1 className="page__title">{t("remittance.insurerSettlement")}</h1>
-          <BreadCrumb model={items} home={home} />
 
           <div className="header-content">
             <div className="header-info">
@@ -414,8 +380,9 @@ const SettlementProcessing = () => {
         <div className="content-container">
           <div className="content-section">
           <Card>
-            <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-              <TabPanel header={t("remittance.settlementDetails")}>
+            <TabMenu model={[t("remittance.settlementDetails"), t("remittance.settlementScreen.tabs.adjustments"), t("remittance.settlementScreen.tabs.payment"),
+              t("remittance.settlementScreen.tabs.workflow")].map((label) => ({ label }))} activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)} className="rm-tabs" />
+            {activeIndex === 0 ? (
                 <div className="tab-content">
                   <div className="section-title">{t("remittance.insurerInformation")}</div>
                   {insurerCredits?.openBalance > 0 && (
@@ -484,14 +451,14 @@ const SettlementProcessing = () => {
                     <Button
                       label="Import"
                       icon="pi pi-upload"
-                      className="p-button-sm p-button-secondary"
+                      className="p-button-sm" outlined
                       onClick={handleImport}
                       disabled={!editable || unselectedPolicies.length === 0}
                     />
                     <Button
                       label={t("remittance.calculate")}
                       icon="pi pi-calculator"
-                      className="p-button-sm p-button-secondary"
+                      className="p-button-sm" outlined
                       onClick={handleCalculate}
                       loading={loading}
                     />
@@ -509,9 +476,9 @@ const SettlementProcessing = () => {
                     <Column body={actionBodyTemplate} style={{ width: '5%' }} />
                   </DataTable>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Adjustments">
+            {activeIndex === 1 ? (
                 <div className="tab-content">
                   <div className="section-title">Adjustment Details</div>
                   <div className="form-grid two-column">
@@ -580,9 +547,9 @@ const SettlementProcessing = () => {
                     />
                   </div>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Payment">
+            {activeIndex === 2 ? (
                 <div className="tab-content">
                   <div className="section-title">Payment Information</div>
                   <div className="form-grid two-column">
@@ -630,9 +597,9 @@ const SettlementProcessing = () => {
                     </div>
                   </div>
                 </div>
-              </TabPanel>
+            ) : null}
 
-              <TabPanel header="Workflow">
+            {activeIndex === 3 ? (
                 <div className="tab-content">
                   <div className="section-title">Approval Workflow</div>
                   <Timeline value={workflowHistory}
@@ -677,8 +644,7 @@ const SettlementProcessing = () => {
                     )}
                   </div>
                 </div>
-              </TabPanel>
-            </TabView>
+            ) : null}
           </Card>
 
           <Card className="summary-card" title="Settlement Summary">
@@ -720,7 +686,7 @@ const SettlementProcessing = () => {
             <Button
               label={t("remittance.saveDraft")}
               icon="pi pi-save"
-              className="p-button-secondary"
+              outlined
               onClick={handleSaveDraft}
               disabled={!editable || loading}
             />
@@ -731,22 +697,12 @@ const SettlementProcessing = () => {
               disabled={!editable || loading}
             />
             <Button
-              label={t("remittance.print")}
-              icon="pi pi-print"
-              className="p-button-secondary"
-              onClick={handlePrint}
-            />
-            <Button
               label={t("remittance.cancel")}
               className="p-button-text"
-              onClick={() => {
-                confirmDialog({
-                  message: 'Cancel settlement processing? Any unsaved changes will be lost.',
-                  header: 'Confirm Cancel',
-                  icon: 'pi pi-exclamation-triangle',
-                  accept: handleCancel
-                });
-              }}
+              onClick={() => openConfirm({
+                title: t("remittance.settlementScreen.discardTitle"), severity: "warning", message: t("remittance.settlementScreen.discardMessage"),
+                confirmLabel: t("remittance.settlementScreen.discard"), onConfirm: handleCancel,
+              })}
             />
           </div>
 
@@ -784,9 +740,6 @@ const SettlementProcessing = () => {
           >
             {approvalResult && (
               <div className="approval-success">
-                <div className="success-icon">
-                  <i className="pi pi-check-circle" style={{ fontSize: '3em', color: 'var(--green)' }} />
-                </div>
                 <p>Settlement has been submitted for approval.</p>
                 <div className="approval-details">
                   <div className="detail-item">
@@ -802,9 +755,6 @@ const SettlementProcessing = () => {
                     <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                   </div>
                 </div>
-                <p className="info-message">
-                  You will receive a notification once the settlement is approved.
-                </p>
               </div>
             )}
           </Dialog>

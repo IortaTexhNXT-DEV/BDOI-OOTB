@@ -31,6 +31,7 @@ import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currenc
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
 import OriginChip from "../../../components/OriginChip";
+import { useFeature } from "../../../features/Feature";
 
 /** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
 const RECEIPT_MODES = [
@@ -90,7 +91,10 @@ function BranchAdding() {
   const receiptModeOptions = RECEIPT_MODES.map((m) => ({ name: t(`accounts.addReceipts.${m.key}`), code: m.code }));
   const defaultCurrency = getDisplayCurrencyConfig().currency;
   // Currency codes from the Currency master (Master > Finance > Currency)
-  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const allCurrencies = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  // a receipt in another currency than the base one is a future-release feature (features/entitlements.js)
+  const multiCurrency = useFeature("multi-currency").on;
+  const currencyOptions = multiCurrency ? allCurrencies : allCurrencies.filter((o) => o.code === defaultCurrency);
 
   const loadOpenReceivables = useCallback(async () => {
     setReceivablesLoading(true);
@@ -340,10 +344,12 @@ function BranchAdding() {
       title: t("accounts.addReceipts.confirmTitle"),
       message: t("accounts.receiptDialogs.recordPaymentMessage"),
       facts: [
-        { label: t("accounts.addReceipts.customerName"), value: values.customerName },
+        { label: t("accounts.receiptDialogs.customer"), value: values.customerName },
+        { label: t("accounts.receiptDialogs.policyNumber"), value: values.policyNumber },
         { label: t("accounts.addReceipts.billNumber"), value: selectedBill.billNumber },
-        { label: t("accounts.addReceipts.receiptMode"), value: values.receiptMode },
-        { label: t("accounts.addReceipts.receiptDate"), value: toDateText(values.receiptDate), type: "date" },
+        { label: t("accounts.receiptDialogs.branch"), value: masters.branches.find((b) => b.code === values.branchCode)?.name || values.branchCode },
+        { label: t("accounts.receiptDialogs.paymentMode"), value: receiptMode ? t(`accounts.addReceipts.${receiptMode.key}`) : values.receiptMode },
+        { label: t("accounts.receiptDialogs.receiptDate"), value: toDateText(values.receiptDate), type: "date" },
         { label: t("accounts.addReceipts.billBalance"), value: selectedBill.balance, type: "amount" },
         { label: t("accounts.addReceipts.amountReceived"), value: round2(amountReceived), type: "amount", emphasis: true },
         { label: t("accounts.receiptDialogs.balanceAfter"), value: remaining, type: "amount" },
@@ -423,21 +429,7 @@ function BranchAdding() {
       <BreadCrumb model={items} home={home} className="breadcrumbs_container" separatorIcon={<SvgDot color={"#000"} />} />
       <Card>
         <div className="grid">
-          <div className="sm-col-12  md:col-3 lg-col-4 col-offset-9">
-            <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.receiptDate")}</LabelWrapper>
-            <Calendar
-              classNames="calender__container"
-              showIcon
-              value={values.receiptDate}
-              onChange={(e) => setFieldValue("receiptDate", e.target.value)}
-              dateFormat={calendarDateFormat()}
-              disabled={true}
-            />
-            {errorText(touchedError("receiptDate"))}
-          </div>
-        </div>
-        <div className="grid">
-          <div className="sm-col-12 col-12 md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
             <InputField
               value={values.receiptNumber}
               classNames="field__container"
@@ -446,7 +438,20 @@ function BranchAdding() {
               disabled={true}
             />
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
+            <LabelWrapper label={t("accounts.addReceipts.receiptDate")}>
+              <Calendar
+                showIcon
+                className="w-full"
+                value={values.receiptDate}
+                onChange={(e) => setFieldValue("receiptDate", e.target.value)}
+                dateFormat={calendarDateFormat()}
+                disabled={true}
+              />
+            </LabelWrapper>
+            {errorText(touchedError("receiptDate"))}
+          </div>
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.receiptType}
               onChange={(e) => setFieldValue("receiptType", e.value)}
@@ -460,7 +465,9 @@ function BranchAdding() {
             />
             {errorText(touchedError("receiptType"))}
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+        </div>
+        <div className="grid">
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.branchCode}
               onChange={(e) => setFieldValue("branchCode", e.value)}
@@ -474,7 +481,7 @@ function BranchAdding() {
             />
             {errorText(touchedError("branchCode"))}
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.departmentCode}
               onChange={(e) => setFieldValue("departmentCode", e.value)}
@@ -599,14 +606,15 @@ function BranchAdding() {
               {selectedBill && chequeMissing && errorText(t("accounts.addReceipts.validationChequeNumberRequired"))}
             </div>
             <div className="col-12 md:col-4">
-              <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.chequeDate")}</LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={values.chequeDate}
-                onChange={(e) => setFieldValue("chequeDate", e.target.value)}
-                dateFormat={calendarDateFormat()}
-              />
+              <LabelWrapper label={t("accounts.addReceipts.chequeDate")}>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={values.chequeDate}
+                  onChange={(e) => setFieldValue("chequeDate", e.target.value)}
+                  dateFormat={calendarDateFormat()}
+                />
+              </LabelWrapper>
             </div>
           </div>
         )}

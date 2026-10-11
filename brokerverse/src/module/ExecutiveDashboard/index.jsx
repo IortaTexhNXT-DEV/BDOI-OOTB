@@ -15,6 +15,7 @@ import { ChartSkeleton } from "../../components/Skeletons";
 import { useChartTheme } from "../../theme/chartTheme";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import Feature, { useFeature } from "../../features/Feature";
 import { formatPercent, progressValue } from "../../utility/numberFormat";
 import { formatDate } from "../../utility/dateFormat";
 import { statusLabel } from "../../utils/statusSeverity";
@@ -108,6 +109,7 @@ const ExecutiveDashboard = () => {
   const receivables = dashboard?.receivables;
   const sinceGoLive = dashboard?.issuedSinceGoLive;
 
+  const retentionAnalytics = useFeature("renewal-analytics");
   const kpis = [
     { key: "totalRevenue", label: t("executiveDashboard.totalRevenue"), value: dashboard ? money(k.totalRevenue?.value) : null, change: k.totalRevenue?.change, comparison, note: targetNote("totalRevenue", "currency"), onClick: issued },
     { key: "newBusiness", label: t("executiveDashboard.newBusiness"), value: dashboard ? money(k.newBusiness?.value) : null, change: k.newBusiness?.change, comparison, note: targetNote("newBusiness", "currency"), onClick: issued },
@@ -116,7 +118,7 @@ const ExecutiveDashboard = () => {
     { key: "claimsRatio", label: t("executiveDashboard.claimsRatio"), value: dashboard ? formatPercent(k.claimsRatio?.value) : null, note: k.claimsRatio?.target ? t("dashboards.targetMax", { target: formatPercent(k.claimsRatio.target), defaultValue: "Target at most {{target}}" }) : null,
       status: targetStatus(t, k.claimsRatio?.value, k.claimsRatio?.target, true), onClick: () => drillDown(navigate, LISTS.claims("")) },
     { key: "retentionRate", label: t("executiveDashboard.retentionRate"), value: dashboard ? formatPercent(k.retentionRate?.value) : null, note: k.retentionRate?.target ? t("dashboards.targetMin", { target: formatPercent(k.retentionRate.target), defaultValue: "Target {{target}}" }) : null,
-      status: targetStatus(t, k.retentionRate?.value, k.retentionRate?.target, false), onClick: () => navigate("/renewal/analytics") },
+      status: targetStatus(t, k.retentionRate?.value, k.retentionRate?.target, false), onClick: retentionAnalytics.on ? () => navigate("/renewal/analytics") : undefined },
     { key: "receivableClients", label: t("executiveDashboard.premiumReceivable", "Premium receivable"), value: receivables ? money(receivables.premiumFromClients) : null,
       note: receivables ? t("executiveDashboard.overdueNote", { amount: money(receivables.premiumOverdue), defaultValue: "{{amount}} overdue" }) : null,
       status: receivables && Number(receivables.premiumOverdue) > 0 ? { severity: "warning", label: t("dashboards.overdue", "Overdue items") } : null, onClick: () => navigate("/agent/collections") },
@@ -198,6 +200,7 @@ const ExecutiveDashboard = () => {
           )}
         </ChartCard>
 
+        <Feature name="executive-regional">
         <ChartCard title={t("executiveDashboard.regionalPerformance")}>
           <DataTable value={dashboard?.regionalPerformance || []} size="small" loading={!dashboard} className="regional-table">
             <Column field="region" header={t("executiveDashboard.region")} />
@@ -207,6 +210,7 @@ const ExecutiveDashboard = () => {
             <Column field="marketShare" header={t("executiveDashboard.marketShare")} body={marketShareTemplate} />
           </DataTable>
         </ChartCard>
+        </Feature>
 
         <ChartCard title={t("executiveDashboard.topPerformingProducts")}>
           <DataTable value={dashboard?.topProducts || []} size="small" loading={!dashboard} className="products-table"
@@ -218,6 +222,7 @@ const ExecutiveDashboard = () => {
           </DataTable>
         </ChartCard>
 
+        <Feature name="sales-dashboard">
         <ChartCard className="bv-dash-grid__wide" title={t("executiveDashboard.topAgentsPerformance")}>
           <DataTable value={dashboard?.agentPerformance || []} size="small" loading={!dashboard} className="agents-table">
             <Column field="name" header={t("executiveDashboard.agent")} />
@@ -227,6 +232,7 @@ const ExecutiveDashboard = () => {
             <Column field="policies" header={t("executiveDashboard.policies")} {...num} />
           </DataTable>
         </ChartCard>
+        </Feature>
       </div>
 
       {/* Quick Actions: only the screens the signed-in user's roles may open */}

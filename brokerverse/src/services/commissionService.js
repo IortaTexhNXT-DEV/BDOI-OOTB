@@ -75,18 +75,18 @@ class CommissionService {
     return response.data;
   }
 
-  static async reverseLine(referrerId, lineId) {
+  static async reverseLine(referrerId, lineId, reason) {
     const response = await postRequest(
       `commission/referrer-accounts/${referrerId}/lines/${lineId}/reverse`,
-      {}
+      { reason }
     );
     return response.data;
   }
 
-  static async setWhtApplicable(referrerId, whtApplicable) {
+  static async setWhtApplicable(referrerId, whtApplicable, reason) {
     const response = await postRequest(
       `commission/referrer-accounts/${referrerId}/wht`,
-      { whtApplicable }
+      { whtApplicable, reason }
     );
     return response.data;
   }

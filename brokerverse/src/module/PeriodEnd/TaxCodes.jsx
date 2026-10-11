@@ -92,7 +92,7 @@ const TaxCodes = () => {
             onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, atc: r.atc || "", natureOfPayment: r.natureOfPayment || "", remarks: r.remarks || "", effectiveFrom: toDate(r.effectiveFrom), effectiveTo: toDate(r.effectiveTo) } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("periodEnd.addTaxCode") : v.code) : ""} visible={!!editing} style={{ width: "min(760px, 95vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("periodEnd.addTaxCode") : t("periodEnd.editTaxCode", { name: [v.code, v.description].filter(Boolean).join(" – ") })) : ""} visible={!!editing} style={{ width: "min(760px, 95vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("periodEnd.cancel")} text onClick={() => setEditing(null)} />

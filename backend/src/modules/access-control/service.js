@@ -19,6 +19,7 @@ import { isoDate, today } from '../../lib/dates.js';
 import { formatDate } from '../../lib/pdf/format.js';
 import { BUILT_IN_ADMIN, isAdminAccount } from './roles.js';
 import { rolesHeldBy } from './changes.js';
+import { PLATFORM_PERMISSIONS, PLATFORM_ROLE } from '../../lib/platform.js';
 
 const money = (v) => (v === null || v === undefined ? null : Math.round(Number(v) * 100) / 100);
 
@@ -183,12 +184,15 @@ export async function ownLimit(db, userId, type, onDate) {
 /**
  * Effective authority of a user for a transaction type on a date, delegations included. A delegation never lowers it:
  * a person with no limit of their own while access.authority_without_limit is allow is not restricted, so a delegated
- * limit is not applied to them.
+ * limit is not applied to them. `requireLimit`: the step refuses an approver without a limit whatever that setting
+ * says (remittance approvals with remittance.require_authority_limit), so a delegated limit applies.
  */
-export async function effectiveAuthority(db, userId, type, onDate = null) {
+export async function effectiveAuthority(db, userId, type, onDate = null, { requireLimit = false } = {}) {
   onDate = onDate || (await today());
   const own = await ownLimit(db, userId, type, onDate);
-  if (!own.found && String(await getSetting('access.authority_without_limit', 'allow')) !== 'refuse') return { found: false, limit: null, unlimited: false, source: null };
+  if (!own.found && !requireLimit && String(await getSetting('access.authority_without_limit', 'allow')) !== 'refuse') {
+    return { found: false, limit: null, unlimited: false, source: null };
+  }
   const candidates = [own];
   const { rows: dels } = await db.query(`SELECT d.delegator_id, u.display_name FROM user_delegations d JOIN users u ON u.id = d.delegator_id
     WHERE d.delegate_id = $1 AND d.status = 'active' AND $2::date BETWEEN d.date_from AND d.date_to
@@ -322,8 +326,8 @@ export async function assertSod(db, roleCodes, { userId = null } = {}) {
 
 /** Permissions down, roles across (what each role may do), grouped by module. */
 export async function roleMatrix(db) {
-  const roles = (await db.query("SELECT id, code, name, inherits FROM roles WHERE status = 'active' ORDER BY id")).rows;
-  const perms = (await db.query('SELECT id, code, module, description FROM permissions ORDER BY module, code')).rows;
+  const roles = (await db.query("SELECT id, code, name, inherits FROM roles WHERE status = 'active' AND code <> $1 ORDER BY id", [PLATFORM_ROLE])).rows;
+  const perms = (await db.query('SELECT id, code, module, description FROM permissions WHERE NOT (code = ANY($1)) ORDER BY module, code', [PLATFORM_PERMISSIONS])).rows;
   const grants = (await db.query('SELECT role_id, permission_id FROM role_permissions')).rows;
   const has = new Set(grants.map((g) => `${g.role_id}:${g.permission_id}`));
   return {

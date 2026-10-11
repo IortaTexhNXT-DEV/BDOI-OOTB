@@ -36,6 +36,7 @@ export const toRequestRow = (request) => ({
   rejectionReason: request.rejectionReason,
   createdBy: request.createdBy,
   approvedAt: request.approvedAt,
+  approvedByName: request.approvedByName || null,
   purpose: request.purpose || "",
   requestDateValue: request.requestDate,
   lines: (request.lines || []).map(toLineRow),

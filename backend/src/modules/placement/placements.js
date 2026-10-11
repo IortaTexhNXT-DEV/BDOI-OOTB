@@ -372,7 +372,7 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   await query("UPDATE placements SET status = CASE WHEN status = 'draft' THEN 'sent' ELSE status END, sent_at = COALESCE(sent_at, now()), updated_by = $2, updated_at = now() WHERE id = $1", [p.id, user.id]);
   // the quotation the placement comes from is now with the insurer(s)
   if (p.quoteId) await query("UPDATE quotes SET status = 'submitted', submitted_to_insurer_at = now(), submitted_by = $2, updated_at = now() WHERE id = $1 AND status = 'accepted'", [p.quoteId, user.id]);
-  return { sent, failed, placement: await placementById(p.id) };
+  return { sent, failed, previousStatus: p.status, placement: await placementById(p.id) };
 }
 
 /** Sent to insurer -> Acknowledged: the insurer confirmed receipt of the order (its reference and remark). */

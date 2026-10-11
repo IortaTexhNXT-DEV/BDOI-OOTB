@@ -144,7 +144,7 @@ const TransactionCodeSetupTable = () => {
           value={TransactionCodeSetup}
           tableStyle={{
             minWidth: "50rem",
-            color: "#2e2e2e",
+            color: "var(--text-color)",
           }}
           scrollable={true}
           scrollHeight="40vh"
@@ -238,7 +238,7 @@ const TransactionCodeSetupTable = () => {
               classNames="input__filed"
               label="Transaction Number From"
               placeholder="Enter"
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.TransactionNumberFrom}
@@ -255,7 +255,7 @@ const TransactionCodeSetupTable = () => {
               classNames="input__filed"
               label="Transaction Number To"
               placeholder="Enter"
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.TransactionNumberTo}

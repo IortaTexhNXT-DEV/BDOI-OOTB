@@ -63,7 +63,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Receipt Number"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"1010011"}
@@ -74,7 +74,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Requester"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReceipt.RequesterName}
@@ -87,7 +87,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Bank Code"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReceipt.BankCode}
@@ -98,7 +98,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Bank Account Name"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"Bank-01"}
@@ -111,7 +111,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Sub Account Code"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReceipt.SubAccount}
@@ -122,7 +122,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Sub Account Description"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"SubAccount-001"}
@@ -135,7 +135,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Transaction Code"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReceipt.Transactioncode}
@@ -146,7 +146,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Transaction Description"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"Transactioncode-001"}
@@ -159,7 +159,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Branch Code"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReceipt.Branchcode}
@@ -170,7 +170,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Branch Description"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"Branchcode-001"}
@@ -183,7 +183,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Department Code"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"Depart-001"}
@@ -194,7 +194,7 @@ const ReceiptList = () => {
               classNames="input__filed"
               label="Department Description"
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={"DepartDescription-001"}

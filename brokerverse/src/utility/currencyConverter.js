@@ -88,6 +88,12 @@ export const formatNumber = (value, options = {}) => {
   return n.toLocaleString(numberLocale(), options);
 };
 
+/** "PHP 409,141.43": the currency code, then the amount with two decimals and thousands separators. */
+export const codeAmount = (value, currency = "PHP") => {
+  const text = formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return text ? `${currency} ${text}` : "";
+};
+
 /**
  * Symbol of the display currency (System Settings > display currency), e.g. "₱" for PHP in en-PH.
  * Use it in labels such as "Min Premium (₱)" instead of a literal symbol.

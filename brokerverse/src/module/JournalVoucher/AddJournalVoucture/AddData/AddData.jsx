@@ -508,7 +508,7 @@ const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
         </div>
         <div className="col-12 md:col-6">
           <div className="select__label__jv">
-            Remarks <span style={{ color: "#B1B1B1" }}>(Options)</span>
+            Remarks <span style={{ color: "var(--text-color-secondary)" }}>(Options)</span>
           </div>
           <InputField
             classNames="field__container"

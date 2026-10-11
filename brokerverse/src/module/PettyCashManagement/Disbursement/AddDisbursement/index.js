@@ -204,9 +204,7 @@ const AddDisbursement = () => {
         <Card className="mt-3">
           <div className="grid mt-1">
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-              <LabelWrapper className="calenderlable__container">
-                Date
-              </LabelWrapper>
+              <LabelWrapper label={t("pettyCash.date")} className="calenderlable__container" />
               <Calendar
                 classNames="calender__container"
                 showIcon
@@ -222,7 +220,7 @@ const AddDisbursement = () => {
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.transactionCode")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -238,7 +236,7 @@ const AddDisbursement = () => {
               <InputField
                 classNames="input__filed"
                 label={t("pettyCash.transactionNumber")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 disabled={true}
@@ -256,7 +254,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.pettyCashCodeRequired")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -274,7 +272,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.criteria")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -290,7 +288,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.vatMainAccount")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -310,7 +308,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.vatSubAccount")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -328,7 +326,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.whtMainAccount")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -348,7 +346,7 @@ const AddDisbursement = () => {
                 className="input__filed"
                 label={t("pettyCash.whtSubAccount")}
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -366,7 +364,7 @@ const AddDisbursement = () => {
                 classNames="input__filed"
                 label={t("pettyCash.remarks")}
                 placeholder="Enter remarks"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Remarks}

@@ -122,10 +122,25 @@ const ReferrerAccountDetail = () => {
     }
   };
 
+  // switching withholding tax recomputes the net payable of every unpaid line: confirmed, with its reason
   const handleWhtToggle = async (checked) => {
+    const unpaid = [...(detail?.currentCycle?.lines || []), ...(detail?.futureCycles?.lines || [])];
+    const reason = await openConfirm({
+      title: t(checked ? "commissionLine.confirm.whtOnTitle" : "commissionLine.confirm.whtOffTitle"),
+      severity: "warning",
+      facts: [
+        { label: t("commissionLine.referrer"), value: detail?.referrer?.name },
+        { label: t("commissionLine.wht"), value: `${t(checked ? "commissionLine.whtState.off" : "commissionLine.whtState.on")} → ${t(checked ? "commissionLine.whtState.on" : "commissionLine.whtState.off")}` },
+        { label: t("commissionLine.linesRecomputed"), value: unpaid.length, type: "number" },
+        { label: t("commissionLine.netPayableNow"), value: unpaid.reduce((sum, l) => sum + Number(l.net || 0), 0), type: "amount", emphasis: true },
+      ],
+      input: { type: "textarea", label: t("commissionLine.whtReason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t(checked ? "commissionLine.confirm.whtOn" : "commissionLine.confirm.whtOff"),
+    });
+    if (!reason) return;
     setActionLoading(true);
     try {
-      const res = await CommissionService.setWhtApplicable(id, checked);
+      const res = await CommissionService.setWhtApplicable(id, checked, reason);
       const account = res?.data || res;
       setDetail(account);
       if (selectedLine?.id && account?.currentCycle) {

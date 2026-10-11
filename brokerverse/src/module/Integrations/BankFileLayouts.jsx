@@ -10,9 +10,9 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { MultiSelect } from "primereact/multiselect";
-import { Message } from "primereact/message";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
+import StatusChip from "../../components/StatusChip";
 import service from "../../services/integrationsService";
 import { loadMasterOptions } from "../Remittance/shared";
 import { IntTag, PageHeader, insurerOptions, parseJson, pretty, showError, showSuccess } from "./common";
@@ -128,12 +128,12 @@ const Layouts = ({ toast, banks }) => {
         <Column header={t("integrations.status.label")} body={(l) => <span className="flex gap-1">{l.isExample && <IntTag status="test" />}<IntTag status={l.active ? "active" : "closed"} /></span>} />
         <Column header="" body={(l) => <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("integrations.edit")} tooltip={t("integrations.edit")} tooltipOptions={{ position: "top" }} onClick={() => open(l)} />} />
       </DataTable>
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newLayout") : v.code) : ""} visible={!!editing} style={{ width: "min(1100px, 98vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newLayout") : t("integrations.editLayout", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(1100px, 98vw)" }} onHide={() => setEditing(null)}
         footer={<div><Button label={t("integrations.preview")} icon="pi pi-eye" outlined onClick={runPreview} /><Button label={t("integrations.cancel")} text onClick={() => setEditing(null)} />
           <Button label={t("integrations.save")} icon="pi pi-save" onClick={save} disabled={!v?.code || !v?.name || !v?.detailFields?.length} /></div>}>
         {editing && (
           <div className="grid">
-            {v.isExample && <div className="col-12"><Message severity="warn" className="w-full" text={t("integrations.exampleLayout")} /></div>}
+            {v.isExample && <div className="col-12"><StatusChip label={t("integrations.starterLayout")} severity="warning" /></div>}
             <div className="col-12 md:col-3"><label>{t("integrations.code")} *</label>
               <InputText value={v.code} disabled={!editing.isNew} onChange={(e) => set({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "") })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.name")} *</label><InputText value={v.name} onChange={(e) => set({ name: e.target.value })} className="w-full" /></div>

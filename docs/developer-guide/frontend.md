@@ -57,9 +57,12 @@ System Configuration); a grant such as `"Finance > Bank File Layouts"`
 opens one item of a section.
 
 4. **Help** (`components/HelpPanel/helpRoutes.js`). Every screen maps its address prefix to a heading
-   of the user manual; F1 or the help button opens that section with the support contacts.
-   `helpRoutes.test.js` checks each heading id against `public/help/sections.json`; `npm run help:build`
-   rebuilds `public/help/` from `docs/package/source/user-manual.md`.
+   of the user manual (the TISPH id first, then the product manual's id where they differ); F1 or the help button
+   opens that section, the chapter of the user's role and the support contacts. `public/help/` holds one edition of
+   the manual, the one `help.config.json` names (`tisph` on this branch); `npm run help:build` rebuilds it, from
+   `docs/TISPH/manual/` (TISPH) or `docs/package/source/user-manual.md` (product). `helpRoutes.test.js` checks the
+   heading ids against `public/help/sections.json`, and `utils/tisphMenus.test.js` that the TISPH edition is shipped
+   with a chapter per TISPH role and a section for every screen of their menus. See `docs/TISPH/manual/README.md`.
 
 ## 3. Business areas
 

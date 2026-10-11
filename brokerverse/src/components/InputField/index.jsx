@@ -2,6 +2,7 @@ import React from "react";
 import "./index.scss";
 import { InputText } from "primereact/inputtext";
 import LabelWrapper from "../LabelWrapper";
+import { RecordValue, useRecordView } from "../RecordView";
 
 const InputField = ({
   placeholder,
@@ -20,6 +21,9 @@ const InputField = ({
   textWeight,
   length,
 }) => {
+  // on a record view the field is its value as text, not a disabled input
+  const readOnly = useRecordView();
+  if (readOnly) return <div className="input__block"><RecordValue label={label} value={value} /></div>;
   return (
     <div className="input__block">
       <LabelWrapper

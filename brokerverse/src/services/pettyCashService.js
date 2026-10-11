@@ -46,6 +46,11 @@ const pettyCashService = {
   async updateRequest(id, body) {
     return (await request(`/requests/${encodeURIComponent(id)}`, { method: "PUT", body })).data;
   },
+  /** A fund waiting for approval: action approve (establishes it) | reject (needs a reason). */
+  async decideFund(id, action, reason) {
+    const body = action === "reject" ? { reason } : {};
+    return (await request(`/funds/${encodeURIComponent(id)}/${action}`, { method: "POST", body })).data;
+  },
   /** action: submit | approve | reject (reject needs a reason). */
   async transitionRequest(id, action, reason) {
     const body = action === "reject" ? { reason } : {};

@@ -15,6 +15,7 @@ import { requestContext } from './lib/requestContext.js';
 import { healthHandler, livenessHandler } from './lib/health.js';
 import { logger, redactRequest } from './lib/logger.js';
 import { piiMiddleware } from './lib/piiPolicy.js';
+import { featureGate } from './modules/features/gate.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -79,6 +80,8 @@ export async function createApp() {
   // Load-balancer readiness (database + migrations, 503 when not ready) and liveness (process only): src/lib/health.js
   api.get('/health', healthHandler);
   api.get('/health/live', livenessHandler);
+  // functions of releases this environment does not run answer 403 FEATURE_NOT_ENABLED (modules/features)
+  api.use(featureGate);
   for (const m of await loadModules()) {
     api.use(m.mount || '/', m.default);
     for (const [prefix, r] of m.extraMounts || []) api.use(prefix, r);

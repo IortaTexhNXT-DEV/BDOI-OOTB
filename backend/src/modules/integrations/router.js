@@ -15,6 +15,7 @@ import * as msg from './messaging.js';
 import ctplRoutes from './ctplRoutes.js';
 import insurerRoutes from './insurerRoutes.js';
 import bankRoutes from './bankRoutes.js';
+import { connectorAllowed } from '../features/service.js';
 
 /**
  * Integration framework routes.
@@ -164,7 +165,7 @@ pub.define({
   handler: async (req, res) => {
     if (!(await getSetting('integrations.inbound_enabled', true))) throw notFound('Inbound integration messages are switched off');
     const c = await connectorRow(req.params.connector);
-    if (!c.enabled) throw notFound('Connector not found');
+    if (!c.enabled || !(await connectorAllowed(c.code))) throw notFound('Connector not found');
     const type = messageTypeOf(req.body?.type);
     if (!type?.onInbound || type.kind !== c.kind) throw badRequest(`Unknown inbound message type ${req.body?.type || ''}`);
     const text = req.rawBody ? Buffer.from(req.rawBody).toString('utf8') : JSON.stringify(req.body || {});
@@ -188,7 +189,7 @@ const templateBody = z.object({
 messaging.define({
   method: 'GET', path: '/templates', summary: 'Message templates (event, active) with the placeholders a template may use', screen: TEMPLATES, middleware: readTemplates, query: { event: 'renewal_notice' },
   response: { success: true, data: [templateExample], placeholders: msg.PLACEHOLDERS },
-  handler: async (req, res) => ok(res, await msg.listTemplates({ event: req.query.event, active: req.query.active === undefined ? undefined : req.query.active === 'true' }), 'OK', { placeholders: msg.PLACEHOLDERS }),
+  handler: async (req, res) => ok(res, await msg.listTemplates({ event: req.query.event, active: req.query.active === undefined ? undefined : req.query.active === 'true' }), 'OK', { placeholders: await msg.placeholderExamples() }),
 });
 messaging.define({
   method: 'POST', path: '/templates', summary: 'New message template', screen: `${TEMPLATES} > New template`,
@@ -214,7 +215,7 @@ messaging.define({
   middleware: [...readTemplates, validate(z.object({ body: z.string().max(1000) }).strict())], request: { body: 'Hi {{clientName}}' },
   response: { success: true, data: { text: 'Hi Maria Santos', length: 15, parts: 1 } },
   handler: async (req, res) => {
-    const text = await msg.renderMessage(req.body.body, msg.PLACEHOLDERS);
+    const text = await msg.renderMessage(req.body.body, await msg.placeholderExamples());
     ok(res, { text, length: text.length, parts: Math.max(1, Math.ceil(text.length / 160)) });
   },
 });
@@ -224,7 +225,7 @@ messaging.define({
   response: { success: true, data: { ...messageExample, status: 'sent' } },
   handler: async (req, res) => {
     const t = await msg.templateRow(req.params.code);
-    const m = await msg.queueClientMessage(null, { template: t, to: req.body.to, vars: msg.PLACEHOLDERS, skipConsent: true, allowInactive: true, entity: 'message_template', entityId: t.code }, req.user);
+    const m = await msg.queueClientMessage(null, { template: t, to: req.body.to, vars: await msg.placeholderExamples(), skipConsent: true, allowInactive: true, entity: 'message_template', entityId: t.code }, req.user);
     const after = m.status === 'queued' ? await outbox.sendNow(m.id) : m;
     await audit(req, { entity: 'message_template', entityId: t.code, action: 'test-send', after: { to: req.body.to, messageId: after.id, status: after.status } });
     ok(res, after, after.status === 'sent' ? `Test message sent (${after.mode} mode)` : `Not sent: ${after.lastError || after.status}`);
