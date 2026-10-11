@@ -701,8 +701,11 @@
         "correctionOf": "Correction of",
         "reversedBy": "Reversed by",
         "lines": "Entries",
-        "activity": "Activity"
-      }
+        "activity": "Activity",
+        "withdraw": "Withdraw",
+        "withdrawTitle": "Withdraw journal voucher {{number}}?"
+      },
+      "withdrawReason": "Reason (optional)"
     },
     "receiptDialogs": {
       "recordPaymentMessage": "An official receipt is issued for the payment.",

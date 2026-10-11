@@ -94,3 +94,29 @@ describe('journal vouchers', () => {
     expect((await ctx.as('maker')('get', '/journal-vouchers/jv_missing')).status).toBe(404);
   });
 });
+
+describe('the maker edits or withdraws a parked voucher (GAP-FIN-27)', () => {
+  it('changes its own voucher awaiting approval, keeps its number and sends it again; the checker cannot', async () => {
+    const jv = (await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV01', transactionDescription: 'Audit accrual', entries: entries(1000) })).body.data;
+    expect((await ctx.as('checker')('put', `/journal-vouchers/${jv.id}`).send({ entries: entries(1200) })).status).toBe(403);
+    expect((await ctx.as('maker')('put', `/journal-vouchers/${jv.id}`).send({ entries: [entries(1200)[0], entries(1100)[1]] })).status).toBe(400);
+    const e = await ctx.as('maker')('put', `/journal-vouchers/${jv.id}`).send({ transactionDescription: 'Audit accrual (corrected)', entries: entries(1200) });
+    expect(e.status, JSON.stringify(e.body)).toBe(200);
+    expect(e.body.data).toMatchObject({ transactionNumber: jv.transactionNumber, status: 'for-approval', totalDebit: 1200, description: 'Audit accrual (corrected)' });
+    const lines = (await pool.query('SELECT debit, credit FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [jv.id])).rows;
+    expect(lines.map((l) => [Number(l.debit), Number(l.credit)])).toEqual([[1200, 0], [0, 1200]]);
+  });
+
+  it('a returned voucher is changed and resubmitted; a withdrawn one is cancelled and can no longer be approved', async () => {
+    const jv = (await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV01', transactionDescription: 'Accrual', entries: entries(500) })).body.data;
+    await ctx.as('checker')('post', `/journal-vouchers/${jv.id}/reject`).send({ reason: 'Wrong amount' });
+    const again = await ctx.as('maker')('put', `/journal-vouchers/${jv.id}`).send({ entries: entries(550) });
+    expect(again.body.data).toMatchObject({ status: 'for-approval', rejectionReason: null });
+    expect((await ctx.as('checker')('post', `/journal-vouchers/${jv.id}/withdraw`).send({})).status).toBe(403);
+    const w = await ctx.as('maker')('post', `/journal-vouchers/${jv.id}/withdraw`).send({ reason: 'Keyed twice' });
+    expect(w.body.data.status).toBe('cancelled');
+    expect((await ctx.as('checker')('post', `/journal-vouchers/${jv.id}/approve`)).status).toBe(409);
+    expect((await ctx.as('maker')('put', `/journal-vouchers/${jv.id}`).send({ entries: entries(550) })).status).toBe(409);
+    expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
+  });
+});

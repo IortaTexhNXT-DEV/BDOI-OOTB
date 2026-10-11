@@ -7,8 +7,8 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { baseCurrency, rateToBase } from '../../lib/currency.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { MANUAL_SOURCES, assertNotOpeningJournal, assertPeriodOpen, createJournal, postJournal, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { MANUAL_SOURCES, assertNotOpeningJournal, assertPeriodOpen, createJournal, postJournal, replaceJournalLines, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
 import { OPENING_JOURNAL_SOURCE, openingJournalLines } from '../period-end/opening.js';
 import { assertCostCentres } from '../accounting/lib/costCentre.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
@@ -171,6 +171,34 @@ export async function reject(db, ref, reason, user) {
   }
   await assertChecker(user, j.created_by, 'journal voucher');
   return (await db.query('UPDATE journal_vouchers SET status = \'rejected\', rejected_by = $2, rejected_at = now(), rejection_reason = $3, updated_at = now() WHERE id = $1 RETURNING *', [j.id, user.id, reason])).rows[0];
+}
+
+/**
+ * The maker's own voucher before approval (GAP-FIN-27, FGA-JV-01/02): a manual voucher awaiting approval or returned
+ * by the checker, changed or withdrawn only by the user who made it.
+ */
+async function ownParkedVoucher(db, ref, user) {
+  const j = await getJv(db, ref, true);
+  if (j.source !== 'manual') throw conflict(`Journal ${j.jv_number} is a ${j.source} journal; only a manual voucher is changed or withdrawn by its maker`);
+  if (!['for-approval', 'rejected'].includes(j.status)) throw conflict(`Voucher ${j.jv_number} is ${j.status}; only a voucher awaiting approval or returned can be changed or withdrawn`);
+  if (j.created_by !== user?.id) throw forbidden(`Only the maker of ${j.jv_number} changes or withdraws it`);
+  return j;
+}
+
+/** Edit and (re)submit: new lines, date, description or transaction code; the voucher waits for approval again. */
+export async function editParked(db, ref, b, user) {
+  const j = await ownParkedVoucher(db, ref, user);
+  const date = isoDate(b.date || b.voucherDate) || isoDate(j.jv_date);
+  const row = await replaceJournalLines(db, j, { date, description: b.transactionDescription ?? b.description, transactionCode: b.transactionCode, lines: await toLines(db, b.entries, date) });
+  return (await db.query(`UPDATE journal_vouchers SET status = 'for-approval', rejected_by = NULL, rejected_at = NULL, rejection_reason = NULL, updated_at = now()
+    WHERE id = $1 RETURNING *`, [row.id])).rows[0];
+}
+
+/** Withdraw: the voucher is cancelled (kept with its number, never posted). */
+export async function withdrawParked(db, ref, reason, user) {
+  const j = await ownParkedVoucher(db, ref, user);
+  return (await db.query(`UPDATE journal_vouchers SET status = 'cancelled', cancelled_by = $2, cancelled_at = now(), rejection_reason = COALESCE($3, rejection_reason), updated_at = now()
+    WHERE id = $1 RETURNING *`, [j.id, user.id, reason || null])).rows[0];
 }
 
 // ---------- upload (TIS-BRD-NIA-05) ----------

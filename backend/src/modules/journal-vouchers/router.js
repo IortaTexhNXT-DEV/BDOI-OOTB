@@ -122,6 +122,29 @@ define({
   response: { success: true, data: { ...header, entries: [] } }, handler: async (req, res) => ok(res, await svc.jvDetail(pool, req.params.id)),
 });
 define({
+  method: 'PUT', path: '/:id', summary: 'The maker changes a manual voucher awaiting approval or returned (entries, date, description, transaction code); it waits for approval again',
+  screen: `${SCREEN} > Details > Edit`, middleware: [...write, validate(z.object({ transactionCode: z.string().min(1).optional(), transactionDescription: z.string().optional(), description: z.string().optional(),
+    date: z.string().optional(), entries: z.array(entrySchema).min(2) }).passthrough())],
+  request: { transactionDescription: 'Accrual of audit fees (corrected)', entries: entryExample }, response: { success: true, data: { ...header, status: 'for-approval' } },
+  handler: async (req, res) => {
+    const before = await svc.jvDetail(pool, req.params.id);
+    const jv = await withTransaction((db) => svc.editParked(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'update', before, after: req.body });
+    await askApproval(jv, req);
+    ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} saved and sent for approval`);
+  },
+});
+define({
+  method: 'POST', path: '/:id/withdraw', summary: 'The maker withdraws a manual voucher awaiting approval or returned; it is cancelled, never posted',
+  screen: `${SCREEN} > Details > Withdraw`, middleware: [...write, validate(z.object({ reason: z.string().max(500).optional() }))],
+  request: { reason: 'Keyed twice' }, response: { success: true, data: { ...header, status: 'cancelled' } },
+  handler: async (req, res) => {
+    const jv = await withTransaction((db) => svc.withdrawParked(db, req.params.id, req.body.reason, req.user));
+    await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'withdraw', after: { reason: req.body.reason || null } });
+    ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} withdrawn`);
+  },
+});
+define({
   method: 'POST', path: '/:id/approve', summary: 'Checker approves and posts a voucher (maker cannot approve own voucher)', screen: `${SCREEN} > Details`, middleware: write,
   request: {}, response: { success: true, data: { ...header, status: 'posted' } },
   handler: async (req, res) => {

@@ -17,7 +17,7 @@ import { openConfirm } from "../../../components/ConfirmDialog";
 import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
-import ApprovalActions from "../../../components/ApprovalActions";
+import ApprovalActions, { isInitiator } from "../../../components/ApprovalActions";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import OriginChip from "../../../components/OriginChip";
@@ -171,6 +171,24 @@ const DetailsJournalVocture = () => {
     await loadVoucher();
   };
 
+  // the maker withdraws its own manual voucher before approval (GAP-FIN-27)
+  const canWithdraw = ["for-approval", "rejected"].includes(voucher?.status) && voucher?.source === "manual" && isInitiator({ id: voucher?.createdBy });
+  const withdraw = async () => {
+    let result;
+    const answer = await openConfirm({
+      title: t("accounts.journalVoucherDetails.confirm.withdrawTitle", { number }),
+      severity: "danger",
+      facts: voucherFacts(),
+      input: { type: "textarea", label: t("accounts.journalVoucherDetails.withdrawReason"), required: false, maxLength: 500 },
+      confirmLabel: t("accounts.journalVoucherDetails.confirm.withdraw"),
+      onConfirm: async (reason) => { result = await journalVoucherService.withdraw(voucher?.id || id, reason || undefined); },
+    });
+    if (answer === null || answer === false) return;
+    toast.current?.show({ severity: "success", summary: t("accounts.journalVoucherDetails.success"), detail: result?.message, life: 3000 });
+    setActivityKey((k) => k + 1);
+    await loadVoucher();
+  };
+
   const print = () =>
     printPdf(`/journal-vouchers/${encodeURIComponent(voucher?.id || id)}/pdf`, { fileName: `${number}.pdf` })
       .catch((error) => showError(error));
@@ -229,6 +247,9 @@ const DetailsJournalVocture = () => {
                   onApprove={() => decide("approve")}
                   onReject={() => decide("reject")}
                 />
+              )}
+              {canWithdraw && (
+                <Button label={t("accounts.journalVoucherDetails.confirm.withdraw")} icon="pi pi-undo" severity="danger" outlined onClick={withdraw} data-testid="withdraw-jv" />
               )}
               <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
             </div>
