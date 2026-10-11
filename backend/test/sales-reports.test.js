@@ -1,6 +1,6 @@
 /**
  * Sales reports of TISPH (TIS-BRD-RPT-SLS-01..04, RPT-02, CR-13): the APR Operation Report per business category month
- * to date and year to date, Production per Line, Agent Policy Conversion with the incentive tier and payout,
+ * to date and year to date, Production per Line, Agent Pipeline with the incentive tier and payout,
  * and the Renewal Notice Listing in 30/60/90 day buckets with the lock-in treatment; who may run them.
  * The policies of the tests are written with their own insurer (RPTEST) and agent so that the sample data stays out.
  */
@@ -115,15 +115,15 @@ describe('Production per Line', () => {
   });
 });
 
-describe('Agent Policy Conversion', () => {
+describe('Agent Pipeline', () => {
   it('gives each agent per month the prospects, quotations, policies, accounts, premium, commission and incentive', async () => {
-    const r = await run('agent-conversion', { ReportCriteria: 'Agent by Month', Agent: 'rp.sales', FromDate: '2025-03-01', ToDate: '2025-03-31' });
+    const r = await run('agent-pipeline', { ReportCriteria: 'Agent by Month', Agent: 'rp.sales', FromDate: '2025-03-01', ToDate: '2025-03-31' });
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.data.rows).toEqual([expect.objectContaining({ agent: 'rp.sales', month: '2025-03', prospects: 2, converted: 1, quotations: 1, policies: 5, accounts: 1,
       premium: 90000, tier: 'Tier 2', incentive: 1500 })]);
   });
   it('answers a month without business with no rows and no error', async () => {
-    const r = await run('agent-conversion', { ReportCriteria: 'Agent by Month', Agent: 'rp.sales', FromDate: '2025-05-01', ToDate: '2025-05-31' });
+    const r = await run('agent-pipeline', { ReportCriteria: 'Agent by Month', Agent: 'rp.sales', FromDate: '2025-05-01', ToDate: '2025-05-31' });
     expect(r.status).toBe(200);
     expect(r.body.data.rows).toEqual([]);
   });

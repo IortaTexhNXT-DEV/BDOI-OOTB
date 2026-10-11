@@ -523,7 +523,7 @@ export const FEATURES = Object.freeze([
     menus: ['Reports > All Reports', 'Reports > Operational Reports > Production', 'Reports > Operational Reports > Claims', 'Reports > Operational Reports > Renewal',
       'Reports > Operational Reports > Remittance', 'Reports > Operational Reports > Broker Commission', 'Reports > Operational Reports > Dealer Production',
       'Reports > Operational Reports > APR Operation Report', 'Reports > Operational Reports > Production per Line',
-      'Reports > Operational Reports > Agent Policy Conversion', 'Reports > Operational Reports > Renewal Notice Listing',
+      'Reports > Operational Reports > Agent Pipeline', 'Reports > Operational Reports > Renewal Notice Listing',
       'Reports > Financial Reports > SOA/Premium Receivable', 'Reports > Financial Reports > Collection Report', 'Reports > Financial Reports > Payables',
       'Reports > Financial Reports > Journal', 'Reports > Financial Reports > Trial Balance', 'Reports > Financial Reports > Income Statement',
       'Reports > Financial Reports > Balance Sheet', 'Reports > Financial Reports > Trial Balance Movement', 'Reports > Financial Reports > General Ledger Detail',

@@ -5,7 +5,7 @@
  *                       business category: Existing UIO, New Car, ROPA, OEM, Cancelled, and Unclassified for a policy
  *                       with neither a category nor a vehicle brand, so that no policy is dropped.
  *   productionByLine    Production per product line: policy count, sum insured, premium and commission, per month.
- *   agentConversion     Agent policy conversion per month: prospects, quotations, policies, accounts, premium,
+ *   agentPipeline     Agent pipeline per month: prospects, quotations, policies, accounts, premium,
  *                       commission and the incentive results (tier, payout) of the month.
  *   renewalNotice       Renewal Notice Listing: the policies expiring within 90 days of the To date (the as-of date),
  *                       in 30/60/90 day buckets, with the fields of the renewal calling template.
@@ -58,7 +58,7 @@ const productionByLine = `SELECT p.policy_number AS "policyNumber", p.inception_
 
 const AGENT_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
   u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch`;
-const agentConversion = `SELECT x.kind, x.month, x.client_id AS "clientId", x.premium, x.commission, x.tier, x.payout, x.converted, ${AGENT_DIMS}
+const agentPipeline = `SELECT x.kind, x.month, x.client_id AS "clientId", x.premium, x.commission, x.tier, x.payout, x.converted, ${AGENT_DIMS}
   FROM (
     SELECT 'lead' AS kind, l.owner_user_id AS user_id, to_char(l.created_at, 'YYYY-MM') AS month, NULL::text AS client_id, 0::numeric AS premium, 0::numeric AS commission,
            NULL::text AS tier, 0::numeric AS payout, (l.status = 'converted') AS converted
@@ -132,8 +132,8 @@ export const SALES_QUERIES = {
     },
     aggregate: { policies: 'count(*)', sumInsured: 'sum(t."sumInsured")', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },
-  agentConversion: {
-    sql: agentConversion, filters: ['agent', 'branch'],
+  agentPipeline: {
+    sql: agentPipeline, filters: ['agent', 'branch'],
     criteria: { 'Agent by Month': { dims: ['agent', 'month'] }, Agent: { dims: ['agent'] }, 'Branch by Month': { dims: ['branch', 'month'] } },
     aggregate: {
       prospects: "count(*) FILTER (WHERE t.kind = 'lead')", converted: "count(*) FILTER (WHERE t.kind = 'lead' AND t.converted)",

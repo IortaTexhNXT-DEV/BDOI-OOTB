@@ -91,7 +91,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Incentive Results** | The incentive programme results: target, achieved, achievement and payout per agent |
 | **APR Operation Report** | Policies written month to date or year to date per business category: Existing UIO, New Car, ROPA, OEM, Cancelled and Unclassified; see [Sales reports](#reports-sales) |
 | **Production per Line** | Policy count, sum insured, premium and commission per product line, by month, product or business type |
-| **Agent Policy Conversion** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout |
+| **Agent Pipeline** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout (the **Agent Policy Conversion** report of All Reports gives the converted policies per agent with the tier level of the agent master) |
 | **Renewal Notice Listing** | Policies expiring within 90 days of the as-of date, in 30, 60 and 90 day buckets, with the renewal calling details |
 
 **Operations** (TIS Operations Associate, TIS Operations Officer, TIS Operations Unit Head): the operational reports above, and
@@ -170,7 +170,7 @@ The business category of a policy is:
 
 **Production per Line**. Choose the From Date, the To Date and the Report Criteria: Product Line, Product Line by Month, Product or Business Type. Cancelled policies are left out.
 
-**Agent Policy Conversion**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
+**Agent Pipeline**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
 
 **Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Suppressed or Held. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. The notice treatment is the one of the renewal notices: **Send**, **Suppressed: lock-in** or **Suppressed: Scheme 2** for an account under a lock-in, or **Held: loan status** when the TFS loan status holds the notices (see [Lock-in Accounts](#lock-in-accounts)).
 

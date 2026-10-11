@@ -1039,7 +1039,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
@@ -1082,7 +1082,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1284,7 +1284,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
@@ -1334,7 +1334,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1531,7 +1531,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
@@ -1586,7 +1586,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -1751,7 +1751,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
@@ -1793,7 +1793,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -2053,7 +2053,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
@@ -2098,7 +2098,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -2255,7 +2255,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
@@ -2310,7 +2310,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -3293,7 +3293,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -3370,7 +3370,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
@@ -3672,7 +3672,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -3765,7 +3765,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
 | Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
@@ -4084,7 +4084,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -4170,7 +4170,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Approve | Approve or return a commission rule submitted by another user |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
@@ -7096,7 +7096,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Incentive Results** | The incentive programme results: target, achieved, achievement and payout per agent |
 | **APR Operation Report** | Policies written month to date or year to date per business category: Existing UIO, New Car, ROPA, OEM, Cancelled and Unclassified; see [Sales reports (22.1.4)](#reports-sales) |
 | **Production per Line** | Policy count, sum insured, premium and commission per product line, by month, product or business type |
-| **Agent Policy Conversion** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout |
+| **Agent Pipeline** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout (the **Agent Policy Conversion** report of All Reports gives the converted policies per agent with the tier level of the agent master) |
 | **Renewal Notice Listing** | Policies expiring within 90 days of the as-of date, in 30, 60 and 90 day buckets, with the renewal calling details |
 
 **Operations** (TIS Operations Associate, TIS Operations Officer, TIS Operations Unit Head): the operational reports above, and
@@ -7174,7 +7174,7 @@ The business category of a policy is:
 
 **Production per Line**. Choose the From Date, the To Date and the Report Criteria: Product Line, Product Line by Month, Product or Business Type. Cancelled policies are left out.
 
-**Agent Policy Conversion**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
+**Agent Pipeline**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
 
 **Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Suppressed or Held. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. The notice treatment is the one of the renewal notices: **Send**, **Suppressed: lock-in** or **Suppressed: Scheme 2** for an account under a lock-in, or **Held: loan status** when the TFS loan status holds the notices (see [Lock-in Accounts (17.18)](#lock-in-accounts)).
 

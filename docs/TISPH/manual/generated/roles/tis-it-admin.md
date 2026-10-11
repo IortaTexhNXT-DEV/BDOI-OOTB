@@ -49,7 +49,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -143,7 +143,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
 | Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |

@@ -855,9 +855,9 @@ export const menuList = [
           {
             // prospects, quotations and policies per agent per month with the incentive (TIS-BRD-RPT-SLS-03)
             id: 9,
-            name: "Agent Policy Conversion",
-            path: "/reports/run/agent-conversion",
-            includes: ["/reports/run/agent-conversion"],
+            name: "Agent Pipeline",
+            path: "/reports/run/agent-pipeline",
+            includes: ["/reports/run/agent-pipeline"],
             permissions: ["read:reports"],
           },
           {

@@ -91,7 +91,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
-| Reports > Operational Reports | Agent Policy Conversion | View |
+| Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -178,7 +178,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Approve | Approve or return a commission rule submitted by another user |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |

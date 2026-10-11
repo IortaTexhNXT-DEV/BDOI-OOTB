@@ -1,7 +1,7 @@
 -- Sales reports of TISPH (TIS-BRD-RPT-SLS-01..04, RPT-02, CR-13), queries in src/modules/reports/salesQueries.js:
 --   apr-operation           APR Operation Report, month to date or year to date per business category
 --   production-by-line      Production per Line, by month or product
---   agent-conversion        Agent Policy Conversion per month, with the incentive tier and payout
+--   agent-pipeline        Agent Pipeline per month (prospects, quotations, policies), with the incentive tier and payout
 --   renewal-notice-listing  Renewal Notice Listing, 30/60/90 days from the as-of date
 -- Roles: those of the Sales, Processing, Operations and Accounting broker roles; seeds/82_tisph_roles.sql extends them
 -- to the TISPH roles (Finance through Accounting). Setting reports.apr_home_brands: the brands that are not OEM.
@@ -26,11 +26,11 @@ INSERT INTO report_definitions(code, name, category, description, screen, parame
   'productionByLine',
   '[{"key":"month","type":"text","label":"Month"},{"key":"productLine","type":"text","label":"Product Line"},{"key":"product","type":"text","label":"Product"},{"key":"businessType","type":"text","label":"Business Type"},{"key":"policies","type":"integer","label":"Policies"},{"key":"sumInsured","type":"money","label":"Sum Insured"},{"key":"premium","type":"money","label":"Gross Premium"},{"key":"commission","type":"money","label":"Commission"}]',
   '{sales,processing,operations,accounting}', 'read:reports', 271),
- ('agent-conversion', 'Agent Policy Conversion', 'operational',
+ ('agent-pipeline', 'Agent Pipeline', 'operational',
   'Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout.',
-  'Reports > Operational Reports > Agent Policy Conversion',
+  'Reports > Operational Reports > Agent Pipeline',
   '{"type": "object", "required": ["ReportCriteria"], "properties": {"FromDate": {"type": "string", "title": "From Date", "format": "date"}, "ToDate": {"type": "string", "title": "To Date", "format": "date"}, "ReportCriteria": {"enum": ["Agent by Month", "Agent", "Branch by Month"], "type": "string", "title": "Report Criteria", "default": "Agent by Month"}, "Agent": {"type": "string", "title": "Agent", "x-options": "agents", "description": "id, username or name"}, "Branch": {"type": "string", "title": "Branch", "x-options": "branches", "description": "id, code or name"}, "format": {"enum": ["csv", "xlsx", "pdf"], "type": "string", "title": "File format (generate only)", "default": "xlsx"}, "period": {"enum": ["today", "yesterday", "last-7-days", "last-30-days", "month-to-date", "previous-month", "year-to-date"], "type": "string", "title": "Relative period (schedules; used when no dates are given)"}}}',
-  'agentConversion',
+  'agentPipeline',
   '[{"key":"agent","type":"text","label":"Agent"},{"key":"branch","type":"text","label":"Branch"},{"key":"month","type":"text","label":"Month"},{"key":"prospects","type":"integer","label":"Prospects"},{"key":"converted","type":"integer","label":"Prospects Converted"},{"key":"quotations","type":"integer","label":"Quotations"},{"key":"policies","type":"integer","label":"Policies"},{"key":"accounts","type":"integer","label":"Accounts"},{"key":"conversionRate","type":"number","label":"Quotation Conversion %","total":false},{"key":"premium","type":"money","label":"Gross Premium"},{"key":"commission","type":"money","label":"Commission"},{"key":"tier","type":"text","label":"Incentive Tier"},{"key":"incentive","type":"money","label":"Incentive Payout"}]',
   '{sales,processing,operations,accounting}', 'read:reports', 272),
  ('renewal-notice-listing', 'Renewal Notice Listing', 'operational',
