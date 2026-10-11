@@ -248,6 +248,7 @@ const PlacementDetail = () => {
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
 
       {p.status === "declined" && <Message severity="warn" className="w-full mb-3" text={t("placement.placementSlip.declinedNote")} />}
+      {needsApproval && !approval && <Message severity="info" className="w-full mb-3" text={t("placement.approval.required")} />}
       {p.status === "draft" && approval?.status === "pending" && <Message severity="info" className="w-full mb-3"
         text={`${t("placement.approval.pending", { by: approval.requestedBy || "-", date: formatDate(approval.requestedAt) })}${isMaker ? ` · ${t("placement.approval.makerNote")}` : ""}`} />}
       {p.status === "draft" && approval?.status === "rejected" && <Message severity="warn" className="w-full mb-3" text={t("placement.approval.rejected", { by: approval.decidedBy || "-", note: approval.note || "" })} />}

@@ -156,7 +156,7 @@ bs.define({
   handler: async (req, res) => {
     const p = await plc.createPlacement({ ...req.body, brokerSlipId: (await slips.getSlipRow(req.params.id)).id }, req.user);
     await audit(req, { entity: 'placement', entityId: p.id, action: 'create-from-broker-slip', after: { placementNumber: p.placementNumber, brokerSlip: p.brokerSlipNumber } });
-    sendEntity(res, p, { status: 201, message: `Placement slip ${p.placementNumber} prepared` });
+    sendEntity(res, { ...p, sendApprovalRequired: await plc.sendApprovalRequired() }, { status: 201, message: `Placement slip ${p.placementNumber} prepared` });
   },
 });
 for (const [path, status, label] of [['/:id/cancel', 'cancelled', 'Cancel the broker slip'], ['/:id/close', 'closed', 'Close the broker slip without a quotation (e.g. not taken up)']]) {
@@ -251,7 +251,7 @@ define({
   handler: async (req, res) => {
     const p = await plc.createPlacement(req.body, req.user);
     await audit(req, { entity: 'placement', entityId: p.id, action: 'create', after: { placementNumber: p.placementNumber, source: p.source, quotationNumber: p.quotationNumber, participants: p.participants.map((x) => `${x.insuranceCompanyName} ${x.sharePercent}%`) } });
-    sendEntity(res, p, { status: 201, message: `Placement slip ${p.placementNumber} created` });
+    sendEntity(res, { ...p, sendApprovalRequired: await plc.sendApprovalRequired() }, { status: 201, message: `Placement slip ${p.placementNumber} created` });
   },
 });
 define({
@@ -268,7 +268,7 @@ define({
   handler: async (req, res) => {
     const r = await plc.updatePlacement(req.params.id, req.body, req.user);
     await audit(req, { entity: 'placement', entityId: r.after.id, action: 'update', before: r.before, after: plc.toPlacement(await plc.getPlacementRow(r.after.id)) });
-    sendEntity(res, r.after, { message: 'Placement slip updated' });
+    sendEntity(res, { ...r.after, sendApprovalRequired: await plc.sendApprovalRequired() }, { message: 'Placement slip updated' });
   },
 });
 define({

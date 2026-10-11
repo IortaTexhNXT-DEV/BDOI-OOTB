@@ -142,7 +142,7 @@ const PaymentConfirmation = () => {
       // the line's placement journey requires a Placement Slip: the policy is issued from it once the insurer(s) confirm
       try {
         const placement = await placementService.placeQuotation(quotationId, { billingMode });
-        showToast("info", t("placement.quoteJourney.created", { number: placement.placementNumber }), t("placement.quoteJourney.createdDetail"), 3000);
+        showToast("info", t("placement.quoteJourney.created", { number: placement.placementNumber }), t(placement.sendApprovalRequired ? "placement.quoteJourney.createdDetailApproval" : "placement.quoteJourney.createdDetail"), 3000);
         navigate(`/placement/placement-slips/${placement.id}`);
       } catch (e) {
         showToast("error", t("agent.policyCreationFailed", "Policy not issued"), e.message, 8000);

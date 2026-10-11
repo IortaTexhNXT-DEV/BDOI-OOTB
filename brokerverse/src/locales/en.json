@@ -9338,7 +9338,8 @@
       "direct": "Issue the policy directly",
       "directHint": "Convert the accepted quotation slip to a policy now.",
       "created": "Placement slip {{number}}",
-      "createdDetail": "Send it to the insurer(s) and record their confirmation to issue the policy."
+      "createdDetail": "Send it to the insurer(s) and record their confirmation to issue the policy.",
+      "createdDetailApproval": "Submit it for approval: a second user approves it before it is sent to the insurer(s)."
     },
     "acknowledge": {
       "title": "Insurer acknowledgement",
@@ -9478,7 +9479,8 @@
       "field": "Approval to send",
       "statusPending": "Waiting for approval",
       "statusApproved": "Approved",
-      "statusRejected": "Rejected"
+      "statusRejected": "Rejected",
+      "required": "Approval required before sending to the insurer: submit the slip for approval"
     },
     "checklist": {
       "title": "Motor issuance checklist",
@@ -13349,7 +13351,8 @@
     "noChecklist": "No document required",
     "printKycForm": "Print KYC form",
     "duplicateTitle": "Client already on record?",
-    "createAnyway": "Create anyway"
+    "createAnyway": "Create anyway",
+    "noOnboardPermission": "Onboarding a new client needs the right to create clients; open an existing client to maintain its KYC"
   },
   "jvTools": {
     "upload": "Upload",
