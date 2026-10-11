@@ -161,19 +161,21 @@ async function reviewers() {
     [roles])).map((u) => u.id);
 }
 
-async function reviewTask(item, policyNumber, expiry, ownerId, due) {
+async function reviewTask(item, policyNumber, expiry, ownerId, due, renewalId = null) {
   const users = ownerId ? [ownerId] : await reviewers();
   let n = 0;
   for (const u of users) {
+    // the first review task of an owner shares the key of the renewal notices job's lock-in review task (one task, not two)
+    const key = renewalId && ownerId ? `lock-in:${renewalId}` : `lock-in-review:${item}:${due}:${u}`;
     n += (await query(`INSERT INTO work_tasks(title, notes, due_date, priority, assigned_to, source, source_key, entity, entity_id, created_by)
       SELECT $1, $2, $3::date, 'high', $4, 'renewal', $5, 'lock-in-review', $6, 'system' WHERE EXISTS (SELECT 1 FROM users WHERE id = $4 AND status = 'active')
       ON CONFLICT (source_key) DO NOTHING`, [`Lock-in review due: ${policyNumber}, expires ${dmy(expiry)}`, 'Operations > Renewals > Lock-in Review', due,
-      u, `lock-in-review:${item}:${due}:${u}`, item])).rowCount;
+      u, key, item])).rowCount;
   }
   return n;
 }
-const closeTasks = (db, reviewId, note) => db.query(`UPDATE work_tasks SET status = 'done', completed_at = now(), completed_by = 'system', completion_note = $2, updated_at = now()
-  WHERE entity = 'lock-in-review' AND entity_id = $1 AND status = 'open'`, [reviewId, note]);
+const closeTasks = (db, reviewId, note, renewalId = null) => db.query(`UPDATE work_tasks SET status = 'done', completed_at = now(), completed_by = 'system', completion_note = $2,
+  updated_at = now() WHERE ((entity = 'lock-in-review' AND entity_id = $1) OR ($3::text IS NOT NULL AND source_key = 'lock-in:' || $3)) AND status = 'open'`, [reviewId, note, renewalId]);
 
 /** Job lock-in-review (FR-LCK-003, 014, 030, 032). params.date: the run date (tests). */
 export async function lockInReview(params = {}) {
@@ -200,7 +202,7 @@ export async function lockInReview(params = {}) {
     if (!ins) continue;
     if (ends) { out.lockinEnds += 1; continue; }
     out.reviewItems += 1;
-    out.tasks += await reviewTask(ins.id, r.policy_number, r.expiry_date, r.owner_user_id, review);
+    out.tasks += await reviewTask(ins.id, r.policy_number, r.expiry_date, r.owner_user_id, review, r.renewal_id || null);
   }
   const due = await many(`UPDATE lock_in_reviews v SET status = 'review-due', updated_at = now() FROM policies p WHERE p.id = v.policy_id AND v.status = 'on-hold'
     AND v.re_review_date <= $1::date RETURNING v.id, p.policy_number, v.term_expiry, v.owner_user_id`, [now]);
@@ -246,7 +248,7 @@ export async function decide(id, { decision, reasonCode, remark, reReviewDate = 
     const status = decision === 'renew' ? 'renew' : decision === 'hold' ? 'on-hold' : approval ? 'pending-approval' : decision === 'release' ? 'released' : 'not-renewed';
     await db.query(`UPDATE lock_in_reviews SET status = $2, decision = $3, reason_code = $4, reason = $5, remark = $6, re_review_date = $7, decided_by = $8, decided_at = now(),
       approved_by = NULL, approved_at = NULL, return_note = NULL, updated_at = now() WHERE id = $1`, [id, status, decision, why.code, why.name, String(remark).trim(), reDate, user.id]);
-    await closeTasks(db, id, `Decision: ${DECISION_LABELS[decision]}`);
+    await closeTasks(db, id, `Decision: ${DECISION_LABELS[decision]}`, rv.renewal_id || null);
     if (!approval && ['release', 'not-renewed'].includes(decision)) await applyDecision(db, { ...rv, decision, reason: why.name }, user);
     return { rv, status, approval, why };
   });

@@ -6,6 +6,7 @@ import { clearSettingsCache } from '../src/lib/settings.js';
 import { today, addDays } from '../src/lib/dates.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { lockInReview } from '../src/modules/lock-in/review.js';
+import { runNoticeSchedule } from '../src/modules/renewals/notices.js';
 
 // TIS-BRD-SCHM-03 (FRS SCHM-03) remaining parts: TFS loan status upload and manual status, notices held, 60-day Lock-in
 // Review with maker-checker, Change lock-in with approval; TIS-BRD-RPT-SLS-05 Lock-in / Scheme 2 expiry report.
@@ -118,6 +119,12 @@ describe('Lock-in Review (FR-LCK-030 to 041)', () => {
     expect(job.report?.error).toBeUndefined();
     // run again: nothing raised twice
     expect((await lockInReview({ date: now, report: false })).reviewItems).toBe(0);
+    // the renewal notices job raises no second review task for the same account (FR-LCK-014)
+    await runNoticeSchedule();
+    const rv = await reviewOf('lka');
+    const tasks = await one(`SELECT count(*)::int AS n FROM work_tasks WHERE status = 'open' AND ((entity = 'lock-in-review' AND entity_id = $1)
+      OR source_key = 'lock-in:' || (SELECT id FROM renewals WHERE policy_id = 'lka' ORDER BY created_at DESC LIMIT 1))`, [rv.id]);
+    expect(tasks.n).toBe(1);
     const tabs = (await as('lk.sales', 'get', '/lock-in/reviews?tab=due')).body;
     expect(tabs.data.items.map((a) => a.policyNumber)).toEqual(expect.arrayContaining(['POL-lka', 'POL-lkb', 'POL-lkd']));
     const a = tabs.data.items.find((x) => x.policyNumber === 'POL-lka');

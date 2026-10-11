@@ -94,3 +94,11 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
   ID number, the ID card image uploaded with the booking); a renewal takes them from the expiring term.
 - The e-mail to an insurer or the schedule to the client did not arrive: see Master > E-mail Outbox (`email_outbox`,
   entity `placement` or `policy`), which also says whether e-mail sending is configured.
+
+## Dealer schemes
+
+A Placement Slip of source `scheme` comes from Scheme Issuance (scheme-issuance/README.md): it places Motor without a
+quotation, skips the payment verification (`schemes.skip_payment_verification`), is e-mailed with the checklist files
+(`attachments` of `sendPlacement`), is cancelled with the application under `approve:scheme-issuance`
+(`approvedUnder` of `cancelPlacement`), and its booking from Placement Slips is the issuance of the application
+(`issueFromPlacement`).
