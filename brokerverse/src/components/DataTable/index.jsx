@@ -61,8 +61,23 @@ export const TableSkeleton = ({ rows = 5 }) => {
 
 const isEmpty = (value) => !Array.isArray(value) || value.length === 0;
 
+/**
+ * A paginator only when there is more than one page (UI standard): the rows given (or `totalRecords` of a lazy table)
+ * fit in one page of `rows` otherwise. A table that filters its rows itself keeps its paginator.
+ */
+export const needsPaginator = ({ paginator, lazy, value, totalRecords, rows, filters, globalFilter }) => {
+  if (!paginator) return false;
+  if (filters || globalFilter) return true;
+  const size = Number(rows) || 0;
+  if (!size) return true;
+  const total = lazy ? Number(totalRecords) : Array.isArray(value) ? value.length : Number(totalRecords);
+  if (!Number.isFinite(total)) return true;
+  return total > size;
+};
+
 export const DataTable = forwardRef(function DataTable(props, ref) {
-  const { skeletonRows, ...rest } = props;
+  const { skeletonRows, ...given } = props;
+  const rest = given.paginator && !needsPaginator(given) && !given.first ? { ...given, paginator: false } : given;
   const empty = isEmpty(rest.value);
   // "settled": the table has had its data once (rows arrived, or a load finished, or the grace time is over)
   const [settled, setSettled] = useState(!empty);
@@ -89,7 +104,7 @@ export const DataTable = forwardRef(function DataTable(props, ref) {
   const skeleton = empty && (!!rest.loading || !settled);
   if (!skeleton) return <PrimeDataTable ref={ref} {...rest} />;
 
-  const rows = skeletonRows || (rest.paginator && rest.rows) || 5;
+  const rows = skeletonRows || (given.paginator && given.rows) || 5;
   return (
     <PrimeDataTable
       ref={ref}
