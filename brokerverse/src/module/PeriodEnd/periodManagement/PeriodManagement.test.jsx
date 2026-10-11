@@ -48,7 +48,8 @@ const PASSED = { ...FAILED, allowed: true, reason: null, checks: FAILED.checks.m
 
 const renderPage = () => render(<MemoryRouter><PeriodManagement /></MemoryRouter>);
 const rowOf = async (p) => {
-  await screen.findByText(p);
+  // the period table shows once the fiscal year and the status of each period have loaded
+  await screen.findByText(p, {}, { timeout: 3000 });
   return screen.getAllByRole("row").find((r) => within(r).queryByText(p));
 };
 
