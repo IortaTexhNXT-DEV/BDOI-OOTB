@@ -24,26 +24,26 @@ jest.mock("../../services/opsAccountingService", () => ({ __esModule: true, defa
 jest.setTimeout(20000);
 
 const BASE = "/master/generals/usermanagement";
-const departments = [{ name: "Cash Control", order: 1 }, { name: "Finance and Accounting", order: 2 }, { name: "IT", order: 3 }];
+const departments = [{ name: "Cash control", order: 1 }, { name: "Finance and accounting", order: 2 }, { name: "IT", order: 3 }];
 const roles = [
-  { code: "tis-ccd-bp", name: "CCD-BP / QRPh (Receipting)", department: "Cash Control", platform: false, fullAccess: false, status: "active" },
-  { code: "tis-ccd-recon", name: "CCD-Recon", department: "Cash Control", platform: false, fullAccess: false, status: "active" },
-  { code: "tis-finance", name: "TIS Finance & General Accounting", department: "Finance and Accounting", platform: false, fullAccess: false, status: "active" },
+  { code: "tis-ccd-bp", name: "CCD-BP / QRPh (Receipting)", department: "Cash control", platform: false, fullAccess: false, status: "active" },
+  { code: "tis-ccd-recon", name: "CCD-Recon", department: "Cash control", platform: false, fullAccess: false, status: "active" },
+  { code: "tis-finance", name: "TIS Finance & General Accounting", department: "Finance and accounting", platform: false, fullAccess: false, status: "active" },
   { code: "tis-it-admin", name: "TIS IT AppSupport / Admin", department: "IT", platform: false, fullAccess: false, status: "active" },
   { code: "accounting", name: "Accounting", department: null, platform: true, fullAccess: false, status: "active" },
 ];
 const directory = { asOf: "2026-10-10", approval: true, departments, roles, settings: { delegationMaxDays: 90, sodExceptionMaxDays: 365, reviewDueDays: 14, dormantDays: 90 },
   abilities: { edit: true, approve: true, signOut: true } };
 const user = (over) => ({
-  id: "u1", username: "gene", displayName: "Gene Jaen", designation: "Cashier", status: "active", department: "Cash Control", roles: ["tis-ccd-bp", "tis-ccd-recon"],
-  roleNames: ["CCD-BP / QRPh (Receipting)", "CCD-Recon"], effectiveRoles: ["tis-ccd-bp", "tis-ccd-recon"], platformRoles: [], included: [], branch: "HO", branchName: "Head Office",
+  id: "u1", username: "gene", displayName: "Gene Jaen", designation: "Cashier", status: "active", department: "Cash control", roles: ["tis-ccd-bp", "tis-ccd-recon"],
+  roleNames: ["CCD-BP / QRPh (Receipting)", "CCD-Recon"], effectiveRoles: ["tis-ccd-bp", "tis-ccd-recon"], platformRoles: [], included: [], branch: "HO", branchName: "Head office",
   lastLoginAt: "2026-10-09T01:00:00Z", daysSinceLogin: 1, dormant: false, twoFactor: false, passwordAgeDays: 30, pending: [], lastReview: null,
   sodConflicts: [{ ruleId: 6, ruleCode: "SOD-TIS-BP-RECON", name: "Receipting and reversals", action: "warn", state: "open", heldTogether: ["CCD-BP", "CCD-Recon"] }],
   ...over,
 });
 const matrix = () => ({ asOf: "2026-10-10", dormantDays: 90, departments, roles, rows: [
   user(),
-  user({ id: "u2", username: "mariela", displayName: "Mariela Valentino", department: "Finance and Accounting", roles: ["tis-finance"], roleNames: ["TIS Finance & General Accounting"],
+  user({ id: "u2", username: "mariela", displayName: "Mariela Valentino", department: "Finance and accounting", roles: ["tis-finance"], roleNames: ["TIS Finance & General Accounting"],
     effectiveRoles: ["tis-finance"], twoFactor: true, sodConflicts: [], pending: [{ ref: "CFG-4", id: 4, kind: "delegation", kindLabel: "Delegation", title: "x", link: "/x" }] }),
   user({ id: "u3", username: "old", displayName: "Old Account", status: "inactive", department: null, roles: [], roleNames: [], effectiveRoles: [], sodConflicts: [] }),
 ] });
@@ -72,7 +72,7 @@ beforeEach(() => {
   opsAccountingService.masterRecords.mockResolvedValue({ rows: [{ code: "DLG-LEAVE", name: "Vacation or annual leave", context: "delegation", status: "Active", sortOrder: 1 }] });
 });
 
-describe("User Access Matrix", () => {
+describe("User access matrix", () => {
   it("shows active users by default with roles by name, filters on a stat card and keeps the figures while refreshing", async () => {
     renderAt(`${BASE}/access-matrix`, <UserAccessMatrix />, `${BASE}/access-matrix`);
     expect(await screen.findByText("Gene Jaen")).toBeInTheDocument();
@@ -104,9 +104,9 @@ describe("Delegations", () => {
   const options = { asOf: "2026-10-10", maxDays: 90, approval: true, withoutLimit: "allow", departments,
     types: [{ code: "journal_voucher", name: "Journal voucher approval", measure: "amount" }, { code: "payment_voucher", name: "Payment voucher", measure: "amount" }],
     people: [
-      { id: "m", name: "Mariela Valentino", department: "Finance and Accounting", roleNames: ["TIS Finance"], approves: ["journal_voucher", "payment_voucher"], platformOnly: false,
+      { id: "m", name: "Mariela Valentino", department: "Finance and accounting", roleNames: ["TIS Finance"], approves: ["journal_voucher", "payment_voucher"], platformOnly: false,
         authority: { journal_voucher: { set: true, limit: 750000 }, payment_voucher: { set: false } } },
-      { id: "c", name: "Chrystal Malinay", department: "Finance and Accounting", roleNames: ["TIS Finance"], approves: ["journal_voucher"], platformOnly: false, authority: {} },
+      { id: "c", name: "Chrystal Malinay", department: "Finance and accounting", roleNames: ["TIS Finance"], approves: ["journal_voucher"], platformOnly: false, authority: {} },
     ] };
 
   beforeEach(() => {
@@ -127,13 +127,13 @@ describe("Delegations", () => {
   });
 });
 
-describe("Segregation of Duties", () => {
+describe("Segregation of duties", () => {
   it("lists the conflicts by user and offers an exception", async () => {
     accessControlService.sodRules.mockResolvedValue({ rows: [{ id: 6, code: "SOD-TIS-BP-RECON", name: "Receipting and reversals", kind: "roles", roleA: "tis-ccd-bp", roleB: "tis-ccd-recon",
       roleAName: "CCD-BP", roleBName: "CCD-Recon", accessA: [], accessB: [], accessANames: [], accessBNames: [], action: "warn", active: true, users: 1, platform: false, canEdit: true }],
     pendingNew: [], approval: true, maxExceptionDays: 365, asOf: "2026-10-10", abilities: { edit: true, approve: true } });
     accessControlService.sodConflicts.mockResolvedValue({ asOf: "2026-10-10", rows: [{ key: "6:u1", ruleId: 6, ruleCode: "SOD-TIS-BP-RECON", ruleName: "Receipting and reversals",
-      action: "warn", userId: "u1", username: "gene", userName: "Gene Jaen", department: "Cash Control", heldTogether: ["CCD-BP", "CCD-Recon"], state: "open", exception: null,
+      action: "warn", userId: "u1", username: "gene", userName: "Gene Jaen", department: "Cash control", heldTogether: ["CCD-BP", "CCD-Recon"], state: "open", exception: null,
       change: null, canRequest: true, canEnd: false }] });
     renderAt(`${BASE}/segregation-of-duties`, <SodRules />, `${BASE}/segregation-of-duties`);
     expect(await screen.findByText("Gene Jaen")).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe("Segregation of Duties", () => {
   });
 });
 
-describe("Access Reviews", () => {
+describe("Access reviews", () => {
   const review = { id: 3, name: "Access review October 2026", scopeText: "All active users", dueDate: "2026-10-24", status: "open", overdue: false, users: 2, pending: 2, kept: 0,
     removeRoles: 0, deactivate: 0, removals: 0, applied: 0, createdBy: "IT One", createdAt: "2026-10-10T01:00:00Z", approval: true, canSubmit: false, canClose: false, change: null,
     abilities: { edit: true, approve: true },
@@ -153,7 +153,7 @@ describe("Access Reviews", () => {
       { id: 41, userId: "me", username: "it.one", displayName: "IT One", department: "IT", decision: "pending", rolesAtStart: ["tis-it-admin"], rolesNow: ["tis-it-admin"],
         roleNamesAtStart: ["TIS IT AppSupport / Admin"], roleNamesNow: ["TIS IT AppSupport / Admin"], removeRoles: [], removeRoleNames: [], conflicts: [], openConflicts: 0,
         rolesChanged: false, needsNote: false, blocked: "own", canDecide: false },
-      { id: 42, userId: "u1", username: "gene", displayName: "Gene Jaen", department: "Cash Control", decision: "pending", rolesAtStart: ["tis-ccd-bp", "tis-ccd-recon"],
+      { id: 42, userId: "u1", username: "gene", displayName: "Gene Jaen", department: "Cash control", decision: "pending", rolesAtStart: ["tis-ccd-bp", "tis-ccd-recon"],
         rolesNow: ["tis-ccd-bp", "tis-ccd-recon"], roleNamesAtStart: ["CCD-BP", "CCD-Recon"], roleNamesNow: ["CCD-BP", "CCD-Recon"], removeRoles: [], removeRoleNames: [],
         conflicts: [{ ruleName: "Receipting and reversals", action: "warn", state: "open" }], openConflicts: 1, rolesChanged: false, needsNote: true, blocked: null, canDecide: true },
     ] };
@@ -162,7 +162,7 @@ describe("Access Reviews", () => {
     accessControlService.review.mockResolvedValue(review);
     renderAt(`${BASE}/access-reviews?review=3`, <AccessReviews />, `${BASE}/access-reviews`);
     expect(await screen.findByRole("heading", { name: "Access review October 2026" })).toBeInTheDocument();
-    expect(screen.getByText("Cash Control")).toBeInTheDocument();
+    expect(screen.getByText("Cash control")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Gene Jaen"));
     fireEvent.click(await screen.findByRole("button", { name: "Keep access" }));
     fireEvent.click(screen.getByRole("button", { name: "Save" }));

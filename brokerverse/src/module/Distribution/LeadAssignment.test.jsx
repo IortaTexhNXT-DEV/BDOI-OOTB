@@ -28,7 +28,7 @@ jest.mock("../../services/systemSettingsService", () => ({ __esModule: true, def
 
 const LEADS = [{ id: "ld_1", leadNumber: "LD-2026-95015", name: "Ricardo Salazar", ownerUserId: "usr_admin" }];
 const ASSIGNEES = [
-  { id: "usr_ana", name: "Ana Garcia", branchCode: "CEB", designation: "Account Executive", open: 2, suggested: true, rules: ["Cebu motor"] },
+  { id: "usr_ana", name: "Ana Garcia", branchCode: "CEB", designation: "Account executive", open: 2, suggested: true, rules: ["Cebu motor"] },
   { id: "usr_juan", name: "Juan Dela Cruz", branchCode: "HO", open: 0, suggested: false, rules: [] },
 ];
 const REASONS = [
@@ -128,7 +128,7 @@ describe("Lead Assignment screen", () => {
 
   it("opens the Reassignment Queue tab, takes a prospect and previews the run of the queue through the rules", async () => {
     render(<LeadAssignment />);
-    fireEvent.click(await screen.findByText("Reassignment Queue"));
+    fireEvent.click(await screen.findByText("Reassignment queue"));
     expect(await screen.findByText("Jose Reyes")).toBeInTheDocument();
     expect(screen.getByText("Product not yet tagged")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Take" }));
@@ -142,7 +142,7 @@ describe("Lead Assignment screen", () => {
     service.assignmentRules.mockResolvedValue([{ id: 7, name: "Malayan TFS accounts", priority: 10, method: "round_robin", status: "active", assignees: ["usr_ana"],
       assigneeNames: ["Ana Garcia"], conditions: { insuranceProviderId: "2", customerType: "TFS" }, maxOpen: 40 }]);
     render(<LeadAssignment />);
-    fireEvent.click(await screen.findByText("Assignment Rules"));
+    fireEvent.click(await screen.findByText("Assignment rules"));
     expect(await screen.findByText("Insurance provider: Malayan Insurance Co., Inc.; Customer type: TFS")).toBeInTheDocument();
     expect(screen.getByText("40")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add rule" }));
@@ -153,7 +153,7 @@ describe("Lead Assignment screen", () => {
 
   it("opens the Assignment Rules tab", async () => {
     render(<LeadAssignment />);
-    fireEvent.click(await screen.findByText("Assignment Rules"));
+    fireEvent.click(await screen.findByText("Assignment rules"));
     expect(await screen.findByText("No rule yet: prospects stay with the user who creates them")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add rule" })).toBeInTheDocument();
   }, 20000);

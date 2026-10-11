@@ -33,7 +33,8 @@ Back-office screens look like an enterprise insurance system (Guidewire, Sapiens
 - Don't: a table wider than its card at 1366px; merge related columns (gross with net + taxes as a muted second line).
 
 ## Copy
-- Do: sentence case labels; consistent terms: Policy, Quotation, Request for Quotation, Placement Slip, Insurer, Client.
+- Do: sentence case labels, buttons and headings ("Sum insured", not "Sum Insured"); proper nouns, acronyms and form names keep their capitals (Toyota, BIR 2307, OR/CR). Guarded: a Title Case label in en.json fails unless its key is in `titleCaseKeys` of the allow-list, or the word is in `PROPER_NOUNS` (`src/utils/uiStandard.js`).
+- Do: consistent terms: Policy, Quotation, Request for Quotation, Placement Slip, Insurer, Client.
 - Don't: emojis, exclamation marks, marketing adjectives (seamless, powerful, easily, simply, effortlessly, smart), chatty phrases (Let's, Oops, Great!, Here you can), em-dash flourishes (guarded in en.json).
 
 ## Visual

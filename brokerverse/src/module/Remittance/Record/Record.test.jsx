@@ -36,7 +36,7 @@ const approval = (extra = {}) => ({
   ...extra,
 });
 const record = (extra = {}) => ({
-  id: "rm_21", remittanceNo: "REM-2026-00021", statusCode: "for-approval", statusLabel: "Pending approval", status: "Pending Approval",
+  id: "rm_21", remittanceNo: "REM-2026-00021", statusCode: "for-approval", statusLabel: "Pending approval", status: "Pending approval",
   insurer: { id: 3, name: "Pioneer Insurance" }, productLine: "Motor", basisLabel: "Net", coverageWeek: { from: "2026-10-05", to: "2026-10-09" },
   dueDate: "2026-10-16", source: { code: "weekly-run", label: "Weekly run" }, flags: { offCycle: false, overdue: false },
   policyCount: 1, premium: 64159.68, commission: 24022.5, tax: 0, adjustments: 0, dueToInsurer: 40137.18, version: 3,
@@ -146,7 +146,7 @@ describe("Remittance record", () => {
     remittanceService.getRemittance.mockRejectedValue(failWith(404));
     show();
     expect(await screen.findByText("Remittance not found.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Back to Remittances" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back to remittances" }));
     expect(await screen.findByText("Register")).toBeInTheDocument();
   });
 

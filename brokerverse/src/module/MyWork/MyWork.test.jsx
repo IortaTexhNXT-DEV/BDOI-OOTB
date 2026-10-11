@@ -76,7 +76,7 @@ test("shows the header figures, the categories with counts and the user's items"
   expect(within(rail).getByRole("button", { name: /All items/ })).toHaveTextContent("9");
   expect(myWorkService.items).toHaveBeenCalledWith(expect.objectContaining({ scope: "me", sort: "due", page: 1, pageSize: 20 }));
   // no My Team tab nor "My team" scope without a team
-  expect(screen.queryByText(/My Team/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/My team/)).not.toBeInTheDocument();
   expect(screen.queryByText("My team")).not.toBeInTheDocument();
 });
 
@@ -102,7 +102,7 @@ test("the accounting manager preset lists the approvals first, looks at everyone
   const entries = () => within(rail).getAllByRole("button").filter((b) => b.classList.contains("mw-rail__item")).map((b) => b.textContent);
   await waitFor(() => expect(entries()).toEqual([expect.stringContaining("All items"), expect.stringContaining("Approvals"), expect.stringContaining("Quotations"), expect.stringContaining("Tasks")]), { timeout: 5000 });
   await waitFor(() => expect(myWorkService.items).toHaveBeenCalledWith(expect.objectContaining({ scope: "all" })));
-  expect(await screen.findByText("Accounting Manager | 04/10/2026 | BrokerVerse")).toBeInTheDocument();
+  expect(await screen.findByText("Accounting manager | 04/10/2026 | BrokerVerse")).toBeInTheDocument();
   expect(screen.getByText("Overdue receivables")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: /^Approvals$/ }));
   await waitFor(() => expect(myWorkService.items).toHaveBeenLastCalledWith(expect.objectContaining({ category: "approvals" })));
@@ -126,9 +126,9 @@ test("a manager has the My Team tab with the per-person breakdown and the My tea
   });
   renderAt("/my-work?tab=team");
   expect(await screen.findByText("Paolo Dizon", {}, { timeout: 5000 })).toBeInTheDocument();
-  expect(screen.getByText(/My Team \(2\)/)).toBeInTheDocument();
+  expect(screen.getByText(/My team \(2\)/)).toBeInTheDocument();
   await waitFor(() => expect(myWorkService.items).toHaveBeenCalledWith(expect.objectContaining({ scope: "team" })));
-  fireEvent.click(screen.getByRole("tab", { name: /My Items/ }));
+  fireEvent.click(screen.getByRole("tab", { name: /My items/ }));
   const scope = await screen.findByRole("group", { name: "Whose items" }, { timeout: 5000 });
   fireEvent.click(within(scope).getByText("My team"));
   await waitFor(() => expect(myWorkService.summary).toHaveBeenCalledWith("team"));

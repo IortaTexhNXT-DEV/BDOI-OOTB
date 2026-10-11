@@ -97,7 +97,7 @@ describe("Financial statements", () => {
     service.statement.mockImplementation((type) => (type === "balance-sheet" ? next.promise : Promise.resolve(incomeStatement)));
     render(<MemoryRouter><FinancialStatements /></MemoryRouter>);
     await screen.findByRole("button", { name: /4401010/ });
-    fireEvent.click(screen.getByRole("tab", { name: "Balance Sheet" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Balance sheet" }));
     await waitFor(() => expect(service.statement).toHaveBeenCalledWith("balance-sheet", { FromDate: undefined, ToDate: "2026-10-31" }));
     // the income statement stays mounted until the balance sheet arrives
     expect(screen.getByRole("button", { name: /4401010/ })).toBeInTheDocument();

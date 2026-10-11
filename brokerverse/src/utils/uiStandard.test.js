@@ -5,7 +5,7 @@
  */
 import fs from "fs";
 import path from "path";
-import { bundleProblems, copyProblems, sourceProblems } from "./uiStandard";
+import { bundleProblems, copyProblems, isTitleCaseLabel, sourceProblems, titleCaseLabels } from "./uiStandard";
 import allow from "./uiStandard.allow.json";
 
 const SRC = path.join(__dirname, "..");
@@ -42,6 +42,20 @@ describe("UI standard guard", () => {
     const en = JSON.parse(fs.readFileSync(path.join(SRC, "locales", "en.json"), "utf8"));
     const problems = bundleProblems(en, allow.copyKeys.map((c) => c.key)).map((p) => `${p.key}: ${p.rule} (${p.detail})`);
     expect(problems).toEqual([]);
+  });
+});
+
+describe("sentence case", () => {
+  it("finds no Title Case label in en.json outside the allow-list", () => {
+    const en = JSON.parse(fs.readFileSync(path.join(SRC, "locales", "en.json"), "utf8"));
+    expect(titleCaseLabels(en, (allow.titleCaseKeys || []).map((c) => c.key))).toEqual([]);
+  });
+
+  it("tells Title Case from sentence case, keeping proper nouns and acronyms", () => {
+    expect(isTitleCaseLabel("Sum Insured Amount")).toBe(true);
+    expect(isTitleCaseLabel("Sum insured amount")).toBe(false);
+    expect(isTitleCaseLabel("Toyota BIR 2307 certificate")).toBe(false);
+    expect(isTitleCaseLabel("OR/CR upload")).toBe(false);
   });
 });
 

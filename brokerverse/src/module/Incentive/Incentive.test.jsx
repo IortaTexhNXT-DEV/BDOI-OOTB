@@ -130,7 +130,7 @@ describe("My Programs", () => {
     incentiveService.myPrograms.mockResolvedValue({ agentId: "usr_a", assignedPrograms: [{ ...program, ended: false, daysRemaining: 12, achieved: 4, achievementPercent: 20,
       nextTier: { level: "11-20 policies", needed: 7 } }], activity: [] });
     render(<MyPrograms />);
-    fireEvent.click(await screen.findByRole("button", { name: "View Details" }));
+    fireEvent.click(await screen.findByRole("button", { name: "View details" }));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).queryByRole("tab")).toBeNull();
     expect(within(dialog).getByRole("heading", { name: "Tiers" })).toBeInTheDocument();

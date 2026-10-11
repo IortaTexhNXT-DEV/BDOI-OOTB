@@ -48,3 +48,32 @@ export const sourceProblems = (file, source) => {
   if (/<select[\s>]/.test(source)) problems.push({ file, rule: "native-select" });
   return problems;
 };
+
+/** Proper nouns that keep their capital inside a sentence-case label (names, products, months, organisations). */
+export const PROPER_NOUNS = new Set(`Toyota Lexus Excel Microsoft Word PowerPoint Google Gmail Outlook Viber WhatsApp BrokerVerse Talkbot TechNXT Philippines
+Philippine Filipino Manila Makati Cebu Davao Luzon Visayas Mindanao Metro January February March April May June July August September October November
+December Monday Tuesday Wednesday Thursday Friday Saturday Sunday PhilHealth Pag IBIG GCash Maya PayMaya Visa Mastercard Amex AppSupport SharePoint
+Teams Slack Zoom Docker AWS Azure Bancnet BancNet Guidewire Sapiens SAP Fiori English Tagalog Thai Unicode Bureau Internal Revenue Insurance Commission`.split(/\s+/));
+
+const LABEL_WORD = /[A-Za-z][A-Za-z'’]*/g;
+const SMALL_WORDS = new Set(["a", "an", "the", "of", "to", "for", "and", "or", "in", "on", "by", "with", "from", "per", "at", "vs", "as"]);
+const keepsCapital = (w) => PROPER_NOUNS.has(w) || w === "I" || w === w.toUpperCase() || /\d/.test(w) || /[A-Z]/.test(w.slice(1));
+
+/** True for a short label written in Title Case ("Sum Insured Amount") rather than sentence case ("Sum insured amount"). */
+export const isTitleCaseLabel = (text) => {
+  const plain = String(text).replace(/\{\{[^}]*\}\}|<[^>]+>|\$t\([^)]*\)/g, " ");
+  const all = plain.match(LABEL_WORD) || [];
+  if (all.length < 2 || all.length > 8) return false;
+  if (/[.?]\s*$/.test(String(text).trim()) && all.length > 5) return false;
+  // words after a sentence break, a colon, a dash or a breadcrumb arrow start again
+  const rest = plain.split(/[.:!?]\s|\n|\s-\s|>/).flatMap((seg) => (seg.match(LABEL_WORD) || []).slice(1));
+  const caps = rest.filter((w) => /^[A-Z]/.test(w) && !keepsCapital(w));
+  const small = rest.filter((w) => /^[a-z]/.test(w) && !SMALL_WORDS.has(w));
+  return caps.length >= 1 && caps.length > small.length;
+};
+
+/** Keys of a bundle whose label is in Title Case, skipping the allowed keys (exact or prefixes ending in "."). */
+export const titleCaseLabels = (bundle, allow = []) => flatten(bundle)
+  .filter(([key]) => !allow.some((a) => key === a || (a.endsWith(".") && key.startsWith(a))))
+  .filter(([, text]) => isTitleCaseLabel(text))
+  .map(([key, text]) => `${key}: ${text}`);

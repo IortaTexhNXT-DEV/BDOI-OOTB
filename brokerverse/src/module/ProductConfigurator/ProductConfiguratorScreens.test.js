@@ -49,10 +49,10 @@ describe("Acceptance Rules screen", () => {
   it("has one title with the Product Configurator breadcrumb, and no duplicated card titles", async () => {
     productConfiguratorService.listComponents.mockResolvedValue([rule(1)]);
     renderScreen(<UnderwritingRules />);
-    expect(screen.getByRole("heading", { level: 1, name: "Acceptance Rules" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Acceptance rules" })).toBeInTheDocument();
     const crumbs = screen.getByLabelText("Breadcrumb");
-    expect(within(crumbs).getByText("Product Configurator")).toBeInTheDocument();
-    expect(within(crumbs).getByText("Acceptance Rules")).toBeInTheDocument();
+    expect(within(crumbs).getByText("Product configurator")).toBeInTheDocument();
+    expect(within(crumbs).getByText("Acceptance rules")).toBeInTheDocument();
     await screen.findByText("R1");
     expect(screen.queryByText(/Insurer Acceptance Rules/)).not.toBeInTheDocument();
     expect(screen.queryByText(/insurer underwriting guidelines\)/)).not.toBeInTheDocument();
@@ -116,7 +116,7 @@ describe("Document Manager screen", () => {
     ]);
     productConfiguratorService.previewDocument.mockResolvedValue();
     renderScreen(<DocumentManager />);
-    expect(screen.getByRole("heading", { level: 1, name: "Document Manager" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Document manager" })).toBeInTheDocument();
     await screen.findByText("MOTOR_SCHED");
     expect(screen.queryByText("Document Template Manager")).not.toBeInTheDocument();
     expect(screen.getByText("Policy schedule")).toBeInTheDocument();

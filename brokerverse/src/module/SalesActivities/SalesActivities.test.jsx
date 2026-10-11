@@ -73,7 +73,7 @@ describe("activities of a prospect, quotation or client", () => {
         positive: 1, nextSteps: 1, followUpsDone: 0, followUpsOpen: 1, followUpsOverdue: 0 }], byType: [{ activityType: "CALL", activityTypeName: "Phone call", total: 1 }], byOutcome: [] });
     render(<MemoryRouter><SalesActivities /></MemoryRouter>);
     expect(await screen.findByText("Introductory call")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Activity Report"));
+    fireEvent.click(screen.getByText("Activity report"));
     expect(await screen.findAllByText("Maria Rivera")).not.toHaveLength(0);
     expect(screen.getByText("By activity type")).toBeInTheDocument();
   });
@@ -81,7 +81,7 @@ describe("activities of a prospect, quotation or client", () => {
 
 describe("the quote wizard follows the product template", () => {
   const setup = { templateCode: "MOT-003-2025", templateName: "Motor Insurance Basic Plan",
-    covers: [{ code: "OD", name: "Own Damage", type: "Mandatory", quoteField: "lossAndDamageCoveragePremium" }, { code: "AOG", name: "Acts of Nature", type: "Optional", quoteField: "actsOfNaturePremium" }],
+    covers: [{ code: "OD", name: "Own Damage", type: "Mandatory", quoteField: "lossAndDamageCoveragePremium" }, { code: "AOG", name: "Acts of nature", type: "Optional", quoteField: "actsOfNaturePremium" }],
     riskFields: [{ field: "driverAge", label: "Driver age", type: "number", acceptanceRule: true }, { field: "claimsLast3Years", label: "Claims in the last 3 years", type: "number", acceptanceRule: true },
       { field: "modified", label: "Vehicle has modifications", type: "boolean", acceptanceRule: true }, { field: "ncbYears", label: "Claim-free years (NCB)", type: "number", acceptanceRule: false },
       { field: "vehicleAge", label: "Vehicle age (years)", type: "number", acceptanceRule: true }] };
@@ -91,7 +91,7 @@ describe("the quote wizard follows the product template", () => {
     render(<ProductCovers setup={setup} isSelected={(c) => c.code === "OD"} onToggle={onToggle} />);
     expect(screen.getByText("Own Damage")).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Own Damage" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("checkbox", { name: "Acts of Nature" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Acts of nature" }));
     expect(onToggle).toHaveBeenCalledWith(expect.objectContaining({ code: "AOG" }), true);
   });
 

@@ -42,17 +42,17 @@ describe("About Toyota Insurance Services", () => {
     expect(aboutRows()).toEqual([
       ["Version", "PH-WEB-2026.1.3 · PH-API-2026.1.3"],
       ["Environment", "Development"],
-      ["Build & Release Date", "Oct 10, 2026, 06.34 PM"],
-      ["User Manual", "PH Version 1.3 - 10 October 2026 Draft"],
-      ["Requirements Approval", "Andrew"],
-      ["Version Release Approval", "Vijay"],
+      ["Build & release date", "Oct 10, 2026, 06.34 PM"],
+      ["User manual", "PH Version 1.3 - 10 October 2026 Draft"],
+      ["Requirements approval", "Andrew"],
+      ["Version release approval", "Vijay"],
     ]);
   });
 
   it("hides an approver that is not set", async () => {
     adminService.getVersion.mockResolvedValue({ version: "2026.1.3", release: { ...release, requirementsApprover: undefined } });
     await openPanel();
-    expect(aboutRows().map(([label]) => label)).toEqual(["Version", "Environment", "Build & Release Date", "User Manual", "Version Release Approval"]);
+    expect(aboutRows().map(([label]) => label)).toEqual(["Version", "Environment", "Build & release date", "User manual", "Version release approval"]);
   });
 
   it("copies the same release facts into the support details", async () => {
@@ -65,10 +65,10 @@ describe("About Toyota Insurance Services", () => {
     expect(text).toContain([
       "Version: PH-WEB-2026.1.3 · PH-API-2026.1.3",
       "Environment: Development",
-      "Build & Release Date: Oct 10, 2026, 06.34 PM",
-      "User Manual: PH Version 1.3 - 10 October 2026 Draft",
-      "Requirements Approval: Andrew",
-      "Version Release Approval: Vijay",
+      "Build & release date: Oct 10, 2026, 06.34 PM",
+      "User manual: PH Version 1.3 - 10 October 2026 Draft",
+      "Requirements approval: Andrew",
+      "Version release approval: Vijay",
       "Commit: f56851e",
     ].join("\n"));
   });

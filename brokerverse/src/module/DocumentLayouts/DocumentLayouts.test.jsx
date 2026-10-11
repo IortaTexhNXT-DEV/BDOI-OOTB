@@ -50,7 +50,7 @@ describe("E-mail Layout", () => {
   });
 });
 
-describe("Documents and Reports Layout", () => {
+describe("Documents and reports layout", () => {
   it("cannot be saved while a blocking contrast check fails", async () => {
     brandingService.validate.mockResolvedValue({ errors: [{ path: "contrast.docTableHeader", message: "Document table header: contrast 1.2:1 is below WCAG AA 4.5:1" }] });
     render(<DocumentsLayoutPage />);
@@ -69,7 +69,7 @@ describe("Documents and Reports Layout", () => {
   });
 });
 
-describe("Document Signatures", () => {
+describe("Document signatures", () => {
   it("lists the slots of the document chosen", async () => {
     mastersService.options.mockResolvedValue([{ id: "3", label: "Maria Santos" }]);
     brandingService.getSlots.mockResolvedValue({
@@ -81,6 +81,6 @@ describe("Document Signatures", () => {
     });
     render(<DocumentSignaturesPage />);
     expect(await screen.findByDisplayValue("Authorised signatory")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Document Signatures" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Document signatures" })).toBeInTheDocument();
   });
 });
