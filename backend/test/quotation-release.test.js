@@ -36,10 +36,13 @@ describe('a quotation reaches the client through a second user (QUOT-03, MC-08)'
   it('the raiser cannot send it, nor approve it', async () => {
     const r = await associate('post', '/quotations').send(motor());
     id = r.body.quotationId;
-    expect((await associate('get', `/quotations/${id}`)).body.approveBeforeSend).toBe(true);
+    const mine = (await associate('get', `/quotations/${id}`)).body;
+    expect(mine.approveBeforeSend).toBe(true);
+    expect(mine.sendDecision).toMatchObject({ canDecide: false, blockedCode: 'RAISER' });
+    expect((await officer('get', `/quotations/${id}`)).body.sendDecision).toMatchObject({ canDecide: true, blockedReason: null });
     const own = await associate('post', `/quotations/${id}/send-for-approval`).send({});
     expect(own.status).toBe(403);
-    expect(own.body.message).toContain('Maker-checker');
+    expect(own.body.message).toBe(mine.sendDecision.blockedReason);
     expect((await q('SELECT status FROM quotes WHERE id = $1', [id]))[0].status).toBe('draft');
   });
 

@@ -6,6 +6,11 @@ the client for approval, approved on maker-checker and converted to a policy thr
 `read:quotations`, `write:quotations`, `approve:quotations` (another user's quotation) and `extend:quotations`
 (validity extension).
 
+With `quotations.approve_before_send` (TIS-BRD-QUOT-03) a Draft reaches the client only through a second user holding
+`approve:quotations`: `GET /quotations/:id` carries `sendDecision` ({ canDecide, blockedCode, blockedReason }) for the
+signed-in user, the Quotation Slip offers Approve and send only when it is true (with a confirmation and an optional
+note kept in the audit trail), and `POST /:id/send-for-approval` refuses the raiser with the same reason.
+
 ## Files
 
 | File | What it does |

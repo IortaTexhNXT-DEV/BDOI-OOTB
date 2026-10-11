@@ -1288,7 +1288,14 @@
       "Bundle discount": "ส่วนลดแบบรวม",
       "Quarterly payment option": "ผ่อนชำระรายไตรมาส",
       "Auto-debit setup": "ตั้งหักบัญชีอัตโนมัติ"
-    }
+    },
+    "approveTitle": "อนุมัติเงื่อนไขการต่ออายุ",
+    "rejectTitle": "ปฏิเสธเงื่อนไขการต่ออายุ",
+    "approveTerms": "อนุมัติเงื่อนไข",
+    "rejectTerms": "ปฏิเสธเงื่อนไข",
+    "client": "ลูกค้า",
+    "noteOptional": "หมายเหตุ (ไม่บังคับ)",
+    "rejectNote": "เหตุผล"
   },
   "atRisk": {
     "title": "กรมธรรม์ที่มีความเสี่ยง",
@@ -6203,7 +6210,14 @@
     "schedulePremium": "เบี้ยประกัน",
     "fst": "ภาษีบริการดับเพลิง",
     "viewPolicy": "ดูกรมธรรม์",
-    "completePolicy": "ดำเนินการกรมธรรม์ให้เสร็จ"
+    "completePolicy": "ดำเนินการกรมธรรม์ให้เสร็จ",
+    "approveAndSendTitle": "อนุมัติและส่งใบเสนอราคา",
+    "approveAndSendMessage": "ใบเสนอราคาจะได้รับการอนุมัติและส่งอีเมลถึงลูกค้าพร้อมใบเสนอราคาเพื่อตอบรับ",
+    "client": "ลูกค้า",
+    "quotationNumber": "เลขที่ใบเสนอราคา",
+    "totalPremium": "เบี้ยประกันรวม",
+    "recipients": "ผู้รับ",
+    "approvalNote": "หมายเหตุ (ไม่บังคับ)"
   },
   "policyList": {
     "title": "กรมธรรม์",

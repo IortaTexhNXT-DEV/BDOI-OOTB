@@ -25,9 +25,8 @@ import { QuotationStatus } from "../../../utils/statusHelpers";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorsementCategories";
 import { Toast } from "primereact/toast";
-import { Message } from "primereact/message";
-import { isInitiator } from "../../../components/ApprovalActions";
-import { hasPermission } from "../../../utils/canOpen";
+import EligibilityNote from "../../../components/EligibilityNote";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
@@ -75,38 +74,33 @@ const QuoteDetailView = ({ action }) => {
   // Get quotation ID from URL path parameter, navigation state, or query params
   const quotationIdFromParams = quotationIdFromUrl || state?.quotationId;
 
-  // Fetch quotation data if not available from navigation state
+  // The quotation passed by the previous screen is shown at once and read again from the server, which adds what
+  // only the detail carries (the approval before sending and the signed-in user's decision on it)
+  const fetchedIdRef = useRef(null);
+  const quotationIdToRead = quotationIdFromParams || quotationData?.quotationId;
   useEffect(() => {
     const fetchQuotation = async () => {
-      // If we already have data from navigation, don't fetch
-      if (quotationData) {
+      if (!quotationIdToRead || fetchedIdRef.current === quotationIdToRead) {
         return;
       }
-
-      // If we have a quotation ID, fetch the data
-      if (quotationIdFromParams) {
-        setIsLoading(true);
-
-        try {
-          const result = await dispatch(
-            getQuotationByIdMiddleware(quotationIdFromParams)
-          );
-
-          if (result.type.endsWith("/fulfilled")) {
-            setQuotationData(result.payload);
-          } else {
-            notifyError(t("quoteDetailView.failedToLoad"));
-          }
-        } catch (error) {
-          notifyError(t("quoteDetailView.errorLoading"));
-        } finally {
-          setIsLoading(false);
+      fetchedIdRef.current = quotationIdToRead;
+      if (!quotationData) setIsLoading(true);
+      try {
+        const result = await dispatch(getQuotationByIdMiddleware(quotationIdToRead));
+        if (result.type.endsWith("/fulfilled")) {
+          setQuotationData(result.payload);
+        } else {
+          notifyError(t("quoteDetailView.failedToLoad"));
         }
+      } catch (error) {
+        notifyError(t("quoteDetailView.errorLoading"));
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchQuotation();
-  }, [quotationIdFromParams, dispatch, quotationData]);
+  }, [quotationIdToRead, dispatch, quotationData]);
 
   const { productConfigurator } = useSelector(
     ({ productConfiguratorReducer }) => {
@@ -400,62 +394,68 @@ const QuoteDetailView = ({ action }) => {
     phone: quotationData?.insured?.contactNumber || quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
   };
 
-  // Send quote for customer approval
+  // Send quote for customer approval (with the approval before sending, the approver's note goes to the audit trail)
+  const postSendForApproval = async (note) => {
+    const response = await fetch(
+      `${BASE_URL}/quotations/${quotationData.quotationId}/send-for-approval`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        body: JSON.stringify({ sentBy: "agent", ...(note ? { note } : {}) }),
+      }
+    );
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || t("quoteDetailView.errorSendingQuoteForApproval"));
+    }
+    return result;
+  };
+
+  const afterSent = async (result) => {
+    // e-mail sending off: the quotation still waits for the customer, but nobody was e-mailed
+    toast.current?.show(
+      result.emailSending === false
+        ? { severity: "warn", summary: t("customerResponse.emailNotConfiguredTitle"), detail: t("customerResponse.emailNotConfigured"), life: 10000 }
+        : { severity: "success", summary: t("quoteDetailView.success"), detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }), life: 3000 }
+    );
+    await loadQuotation();
+  };
+
   const handleSendForApproval = async () => {
     if (!quotationData?.quotationId) {
-      toast.error(t("quoteDetailView.quotationIdNotFound"));
+      notifyError(t("quoteDetailView.quotationIdNotFound"));
       return;
     }
-
     try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/send-for-approval`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ sentBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        // e-mail sending off: the quotation still waits for the customer, but nobody was e-mailed
-        toast.current?.show(
-          result.emailSending === false
-            ? { severity: "warn", summary: t("customerResponse.emailNotConfiguredTitle"), detail: t("customerResponse.emailNotConfigured"), life: 10000 }
-            : { severity: "success", summary: t("quoteDetailView.success"), detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }), life: 3000 }
-        );
-        // Refresh quotation data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        toast.current?.show({
-          severity: "error",
-          summary: t("quoteDetailView.error"),
-          detail: t("quoteDetailView.failedMessage", { message: result.message }),
-          life: 3000,
-        });
-      }
+      await afterSent(await postSendForApproval());
     } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("quoteDetailView.error"),
-        detail: t("quoteDetailView.errorSendingQuoteForApproval"),
-        life: 3000,
-      });
+      toast.current?.show({ severity: "error", summary: t("quoteDetailView.error"), detail: error.message, life: 6000 });
       logger.error(error);
     }
   };
 
-
+  const handleApproveAndSend = async () => {
+    let result = null;
+    const confirmed = await openConfirm({
+      title: t("quoteDetailView.approveAndSendTitle"),
+      message: t("quoteDetailView.approveAndSendMessage"),
+      facts: [
+        { label: t("quoteDetailView.client"), value: assured.name || "—" },
+        { label: t("quoteDetailView.quotationNumber"), value: quotationData.quotationNumber || quotationData.generatedQuotationId },
+        { label: t("quoteDetailView.totalPremium"), value: quotationData.grossPremium, type: "amount", currency: quotationData.currency },
+        { label: t("quoteDetailView.recipients"), value: assured.email || "—" },
+      ],
+      input: { type: "textarea", label: t("quoteDetailView.approvalNote"), required: false, maxLength: 500, rows: 3 },
+      confirmLabel: t("quoteDetailView.approveAndSend"),
+      onConfirm: async (note) => {
+        result = await postSendForApproval(note);
+      },
+    });
+    if (confirmed !== null && result) await afterSent(result);
+  };
 
   // Show loading state
   if (isLoading) {
@@ -1331,10 +1331,10 @@ const QuoteDetailView = ({ action }) => {
                   />
                 )}
                 {quotationData?.quotationStatus === "Draft" && quotationData?.approveBeforeSend && (
-                  isInitiator({ id: quotationData.createdById }) || !hasPermission("approve:quotations") ? (
-                    <Message severity="info" text={t("quoteDetailView.awaitingApprovalToSend")} />
+                  quotationData.sendDecision?.canDecide ? (
+                    <Button label={t("quoteDetailView.approveAndSend")} icon="pi pi-check" onClick={handleApproveAndSend} />
                   ) : (
-                    <Button label={t("quoteDetailView.approveAndSend")} icon="pi pi-check" onClick={handleSendForApproval} />
+                    <EligibilityNote reason={quotationData.sendDecision?.blockedReason || t("quoteDetailView.awaitingApprovalToSend")} />
                   )
                 )}
 

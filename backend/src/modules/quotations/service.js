@@ -314,6 +314,20 @@ async function issueApprovalToken(q) {
 }
 
 /**
+ * Whether `user` may approve and send a Draft quotation under quotations.approve_before_send (QUOT-03), as the
+ * decision block the screens show: { canDecide, blockedCode, blockedReason }. The raiser (creator or Account
+ * Executive of the quotation) never sends it; the approver holds approve:quotations.
+ */
+export function sendDecision(q, user) {
+  const no = (blockedCode, blockedReason) => ({ canDecide: false, blockedCode, blockedReason });
+  if ([q.created_by, q.agent_user_id].includes(user.id)) {
+    return no('RAISER', `You raised quotation ${q.quote_number}. Another user with quotation approval authority approves and sends it to the client.`);
+  }
+  if (!hasPermission(user, 'approve:quotations')) return no('PERMISSION', 'Requires permission: approve:quotations');
+  return { canDecide: true, blockedCode: null, blockedReason: null };
+}
+
+/**
  * Draft -> PendingCustomer: e-mail the customer a signed approval link and notify the Processing Team.
  * When e-mail sending is not configured the quotation still moves to PendingCustomer (an e-mail, when there is an
  * address, waits in the outbox), so staff can share the link another way or record the customer's answer.
@@ -328,10 +342,8 @@ export async function sendForApproval(id, user) {
   // QUOT-03: the raiser never sends; a second user holding approve:quotations approves the quotation, which sends it
   const release = q.status === 'draft' && await getSetting('quotations.approve_before_send', true);
   if (release) {
-    if ([q.created_by, q.agent_user_id].includes(user.id)) {
-      throw forbidden(`Maker-checker: quotation ${q.quote_number} is approved and sent to the client by a user other than the one who raised it`);
-    }
-    if (!hasPermission(user, 'approve:quotations')) throw forbidden('Requires permission: approve:quotations');
+    const decision = sendDecision(q, user);
+    if (!decision.canDecide) throw forbidden(decision.blockedReason);
   }
   const email = await emailSendingStatus();
   // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
@@ -645,7 +657,7 @@ export async function assertDirectConversion(q) {
 }
 
 /** The quotation with its co-insurance participants, the journey step links (broker slip, placement slip, policy) and the journey config. */
-export async function quoteById(id) {
+export async function quoteById(id, user = null) {
   const row = await getQuoteRow(id);
   const quote = toQuote(row);
   const participants = await participantsOf('quote', row.id);
@@ -654,12 +666,14 @@ export async function quoteById(id) {
   const offers = slip ? await many(`SELECT o.*, ic.name AS insurer_name FROM insurer_offers o JOIN insurance_companies ic ON ic.id = o.insurance_company_id
     WHERE o.broker_slip_id = $1 ORDER BY o.premium_total NULLS LAST, ic.name`, [slip.id]) : [];
   const journey = await journeyFor({ lob: row.lob, productType: row.product_type, productId: row.product_id });
+  const approveBeforeSend = row.status === 'draft' && Boolean(await getSetting('quotations.approve_before_send', true));
   return {
     ...quote, participants, isCoInsurance: participants.length > 1 || Boolean(quote.isCoInsurance),
     brokerSlipId: slip?.id || null, brokerSlipNumber: slip?.slip_number || null, placementId: placement?.id || null, placementNumber: placement?.placement_number || null,
     placementStatus: placement?.status || null, journey, validity: await validityOf(row),
     // QUOT-03: a Draft reaches the client only through a second user's approval
-    approveBeforeSend: row.status === 'draft' && Boolean(await getSetting('quotations.approve_before_send', true)),
+    approveBeforeSend,
+    sendDecision: approveBeforeSend && user ? sendDecision(row, user) : null,
     offers: offers.map((o) => ({ offerId: o.id, insuranceCompanyId: o.insurance_company_id, insuranceCompanyName: o.insurer_name, status: o.status, premium: o.premium === null ? null : Number(o.premium),
       rate: o.rate === null ? null : Number(o.rate), premiumTotal: o.premium_total === null ? null : Number(o.premium_total), offeredShare: Number(o.offered_share), deductibles: o.deductibles,
       validityDate: o.validity_date, selected: o.selected })),

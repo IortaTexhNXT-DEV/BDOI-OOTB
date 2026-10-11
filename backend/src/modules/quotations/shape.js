@@ -11,7 +11,7 @@ export const RESERVED = ['id', 'quotationId', 'quotationNumber', 'generatedQuota
   // validity and versions are kept in their own columns (validity.js); changeReason goes with the version it closes
   'version', 'issuedOn', 'validity', 'createdById', 'extensionCount', 'extendedAt', 'extendedBy', 'extensionRemarks', 'readOnly', 'changeReason',
   // set by the server: the approval rule of the quotation (QUOT-03) and the notice of a promotion priced again (PROD-15)
-  'approveBeforeSend', 'promotionNotice'];
+  'approveBeforeSend', 'sendDecision', 'promotionNotice'];
 
 export const stripReserved = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 

@@ -140,7 +140,7 @@ define({
 });
 define({
   method: 'GET', path: '/:id', summary: 'Get one quotation (by id or number) with lead summary and premium breakdown', screen: `${SCREEN} > Quote detail`, middleware: [...canRead, ownRecord('quote')],
-  response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, await svc.quoteById(req.params.id)),
+  response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, await svc.quoteById(req.params.id, req.user)),
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Update a quotation (not once converted); premiums recalculated', screen: `${SCREEN} > Edit quote`, middleware: [...canWrite, ownRecord('quote'), validate(quoteBody)],
@@ -198,10 +198,10 @@ for (const method of ['PUT', 'PATCH']) {
 }
 define({
   method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)', screen: `${SCREEN} > Quote detail > Send for customer approval`,
-  middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
+  middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent', note: 'Rates checked against the Malayan offer' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);
-    await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo, emailSending: r.emailSending } });
+    await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo, emailSending: r.emailSending, ...(r.approved && req.body?.note ? { note: String(req.body.note).slice(0, 500) } : {}) } });
     let message = r.approved ? `Quotation approved and sent to ${r.sentTo}` : `Quotation sent to ${r.sentTo} for approval`;
     if (!r.emailSending) {
       message = `${r.sentTo ? `The e-mail to ${r.sentTo} is queued, but e-mail` : 'E-mail'} sending is not configured, so the customer has not been e-mailed. `

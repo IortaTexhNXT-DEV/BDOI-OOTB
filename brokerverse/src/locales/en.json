@@ -6422,7 +6422,14 @@
     "viewPolicy": "View policy",
     "completePolicy": "Complete policy",
     "approveAndSend": "Approve and send to client",
-    "awaitingApprovalToSend": "Awaiting approval by another user before it is sent to the client"
+    "awaitingApprovalToSend": "Awaiting approval by another user before it is sent to the client",
+    "approveAndSendTitle": "Approve and send quotation",
+    "approveAndSendMessage": "The quotation is approved and e-mailed to the client with the quotation slip for acceptance.",
+    "client": "Client",
+    "quotationNumber": "Quotation number",
+    "totalPremium": "Total premium",
+    "recipients": "Recipients",
+    "approvalNote": "Note (optional)"
   },
   "policyList": {
     "title": "Policies",
@@ -12017,7 +12024,14 @@
       "Bundle discount": "Bundle discount",
       "Quarterly payment option": "Quarterly payment option",
       "Auto-debit setup": "Auto-debit setup"
-    }
+    },
+    "approveTitle": "Approve renewal terms",
+    "rejectTitle": "Reject renewal terms",
+    "approveTerms": "Approve terms",
+    "rejectTerms": "Reject terms",
+    "client": "Client",
+    "noteOptional": "Note (optional)",
+    "rejectNote": "Reason"
   },
   "atRisk": {
     "title": "At-Risk Policies",
