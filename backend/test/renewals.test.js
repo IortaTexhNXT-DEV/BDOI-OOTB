@@ -106,6 +106,21 @@ describe('renewals', () => {
     expect(detail.body.data.notices).toHaveLength(2);
     expect(detail.body.data.statusCode).toBe('quoted');
   });
+  it('renews a CTPL policy at the tariff amount of its vehicle class, not a rate on the CTPL limit', async () => {
+    // RN-2026-90011: motorcycle CTPL of P300.40 on a P100,000 limit was re-rated at the motor rate (P3,444.63)
+    await query(`INSERT INTO policies(id, policy_number, client_id, product_id, insurance_company_id, owner_user_id, status, inception_date, expiry_date, sum_insured, net_premium, premium_total, doc)
+      VALUES ('pol_r_ctpl','POL-R-CTPL','cl_r1',(SELECT id FROM products WHERE code = 'CTPL'),(SELECT id FROM insurance_companies WHERE code = 'MAPFRE'),
+        (SELECT id FROM users WHERE username = 'u.maker'),'active',current_date - 334,current_date + 30,100000,0,300.40,$1)`,
+    [JSON.stringify({ insurancePolicyType: 'CTPL', includeCTPL: true, ctplCoveragePremium: 300.40, insuranceVehicleDetails: [{ vehicleType: 'motorcycles_tricycles', seatingCapacity: 2 }] })]);
+    await query(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, estimate_amount) VALUES ('CLM-R-CTPL','pol_r_ctpl','cl_r1','settled',current_date - 40, 15000)`);
+    const ctpl = (await ctx.api('post', '/renewals/policies/POL-R-CTPL')).body.data;
+    const q = await ctx.api('post', `/renewals/${ctpl.id}/quote`);
+    expect(q.status).toBe(200);
+    expect(q.body.data.quotedPremium).toBe(300.4);
+    expect(q.body.data.premiumCalculation).toMatchObject({ basePremium: 300.4, claimsLoading: 0, loyaltyDiscount: 0, subtotal: 300.4, totalPremium: 300.4 });
+    expect(q.body.data.premiumVariance).toBe(0);
+    expect(q.body.data.rating).toMatchObject({ line: 'ctpl', basis: 'tariff', vehicleClass: 'motorcycles_tricycles' });
+  });
   it('requires checker approval by a different user and then renews into a new policy term', async () => {
     expect((await as('u.maker', 'post', `/renewals/${rn.id}/complete`).send({})).status).toBe(409);
     const s = await as('u.maker', 'post', `/renewals/${rn.id}/submit`).send({ note: 'Standard terms' });

@@ -34,7 +34,7 @@ export const BASE = `SELECT r.*, p.policy_number, p.inception_date, p.expiry_dat
   p.commission_amount, p.status AS policy_status, p.client_id AS policy_client_id, p.owner_user_id AS policy_owner, p.currency,
   p.product_id, p.policy_type_id, p.insurance_company_id, p.details AS policy_details, p.renewed_from, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
   cl.display_name AS client_name, cl.email AS client_email, cl.phone AS client_phone,
-  ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line, ou.display_name AS agent_name,
+  ic.name AS insurer_name, pr.name AS product_name, pr.code AS product_code, pr.line AS product_line, p.doc AS policy_doc, ou.display_name AS agent_name,
   (SELECT count(*) FROM claims c WHERE c.policy_id = p.id)::int AS claims_count,
   (SELECT COALESCE(sum(COALESCE(c.settled_amount, c.estimate_amount)), 0) FROM claims c WHERE c.policy_id = p.id)::numeric AS claims_amount,
   (SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN ('paid', 'written-off'))::numeric AS unpaid,
@@ -447,11 +447,36 @@ export const quoteApi = (q) => ({
   rating: q.rating, createdBy: q.created_by,
 });
 
+/** Whether the expiring term is a CTPL policy (its product, or the CTPL-only flag of its document). */
+const isCtplTerm = (r) => {
+  const doc = r.policy_doc || {};
+  return String(r.product_code || '').toUpperCase() === 'CTPL' || doc.ctplOnly === true || /^ctpl$/i.test(String(doc.insurancePolicyType || ''));
+};
+
+/**
+ * CTPL renews at the Insurance Commission tariff amount of the vehicle class (motor tariff), inclusive of taxes and the
+ * authentication fee: never a rate on the sum insured (the CTPL limit), no claims loading or loyalty discount. A term
+ * whose vehicle class has no tariff amount renews at its expiring premium.
+ */
+async function rateCtpl(r) {
+  const { motorTariff, vehicleClass, vehicleOf } = await import('../quotations/motorTariff.js');
+  const cls = vehicleClass(await motorTariff(), vehicleOf({ ...(r.policy_doc || {}), policyDetails: r.policy_details || {} }).vehicleType);
+  const previous = Number(r.premium_old ?? r.premium_total ?? 0);
+  const total = cls?.ctplPremium ?? previous;
+  const variance = round2(total - previous);
+  return {
+    base: total, claimsLoading: 0, loyaltyDiscount: 0, net: total, taxes: {}, total, previous, variance, variancePct: previous ? round2((variance / previous) * 100) : 0,
+    rating: { line: 'ctpl', basis: cls?.ctplPremium != null ? 'tariff' : 'previous', vehicleClass: cls?.value || null, sumInsured: r.sum_insured, claims: r.claims_count,
+      loyaltyYears: r.loyalty_years, ratedAt: new Date().toISOString() },
+  };
+}
+
 /**
  * Re-rate at current rates: base rate on sum insured, claims loading, loyalty discount, taxes from the premium tax and
- * charge engine (the same as a quotation); returns premium variance.
+ * charge engine (the same as a quotation); returns premium variance. CTPL renews at its tariff amount (rateCtpl).
  */
 export async function rate(r) {
+  if (isCtplTerm(r)) return rateCtpl(r);
   const line = r.product_line || 'default';
   const rates = (await getSetting('renewals.rating_rates', {})) || {};
   const rateUsed = Number(rates[line] ?? rates.default ?? 0);
