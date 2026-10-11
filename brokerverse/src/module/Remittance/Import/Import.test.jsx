@@ -99,7 +99,7 @@ describe("Import policy list", () => {
     for (const chip of ["Rows 52", "Ready 46", "Errors 6", "Warnings 4", "Fully paid check: not yet available"]) expect(await screen.findByText(chip)).toBeInTheDocument();
     expect(await screen.findByText("File 25,871.34, system 25,817.34, difference -54.00")).toBeInTheDocument();
     expect(screen.getByText("-PHP 54.00")).toBeInTheDocument();
-    expect(screen.getByText("Remittances to create")).toBeInTheDocument();
+    expect(screen.getByText("Remittances to Create")).toBeInTheDocument();
     expect(screen.getByText("PHP 1,204,553.10")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Download error report" }));
     await waitFor(() => expect(remittanceService.download).toHaveBeenCalledWith("/remittance/imports/imp_4/errors.xlsx", "IMP-2026-0004_Errors.xlsx"));
@@ -113,7 +113,7 @@ describe("Import policy list", () => {
     const onChanged = jest.fn();
     open("imp_4", { onChanged });
     fireEvent.click(await screen.findByRole("button", { name: "Create 3 draft remittances" }));
-    const confirm = await screen.findByRole("dialog", { name: "Create draft remittances" });
+    const confirm = await screen.findByRole("dialog", { name: "Create Draft Remittances" });
     expect(within(confirm).getByText(/Create 3 draft remittances for PHP 1,204,553.10 from 46 policies\?/)).toBeInTheDocument();
     expect(remittanceService.commitImport).not.toHaveBeenCalled();
     fireEvent.click(within(confirm).getByRole("button", { name: "Create 3 drafts" }));
@@ -122,7 +122,7 @@ describe("Import policy list", () => {
     expect(screen.getByRole("link", { name: "REM-2026-00031" })).toHaveAttribute("href", "/finance/remittance/remittances/rm_31");
     expect(onChanged).toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Submit the 3 drafts for approval" }));
-    const submit = await screen.findByRole("dialog", { name: "Submit for approval" });
+    const submit = await screen.findByRole("dialog", { name: "Submit for Approval" });
     fireEvent.click(within(submit).getByRole("button", { name: "Submit 3 remittances" }));
     expect(await screen.findByText("3 submitted · 0 not submitted")).toBeInTheDocument();
     expect(remittanceService.submitRemittances).toHaveBeenCalledWith([{ id: "rm_31", version: undefined }, { id: "rm_32", version: undefined }, { id: "rm_33", version: undefined }]);

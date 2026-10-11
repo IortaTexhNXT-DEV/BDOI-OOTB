@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import PageHeader from "../../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
 import { Steps } from "primereact/steps";
 import { InputText } from "primereact/inputtext";
@@ -18,7 +18,6 @@ import { Badge } from "primereact/badge";
 import { ProgressSpinner } from "primereact/progressspinner";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import quotationService from "../../../services/quotationService";
-import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
@@ -77,12 +76,6 @@ const QuoteGeneration = () => {
     value: method
   }));
 
-  const items = [
-    { label: t("renewal.renewals"), url: "#" },
-    { label: t("renewal.quoteGeneration"), url: "#" }
-  ];
-
-  const home = { icon: <SvgDot />, url: "#" };
 
   useEffect(() => {
     const loadRenewal = async () => {
@@ -804,10 +797,7 @@ const QuoteGeneration = () => {
     <div className="container__quote__generation__master">
       <Toast ref={toast} />
 
-      <div className="top__container">
-        <h1 className="page__title">{t("renewal.quoteGeneration")}</h1>
-        <BreadCrumb model={items} home={home} />
-      </div>
+      <PageHeader title={t("renewal.quoteGeneration")} home={t("renewal.renewals")} trail={[t("renewal.quoteGeneration")]} />
 
       <div className="content-container">
         <Card className="steps-card">

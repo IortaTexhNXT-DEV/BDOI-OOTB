@@ -9,6 +9,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import PageHeader from "../../components/PageHeader";
+import { ListCell } from "../../components/TableCells";
 import LoadingBar from "../../components/LoadingBar";
 import DetailDialog from "../../components/DetailDialog";
 import DetailSection from "../../components/DetailSection";
@@ -106,11 +107,11 @@ const SecurityControls = () => {
           rowGroupHeaderTemplate={(r) => <strong>{k(`groups.${r.group}`, { defaultValue: r.groupLabel })}</strong>}
           emptyMessage={error || k("empty")} className="fr-table" data-testid="security-controls">
           <Column header={k("columns.control")} body={nameBody} style={{ minWidth: "16rem" }} />
-          <Column header={k("columns.requirements")} body={(r) => (r.requirements || []).join(", ")} style={{ maxWidth: "16rem" }} />
+          <Column header={k("columns.requirements")} body={(r) => <ListCell items={r.requirements || []} max={2} />} style={{ minWidth: "12rem" }} />
           <Column header={k("columns.current")} field="current" style={{ minWidth: "18rem" }} />
           <Column header={k("columns.target")} field="target" style={{ minWidth: "16rem" }} />
           <Column header={k("columns.status")} body={(r) => statusChip(r.status)} />
-          <Column header={k("columns.evidence")} body={(r) => (r.evidence ? `${formatDate(r.evidence.evidenceDate)} · ${r.evidence.reference || ""}` : "-")} />
+          <Column header={k("columns.evidence")} body={(r) => (r.evidence ? `${formatDate(r.evidence.evidenceDate)} · ${r.evidence.reference || ""}` : "-")} bodyClassName="bv-nowrap" />
           <Column header="" body={actions} style={{ width: "6.5rem" }} />
         </DataTable>
       </div>

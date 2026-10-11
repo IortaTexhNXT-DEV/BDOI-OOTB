@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import PageHeader from "../../../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
@@ -10,7 +10,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { PickList } from "primereact/picklist";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { confirmDeleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
@@ -156,18 +155,9 @@ const StatementTemplateMaster = () => {
   return (
     <div className="container__statement__template__master">
         <Toast ref={toast} />
-        <div className="top__container">
-          <div className="header-actions">
-            <Button
-              icon={<SvgBackArrow />}
-              className="back-button"
-              onClick={handleClose}
-              text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
-            <h1 className="page__title">Statement Template Master</h1>
-            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
-          </div>
-          <BreadCrumb model={items} home={home} />
-        </div>
+        <PageHeader title="Statement Template Master" onBack={handleClose} home={home.label}
+          trail={items.map((i) => (i.url && i.url !== "#" ? { label: i.label, to: i.url } : i.label))}
+          meta={<span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>} />
 
         <div className="content-container">
           <div className="content-section">

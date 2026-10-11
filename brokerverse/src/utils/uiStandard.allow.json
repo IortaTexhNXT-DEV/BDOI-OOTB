@@ -1,0 +1,97 @@
+{
+  "_about": "Justified exceptions to the UI standard guard (uiStandard.test.js, docs/developer-guide/ui-standard.md). Each entry names the file, the rule and why. Remove an entry when the screen is migrated.",
+  "files": [
+    {
+      "file": "components/FileField/index.jsx",
+      "rule": "raw-file-input",
+      "why": "The shared file picker: hidden input behind its own button."
+    },
+    {
+      "file": "components/ImportDialog/index.jsx",
+      "rule": "raw-file-input",
+      "why": "The shared upload dialog: hidden input behind Choose file."
+    },
+    {
+      "file": "components/S3FileUpload/index.jsx",
+      "rule": "raw-file-input",
+      "why": "The shared document upload component."
+    },
+    {
+      "file": "components/PageHeader/index.jsx",
+      "rule": "own-h1",
+      "why": "The shared page header."
+    },
+    {
+      "file": "components/Print/PrintableDocument.jsx",
+      "rule": "own-h1",
+      "why": "Printed document title, not a screen."
+    },
+    {
+      "file": "agentModule/authModule/Login/index.js",
+      "rule": "own-h1",
+      "why": "Sign-in page outside the application frame."
+    },
+    {
+      "file": "agentModule/claimsModule/shared/ClaimDocumentChecklist.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the row's Upload button."
+    },
+    {
+      "file": "agentModule/EmployeeFlow/CQEmployeeBulkUpload.js",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from an Upload button; legacy agent flow."
+    },
+    {
+      "file": "module/Distribution/DealerProgrammes.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the Upload button."
+    },
+    {
+      "file": "module/Distribution/FleetSchedules.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the Upload vehicles button."
+    },
+    {
+      "file": "module/FeaturesReleases/PlatformFeatures.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the Promote button."
+    },
+    {
+      "file": "module/GeneralMasters/OrganizationMasters/CompanyMaster/AddCompany/index.js",
+      "rule": "raw-file-input",
+      "why": "Hidden input behind the logo upload button."
+    },
+    {
+      "file": "module/Integrations/BankPaymentFiles.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the Import status button."
+    },
+    {
+      "file": "module/JournalVoucher/UploadJournalVouchers.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the Choose file button."
+    },
+    {
+      "file": "module/Placement/BrokerSlipDetail.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input (hidden-file) behind the offer attachment button."
+    },
+    {
+      "file": "module/Sales/SchemeApplication.jsx",
+      "rule": "raw-file-input",
+      "why": "Hidden input opened from the checklist row's Upload button."
+    }
+  ],
+  "copyKeys": [
+    {
+      "key": "security.rules.symbol",
+      "why": "Lists the symbols a password may contain, including the exclamation mark."
+    }
+  ],
+  "titleCaseKeys": [
+    {
+      "key": "technicalDetails.title",
+      "why": "The label of the Technical details disclosure button, sentence case like every button."
+    }
+  ]
+}

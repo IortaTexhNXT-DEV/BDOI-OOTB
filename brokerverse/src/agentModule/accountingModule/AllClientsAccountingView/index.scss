@@ -48,12 +48,12 @@
 
     .summary-card {
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow-sm);
       border: 1px solid #e9ecef;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
 
       &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-md);
       }
 
       .p-card-body {
@@ -95,7 +95,7 @@
     margin-bottom: 1.25rem;
     animation: fadeIn 0.3s ease-in;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
     border: 1px solid #e9ecef;
 
     .p-card-body {
@@ -160,7 +160,7 @@
   .empty-state-card {
     animation: fadeIn 0.3s ease-in;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
     border: 1px solid #e9ecef;
 
     .p-card-body {
@@ -205,10 +205,10 @@
       border: 1px solid #e9ecef;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow-sm);
 
       &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--shadow-md);
       }
 
       .client-header {

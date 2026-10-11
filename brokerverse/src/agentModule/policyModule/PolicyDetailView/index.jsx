@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PageHeader from "../../../components/PageHeader";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -7,7 +8,6 @@ import { AuditTimeline } from "../../../components/AuditTrail";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "primereact/button";
 import { Skeleton } from "primereact/skeleton";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Galleria } from "primereact/galleria";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
@@ -15,9 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import StatusBadge from "../../../components/StatusBadge";
 import { policyDetailsDataMiddleWare } from "../store/policyMiddleWare";
-import SvgDot from "../../../assets/agentIcon/SvgDots";
 import { isFireLob, isOtherLob } from "../../endorsementModule/constants/endorsementCategories";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
 import BatchRenewalService from "../../../services/batchRenewalService";
@@ -1656,16 +1654,9 @@ const PolicyDetailView = () => {
     <div className="policy-detail-container">
       <Toast ref={toast} />
       <div className="policy-detail-view">
-        <div className="policy-header">
-          <div className="header-left">
-            <button type="button" className="header-back" onClick={handleBack}>
-              <SvgLeftArrow />
-              <span>{t("policyDetail.backToPolicies")}</span>
-            </button>
-            <div className="header-title">
-              <h1>{t("policyDetail.title")}</h1>
-              <p>{t("policyDetail.policyLabel")} {policyDetails.policyNumber || t("policyDetail.nA")}</p>
-            </div>
+        <PageHeader className="policy-header" title={policyDetails.policyNumber || t("policyDetail.title")} onBack={handleBack}
+          home={breadcrumbHome.label} trail={[...breadcrumbItems.map((i) => (i.command ? { label: i.label, onClick: i.command } : i.label)), policyDetails.policyNumber || t("policyDetail.title")]}
+          meta={(
             <div className="header-meta">
               {headerMetaItems.map((item) => (
                 <div
@@ -1688,13 +1679,8 @@ const PolicyDetailView = () => {
                 </div>
               ))}
             </div>
-            <BreadCrumb
-              model={breadcrumbItems}
-              home={breadcrumbHome}
-              className="breadcrumb"
-              separatorIcon={<SvgDot color="#000" />}
-            />
-          </div>
+          )}
+          actions={(
           <div className="header-actions">
             {moves.map((move) => (
               <Button
@@ -1755,7 +1741,7 @@ const PolicyDetailView = () => {
               />
             )}
           </div>
-        </div>
+          )} />
         {rawPolicyData?.renewedTo && (
           <NextStep title={t("policyDetail.renewedTitle")} text={t("policyDetail.renewedText")}
             actions={[{ key: "renewal", label: t("policyDetail.openRenewalTerm"), to: `/agent/policydetail/${rawPolicyData.renewedTo}` }]} />

@@ -156,7 +156,7 @@ describe("Setup > Schedules", () => {
     expect(runNow).toHaveAttribute("aria-disabled", "true");
     expect(runNow).toHaveTextContent(WINDOW_DONE);
     fireEvent.click(menuItem("Preview run"));
-    expect(await screen.findByText("Preview run · TIS-WEEKLY")).toBeInTheDocument();
+    expect(await screen.findByText("Preview Run · TIS-WEEKLY")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Create/ })).toBeNull();
     expect(remittanceService.runSchedule).not.toHaveBeenCalled();
   });

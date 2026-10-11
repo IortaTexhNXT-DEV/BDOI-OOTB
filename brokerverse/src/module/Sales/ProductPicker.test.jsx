@@ -69,9 +69,9 @@ describe("the product picker", () => {
   it("asks for the line of business first, then offers the products of that line", async () => {
     const onChange = jest.fn();
     render(<Harness onChange={onChange} idPrefix="test" />);
-    await waitFor(() => expect(screen.getByLabelText("Line of Business")).toBeEnabled());
+    await waitFor(() => expect(screen.getByLabelText("Line of business")).toBeEnabled());
     expect(screen.getByLabelText("Product")).toBeDisabled();
-    await choose("Line of Business", "Motor");
+    await choose("Line of business", "Motor");
     expect(onChange).toHaveBeenLastCalledWith({ lob: "MOTOR", productId: null, product: null });
     await choose("Product", "Compulsory Third Party Liability");
     expect(screen.getByRole("option", { name: "Motor Vehicle Insurance", hidden: true })).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe("the product picker", () => {
     const onChange = jest.fn();
     render(<Harness onChange={onChange} idPrefix="test" />);
     await waitFor(() => expect(placementService.productLines).toHaveBeenCalled());
-    await choose("Line of Business", "Credit Life");
+    await choose("Line of business", "Credit Life");
     expect(onChange).toHaveBeenLastCalledWith({ lob: "LIFE", productId: 7, product: expect.objectContaining({ code: "CL-COMP" }) });
   });
 
@@ -121,7 +121,7 @@ describe("Create prospect", () => {
   it("opens the form of the product chosen by line of business, then product", async () => {
     const onProduct = jest.fn();
     await open({ onSkip: jest.fn(), onProduct });
-    await choose("Line of Business", "Motor");
+    await choose("Line of business", "Motor");
     await choose("Product", "Motor Vehicle Insurance");
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(onProduct).toHaveBeenCalledWith(expect.objectContaining({ id: 1, lob: "MOTOR" }), null);

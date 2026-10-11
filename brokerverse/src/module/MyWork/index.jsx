@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import PageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
@@ -120,18 +121,14 @@ const MyWork = () => {
 
   return (
     <div className="mw-page">
-      <div className="mw-head">
-        <div>
-          <h1 className="page__title">{t("myWork.title", "My Work")}</h1>
-          <p className="mw-subtitle">{subtitle}</p>
-        </div>
+      <PageHeader title={t("myWork.title", "My Work")} home={t("myWork.title", "My Work")} meta={<span>{subtitle}</span>} actions={(
         <div className="mw-head__actions">
           <Button icon="pi pi-refresh" text rounded aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />
           {dashboard && <Button label={t("myWork.myDashboard", "My dashboard")} icon="pi pi-chart-bar" text onClick={() => navigate(dashboard.path)} />}
           <Button label={t("myWork.task.new", "New task")} icon="pi pi-plus" outlined onClick={() => setDialog({ visible: true, task: null })} />
           {action && <Button label={t(`myWork.home.action.${action.key}`, { defaultValue: action.key })} icon={action.category ? "pi pi-check-square" : "pi pi-arrow-right"} iconPos={action.category ? "left" : "right"} onClick={runAction} />}
         </div>
-      </div>
+      )} />
 
       <StatCards items={[...cards, ...roleCards]} className="mw-kpis" />
 

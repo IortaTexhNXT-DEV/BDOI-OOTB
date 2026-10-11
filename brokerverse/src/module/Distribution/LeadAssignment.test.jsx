@@ -28,7 +28,7 @@ jest.mock("../../services/systemSettingsService", () => ({ __esModule: true, def
 
 const LEADS = [{ id: "ld_1", leadNumber: "LD-2026-95015", name: "Ricardo Salazar", ownerUserId: "usr_admin" }];
 const ASSIGNEES = [
-  { id: "usr_ana", name: "Ana Garcia", branchCode: "CEB", designation: "Account Executive", open: 2, suggested: true, rules: ["Cebu motor"] },
+  { id: "usr_ana", name: "Ana Garcia", branchCode: "CEB", designation: "Account executive", open: 2, suggested: true, rules: ["Cebu motor"] },
   { id: "usr_juan", name: "Juan Dela Cruz", branchCode: "HO", open: 0, suggested: false, rules: [] },
 ];
 const REASONS = [

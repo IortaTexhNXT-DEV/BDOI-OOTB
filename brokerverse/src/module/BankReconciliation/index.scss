@@ -129,7 +129,7 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  box-shadow: 0 6px 18px rgba(17, 25, 39, 0.25);
+  box-shadow: var(--shadow-md);
 
   .br-sel-figures {
     display: flex;

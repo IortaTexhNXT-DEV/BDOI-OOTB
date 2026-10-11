@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
+import FileField from "../../components/FileField";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -472,7 +473,7 @@ const PlacementDetail = () => {
                   <div className="col-12">
                     <label htmlFor="bk-idImage">{t("placement.kyc.idCardImage")}</label>
                     {booking.kyc.idCardImage && !booking.idFile && <div className="muted">{t("placement.kyc.idCardImageAttached")}</div>}
-                    <input id="bk-idImage" type="file" accept="image/*,application/pdf" onChange={(e) => setBooking({ ...booking, idFile: e.target.files?.[0] || null })} />
+                    <FileField id="bk-idImage" accept="image/*,application/pdf" value={booking.idFile || null} onChange={(f) => setBooking({ ...booking, idFile: f })} />
                   </div>
                 )}
               </div>

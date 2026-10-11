@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import PageHeader from "../../components/PageHeader";
+import { ListCell } from "../../components/TableCells";
 import LoadingBar from "../../components/LoadingBar";
 import StatusChip from "../../components/StatusChip";
 import KeyValueGrid from "../../components/KeyValueGrid";
@@ -128,9 +129,9 @@ const PlatformFeatures = () => {
             <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value ?? null)} placeholder={t("features.allTiers")} showClear className="bv-list-filter"
               aria-label={t("features.columns.tier")} />
             <span className="fr-toolbar-actions">
-              <Button type="button" label={t("features.enableSelected", { count: switchable.length })} disabled={!switchable.length}
+              <Button type="button" label={t("features.enableSelected", { count: switchable.length })} outlined disabled={!switchable.length} {...(switchable.length ? {} : { tooltip: t("features.selectFirst", "Select features in the list first"), tooltipOptions: { position: "top", showOnDisabled: true } })}
                 onClick={() => open("enable", { features: switchable.map((r) => r.key) })} data-testid="enable-selected" />
-              <Button type="button" label={t("features.disableSelected", { count: switchable.length })} outlined severity="danger" disabled={!switchable.length}
+              <Button type="button" label={t("features.disableSelected", { count: switchable.length })} outlined severity="danger" disabled={!switchable.length} {...(switchable.length ? {} : { tooltip: t("features.selectFirst", "Select features in the list first"), tooltipOptions: { position: "top", showOnDisabled: true } })}
                 onClick={() => open("disable", { features: switchable.map((r) => r.key) })} data-testid="disable-selected" />
             </span>
           </div>
@@ -151,8 +152,8 @@ const PlatformFeatures = () => {
               <Column header={t("features.columns.tier")} body={(r) => <TierTag t={t} tier={r.tier} />} />
               <Column header={t("features.columns.status")} body={(r) => <StatusOf t={t} status={r.status} />} />
               <Column header={t("features.columns.dependsOn")} body={(r) => r.dependsOn.map((k) => (features.data || []).find((f) => f.key === k)?.name || k).join(", ") || "-"} />
-              <Column header={t("features.columns.requirements")} body={(r) => r.requirements.join(", ") || "-"} style={{ maxWidth: "16rem" }} />
-              <Column header={t("features.columns.enabledOn")} body={(r) => formatDate(r.enabledAt)} />
+              <Column header={t("features.columns.requirements")} body={(r) => <ListCell items={r.requirements || []} max={2} />} style={{ minWidth: "12rem" }} />
+              <Column header={t("features.columns.enabledOn")} body={(r) => formatDate(r.enabledAt)} bodyClassName="bv-nowrap" />
               <Column header={t("features.columns.releaseRef")} body={(r) => r.releaseRef || "-"} />
             </DataTable>
           </div>

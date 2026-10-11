@@ -43,7 +43,7 @@ describe("Role Permissions", () => {
     renderAt();
     const list = await screen.findByRole("listbox");
     expect(within(list).getByText("TIS Sales Associate")).toBeInTheDocument();
-    expect(within(list).getByText("Cash Control")).toBeInTheDocument();
+    expect(within(list).getByText("Cash control")).toBeInTheDocument();
     expect(within(list).queryByText("Accounting Manager")).not.toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Include base platform roles"));
     expect(await within(screen.getByRole("listbox")).findByText("Accounting Manager")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("Role Permissions", () => {
   it("shows the access of a role like the menu, in business words", async () => {
     renderAt("/master/generals/usermanagement/role-permissions?role=tis-sales-officer");
     expect(await screen.findByRole("heading", { name: "TIS Sales Officer" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Sales & Marketing" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sales & marketing" })).toBeInTheDocument();
     expect(screen.getByText("Quotations and placement")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Approve, Quotations and placement, TIS Sales Officer: Granted" })).toBeInTheDocument();
     expect(screen.queryByText("approve:quotations")).not.toBeInTheDocument();

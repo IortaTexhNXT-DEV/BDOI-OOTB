@@ -111,7 +111,7 @@ describe("flowView", () => {
   });
 });
 
-describe("Accounting Flow", () => {
+describe("Accounting flow", () => {
   it("lists the events under their modules in cycle order with contents, facts and entries in business words", async () => {
     renderAt();
     await loaded();

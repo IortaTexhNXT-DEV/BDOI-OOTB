@@ -36,7 +36,7 @@ describe("Financial statement versions", () => {
     expect(await screen.findByText("Cash and cash equivalents")).toBeInTheDocument();
     expect(screen.getByText("Suspense - conversion")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Add version" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add Version" })).not.toBeInTheDocument();
   });
 
   it("Finance adds a line, is told what is missing, then saves", async () => {

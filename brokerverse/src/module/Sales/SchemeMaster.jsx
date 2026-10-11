@@ -22,6 +22,9 @@ import StatusChip from "../../components/StatusChip";
 import RowActions from "../../components/RowActions";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import DetailSection from "../../components/DetailSection";
+import DialogFooter, { RecordTitle } from "../../components/DialogFooter";
+import ImportDialog from "../../components/ImportDialog";
 import DateField from "../../components/DateField";
 import FieldError from "../../components/FieldError";
 import ApprovalActions, { isInitiator } from "../../components/ApprovalActions";
@@ -49,6 +52,8 @@ const bodyOf = (f) => ({
  * vehicle lines entered or uploaded), approved by another user, activated on its effective date by the daily job, and
  * changed only as a new version (Amend). The premium preview prices every policy year of a sample vehicle.
  */
+const LINE_TARGETS = [{ label: "Vehicle lines", templatePath: "/schemes/lines/template", uploadPath: "/schemes/lines/upload" }];
+
 const SchemeMaster = () => {
   const { t } = useTranslation();
   const write = hasPermission("write:schemes");
@@ -184,49 +189,35 @@ const SchemeMaster = () => {
       notifyError(e.message);
     }
   };
-  const downloadTemplate = async () => {
-    try {
-      saveBlob(await service.linesTemplate(), "Scheme_Vehicle_Lines_Upload_Template.xlsx");
-    } catch (e) {
-      notifyError(e.message);
-    }
-  };
-  const sendUpload = async () => {
-    try {
-      const r = await service.uploadLines(upload.scheme.id, upload.mode, upload.file);
-      setUpload((u) => ({ ...u, result: r }));
-      notifySuccess(r.message);
-      await refresh(upload.scheme.id);
-    } catch (e) {
-      notifyError(e.message);
-    }
-  };
-
   const footer = (s) => {
     if (!s) return null;
     const mine = isInitiator({ id: s.createdById }) || isInitiator({ id: s.updatedById }) || isInitiator({ id: s.submittedById });
+    const draft = write && s.status === "draft";
+    const deciding = approve && s.status === "pending-approval" && !mine;
     return (
-      <div className="flex flex-wrap gap-2 justify-content-end">
-        {write && s.status === "draft" ? <Button label={t("schemeMaster.actions.edit", "Edit")} icon="pi pi-pencil" outlined onClick={() => edit(s)} /> : null}
-        {write && s.status === "draft" ? <Button label={t("schemeMaster.uploadLines", "Upload vehicle lines")} icon="pi pi-upload" outlined
-          onClick={() => setUpload({ scheme: s, mode: "add", file: null, result: null })} /> : null}
-        {write && s.status === "draft" && s.version === 1 ? <Button label={t("schemeMaster.actions.delete", "Delete")} icon="pi pi-trash" severity="danger" text onClick={() => remove(s)} /> : null}
-        {write && s.status === "draft" && s.version > 1 ? <Button label={t("schemeMaster.actions.discard", "Discard version")} icon="pi pi-trash" severity="danger" text onClick={() => act(s, "discard")} /> : null}
-        {write && s.status === "draft" ? <Button label={t("schemeMaster.actions.submit", "Submit")} icon="pi pi-send" onClick={() => act(s, "submit")} /> : null}
-        {write && s.status === "pending-approval" && isInitiator({ id: s.submittedById })
-          ? <Button label={t("schemeMaster.actions.recall", "Recall")} icon="pi pi-undo" outlined onClick={() => act(s, "recall")} /> : null}
-        {approve && s.status === "pending-approval" && !mine ? (
+      <DialogFooter onClose={() => setViewed(null)}
+        primary={draft ? { label: t("schemeMaster.actions.submit", "Submit"), icon: "pi pi-send", onClick: () => act(s, "submit") } : null}
+        secondary={[
+          { label: t("schemeMaster.actions.edit", "Edit"), icon: "pi pi-pencil", onClick: () => edit(s), hidden: !draft },
+          { label: t("schemeMaster.uploadLines", "Upload vehicle lines"), icon: "pi pi-upload", onClick: () => setUpload({ scheme: s, mode: "add" }), hidden: !draft },
+          { label: t("schemeMaster.actions.recall", "Recall"), icon: "pi pi-undo", onClick: () => act(s, "recall"),
+            hidden: !(write && s.status === "pending-approval" && isInitiator({ id: s.submittedById })) },
+          { label: t("schemeMaster.actions.copy", "Copy"), icon: "pi pi-clone", onClick: () => copy(s), hidden: !write },
+          { label: t("schemeMaster.actions.amend", "Amend"), icon: "pi pi-copy", onClick: () => act(s, "amend"), hidden: !(write && ["scheduled", "active", "suspended"].includes(s.status)) },
+          { label: t("schemeMaster.actions.suspend", "Suspend"), icon: "pi pi-pause", onClick: () => act(s, "suspend", { reason: true }), hidden: !(approve && ["scheduled", "active"].includes(s.status)) },
+          { label: t("schemeMaster.actions.resume", "Resume"), icon: "pi pi-play", onClick: () => act(s, "resume", { reason: true }), hidden: !(approve && s.status === "suspended") },
+        ]}
+        destructive={[
+          { label: t("schemeMaster.actions.delete", "Delete"), icon: "pi pi-trash", onClick: () => remove(s), hidden: !(draft && s.version === 1) },
+          { label: t("schemeMaster.actions.discard", "Discard version"), icon: "pi pi-trash", onClick: () => act(s, "discard"), hidden: !(draft && s.version > 1) },
+          { label: t("schemeMaster.actions.withdraw", "Withdraw"), icon: "pi pi-ban", onClick: () => act(s, "withdraw", { reason: true, severity: "danger" }),
+            hidden: !(approve && ["draft", "scheduled", "active", "suspended"].includes(s.status)) },
+        ]}>
+        {deciding ? (
           <ApprovalActions initiator={{ id: s.submittedById }} approveLabel={t("schemeMaster.actions.approve", "Approve")} rejectLabel={t("schemeMaster.actions.return", "Return")}
             onApprove={() => act(s, "approve")} onReject={() => act(s, "return", { reason: true, severity: "danger" })} />
         ) : null}
-        {write ? <Button label={t("schemeMaster.actions.copy", "Copy")} icon="pi pi-clone" outlined onClick={() => copy(s)} /> : null}
-        {write && ["scheduled", "active", "suspended"].includes(s.status) ? <Button label={t("schemeMaster.actions.amend", "Amend")} icon="pi pi-copy" outlined onClick={() => act(s, "amend")} /> : null}
-        {approve && ["scheduled", "active"].includes(s.status) ? <Button label={t("schemeMaster.actions.suspend", "Suspend")} icon="pi pi-pause" outlined onClick={() => act(s, "suspend", { reason: true })} /> : null}
-        {approve && s.status === "suspended" ? <Button label={t("schemeMaster.actions.resume", "Resume")} icon="pi pi-play" outlined onClick={() => act(s, "resume", { reason: true })} /> : null}
-        {approve && ["draft", "scheduled", "active", "suspended"].includes(s.status)
-          ? <Button label={t("schemeMaster.actions.withdraw", "Withdraw")} icon="pi pi-ban" severity="danger" outlined onClick={() => act(s, "withdraw", { reason: true, severity: "danger" })} /> : null}
-        <Button label={t("common.close", "Close")} text onClick={() => setViewed(null)} />
-      </div>
+      </DialogFooter>
     );
   };
 
@@ -241,7 +232,8 @@ const SchemeMaster = () => {
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeMaster.title", "Scheme Master")}>
+      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeMaster.title", "Scheme Master")}
+        trail={[t("schemeMaster.title", "Scheme Master")]}>
         <Button label={t("schemeMaster.export", "Export to Excel")} icon="pi pi-file-excel" outlined onClick={exportList} disabled={!rows.length} />
         {write ? <Button label={t("schemeMaster.add", "New scheme")} icon="pi pi-plus" disabled={!choices.perils.length} onClick={() => edit(null)} /> : null}
       </PageHeader>
@@ -270,27 +262,39 @@ const SchemeMaster = () => {
       </div>
 
       <DetailDialog visible={Boolean(viewed)} onHide={() => setViewed(null)} size="xl" footer={footer(viewed)}
-        header={viewed ? `${viewed.schemeNo} v${viewed.version} - ${viewed.description}` : ""}>
+        header={viewed ? <RecordTitle number={viewed.schemeNo} version={viewed.version} status={viewed.status} statusLabel={viewed.statusLabel} /> : ""}>
         {viewed ? (
           <TabView>
             <TabPanel header={t("schemeMaster.general", "General")}>
-              <KeyValueGrid columns={4} items={[
-                { label: t("schemeMaster.status", "Status"), value: <StatusChip code={viewed.status} label={viewed.statusLabel} /> },
-                { label: t("schemeMaster.schemeType", "Scheme type"), value: viewed.schemeTypeLabel },
-                { label: t("schemeMaster.effectiveFrom", "Effective from"), value: viewed.effectiveFrom, type: "date" },
-                { label: t("schemeMaster.effectiveTo", "Effective to"), value: viewed.effectiveTo, type: "date" },
-                { label: t("schemeMaster.bank", "Financing bank"), value: viewed.bankName },
-                { label: t("schemeMaster.product", "Product"), value: viewed.productName },
-                { label: t("schemeMaster.dealers", "Dealers"), value: viewed.allDealers ? t("schemeMaster.allDealers", "All dealers") : viewed.dealers.map((d) => d.name).join(", "), span: 2 },
-                { label: t("schemeMaster.insurers", "Insurers"), value: viewed.insurers.map((i) => i.name).join(", "), span: 2 },
-                { label: t("schemeMaster.vehicleClasses", "Vehicle classes"), value: viewed.vehicleClasses.map((c) => choices.vehicleClasses.find((x) => x.value === c)?.label || c).join(", "), span: 2 },
-                { label: t("schemeMaster.notes", "Notes"), value: viewed.notes, span: 2 },
-                { label: t("schemeMaster.createdBy", "Created by"), value: viewed.createdBy },
-                { label: t("schemeMaster.submittedBy", "Submitted by"), value: viewed.submittedBy, hidden: !viewed.submittedAt },
-                { label: t("schemeMaster.decidedBy", "Approved / returned by"), value: viewed.decidedBy ? `${viewed.decidedBy}, ${formatValue(viewed.decidedAt, { type: "datetime" })}` : null, hidden: !viewed.decidedAt },
-                { label: t("schemeMaster.decision", "Decision note"), value: viewed.decisionNote, hidden: !viewed.decisionNote, span: 2 },
-                { label: t("schemeMaster.statusReason", "Status reason"), value: viewed.statusNote, hidden: !viewed.statusNote, span: 2 },
-              ]} />
+              <DetailSection title={t("schemeMaster.scheme", "Scheme")}>
+                <KeyValueGrid columns={3} items={[
+                  { label: t("schemeMaster.description", "Description"), value: viewed.description, span: "full" },
+                  { label: t("schemeMaster.schemeType", "Scheme type"), value: viewed.schemeTypeLabel },
+                  { label: t("schemeMaster.product", "Product"), value: viewed.productName },
+                  { label: t("schemeMaster.bank", "Financing bank"), value: viewed.bankName },
+                  { label: t("schemeMaster.effectiveFrom", "Effective from"), value: viewed.effectiveFrom, type: "date" },
+                  { label: t("schemeMaster.effectiveTo", "Effective to"), value: viewed.effectiveTo, type: "date" },
+                  { label: t("schemeMaster.createdBy", "Created by"), value: viewed.createdBy },
+                ]} />
+              </DetailSection>
+              <DetailSection title={t("schemeMaster.appliesTo", "Applies to")}>
+                <KeyValueGrid columns={3} items={[
+                  { label: t("schemeMaster.dealers", "Dealers"), value: viewed.allDealers ? t("schemeMaster.allDealers", "All dealers") : viewed.dealers.map((d) => d.name).join(", "), span: "full" },
+                  { label: t("schemeMaster.insurers", "Insurers"), value: viewed.insurers.map((i) => i.name).join(", "), span: "full" },
+                  { label: t("schemeMaster.vehicleClasses", "Vehicle classes"), value: viewed.vehicleClasses.map((c) => choices.vehicleClasses.find((x) => x.value === c)?.label || c).join(", "), span: "full" },
+                  { label: t("schemeMaster.notes", "Notes"), value: viewed.notes, span: "full", hidden: !viewed.notes },
+                ]} />
+              </DetailSection>
+              {viewed.submittedAt || viewed.decidedAt || viewed.statusNote ? (
+                <DetailSection title={t("schemeMaster.approval", "Approval")}>
+                  <KeyValueGrid columns={2} items={[
+                    { label: t("schemeMaster.submittedBy", "Submitted by"), value: viewed.submittedBy, hidden: !viewed.submittedAt },
+                    { label: t("schemeMaster.decidedBy", "Approved / returned by"), value: viewed.decidedBy ? `${viewed.decidedBy}, ${formatValue(viewed.decidedAt, { type: "datetime" })}` : null, hidden: !viewed.decidedAt },
+                    { label: t("schemeMaster.decision", "Decision note"), value: viewed.decisionNote, hidden: !viewed.decisionNote, span: "full" },
+                    { label: t("schemeMaster.statusReason", "Status reason"), value: viewed.statusNote, hidden: !viewed.statusNote, span: "full" },
+                  ]} />
+                </DetailSection>
+              ) : null}
               {(viewed.warnings || []).map((w) => <div key={w.message} className="bv-text-alert mt-2"><i className="pi pi-exclamation-triangle mr-2" />{w.message}</div>)}
               {viewed.changes ? <div className="bv-muted mt-2">{t("schemeMaster.changesSince", "Changed since version {{version}}: {{what}}", { version: viewed.changes.previousVersion, what: Object.keys(viewed.changes).filter((k) => k !== "previousVersion").join(", ") })}</div> : null}
             </TabPanel>
@@ -377,12 +381,8 @@ const SchemeMaster = () => {
 
       <Dialog visible={Boolean(form)} onHide={() => setForm(null)} modal style={{ width: "76rem" }} breakpoints={{ "960px": "96vw" }}
         header={form?.id ? t("schemeMaster.editTitle", "Edit {{schemeNo}} v{{version}}", { schemeNo: form.schemeNo, version: form.version }) : t("schemeMaster.add", "New scheme")}
-        footer={(
-          <div className="flex gap-2 justify-content-end">
-            <Button label={t("common.cancel", "Cancel")} text onClick={() => setForm(null)} />
-            <Button label={t("schemeMaster.saveDraft", "Save draft")} icon="pi pi-save" loading={saving} onClick={save} />
-          </div>
-        )}>
+        footer={<DialogFooter onClose={() => setForm(null)} closeLabel={t("common.cancel", "Cancel")}
+          primary={{ label: t("schemeMaster.saveDraft", "Save draft"), icon: "pi pi-save", loading: saving, onClick: save }} />}>
         {form ? (
           <TabView>
             <TabPanel header={t("schemeMaster.general", "General")}>
@@ -539,30 +539,14 @@ const SchemeMaster = () => {
         {errors.form ? <FieldError error={errors.form} /> : null}
       </Dialog>
 
-      <Dialog visible={Boolean(upload)} onHide={() => setUpload(null)} modal style={{ width: "40rem" }} breakpoints={{ "640px": "96vw" }}
-        header={t("schemeMaster.uploadLines", "Upload vehicle lines")}
-        footer={(
-          <div className="flex gap-2 justify-content-end">
-            <Button label={t("schemeMaster.template", "Download template")} icon="pi pi-download" text onClick={downloadTemplate} />
-            <Button label={t("common.close", "Close")} text onClick={() => setUpload(null)} />
-            <Button label={t("schemeMaster.upload", "Upload")} icon="pi pi-upload" disabled={!upload?.file} onClick={sendUpload} />
-          </div>
-        )}>
-        {upload ? (
-          <div className="flex flex-column gap-3">
-            <div>{upload.scheme.schemeNo} v{upload.scheme.version}</div>
-            <Dropdown value={upload.mode} aria-label={t("schemeMaster.uploadMode", "Upload mode")} onChange={(e) => setUpload((u) => ({ ...u, mode: e.value }))}
-              options={[{ value: "add", label: t("schemeMaster.modeAdd", "Add to the lines") }, { value: "replace", label: t("schemeMaster.modeReplace", "Replace all lines") }]} />
-            <input type="file" accept=".xlsx" aria-label={t("schemeMaster.file", "File")} onChange={(e) => setUpload((u) => ({ ...u, file: e.target.files?.[0] || null }))} />
-            {upload.result ? (
-              <div>
-                <strong>{upload.result.message}</strong>
-                {(upload.result.data?.errors || []).map((x) => <div key={x.text} className="bv-text-alert">{x.text}</div>)}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </Dialog>
+      <ImportDialog visible={Boolean(upload)} onHide={() => setUpload(null)} accept=".xlsx" fileTypes={t("schemeMaster.fileTypes", "Excel workbook (.xlsx)")}
+        title={upload ? t("schemeMaster.uploadLinesOf", "Upload vehicle lines to {{schemeNo}} v{{version}}", { schemeNo: upload.scheme.schemeNo, version: upload.scheme.version }) : ""}
+        targets={LINE_TARGETS} fields={upload ? { schemeId: upload.scheme.id, mode: upload.mode } : {}}
+        steps={upload ? [{ key: "sm-upload-mode", label: t("schemeMaster.uploadMode", "Upload mode"), node: (
+          <Dropdown inputId="sm-upload-mode" value={upload.mode} className="w-full" onChange={(e) => setUpload((u) => ({ ...u, mode: e.value }))}
+            options={[{ value: "add", label: t("schemeMaster.modeAdd", "Add to the lines") }, { value: "replace", label: t("schemeMaster.modeReplace", "Replace all lines") }]} />
+        ) }] : []}
+        onUploaded={() => upload && refresh(upload.scheme.id)} />
     </div>
   );
 };

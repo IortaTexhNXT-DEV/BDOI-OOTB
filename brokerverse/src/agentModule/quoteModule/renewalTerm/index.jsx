@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PageHeader from "../../../components/PageHeader";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -61,11 +62,8 @@ const RenewalTermDetails = ({ prefill }) => {
 
   return (
     <div className="renewal-term">
-      <h1 className="renewal-term__title">{t("renewalTerm.title")}</h1>
-      <p className="renewal-term__sub">
-        {prefill.clientName} / {prefill.policyNumber}
-        {prefill.eligibility?.label ? ` / ${prefill.eligibility.label}` : ""}
-      </p>
+      <PageHeader title={t("renewalTerm.title")} home={t("renewal.renewals", "Renewals")} trail={[t("renewalTerm.title")]}
+        meta={<span>{prefill.clientName} / {prefill.policyNumber}{prefill.eligibility?.label ? ` / ${prefill.eligibility.label}` : ""}</span>} />
       <Card>
         <h2 className="renewal-term__section">{t("renewalTerm.expiringTerm")}</h2>
         <dl className="renewal-term__facts">

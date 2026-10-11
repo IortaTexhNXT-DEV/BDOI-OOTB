@@ -40,7 +40,7 @@ describe("market value and rates of a motor quotation", () => {
   it("lets an officer change the FMV and the rate with a reason, and notes a rate below the minimum", async () => {
     grant(["override:motor-fmv", "override:quotation-rates"]);
     render(<MotorRatingPanel draft={DRAFT} values={{ fmv: 950000, odRate: 1.3, aonRate: 0.5 }} onChange={jest.fn()} />);
-    expect(await screen.findByText("Market value and rates")).toBeInTheDocument();
+    expect(await screen.findByText("Market Value and Rates")).toBeInTheDocument();
     expect(screen.getByLabelText("Fair market value")).toBeEnabled();
     expect(screen.getByLabelText("Own Damage rate")).toBeEnabled();
     expect(screen.getByText("Reason for the FMV change")).toBeInTheDocument();

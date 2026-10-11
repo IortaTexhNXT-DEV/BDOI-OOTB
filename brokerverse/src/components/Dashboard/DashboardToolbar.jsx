@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PageHeader from "../PageHeader";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -39,7 +40,7 @@ const DashboardToolbar = ({ title, period, onPeriod, periods, compare, onCompare
   return (
     <div className="bv-dash-head">
       <div className="bv-dash-head__title">
-        <h1>{title}</h1>
+        <PageHeader title={title} home={t("dashboards.home", "Dashboards")} trail={[title]} />
         {range?.from ? (
           <p>
             {t("dashboards.range", { from: formatDate(range.from), to: formatDate(range.to), defaultValue: "{{from}} to {{to}}" })}

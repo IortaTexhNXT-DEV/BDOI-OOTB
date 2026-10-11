@@ -9,7 +9,7 @@
   .paymentCard_container {
     border-radius: 20px;
     background: #fff;
-    box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.07);
+    box-shadow: var(--shadow-md);
   }
   .header_search_container {
     display: grid;
@@ -46,14 +46,14 @@
     font-size: 14px;
     font-weight: 500;
     border-radius: 18px;
-    background: rgba(16, 185, 129, 0.12);
+    background: var(--color-surface);
     text-align: center;
     padding: 4px 10px;
   }
 
   .payment__paidfieldcard__red {
     color: #c1622a;
-    background: #fef2e1;
+    background: var(--color-surface);
     font-family: "Nunito", Arial, sans-serif;
     font-size: 14px;
     font-weight: 500;
@@ -65,11 +65,11 @@
   .payment__paidfieldcard__blue {
     color: #167594;
     font-family: "Nunito", Arial, sans-serif;
-    background: #d9edf3;
+    background: var(--color-surface);
     font-size: 14px;
     font-weight: 500;
     border-radius: 18px;
-    background: rgba(16, 185, 129, 0.12);
+    background: var(--color-surface);
     text-align: center;
     padding: 4px 10px;
   }
@@ -98,7 +98,7 @@
     background: #fff;
     margin-bottom: 18px;
     text-align: center;
-    // box-shadow: 0px 0px 25px 0px rgba(0, 0, 0, 0.07);
+    // box-shadow: var(--shadow-md);
   }
   .price__listing {
     margin: 14px 0px;

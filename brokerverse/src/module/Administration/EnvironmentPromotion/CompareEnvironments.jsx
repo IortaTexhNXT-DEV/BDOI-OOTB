@@ -11,7 +11,7 @@ import DetailDialog from "../../../components/DetailDialog";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
-import { fileSize } from "../../../components/ImportDialog";
+import FileField from "../../../components/FileField";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import environmentPromotionService from "../../../services/environmentPromotionService";
 import importService from "../../../services/importService";
@@ -28,7 +28,6 @@ const CompareEnvironments = () => {
   const { t } = useTranslation();
   const k = (key, opts) => t(`environmentPromotion.${key}`, opts);
   const toast = useRef(null);
-  const input = useRef(null);
   const [file, setFile] = useState(null);
   const [includeNumbering, setIncludeNumbering] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -43,7 +42,6 @@ const CompareEnvironments = () => {
       const r = await importService.upload(environmentPromotionService.comparePath, file, { kit: "configuration", includeNumbering: includeNumbering ? "true" : "false" });
       toast.current?.show({ severity: r.verdict === "mirrored" ? "success" : "warn", summary: k("compareTitle"), detail: r.message });
       setFile(null);
-      if (input.current) input.current.value = "";
       reload();
       openComparison({ id: r.id });
     } catch (e) {
@@ -75,8 +73,7 @@ const CompareEnvironments = () => {
         {error ? <p className="ep-error">{String(error)}</p> : null}
         <DetailSection title={k("sections.compare")}>
           <div className="ep-upload">
-            <input ref={input} type="file" accept=".xlsx" aria-label={k("chooseWorkbook")} onChange={(e) => setFile(e.target.files?.[0] || null)} data-testid="compare-file" />
-            {file ? <span>{file.name} · {fileSize(file.size)}</span> : null}
+            <FileField accept=".xlsx" value={file} chooseLabel={k("chooseWorkbook")} onChange={setFile} />
             <label className="ep-check">
               <Checkbox inputId="ep-numbering" checked={includeNumbering} onChange={(e) => setIncludeNumbering(!!e.checked)} />
               <span>{k("includeNumbering")}</span>

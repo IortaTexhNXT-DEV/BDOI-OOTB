@@ -1,8 +1,7 @@
 import React from "react";
+import SharedPageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
-import SvgDot from "../../assets/icons/SvgDot";
 import { money, date, dateTime, showError, showSuccess } from "../PeriodEnd/common";
 import { loadInsurerOptions } from "../Remittance/shared";
 import "./index.scss";
@@ -25,16 +24,9 @@ export const IntTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`integrations.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
 };
 
-/** Page title with its breadcrumb (home, section, page) and the action buttons on the right. */
+/** Page title with its breadcrumb (home, section, page), the help behind the info icon and the action buttons. */
 export const PageHeader = ({ home, section, title, subtitle, children }) => (
-  <div className="pe-header">
-    <div>
-      <h1 className="pe-title">{title}</h1>
-      <BreadCrumb home={{ label: home }} model={[section ? { label: section } : null, { label: title }].filter(Boolean)} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-      {subtitle && <p className="pe-subtitle">{subtitle}</p>}
-    </div>
-    <div className="pe-header-actions">{children}</div>
-  </div>
+  <SharedPageHeader title={title} home={home} section={section} trail={[title]} help={subtitle}>{children}</SharedPageHeader>
 );
 
 /** Insurer dropdown options with the insurer id as value. */

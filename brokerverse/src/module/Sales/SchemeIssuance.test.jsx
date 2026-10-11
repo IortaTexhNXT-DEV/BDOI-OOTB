@@ -54,7 +54,7 @@ describe("Scheme Issuance", () => {
     expect(await screen.findByText("SAP-2026-90012")).toBeInTheDocument();
     expect(screen.getByText("8005123456")).toBeInTheDocument();
     expect(screen.getByText("1 / 2")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Loan bookings upload"));
+    fireEvent.click(screen.getByText("Loan Bookings Upload"));
     expect(await screen.findByText("SB-2026-90003")).toBeInTheDocument();
   });
 

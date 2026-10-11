@@ -49,7 +49,7 @@ describe("telesales batch (FR-TSI-031 to 035, 042)", () => {
     expect(screen.getByRole("button", { name: "Export to Excel" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Recalculate" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Exclude" }));
-    await screen.findByText("Exclude policy POL-2026-004655");
+    await screen.findByText("Exclude Policy POL-2026-004655");
     const buttons = screen.getAllByRole("button", { name: "Exclude", hidden: true });
     fireEvent.click(buttons[buttons.length - 1]);
     expect(await screen.findByText("A reason and a remark are required to exclude a policy")).toBeInTheDocument();

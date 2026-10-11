@@ -56,12 +56,12 @@
     cursor: pointer;
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
 
     &.unread {
-      background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+      background: #fff3cd;
       border-left: 4px solid #ffc107;
       font-weight: 600;
 
@@ -223,7 +223,7 @@
       color: #ffffff;
 
       &.unread {
-        background: linear-gradient(135deg, #664d03 0%, #343a40 100%);
+        background: #664d03;
       }
 
       .notification-header .notification-title-text {

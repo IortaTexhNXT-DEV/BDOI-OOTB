@@ -1,8 +1,7 @@
 import React from "react";
+import SharedPageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { Tag } from "primereact/tag";
-import { BreadCrumb } from "primereact/breadcrumb";
-import SvgDot from "../../assets/icons/SvgDot";
 import { money, date, dateTime, showError, showSuccess, previousPeriod, currentPeriod, JournalDialog, JournalLink } from "../PeriodEnd/common";
 import "./index.scss";
 
@@ -24,17 +23,10 @@ export const BrTag = ({ status, value }) => {
 /** Page header with the Accounts > Bank Reconciliation breadcrumb (or Master > Finance for the masters). */
 export const PageHeader = ({ master = false, title, trail = [], subtitle, children }) => {
   const { t } = useTranslation();
-  const home = { label: master ? t("bankReconciliation.master") : t("bankReconciliation.accounts") };
-  const model = [{ label: master ? t("bankReconciliation.finance") : t("bankReconciliation.menu") }, ...trail.map((label) => ({ label }))];
+  const home = master ? t("bankReconciliation.master") : t("bankReconciliation.accounts");
+  const section = master ? t("bankReconciliation.finance") : t("bankReconciliation.menu");
   return (
-    <div className="pe-header">
-      <div>
-        <h1 className="pe-title">{title}</h1>
-        <BreadCrumb home={home} model={model} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-        {subtitle && <p className="pe-subtitle">{subtitle}</p>}
-      </div>
-      <div className="pe-header-actions">{children}</div>
-    </div>
+    <SharedPageHeader title={title} home={home} section={section} trail={[...trail, ...(trail[trail.length - 1] === title ? [] : [title])]} help={subtitle}>{children}</SharedPageHeader>
   );
 };
 

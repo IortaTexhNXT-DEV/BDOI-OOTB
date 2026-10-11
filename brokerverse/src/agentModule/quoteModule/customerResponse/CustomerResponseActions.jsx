@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import FileField from "../../../components/FileField";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
@@ -137,7 +138,7 @@ const CustomerResponseActions = ({ quotationId, onRecorded, notice }) => {
         {error("remarks")}
 
         <label htmlFor="cr-file">{t("customerResponse.attachment")}</label>
-        <input id="cr-file" type="file" onChange={(e) => set("file")(e.target.files?.[0] || null)} />
+        <FileField id="cr-file" value={form.file || null} onChange={(f) => set("file")(f)} />
       </Dialog>
 
       <Dialog header={t("customerResponse.copyLink")} visible={Boolean(manualLink)} onHide={() => setManualLink(null)} style={{ width: "34rem" }} breakpoints={{ "640px": "96vw" }}>

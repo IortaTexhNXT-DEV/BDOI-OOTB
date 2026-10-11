@@ -22,6 +22,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import ReasonPicker, { reasonPayload, reasonProblem } from "../../../components/ReasonPicker";
 import { isInitiator } from "../../../components/ApprovalActions";
 import { formatValue } from "../../../components/KeyValueGrid/formatValue";
+import ImportDialog from "../../../components/ImportDialog";
 
 const TABS = ["due", "held", "pending", "in-lock-in"];
 const DECISIONS = ["renew", "hold", "release", "not-renewed"];
@@ -52,7 +53,7 @@ const LockInReview = () => {
   const [decision, setDecision] = useState({ decision: "renew", reason: null, remark: "", reReviewDate: "" });
   const [errors, setErrors] = useState({});
   const [batches, setBatches] = useState([]);
-  const [file, setFile] = useState(null);
+  const [importing, setImporting] = useState(false);
   const [result, setResult] = useState(null);
 
   const query = useMemo(() => ({ tab: TABS[tab] || "due", asOf: asOf || undefined, search: search || undefined, source: source || undefined }), [tab, asOf, search, source]);
@@ -128,16 +129,6 @@ const LockInReview = () => {
       notifyError(e.message);
     }
   };
-  const upload = async () => {
-    try {
-      const r = await service.uploadStatus(file);
-      setResult(r.data);
-      notifySuccess(r.message);
-      loadBatches();
-    } catch (e) {
-      notifyError(e.message);
-    }
-  };
   const download = async (fn, name) => {
     try {
       saveBlob(await fn(), name);
@@ -187,7 +178,8 @@ const LockInReview = () => {
   const canApprove = approve && review?.status === "pending-approval" && !isInitiator({ id: review.decidedById });
   return (
     <div className="pe-page">
-      <PageHeader home={t("lockInReview.home", "Operations")} section={t("lockInReview.section", "Renewals")} title={t("lockInReview.title", "Lock-in Review")}>
+      <PageHeader home={t("lockInReview.home", "Operations")} section={t("lockInReview.section", "Renewals")} title={t("lockInReview.title", "Lock-in Review")}
+        trail={[t("lockInReview.title", "Lock-in Review")]}>
         <Button label={t("lockInReview.report", "Lock-in / Scheme 2 expiry report")} icon="pi pi-file-excel" outlined onClick={report} />
       </PageHeader>
       <div className="pe-card">
@@ -198,8 +190,7 @@ const LockInReview = () => {
           <TabPanel header={t("lockInReview.tabs.uploads", "Loan status uploads")}>
             {uploadRight ? (
               <div className="flex flex-wrap gap-2 align-items-center mb-3">
-                <input type="file" accept=".xlsx" aria-label={t("lockInReview.file", "TFS account status file")} onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                <Button label={t("lockInReview.upload", "Upload loan status")} icon="pi pi-upload" disabled={!file} onClick={upload} />
+                <Button label={t("lockInReview.upload", "Upload loan status")} icon="pi pi-upload" outlined onClick={() => setImporting(true)} />
                 <Button label={t("lockInReview.template", "Download template")} icon="pi pi-download" text onClick={() => download(service.uploadsTemplate, "TFS_Loan_Status_Upload_Template.xlsx")} />
               </div>
             ) : null}
@@ -209,7 +200,7 @@ const LockInReview = () => {
                 {(result.warnings || []).map((x) => <div key={x.message} className="bv-muted">{x.message}</div>)}
               </div>
             ) : null}
-            <DataTable value={batches} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("lockInReview.noUploads", "No uploads yet")}>
+            <DataTable value={batches} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("lockInReview.noUploads", "No uploads yet. Upload the TFS account status file.")}>
               <Column field="batchNumber" header={t("lockInReview.batch", "Batch")} />
               <Column field="fileName" header={t("lockInReview.fileName", "File")} />
               <Column field="rowsTotal" header={t("lockInReview.rows", "Rows")} className="bv-num" headerClassName="bv-num" />
@@ -217,9 +208,10 @@ const LockInReview = () => {
               <Column field="notChanged" header={t("lockInReview.notChanged", "Not changed")} className="bv-num" headerClassName="bv-num" />
               <Column field="failed" header={t("lockInReview.failed", "Failed")} className="bv-num" headerClassName="bv-num" />
               <Column field="noticesHeld" header={t("lockInReview.noticesHeld", "Notices held")} className="bv-num" headerClassName="bv-num" />
-              <Column header={t("lockInReview.uploadedAt", "Uploaded")} body={(b) => formatValue(b.createdAt, { type: "datetime" })} />
+              <Column header={t("lockInReview.uploadedAt", "Uploaded")} body={(b) => formatValue(b.createdAt, { type: "datetime" })} bodyClassName="bv-nowrap" />
               <Column header={t("common.actions", "Actions")} body={(b) => (b.failed ? (
-                <Button icon="pi pi-download" text size="small" label={t("lockInReview.failedRows", "Failed rows")} onClick={() => download(() => service.failedRows(b.id), `${b.batchNumber}-failed.xlsx`)} />
+                <Button icon="pi pi-download" text rounded aria-label={t("lockInReview.failedRows", "Failed rows")} tooltip={t("lockInReview.failedRows", "Failed rows")}
+                  tooltipOptions={{ position: "top" }} onClick={() => download(() => service.failedRows(b.id), `${b.batchNumber}-failed.xlsx`)} />
               ) : null)} />
             </DataTable>
           </TabPanel>
@@ -299,6 +291,10 @@ const LockInReview = () => {
           </>
         ) : null}
       </Dialog>
+      <ImportDialog visible={importing} onHide={() => setImporting(false)} title={t("lockInReview.upload", "Upload loan status")} accept=".xlsx"
+        fileTypes={t("lockInReview.fileTypes", "Excel workbook (.xlsx)")}
+        targets={[{ label: t("lockInReview.tabs.uploads", "Loan status uploads"), templatePath: "/lock-in/uploads/template", uploadPath: "/lock-in/uploads" }]}
+        onUploaded={(r) => { setResult(r); loadBatches(); }} />
     </div>
   );
 };

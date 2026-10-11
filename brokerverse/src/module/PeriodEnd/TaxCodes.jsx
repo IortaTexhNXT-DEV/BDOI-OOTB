@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import PageHeader from "../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -67,16 +68,11 @@ const TaxCodes = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <div className="pe-header">
-        <div>
-          <h1 className="pe-title">{t("periodEnd.taxCodes")}</h1>
-        </div>
-        <div className="pe-header-actions">
+      <PageHeader title={t("periodEnd.taxCodes")} home={t("sidebar.Master", "Master")} section={t("sidebar.Finance", "Finance")} trail={[t("periodEnd.taxCodes")]}>
           <Dropdown value={filters.taxType} options={TYPES.map((x) => ({ label: x, value: x }))} onChange={(e) => setFilters({ ...filters, taxType: e.value })} placeholder={t("periodEnd.allTaxTypes")} showClear />
           <span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} placeholder={t("periodEnd.searchTax")} /></span>
           <Button icon="pi pi-plus" label={t("periodEnd.addTaxCode")} onClick={() => setEditing({ isNew: true, values: { ...EMPTY } })} />
-        </div>
-      </div>
+      </PageHeader>
       <div className="pe-card">
         <DataTable value={rows} loading={loading} dataKey="code" size="small" stripedRows paginator rows={20} emptyMessage={t("periodEnd.noRows")}>
           <Column field="code" header={t("periodEnd.code")} sortable />
