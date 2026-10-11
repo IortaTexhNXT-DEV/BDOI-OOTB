@@ -93,6 +93,10 @@ with `approve:period-end` (Finance; the System Administrator passes), on every p
 AppSupport (write:settings) keeps the rest of the configuration. Finance changes them on Period Management > Finance
 controls: `GET / PUT /period-end/finance-controls` (other keys refused, the change audited).
 
+BIR Form 2307 batches (TIS-BRD-TAX-03): each `POST /bir/2307/issue-all` that issues certificates is a batch
+(`bir_2307_batches`, `CWB-yyyyQq-nnn`); `GET /bir/2307/batches` and `/bir/2307/batches/:id` (EWT detail per certificate
+and ATC, `format=xlsx`). A certificate is refused while the payor (the primary company) has no TIN.
+
 ## Key settings
 
 `accounting.operations_cutoff_day` (26: premium bookings from that day go to the next period),

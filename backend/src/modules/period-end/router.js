@@ -624,6 +624,27 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/bir/2307/batches', summary: 'Batches of BIR Form 2307 (each issue-all run of a quarter) with their certificate count, income and tax (filter year, quarter)',
+  screen: 'Accounts > Tax > BIR Form 2307', middleware: read, query: { year: 2026, quarter: 3 },
+  response: { success: true, data: [{ batchNumber: 'CWB-2026Q3-001', certificates: 12, totalIncome: 250000, totalTax: 12500 }] },
+  handler: async (req, res) => ok(res, await tax.list2307Batches(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/bir/2307/batches/:id', summary: 'A BIR Form 2307 batch with its EWT detail per certificate and ATC (format=xlsx for Excel)',
+  screen: 'Accounts > Tax > BIR Form 2307', middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: { batchNumber: 'CWB-2026Q3-001', detail: [{ certificateNumber: 'CWT-2026-00007', payeeName: 'Makati Office Supplies Inc.', atc: 'WC158', income: 9000, tax: 450 }] } },
+  handler: async (req, res) => {
+    const b = await tax.batch2307(pool, req.params.id);
+    if (req.query.format !== 'xlsx') return ok(res, b);
+    const cols = [['certificateNumber', 'Certificate No.'], ['payeeName', 'Payee'], ['payeeTin', 'TIN'], ['atc', 'ATC'], ['nature', 'Nature of payment'], ['month1', 'Month 1'],
+      ['month2', 'Month 2'], ['month3', 'Month 3'], ['income', 'Total income'], ['tax', 'Tax withheld'], ['status', 'Status']];
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="${b.batchNumber}.xlsx"`);
+    return res.send(writeXlsx({ title: `BIR Form 2307 batch ${b.batchNumber}`, sheets: [{ name: b.batchNumber,
+      columns: cols.map(([, h]) => ({ header: h, width: Math.max(12, h.length + 6) })), rows: b.detail.map((d) => cols.map(([k]) => d[k])) }] }));
+  },
+});
+define({
   method: 'GET', path: '/bir/2307/certificates', summary: 'Register of issued BIR Form 2307 certificates (filter year, quarter, direction)', screen: 'Accounts > Tax > BIR Form 2307', middleware: read,
   response: { success: true, data: [{ certificateNumber: 'CWT-2026-00001', payeeName: 'Juan Dela Cruz', totalTax: 264.93, status: 'issued' }] },
   handler: async (req, res) => ok(res, await tax.listCertificates(pool, req.query)),
