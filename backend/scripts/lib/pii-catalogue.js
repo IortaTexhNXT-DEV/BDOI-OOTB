@@ -418,10 +418,12 @@ export const ALLOW_LIST = {
   'commissions.share_note': 'reason note of a share change, business text',
   'commission_line_requests.note': 'reason note of a line change request, business text',
   'commission_line_requests.decision_note': 'decision note of a line change request, business text',
+  'control_evidence.remarks': 'note on the evidence of a security control (backup report, drill), operations text',
   'pdc_sets.payee': 'payee code of the cheques (insurance-partner or tisph), not a person',
   'post_dated_cheques.payee': 'payee code of the cheque (insurance-partner or tisph), not a person',
   // people tables: what testing needs and is not personal once names, contacts and identifiers are masked
   'users.username': 'sign-in name kept so testers can sign in with the roles of production (owners, approvers, scoping)',
+  'users.email_otp_hash': 'hash of a one-time sign-in code valid for minutes; cleared with the sessions by the masking step',
   'users.password_hash': 'replaced by the masking step itself (every password reset, or sign-in disabled except the named administrator)',
   'users.employee_code': 'internal staff code, needed for approvals and reports; not personal once names are masked',
   'users.department': 'organisational unit, needed for scoping and approvals',

@@ -6,7 +6,8 @@
 --   - MFA for every user (security.require_2fa_all) with a one-time code by e-mail as the second factor for users who
 --     have no authenticator app (security.email_otp_*);
 --   - reactivation restarts the dormancy clock (users.reactivated_at);
---   - the audit trail is append-only at the database (trigger; the housekeeping purge sets app.audit_purge);
+--   - the audit trail is append-only at the database (trigger; the housekeeping purge, the transaction reset with
+--     --purge-audit and the masking tool of a copy set app.audit_purge for their own transaction);
 --   - retention of closed contracts (retention.*) applied by the data-retention job, which flags the policies past
 --     their retention period;
 --   - a register of control evidence (control_evidence) behind Master > System Configuration > Security Controls.
@@ -61,7 +62,9 @@ CREATE INDEX IF NOT EXISTS control_evidence_key_idx ON control_evidence(control_
 CREATE OR REPLACE FUNCTION audit_log_append_only() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF current_setting('app.audit_purge', true) = 'on' THEN
+    -- the housekeeping purge deletes; the masking tool rewrites the personal values of a copy
     IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;
+    IF TG_OP = 'UPDATE' THEN RETURN NEW; END IF;
     IF TG_OP = 'TRUNCATE' THEN RETURN NULL; END IF;
   END IF;
   RAISE EXCEPTION 'The audit trail cannot be changed or deleted' USING ERRCODE = '42501';

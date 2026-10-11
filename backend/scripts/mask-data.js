@@ -441,6 +441,8 @@ export async function maskData(client, {
   const m = new Masker({ salt, maskStaff, keepLocality, referenceDate: now, fileFolders: TRANSACTION_FILE_FOLDERS });
 
   await client.query('BEGIN');
+  // the audit trail is append-only (migration 0591); masking a copy rewrites its personal values, in this transaction only
+  await client.query("SET LOCAL app.audit_purge = 'on'");
   try {
     let marker = await systemEnvironment(client);
     const locked = await isGoLiveLocked(client);

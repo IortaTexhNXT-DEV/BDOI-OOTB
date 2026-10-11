@@ -35,7 +35,7 @@ const setting = async (key, value) => {
 beforeAll(async () => {
   ctx = await setup();
   uw = await persona('pdp.uw', ['processing']);
-  const c = await ctx.api('post', '/clients').send({ firstName: 'Lourdes', lastName: 'Macapagal', emailId: 'lourdes.m@example.ph', contactNumber: '09171234567',
+  const c = await ctx.api('post', '/clients').send({ firstName: 'Lourdes', lastName: 'Macapagal', emailId: 'lourdes.m@example.ph', contactNumber: '09175554567',
     taxNumber: TIN, DOB: '1984-05-20', idNumber: 'N01-99-123456' });
   clientId = c.body.clientId;
 });

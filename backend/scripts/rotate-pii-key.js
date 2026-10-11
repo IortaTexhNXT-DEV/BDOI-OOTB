@@ -15,6 +15,34 @@ import { PII_STORAGE } from '../src/lib/pii.js';
 const ident = (s) => `"${String(s).replace(/"/g, '""')}"`;
 
 /** Count (dry run) or re-encrypt the values not encrypted with the current key. Returns [{ table, column, left, rotated }]. */
+/**
+ * The audit trail is append-only (migration 0591): its re-encryption runs in a transaction of its own that lifts the
+ * guard (app.audit_purge) for that transaction only. `db` is a pool or a client already in a transaction.
+ */
+async function rewriteAudit(db, sql, params) {
+  if (typeof db.connect !== 'function' || db.release) {
+    await db.query("SELECT set_config('app.audit_purge', 'on', false)");
+    try {
+      return await db.query(sql, params);
+    } finally {
+      await db.query("SELECT set_config('app.audit_purge', '', false)");
+    }
+  }
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query("SET LOCAL app.audit_purge = 'on'");
+    const r = await client.query(sql, params);
+    await client.query('COMMIT');
+    return r;
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 export async function rotate(db, { execute = false, batch = 500 } = {}) {
   // the key of the connection (its session settings), which is the key the database encrypts with
   const kid = (await db.query("SELECT NULLIF(current_setting('brokerverse.pii_kid', true), '') AS kid")).rows[0].kid;
@@ -32,7 +60,8 @@ export async function rotate(db, { execute = false, batch = 500 } = {}) {
     if (execute && left) {
       const set = s.json ? `${ident(s.column)} = pii_protect_jsonb(${ident(s.column)}, NULL)` : `${ident(s.column)} = pii_encrypt(pii_decrypt(${ident(s.column)}))`;
       for (;;) {
-        const r = await db.query(`UPDATE ${ident(s.table)} SET ${set} WHERE ctid IN (SELECT ctid FROM ${ident(s.table)} WHERE ${stale} LIMIT ${Number(batch)})`, params);
+        const sql = `UPDATE ${ident(s.table)} SET ${set} WHERE ctid IN (SELECT ctid FROM ${ident(s.table)} WHERE ${stale} LIMIT ${Number(batch)})`;
+        const r = s.table === 'audit_log' ? await rewriteAudit(db, sql, params) : await db.query(sql, params);
         rotated += r.rowCount;
         if (r.rowCount < batch) break;
       }
