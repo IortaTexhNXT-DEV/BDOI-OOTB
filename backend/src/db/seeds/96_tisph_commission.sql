@@ -5,13 +5,15 @@
 
 -- Motor policies are booked on the per-peril rates of the register; rules and schemes are approved on Configuration
 -- Approvals; a rate change, reversal or withholding tax change on a commission line waits for a second user; a
--- commission line becomes payable once the policy is fully paid and remitted to the insurer.
+-- commission line becomes payable once the policy is fully paid and remitted to the insurer; a new payee or a change of
+-- its payment details is verified by a second user (migration 0645, FGA EN-01).
 UPDATE app_settings s
    SET value = v.value, updated_at = now()
   FROM (VALUES ('commission.peril_based_motor', 'false'::jsonb, 'true'::jsonb),
                ('commission.rules_approval_required', 'false'::jsonb, 'true'::jsonb),
                ('commission.adjustment_approval_required', 'false'::jsonb, 'true'::jsonb),
-               ('commission.eligible_requires_remittance', 'false'::jsonb, 'true'::jsonb)) AS v(key, reference, value)
+               ('commission.eligible_requires_remittance', 'false'::jsonb, 'true'::jsonb),
+               ('commission.payee_verification_required', 'false'::jsonb, 'true'::jsonb)) AS v(key, reference, value)
  WHERE s.key = v.key AND s.updated_by IS NULL AND s.value = v.reference
    AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
 
