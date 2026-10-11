@@ -33,17 +33,20 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 ## Main flows
 
 Period status (Period Management): the side panel first calls `GET /periods/:period/status-preview?status=` (read
-only): whether the user may make the move (`reason`: `permission`, `approval`, `locked`, `year-closed`, `year-end-closed`,
-`adjustment-disabled`, `checks`) and the results of the blocking auto items of the Close Checklist; for a close also the
+only): whether the user may make the move (`reason`: `permission`, `approval`, `hard-closed`, `locked`, `year-closed`,
+`year-end-closed`, `adjustment-disabled`, `checks`) and the results of the blocking auto items of the Close Checklist; for a close also the
 blocking manual items, signed off on the latest month-end close run of the period or still `pending`. The change itself,
 `POST /periods/:period/status { status, reasonCode, note }`, needs a reason of the Reason Codes master: context
 `period_close` to soft-close or close, `period_reopen` to reopen (the note when the reason asks for one). The code is
 kept in `period_status_history.reason_code`, the reason's name and the note in `remarks`, both in the audit entry.
 Closing and reopening need `approve:period-end` (the maker submits the month-end close for approval instead); the
 server runs the blocking checks again before a soft-close or close, and refuses a close while a blocking manual item is
-not signed off. A period is locked only
-by the year-end close. `GET /fiscal-years/:code` gives each period its latest change (`lastChange`: who, when, reason)
-and the moves the user may make (`actions`).
+not signed off. A closed period is final (hard close, reason `hard-closed`) unless `accounting.reopen_closed_periods`
+is on; a soft-closed period reopens. A period is locked only by the year-end close. `GET /fiscal-years/:code` gives
+each period its latest change (`lastChange`: who, when, reason), its closing calendar (`closing`: the operations
+cut-off, the finance close and the last day of the adjustment window, from the settings below) and the moves the user
+may make (`actions`). The older `POST /accounting/periods/:period/close|reopen` (Accounts > Journal Voucher > Periods)
+runs the same change (reason, permission, checks, history).
 
 Go-live opening balances: `POST /opening-balances/validate` checks the file (rows, accounts, totals, difference, every
 error with its row and column, the earlier load of the year) without loading it; `POST /opening-balances/import` loads
@@ -87,6 +90,7 @@ it is possible until the first period of the next year is closed. Every action i
 `accounting.operations_cutoff_day` (26: premium bookings from that day go to the next period),
 `accounting.finance_close_day` (29: the month-end reminder counts down to it), `accounting.adjustment_window_working_days`
 (6: the auto soft-close waits for that working day of the next month, Holiday master; 0 uses the job's grace days),
+`accounting.reopen_closed_periods` (false: a closed period is not reopened),
 `accounting.fiscal_year_start_month`, `accounting.period_close_requires_approval`, `accounting.year_end_accepts_soft_closed`,
 `finance.maker_checker_enabled`, `accounting.account.suspense`, `period_end.tieout_tolerance`,
 `accounting.fx_revaluation_account_types`, `accounting.account.current_year_pl`,
