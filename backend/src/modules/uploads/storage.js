@@ -8,6 +8,10 @@ import { signFileQuery } from '../../lib/secrets.js';
 import { assertAllowedFile } from './fileTypes.js';
 
 const root = () => path.resolve(config.uploadDir);
+/** Folder of the workbooks uploaded to Data Migration & Go-Live: served only by GET /api/data-load/batches/:id/file. */
+export const LOAD_FOLDER = 'go-live-loads';
+/** Folder of the evidence of Data Migration & Go-Live (the signed reconciliation reports): served only by its module. */
+export const EVIDENCE_FOLDER = 'go-live-evidence';
 export const safeSegment = (s) => String(s || '').replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^\.+/, '_').slice(0, 120);
 export const safeKey = (k) => String(k || '').split('/').map(safeSegment).filter(Boolean).join('/');
 /** Canonical (unsigned) object URL: what is stored in records. API responses carry it signed (see lib/fileLinks.js). */

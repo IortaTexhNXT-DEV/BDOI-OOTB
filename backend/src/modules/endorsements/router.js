@@ -158,7 +158,7 @@ for (const decision of ['approve', 'reject']) {
   });
 }
 define({
-  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number) with the workflow actions open to the user', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
+  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number) with the workflow actions open to the user; policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
   response: { ...example, workflow: { approvalRequired: true, canSubmit: false, canApprove: true, canSend: false, canComplete: false }, success: true },
   handler: async (req, res) => {
     const row = await svc.getEndorsementRow(req.params.id);

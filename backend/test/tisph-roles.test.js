@@ -45,7 +45,7 @@ afterAll(async () => { await pool.end(); });
 
 describe('TISPH roles of a new database', () => {
   it('creates the 13 TIS personas and SUPERID with their names; the CCD-PDC / CCD-ADA role carries both labels', async () => {
-    const roles = await q('SELECT code, name, description, inherits, status FROM roles WHERE code LIKE \'tis-%\' ORDER BY id');
+    const roles = await q('SELECT code, name, description, inherits, status FROM roles WHERE code LIKE \'tis-%\' AND code <> \'tis-auditor\' ORDER BY id');
     expect(roles.map((r) => r.code)).toEqual(TIS_ROLES);
     expect(roles.every((r) => r.status === 'active' && r.name && r.description.startsWith('RBAC v4'))).toBe(true);
     const pdc = roles.find((r) => r.code === 'tis-ccd-pdc');
@@ -198,6 +198,8 @@ describe('migrations 0348 and 0400 on a database in use', () => {
       '0480_quotation_validity_versions.sql', '0485_promotions.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql',
       '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql',
       '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql')`);
+    // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
+    await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });
     const migrated = await grants();
     for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims', 'accounting', 'system-admin']) expect(migrated[code], code).toEqual(seeded[code]);

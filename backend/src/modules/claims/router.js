@@ -170,8 +170,8 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/', summary: 'Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)', screen: 'Operations > Claims; Clients > Claims tab',
-  middleware: read, query: { page: 1, pageSize: 10, status: 'Processing', search: 'CLM-2026' },
+  method: 'GET', path: '/', summary: 'Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy', screen: 'Operations > Claims; Clients > Claims tab',
+  middleware: read, query: { page: 1, pageSize: 10, status: 'Processing', search: 'CLM-2026', origin: 'issued' },
   response: { success: true, data: { claims: [claimExample], pagination: { total: 1, page: 1, pageSize: 10, limit: 10, totalPages: 1 } }, total: 1, page: 1, perPage: 10, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query);

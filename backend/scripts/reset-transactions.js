@@ -27,10 +27,12 @@
  * in with the opening balances).
  * Kept: masters, configuration, users, roles, settings, chart of accounts, product configurator, numbering series
  * definitions, authority matrix, commission rate matrix, tax rules, scheduled job definitions, report catalogue,
- * templates, the audit trail (unless --purge-audit; the reset itself is always recorded in it).
+ * templates, the audit trail (unless --purge-audit; the reset itself is always recorded in it), the go-live load
+ * history and environment comparisons (evidence of the mock runs: the loaded migration batches, whose records go, are
+ * marked undone with the reason "transaction reset").
  *
- * Safety: refuses to run unless CONFIRM_RESET=yes, and refuses while the setting golive.locked is on (an administrator
- * switches it off in Master > Configuration > Go-live; that change is audited). Dry run by default (prints the row
+ * Safety: refuses to run unless CONFIRM_RESET=yes, and refuses while the setting golive.locked is on (switched on by two
+ * users on Data Migration & Go-Live > Go-Live and never lifted on screen; an unlock reopens named imports only). Dry run by default (prints the row
  * counts per table); --execute deletes. Everything runs in one transaction: any error rolls the whole reset back.
  *
  * Usage:
@@ -103,8 +105,8 @@ export async function resetTransactions(client, {
   let committed = false;
   try {
     if (await isGoLiveLocked(client)) {
-      throw new ResetRefused(`Refusing to reset: ${GO_LIVE_LOCK_KEY} is on, this database holds the live book. An administrator switches it off in `
-        + 'Master > Configuration > Go-live (recorded in the audit trail) only if the database really has to be reset.', 'GOLIVE_LOCKED');
+      throw new ResetRefused(`Refusing to reset: ${GO_LIVE_LOCK_KEY} is on, this database holds the live book. Only a copy restored from it that really has `
+        + `to be reset is unlocked, by the database administrator (setting ${GO_LIVE_LOCK_KEY}), never the live database.`, 'GOLIVE_LOCKED');
     }
     const existing = (await client.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")).rows.map((r) => r.tablename);
     const gaps = classificationGaps(existing);
@@ -137,6 +139,9 @@ export async function resetTransactions(client, {
       if (has.has('fiscal_years')) partial.push({ table: 'fiscal_years', category: 'transaction', what: 'fiscal years without go-live opening balances (the others reopened)', where: 'code NOT IN (SELECT fiscal_year FROM opening_balances WHERE source_run LIKE $1)', params: [GO_LIVE_RUN] });
     }
     for (const p of partial) plan.push({ ...p, rows: await countRows(client, p.table, p.where, p.params) });
+
+    // Load history is kept: the loaded migration batches, whose records go, are marked undone with their rows.
+    const loadsUndone = has.has('data_load_batches') ? await countRows(client, 'data_load_batches', "kit = 'migration' AND status = 'loaded'") : 0;
 
     // Petty cash funds are kept, detached from their establishment journal.
     const pettyCash = has.has('petty_cash_funds') ? await countRows(client, 'petty_cash_funds', 'journal_id IS NOT NULL OR transaction_number IS NOT NULL OR available_cash <> fund_size') : 0;
@@ -183,6 +188,12 @@ export async function resetTransactions(client, {
       }
       for (const f of fks) await client.query(`ALTER TABLE ${ident(f.tbl)} ADD CONSTRAINT ${ident(f.conname)} ${f.def}`);
       for (const p of partial) await client.query(`DELETE FROM ${ident(p.table)} WHERE ${p.where}`, p.params);
+      if (loadsUndone) {
+        await client.query(`UPDATE data_load_rows SET status = 'undone' WHERE status = 'loaded'
+          AND batch_id IN (SELECT id FROM data_load_batches WHERE kit = 'migration' AND status = 'loaded')`);
+        await client.query(`UPDATE data_load_batches SET status = 'undone', undo_reason = 'transaction reset', undone_at = now()
+          WHERE kit = 'migration' AND status = 'loaded'`);
+      }
       if (keepOpeningBalances && has.has('fiscal_years')) {
         await client.query("UPDATE fiscal_years SET status = 'open', closed_by = NULL, closed_at = NULL, updated_at = now() WHERE status <> 'open'");
       }
@@ -190,7 +201,7 @@ export async function resetTransactions(client, {
         await client.query(`INSERT INTO audit_log(username, entity, entity_id, action, after_data) VALUES ($1, 'database', 'transactions', 'reset', $2)`,
           [actor, JSON.stringify({
             tables: plan.filter((p) => p.rows).map((p) => ({ table: p.table, what: p.what, rows: p.rows })),
-            seriesRestarted: series.restart.map((x) => ({ series: x.series, restartAt: x.restartAt })), seriesKept: series.kept, pettyCashFundsDetached: pettyCash,
+            seriesRestarted: series.restart.map((x) => ({ series: x.series, restartAt: x.restartAt })), seriesKept: series.kept, pettyCashFundsDetached: pettyCash, migrationLoadsUndone: loadsUndone,
             keepOpeningBalances, purgeAudit, purgeFiles: purgeFiles ? files.map((f) => ({ folder: f.folder, files: f.files })) : false,
           })]);
       }
@@ -204,6 +215,7 @@ export async function resetTransactions(client, {
       await client.query('ROLLBACK');
     }
     if (pettyCash) plan.push({ table: 'petty_cash_funds', category: 'master', what: 'funds kept, detached from the establishment journal (available cash = fund size)', rows: 0, updated: pettyCash });
+    if (loadsUndone) plan.push({ table: 'data_load_batches', category: 'system', what: 'loaded migration batches kept as history, marked undone', rows: 0, updated: loadsUndone });
     const total = plan.reduce((s, p) => s + p.rows, 0);
     return {
       executed: execute,
@@ -276,7 +288,7 @@ async function main() {
     if (opts.purgeFiles) console.log(r.files.length ? `  files ${r.executed ? 'removed' : 'to remove'}: ${r.files.map((f) => `${f.folder}/ ${f.files}`).join(', ')}` : '  no transaction files in storage');
     console.log(`  opening balances: ${opts.keepOpeningBalances ? 'go-live balances kept' : 'removed (load the go-live migration again)'}`);
     if (!r.executed) console.log('Nothing was changed. Run again with --execute to reset.');
-    else console.log(`Done. Load the go-live migration, then switch on ${GO_LIVE_LOCK_KEY} (Master > Configuration > Go-live).`);
+    else console.log(`Done. Load the go-live migration, then lock go-live (${GO_LIVE_LOCK_KEY}: Data Migration & Go-Live > Go-Live, two users).`);
     return 0;
   } finally {
     client.release();

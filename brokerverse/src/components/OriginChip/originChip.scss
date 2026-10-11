@@ -1,0 +1,34 @@
+// Origin of a record: the Migrated chip, the legacy number and the load, on one line in a page header or a grid cell.
+
+.bv-origin {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  vertical-align: middle;
+
+  &__chip {
+    display: inline-flex;
+  }
+
+  &__legacy,
+  &__load {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+  }
+
+  a.bv-origin__load {
+    color: var(--primary-color);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  &--compact {
+    flex-wrap: nowrap;
+  }
+}

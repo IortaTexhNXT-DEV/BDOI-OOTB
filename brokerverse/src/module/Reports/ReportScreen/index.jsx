@@ -23,8 +23,9 @@ import "./index.scss";
 
 /**
  * One report screen for every report in the catalogue (GET /reports/:code). The filter form is built from the report
- * definition: Report Criteria (enum), From / To dates, and the look-up filters (agent, insurer, branch, client, product)
- * each enabled for the criteria the report declares (x-enabledWhen) and left out when the report does not use it
+ * definition: Report Criteria (enum), From / To dates, the look-up filters (agent, insurer, branch, client, product) and
+ * the filters with a list of values (Origin: Issued in BrokerVerse / Migrated, on the reports that declare it), each
+ * enabled for the criteria the report declares (x-enabledWhen) and left out when the report does not use it
  * (x-disabled). Preview shows the first page on screen; Generate writes the file in the chosen format (CSV, XLSX, PDF).
  */
 
@@ -39,6 +40,8 @@ const LOOKUPS = {
   fs_versions: async () => (await periodEndService.fsVersions()).filter((v) => v.status === "active").map((v) => ({ label: v.name, value: v.code })),
 };
 const HIDDEN = new Set(["format", "period", "ReportCriteria", "FromDate", "ToDate"]);
+/** Labels of list values the screen translates (the value itself is sent to the report). */
+const VALUE_LABELS = { "Issued in BrokerVerse": "origin.issued", Migrated: "origin.migrated" };
 const FORMAT_LABELS = { xlsx: "Excel (XLSX)", csv: "CSV", pdf: "PDF" };
 
 const startOfMonth = () => {
@@ -97,7 +100,7 @@ const ReportScreen = ({ code, group, groupPath }) => {
   const properties = definition?.parameters?.properties || {};
   const criteriaProp = properties.ReportCriteria;
   const filters = useMemo(
-    () => Object.entries(properties).filter(([key, p]) => !HIDDEN.has(key) && !p["x-disabled"] && (p["x-options"] || key === "Status")),
+    () => Object.entries(properties).filter(([key, p]) => !HIDDEN.has(key) && !p["x-disabled"] && (p["x-options"] || Array.isArray(p.enum) || key === "Status")),
     [properties]
   );
   const enabled = (prop) => {
@@ -219,11 +222,11 @@ const ReportScreen = ({ code, group, groupPath }) => {
               return (
                 <div key={key} className="field col-12 md:col-6 lg:col-3">
                   <label htmlFor={`rpt-${key}`}>{p.title || key}</label>
-                  {p["x-options"] ? (
+                  {p["x-options"] || Array.isArray(p.enum) ? (
                     <Dropdown
                       inputId={`rpt-${key}`}
                       value={values[key] || null}
-                      options={options[p["x-options"]] || []}
+                      options={p["x-options"] ? options[p["x-options"]] || [] : p.enum.map((v) => ({ label: VALUE_LABELS[v] ? t(VALUE_LABELS[v]) : v, value: v }))}
                       onChange={(e) => setField(key, e.value)}
                       placeholder={on ? t("reports.select") : `Used with criteria ${(p["x-enabledWhen"]?.ReportCriteria || []).join(", ")}`}
                       disabled={!on}

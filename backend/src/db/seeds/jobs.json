@@ -111,5 +111,19 @@
     "description": "Tell the customer of an unpaid premium bill at 5, 10 and 15 days after the due date, flag the account for cancellation at the last notice, tell Sales and the insurer of each policy cancelled for non-payment, and send each insurer the month's non-payment cancellations on or before the insurer notice day",
     "cron": "30 8 * * *",
     "handler": "nonpaymentCadence"
+  },
+  {
+    "code": "data-load-sweep",
+    "name": "Data load sweep",
+    "description": "Mark the data loads whose job stopped (deployment, restart) as failed, nothing saved (an undo goes back to loaded), and expire the loads waiting for approval longer than migration.approval_expiry_hours",
+    "cron": "*/5 * * * *",
+    "handler": "dataLoadSweep"
+  },
+  {
+    "code": "golive-relock",
+    "name": "Go-live relock",
+    "description": "End the unlocks of the go-live lock whose hours have run out: the imports they reopened are closed again",
+    "cron": "*/5 * * * *",
+    "handler": "goLiveRelock"
   }
 ]

@@ -5,7 +5,8 @@
   "Cash Control",
   "Finance and Accounting",
   "IT",
-  "Management"
+  "Management",
+  "Audit"
  ],
  "levels": [
   "View",
@@ -5027,6 +5028,15 @@
      ]
     },
     {
+     "section": "Master > System",
+     "screen": "Data Migration & Go-Live",
+     "path": "/master/configuration/go-live",
+     "access": "View",
+     "modules": [
+      "Data migration and go-live"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -5359,6 +5369,18 @@
      "meaning": "See connectors and the integration outbox and inbox"
     },
     {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "View",
+     "meaning": "Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "Approve",
+     "meaning": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock"
+    },
+    {
      "area": "Basic and special access",
      "module": "Basic access",
      "level": "View",
@@ -5378,6 +5400,10 @@
     },
     {
      "what": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
      "kind": "maker-checker"
     },
     {
@@ -5578,6 +5604,12 @@
      "conflict": "Claims (create and edit) with Disbursements and petty cash (create and edit) held by the same person",
      "action": "Warning",
      "reason": "The claims handler should not also prepare the claim payments"
+    },
+    {
+     "rule": "Load and approve migration data",
+     "conflict": "Data migration and go-live (approve) with Data migration and go-live (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare"
     },
     {
      "rule": "Placing and paying insurers",
@@ -7676,6 +7708,15 @@
      "modules": [
       "Audit trail"
      ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Data Migration & Go-Live",
+     "path": "/master/configuration/go-live",
+     "access": "Create and edit",
+     "modules": [
+      "Data migration and go-live"
+     ]
     }
    ],
    "permissions": [
@@ -7998,6 +8039,24 @@
      "meaning": "See the audit trail"
     },
     {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "View",
+     "meaning": "Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "Create and edit",
+     "meaning": "Upload, validate and submit loads, record checklist steps, evidence and defects, mark the environment"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "Approve",
+     "meaning": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock"
+    },
+    {
      "area": "Basic and special access",
      "module": "Basic access",
      "level": "View",
@@ -8021,6 +8080,10 @@
     },
     {
      "what": "Approve premium warranty extensions and client credit limits (not the requester)",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
      "kind": "maker-checker"
     },
     {
@@ -8099,6 +8162,16 @@
      "work": "Commission rules register",
      "approval": "Approve or return a commission rule submitted by another user",
      "approvers": [
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Data migration and go-live",
+     "approval": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
+     "approvers": [
+      "TIS Operations Unit Head",
+      "TIS Finance & General Accounting",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -8233,6 +8306,12 @@
      "conflict": "Disbursements and petty cash (create and edit) with Claims (create and edit) held by the same person",
      "action": "Warning",
      "reason": "The claims handler should not also prepare the claim payments"
+    },
+    {
+     "rule": "Load and approve migration data",
+     "conflict": "This role itself combines Data migration and go-live (create and edit) with Data migration and go-live (approve)",
+     "action": "Warning",
+     "reason": "The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare"
     },
     {
      "rule": "Placing and paying insurers",
@@ -9199,12 +9278,12 @@
      ]
     },
     {
-     "section": "Master > Environment Promotion",
-     "screen": "Setup Workbook",
-     "path": "/master/promotion/workbook",
+     "section": "Master > System",
+     "screen": "Data Migration & Go-Live",
+     "path": "/master/configuration/go-live",
      "access": "Create and edit",
      "modules": [
-      "Environment promotion"
+      "Data migration and go-live"
      ]
     },
     {
@@ -9213,7 +9292,7 @@
      "path": "/master/promotion/compare",
      "access": "Create and edit",
      "modules": [
-      "Environment promotion"
+      "Data migration and go-live"
      ]
     },
     {
@@ -9222,7 +9301,7 @@
      "path": "/master/promotion/path",
      "access": "Create and edit",
      "modules": [
-      "Environment promotion"
+      "Data migration and go-live"
      ]
     },
     {
@@ -9508,15 +9587,15 @@
     },
     {
      "area": "Master data and configuration",
-     "module": "Environment promotion",
+     "module": "Data migration and go-live",
      "level": "View",
-     "meaning": "Download the Setup Workbook, see the uploads, compare environments and the promotion path"
+     "meaning": "Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path"
     },
     {
      "area": "Master data and configuration",
-     "module": "Environment promotion",
+     "module": "Data migration and go-live",
      "level": "Create and edit",
-     "meaning": "Upload, validate and load the Setup Workbook; mark the environment"
+     "meaning": "Upload, validate and submit loads, record checklist steps, evidence and defects, mark the environment"
     },
     {
      "area": "Master data and configuration",
@@ -9583,6 +9662,16 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Data migration and go-live",
+     "approval": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
+     "approvers": [
+      "TIS Operations Unit Head",
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Accounts > Remittance > Approvals",
      "approval": "Remittance approval within the approver's limit",
      "approvers": [
@@ -9629,6 +9718,12 @@
      "conflict": "Users (create and edit), Roles (create and edit), Access control (create and edit) with Receipts (create and edit), Collections and credit control (create and edit), Disbursements and petty cash (create and edit), Journal vouchers (create and edit), Remittance and insurer reconciliation (create and edit), Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) held by the same person",
      "action": "Warning",
      "reason": "The person who administers users and access should not enter business or accounting transactions"
+    },
+    {
+     "rule": "Load and approve migration data",
+     "conflict": "Data migration and go-live (create and edit) with Data migration and go-live (approve) held by the same person",
+     "action": "Warning",
+     "reason": "The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare"
     }
    ]
   },
@@ -10631,6 +10726,15 @@
      ]
     },
     {
+     "section": "Master > System",
+     "screen": "Data Migration & Go-Live",
+     "path": "/master/configuration/go-live",
+     "access": "View",
+     "modules": [
+      "Data migration and go-live"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -11054,6 +11158,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "View",
+     "meaning": "Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "Approve",
+     "meaning": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Features and releases",
      "level": "View",
      "meaning": "See the catalogue of features and releases with their status (read only)"
@@ -11094,6 +11210,10 @@
     },
     {
      "what": "Approve or return a commission rule submitted by another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
      "kind": "maker-checker"
     },
     {
@@ -11305,6 +11425,12 @@
      "reason": "The claims handler should not also prepare the claim payments"
     },
     {
+     "rule": "Load and approve migration data",
+     "conflict": "Data migration and go-live (approve) with Data migration and go-live (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare"
+    },
+    {
      "rule": "Placing and paying insurers",
      "conflict": "Quotations and placement (create and edit), Policies (create and edit) with Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) held by the same person",
      "action": "Warning",
@@ -11317,6 +11443,211 @@
      "reason": "The person who issues receipts and posts cash should not also sell or issue the policies paid for"
     }
    ]
+  },
+  {
+   "code": "tis-auditor",
+   "name": "TIS Audit (read only)",
+   "chapterId": "tis-audit-read-only",
+   "department": "Audit",
+   "summary": "Internal and external audit: reads the migration workspace, the audit trail, the business records, the ledgers and the reports; changes nothing",
+   "menus": [
+    {
+     "section": "Master > System",
+     "screen": "Audit Trail",
+     "path": "/master/configuration/audit-trail",
+     "access": "View",
+     "modules": [
+      "Audit trail"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Data Migration & Go-Live",
+     "path": "/master/configuration/go-live",
+     "access": "View",
+     "modules": [
+      "Data migration and go-live"
+     ]
+    }
+   ],
+   "permissions": [
+    {
+     "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "View",
+     "meaning": "See prospects and leads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "View",
+     "meaning": "See quotations, requests for quotation, placement slips and comparison reports"
+    },
+    {
+     "area": "Operations",
+     "module": "Clients",
+     "level": "View",
+     "meaning": "See clients"
+    },
+    {
+     "area": "Operations",
+     "module": "Policies",
+     "level": "View",
+     "meaning": "See policies, cover notes, payments and CTPL authentication"
+    },
+    {
+     "area": "Operations",
+     "module": "Endorsements and cancellations",
+     "level": "View",
+     "meaning": "See endorsements and cancellations"
+    },
+    {
+     "area": "Operations",
+     "module": "Renewals",
+     "level": "View",
+     "meaning": "See renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "View",
+     "meaning": "See claims"
+    },
+    {
+     "area": "Accounts",
+     "module": "Receipts",
+     "level": "View",
+     "meaning": "See receipts"
+    },
+    {
+     "area": "Accounts",
+     "module": "Collections and credit control",
+     "level": "View",
+     "meaning": "See collections, instalment plans and credit limits"
+    },
+    {
+     "area": "Accounts",
+     "module": "Disbursements and petty cash",
+     "level": "View",
+     "meaning": "See payment vouchers, petty cash and bank payment files"
+    },
+    {
+     "area": "Accounts",
+     "module": "Payables",
+     "level": "View",
+     "meaning": "See suppliers, supplier invoices and payments, AP ageing"
+    },
+    {
+     "area": "Accounts",
+     "module": "Fixed assets",
+     "level": "View",
+     "meaning": "See the fixed asset register and depreciation"
+    },
+    {
+     "area": "Accounts",
+     "module": "Journal vouchers",
+     "level": "View",
+     "meaning": "See journal vouchers and the SAP GL export"
+    },
+    {
+     "area": "Accounts",
+     "module": "Remittance and insurer reconciliation",
+     "level": "View",
+     "meaning": "See remittances to insurers and insurer statements"
+    },
+    {
+     "area": "Accounts",
+     "module": "Bank reconciliation",
+     "level": "View",
+     "meaning": "See bank reconciliations"
+    },
+    {
+     "area": "Accounts",
+     "module": "Period end and tax",
+     "level": "View",
+     "meaning": "See period status, the close checklist and BIR tax"
+    },
+    {
+     "area": "Accounts",
+     "module": "Incentives",
+     "level": "View",
+     "meaning": "See incentive programmes, calculations and statements"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission",
+     "level": "View",
+     "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Reports",
+     "module": "Reports",
+     "level": "View",
+     "meaning": "Run and download reports"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Audit trail",
+     "level": "View",
+     "meaning": "See the audit trail"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Data migration and go-live",
+     "level": "View",
+     "meaning": "Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path"
+    },
+    {
+     "area": "Basic and special access",
+     "module": "Basic access",
+     "level": "View",
+     "meaning": "Own profile and the look-up lists of every form"
+    }
+   ],
+   "approves": [],
+   "approvedBy": [
+    {
+     "work": "Accounts > Remittance > Approvals",
+     "approval": "Remittance approval within the approver's limit",
+     "approvers": [
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Accounts > Remittance > Approvals (settlement, adjustment, transfer)",
+     "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
+     "approvers": [
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    }
+   ],
+   "sod": []
   }
  ],
  "screens": {
@@ -14859,6 +15190,10 @@
     {
      "role": "TIS General Manager",
      "access": "View"
+    },
+    {
+     "role": "TIS Audit (read only)",
+     "access": "View"
     }
    ]
   },
@@ -14911,12 +15246,28 @@
     }
    ]
   },
-  "/master/promotion/workbook": {
-   "menu": "Master > Environment Promotion > Setup Workbook",
+  "/master/configuration/go-live": {
+   "menu": "Master > System > Data Migration & Go-Live",
    "roles": [
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "Create and edit"
+    },
     {
      "role": "TIS IT AppSupport / Admin",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    },
+    {
+     "role": "TIS Audit (read only)",
+     "access": "View"
     }
    ]
   },
@@ -15080,6 +15431,11 @@
   "approve:credit-control": [
    "TIS Finance & General Accounting"
   ],
+  "approve:data-load": [
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS General Manager"
+  ],
   "approve:discount-caps": [
    "TIS Sales Unit Head",
    "TIS General Manager"
@@ -15174,14 +15530,16 @@
   "read:audit": [
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:bank-reconciliation": [
    "CCD-PDC / CCD-ADA",
    "CCD-BP / QRPh (Receipting)",
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:campaigns": [
    "TIS Sales Associate",
@@ -15209,7 +15567,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:clients": [
    "TIS Sales Associate",
@@ -15220,7 +15579,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:collections": [
    "TIS Sales Associate",
@@ -15234,7 +15594,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:commission": [
    "TIS Sales Associate",
@@ -15245,7 +15606,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:commission-rules": [
    "TIS Operations Officer",
@@ -15255,7 +15617,11 @@
    "TIS General Manager"
   ],
   "read:data-load": [
-   "TIS IT AppSupport / Admin"
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:disbursements": [
    "TIS Sales Unit Head",
@@ -15263,7 +15629,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:discount-caps": [
    "TIS Sales Associate",
@@ -15284,7 +15651,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:features": [
    "TIS IT AppSupport / Admin",
@@ -15295,7 +15663,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:fleet": [
    "TIS Sales Associate",
@@ -15315,7 +15684,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:integrations": [
    "TIS Sales Associate",
@@ -15333,7 +15703,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:lead-assignment": [
    "TIS Sales Associate",
@@ -15353,7 +15724,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:marine": [
    "TIS Sales Associate",
@@ -15395,7 +15767,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:pdc": [
    "TIS Sales Associate",
@@ -15414,7 +15787,8 @@
   ],
   "read:period-end": [
    "TIS Finance & General Accounting",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:policies": [
    "TIS Sales Associate",
@@ -15425,7 +15799,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:products": [
    "TIS Sales Associate",
@@ -15451,7 +15826,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:promotions": [
    "TIS Sales Associate",
@@ -15473,7 +15849,8 @@
    "CCD-BP / QRPh (Receipting)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:receipts": [
    "TIS Sales Associate",
@@ -15487,7 +15864,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:remittance": [
    "TIS Sales Associate",
@@ -15501,7 +15879,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:renewals": [
    "TIS Sales Associate",
@@ -15512,7 +15891,8 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:reports": [
    "TIS Sales Associate",
@@ -15527,7 +15907,8 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
-   "TIS General Manager"
+   "TIS General Manager",
+   "TIS Audit (read only)"
   ],
   "read:sales-activities": [
    "TIS Sales Associate",
@@ -15638,6 +16019,7 @@
    "TIS Finance & General Accounting"
   ],
   "write:data-load": [
+   "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin"
   ],
   "write:disbursements": [

@@ -116,6 +116,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Discount Caps | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
+| Master > System | Data Migration & Go-Live | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -192,6 +193,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews | Authority Matrix and Segregation of Duties |
@@ -205,6 +208,7 @@ This role approves the work of other users:
 - Claim decisions: review, reject, settle, approve a settlement, close
 - Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
 - Approve or return a commission rule submitted by another user
+- Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or return discount caps (not the requester)
 - Approve or reject an incentive calculation batch submitted by another user
 - Approve or reject an insurer billing statement raised or submitted by another user
@@ -251,6 +255,7 @@ The user who enters a record never approves it: the approval is always another u
 |---|---|---|---|
 | Administration and transactions | Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Claims and payment | Claims (create and edit) with Disbursements and petty cash (create and edit) held by the same person | Warning | The claims handler should not also prepare the claim payments |
+| Load and approve migration data | Data migration and go-live (approve) with Data migration and go-live (create and edit) held by the same person | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 | Placing and paying insurers | Quotations and placement (create and edit), Policies (create and edit) with Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
 | Receipting and selling | Quotations and placement (create and edit), Policies (create and edit) with Receipts (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
 

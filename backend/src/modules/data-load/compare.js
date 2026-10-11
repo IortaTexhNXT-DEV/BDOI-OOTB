@@ -31,8 +31,6 @@ const tokens = (key) => String(key || '').toLowerCase().split(/[._]/);
  * is switched off by that comparison option (the numbering counters are compared with includeNumbering).
  */
 export const ENVIRONMENT_SPECIFIC = [
-  { id: 'cutover-date', sheet: 'settings', label: 'Cutover date (golive.cutover_date)',
-    reason: 'Each environment has its own cutover date: rehearsals use their own, Production the real one', setting: (k) => k === 'golive.cutover_date' },
   { id: 'urls-hosts', sheet: 'settings', label: 'Settings holding a URL or host (e.g. general.frontend_url)',
     reason: 'Every environment has its own addresses', setting: (k) => tokens(k).some((t) => URL_TOKENS.has(t)) },
   { id: 'email-sender', sheet: 'settings', label: 'E-mail sender settings (e.g. notification.from_address)',

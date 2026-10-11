@@ -7,15 +7,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { expect } from './log.js';
 import * as wb from './workbench.js';
-import { reset } from './database.js';
+import { reset, setGoLiveLock } from './database.js';
 import { explainConfigDiffs, diffTable, REHEARSAL_MASTER } from './steps-config.js';
 
 export async function step6(ctx) {
   const { log } = ctx;
   log.setPhase('Step 6. Go-live lock');
   const admin = ctx.tgt.admin;
-  await log.check('Switch on golive.locked (PUT /settings)', async () => {
-    await admin.put('/settings', { settings: { 'golive.locked': true } });
+  // a real cutover locks go-live with two users once the production run has its Go decision (Data Migration & Go-Live
+  // > Go-Live); the rehearsal switches the setting in TARGET's database
+  await log.check('Switch on golive.locked (TARGET database, rehearsal)', async () => {
+    await setGoLiveLock(ctx.cfg.targetDb, true);
     const k = await wb.kits(admin);
     expect(k.locked === true, `golive.locked reads ${k.locked}`);
     ctx.state.locked = true;
@@ -63,11 +65,20 @@ export async function step7(ctx) {
   });
 }
 
-/** End of the rehearsal: switch the lock off again (TARGET is a rehearsal environment) unless REHEARSAL_KEEP_LOCK=yes. */
+/**
+ * End of the rehearsal: switch the lock off again (TARGET is a rehearsal environment) unless REHEARSAL_KEEP_LOCK=yes, and
+ * the approval of loads on again.
+ */
 export async function unlock(ctx) {
+  if (ctx.state.approvalOff) {
+    await ctx.log.check('Rehearsal clean-up: approval of each load by a second user on again', async () => {
+      await ctx.tgt.admin.put('/data-load/golive/settings', { loadApprovalRequired: true });
+      return 'migration.load_approval_required = true';
+    });
+  }
   if (!ctx.state.locked || ctx.cfg.keepLock) return;
-  await ctx.log.check('Rehearsal clean-up: golive.locked switched off again (REHEARSAL_KEEP_LOCK=yes keeps it)', async () => {
-    await ctx.tgt.admin.put('/settings', { settings: { 'golive.locked': false } });
+  await ctx.log.check('Rehearsal clean-up: golive.locked switched off again in TARGET\'s database (REHEARSAL_KEEP_LOCK=yes keeps it)', async () => {
+    await setGoLiveLock(ctx.cfg.targetDb, false);
     return 'golive.locked = false';
   });
 }

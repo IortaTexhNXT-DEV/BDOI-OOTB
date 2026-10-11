@@ -1,6 +1,6 @@
 /** Ledger queries (entries, client / policy ledgers, trial balance), open-entry matching, periods, chart of accounts, payment entries. */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { periodOf } from './lib/ledger.js';
+import { currentBalance, periodOf } from './lib/ledger.js';
 import { postEvent } from './lib/posting.js';
 import { isoDate, num, round2, today } from './lib/http.js';
 import { applyToPolicy, ensureBilled, requirePolicy, findClient } from '../receipts/receivables.js';
@@ -194,15 +194,22 @@ export async function unmatch(db, ids, user) {
 export async function trialBalance(db, q) {
   const asOf = isoDate(q.asOf) || (q.period ? (await db.query('SELECT (to_date($1, \'YYYY-MM\') + interval \'1 month - 1 day\')::date AS d', [q.period])).rows[0].d : (await today()));
   const from = isoDate(q.from) || null;
-  const rows = (await db.query(`SELECT a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance, COALESCE(sum(l.debit),0) AS d, COALESCE(sum(l.credit),0) AS c
+  // balances as at a date start from the opening balances of its fiscal year (go-live set, year-end carry-forward) and
+  // take the journals of that year, as the Trial Balance report does; a range (from) shows the movements only
+  const fy = from ? null : (await db.query(`SELECT f.code, f.start_date FROM fiscal_years f WHERE $1::date BETWEEN f.start_date AND f.end_date
+    AND EXISTS (SELECT 1 FROM opening_balances o WHERE o.fiscal_year = f.code)`, [asOf])).rows[0] || null;
+  const rows = (await db.query(`SELECT a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance, COALESCE(sum(l.debit),0) AS d, COALESCE(sum(l.credit),0) AS c,
+      COALESCE((SELECT sum(o.balance) FROM opening_balances o WHERE o.account_code = a.code AND o.fiscal_year = $3), 0) AS ob
     FROM gl_accounts a LEFT JOIN journal_lines l ON l.account_code = a.code AND EXISTS (SELECT 1 FROM journal_vouchers j WHERE j.id = l.jv_id
       AND j.status IN ('posted','reversed') AND j.jv_date <= $1 AND ($2::date IS NULL OR j.jv_date >= $2))
-    GROUP BY a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance HAVING COALESCE(sum(l.debit),0) <> 0 OR COALESCE(sum(l.credit),0) <> 0`, [asOf, from])).rows;
+    GROUP BY a.code, a.name, a.account_type, a.fs_group, a.category, a.normal_balance
+    HAVING COALESCE(sum(l.debit),0) <> 0 OR COALESCE(sum(l.credit),0) <> 0 OR COALESCE((SELECT sum(o.balance) FROM opening_balances o WHERE o.account_code = a.code AND o.fiscal_year = $3), 0) <> 0`,
+  [asOf, from || fy?.start_date || null, fy?.code || null])).rows;
   const groupRank = new Map(FS_GROUPS.map(([g], i) => [g, i]));
   const data = rows.map((r) => {
-    const net = round2(Number(r.d) - Number(r.c));
+    const net = round2(Number(r.ob) + Number(r.d) - Number(r.c));
     return { accountCode: r.code, accountName: r.name, accountType: r.account_type, fsGroup: fsGroupOf(r.account_type, r.fs_group), category: r.category, normalBalance: r.normal_balance,
-      totalDebit: round2(r.d), totalCredit: round2(r.c), debit: net > 0 ? net : 0, credit: net < 0 ? -net : 0, balance: net };
+      opening: round2(r.ob), totalDebit: round2(r.d), totalCredit: round2(r.c), debit: net > 0 ? net : 0, credit: net < 0 ? -net : 0, balance: net };
   }).sort((x, y) => TYPE_ORDER.indexOf(x.accountType) - TYPE_ORDER.indexOf(y.accountType) || (groupRank.get(x.fsGroup) ?? 99) - (groupRank.get(y.fsGroup) ?? 99) || x.accountCode.localeCompare(y.accountCode));
   const debit = round2(data.reduce((s, r) => s + r.debit, 0)); const credit = round2(data.reduce((s, r) => s + r.credit, 0));
   // subtotals per account type and statement group (debit-positive balance), in statement order
@@ -343,8 +350,9 @@ export async function upsertAccount(db, code, b) {
     if (b.status === 'inactive' && exists.status !== 'inactive') {
       const roles = (await accountRoles(db)).get(code);
       if (roles) throw conflict(`Account ${code} is used by the system (${roles.join(', ')}); change the accounting settings first`);
-      const bal = (await db.query('SELECT COALESCE(sum(debit - credit),0) AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE l.account_code = $1 AND j.status IN (\'posted\',\'reversed\')', [code])).rows[0].b;
-      if (round2(bal) !== 0) throw conflict(`Account ${code} has a balance of ${bal}; it cannot be deactivated`);
+      // the opening balances (go-live set, year-end carry-forward) count: an account with a migrated balance stays active
+      const bal = await currentBalance(db, code);
+      if (bal !== 0) throw conflict(`Account ${code} has a balance of ${bal.toFixed(2)}; it cannot be deactivated`);
     }
     if (b.accountType && b.accountType !== exists.account_type) {
       const used = (await db.query('SELECT count(*)::int AS n FROM journal_lines WHERE account_code = $1', [code])).rows[0].n;

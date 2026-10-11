@@ -75,6 +75,13 @@ export class Book {
     return s.rows.length;
   }
 
+  /** Add an empty sheet with its headers (before the hidden Control sheet when there is one); returns the book. */
+  addSheet(name, headers) {
+    const at = this.sheets.findIndex((s) => s.name.toLowerCase() === 'control');
+    this.sheets.splice(at < 0 ? this.sheets.length : at, 0, { name, rows: [headers.map(String), []] });
+    return this;
+  }
+
   /** Remove the data rows of a sheet (headers and sample row kept). */
   clear(name) { this.sheet(name).rows.length = Math.min(this.sheet(name).rows.length, FIRST_DATA_ROW - 1); }
 

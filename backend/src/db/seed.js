@@ -38,6 +38,7 @@ export const ROLES = [
   ['tis-finance', 'TIS Finance & General Accounting', 'RBAC v4 Finance & GenAcctg: disbursements, journal vouchers, payables, fixed assets, commission and remittance, period end, bank reconciliation and posting rule approvals; reads the front office', false],
   ['tis-it-admin', 'TIS IT AppSupport / Admin', 'RBAC v4 IT AppSupport/Admin: users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; reads business data, enters no business transactions', false],
   ['tis-general-manager', 'TIS General Manager', 'RBAC v4 TIS General Manager: front office (leads to claims) with every approval of the front office and supplier invoices; reads accounting, administration and the audit trail', false],
+  ['tis-auditor', 'TIS Audit (read only)', 'Internal and external audit: reads the Data Migration & Go-Live workspace and the audit trail, changes nothing', false],
   ['tis-superid', 'SUPERID (UAT only)', 'RBAC v4 SUPERID for user acceptance testing: includes the System Administrator. Set the role Inactive before go-live', false],
   // the vendor role that enables the releases of the platform (migration 0550, lib/platform.js); no business access
   ['iorta-platform-admin', 'iorta TechNXT Platform Administrator', 'Vendor role: enables and disables the releases of the platform (Phase 2, future releases); no business access', true],
@@ -185,6 +186,17 @@ for (const role of ['tis-finance', 'tis-general-manager']) ROLE_PERMS[role].push
 // RBAC v4: reversals sit with CCD-Recon, checked by a second CCD-Recon user or Finance
 ROLE_PERMS['tis-ccd-recon'].push('receipts:reverse', 'receipt-reversal:approve');
 ROLE_PERMS['tis-finance'].push('receipt-reversal:approve');
+// Data Migration & Go-Live (migration 0440): IT AppSupport loads, Finance, the Operations Unit Head and the General
+// Manager approve another user's load, auditors read. The System Administrator holds all three.
+// Finance enters the legacy control totals, explains differences and runs its checklist steps (write, migration 0445)
+// and approves another user's load (maker-checker on every item).
+const MIGRATION_PERMS = { 'tis-it-admin': ['data-load'], 'tis-finance': ['data-load', 'data-load:approve'], 'tis-ops-unit-head': ['data-load:read', 'data-load:approve'],
+  'tis-general-manager': ['data-load:read', 'data-load:approve'] };
+for (const [role, items] of Object.entries(MIGRATION_PERMS)) ROLE_PERMS[role].push(...items);
+// Audit reads everything it reconciles and changes nothing: the workspace, the audit trail, the business records, the
+// ledgers and the reports (migration 0445); personal data masked (no view:pii)
+ROLE_PERMS['tis-auditor'] = ['profile', 'notifications', 'data-load:read', 'audit:read', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read',
+  'remittance:read', 'commission:read', 'incentive:read', ...TIS_ACCOUNTING_READS, 'period-end:read', 'bank-reconciliation:read'];
 // Commission rules register and sharing schemes (migration 0570, FRS PROD-16): Accounting keeps them, the Accounting
 // Manager approves; for TISPH Finance keeps them, the General Manager approves, the front office reads. Rate changes,
 // reversals and withholding tax changes on commission lines are approved by a second user (migration 0571, COMM-02).

@@ -73,13 +73,13 @@ import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import SecurityControlsPage from "../module/Administration/SecurityControls";
 import ServiceLevelsPage from "../module/Administration/ServiceLevels";
-import SetupWorkbookPage from "../module/Administration/EnvironmentPromotion/SetupWorkbook";
 import CompareEnvironmentsPage from "../module/Administration/EnvironmentPromotion/CompareEnvironments";
 import PromotionPathPage from "../module/Administration/EnvironmentPromotion/PromotionPath";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import DiscountCaps from "../module/FinanceMastersModule/DiscountCaps";
 import AuditTrailPage from "../module/Administration/AuditTrail";
+import GoLiveWorkspace from "../module/GoLiveWorkspace";
 import FeatureCatalogue from "../module/FeaturesReleases/FeatureCatalogue";
 import PlatformFeatures from "../module/FeaturesReleases/PlatformFeatures";
 import EmailOutboxPage from "../module/Administration/EmailOutbox";
@@ -894,7 +894,6 @@ const Maincomponent = () => {
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/security-controls" element={<SecurityControlsPage />} />
           <Route path="master/configuration/service-levels" element={<ServiceLevelsPage />} />
-          <Route path="master/promotion/workbook" element={<SetupWorkbookPage />} />
           <Route path="master/promotion/compare" element={<CompareEnvironmentsPage />} />
           <Route path="master/promotion/path" element={<PromotionPathPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
@@ -905,6 +904,7 @@ const Maincomponent = () => {
           <Route path="master/configuration/features" element={<FeatureCatalogue />} />
           <Route path="master/platform/features" element={<PlatformFeatures />} />
           <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
+          <Route path="master/configuration/go-live/*" element={<GoLiveWorkspace />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 
           {/* Bank */}

@@ -22,6 +22,7 @@ import * as bankPayments from './bankPayments.js';
 import { emailBill, emailReceipt } from './email.js';
 import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
+import { migrationImportOpen } from '../../lib/goLiveLock.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
 
 const { router, define } = moduleRouter('Receipts', '/receipts');
@@ -73,7 +74,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/open-receivables', summary: 'Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)',
+  method: 'GET', path: '/open-receivables', summary: 'Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block',
   screen: `${SCREEN} > Add receipt`, middleware: read, query: { customerCode: 'CL-2026-00001', policyNumber: 'POL-2026-00001' },
   response: { success: true, data: [{ receivableId: 'rcv_1', billNumber: 'INV-2026-00002', source: 'endorsement', customerCode: 'CL-2026-00001', customerName: 'Maria Santos', policyId: 'pol_1', policyNumber: 'POL-2026-00001', amount: 5010, paidAmount: 0, balance: 5010, dueDate: '2026-10-28', status: 'Open', currency: 'PHP' }] },
   handler: async (req, res) => ok(res, await svc.listOpenReceivables(pool, await withScope(req))),
@@ -253,8 +254,8 @@ define({
   response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'open-items'),
 });
 define({
-  method: 'POST', path: '/opening-items/import', summary: 'Go-live: load unpaid premium bills of the old system (multipart "file" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped',
-  screen: 'Accounts > Collections > Import open items', middleware: [...write, upload.single('file')], request: { goLiveDate: '2026-10-01', file: '(multipart) Open_Items_Upload_Template.xlsx' },
+  method: 'POST', path: '/opening-items/import', summary: 'Go-live: load unpaid premium bills of the old system (multipart "file" + goLiveDate) against existing policies; no journal (the GL opening balance carries them); rows already loaded for the date are skipped. Also needs write:data-load; refused once go-live is locked (409)',
+  screen: 'Accounts > Collections > Import open items', middleware: [...write, requirePermission('write:data-load'), migrationImportOpen('opening-items'), upload.single('file')], request: { goLiveDate: '2026-10-01', file: '(multipart) Open_Items_Upload_Template.xlsx' },
   response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 already loaded, 0 failed', total: 2, created: 2, skipped: 0, failed: 0, errors: [] } },
   handler: async (req, res) => {
     if (!req.file) throw badRequest('Attach the file in the "file" field');

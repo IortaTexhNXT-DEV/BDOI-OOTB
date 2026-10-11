@@ -24,6 +24,7 @@ import { formatMoney } from '../../lib/money.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 import { revealPii } from '../../lib/pii.js';
+import { MIGRATED, kpiOriginWhere } from '../../lib/origin.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cycleLabel = (d) => { const x = new Date(d); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
@@ -301,8 +302,14 @@ export async function isPolicyRemitted(db, policyId) {
   return r > 0;
 }
 
-/** Hook from receivables: premium fully collected -> accrue from policy details if needed, set receipt no, auto-eligible. */
+/**
+ * Hook from receivables: premium fully collected -> accrue from policy details if needed, set receipt no, auto-eligible.
+ * A migrated policy accrues nothing (its commission belongs to the legacy period and sits in the opening balances)
+ * unless migration.commission_include_migrated is on.
+ */
 export async function onPolicyPremiumCollected(db, policyId, receiptNo) {
+  const origin = (await db.query('SELECT origin FROM policies WHERE id = $1', [policyId])).rows[0]?.origin;
+  if (origin === MIGRATED && (await getSetting('migration.commission_include_migrated', false)) !== true) return;
   const existing = (await db.query('SELECT count(*)::int AS n FROM commissions WHERE policy_id = $1 AND referrer_id IS NOT NULL', [policyId])).rows[0].n;
   if (!existing) await accrueForPolicy(db, policyId, null);
   if (receiptNo) await db.query('UPDATE commissions SET receipt_no = COALESCE(receipt_no, $2) WHERE policy_id = $1', [policyId, receiptNo]);
@@ -580,9 +587,11 @@ const pctRows = (rows) => {
 };
 
 export async function dashboard(db, scope = null) {
-  // Scoped users (agents) see their own lines only: every query below shares the one ownership parameter.
+  // Scoped users (agents) see their own lines only: every query below shares the one ownership parameter. Lines of
+  // migrated policies count only when migration.commission_include_migrated is on.
   const sp = [];
-  const own = scopeSql(scope, 'commission', 'commissions', sp);
+  const issued = await kpiOriginWhere('mp', 'commission');
+  const own = `${scopeSql(scope, 'commission', 'commissions', sp)}${issued ? ` AND COALESCE((SELECT ${issued} FROM policies mp WHERE mp.id = commissions.policy_id), true)` : ''}`;
   const q = async (sql) => (await db.query(sql, sp)).rows;
   const live = `status <> 'Reversed' AND referrer_id IS NOT NULL AND ${own}`;
   const [k] = await q(`SELECT COALESCE(sum(brokerage_amount),0) AS b, COALESCE(sum(amount),0) AS c,

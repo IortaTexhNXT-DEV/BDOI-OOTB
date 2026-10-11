@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2.6
-date: 09 October 2026
+version: 1.2.7
+date: 10 October 2026
 prepared: iorta TechNXT
-change: Version 1.2.6 (09 October 2026): System Settings withdrawn: the display currency and the default language are set on Master > Configuration (area Company & Branding); the brand pack of the environment is applied again whenever the API starts and the screens differ from it, and the side bar shows only the logo when it carries the name. Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.7 (10 October 2026): Data Migration & Go-Live workspace on Master > System Configuration (loads with second-person approval and undo, reconciliation sign-off, mock runs, cutover checklist, Go / No-Go, two-person go-live lock, hypercare); migrated records marked on the business screens, Origin filters on the lists and reports, dashboards on Issued since go-live. Version 1.2.6 (09 October 2026): System Settings withdrawn: the display currency and the default language are set on Master > Configuration (area Company & Branding); the brand pack of the environment is applied again whenever the API starts and the screens differ from it, and the side bar shows only the logo when it carries the name. Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -25,7 +25,7 @@ This manual tells each user how to do his or her work in BrokerVerse. It is orga
 | Getting started | Signing in, passwords, two-step verification, the screen layout, notifications, My Profile and account security, lists, forms, statuses and approvals, the audit trail. |
 | The business process end to end | The broking cycle from prospect to reports, with who does each step and on which screen. |
 | One chapter per persona | System Administrator; Sales & Marketing (Account Executive); Processing Team; Operations (client servicing); Claims; Accounting; Accounting Manager. |
-| Go-Live Data Load | The configuration and migration workbooks loaded before go-live through the go-live data load API. |
+| Data Migration & Go-Live | The workspace for the configuration and migration loads, their approval and reconciliation, the mock runs, the cutover, the Go / No-Go decision, the go-live lock and hypercare; how migrated and issued business are told apart. |
 | Distribution, programmes and products | Lead assignment, distribution channels, dealer programmes, fleet schedules, marine open covers, comparison reports, campaigns and the Report Builder: screens shared by Sales, Processing and Operations. |
 | Module reference | Every menu screen in menu order: purpose, main fields and rules. |
 | Reports, dashboards, schedules and notifications | A short guide; the Reports Book and the Schedules and Batch Jobs document hold the detail. |
@@ -436,7 +436,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 | Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | Users and Access > User Access Matrix |
 | Quarterly | Run an access review | Users and Access > Access Reviews |
 | Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
-| Before go-live | Check the reconciliation of the configuration and migration workbooks loaded by the implementation team, set the go-live lock | Master > Configuration (chapter Go-Live Data Load) |
+| Before go-live | Approve the loads, sign the reconciliation, vote Go / No-Go, lock go-live with a second person | Master > System Configuration > Data Migration & Go-Live |
 
 ## Users
 
@@ -652,7 +652,7 @@ Master > Configuration holds every business parameter, grouped in areas: Company
 
 ![Configuration: the Security & Access area](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-area.png)
 
-The group **Go-live** (area Company & Branding) holds the cutover date `golive.cutover_date`, the first day of live transactions, and the go-live lock `golive.locked`. Set them as described in the chapter Go-Live Data Load; switch the lock on only when the migration is loaded and reconciled.
+The cutover date (the first day of live transactions) and the go-live lock are not on this screen: they are set on Data Migration & Go-Live, Go-Live tab (chapter Data Migration & Go-Live), the cutover date by a holder of `write:data-load` and the lock by two people.
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
@@ -850,42 +850,58 @@ The System Administrator can open every Master > Finance screen. The Accounting 
 
 The System Administrator approves posting rule and account determination changes of another user (Configuration Approvals), Authority Matrix changes of another administrator. Business approvals belong to the business roles.
 
-# Go-Live Data Load
+# Data Migration & Go-Live
 
-This chapter is for the System Administrator and the migration lead. The broker's go-live data is loaded with two Excel workbooks instead of one upload per master. The implementation team loads them through the go-live data load API and its scripts (there is no screen for it): each workbook is validated as a trial run, the rows in error come back in an errors workbook with the sheet, row, column and message, the corrected workbook is loaded again without creating duplicates, and every load is in the audit trail. Only the System Administrator holds the permissions (`read:data-load`, `write:data-load`).
+This chapter is for the System Administrator, the migration lead, the approvers of the loads (Finance, Operations Unit Head, General Manager) and the auditors. The workspace is on **Master > System Configuration > Data Migration & Go-Live**. It holds the templates, the loads with their approval, the reconciliation, the mock runs, the cutover checklist, the Go / No-Go decision, the go-live lock and the hypercare figures. Permissions: `read:data-load` (every tab, no action), `write:data-load` (upload, submit, record), `approve:data-load` (approve, reject, sign, vote). The role TIS Auditor reads everything and changes nothing. Personal data in every download and review is masked for users without `view:pii`.
 
-## The two workbooks
+## The tabs
 
-| Workbook | What it holds |
+| Tab | What it is for |
 |---|---|
-| **Configuration** | Everything needed to run new business: company, settings, countries, states, cities, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands, models, variants and vehicles, commission rates, premium taxes, LGU rates, authority limits and document numbering. |
-| **Migration** | The open business of the old system at cutover: clients, in-force policies (with their old numbers), open premium receivables, open claims and the GL opening balances. |
+| **Overview** | Phase of the programme, cutover date, lock, latest loads, reconciliation, Go / No-Go and open defects, and what waits for you |
+| **Templates** | The configuration and migration workbooks per object, blank or with current data; the policy sheets per product (Motor, CTPL, Personal Accident, Credit Life, Travel, Other Lines); value maps of legacy codes; the document file naming convention and its checker |
+| **Loads** | Upload and validate, review each row (New, Changed with old and new values, Unchanged, Duplicate, Error), resolve duplicates, submit, approve or reject, load, history, undo before go-live |
+| **Reconciliation** | Control totals per object against the legacy figures, receivables against the GL, the trial balance, the difference list and the sign-off, with the report |
+| **Runs** | Mock 1, Mock 2, the dress rehearsal and the production run with their timings, results and defects |
+| **Cutover** | The runbook checklist of the run: owner, planned and actual start and end, status and evidence of each step |
+| **Go-Live** | Go / No-Go against the criteria with the named approvers, cutover date, lock and unlock by two people |
+| **Hypercare** | After the lock: business issued since go-live, migrated items worked, edits to migrated records, daily checks and defects |
 
-The blank workbooks are delivered with the upload templates as GoLive_Configuration_Workbook.xlsx and GoLive_Migration_Workbook.xlsx; the workbook with the current data of an environment is how configuration moves from one environment to the next (test, UAT, production).
+## Loads
 
-Each workbook has an **Instructions** sheet (load order, rules, every column), a **Lists** sheet with the allowed values, and one sheet per object in load order. Row 1 holds the headers; a required column ends with *. Row 2 is a sample row: a row whose first cell starts with SAMPLE is never loaded. Enter data from row 3. Dates are written YYYY-MM-DD.
+1. Download the workbook on Templates, fill it and upload it on **Loads > Upload** with the legacy system and the run. The file is validated in the background; nothing is saved.
+2. Review the rows. **Changed** shows each field as old and new value. **Duplicate** lists the matching record (same TIN, name and birth date, plate or chassis, insurer name variant); choose **Load as new** or **Use existing** with a reason. **Error** rows are in the errors workbook: correct them and upload the file again.
+3. **Submit** the load. Another user holding `approve:data-load` approves or rejects it with a reason; the uploader, the submitter and whoever resolved one of its duplicates cannot approve it. Approval loads the records as load **MIG-000012** in one go: a load that fails saves nothing.
+4. Every record created or changed has its own entry in its activity log ("Migrated from TISPH Excel, load MIG-000012") with the values loaded. Before go-live, a load can be undone under the same second-person approval while nothing depends on its records.
 
-Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
+## Reconciliation and sign-off
 
-## Migration rules and reconciliation
+Enter or upload the legacy totals for each line (counts and amounts per object, product, insurer and ageing bucket). Each line shows **Matched** or **Difference**; every difference needs an explanation and is accepted by a user who did not load the data. When the lines agree, the named signatories sign the reconciliation in the system; the signed report (PDF) is kept with the run and does not change afterwards.
 
-The migration workbook is refused until the cutover date is set, with the message **Set the cutover date (golive.cutover_date) first**. The cutover date is the first day of live transactions and is set on Master > Configuration, area Company & Branding, group **Go-live**, or on the Settings sheet of the configuration workbook.
+## Mock runs, cutover and Go / No-Go
 
-![Master > Configuration: the Go-live settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-golive.png)
-
-- A line of business on the Commission Rates sheet of the configuration workbook, or on the Commission Rate Matrix screen, must be a code of the Line of Business master; a rate on an unknown line is refused.
-- Rows dated on or after the cutover date are refused: policy issue date, claim loss and reported dates, client birth date. Policies must still be in force at cutover. Open claims are registered or in review.
-- Opening balances are the trial balance of the old system at the close of the day before the cutover date. Debits must equal credits, and the fiscal year of the cutover date must have no journal posted before it. A row with no debit and no credit (an account whose movements net to zero) is accepted and ignored, with a note above the counts. The sheet loads all or nothing: when it fails, the rows in error show their own error, the other rows are counted as **Held**, and one message with the row **Sheet** says why nothing was loaded.
-- Migrated records keep the numbers of the old system. New business takes the next number of its Document Numbering series, set on the Numbering sheet. Both workbooks refuse a number that the other side would also issue: raise the next number of the series above the old range first. A reset of test transactions restarts each series at the next number the Numbering sheet set, so the sheet need not be loaded again after a reset.
-- An open item keeps the bill number of the old system as its bill number. Only when another bill already has that number (one debit note over several policies) does it get the next BrokerVerse invoice number; the old number is then shown with it, for example INV-2026-00011 (old system DN-OLD-77), on Add Receipt and the billing statements, and the open receivables can be searched by it.
-- A migrated policy is renewed like any other policy; its renewal is new business in BrokerVerse.
-- Migrated records post nothing: no bill, booking journal or commission accrual for a policy, no booking journal for an open item (the GL carries it in the opening balance), no e-mail, notification or journal for an open claim. Migrated policies count as policies in force but not as premium written or new business on the Executive Dashboard.
-
-Every validation and load of the migration workbook shows a **Reconciliation**: per sheet the **Workbook rows** and **Workbook totals** (premium, sum insured, open balance, claim estimate, debits and credits) against the records and totals **In BrokerVerse**, and the checks that the trial balance balances and that the premiums receivable control account equals the open items of the cutover date, each with **Agrees** or **Difference**. Compare these totals with the old system before go-live; the implementation team hands them over as a workbook.
+Record each mock run with its loads, timings, results and defects. The production run carries the cutover checklist CO-1 to CO-10: start and close each step with its evidence. The Go / No-Go decision lists the criteria G1 to G11 with their automatic checks; the named approvers vote Go or No-Go with their remarks.
 
 ## Go-live lock
 
-When the data is loaded and reconciled, switch on the go-live lock on Master > Configuration, group **Go-live** (`golive.locked`). From then on the migration workbook can no longer be validated or loaded, and the reset of test transactions refuses to run. The configuration workbook stays available for new masters. Agree the moment with the project lead: the lock is the formal end of the migration.
+After a Go decision, a signed reconciliation and no load waiting, one user requests the lock and another approves it on the Go-Live tab. The lock closes every migration import: the migration workbook, the policies go-live upload, the open items import, the opening balances import, the transaction reset and the undo of loads. An unlock is requested and approved by two people, names the imports it reopens and relocks itself after its hours.
+
+## Migrated and issued business
+
+Every migrated client, policy, claim, open item and opening balance journal shows the chip **Migrated** with its legacy number and its load (a link to the load for users of the workspace). Policies keep their legacy policy number; business written after go-live takes the insurer's policy number or the next TISPH number.
+
+| Where | What you see |
+|---|---|
+| Client, Policy, claim and collection pages | **Migrated**, the legacy number and the load |
+| Endorsement and claim on a migrated policy | **Migrated policy** with the legacy policy number; the endorsement or claim itself is issued in BrokerVerse |
+| Renewal of a migrated policy | **Renewal of legacy policy** on the Renewal Queue and on the renewed policy, which is new business with its own number, linked to the legacy term |
+| Clients, Policies, Claims, Collections, Journal Voucher and Renewal Queue lists | Filter **Origin** (All, Issued in BrokerVerse, Migrated) and the Origin column |
+| Add Receipt | The chip next to the bill and the old system's bill number |
+| Journal Voucher | The opening balance journal, status **Opening balance**, view and print only |
+| Executive and Sales dashboards | **Issued since go-live** (default) or **All business** in the toolbar, kept per user; the tile **Issued since go-live** gives the premium and number of policies issued since the cutover date |
+| Reports | Filter and Report Criteria **Origin** on the production register, premium by product, new business vs renewals and dealer production |
+
+Migrated policies are not counted in premium written, new business, commission or incentive figures unless the approvers switch this on (Go-Live tab); they count as renewal opportunities. Migrated balances are in the opening balances and never go to the SAP GL daily file. Edits to migrated records after go-live are in their activity log like any change; the origin, legacy number and load cannot be changed.
 
 # Sales & Marketing (Account Executive)
 
@@ -3320,8 +3336,8 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | You were signed out | 30 minutes without activity. Sign in again. |
 | The new password does not meet all the rules below. | Choose a password that ticks every rule under **New password**. |
 | The two new passwords do not match. | Type the same password in **New password** and **Confirm new password**. |
-| Set the cutover date (golive.cutover_date) first | The go-live data load refuses the migration workbook until the cutover date is set on Master > Configuration, group Go-live. |
-| Go-live is locked: the migration workbook can no longer be loaded | The go-live lock is on. Only the configuration workbook can still be loaded. |
+| Set the cutover date (golive.cutover_date) first | The migration workbook is refused until the cutover date is set on Data Migration & Go-Live, Go-Live tab. |
+| Go-live is locked: the migration workbook can no longer be loaded | The go-live lock is on. Every migration import is closed; ask for a scoped unlock on the Go-Live tab (two people). |
 | Invalid mobile number | Use a Philippine mobile number: 0917 123 4567, +63 917 123 4567 or 9171234567. |
 | A required field is empty | Fill in every field marked with an asterisk. |
 | Shares must total exactly 100% (now ...%) | Correct the participants' shares so that they total 100%, with exactly one lead. |

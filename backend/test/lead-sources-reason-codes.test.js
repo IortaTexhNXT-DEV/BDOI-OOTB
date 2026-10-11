@@ -45,7 +45,7 @@ describe('masters', () => {
       'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review',
       'renewal_reassign', 'non_renewal', 'claim_cancel', 'claim_cash_reversal', 'pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject',
       'unapplied_refund', 'commission_rate_change', 'commission_reversal', 'commission_share_change', 'commission_wht_change', 'scheme_end',
-      'policy_correction', 'policy_correction_reject', 'endorsement_reject', 'promotion_return', 'promotion_status', 'discount_cap_return',
+      'policy_correction', 'policy_correction_reject', 'endorsement_reject', 'promotion_return', 'promotion_status', 'discount_cap_return', 'data_load_reject',
       'policy_suspend', 'policy_reinstate')
       AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|talkbot|feature)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },

@@ -10,10 +10,11 @@ Columns sheet and an Instructions sheet. On screens with an **Upload** button th
 **Download template**. Screens without an Upload button are marked below; for those a System Administrator loads the
 file through the API route written on the template's Instructions sheet, or enters the records on the screen.
 
-Most of the steps below can also be done with two workbooks on **Master > Go-Live Data Load**: the configuration
-workbook (steps 1 to 8: company, users, masters, chart of accounts, commission rates, numbering, settings) and the
-migration workbook (step 11: clients, in-force policies, open items, open claims, opening balances), each validated as
-a whole before anything is saved. See `GO_LIVE_DATA_WORKBENCH.md`.
+Most of the steps below can also be done with two workbooks on **Master > System Configuration > Data Migration &
+Go-Live**: the configuration workbook (steps 1 to 8: company, users, masters, chart of accounts, commission rates,
+numbering, settings) and the migration workbook (step 11: clients, in-force policies per product, open items, open
+claims, post-dated cheques on hand, opening balances), each validated as a whole before anything is saved, approved by
+a second person and loaded as a numbered load (MIG-000012). See `GO_LIVE_DATA_WORKBENCH.md`.
 
 Agree a **go-live date** with Accounting before you start: the first day on which transactions are entered in
 BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
@@ -209,6 +210,12 @@ warranties, renewals and reminders).
 
 ## Step 11. Opening data from the old system
 
+Load the opening data through the migration workbook on Data Migration & Go-Live (Loads tab): one validated,
+approved and reconciled load per mock run and for the production run, with the cutover checklist and the Go / No-Go
+decision on the same workspace. The single-object imports below remain for a correction before go-live; they need
+write:data-load, tag their records as migrated like the workbook and are refused once go-live is locked (two people
+lock and unlock it on the Go-Live tab).
+
 Load in this order. Each file is checked row by row; fix the rows reported and upload again.
 
 1. **In-force policies** (and their clients): Operations > Policy > Bulk Upload with **Existing policies (go-live)**
@@ -243,6 +250,10 @@ Points to know:
   booked in BrokerVerse.
 - Close the accounting periods of the fiscal year before the go-live date (Accounts > Period End > Period Management)
   so nothing is posted into them by mistake.
+- Every record loaded here is marked **Migrated** with its legacy number and load on the client, policy, claim,
+  collection and journal screens; the lists of clients, policies, claims, collections, journal vouchers and renewals
+  filter on Origin, and the dashboards open on **Issued since go-live**. A renewal, endorsement, claim or receipt
+  entered afterwards on a migrated policy is business issued in BrokerVerse, linked to the legacy policy.
 
 ## Step 12. First month-end
 

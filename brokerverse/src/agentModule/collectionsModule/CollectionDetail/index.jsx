@@ -22,6 +22,7 @@ import { statusLabel } from "../../../utils/statusSeverity";
 import { PageHeader } from "../../../module/PeriodEnd/common";
 import logger from "../../../utility/logger";
 import { ActivityLog, fromCollectionActions } from "../../../components/ActivityLog";
+import OriginChip, { isMigrated, policyOriginOf } from "../../../components/OriginChip";
 
 const CollectionDetail = () => {
   const { t } = useTranslation();
@@ -236,6 +237,7 @@ const CollectionDetail = () => {
 
       <PageHeader title={`${t("collectionDetail.collectionDetails")} · ${collection.policyNumber || ""}`} section={t("collectionDetail.collections")}
         trail={[collection.policyNumber].filter(Boolean)}>
+        {isMigrated(collection.origin) ? <OriginChip origin={collection.origin} /> : <OriginChip origin={policyOriginOf(collection)} variant="policy" />}
         <Button label={t("collectionDetail.back")} icon="pi pi-arrow-left" outlined onClick={() => navigate("/agent/collections")} />
         <Button label={t("collectionDetail.sendEmail")} icon="pi pi-envelope" outlined onClick={() => handleFollowUpAction("Email")} />
         <Button label={t("emailDocument.emailInvoice")} icon="pi pi-file-pdf" outlined disabled={!collection.receivableId} onClick={() => setShowInvoiceEmail(true)} />

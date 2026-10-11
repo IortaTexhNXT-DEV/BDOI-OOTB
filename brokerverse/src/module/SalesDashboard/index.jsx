@@ -9,8 +9,8 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import dashboardService from "../../services/dashboardService";
 import StatCards from "../../components/StatCards";
-import { ChartCard, DashboardToolbar, LISTS, ThemedChart, changeOf, drillDown, formatValue } from "../../components/Dashboard";
-import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
+import { ChartCard, DashboardToolbar, LISTS, ThemedChart, changeOf, drillDown, formatValue, useDashboardOrigin } from "../../components/Dashboard";
+import { calendarDateFormat, formatDate, toIsoDate } from "../../utility/dateFormat";
 import { formatPercent } from "../../utility/numberFormat";
 import { useChartTheme } from "../../theme/chartTheme";
 import "./index.scss";
@@ -24,7 +24,8 @@ export const stageLabel = (stage) => {
 /**
  * Sales Dashboard: prospects, quotations, conversion and premium over a period against the previous period or the
  * same period last year, the open pipeline by stage and the figures per sales person. Managers see the whole book (or
- * one sales person); scoped sales roles their own book.
+ * one sales person); scoped sales roles their own book. Policies and premium count the business issued in BrokerVerse
+ * since go-live, or all business with the migrated policies (the toolbar switch, kept per user).
  */
 const SalesDashboard = () => {
   const { t } = useTranslation();
@@ -35,20 +36,22 @@ const SalesDashboard = () => {
   const [compare, setCompare] = useState("previous");
   const [range, setRange] = useState(null);
   const [salesPerson, setSalesPerson] = useState(null);
+  const { origin, setOrigin, ready } = useDashboardOrigin();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(() => {
+    if (!ready) return;
     // a custom range is used once both ends are picked; otherwise the calendar period
     const custom = range?.[0] && range?.[1];
     const query = custom ? { from: toIsoDate(range[0]), to: toIsoDate(range[1]) } : { period };
     setLoading(true);
     dashboardService
-      .getSalesOverview({ ...query, compare, salesPerson: salesPerson || undefined })
+      .getSalesOverview({ ...query, compare, salesPerson: salesPerson || undefined, origin })
       .then(setData)
       .catch((e) => toast.current?.show({ severity: "error", summary: t("common.error"), detail: e.message, life: 5000 }))
       .finally(() => setLoading(false));
-  }, [period, compare, range, salesPerson, t]);
+  }, [period, compare, range, salesPerson, origin, ready, t]);
   useEffect(() => { load(); }, [load]);
 
   const money = (v) => formatValue("currency", v, { compact: true });
@@ -58,6 +61,8 @@ const SalesDashboard = () => {
   const comparison = t(`dashboards.vs.${compare}`);
   const from = data?.period?.from;
   const to = data?.period?.to;
+  const listOrigin = origin === "issued" ? "issued" : "";
+  const sinceGoLive = data?.issuedSinceGoLive;
 
   const personOptions = [
     { label: t("salesDashboard.allSalesPersons"), value: null },
@@ -72,11 +77,14 @@ const SalesDashboard = () => {
     { key: "conversion", label: t("salesDashboard.conversion"), value: data ? formatPercent(k.prospectConversionRate) : null, change: changeOf(k.prospectConversionRate, p.prospectConversionRate), comparison,
       note: `${t("salesDashboard.quoteConversion")}: ${formatPercent(k.quoteConversionRate)}` },
     { key: "policies", label: t("salesDashboard.policies"), value: data ? k.policies : null, change: changeOf(k.policies, p.policies), comparison,
-      onClick: () => drillDown(navigate, LISTS.policiesIssued(from, to)) },
+      onClick: () => drillDown(navigate, LISTS.policiesIssued(from, to, "", listOrigin)) },
     { key: "premium", label: t("salesDashboard.premium"), value: data ? money(k.premium) : null, change: changeOf(k.premium, p.premium), comparison,
-      onClick: () => drillDown(navigate, LISTS.policiesIssued(from, to)) },
+      onClick: () => drillDown(navigate, LISTS.policiesIssued(from, to, "", listOrigin)) },
     { key: "pipeline", label: t("salesDashboard.pipeline"), value: data ? money(k.pipelineValue) : null, note: t("salesDashboard.openQuotations", { count: k.pipelineCount ?? 0 }),
       onClick: () => drillDown(navigate, LISTS.quotations()) },
+    ...(sinceGoLive ? [{ key: "issuedSinceGoLive", label: t("dashboards.sinceGoLive.title", "Issued since go-live"), value: money(sinceGoLive.premium),
+      note: t("dashboards.sinceGoLive.note", { count: sinceGoLive.policies, date: formatDate(sinceGoLive.cutoverDate), defaultValue: "{{count}} policies since {{date}}" }),
+      onClick: () => drillDown(navigate, LISTS.policiesIssued(sinceGoLive.cutoverDate, null, "", "issued")) }] : []),
   ];
 
   // premium and activity by month: two charts, never two scales on one plot
@@ -100,6 +108,7 @@ const SalesDashboard = () => {
     <div className="sales-dashboard bv-dash-page">
       <Toast ref={toast} />
       <DashboardToolbar title={t("salesDashboard.title")} period={period} onPeriod={(v) => { setRange(null); setPeriod(v); }} compare={compare} onCompare={setCompare}
+        origin={origin} onOrigin={setOrigin}
         range={data?.period ? { from, to, previousFrom: data.period.comparedFrom, previousTo: data.period.comparedTo } : null}
         asOf={data?.asOf} onRefresh={load} loading={loading}
         actions={<Button label={t("salesDashboard.viewProspects")} icon="pi pi-list" outlined onClick={() => drillDown(navigate, LISTS.prospects())} />}>

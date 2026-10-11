@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import UploadJournalVouchers from "./UploadJournalVouchers";
+import { OriginFilter } from "../../components/OriginChip";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
@@ -57,6 +58,7 @@ const JournalVoucher = () => {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [uploading, setUploading] = useState(false);
   const [parked, setParked] = useState(false);
+  const [origin, setOrigin] = useState("");
   const [reloads, setReloads] = useState(0);
   const loadedOnce = useRef(false);
 
@@ -67,12 +69,12 @@ const JournalVoucher = () => {
 
   // One request per change of page, page size or search (the search is debounced while typing).
   useEffect(() => {
-    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage, parked };
+    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage, parked, origin };
     if (globalFilter && search) params[globalFilter] = search;
     const h = setTimeout(() => dispatch(getJournalVoucherHistory(params)), loadedOnce.current ? 250 : 0);
     loadedOnce.current = true;
     return () => clearTimeout(h);
-  }, [dispatch, first, rowsPerPage, search, globalFilter, parked, reloads]);
+  }, [dispatch, first, rowsPerPage, search, globalFilter, parked, origin, reloads]);
 
   // a new search starts on the first page
   const onSearch = (value) => {
@@ -180,6 +182,7 @@ const JournalVoucher = () => {
             <div className="flex align-items-center gap-2" style={{ paddingLeft: 10, paddingRight: 10 }}>
               <Checkbox inputId="jv-parked" checked={parked} onChange={(e) => { setParked(e.checked); setFirst(0); }} />
               <label htmlFor="jv-parked">{t("jvTools.showParked")}</label>
+              <OriginFilter value={origin} onChange={(v) => { setOrigin(v); setFirst(0); }} className="ml-3" />
             </div>
           </div>
           <div

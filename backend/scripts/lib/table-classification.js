@@ -86,6 +86,7 @@ export const TRANSACTION_TABLES = [
  *   remove     emptied
  *   partial    some rows go (see the reset script: documents by storage folder, sequences by series)
  *   optional   removed unless an option keeps it (opening balances: --keep-opening-balances; audit: kept unless --purge-audit)
+ *   mark-reset kept, the rows about removed records marked (loaded migration batches: undone by the transaction reset)
  *   keep       left as is
  */
 export const SYSTEM_RESET_ACTIONS = {
@@ -97,9 +98,26 @@ export const SYSTEM_RESET_ACTIONS = {
   login_history: 'remove',
   refresh_tokens: 'remove', // sign-in sessions: everyone signs in again
   password_resets: 'remove',
-  data_load_batches: 'remove', // go-live data load history: the loads of a smoke test go with the records they created
-  data_load_rows: 'remove',
-  data_load_comparisons: 'remove', // environment comparisons go with the load history (compare again after the reset)
+  // go-live data load history: kept as evidence across mock runs; the loaded migration batches (whose records the reset
+  // removes) and their rows are marked undone by the transaction reset
+  data_load_batches: 'mark-reset',
+  data_load_rows: 'mark-reset',
+  data_load_comparisons: 'keep', // environment comparisons stay with the load history
+  go_live_lock_requests: 'keep', // the requests that locked go-live and lifted the lock: evidence of the cutover
+  // reconciliations of the migration loads, their lines, differences and sign-offs: evidence of the mock runs and the cutover
+  migration_reconciliations: 'keep',
+  migration_recon_lines: 'keep',
+  migration_recon_differences: 'keep',
+  migration_recon_signoffs: 'keep',
+  // mock runs and the production run: checklist, defects, Go / No-Go decisions with their criteria and votes, evidence files
+  migration_runs: 'keep',
+  migration_run_steps: 'keep',
+  migration_run_defects: 'keep',
+  go_live_decisions: 'keep',
+  go_live_decision_criteria: 'keep',
+  go_live_decision_votes: 'keep',
+  migration_evidence: 'keep',
+  sap_opening_file_requests: 'remove', // the SAP opening file of an opening balance journal the reset removes
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances
@@ -143,6 +161,10 @@ export const MASTER_CONFIG_TABLES = [
   'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'promotions', 'promotion_lines', 'discount_caps', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
   // CAS registration documents (system description, backup procedure): approved versions kept as the system's documentation
   'cas_documents',
+  // legacy code tables of the go-live migration (Data Migration & Go-Live > Templates > Value Maps)
+  'migration_value_maps',
+  // runbook and Go / No-Go criteria templates copied into each run and decision (Data Migration & Go-Live)
+  'go_live_runbook_steps', 'go_live_criteria',
   // the releases the environment runs and their approved changes (modules/features)
   'feature_entitlements', 'feature_changes',
 ];
@@ -180,7 +202,7 @@ export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-
  * sample seed fills with demo rows (bundles, insurer rate tables, petty cash funds, delegations).
  */
 export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances',
-  'integration_outbox', 'integration_attempts', 'integration_inbox'];
+  'integration_outbox', 'integration_attempts', 'integration_inbox', 'sap_opening_file_requests'];
 export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'user_delegations', 'remittance_delegations', 'sod_exceptions',
   // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/98_integrations.sql

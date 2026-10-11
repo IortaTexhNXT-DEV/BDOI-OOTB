@@ -19,6 +19,7 @@ import { assertApprovalLimit, daysBetween, round2, shownDate, today, unprocessab
 import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays, businessDate } from '../../lib/dates.js';
+import { originWhere } from '../../lib/origin.js';
 import { workingDaysBetween } from '../../lib/workingCalendar.js';
 import { LOCK_IN_COLUMNS, assertNoticeAllowed, gateContext, lockInTerm, treatmentOf } from './noticeGate.js';
 
@@ -31,7 +32,7 @@ const addYears = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCFullY
 // ---------------------------------------------------------------- read model
 export const BASE = `SELECT r.*, p.policy_number, p.inception_date, p.expiry_date AS policy_expiry, p.sum_insured, p.premium_total,
   p.commission_amount, p.status AS policy_status, p.client_id AS policy_client_id, p.owner_user_id AS policy_owner, p.currency,
-  p.product_id, p.policy_type_id, p.insurance_company_id, p.details AS policy_details, p.renewed_from,
+  p.product_id, p.policy_type_id, p.insurance_company_id, p.details AS policy_details, p.renewed_from, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
   cl.display_name AS client_name, cl.email AS client_email, cl.phone AS client_phone,
   ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line, ou.display_name AS agent_name,
   (SELECT count(*) FROM claims c WHERE c.policy_id = p.id)::int AS claims_count,
@@ -143,6 +144,8 @@ export function toApi(r, ctx) {
     premiumChangeReview: variancePct != null && ctx.changeCap > 0 && Math.abs(variancePct) > ctx.changeCap, sumInsured: r.sum_insured, currency: r.currency,
     noticeStage: r.notice_stage, lastNoticeAt: r.last_notice_at, nextNotice: next,
     renewalAttempts: r.contact_attempts, contactAttempts: r.contact_attempts, lastContactDate: r.last_contact_at,
+    // the renewal of a policy migrated at go-live: "Renewal of legacy policy <legacy number>" (the renewed term is issued in BrokerVerse)
+    policyOrigin: r.policy_origin || 'issued', policyLegacyNumber: r.policy_origin === 'migrated' ? r.policy_legacy_number || null : null,
     assignedAgent: r.agent_name, salesPerson: r.agent_name, priority: r.priority || (risk.band === 'Critical' || daysToExpiry <= 7 ? 'High' : 'Normal'),
     retentionRisk: risk.band, riskScore: risk.score,
     claimsHistory: { hasClaimsLastYear: r.claims_count > 0, totalClaims: r.claims_count, claimsAmount: r.claims_amount },
@@ -202,6 +205,9 @@ export async function listRenewals(q, pg) {
   }
   if (q.openOnly === 'true' || q.open === 'true') add('r.status = ANY(?)', OPEN);
   if (q.agent && q.agent !== 'All') add('(ou.display_name = ? OR ou.id = ?)', q.agent, q.agent);
+  // origin of the expiring policy: migrated = renewals of legacy policies
+  const origin = originWhere('p', q.origin, params);
+  if (origin) where.push(origin);
   if (q.from || q.expiryFrom) add('p.expiry_date >= ?::date', q.from || q.expiryFrom);
   if (q.to || q.expiryTo) add('p.expiry_date <= ?::date', q.to || q.expiryTo);
   if (q.search) add('(p.policy_number ILIKE ? OR cl.display_name ILIKE ? OR r.renewal_number ILIKE ? OR pr.name ILIKE ?)', ...Array(4).fill(`%${q.search}%`));
@@ -815,6 +821,18 @@ const CARRY_KEYS = ['insuranceVehicleDetails', 'plateNumber', 'chassisNumber', '
   'fireRiskDetails'];
 /** The vehicle part of CARRY_KEYS, carried on motor renewals only. */
 const MOTOR_CARRY_KEYS = CARRY_KEYS.slice(0, CARRY_KEYS.indexOf('TNVS') + 1);
+/**
+ * Risk fields carried by line of business on top of CARRY_KEYS (the product columns of the migration policy sheets
+ * store them too, so a migrated policy renews with them). The dates of the expiring term (travel dates, loan release
+ * date) are never carried.
+ */
+const LINE_CARRY_KEYS = {
+  MOTOR: ['conductionSticker', 'loanReference', 'dealerCode'],
+  ACCIDENT: ['plan', 'beneficiary', 'occupationClass', 'destination'],
+  LIFE: ['loanReference', 'loanAmount', 'loanTermMonths'],
+  FIRE: ['riskAddress', 'occupancy', 'constructionClass'],
+  IAR: ['riskAddress', 'occupancy', 'constructionClass'],
+};
 const present = (v) => v !== undefined && v !== null && v !== '';
 const pickPresent = (src, keys) => Object.fromEntries(keys.filter((k) => present(src?.[k])).map((k) => [k, src[k]]));
 const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
@@ -863,7 +881,7 @@ export async function renewalPrefill(policyRef) {
   const capturedObject = open?.accessories && typeof open.accessories === 'object' && !Array.isArray(open.accessories);
   const accessorySource = capturedObject ? open.accessories : source;
   const accessories = isMotor ? Object.fromEntries(ACCESSORY_KEYS.map((k) => [k, present(accessorySource[k]) ? accessorySource[k] : ''])) : {};
-  const vehicle = pickPresent(source, isMotor ? CARRY_KEYS : CARRY_KEYS.filter((k) => !MOTOR_CARRY_KEYS.includes(k)));
+  const vehicle = pickPresent(source, [...(isMotor ? CARRY_KEYS : CARRY_KEYS.filter((k) => !MOTOR_CARRY_KEYS.includes(k))), ...(LINE_CARRY_KEYS[lob] || [])]);
   const coverageDetails = { ...coverage, ...captured };
   let seats = null;
   if (isMotor) {

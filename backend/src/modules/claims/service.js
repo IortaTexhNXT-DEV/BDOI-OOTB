@@ -27,6 +27,7 @@ import { emailTemplate } from '../documents/common.js';
 import { assertDeathBenefit, claimsRatio, duplicatesOf, estimateOf, followUpDays, intimation } from './intake.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { businessDate, postingDate } from '../../lib/dates.js';
+import { originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 
 /** When a settlement is settled: its settlement date (not after today), else now. */
 const settledAt = async (settlement) => (settlement?.settlementDate ? postingDate(settlement.settlementDate) : new Date());
@@ -63,6 +64,7 @@ const BASE = `SELECT c.*, p.policy_number, p.inception_date, p.expiry_date, p.su
   (SELECT l.lead_number FROM leads l WHERE l.id = COALESCE(c.lead_id, p.lead_id)) AS lead_number,
   (SELECT q.quote_number FROM quotes q WHERE q.id = COALESCE(c.quote_id, p.quote_id)) AS quote_number,
   (SELECT u.display_name FROM users u WHERE u.id = c.created_by OR u.username = c.created_by ORDER BY (u.id = c.created_by) DESC LIMIT 1) AS reported_by_name,
+  ${originColumns('c')}, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
   (SELECT u.display_name FROM users u WHERE u.id = c.settlement_requested_by) AS settlement_requested_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = c.settlement_approved_by) AS settlement_approved_by_name, p.product_id, pr.code AS product_code
   FROM claims c JOIN policies p ON p.id = c.policy_id
@@ -137,6 +139,8 @@ export function toApi(r, labels, todayStr, open, adviceLabels = null) {
     },
     lead: null, quotation: null,
     createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    // a claim registered in BrokerVerse on a migrated policy is flagged with the policy's origin and legacy number
+    origin: originOf(r), policyOrigin: r.policy_origin || 'issued', policyLegacyNumber: r.policy_origin === 'migrated' ? r.policy_legacy_number : null,
   };
 }
 
@@ -288,6 +292,8 @@ export async function listClaims(q, pg) {
   if (q.policyId) add('(c.policy_id = ? OR p.policy_number = ?)', q.policyId, q.policyId);
   if (q.lob) add('upper(c.lob) = upper(?)', q.lob);
   if (q.handlerUserId) add('c.handler_user_id = ?', q.handlerUserId);
+  const origin = originWhere('c', q.origin, params);
+  if (origin) where.push(origin);
   if (q.dateFrom || q.startDate) add('c.reported_date >= ?::date', q.dateFrom || q.startDate);
   if (q.dateTo || q.endDate) add('c.reported_date <= ?::date', q.dateTo || q.endDate);
   const search = q.search || q.q;
@@ -512,6 +518,7 @@ const EDITABLE = {
 /** Update claim details / adjuster report (PUT /claims/:id). Allowed while registered or in review. */
 export async function updateClaim(id, input, user, files) {
   const before = await loadRow(id);
+  withoutOriginFields(input, before);
   if (!['registered', 'in-review'].includes(before.status)) throw conflict(`Claim is ${before.status}; it can no longer be edited`);
   const sets = [];
   const params = [];

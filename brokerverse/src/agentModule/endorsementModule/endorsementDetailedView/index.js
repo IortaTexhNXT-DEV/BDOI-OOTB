@@ -11,6 +11,7 @@ import s3Service from "../../../services/s3Service";
 import { notifyError } from "../../../utility/dialogs";
 import { FieldsSkeleton } from "../../../components/Skeletons";
 import DetailHeader from "../../../components/DetailHeader";
+import OriginChip, { policyOriginOf } from "../../../components/OriginChip";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import { RecordActivityLog } from "../../../components/ActivityLog";
@@ -180,7 +181,12 @@ const EndorsementDetailedView = ({ action }) => {
           <DetailHeader
             title={endorsementData?.endorsementNumber || t("endorsement.endorsementTitle")}
             status={endorsementStatus ? { code: endorsementStatus, label: t(`endorsement.status.${endorsementStatus}`, { defaultValue: endorsementStatus }) } : null}
-            subtitle={[endorsementData?.policyNumber, endorsementData?.insuredName || endorsementData?.clientName].filter(Boolean).join(" · ")}
+            subtitle={(
+              <>
+                {[endorsementData?.policyNumber, endorsementData?.insuredName || endorsementData?.clientName].filter(Boolean).join(" · ")}
+                <OriginChip origin={policyOriginOf(endorsementData)} variant="policy" className="ml-2" />
+              </>
+            )}
             meta={[
               { label: t("endorsement.effectiveDate"), value: endorsementData?.effectiveDate, type: "date" },
               { label: t("endorsement.premiumChange"), value: isCancelled ? null : premiumDelta, type: "amount", hidden: isCancelled },

@@ -11,7 +11,7 @@ const FIGURES = ["open", "pending-approval", "approved", "settled"];
 /** Operations > Claims: the claims register with the number of claims at each stage (each figure filters the list). */
 const ClaimsPage = () => {
   const { t } = useTranslation();
-  const [state, patch] = useListState("claims", { search: "", status: "" });
+  const [state, patch] = useListState("claims", { search: "", status: "", origin: "" });
   const [counts, setCounts] = useState({});
 
   useEffect(() => {

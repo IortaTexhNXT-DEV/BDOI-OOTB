@@ -9,6 +9,8 @@ import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import StatusChip from "../../../components/StatusChip";
+import { originColumnBody } from "../../../components/OriginChip";
 import { useTranslation } from "react-i18next";
 import { statusLabel } from "../../../utils/statusSeverity";
 
@@ -148,10 +150,12 @@ const DataTabelJV = ({
           className="fieldvalue_container"
           headerStyle={headerStyle}
           body={(r) => {
+            if (r.status === "opening") return <StatusChip label={translate("origin.openingBalance")} severity="info" />;
             // named as on the voucher's own page and its print
             return r.status ? tr(`accounts.journalVoucherDetails.statuses.${r.status}`, { defaultValue: statusLabel(r.status) }) : "—";
           }}
         ></Column>
+        <Column header={translate("origin.title")} body={originColumnBody} className="fieldvalue_container" headerStyle={headerStyle}></Column>
 
         <Column
 

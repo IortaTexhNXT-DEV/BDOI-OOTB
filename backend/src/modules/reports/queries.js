@@ -41,16 +41,22 @@ const CREATOR_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.displa
 /** Billing mode label: broker billed (client pays the broker) or direct bill (client pays the insurer; commission billed by debit note). */
 const BILLING_MODE = "CASE p.billing_mode WHEN 'direct' THEN 'Direct bill' ELSE 'Broker billed' END";
 
+/** Origin of a record (migration 0440): Migrated (loaded from the legacy system at go-live) or Issued in BrokerVerse. */
+export const ORIGIN_LABEL = (alias) => `CASE ${alias}.origin WHEN 'migrated' THEN 'Migrated' ELSE 'Issued in BrokerVerse' END`;
 const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
 const POLICY_FILTERS = ['agent', 'insurer', 'branch', 'client', 'product', 'status'];
+const PRODUCTION_FILTERS = [...POLICY_FILTERS, 'origin'];
+/** Reports that split migrated and issued business: the Origin filter, column and criteria (seeds/68_report_source.sql). */
+const ORIGIN_FILTERS = PRODUCTION_FILTERS;
+const ORIGIN_CRITERIA = { Origin: { groupBy: 'origin' } };
 
 const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALESCE(p.issued_date, p.created_at::date) AS "issueDate",
     p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", to_char(p.inception_date, 'YYYY-MM') AS month,
     CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END AS "businessType",
     ${POLICY_DIMS}, p.sum_insured AS "sumInsured", p.premium_total AS premium, p.commission_amount AS commission,
     ${BILLING_MODE} AS "billingMode", p.currency, p.status,
-    -- policies of the old system loaded by the go-live migration, kept apart from business written in BrokerVerse
-    CASE WHEN p.doc->>'source' = 'go-live-migration' OR p.load_batch_id IS NOT NULL THEN 'Migrated' ELSE 'BrokerVerse' END AS "source"
+    -- policies of the old system loaded by the go-live migration, kept apart from business issued in BrokerVerse
+    ${ORIGIN_LABEL('p')} AS origin, p.origin AS _origin
   FROM policies p ${POLICY_JOINS}
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
@@ -61,7 +67,9 @@ const claimRows = `SELECT cl.claim_number AS "claimNumber", p.policy_number AS "
     (SELECT CASE WHEN count(*) = 0 THEN NULL ELSE (count(*) FILTER (WHERE i.status <> 'pending')) || ' of ' || count(*) END
        FROM claim_document_items i WHERE i.claim_id = cl.id AND i.required) AS requirements,
     (COALESCE(cl.settled_at::date, $7::date) - cl.reported_date) AS "ageDays",
-    rpt_age_bucket(COALESCE(cl.settled_at::date, $7::date) - cl.reported_date, $3::int[]) AS "ageBucket"
+    rpt_age_bucket(COALESCE(cl.settled_at::date, $7::date) - cl.reported_date, $3::int[]) AS "ageBucket",
+    -- an open claim of the old system loaded at go-live, or a claim registered in BrokerVerse
+    ${ORIGIN_LABEL('cl')} AS origin, cl.origin AS _origin
   FROM claims cl JOIN policies p ON p.id = cl.policy_id ${POLICY_JOINS}`;
 const claims = `${claimRows}
   WHERE cl.reported_date BETWEEN $1 AND $2`;
@@ -78,7 +86,9 @@ const BILL_DATE = '(SELECT bj.jv_date FROM journal_vouchers bj WHERE bj.id = rv.
 const receivables = `SELECT rv.bill_number AS "billNumber", COALESCE(${BILL_DATE}, rv.created_at::date) AS "billDate", rv.due_date AS "dueDate",
     p.policy_number AS "policyNumber", ${POLICY_DIMS},
     rv.amount, (rv.amount - rv.balance) AS paid, rv.balance, rv.status,
-    ($2::date - rv.due_date) AS "ageDays", rpt_age_bucket($2::date - rv.due_date, $3::int[]) AS "ageBucket"
+    ($2::date - rv.due_date) AS "ageDays", rpt_age_bucket($2::date - rv.due_date, $3::int[]) AS "ageBucket",
+    -- an open item of the old system migrated at go-live, or a bill issued in BrokerVerse
+    ${ORIGIN_LABEL('rv')} AS origin, rv.origin AS _origin
   FROM receivables rv LEFT JOIN policies p ON p.id = rv.policy_id
   LEFT JOIN clients c ON c.id = COALESCE(rv.client_id, p.client_id)
   LEFT JOIN products pr ON pr.id = p.product_id
@@ -239,27 +249,27 @@ export const QUERIES = {
   ...SALES_QUERIES,
   ...TISPH_QUERIES,
   production: {
-    sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Source: { groupBy: 'source' } },
+    sql: production, filters: PRODUCTION_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Origin: { groupBy: 'origin' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
     summary: { newBusiness: 'count(*) FILTER (WHERE f."businessType" = \'New Business\')', renewals: 'count(*) FILTER (WHERE f."businessType" = \'Renewal\')',
-      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')', migrated: 'count(*) FILTER (WHERE f.source = \'Migrated\')' },
+      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')', migrated: 'count(*) FILTER (WHERE f._origin = \'migrated\')' },
   },
   premiumByProduct: {
-    sql: production, filters: POLICY_FILTERS,
+    sql: production, filters: PRODUCTION_FILTERS,
     criteria: { Overall: { dims: ['month', 'product', 'insurer'] }, Product: { dims: ['product'] }, Month: { dims: ['month'] }, 'Principal Insurer': { dims: ['insurer'] } },
     aggregate: { policies: 'count(*)', sumInsured: 'sum(t."sumInsured")', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },
   newVsRenewal: {
-    sql: production, filters: POLICY_FILTERS,
+    sql: production, filters: PRODUCTION_FILTERS,
     criteria: { Overall: { dims: ['month', 'businessType'] }, 'Business Type': { dims: ['businessType'] }, Agent: { dims: ['agent', 'businessType'] } },
     aggregate: { policies: 'count(*)', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },
   claims: {
-    sql: claims, extras: claimExtras, filters: POLICY_FILTERS,
+    sql: claims, extras: claimExtras, filters: ORIGIN_FILTERS,
     criteria: {
       All: {}, Open: { where: 't.status = ANY($4::text[])' }, Settled: { where: 't.status = ANY($5::text[])' },
       Rejected: { where: 't.status = ANY($6::text[])' }, Aging: { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' },
-      Partial: { where: 't.status = \'partially-settled\'' }, Cancelled: { where: 't.status = \'cancelled\'' }, 'Claim Type': { groupBy: 'claimType' },
+      Partial: { where: 't.status = \'partially-settled\'' }, Cancelled: { where: 't.status = \'cancelled\'' }, 'Claim Type': { groupBy: 'claimType' }, ...ORIGIN_CRITERIA,
     },
     orderBy: 'f."reportedDate", f."claimNumber"',
   },
@@ -269,20 +279,22 @@ export const QUERIES = {
     orderBy: 'f."settledDate", f."claimNumber"',
   },
   claimsAgeing: {
-    sql: `${claims} AND cl.status = ANY($4::text[])`, extras: claimExtras, filters: POLICY_FILTERS,
-    criteria: { Overall: { dims: ['ageBucket'] }, 'Principal Insurer': { dims: ['insurer', 'ageBucket'] }, Agent: { dims: ['agent', 'ageBucket'] } },
+    sql: `${claims} AND cl.status = ANY($4::text[])`, extras: claimExtras, filters: ORIGIN_FILTERS,
+    criteria: { Overall: { dims: ['ageBucket'] }, 'Principal Insurer': { dims: ['insurer', 'ageBucket'] }, Agent: { dims: ['agent', 'ageBucket'] }, Origin: { dims: ['origin', 'ageBucket'] } },
     aggregate: { claims: 'count(*)', estimateAmount: 'sum(t."estimateAmount")', approvedAmount: 'sum(COALESCE(t."approvedAmount", 0))', averageAgeDays: 'round(avg(t."ageDays"), 1)', _minAge: 'min(t."ageDays")' },
     orderBy: (dims) => dims.map((d) => (d === 'ageBucket' ? 'f."_minAge"' : `f."${d}"`)).join(', '),
   },
   renewals: {
     sql: `SELECT p.policy_number AS "policyNumber", ${POLICY_DIMS}, r.due_date AS "dueDate", r.status,
         CASE WHEN r.status = ANY($3::text[]) THEN 'Retained' WHEN r.status = ANY($4::text[]) THEN 'Lost' ELSE 'Pending' END AS outcome,
-        r.premium_old AS "premiumOld", r.premium_new AS "premiumNew", np.policy_number AS "renewedPolicyNumber"
+        r.premium_old AS "premiumOld", r.premium_new AS "premiumNew", np.policy_number AS "renewedPolicyNumber",
+        -- the expiring policy migrated at go-live (its renewal is new business in BrokerVerse) or issued in BrokerVerse
+        ${ORIGIN_LABEL('p')} AS origin, p.origin AS _origin
       FROM renewals r JOIN policies p ON p.id = r.policy_id ${POLICY_JOINS}
       LEFT JOIN policies np ON np.id = r.new_policy_id
       WHERE r.due_date BETWEEN $1 AND $2`,
     extras: [setting('reports.renewal_retained_statuses', ['renewed'], 'text[]'), setting('reports.renewal_lost_statuses', ['lapsed'], 'text[]')],
-    filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f."dueDate", f."policyNumber"',
+    filters: ORIGIN_FILTERS, criteria: { ...STANDARD_CRITERIA, ...ORIGIN_CRITERIA }, orderBy: 'f."dueDate", f."policyNumber"',
     summary: {
       retained: 'count(*) FILTER (WHERE f.outcome = \'Retained\')',
       lost: 'count(*) FILTER (WHERE f.outcome = \'Lost\')',
@@ -307,23 +319,24 @@ export const QUERIES = {
         c.id AS _client_id, c.client_code AS _client_code, c.display_name AS client,
         pr.id::text AS _product_id, pr.code AS _product_code, pr.name AS product,
         cm.basis_amount AS "basisAmount", cm.rate, cm.amount, cm.withholding, cm.net_amount AS "netAmount", cm.status, cm.paid_at::date AS "paidDate",
-        ${BILLING_MODE} AS "billingMode"
+        ${BILLING_MODE} AS "billingMode", ${ORIGIN_LABEL('p')} AS origin, p.origin AS _origin
       FROM commissions cm LEFT JOIN policies p ON p.id = cm.policy_id
       LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
       LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
       LEFT JOIN users u ON u.id = COALESCE(cm.agent_user_id, p.owner_user_id)
       LEFT JOIN branches b ON b.code = u.branch_code
       WHERE COALESCE(p.issued_date, cm.created_at::date) BETWEEN $1 AND $2`,
-    filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f.agent, f."accruedDate", f."policyNumber"',
+    filters: ORIGIN_FILTERS, criteria: { ...STANDARD_CRITERIA, ...ORIGIN_CRITERIA }, orderBy: 'f.agent, f."accruedDate", f."policyNumber"',
   },
   premiumReceivable: {
     sql: `${receivables} WHERE COALESCE(${BILL_DATE}, rv.created_at::date) BETWEEN $1 AND $2`, extras: [receivableBuckets],
-    filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f.client, f."dueDate", f."billNumber"',
+    filters: ORIGIN_FILTERS, criteria: { ...STANDARD_CRITERIA, ...ORIGIN_CRITERIA }, orderBy: 'f.client, f."dueDate", f."billNumber"',
   },
   collectionsAgeing: {
     sql: `${receivables} WHERE rv.balance > 0 AND rv.status <> 'written-off' AND COALESCE(${BILL_DATE}, rv.created_at::date) <= $2`, extras: [receivableBuckets],
-    filters: POLICY_FILTERS,
-    criteria: { 'Ageing Bucket': { groupBy: 'ageBucket' }, Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' }, Client: { groupBy: 'client' } },
+    filters: ORIGIN_FILTERS,
+    criteria: { 'Ageing Bucket': { groupBy: 'ageBucket' }, Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' }, Client: { groupBy: 'client' },
+      ...ORIGIN_CRITERIA },
     orderBy: 'f."ageDays" DESC, f."billNumber"',
   },
   collections: {
@@ -331,7 +344,7 @@ export const QUERIES = {
         SELECT rv.bill_number AS "billNumber", COALESCE(${BILL_DATE}, rv.created_at::date) AS "billDate", rv.due_date AS "dueDate", p.policy_number AS "policyNumber",
           ${POLICY_DIMS}, rv.amount AS billed,
           COALESCE((SELECT sum(r.amount) FROM receipts r WHERE r.receivable_id = rv.id AND r.status = 'posted' AND r.received_date <= $2), 0) AS collected,
-          rv.balance, rv.status
+          rv.balance, rv.status, ${ORIGIN_LABEL('rv')} AS origin, rv.origin AS _origin
         FROM receivables rv LEFT JOIN policies p ON p.id = rv.policy_id
         LEFT JOIN clients c ON c.id = COALESCE(rv.client_id, p.client_id)
         LEFT JOIN products pr ON pr.id = p.product_id
@@ -339,13 +352,15 @@ export const QUERIES = {
         LEFT JOIN users u ON u.id = p.owner_user_id
         LEFT JOIN branches b ON b.code = u.branch_code
         WHERE rv.due_date BETWEEN $1 AND $2) x`,
-    filters: POLICY_FILTERS, criteria: STANDARD_CRITERIA, orderBy: 'f."dueDate", f."billNumber"',
+    filters: ORIGIN_FILTERS, criteria: { ...STANDARD_CRITERIA, ...ORIGIN_CRITERIA }, orderBy: 'f."dueDate", f."billNumber"',
     summary: { collectionEfficiency: 'round(100.0 * sum(f.collected) / NULLIF(sum(f.billed), 0), 2)' },
   },
   receipts: {
     sql: `SELECT r.receipt_number AS "receiptNumber", r.received_date AS "receivedDate", rv.bill_number AS "billNumber",
         p.policy_number AS "policyNumber", ${POLICY_DIMS}, r.payment_mode AS "paymentMode", bk.name AS bank,
-        r.reference_no AS "referenceNo", r.amount, r.status
+        r.reference_no AS "referenceNo", r.amount, r.status,
+        -- what the receipt collects: a migrated open item (or a migrated policy) or business issued in BrokerVerse
+        CASE COALESCE(rv.origin, p.origin) WHEN 'migrated' THEN 'Migrated' ELSE 'Issued in BrokerVerse' END AS origin, COALESCE(rv.origin, p.origin, 'issued') AS _origin
       FROM receipts r LEFT JOIN receivables rv ON rv.id = r.receivable_id
       LEFT JOIN policies p ON p.id = COALESCE(r.policy_id, rv.policy_id)
       LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
@@ -355,7 +370,7 @@ export const QUERIES = {
       LEFT JOIN branches b ON b.code = u.branch_code
       LEFT JOIN banks bk ON bk.id = r.bank_id
       WHERE r.received_date BETWEEN $1 AND $2`,
-    filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Payment Mode': { groupBy: 'paymentMode' } },
+    filters: ORIGIN_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Payment Mode': { groupBy: 'paymentMode' }, ...ORIGIN_CRITERIA },
     orderBy: 'f."receivedDate", f."receiptNumber"',
   },
   disbursements: {

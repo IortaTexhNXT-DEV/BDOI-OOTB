@@ -103,8 +103,14 @@ export const FEATURES = Object.freeze([
     key: 'configuration-promotion', name: 'Configuration promotion', module: 'Platform', tier: PLAT,
     description: 'Configuration workbook, master data load at cutover and comparison of environments (Dev, UAT, Production)',
     requirements: ['TIS-BRD-NFR-08', 'TIS-BRD-NFR-8.2', 'PBSM-MIG-MASTERS'],
-    menus: ['Master > Environment Promotion > Setup Workbook', 'Master > Environment Promotion > Compare Environments', 'Master > Environment Promotion > Promotion Path'],
+    menus: ['Master > Environment Promotion > Compare Environments', 'Master > Environment Promotion > Promotion Path'],
     api: ['/data-load', '/environment-promotion'],
+  }),
+  feature({
+    key: 'go-live-workspace', name: 'Data Migration & Go-Live workspace', module: 'Platform', tier: PLAT,
+    description: 'Templates, loads with second-person approval, reconciliation, mock runs, cutover checklist, Go / No-Go decision, go-live lock and hypercare',
+    requirements: ['TIS-BRD-MIG-01', 'TIS-BRD-NFR-08', 'BRD-5.14'],
+    menus: ['Master > System Configuration > Data Migration & Go-Live'], jobs: ['data-load-sweep', 'golive-relock'],
   }),
   feature({
     key: 'features-releases', name: 'Features and releases', module: 'Platform', tier: PLAT,

@@ -215,8 +215,10 @@ Object.assign(roleMenuPermissions, {
   "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"], master: [...TIS_SALES.master, "Finance > Discount Caps"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
-  // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572)
-  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables", "Incentive"] },
+  // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572) and, as the
+  // data owner of policies, clients and claims, the migration loads (approve:data-load)
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables", "Incentive"],
+    master: [...TIS_OPERATIONS.master, "System Configuration > Data Migration & Go-Live"] },
   // Receipting (RBAC v4): CCD-PDU has no access to the receipts
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
@@ -233,7 +235,8 @@ Object.assign(roleMenuPermissions, {
   "tis-finance": {
     ...roleMenuPermissions.accounting,
     accounts: withoutInsurerRec(roleMenuPermissions.accounting.accounts),
-    master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules"],
+    master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules",
+      "System Configuration > Data Migration & Go-Live"],
   },
   // IT AppSupport / Admin: administration and the reference masters; the business screens read only.
   "tis-it-admin": {
@@ -267,8 +270,10 @@ Object.assign(roleMenuPermissions, {
       "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
       "Insurance Management > Distribution Channels",
       // approves promotions and discount caps
-      "Finance > Discount Caps"],
+      "Finance > Discount Caps", "System Configuration > Data Migration & Go-Live"],
   },
+  // TIS Audit: the migration workspace and the audit trail, read only (read:data-load, read:audit)
+  "tis-auditor": { master: ["System Configuration > Data Migration & Go-Live", "System Configuration > Audit Trail"] },
 });
 
 // Talkbot Calls (Operations > Renewals, TIS-BRD-LEAD-09): opened with read:talkbot-calls (Sales and Operations personas,

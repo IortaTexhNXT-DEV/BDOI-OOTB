@@ -14,7 +14,8 @@
  *                                                claims, renewals, period-end (period close, year-end, CAS books),
  *                                                incentive (batch rejection), roles and access-control (access changes),
  *                                                remittance (remittance decisions, exceptions, insurer reconciliation
- *                                                and billing), policies (corrections), endorsements (rejection))
+ *                                                and billing), policies (corrections), endorsements (rejection),
+ *                                                data-load (rejection of a data load))
  * Reading needs the read permission of an owning module (or read:masters).
  */
 import { moduleRouter } from '../../lib/registry.js';
@@ -35,7 +36,7 @@ export const OWNERS = {
   'cost-centre': { module: 'journal-vouchers' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
   'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'roles', 'access-control', 'remittance', 'policies', 'endorsements',
-    'promotions', 'discount-caps', 'features'], write: false },
+    'promotions', 'discount-caps', 'features', 'data-load'], write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 

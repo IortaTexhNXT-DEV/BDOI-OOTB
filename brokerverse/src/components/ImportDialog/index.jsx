@@ -51,16 +51,19 @@ const ErrorTable = ({ errors }) => {
 
 /**
  * Spreadsheet import dialog shared by the master screens, the chart of accounts, the bulk uploads and the go-live
- * imports. The steps sit in one aligned grid: the sheet to upload into (when there are several), the template, the
- * go-live date (`goLiveDate`) and the file (name, size and a remove button once chosen).
+ * imports. The steps sit in one aligned grid: the sheet to upload into (when there are several), the template (when the
+ * target has one), the go-live date (`goLiveDate`), the screen's own fields (`steps`) and the file (name, size and a
+ * remove button once chosen).
  *
- * targets: [{ label, templatePath, uploadPath, validatePath? }]. With a validatePath the dialog validates first (the
+ * targets: [{ label, templatePath?, uploadPath, validatePath? }]. With a validatePath the dialog validates first (the
  * summary from `previewFacts(result)` and the errors with row and column, nothing saved), then loads the file after the
  * confirmation that `confirmLoad(result)` describes (ConfirmDialog props). note / help: one sentence behind the help
- * icon of the title. onDone(result) is called after an upload that saved at least one row.
+ * icon of the title. onDone(result) is called after an upload that saved at least one row; onUploaded(result) after
+ * every upload the API accepted (an upload that starts a job and saves nothing yet). `accept` and `fileTypes` name the
+ * file types the picker offers and their hint.
  *
  * Upload preview (an import the server keeps between validation and loading, such as the remittance policy list):
- * `steps` add fields before the file ([{ key, label, node }]) with `fields` (sent with the file) and `fieldsReady`;
+ * `steps` add fields before the file ([{ key, label, node, required }]) with `fields` (sent with the file) and `fieldsReady`;
  * `previewRows` (UploadPreview loadRows) shows the rows read with their result, filtered by `resultFilters`, with
  * `rowColumns`; `onErrorReport(preview)` downloads the error report; `onCommit(preview)` loads what was validated
  * (instead of sending the file again) once `preview.canCommit` is not false. `loadLabel` may be a function of the
@@ -70,8 +73,8 @@ const ErrorTable = ({ errors }) => {
  * ConfirmDialog props of the question, fields: the form fields that load the file anyway }; null keeps the refusal.
  */
 const ImportDialog = ({
-  visible, onHide, title, targets, note, help, goLiveDate = false, onDone, previewFacts, confirmLoad, loadLabel,
-  steps, fields: extraFields, fieldsReady = true, previewRows, rowColumns, resultFilters, onErrorReport, onCommit, confirmRetry,
+  visible, onHide, title, targets, note, help, goLiveDate = false, onDone, onUploaded, previewFacts, confirmLoad, loadLabel,
+  steps, fields: extraFields, fieldsReady = true, previewRows, rowColumns, resultFilters, onErrorReport, onCommit, confirmRetry, accept = ".xlsx,.csv", fileTypes,
 }) => {
   const { t } = useTranslation();
   const [target, setTarget] = useState(targets?.[0] || null);
@@ -129,6 +132,7 @@ const ImportDialog = ({
       const r = onCommit ? await onCommit(preview) : await importService.upload(target.uploadPath, file, { ...fields(), ...more });
       setResult(r);
       setPreview(null);
+      if (onUploaded) onUploaded(r);
       if (onDone && (onCommit || r.created || r.updated || r.accounts || r.loaded)) onDone(r);
     } catch (e) {
       const again = !extra && confirmRetry ? confirmRetry(e) : null;
@@ -191,15 +195,19 @@ const ImportDialog = ({
               </div>
             </div>
           )}
-          <div className="import-dialog__step">
-            <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.template")}</span>
-            <div className="import-dialog__control">
-              <Button type="button" label={t("importDialog.downloadTemplate")} icon="pi pi-download" outlined size="small" className="import-dialog__button" onClick={download} disabled={!target} />
+          {(!target || target.templatePath) && (
+            <div className="import-dialog__step">
+              <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.template")}</span>
+              <div className="import-dialog__control">
+                <Button type="button" label={t("importDialog.downloadTemplate")} icon="pi pi-download" outlined size="small" className="import-dialog__button" onClick={download} disabled={!target} />
+              </div>
             </div>
-          </div>
+          )}
           {(steps || []).map((s) => (
             <div className="import-dialog__step" key={s.key}>
-              <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{s.label}</span>
+              <label htmlFor={s.key} className="import-dialog__label">
+                <span className="import-dialog__no">{number()}</span>{s.label}{s.required ? <span className="required-marker">*</span> : null}
+              </label>
               <div className="import-dialog__control">{s.node}</div>
             </div>
           ))}
@@ -214,7 +222,7 @@ const ImportDialog = ({
           <div className="import-dialog__step">
             <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.file")}</span>
             <div className="import-dialog__control">
-              <input ref={input} type="file" accept=".xlsx,.csv" hidden data-testid="import-file"
+              <input ref={input} type="file" accept={accept} hidden data-testid="import-file"
                 onChange={(e) => { setFile(e.target.files?.[0] || null); changed(); e.target.value = ""; }} />
               {file ? (
                 <span className="import-dialog__file">
@@ -227,7 +235,7 @@ const ImportDialog = ({
               ) : (
                 <>
                   <Button type="button" label={t("importDialog.chooseFile")} icon="pi pi-paperclip" outlined size="small" className="import-dialog__button" onClick={() => input.current?.click()} />
-                  <span className="import-dialog__hint">{t("importDialog.fileTypes")}</span>
+                  <span className="import-dialog__hint">{fileTypes || t("importDialog.fileTypes")}</span>
                 </>
               )}
             </div>
@@ -283,8 +291,8 @@ ImportDialog.propTypes = {
   previewFacts: PropTypes.func,
   confirmLoad: PropTypes.func,
   loadLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
-  /** further steps before the file: [{ key, label, node }] */
-  steps: PropTypes.arrayOf(PropTypes.shape({ key: PropTypes.string.isRequired, label: PropTypes.node, node: PropTypes.node })),
+  /** further steps before the file: [{ key (id of the control), label, node, required }] */
+  steps: PropTypes.arrayOf(PropTypes.shape({ key: PropTypes.string.isRequired, label: PropTypes.node, node: PropTypes.node, required: PropTypes.bool })),
   /** form fields sent with the file (validate and upload) */
   fields: PropTypes.object,
   /** false while the further steps are incomplete */
@@ -297,6 +305,10 @@ ImportDialog.propTypes = {
   onCommit: PropTypes.func,
   /** a refusal the user may override: (error) => { dialog: ConfirmDialog props, fields: sent again }, or null */
   confirmRetry: PropTypes.func,
+  onUploaded: PropTypes.func,
+  /** file types offered by the file picker (".xlsx,.csv") and their hint */
+  accept: PropTypes.string,
+  fileTypes: PropTypes.string,
 };
 
 export { UploadPreview };

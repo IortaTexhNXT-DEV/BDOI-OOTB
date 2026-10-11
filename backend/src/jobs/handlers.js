@@ -156,3 +156,16 @@ export async function sapGlExport() {
   if (!(await tableExists('sap_gl_exports'))) return { skipped: 'sap_gl_exports table missing' };
   return (await import('../modules/sap-gl/service.js')).scheduledExport();
 }
+
+/**
+ * Data Migration & Go-Live (every 5 minutes): loads whose job stopped are marked failed, nothing saved, and loads waiting
+ * for approval too long expire (dataLoadSweep); unlocks of the go-live lock whose hours have run out end (goLiveRelock).
+ */
+export async function dataLoadSweep() {
+  if (!(await tableExists('go_live_lock_requests'))) return { skipped: 'data load jobs not migrated' };
+  return (await import('../modules/data-load/jobs.js')).sweep();
+}
+export async function goLiveRelock() {
+  if (!(await tableExists('go_live_lock_requests'))) return { skipped: 'go-live lock requests not migrated' };
+  return (await import('../modules/data-load/golive.js')).relock();
+}

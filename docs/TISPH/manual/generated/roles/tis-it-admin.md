@@ -110,7 +110,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | E-mail Outbox | Create and edit |
 | Master > System | Integrations | Create and edit |
 | Master > System | Features & Releases | View |
-| Master > Environment Promotion | Setup Workbook | Create and edit |
+| Master > System | Data Migration & Go-Live | Create and edit |
 | Master > Environment Promotion | Compare Environments | Create and edit |
 | Master > Environment Promotion | Promotion Path | Create and edit |
 | Product Configurator | Dashboard | Create and edit |
@@ -163,8 +163,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | Integrations |
 | Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |  |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
-| Master data and configuration | Environment promotion | View | Download the Setup Workbook, see the uploads, compare environments and the promotion path | Setup Workbook, Compare Environments and Promotion Path |
-| Master data and configuration | Environment promotion | Create and edit | Upload, validate and load the Setup Workbook; mark the environment |  |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live, Compare Environments and Promotion Path |
+| Master data and configuration | Data migration and go-live | Create and edit | Upload, validate and submit loads, record checklist steps, evidence and defects, mark the environment |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |  |
@@ -185,6 +185,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Access control | Approve role access changes and authority limits of another administrator | TIS IT AppSupport / Admin |
+| Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
@@ -197,5 +198,6 @@ The user who enters a record never approves it: the approval is always another u
 | Rule | Conflict | When given together | Reason |
 |---|---|---|---|
 | Administration and transactions | Users (create and edit), Roles (create and edit), Access control (create and edit) with Receipts (create and edit), Collections and credit control (create and edit), Disbursements and petty cash (create and edit), Journal vouchers (create and edit), Remittance and insurer reconciliation (create and edit), Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
+| Load and approve migration data | Data migration and go-live (create and edit) with Data migration and go-live (approve) held by the same person | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.

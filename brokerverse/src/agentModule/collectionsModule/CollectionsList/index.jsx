@@ -17,6 +17,7 @@ import ImportDialog from "../../../components/ImportDialog";
 import { hasPermission } from "../../../utils/canOpen";
 import StatCards from "../../../components/StatCards";
 import { openConfirm } from "../../../components/ConfirmDialog";
+import { OriginFilter, originColumnBody } from "../../../components/OriginChip";
 import { PageHeader } from "../../../module/OpsAccounting/common";
 
 const openItemsUpload = (t) => [{ label: t("collectionsList.openItems"), templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
@@ -38,6 +39,7 @@ const CollectionsList = () => {
     status: "",
     overdueLevel: "",
     search: "",
+    origin: "",
   });
 
   const toast = useRef(null);
@@ -348,6 +350,8 @@ const CollectionsList = () => {
             onChange={(e) => handleFilterChange("overdueLevel", e.value)}
             placeholder={t("collectionsList.filterByOverdueLevel")}
           />
+
+          <OriginFilter value={filters.origin} onChange={(v) => handleFilterChange("origin", v)} />
         </div>
 
         <div className="collections-table-container">
@@ -379,6 +383,7 @@ const CollectionsList = () => {
               body={policyBodyTemplate}
               style={{ minWidth: "120px" }}
             />
+            <Column header={t("origin.title")} body={originColumnBody} />
             <Column
               field="outstandingAmount"
               header={t("tables.outstanding")}

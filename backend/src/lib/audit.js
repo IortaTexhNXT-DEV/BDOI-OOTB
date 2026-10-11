@@ -31,3 +31,21 @@ export async function audit(req, { entity, entityId, action, before = null, afte
       before ? JSON.stringify(before) : null, after ? JSON.stringify(after) : null, req.ip, source ? JSON.stringify(source) : null],
   );
 }
+
+/**
+ * Several audit entries of one request in one insert (a data load writes one entry per record it creates, changes or
+ * removes): entries [{ entity, entityId, action, before, after }]. Runs in the caller's transaction when there is one.
+ */
+export async function auditMany(req, entries) {
+  if (!entries.length) return;
+  const source = auditSource(req);
+  const json = (v) => (v ? JSON.stringify(v) : null);
+  await query(
+    `INSERT INTO audit_log(user_id, username, entity, entity_id, action, before_data, after_data, ip, source)
+     SELECT $1::text, $2::text, x.entity, x.entity_id, x.action, x.before_data::jsonb, x.after_data::jsonb, $3::text, $4::jsonb
+       FROM unnest($5::text[], $6::text[], $7::text[], $8::text[], $9::text[]) AS x(entity, entity_id, action, before_data, after_data)`,
+    [req?.user?.id ?? null, req?.user?.username ?? null, req?.ip ?? null, source ? JSON.stringify(source) : null,
+      entries.map((e) => e.entity), entries.map((e) => (e.entityId == null ? null : String(e.entityId))), entries.map((e) => e.action),
+      entries.map((e) => json(e.before)), entries.map((e) => json(e.after))],
+  );
+}

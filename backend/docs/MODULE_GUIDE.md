@@ -35,7 +35,8 @@ minimal, clearly-correct front-end fix.
   (post-dated cheque cancellations, migration 0520), `approve:insurer-billing` (insurer billing statements, 0522),
   `reverse:receipts` and `approve:receipt-reversal` (receipt reversals, 0524), and those of commission: `approve:commission-rules`
   and `approve:sharing-schemes` (decisions on Configuration Approvals, 0570), `approve:commission` (line change requests, 0571),
-  `write:commission-share` (the share of a line within the scheme limits). An approval route requires the approval
+  `write:commission-share` (the share of a line within the scheme limits), and `approve:data-load` (second-person
+  approval of data loads and of the go-live steps, migration 0440). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Where the screens must
   explain a refused decision before anyone acts, the module answers a decision block with the shared codes
   (`canDecide`, `blockedCode` such as SUBMITTER, ABOVE_LIMIT, NO_AUTHORITY, ALREADY_DECIDED, and the sentence in
@@ -95,7 +96,42 @@ minimal, clearly-correct front-end fix.
   hard-code prefixes, tax rates, currencies, limits, e-mail text or colours: read them from `app_settings` via
   `src/lib/settings.js`. New keys go into a seed or migration (`INSERT ... ON CONFLICT DO NOTHING`) with a group and
   a label; `npm run check:settings` lists keys read in code that nothing seeds.
-- Every mutation calls `audit(req, {...})` from `src/lib/audit.js`. Workflow events that someone must act on
+- Origin of a record: clients, policies, receivables, claims, journal vouchers and post-dated cheques carry `origin`
+  (`issued` or `migrated`), `legacy_system`, `legacy_number`, `migrated_at`, `migrated_by` and `load_batch_id`
+  (migration 0440). A list of these records filters on `?origin=` with `originWhere(alias, q.origin, params)` and
+  returns `origin: originOf(row)` on every row (select `originColumns(alias)` for the name of the user who migrated
+  it); an update passes the body through `withoutOriginFields(body, row)`, which refuses a change of the origin
+  fields. Figures that leave migrated business out (production, commission, incentive) add `kpiOriginWhere(alias,
+  kind)`. All in `src/lib/origin.js`; never test the older flags (`source = 'go-live-migration'`, `doc.source`) in new
+  code. A record created by an import of legacy business is written with `origin = 'migrated'`. Dashboards take
+  `origin=issued|all` (`dashboard/service.js` `dashboardOrigin`); a renewal-rate denominator counts migrated policies.
+  A record issued in BrokerVerse on a migrated policy (endorsement, claim, bill, renewal) returns `policyOrigin` and
+  `policyLegacyNumber` from the policy join; the screens mark it with `OriginChip variant="policy"`.
+- The opening balance journal of go-live (`journal_vouchers.source = 'go-live-opening'`, status `opening`) has no
+  journal lines (its lines are the opening balances set, `period-end/opening.js` `openingJournalLines`). A query that
+  reads journal headers without a status filter shows it as read-only or leaves status `opening` out; a change to a
+  journal goes through `accounting/lib/ledger.js`, whose `assertNotOpeningJournal` refuses it (409).
+- Go-live workbooks (`src/modules/data-load`): an object of a kit is a sheet declared in `registry.js`; its importer
+  translates legacy codes through the value maps (`resolveValue(ctx, object, value)`, `maps.js`), checks peso amounts
+  with `pesoValue` (at most two decimals, never rounded) and reports each record it creates or changes with
+  `ctx.record(...)`. The engine gives every row its result (New, Changed, Unchanged, Duplicate, Error) and runs the
+  duplicate rules of the object (`duplicates.js`); see the module README. A table that keeps uploaded rows with personal
+  identifiers in JSON gets the `pii_protect_columns('json:<column>')` trigger and its `PII_STORAGE` entry, as
+  `data_load_rows` does (migration 0441).
+- Long imports run as jobs, never in the request (the proxy cuts a request at 60 seconds): register the job type on the
+  job queue (`renewals/queue.js` `registerJobType`, `requeue: false` when a second run must never happen), move the
+  record with a compare-and-set of its status before the job starts (`data-load/service.js` `moveBatch`), answer 202
+  with the job and write the progress outside the job's transaction (`outsideTransaction` of `db/pool.js`). A job that
+  stops leaves its record in a state a sweep can see (`data-load/jobs.js` `sweep`).
+- A GET route of `/api/data-load` is listed in `test/migration-pii.test.js`, masked and tested or with the reason it
+  carries no personal identifier; a file built for a download is built while serving it (never in a job), so it is
+  masked per user. Evidence of the go-live goes to the storage folder `go-live-evidence` and is served only by a
+  data-load route that checks the caller.
+- Any route that loads legacy business (go-live, opening, migrated data) calls `assertMigrationOpen(kind)` or uses the
+  `migrationImportOpen(kind)` middleware (`src/lib/goLiveLock.js`); `test/migration-lock.test.js` lists every such route
+  as guarded or exempt with the reason, so a new import route must be classified there.
+- Every mutation calls `audit(req, {...})` from `src/lib/audit.js`; several entries of one request (one per record of a
+  data load) go in one insert with `auditMany(req, entries)`. Workflow events that someone must act on
   create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go
   through `queueEmail()` in `src/lib/mailer.js`, with the text from `renderTemplate()` (`src/lib/template.js`;
   subjects with `{ html: false }`).

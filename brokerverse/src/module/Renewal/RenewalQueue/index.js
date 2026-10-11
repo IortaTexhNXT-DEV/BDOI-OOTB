@@ -17,6 +17,7 @@ import StatCards from "../../../components/StatCards";
 import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel } from "../../../components/RecordPage";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
+import OriginChip, { OriginFilter, policyOriginOf } from "../../../components/OriginChip";
 import { hasPermission } from "../../../utils/canOpen";
 import BvConfirmDialog from "../../../components/ConfirmDialog";
 import { ExpiryCell, NoticeChip, PolicyCell, RenewalHeader, RiskChip, StageChip, useRenewalParam } from "../shared";
@@ -30,7 +31,8 @@ const METHODS = ["Email", "SMS", "Phone", "Letter"];
  * treatment and contacts so far. Row actions follow the stage: prepare the renewal quote, send the next notice, record a
  * reminder, complete an approved renewal; the renewal owner's unit (assign:renewals) reassigns a renewal or marks it not
  * for renewal with a coded reason. The detail opens on the right, also for the renewal named in the address
- * (?renewal=<id>, from My Work and the notifications).
+ * (?renewal=<id>, from My Work and the notifications). Renewals of policies migrated at go-live are marked and can be
+ * listed apart (Origin).
  */
 const RenewalQueue = () => {
   const { t } = useTranslation();
@@ -47,6 +49,7 @@ const RenewalQueue = () => {
   const [agent, setAgent] = useState("");
   const [range, setRange] = useState(null);
   const [due, setDue] = useState("");
+  const [origin, setOrigin] = useState("");
   // the Talkbot outcome of each renewal (filter and column) for the users who see the Talkbot call lists
   const talkbotOn = hasPermission("read:talkbot-calls");
   const [talkbot, setTalkbot] = useState("");
@@ -65,7 +68,7 @@ const RenewalQueue = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { items, dashboard: d } = await renewalsWorkspaceService.getQueue();
+      const { items, dashboard: d } = await renewalsWorkspaceService.getQueue(origin ? { origin } : {});
       setRows(items);
       setDashboard(d || {});
     } catch (e) {
@@ -73,7 +76,7 @@ const RenewalQueue = () => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [showError, origin]);
   useEffect(() => { load(); }, [load]);
 
   const refreshPipeline = async () => {
@@ -225,8 +228,8 @@ const RenewalQueue = () => {
       <StatCards items={figures} />
 
       <SectionCard>
-        <FilterBar active={!!(search || stage || risk || agent || range || due || talkbot)}
-          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setTalkbot(""); }}>
+        <FilterBar active={!!(search || stage || risk || agent || range || due || origin || talkbot)}
+          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setOrigin(""); setTalkbot(""); }}>
           <span className="p-input-icon-left bv-filter-bar__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("queue.searchHint")} aria-label={t("queue.searchHint")} />
@@ -243,10 +246,12 @@ const RenewalQueue = () => {
             options={[{ label: t("queue.allAgents"), value: "" }, ...agents.map((a) => ({ label: a, value: a }))]} />
           <Calendar value={range} onChange={(e) => setRange(e.value)} selectionMode="range" readOnlyInput showIcon dateFormat={calendarDateFormat()}
             placeholder={t("queue.expiryRange")} aria-label={t("queue.expiryRange")} />
+          <OriginFilter value={origin} onChange={setOrigin} />
         </FilterBar>
         <DataTable value={filtered} dataKey="id" loading={loading} paginator rows={20} size="small" sortField="daysToExpiry" sortOrder={1}
           emptyMessage={<EmptyState icon="pi-calendar" title={t("queue.emptyTitle")} text={rows.length ? t("queue.emptyFiltered") : t("queue.emptyText")} />}>
           <Column field="policyNumber" header={t("queue.col.policy")} sortable body={(r) => <PolicyCell policyNumber={r.policyNumber} insured={r.insuredName} onOpen={() => setPanelId(r.id)} />} />
+          <Column header={t("origin.title")} body={(r) => <OriginChip origin={policyOriginOf(r)} variant="renewal" compact />} />
           <Column field="product" header={t("queue.col.product")} sortable body={(r) => <span className="bv-cell-stack"><span>{r.product}</span><small>{r.insurer}</small></span>} />
           <Column field="daysToExpiry" header={t("queue.col.expiry")} sortable body={(r) => <ExpiryCell date={r.expiryDate} days={r.daysToExpiry} />} />
           <Column field="currentPremium" header={t("queue.col.premium")} sortable body={(r) => formatCurrency(r.currentPremium)} className="bv-num" headerClassName="bv-num" />
@@ -266,6 +271,7 @@ const RenewalQueue = () => {
             <StageChip row={selected} />
             <RiskChip level={selected.retentionRisk} />
             <span>{selected.renewalNumber}</span>
+            <OriginChip origin={policyOriginOf(selected)} variant="renewal" />
           </>
         ) : null}
         footer={selected ? (

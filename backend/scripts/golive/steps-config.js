@@ -75,12 +75,15 @@ export async function step2(ctx) {
   log.setPhase('Step 2. Configuration promoted into TARGET');
   const admin = tgt.admin;
 
-  await log.check(`Set golive.cutover_date = ${ctx.cutover} on TARGET (PUT /settings)`, async () => {
-    await admin.put('/settings', { settings: { 'golive.cutover_date': ctx.cutover } });
+  await log.check(`Set the cutover date ${ctx.cutover} on TARGET (PUT /data-load/golive/cutover-date) and load without a second user (rehearsal)`, async () => {
+    await admin.put('/data-load/golive/cutover-date', { cutoverDate: ctx.cutover });
+    // the rehearsal loads at once (POST /data-load/batches/:id/load); refused in production and pre-production
+    await admin.put('/data-load/golive/settings', { loadApprovalRequired: false });
+    ctx.state.approvalOff = true;
     const kits = await wb.kits(admin);
     expect(kits.cutoverDate === ctx.cutover, `cutover date reads ${kits.cutoverDate}`);
     expect(kits.locked === false, 'golive.locked is on');
-    return `cutover ${kits.cutoverDate}, lock off`;
+    return `cutover ${kits.cutoverDate}, lock off, approval of loads off for the rehearsal`;
   }, { critical: true });
 
   await log.check('Upload the SOURCE workbook to TARGET and validate (dry run)', async () => {
@@ -284,8 +287,7 @@ export function explainConfigDiffs(ctx, diffs) {
     for (const c of d.changed) {
       const cols = c.columns.map((x) => x.column).join(', ');
       let why = null;
-      if (d.sheet === 'Settings' && c.key === 'golive.cutover_date') why = 'cutover date is set on TARGET only (environment-specific)';
-      else if (d.sheet === 'Settings' && /^(general\.(app_url|environment|public_url)|email\.|notification\.email)/.test(c.key)) why = 'environment-specific setting';
+      if (d.sheet === 'Settings' && /^(general\.(app_url|environment|public_url)|email\.|notification\.email)/.test(c.key)) why = 'environment-specific setting';
       else if (d.sheet === 'Numbering' && cols === 'Next Number') why = 'counters move with the business of each environment';
       else if (d.sheet === 'Authority Limits' && (ctx.state.pendingLimits || []).some((p) => p.startsWith(`${c.key.split(' | ').join('|')}|`))) {
         why = 'the SOURCE limit waits for approval on TARGET (maker-checker); the export lists the active limit';

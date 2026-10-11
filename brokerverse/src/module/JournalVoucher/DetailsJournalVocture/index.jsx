@@ -20,6 +20,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import ApprovalActions from "../../../components/ApprovalActions";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
+import OriginChip from "../../../components/OriginChip";
 
 const AWAITING_APPROVAL = "for-approval";
 
@@ -204,8 +205,13 @@ const DetailsJournalVocture = () => {
       <div className="col-12">
         <DetailHeader
           title={number}
-          subtitle={voucher?.description}
-          status={voucher?.status ? { code: voucher.status, label: statusLabel(voucher.status) } : null}
+          subtitle={(
+            <>
+              {voucher?.description}
+              <OriginChip origin={voucher?.origin} className="ml-2" />
+            </>
+          )}
+          status={voucher?.status ? { code: voucher.status, label: statusLabel(voucher.status), severity: voucher.status === "opening" ? "info" : undefined } : null}
           meta={[
             { label: t("accounts.journalVoucherDetails.date"), value: voucher?.date, type: "date" },
             { label: t("accounts.journalVoucherDetails.totalDebit"), value: voucher?.totalDebit, type: "amount" },

@@ -79,17 +79,17 @@ describe('transaction reset', () => {
     expect(await count('app_settings', "key = 'golive.locked' AND value = 'false'::jsonb")).toBe(1);
     const leads = await count('leads');
     expect(leads).toBeGreaterThan(0);
-    // the administrator switches the lock on and off in Master > Configuration (PUT /settings)
-    const lock = (on) => ctx.api('put', '/settings').send({ settings: { 'golive.locked': on } });
-    expect((await lock(true)).status).toBe(200);
+    // two users lock go-live on Data Migration & Go-Live > Go-Live (test/migration-lock.test.js); the settings screen cannot
+    expect((await ctx.api('put', '/settings').send({ settings: { 'golive.locked': true } })).status).toBe(400);
+    await setLock(true);
     try {
       const err = await withClient((c) => resetTransactions(c, { execute: true }).catch((e) => e));
       expect(err).toBeInstanceOf(ResetRefused);
       expect(err.code).toBe('GOLIVE_LOCKED');
-      expect(err.message).toContain('Master > Configuration > Go-live');
+      expect(err.message).toContain('database administrator');
       expect(await count('leads')).toBe(leads);
     } finally {
-      expect((await lock(false)).status).toBe(200);
+      await setLock(false);
     }
   });
 
@@ -183,6 +183,25 @@ describe('transaction reset', () => {
     expect(await count('opening_balances')).toBe(0);
     expect(await count('fiscal_years')).toBe(0);
     expect(await count('audit_log')).toBe(1);
+  });
+
+  it('keeps the go-live load history: loaded migration batches and their rows are marked undone, the others stay as they are', async () => {
+    const admin = (await query("SELECT id FROM users WHERE username = 'BrokerVerse'")).rows[0].id;
+    const batch = async (kit, status) => (await query('INSERT INTO data_load_batches(kit, status, created_by) VALUES ($1, $2, $3) RETURNING id', [kit, status, admin])).rows[0].id;
+    const migrated = await batch('migration', 'loaded');
+    const configuration = await batch('configuration', 'loaded');
+    const checked = await batch('migration', 'validated');
+    for (const id of [migrated, configuration, checked]) {
+      await query("INSERT INTO data_load_rows(batch_id, sheet, row_number, status) VALUES ($1, 'clients', 3, $2)", [id, id === checked ? 'valid' : 'loaded']);
+    }
+    const r = await withClient((c) => resetTransactions(c, { execute: true }));
+    expect(r.tables.find((t) => t.table === 'data_load_batches')).toMatchObject({ rows: 0, updated: 1 });
+    const status = async (id) => (await query('SELECT b.status, b.undo_reason, b.undone_at, r.status AS row_status FROM data_load_batches b JOIN data_load_rows r ON r.batch_id = b.id WHERE b.id = $1', [id])).rows[0];
+    expect(await status(migrated)).toMatchObject({ status: 'undone', undo_reason: 'transaction reset', undone_at: expect.any(Date), row_status: 'undone' });
+    expect(await status(configuration)).toMatchObject({ status: 'loaded', undo_reason: null, row_status: 'loaded' });
+    expect(await status(checked)).toMatchObject({ status: 'validated', row_status: 'valid' });
+    const last = (await query("SELECT after_data FROM audit_log WHERE entity = 'database' AND action = 'reset' ORDER BY id DESC LIMIT 1")).rows[0];
+    expect(last.after_data.migrationLoadsUndone).toBe(1);
   });
 
   it('rolls everything back on error', async () => {

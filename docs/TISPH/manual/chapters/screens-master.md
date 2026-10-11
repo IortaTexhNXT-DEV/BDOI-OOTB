@@ -379,15 +379,40 @@ The tab **Future releases** lists the functions TISPH can ask for, with their de
 
 The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
 
+## Data Migration & Go-Live {#data-migration-and-go-live}
+
+{{screen:/master/configuration/go-live}}
+
+Master > System > Data Migration & Go-Live is the workspace of the cut-over from the old system: the templates, the loads with their approval, the reconciliation, the mock runs, the cut-over checklist, the Go / No-Go decision, the go-live lock and the hypercare figures. TIS IT AppSupport / Admin uploads and submits the loads; TIS Finance & General Accounting, the TIS Operations Unit Head and the TIS General Manager approve another user's load, sign the reconciliation and vote; TIS Audit reads every tab and changes nothing. Personal data in every download and review is masked for users who may not see it.
+
+| Tab | What it is for |
+|---|---|
+| **Overview** | Phase of the programme, cut-over date, lock, latest loads, reconciliation, Go / No-Go and open defects, and what waits for you |
+| **Templates** | The configuration and migration templates per object, blank or with the current data; the policy sheets per product (Motor, CTPL, Personal Accident, Credit Life, Travel, Other Lines); the value maps of the old system's codes; the document file naming convention and its checker |
+| **Loads** | Upload and validate, review each row (**New**, **Changed** with the old and new values, **Unchanged**, **Duplicate**, **Error**), resolve duplicates, submit, approve or reject, load, history, undo before go-live |
+| **Reconciliation** | Control totals per object against the figures of the old system, receivables against the general ledger, the trial balance, the difference list and the sign-off, with the report |
+| **Runs** | Mock 1, Mock 2, the dress rehearsal and the production run with their timings, results and defects |
+| **Cutover** | The checklist of the run: owner, planned and actual start and end, status and evidence of each step |
+| **Go-Live** | Go / No-Go against the criteria with the named approvers, the cut-over date, the lock and the unlock by two people |
+| **Hypercare** | After the lock: business issued since go-live, migrated items worked, edits to migrated records, daily checks and defects |
+
+**Loads.** Download the template on **Templates**, fill it and upload it on **Loads > Upload** with the old system and the run. The file is validated in the background; nothing is saved. Review the rows: **Changed** shows each field as old and new value; **Duplicate** lists the matching record (same TIN, name and birth date, plate or chassis number, insurer name variant) and takes **Load as new** or **Use existing** with a reason; **Error** rows are in the errors file to correct and upload again. **Submit** the load: another user approves or rejects it with a reason; the uploader, the submitter and whoever resolved one of its duplicates cannot approve it. The approval loads the records in one go under the load number (MIG-000012); a load that fails saves nothing. Every record created or changed starts its activity log with the load it came from. Before go-live, a load is undone under the same second-person approval while nothing depends on its records.
+
+**Reconciliation and sign-off.** Enter or upload the totals of the old system for each line (counts and amounts per object, product, insurer and ageing bucket). Each line shows **Matched** or **Difference**; every difference needs an explanation and is accepted by a user who did not load the data. When the lines agree, the named signatories sign the reconciliation in the system; the signed report (PDF) is kept with the run and does not change afterwards.
+
+**Runs, cut-over and Go / No-Go.** Each mock run is recorded with its loads, timings, results and defects. The production run carries the cut-over checklist: start and close each step with its evidence. The Go / No-Go decision lists the criteria with their automatic checks; the named approvers vote **Go** or **No-Go** with their remarks.
+
+**Go-live lock.** After a Go decision, a signed reconciliation and no load waiting, one user requests the lock and another approves it on **Go-Live**. The lock closes every migration import: the migration template, the policies go-live upload, the open items import, the opening balances import, the transaction reset and the undo of loads. An unlock is requested and approved by two people, names the imports it reopens and ends by itself after its hours.
+
+**Migrated and issued business.** Every migrated client, policy, claim, open item and opening balance journal shows the chip **Migrated** with its number in the old system and its load. Policies keep their old policy number; business written after go-live takes the insurer's policy number or the next TISPH number. Endorsements and claims on a migrated policy show **Migrated policy**; the renewal of a migrated policy shows **Renewal of legacy policy** on the Renewal Queue and on the renewed policy, which is new business with its own number. The Clients, Policies, Claims, Collections, Journal Voucher and Renewal Queue lists filter by **Origin** (All, Issued, Migrated); the Executive and Sales dashboards open on **Issued since go-live** and can show **All business**; the production register, premium by product, new business against renewals and dealer production reports take the **Origin** criterion. Migrated policies are not counted in premium written, new business, commission or incentive figures unless the approvers switch this on (**Go-Live**); they count as renewal opportunities. Migrated balances are in the opening balances and never go to the SAP GL daily file. The origin, the old number and the load of a migrated record cannot be changed.
+
+![Master > System > Data Migration & Go-Live, the Loads tab](images/screens-master/data-migration-and-go-live.png)
+
 ## Environment Promotion {#environment-promotion}
 
-Master > Environment Promotion (IT AppSupport / Admin) moves the configuration of one environment to the next: Development, System Integration Testing, User Acceptance Testing, Pre-Production and Production.
+Master > Environment Promotion (IT AppSupport / Admin) keeps the order in which the configuration moves from one environment to the next: Development, System Integration Testing, User Acceptance Testing, Pre-Production and Production.
 
-### Setup Workbook {#setup-workbook}
-
-{{screen:/master/promotion/workbook}}
-
-The Setup Workbook is the configuration of an environment in one Excel file: the masters, settings, users, chart of accounts, commission rates, taxes, authority limits, numbering series and payee bank accounts, one sheet each in load order. The table **Sheets** lists them with the **Screen** each belongs to and the **Key** that identifies a row. **Download with current data** exports the configuration of this environment to carry to the next one; **Download blank** gives the empty layout. **Upload workbook** validates the file of another environment first (nothing is saved; the rows in error are listed with the sheet, row and column, and **Download errors** returns them in the workbook layout to fix) and **Load** writes the validated rows in one transaction. **Uploads** lists every upload with its **Status** (**Validated**, **Errors**, **Loaded**), its rows and who made it; select one for the result per sheet. The marker of the environment and the secrets never travel in a workbook.
+The configuration itself travels as the configuration template of **Data Migration & Go-Live**: **Templates** downloads it with the current data of this environment, and **Loads** uploads it into the next environment, validates it, and loads it once a second user approves.
 
 ### Compare Environments {#compare-environments}
 

@@ -12,6 +12,7 @@ import { applyToPolicy, ensureBilled, findClient, findPolicy, requirePolicy, rev
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { autoEmailReceipt } from './email.js';
 import { oldBillNumber } from './opening.js';
+import { originColumns, originOf, originWhere } from '../../lib/origin.js';
 
 const money = (v) => round2(v).toFixed(2);
 const SOURCE_BY_TXN = { ENDORSEMENT_PAYMENT: 'endorsement', ENDORSEMENT: 'endorsement', RENEWAL: 'renewal', RENEWAL_PAYMENT: 'renewal' };
@@ -303,10 +304,12 @@ export async function listOpenReceivables(db, q = {}) {
   // the search also finds the 10-digit payment reference and the plate or chassis number of the vehicle
   if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')
     || ' ' || COALESCE(p.payment_reference,'') || ' ' || COALESCE(p.doc->>'plateNumber','') || ' ' || COALESCE(p.doc->>'chassisNumber','')) ILIKE '%' || $${p.length} || '%'`); }
+  const origin = originWhere('r', q.origin, p);
+  if (origin) where.push(origin);
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', p));
   const limit = Math.min(Math.max(Number(q.limit) || 500, 1), 2000);
   const rows = (await db.query(`SELECT r.*, p.policy_number, p.payment_reference, p.doc->>'plateNumber' AS plate_number, p.doc->'insuranceVehicleDetails'->0 AS vehicle,
-      c.client_code, c.display_name, c.first_name, c.last_name
+      c.client_code, c.display_name, c.first_name, c.last_name, ${originColumns('r')}
     FROM receivables r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
     WHERE ${where.join(' AND ')} ORDER BY c.client_code, p.policy_number, r.due_date, r.created_at LIMIT ${limit}`, p)).rows;
   return rows.map((r) => ({
@@ -314,6 +317,6 @@ export async function listOpenReceivables(db, q = {}) {
     customerName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || null, policyId: r.policy_id, policyNumber: r.policy_number,
     amount: Number(r.amount), paidAmount: round2(Number(r.amount) - Number(r.balance)), balance: Number(r.balance), dueDate: r.due_date,
     status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency, paymentReference: r.payment_reference || null,
-    vehicle: [r.vehicle?.vehicleBrand, r.vehicle?.vehicleModel, r.vehicle?.modelYear].filter(Boolean).join(' ') || null, plateNumber: r.plate_number || null,
+    vehicle: [r.vehicle?.vehicleBrand, r.vehicle?.vehicleModel, r.vehicle?.modelYear].filter(Boolean).join(' ') || null, plateNumber: r.plate_number || null, origin: originOf(r),
   }));
 }

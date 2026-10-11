@@ -68,7 +68,8 @@ export async function createFiscalYear(db, start, user = null) {
 export async function ensureCalendar(db, upTo = null) {
   const target = iso(upTo || (await today()));
   let years = (await db.query('SELECT * FROM fiscal_years ORDER BY start_date')).rows;
-  const first = (await db.query('SELECT min(jv_date) AS d FROM journal_vouchers')).rows[0].d;
+  // the opening balance journal of go-live (dated the day before the go-live date) opens no fiscal year of its own
+  const first = (await db.query('SELECT min(jv_date) AS d FROM journal_vouchers WHERE status <> \'opening\'')).rows[0].d;
   const earliest = first && iso(first) < target ? iso(first) : target;
   if (!years.length) {
     await createFiscalYear(db, await fiscalStartFor(earliest));

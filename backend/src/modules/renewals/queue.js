@@ -6,10 +6,18 @@ import { many, one, query } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
 
 const handlers = new Map();
+/** Job types never requeued by requeueStale: their own sweep decides what an interrupted job means (data loads). */
+const notRequeued = new Set();
 let running = false;
 
-/** Register the function that runs a job type: fn(payload, { progress }, job) -> result. */
-export const registerJobType = (type, fn) => handlers.set(type, fn);
+/**
+ * Register the function that runs a job type: fn(payload, { progress }, job) -> result. requeue: false keeps a job of
+ * this type that stopped while processing out of requeueStale.
+ */
+export const registerJobType = (type, fn, { requeue = true } = {}) => {
+  handlers.set(type, fn);
+  if (!requeue) notRequeued.add(type);
+};
 
 export const jobApi = (j) => ({
   id: String(j.id), jobId: String(j.id), queue: j.queue, type: j.job_type, status: j.status,
@@ -18,11 +26,14 @@ export const jobApi = (j) => ({
   createdAt: j.created_at, startedAt: j.started_at, finishedAt: j.finished_at,
 });
 
-/** Insert a waiting job and start processing it in the background. */
-export async function enqueue(queue, type, payload, { userId = null, total = 0 } = {}) {
+/**
+ * Insert a waiting job and start processing it in the background. start: false leaves the start to the caller (kick()),
+ * which first records the job on its own row.
+ */
+export async function enqueue(queue, type, payload, { userId = null, total = 0, start = true } = {}) {
   const r = await one(`INSERT INTO job_queue(queue, job_type, payload, progress, created_by) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
     [queue, type, JSON.stringify(payload), JSON.stringify({ total, processed: 0, succeeded: 0, failed: 0 }), userId]);
-  kick();
+  if (start) kick();
   return jobApi(r);
 }
 
@@ -81,8 +92,9 @@ export function kick() {
   setImmediate(() => { processQueue().catch(() => {}); });
 }
 
-/** Requeue jobs stuck in processing (e.g. after a restart). */
+/** Requeue jobs stuck in processing (e.g. after a restart), except the types registered with requeue: false. */
 export async function requeueStale(minutes = 15) {
-  const r = await query(`UPDATE job_queue SET status = 'waiting' WHERE status = 'processing' AND started_at < now() - ($1 || ' minutes')::interval`, [String(minutes)]);
+  const r = await query(`UPDATE job_queue SET status = 'waiting' WHERE status = 'processing' AND started_at < now() - ($1 || ' minutes')::interval
+    AND NOT (job_type = ANY($2::text[]))`, [String(minutes), [...notRequeued]]);
   return r.rowCount;
 }

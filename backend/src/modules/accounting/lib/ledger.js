@@ -10,9 +10,24 @@ import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.j
 import { round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { assertPostingAllowed } from '../../period-end/posting.js';
+import { OPENING_JOURNAL_SOURCE } from '../../period-end/opening.js';
 import { assertCostCentres, defaultCostCentre } from './costCentre.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
+
+/**
+ * Debit-positive balance of an account as it stands, the way the period-end reports read it (pe_balance_before): the
+ * opening balances of the latest fiscal year that has them (the go-live set, or the carry-forward of a year-end close)
+ * plus the posted journals from the start of that year; every posted journal when no year has opening balances.
+ */
+export async function currentBalance(db, code) {
+  const r = (await db.query(`WITH fy AS (SELECT f.code, f.start_date FROM fiscal_years f
+        WHERE f.start_date <= CURRENT_DATE AND EXISTS (SELECT 1 FROM opening_balances o WHERE o.fiscal_year = f.code) ORDER BY f.start_date DESC LIMIT 1)
+    SELECT COALESCE((SELECT sum(o.balance) FROM opening_balances o JOIN fy ON fy.code = o.fiscal_year WHERE o.account_code = $1), 0)
+      + COALESCE((SELECT sum(l.debit - l.credit) FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
+          WHERE l.account_code = $1 AND j.status IN ('posted', 'reversed') AND (NOT EXISTS (SELECT 1 FROM fy) OR j.jv_date >= (SELECT start_date FROM fy))), 0) AS b`, [code])).rows[0];
+  return round2(Number(r.b));
+}
 const OPEN_STATES = ['draft', 'for-approval', 'approved', 'pending'];
 /** Journals keyed by a user (manual, correction and reversal vouchers, and the year-end adjustments of period 13). */
 export const MANUAL_SOURCES = ['manual', 'correction', 'reversal', 'adjustment'];
@@ -136,9 +151,20 @@ export async function resolveJournalId(db, ref) {
   throw notFound('Journal / transaction not found');
 }
 
+/**
+ * Refuse a change to the opening balance journal (409): it documents the go-live opening balances, has no lines of its
+ * own and is never posted, reversed, corrected or cancelled (period-end/opening.js).
+ */
+export function assertNotOpeningJournal(jv) {
+  if (jv?.source === OPENING_JOURNAL_SOURCE) {
+    throw conflict(`Journal ${jv.jv_number} is the opening balance journal of go-live: it cannot be changed, posted, reversed, corrected or cancelled`);
+  }
+}
+
 async function lockJournal(db, id) {
   const jv = (await db.query('SELECT * FROM journal_vouchers WHERE id = $1 FOR UPDATE', [id])).rows[0];
   if (!jv) throw notFound('Journal not found');
+  assertNotOpeningJournal(jv);
   return jv;
 }
 

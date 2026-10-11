@@ -28,7 +28,12 @@ export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_c
 /** Policy by id or policy number (null when not found). */
 export async function findPolicy(db, ref) {
   if (!ref) return null;
-  return (await db.query(`${POLICY_SQL} WHERE p.id = $1 OR p.policy_number = $1 OR p.payment_reference = $1 LIMIT 1`, [String(ref)])).rows[0] || null;
+  const p = (await db.query(`${POLICY_SQL} WHERE p.id = $1 OR p.policy_number = $1 OR p.payment_reference = $1 LIMIT 1`, [String(ref)])).rows[0];
+  if (p) return p;
+  // a migrated policy whose legacy number another insurer's policy carries is numbered "<legacy number>/<insurer code>":
+  // found by the legacy number as printed when no other policy has it
+  const legacy = (await db.query(`${POLICY_SQL} WHERE p.legacy_number = $1 AND p.origin = 'migrated' LIMIT 2`, [String(ref)])).rows;
+  return legacy.length === 1 ? legacy[0] : null;
 }
 export async function requirePolicy(db, ref) {
   const p = await findPolicy(db, ref);

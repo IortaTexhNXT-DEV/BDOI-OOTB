@@ -393,6 +393,20 @@ async function approvals(ctx) {
       status: 'ic.status', link: "'/incentive/approvals'", amount: 'ic.total_amount', created_at: 'ic.created_at' })}
       FROM incentive_calculations ic WHERE ic.status = 'Pending Approval' AND ${notMine(ctx, 'ic.submitted_by')} AND ${notMine(ctx, 'ic.created_by')}`);
   }
+  // data loads, their undo and the go-live lock requests: decided by the holders of approve:data-load, never by the
+  // uploader, submitter or a resolver of the load's duplicates, nor by the requester (data-load/approval.js, golive.js)
+  if (ctx.can('approve:data-load') && await has('go_live_lock_requests')) {
+    out.push(`SELECT ${select({ ...base, kind: "CASE b.status WHEN 'undo-pending' THEN 'Undo of data load' ELSE 'Data load' END", id: 'b.id', ref: 'b.load_number',
+      title: "COALESCE(b.file_name, b.kit)", due_date: due('COALESCE(b.undo_requested_at, b.submitted_at)'), status: 'b.status',
+      link: "'/master/configuration/go-live/loads/' || b.id", created_at: 'b.created_at' })}
+      FROM data_load_batches b
+      WHERE (b.status = 'pending-approval' AND ${notMine(ctx, 'b.created_by')} AND ${notMine(ctx, 'b.submitted_by')}
+          AND NOT EXISTS (SELECT 1 FROM data_load_rows r WHERE r.batch_id = b.id AND r.resolved_by = ANY(${ctx.ME}::text[])))
+        OR (b.status = 'undo-pending' AND ${notMine(ctx, 'b.undo_requested_by')})`);
+    out.push(`SELECT ${select({ ...base, kind: "CASE g.action WHEN 'lock' THEN 'Go-live lock' ELSE 'Go-live unlock' END", id: 'g.id', ref: "'#' || g.id", title: 'g.reason',
+      due_date: due('g.requested_at'), status: 'g.status', link: "'/master/configuration/go-live/decision'", created_at: 'g.requested_at' })}
+      FROM go_live_lock_requests g WHERE g.status = 'pending' AND ${notMine(ctx, 'g.requested_by')}`);
+  }
   // claim settlements: decided by the holders of approve:claims (claims/service.js), never by the officer who requested them
   if (ctx.can('write:claims') && ctx.can('approve:claims')) {
     out.push(`SELECT ${select({ ...base, kind: "'Claim settlement'", id: 'cs.id', ref: 'cs.claim_number', title: "COALESCE(p.policy_number, 'Claim')", client_name: CLIENT('c'),

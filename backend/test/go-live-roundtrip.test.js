@@ -18,6 +18,7 @@ import { createZip } from '../src/lib/zip.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { nextDocumentNumber } from '../src/lib/numbering.js';
 import { resetTransactions } from '../scripts/reset-transactions.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 const bin = (req) => req.buffer(true).parse((res, cb) => {
@@ -34,7 +35,7 @@ const withClient = async (fn) => {
   const c = await pool.connect();
   try { return await fn(c); } finally { c.release(); }
 };
-const upload = (buffer) => api('post', '/data-load/batches').field('kit', 'configuration').attach('file', buffer, 'current.xlsx');
+const upload = (buffer) => validatedBatch(api, api('post', '/data-load/batches').field('kit', 'configuration').attach('file', buffer, 'current.xlsx'));
 
 beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
@@ -42,6 +43,7 @@ beforeAll(async () => {
   const app = await createApp();
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
+  await goLiveSetup(api, null);
 });
 afterAll(async () => {
   await pool.end();
@@ -113,7 +115,7 @@ describe('configuration workbook round trip', () => {
     const empty = objects.filter((s) => s.rows.length <= 2).map((s) => s.name);
     expect(empty.filter((n) => !['Signatories', 'Exchange Rates'].includes(n))).toEqual([]);
     const r = await upload(t.body);
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     const batch = r.body.data.batch;
     expect(r.body.data.errors).toEqual([]);
     const notUnchanged = batch.sheets.filter((s) => s.unchanged !== s.read).map((s) => `${s.name}: ${s.created} new, ${s.updated} changed, ${s.proposed} proposed, ${s.errors} errors`);
@@ -136,7 +138,7 @@ describe('configuration workbook round trip', () => {
     const resaved = createZip(files);
     expect(readWorkbook(resaved).find((s) => s.name === 'Chart of Accounts').rows.some((r) => /–/.test(r[1]))).toBe(true);
     const r = await upload(resaved);
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     expect(r.body.data.errors).toEqual([]);
     const notUnchanged = r.body.data.batch.sheets.filter((s) => s.unchanged !== s.read).map((s) => `${s.name}: ${s.created} new, ${s.updated} changed`);
     expect(notUnchanged).toEqual([]);

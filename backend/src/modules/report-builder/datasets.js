@@ -5,7 +5,9 @@
  * book (lib/scope.js).
  *
  * Column: { key, label, type: text | integer | number | money | date, sql }. Filter operators by type in OPERATORS.
+ * Origin (policies, clients, bills, claims): Migrated (loaded from the legacy system at go-live) or Issued in BrokerVerse.
  */
+const origin = (alias) => ({ key: 'origin', label: 'Origin', type: 'text', sql: `CASE ${alias}.origin WHEN 'migrated' THEN 'Migrated' ELSE 'Issued in BrokerVerse' END` });
 const POLICY_JOINS = `LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
   LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN users u ON u.id = p.owner_user_id LEFT JOIN branches b ON b.code = u.branch_code
   LEFT JOIN distribution_channels ch ON ch.id = p.channel_id`;
@@ -17,6 +19,7 @@ export const DATASETS = {
       { key: 'policyNumber', label: 'Policy No.', type: 'text', sql: 'p.policy_number' },
       { key: 'status', label: 'Status', type: 'text', sql: 'p.status' },
       { key: 'businessType', label: 'Business Type', type: 'text', sql: "CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END" },
+      origin('p'),
       { key: 'lob', label: 'Line of Business', type: 'text', sql: 'p.lob' },
       { key: 'product', label: 'Product', type: 'text', sql: 'COALESCE(pr.name, p.product_type)' },
       { key: 'insurer', label: 'Insurer', type: 'text', sql: 'ic.name' },
@@ -50,6 +53,7 @@ export const DATASETS = {
       { key: 'clientCode', label: 'Client Code', type: 'text', sql: 'c.client_code' },
       { key: 'name', label: 'Name', type: 'text', sql: 'c.display_name' },
       { key: 'clientType', label: 'Client Type', type: 'text', sql: 'c.client_type' },
+      origin('c'),
       { key: 'category', label: 'Category', type: 'text', sql: 'c.lead_category' },
       { key: 'email', label: 'E-mail', type: 'text', sql: 'c.email' },
       { key: 'phone', label: 'Phone', type: 'text', sql: 'c.phone' },
@@ -77,6 +81,7 @@ export const DATASETS = {
       { key: 'insurer', label: 'Insurer', type: 'text', sql: 'ic.name' },
       { key: 'agent', label: 'Account Executive', type: 'text', sql: 'u.display_name' },
       { key: 'source', label: 'Source', type: 'text', sql: 'r.source' },
+      origin('r'),
       { key: 'billDate', label: 'Bill Date', type: 'date', sql: 'r.created_at::date' },
       { key: 'billMonth', label: 'Bill Month', type: 'text', sql: "to_char(r.created_at, 'YYYY-MM')" },
       { key: 'dueDate', label: 'Due Date', type: 'date', sql: 'r.due_date' },
@@ -104,6 +109,7 @@ export const DATASETS = {
       { key: 'insurer', label: 'Insurer', type: 'text', sql: 'ic.name' },
       { key: 'lob', label: 'Line of Business', type: 'text', sql: 'COALESCE(cl.lob, p.lob)' },
       { key: 'claimType', label: 'Claim Type', type: 'text', sql: 'cl.claim_type' },
+      origin('cl'),
       { key: 'lossType', label: 'Loss Type', type: 'text', sql: 'cl.loss_type' },
       { key: 'status', label: 'Status', type: 'text', sql: 'cl.status' },
       { key: 'priority', label: 'Priority', type: 'text', sql: 'cl.priority' },

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -28,6 +29,7 @@ const PromotionPath = () => {
   const { t } = useTranslation();
   const k = (key, opts) => t(`environmentPromotion.${key}`, opts);
   const toast = useRef(null);
+  const navigate = useNavigate();
   const [choice, setChoice] = useState(null);
   const canMark = hasPermission("write:data-load");
   const loader = useCallback(async () => {
@@ -63,7 +65,12 @@ const PromotionPath = () => {
     <div className="admin__page ep-page">
       <Toast ref={toast} />
       <PageHeader title={k("pathTitle")} home={t("sidebar.Master")} section={t("sidebar.Environment Promotion")} trail={[k("pathTitle")]} help={k("pathHelp")}
-        actions={<Button type="button" icon="pi pi-refresh" label={t("numberingMasters.refresh")} outlined loading={refreshing} onClick={() => reload()} />} />
+        actions={(
+          <>
+            <Button type="button" icon="pi pi-file-excel" label={k("openWorkspace")} outlined onClick={() => navigate("/master/configuration/go-live")} />
+            <Button type="button" icon="pi pi-refresh" label={t("numberingMasters.refresh")} outlined loading={refreshing} onClick={() => reload()} />
+          </>
+        )} />
       <div className="bv-loading-host">
         <LoadingBar active={loading || refreshing} />
         {error ? <p className="ep-error">{String(error)}</p> : null}

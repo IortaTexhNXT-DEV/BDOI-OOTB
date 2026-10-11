@@ -15,8 +15,8 @@ const SCREEN = 'Accounts > Collections';
 const item = { id: 'col_1', policyNumber: 'POL-2026-00001', client: { firstName: 'Maria', lastName: 'Santos' }, grossPremium: 11862.5, paidAmount: 0, outstandingAmount: 11862.5, currentAmount: 0, days1to30Amount: 11862.5, days31to60Amount: 0, days61to90Amount: 0, over90DaysAmount: 0, dueDate: '2026-09-10', daysPastDue: 18, overdueLevel: 1, collectionStatus: 'Overdue' };
 
 define({
-  method: 'GET', path: '/', summary: 'Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)', screen: SCREEN, middleware: read,
-  query: { page: 1, pageSize: 10, status: 'Overdue', overdueLevel: '1', search: 'Santos', sortField: 'dueDate', sortOrder: 'asc' },
+  method: 'GET', path: '/', summary: 'Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy', screen: SCREEN, middleware: read,
+  query: { page: 1, pageSize: 10, status: 'Overdue', overdueLevel: '1', search: 'Santos', sortField: 'dueDate', sortOrder: 'asc', origin: 'migrated' },
   response: { success: true, data: [item], pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 } },
   handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listCollections(pool, req.query, pg); sendList(res, r.rows, r.total, pg, { overdueLevels: r.overdueLevels }); },
 });

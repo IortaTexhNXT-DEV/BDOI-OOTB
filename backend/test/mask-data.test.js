@@ -345,7 +345,10 @@ describe('masking a copy', () => {
     const lead = (await query('SELECT * FROM leads WHERE id = $1', [ids.lead])).rows[0];
     const policy = (await query('SELECT * FROM policies WHERE id = $1', [ids.policy])).rows[0];
     const claim = (await query('SELECT * FROM claims WHERE id = $1', [ids.claim])).rows[0];
+    // the rows of a load keep their TIN encrypted too (migration 0441)
     const row = (await query('SELECT data FROM data_load_rows ORDER BY id DESC LIMIT 1')).rows[0].data;
+    expect(isPiiCipher(row.tin)).toBe(true);
+    row.tin = revealPii(row.tin);
     expect(client.display_name).toBe(`${client.first_name} ${client.last_name}`);
     expect([lead.first_name, lead.last_name, lead.email, lead.birth_date]).toEqual([client.first_name, client.last_name, client.email, client.birth_date]);
     expect(lead.phone.replace(/\D/g, '').slice(1)).toBe(client.phone.replace(/\D/g, '').slice(2));

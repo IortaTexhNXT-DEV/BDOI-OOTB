@@ -30,6 +30,7 @@ import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
+import OriginChip, { isMigrated } from "../../../components/OriginChip";
 import PromotionPanel from "../../quoteModule/promotion/PromotionPanel";
 import PolicyCorrectionsPanel from "../policyCorrections/PolicyCorrectionsPanel";
 import { hasPermission } from "../../../utils/canOpen";
@@ -1089,6 +1090,9 @@ const PolicyDetailView = () => {
         />
       ),
     },
+    ...(isMigrated(rawPolicyData?.origin)
+      ? [{ key: "origin", content: <OriginChip origin={rawPolicyData.origin} /> }]
+      : []),
   ];
 
   const parseAmount = (value) => {
@@ -1756,7 +1760,11 @@ const PolicyDetailView = () => {
             actions={[{ key: "renewal", label: t("policyDetail.openRenewalTerm"), to: `/agent/policydetail/${rawPolicyData.renewedTo}` }]} />
         )}
         {rawPolicyData?.renewedFrom && (
-          <NextStep title={t("policyDetail.renewalOfTitle")} text={t("policyDetail.renewalOfText")}
+          <NextStep
+            title={rawPolicyData.renewedFromOrigin === "migrated"
+              ? t("origin.renewalOfLegacy", { number: rawPolicyData.renewedFromLegacyNumber || "", defaultValue: "Renewal of legacy policy {{number}}" })
+              : t("policyDetail.renewalOfTitle")}
+            text={rawPolicyData.renewedFromOrigin === "migrated" ? t("origin.renewalOfLegacyText", "Issued in BrokerVerse; the expiring term was migrated at go-live.") : t("policyDetail.renewalOfText")}
             actions={[{ key: "expiring", label: t("policyDetail.openExpiringTerm"), to: `/agent/policydetail/${rawPolicyData.renewedFrom}` }]} />
         )}
         {paymentStatusIsPending && hasPermission("write:receipts") && (

@@ -7,8 +7,8 @@
  *                                 'on-request': holders get masked values unless the request carries the header
  *                                 X-Unmask-PII: 1 (the "Show full identifiers" switch of the top bar); each such request
  *                                 is recorded in the audit trail (entity personal_data, action unmask)
- *   privacy.masking_exempt_paths  API path prefixes answered unmasked (the user's own profile, sign-in, configuration,
- *                                 the go-live workbench, the personal data export to a data subject)
+ *   privacy.masking_exempt_paths  API path prefixes answered unmasked (the user's own profile, sign-in, configuration),
+ *                                 never the audit trail (NEVER_EXEMPT_PATHS)
  * Only list and view endpoints (GET) and the exports they produce are masked: the answer to a create or update echoes
  * what the user sent. A request without a signed-in user (public pages such as a customer's quotation response) is not
  * masked: those endpoints expose only what the customer needs.
@@ -22,7 +22,12 @@ import { logger } from './logger.js';
 
 export const VIEW_PII = 'view:pii';
 export const UNMASK_HEADER = 'x-unmask-pii';
-export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/data-load', '/api/health'];
+export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/health'];
+/**
+ * Paths masked although an exempt prefix covers them: the audit trail carries the before / after images of the records
+ * (a client's TIN, e-mail, phone, birth date), read by holders of read:audit who may not hold view:pii.
+ */
+export const NEVER_EXEMPT_PATHS = ['/api/settings/audit'];
 
 async function loadPolicySettings() {
   const enabled = (await getSetting('privacy.masking_enabled', true)) !== false;
@@ -36,7 +41,8 @@ export function piiDecision(req) {
   const s = req?.piiSettings;
   if (!req || !s) return { mask: false, unmasked: false };
   const path = String(req.originalUrl || req.url || '').split('?')[0];
-  if (!s.enabled || s.exempt.some((p) => p && path.startsWith(p))) return { mask: false, unmasked: false };
+  const exempt = s.exempt.some((p) => p && path.startsWith(p)) && !NEVER_EXEMPT_PATHS.some((p) => path.startsWith(p));
+  if (!s.enabled || exempt) return { mask: false, unmasked: false };
   const user = req.user;
   if (!user) return { mask: false, unmasked: false };
   // list and view endpoints (and the exports they produce) are masked; the answer to a change echoes what was sent

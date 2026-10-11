@@ -216,9 +216,11 @@ async function targetOf(db, b) {
 /**
  * Register one cheque payable to TISPH, as the register always did (a full payment by one dated-ahead cheque, or the
  * replacement of a cheque outside a set). b: { receivableId | policyId, bankId | draweeBank, branch, chequeNumber,
- * chequeDate, amount, receivedDate, storageLocation, remarks, replacesId }.
+ * chequeDate, amount, receivedDate, storageLocation, remarks, replacesId }. migration: { legacySystem, batchId, migratedBy }
+ * for a cheque on hand at go-live loaded by a migration load (origin migrated, legacy number = the cheque number);
+ * nothing is posted, as for a cheque registered on screen.
  */
-export async function registerPdc(db, b, user) {
+export async function registerPdc(db, b, user, { migration = null } = {}) {
   const t = await targetOf(db, b);
   const amount = round2(b.amount);
   if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'amount', message: 'Amount must be greater than zero' }]);
@@ -234,6 +236,10 @@ export async function registerPdc(db, b, user) {
       storage_location, remarks, replaces_id, payee, insurance_company_id, created_by, updated_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'tisph',$15,$16,$16) RETURNING id`,
   [number, t.clientId, t.policyId, t.receivable?.id || null, b.bankId || null, b.draweeBank || null, b.branch || null, String(b.chequeNumber).trim(), isoDate(b.chequeDate), amount,
     isoDate(b.receivedDate) || (await today()), b.storageLocation || null, b.remarks || null, b.replacesId || null, t.insurerId || null, user?.id ?? null])).rows[0].id;
+  if (migration) {
+    await db.query(`UPDATE post_dated_cheques SET origin = 'migrated', legacy_system = $2, legacy_number = cheque_number, migrated_at = now(), migrated_by = $3, load_batch_id = $4
+      WHERE id = $1`, [r, migration.legacySystem, migration.migratedBy || user?.id || null, migration.batchId ?? null]);
+  }
   return getPdc(db, r);
 }
 

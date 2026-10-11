@@ -27,7 +27,12 @@ export function toIsoDate(v) {
   return m ? m[1] : s;
 }
 
-export const isDate = (s) => DATE.test(String(s || '')) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`));
+/** A calendar date YYYY-MM-DD that exists (2026-02-30 is not one: the parser would roll it over to March). */
+export const isDate = (s) => {
+  if (!DATE.test(String(s || ''))) return false;
+  const t = Date.parse(`${s}T00:00:00Z`);
+  return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === String(s);
+};
 
 /** Number from a cell (thousands separators allowed); NaN when it is not a number, null when empty. */
 export function numberCell(v) {
@@ -63,11 +68,22 @@ export function cell(v) {
  */
 export const cellString = (v) => String(v ?? '').normalize('NFC').replace(/\r\n?/g, '\n').trim();
 
-/** Clean a value read from a workbook for its column type (dates from Excel serial numbers, trimmed text). */
+/**
+ * A number cell as text without the binary noise a spreadsheet may write (9902.860000000001 is 9902.86): 15
+ * significant digits, so no digit typed in a cell is ever dropped. Text that is no plain number stays as it is.
+ */
+export function numberText(s) {
+  const t = cellString(s);
+  if (!/^-?\d+\.\d{10,}$/.test(t)) return t;
+  return String(Number(Number(t).toPrecision(15)));
+}
+
+/** Clean a value read from a workbook for its column type (dates from Excel serial numbers, numbers, trimmed text). */
 export function cleanValue(col, v) {
   const s = cellString(v);
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
+  if (col.type === 'number') return numberText(s);
   return s;
 }
 
@@ -77,7 +93,7 @@ export function comparable(col, v) {
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
   if (col.type === 'number') {
-    const n = numberCell(s);
+    const n = numberCell(numberText(s));
     return Number.isNaN(n) ? s : String(n);
   }
   if (col.type === 'bool') {
@@ -118,4 +134,31 @@ export function amountValue(column, value, label, { positive = false } = {}) {
   if (Number.isNaN(n)) fail(column, `${label} must be a number (no currency sign)`);
   if (positive ? !(n > 0) : n < 0) fail(column, `${label} must be ${positive ? 'greater than zero' : 'zero or more'}`);
   return n;
+}
+
+/** Whole centavos of an amount, or null when it has more than two decimals (the binary noise of a spreadsheet aside). */
+export function centavos(n) {
+  const c = Math.round(n * 100);
+  return Math.abs(n * 100 - c) > 1e-6 * Math.max(1, Math.abs(n)) ? null : c;
+}
+
+/**
+ * Peso amount column check: as amountValue, and never more than two decimals. The amount is not rounded, so the
+ * workbook total and the stored total are sums of the same values and agree to the centavo.
+ */
+export function pesoValue(column, value, label, options = {}) {
+  const n = amountValue(column, value, label, options);
+  if (n === null) return null;
+  if (centavos(n) === null) fail(column, `${label} has more than two decimals`);
+  return n;
+}
+
+/** Sum of peso cells in whole centavos (each cell rounded to the centavo, then added), as a peso amount. */
+export function pesoSum(values) {
+  let c = 0;
+  for (const v of values) {
+    const n = numberCell(v);
+    if (n !== null && !Number.isNaN(n)) c += Math.round(n * 100);
+  }
+  return c / 100;
 }

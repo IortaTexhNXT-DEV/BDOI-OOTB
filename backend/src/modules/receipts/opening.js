@@ -11,14 +11,17 @@
  * the next number of the invoice series instead; the legacy number stays in reference, shown next to the bill number
  * in lists, statements and the receipt allocation search, which also finds the bill by it.
  *
- * Rows are loaded one by one; a row already loaded for the same go-live date is skipped, so the file can be uploaded
- * again after fixing the rows that failed.
+ * Rows are loaded one by one; a row already loaded for the same go-live date with the same due date, original amount
+ * and open balance is skipped, so the file can be uploaded again after fixing the rows that failed. With other values
+ * the open item is changed, while nothing has touched it in BrokerVerse yet (a receipt, a post-dated cheque, a credit
+ * or a collection action); after that it is corrected on its screens.
  */
 import { badRequest, conflict } from '../../lib/errors.js';
 import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { excelDate } from '../accounting/lib/sheet.js';
-import { seriesShape, sequenceOf } from '../data-load/numbering.js';
+import { legacySystemName } from '../../lib/origin.js';
+import { seriesClash } from '../data-load/numbering.js';
 import { findPolicy } from './receivables.js';
 
 export const OPENING_SOURCE = 'opening';
@@ -40,8 +43,24 @@ export const OPEN_ITEM_COLUMNS = [
 
 const num = (v) => (v === undefined || v === null || String(v).trim() === '' ? null : Number(String(v).replace(/,/g, '').trim()));
 
-/** Load one row ({ policyNumber, billReference, dueDate, originalAmount, openBalance }); returns { status, billNumber }. */
-export async function loadOpenItem(db, v, { goLiveDate, user }) {
+/** What has touched an open item in BrokerVerse since it was loaded: [label]. */
+async function openItemTouched(db, id) {
+  const r = (await db.query(`SELECT (SELECT count(*)::int FROM receipt_applications WHERE receivable_id = $1) + (SELECT count(*)::int FROM receipts WHERE receivable_id = $1) AS receipts,
+      (SELECT count(*)::int FROM post_dated_cheques WHERE receivable_id = $1 AND status <> 'cancelled') AS cheques,
+      (SELECT count(*)::int FROM receivable_credits WHERE receivable_id = $1) AS credits,
+      (SELECT count(*)::int FROM collection_actions a JOIN collection_items i ON i.id = a.collection_id WHERE i.receivable_id = $1) AS actions`, [id])).rows[0];
+  return [['receipts', r.receipts], ['post-dated cheques', r.cheques], ['credits', r.credits], ['collection actions', r.actions]].filter(([, n]) => n > 0).map(([label]) => label);
+}
+
+const dayOf = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+
+/**
+ * Load one row ({ policyNumber, billReference, dueDate, originalAmount, openBalance }); returns { status, billNumber,
+ * receivableId, before? } (status created, updated or skipped). The open item is a migrated record (origin migrated,
+ * legacy number = the bill reference, legacy system of the load or of the setting migration.legacy_system_name) of the
+ * migration load batchId when given.
+ */
+export async function loadOpenItem(db, v, { goLiveDate, user, legacySystem = null, batchId = null, migratedBy = null }) {
   if (!v.policyNumber) throw badRequest('Policy Number is required');
   if (!v.billReference) throw badRequest('Bill Reference is required');
   const policy = await findPolicy(db, v.policyNumber);
@@ -54,26 +73,39 @@ export async function loadOpenItem(db, v, { goLiveDate, user }) {
   const amount = num(v.originalAmount) ?? balance;
   if (!(amount >= balance)) throw badRequest('Original Amount cannot be less than the Open Balance');
   const ref = String(v.billReference).trim();
-  const existing = (await db.query('SELECT bill_number, go_live_date FROM receivables WHERE policy_id = $1 AND reference = $2 AND source = $3', [policy.id, ref, OPENING_SOURCE])).rows[0];
+  const existing = (await db.query('SELECT id, bill_number, go_live_date, due_date, amount, balance FROM receivables WHERE policy_id = $1 AND reference = $2 AND source = $3',
+    [policy.id, ref, OPENING_SOURCE])).rows[0];
   if (existing) {
-    const loadedFor = existing.go_live_date ? new Date(existing.go_live_date).toISOString().slice(0, 10) : null;
+    const loadedFor = dayOf(existing.go_live_date);
     if (loadedFor && loadedFor !== goLiveDate) throw conflict(`Bill ${ref} of ${policy.policy_number} was loaded for go-live date ${loadedFor}`);
-    return { status: 'skipped', billNumber: existing.bill_number };
+    const before = { policyNumber: policy.policy_number, billReference: ref, billNumber: existing.bill_number, dueDate: dayOf(existing.due_date),
+      originalAmount: String(Number(existing.amount)), openBalance: String(Number(existing.balance)) };
+    if (before.dueDate === due && round2(existing.amount) === round2(amount) && round2(existing.balance) === round2(balance)) {
+      return { status: 'skipped', billNumber: existing.bill_number, receivableId: existing.id };
+    }
+    const touched = await openItemTouched(db, existing.id);
+    if (touched.length) {
+      throw conflict(`Bill ${ref} of ${policy.policy_number} has ${touched.join(', ')} in BrokerVerse since it was loaded: its amounts can no longer be changed by a load; correct it on Accounts > Collections`);
+    }
+    await db.query(`UPDATE receivables SET due_date = $2, amount = $3, balance = $4, net_premium = $3, status = $5, updated_at = now() WHERE id = $1`,
+      [existing.id, due, round2(amount), round2(balance), balance < amount ? 'partial' : 'open']);
+    return { status: 'updated', billNumber: existing.bill_number, receivableId: existing.id, before };
   }
   // the old system's bill number is kept unless another bill carries it already
   const taken = (await db.query('SELECT 1 FROM receivables WHERE bill_number = $1', [ref])).rowCount > 0;
   if (!taken) {
-    const shape = await seriesShape('invoice');
-    const seq = sequenceOf(shape, ref);
-    if (seq !== null && seq >= shape.next) {
-      throw badRequest(`Bill Reference ${ref} has the format of the invoice numbering series, whose next number is ${shape.next}: a new bill would get the same number. `
-        + `Set the series' Next Number above ${seq} (Numbering sheet of the configuration workbook, or Master > Document Numbering) first`);
+    const clash = await seriesClash('invoice', ref);
+    if (clash) {
+      throw badRequest(`Bill Reference ${ref} has the format of the invoice numbering series, whose next number is ${clash.shape.next}: a new bill would get the same number. `
+        + `Set the series' Next Number above ${clash.seq} (Numbering sheet of the configuration workbook, or Master > Document Numbering) first`);
     }
   }
   const billNumber = taken ? await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } }) : ref;
-  const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency, net_premium, go_live_date, created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$4,$11,$12) RETURNING id`,
-  [billNumber, policy.id, policy.client_id, round2(amount), round2(balance), due, balance < amount ? 'partial' : 'open', OPENING_SOURCE, ref, policy.currency || 'PHP', goLiveDate, user?.id ?? null])).rows[0];
+  const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency, net_premium, go_live_date, created_by,
+      origin, legacy_system, legacy_number, migrated_at, migrated_by, load_batch_id)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$4,$11,$12,'migrated',$13,$9,now(),$14,$15) RETURNING id`,
+  [billNumber, policy.id, policy.client_id, round2(amount), round2(balance), due, balance < amount ? 'partial' : 'open', OPENING_SOURCE, ref, policy.currency || 'PHP', goLiveDate, user?.id ?? null,
+    legacySystem || await legacySystemName(), migratedBy || user?.id || null, batchId])).rows[0];
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
-  return { status: 'created', billNumber, legacyNumberKept: billNumber === ref };
+  return { status: 'created', billNumber, legacyNumberKept: billNumber === ref, receivableId: r.id };
 }

@@ -17,7 +17,7 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook, readZip } from '../src/modules/documents/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { nextDocumentNumber } from '../src/lib/numbering.js';
-import { loginAs, enableFeatures } from './helpers.js';
+import { loginAs, enableFeatures, goLiveSetup, validatedBatch } from './helpers.js';
 
 let app;
 let api;
@@ -43,14 +43,13 @@ function book(kit, sheets) {
     }),
   });
 }
-const upload = (kit, buffer, name = `${kit}.xlsx`) => api('post', '/data-load/batches').field('kit', kit).attach('file', buffer, name);
+const upload = (kit, buffer, name = `${kit}.xlsx`) => validatedBatch(api, api('post', '/data-load/batches').field('kit', kit).attach('file', buffer, name));
 const load = (id, body = {}) => api('post', `/data-load/batches/${id}/load`).send(body);
-const setSettings = async (settings) => {
-  const r = await api('put', '/settings').send({ settings });
-  expect(r.status).toBe(200);
+const count = async (sql, params) => (await one(sql, params)).n;
+const setLock = async (on) => {
+  await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'golive.locked\'', [JSON.stringify(on)]);
   clearSettingsCache();
 };
-const count = async (sql, params) => (await one(sql, params)).n;
 
 beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
@@ -60,6 +59,7 @@ beforeAll(async () => {
   await enableFeatures(app, ['legacy-migration']);
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
+  await goLiveSetup(api, null);
   kits = (await api('get', '/data-load/kits')).body.data.kits;
   const now = await today();
   year = now.slice(0, 4);
@@ -102,8 +102,10 @@ describe('templates', () => {
       expect(r.status).toBe(200);
       expect(r.headers['content-type']).toContain('spreadsheetml');
       const sheets = readWorkbook(r.body);
-      expect(sheets.map((s) => s.name)).toEqual(['Instructions', 'Lists', ...k.sheets.map((s) => s.name)]);
-      for (const s of k.sheets) {
+      // the single Policies sheet of the earlier layout is read, never downloaded; the hidden Control sheet comes last
+      const shown = k.sheets.filter((s) => !s.legacyLayout);
+      expect(sheets.map((s) => s.name)).toEqual(['Instructions', 'Lists', ...shown.map((s) => s.name), 'Control']);
+      for (const s of shown) {
         const ws = sheets.find((x) => x.name === s.name);
         const required = s.columns.filter((c) => c.required).map((c) => `${c.header} *`);
         for (const h of required) expect(ws.rows[0]).toContain(h);
@@ -155,7 +157,7 @@ describe('configuration kit', () => {
 
   it('validates without saving: cross-sheet references resolve inside the dry run', async () => {
     const r = await upload('configuration', workbook('sales'));
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     expect(r.body.data.batch.status).toBe('validated');
     expect(r.body.data.batch.rowsError).toBe(0);
     const sheet = (k) => r.body.data.batch.sheets.find((s) => s.sheet === k);
@@ -171,7 +173,7 @@ describe('configuration kit', () => {
 
   it('reports the rows in error (sheet, row, column, message) and refuses the load until fixed', async () => {
     const r = await upload('configuration', workbook('no-such-role'));
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     batchA = r.body.data.batch;
     expect(batchA.status).toBe('failed');
     expect(batchA.rowsError).toBe(1);
@@ -190,7 +192,7 @@ describe('configuration kit', () => {
     expect(users.rows.length).toBe(3); // header, sample, the one row in error
     expect(users.rows[2][0]).toBe('wb.ae2');
     expect(users.rows[2][users.rows[0].indexOf('Errors')]).toMatch(/Roles: Unknown role/);
-    for (const s of sheets.filter((x) => !['Instructions', 'Lists', 'Users'].includes(x.name))) expect(s.rows.length).toBeLessThanOrEqual(2);
+    for (const s of sheets.filter((x) => !['Instructions', 'Lists', 'Users', 'Control'].includes(x.name))) expect(s.rows.length).toBeLessThanOrEqual(2);
     // load the valid rows of the first file, then the corrected row
     const partial = await load(batchA.id, { validRowsOnly: true });
     expect(partial.status).toBe(200);
@@ -259,7 +261,7 @@ describe('configuration kit', () => {
     // never a password
     expect(sheets.find((s) => s.name === 'Users').rows[0].join(' ')).not.toMatch(/password/i);
     const r = await upload('configuration', t.body, 'current.xlsx');
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     const batch = r.body.data.batch;
     expect(batch.rowsError).toBe(0);
     expect(batch.rowsRead).toBeGreaterThan(300);
@@ -269,14 +271,17 @@ describe('configuration kit', () => {
     for (const c of Object.values(l.body.data.batch.loadedCounts)) expect(c.created + c.updated + c.proposed).toBe(0);
   });
 
-  it('refuses golive.locked in the Settings sheet and checks setting values', async () => {
+  it('refuses the go-live settings in the Settings sheet and checks setting values', async () => {
     const r = await upload('configuration', book('configuration', { Settings: [
       { 'Setting Key': 'golive.locked', Value: 'true' },
-      { 'Setting Key': 'golive.cutover_date', Value: 'next monday' },
+      { 'Setting Key': 'golive.cutover_date', Value: '2026-12-01' },
       { 'Setting Key': 'tax.vat_rate', Value: '0.12' },
+      { 'Setting Key': 'limits.quote_validity_days', Value: 'twenty' },
     ] }));
-    expect(r.body.data.errors.map((e) => [e.row, e.column])).toEqual([[2, 'Setting Key'], [3, 'Value'], [4, 'Setting Key']]);
+    expect(r.body.data.errors.map((e) => [e.row, e.column])).toEqual([[2, 'Setting Key'], [3, 'Setting Key'], [4, 'Setting Key'], [5, 'Value']]);
+    expect(r.body.data.errors[0].message).toMatch(/Data Migration & Go-Live > Go-Live/);
     expect(r.body.data.errors[2].message).toMatch(/Premium Taxes/);
+    expect(r.body.data.errors[3].message).toMatch(/must be a number/);
   });
 
   it('refuses a commission rate on a line of business that is not in the Line of Business master', async () => {
@@ -328,12 +333,12 @@ describe('migration kit', () => {
   });
 
   it('validates the whole workbook as a dry run: policies refer to clients and insurers of the same workbook; nothing is saved', async () => {
-    await setSettings({ 'golive.cutover_date': cutover });
+    await goLiveSetup(api, cutover);
     const r = await upload('migration', workbook());
-    expect(r.status).toBe(201);
+    expect(r.status).toBe(202);
     expect(r.body.data.errors).toEqual([]);
     expect(r.body.data.batch.status).toBe('validated');
-    expect(r.body.data.batch.sheets.map((s) => [s.sheet, s.created])).toEqual([['clients', 2], ['policies', 2], ['open-items', 1], ['claims', 1], ['opening-balances', 4]]);
+    expect(r.body.data.batch.sheets.filter((s) => s.read).map((s) => [s.sheet, s.created])).toEqual([['clients', 2], ['policies', 2], ['open-items', 1], ['claims', 1], ['opening-balances', 4]]);
     expect(r.body.data.batch.reconciliation.checks.every((c) => c.ok)).toBe(true);
     expect(await count("SELECT count(*)::int AS n FROM policies WHERE policy_number LIKE 'OLD-%'")).toBe(0);
     expect(await count("SELECT count(*)::int AS n FROM clients WHERE client_code LIKE 'OLD-%'")).toBe(0);
@@ -342,7 +347,7 @@ describe('migration kit', () => {
   });
 
   it('loads flagged records without journals, bills or commission accruals, with a reconciliation', async () => {
-    const journals = await count('SELECT count(*)::int AS n FROM journal_vouchers');
+    const journals = await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source <> \'go-live-opening\'');
     const commissions = await count('SELECT count(*)::int AS n FROM commissions');
     const r = await load(loaded.id);
     expect(r.status).toBe(200);
@@ -358,7 +363,10 @@ describe('migration kit', () => {
     const client = await one("SELECT * FROM clients WHERE client_code = 'OLD-C-0001'");
     expect(client).toMatchObject({ source: 'go-live-migration', load_batch_id: loaded.id, display_name: 'Maria Santos' });
     expect(policies.find((p) => p.policy_number === 'OLD-MC-0001').client_id).toBe(client.id);
-    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers')).toBe(journals);
+    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source <> \'go-live-opening\'')).toBe(journals);
+    // the opening balances are documented by their opening balance journal, which has no journal lines
+    expect(await count('SELECT count(*)::int AS n FROM journal_vouchers WHERE source = \'go-live-opening\' AND status = \'opening\'')).toBe(1);
+    expect(await count('SELECT count(*)::int AS n FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE j.source = \'go-live-opening\'')).toBe(0);
     expect(await count('SELECT count(*)::int AS n FROM commissions')).toBe(commissions);
     // the only bill is the open item, without a booking journal
     const bills = (await query('SELECT * FROM receivables WHERE policy_id = ANY($1)', [policies.map((p) => p.id)])).rows;
@@ -431,16 +439,17 @@ describe('migration kit', () => {
 
   it('refuses the migration kit once go-live is locked; the configuration kit stays available', async () => {
     const validated = await upload('migration', workbook());
-    expect(validated.status).toBe(201);
-    await setSettings({ 'golive.locked': true });
+    expect(validated.status).toBe(202);
+    // switched on by two users on the Go-Live tab (test/migration-lock.test.js)
+    await setLock(true);
     expect(await getSetting('golive.locked')).toBe(true);
     const r = await upload('migration', workbook());
     expect(r.status).toBe(409);
     expect(r.body.message).toMatch(/locked/);
     expect((await load(validated.body.data.batch.id)).status).toBe(409);
     const c = await upload('configuration', book('configuration', { 'Lines of Business': [{ 'Line of Business Code': 'WBLOB', 'LOB Name': 'Workbench Line', 'LOB Description': 'Test line' }] }));
-    expect(c.status).toBe(201);
-    await setSettings({ 'golive.locked': false });
+    expect(c.status).toBe(202);
+    await setLock(false);
   });
 
   it('lists the batches with status, who, when and counts', async () => {
@@ -562,8 +571,10 @@ describe('migration kit', () => {
     expect((await request(app).post(`/api/renewals/${rn.body.data.id}/approve`).set('Authorization', `Bearer ${checker}`).send({ decision: 'approve' })).status).toBe(200);
     const done = await api('post', `/renewals/${rn.body.data.id}/complete`).send({});
     expect(done.status, JSON.stringify(done.body)).toBe(200);
-    const term = await one('SELECT doc, load_batch_id, renewed_from FROM policies WHERE id = $1', [done.body.data.newPolicy.id]);
+    const term = await one('SELECT doc, load_batch_id, renewed_from, origin, legacy_number, migrated_at FROM policies WHERE id = $1', [done.body.data.newPolicy.id]);
     expect(term.renewed_from).toBe(old.id);
+    // issued in BrokerVerse: none of the origin fields of the migrated term
+    expect(term).toMatchObject({ origin: 'issued', legacy_number: null, migrated_at: null });
     expect(term.doc.source).toBeUndefined();
     expect(term.doc.loadBatchId).toBeUndefined();
     expect(term.load_batch_id).toBeNull();

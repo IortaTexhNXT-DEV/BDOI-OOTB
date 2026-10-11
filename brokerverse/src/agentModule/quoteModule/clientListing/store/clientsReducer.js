@@ -28,7 +28,8 @@ export const toClientRow = (client) => ({
     Quotes: client.policies?.length?.toString() || "0",
     LeadID: client.generatedClientId,
     type: "motor",
-    ProductDescription: client.policies?.[0]?.status || "N/A"
+    ProductDescription: client.policies?.[0]?.status || "N/A",
+    origin: client.origin || null
 });
 
 const initialState = {

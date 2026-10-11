@@ -195,6 +195,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
         transactionCode,
         transactionNumber,
         parked,
+        origin,
       } = payload;
 
       // Build query parameters (parked: the system journals waiting for approval instead of the manual vouchers)
@@ -209,6 +210,9 @@ export const getJournalVoucherHistory = createAsyncThunk(
       }
       if (transactionNumber) {
         params.transactionNumber = transactionNumber;
+      }
+      if (origin) {
+        params.origin = origin;
       }
 
       const response = await getRequest(
@@ -246,6 +250,8 @@ export const getJournalVoucherHistory = createAsyncThunk(
           transationDescription: item.transactionDescription || item.description || "",
           date: formattedDate,
           status: item.status || "",
+          source: item.source || "",
+          origin: item.origin || null,
         };
       });
 

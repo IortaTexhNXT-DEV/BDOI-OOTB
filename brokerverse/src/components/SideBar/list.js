@@ -1554,6 +1554,13 @@ export const menuList = [
             path: "/master/configuration/features",
             includes: ["/master/configuration/features"],
           },
+          {
+            // templates, loads, reconciliation, mock runs, cutover, Go / No-Go, go-live lock and hypercare
+            id: 33,
+            name: "Data Migration & Go-Live",
+            path: "/master/configuration/go-live",
+            includes: ["/master/configuration/go-live"],
+          },
         ],
       },
       {
@@ -1561,13 +1568,6 @@ export const menuList = [
         name: "Environment Promotion",
         section: true,
         submenu: [
-          {
-            id: 42,
-            name: "Setup Workbook",
-            path: "/master/promotion/workbook",
-            includes: ["/master/promotion/workbook"],
-            permissions: ["read:data-load"],
-          },
           {
             id: 43,
             name: "Compare Environments",

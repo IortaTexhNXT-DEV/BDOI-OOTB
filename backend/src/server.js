@@ -30,6 +30,8 @@ const server = app.listen(config.port, () => logger.info(`BrokerVerse API listen
 server.keepAliveTimeout = (Number(process.env.HTTP_KEEP_ALIVE_SECONDS) > 0 ? Number(process.env.HTTP_KEEP_ALIVE_SECONDS) : 65) * 1000;
 server.headersTimeout = server.keepAliveTimeout + 5000;
 await startScheduler(logger);
+// data loads whose job stopped with the previous process are marked interrupted (then every 5 minutes, data-load-sweep)
+await (await import('./modules/data-load/jobs.js')).sweep().catch((e) => logger.warn({ err: e }, `data load sweep at start-up: ${e.message}`));
 watchSchedules(logger); // other instances' schedule / time-zone edits are picked up within SCHEDULER_RELOAD_SECONDS
 setReady(true);
 

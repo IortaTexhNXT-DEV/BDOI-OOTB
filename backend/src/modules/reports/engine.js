@@ -25,6 +25,8 @@ const FILTERS = {
   account: (p) => `(t._account = ${p} OR t._account LIKE ${p} || '%')`,
   // bank account master (code or id); the bank reconciliation reports expose it as _bank_account_code / _bank_account_id
   bankAccount: (p) => `(lower(t._bank_account_code) = lower(${p}) OR t._bank_account_id = ${p})`,
+  // origin of the records: issued or migrated, or their labels; the reports that offer it expose _origin and origin
+  origin: (p) => `(t._origin = lower(${p}) OR lower(t.origin) = lower(${p}))`,
   // financial statement version (code); the FS reports expose it as _fs_version
   fsVersion: (p) => `upper(t._fs_version) = upper(${p})`,
 };
@@ -41,6 +43,7 @@ const ALIASES = {
   status: ['Status', 'status'],
   account: ['Account', 'account', 'accountCode', 'glCode'],
   bankAccount: ['BankAccount', 'bankAccount', 'bankAccountCode', 'bankAccountId'],
+  origin: ['Origin', 'origin'],
   fsVersion: ['FsVersion', 'fsVersion', 'version'],
   period: ['period', 'datePreset'],
 };
@@ -82,7 +85,8 @@ export function resolvePeriod(period, today) {
 }
 
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-const CRITERIA_ALIASES = { principleinsurance: 'principalinsurer', principalinsurance: 'principalinsurer', principleinsurer: 'principalinsurer' };
+// "Source" was the earlier name of the Origin view of the production register
+const CRITERIA_ALIASES = { principleinsurance: 'principalinsurer', principalinsurance: 'principalinsurer', principleinsurer: 'principalinsurer', source: 'origin' };
 
 /** Turn screen/API parameters into { from, to, criteria, filters } for a query definition. */
 export async function normalizeParams(query, raw = {}) {

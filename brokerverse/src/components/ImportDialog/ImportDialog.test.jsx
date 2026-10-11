@@ -72,6 +72,28 @@ describe("ImportDialog", () => {
     expect(await screen.findByText("Loaded")).toBeInTheDocument();
   });
 
+  it("sends the screen's own fields with the file, waits for them, and reports every accepted upload", async () => {
+    importService.upload.mockResolvedValue({ message: "Validating MIG-000012", batch: { id: 12 } });
+    const onUploaded = jest.fn();
+    const targets = [{ label: "Migration workbook", uploadPath: "/data-load/batches" }];
+    const Dialog = ({ run }) => (
+      <ImportDialog visible onHide={() => {}} title="Upload workbook" targets={targets}
+        steps={[{ key: "run", label: "Run", required: true, node: <input id="run" readOnly value={run} /> }]} fields={{ kit: "migration", runId: run }}
+        fieldsReady={!!run} onUploaded={onUploaded} accept=".xlsx" fileTypes="Excel workbook" />
+    );
+    const { rerender } = render(<Dialog run="" />);
+    expect(screen.queryByRole("button", { name: "Download template" })).toBeNull();
+    expect(screen.getByLabelText(/Run/)).toBeInTheDocument();
+    expect(screen.getByText("Excel workbook")).toBeInTheDocument();
+    expect(screen.getByTestId("import-file")).toHaveAttribute("accept", ".xlsx");
+    choose(csv("wb.xlsx"));
+    expect(button("Upload")).toBeDisabled();
+    rerender(<Dialog run="3" />);
+    fireEvent.click(button("Upload"));
+    await waitFor(() => expect(onUploaded).toHaveBeenCalledWith(expect.objectContaining({ batch: { id: 12 } })));
+    expect(importService.upload).toHaveBeenCalledWith("/data-load/batches", expect.any(File), { kit: "migration", runId: "3" });
+  });
+
   it("puts the row errors of the API in one shape and sizes files", () => {
     expect(errorRows([{ path: "row 5", message: "Row 5: Account 1 is inactive" }, { row: 2, column: "Debit", message: "x" }, { path: "code", error: "y" }]))
       .toEqual([{ key: "5-0", row: 5, column: null, message: "Account 1 is inactive" }, { key: "2-1", row: 2, column: "Debit", message: "x" }, { key: "code-2", row: "code", column: null, message: "y" }]);
