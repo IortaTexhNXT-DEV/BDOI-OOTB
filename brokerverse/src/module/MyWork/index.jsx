@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
 import StatCards from "../../components/StatCards";
+import ViewState from "../../components/LoadState/ViewState";
+import { useStableLoad } from "../../hooks/useStableLoad";
 import { useListState } from "../../hooks/useServerList";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import myWorkService, { errorMessage } from "../../services/myWorkService";
@@ -36,8 +38,6 @@ const MyWork = () => {
   const presetCode = useMemo(() => presetFor(getUserRoles()), []);
   const preset = PRESETS[presetCode] || PRESETS.general;
   const [dashboard] = useState(() => defaultDashboard());
-  const [mine, setMine] = useState(null);
-  const [scoped, setScoped] = useState(null);
   const [home, setHome] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [dialog, setDialog] = useState({ visible: false, task: null });
@@ -46,19 +46,27 @@ const MyWork = () => {
   const [tasks, patchTasks] = useListState("my-work-tasks-filters", { scope: "mine", status: "open", due: "", priority: "", search: "" });
   const [calendar, patchCalendar] = useListState("my-work-calendar", { view: "week", date: "" });
 
+  // four states (hooks/useStableLoad): the figures and the category rail show skeletons on the first load only, then the
+  // counts (kept under a veil while a refresh runs), or the reason with Retry; never a rail on skeletons for ever
+  const failed = useCallback((e) => { throw new Error(errorMessage(e, t("myWork.loadFailed", "My Work could not be loaded"))); }, [t]);
+  const mineLoad = useStableLoad(useCallback(() => myWorkService.summary("me").catch(failed), [reloadKey, failed])); // eslint-disable-line react-hooks/exhaustive-deps
+  const scopedLoad = useStableLoad(useCallback(() => myWorkService.summary(items.scope), [items.scope, reloadKey]), { enabled: items.scope !== "me" }); // eslint-disable-line react-hooks/exhaustive-deps
+  const mine = mineLoad.data;
+  const scoped = items.scope === "me" ? null : scopedLoad.data;
+  const summaryLoad = items.scope === "me" ? mineLoad : scopedLoad;
+  const loadSummary = mineLoad.reload;
+  const refreshing = mineLoad.loading || mineLoad.refreshing || (items.scope !== "me" && (scopedLoad.loading || scopedLoad.refreshing));
+  // a refresh that fails keeps the figures and says so (a first load that fails shows the reason with Retry)
+  const refreshError = mineLoad.status === "loaded" ? mineLoad.error : null;
+  useEffect(() => {
+    if (refreshError) notifyError(refreshError);
+  }, [refreshError]);
+
   const isManager = !!mine?.team?.isManager;
   const tab = tabFromSearch(location.search, { isManager: isManager || !mine });
   const today = mine?.asOf || isoToday();
   const soonDays = mine?.dueSoonDays || 7;
 
-  const loadSummary = useCallback(() => {
-    myWorkService.summary("me").then(setMine).catch((e) => notifyError(errorMessage(e, t("myWork.loadFailed", "My Work could not be loaded"))));
-  }, [t]);
-  useEffect(() => { loadSummary(); }, [loadSummary, reloadKey]);
-  useEffect(() => {
-    if (items.scope === "me") return;
-    myWorkService.summary(items.scope).then(setScoped).catch(() => setScoped(null));
-  }, [items.scope, reloadKey]);
   // the role figures and the subtitle (role, branch, company); the page works without them
   useEffect(() => {
     fetchFigures().then(setHome).catch(() => setHome(null));
@@ -126,14 +134,16 @@ const MyWork = () => {
           <p className="mw-subtitle">{subtitle}</p>
         </div>
         <div className="mw-head__actions">
-          <Button icon="pi pi-refresh" text rounded aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />
+          <Button icon="pi pi-refresh" text rounded loading={refreshing} aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />
           {dashboard && <Button label={t("myWork.myDashboard", "My dashboard")} icon="pi pi-chart-bar" text onClick={() => navigate(dashboard.path)} />}
           <Button label={t("myWork.task.new", "New task")} icon="pi pi-plus" outlined onClick={() => setDialog({ visible: true, task: null })} />
           {action && <Button label={t(`myWork.home.action.${action.key}`, { defaultValue: action.key })} icon={action.category ? "pi pi-check-square" : "pi pi-arrow-right"} iconPos={action.category ? "left" : "right"} onClick={runAction} />}
         </div>
       </div>
 
-      <StatCards items={[...cards, ...roleCards]} className="mw-kpis" />
+      <ViewState state={mineLoad} skeleton={<StatCards items={cards} loading className="mw-kpis" />}>
+        <StatCards items={[...cards, ...roleCards]} refreshing={mineLoad.refreshing} className="mw-kpis" />
+      </ViewState>
 
       <TabView className="bv-tabbar mw-tabs" activeIndex={Math.max(0, visibleTabs.indexOf(tab))} onTabChange={(e) => goTab(visibleTabs[e.index])}>
         {visibleTabs.map((x) => <TabPanel key={x} header={tabLabel[x]} leftIcon={`${tabIcon[x]} mr-2`} />)}
@@ -141,7 +151,7 @@ const MyWork = () => {
 
       <div className="mw-body">
         {tab === "items" && (
-          <MyItems state={items} patch={patchItems} summary={withOrder(items.scope === "me" ? mine : scoped)} loading={!(items.scope === "me" ? mine : scoped)}
+          <MyItems state={items} patch={patchItems} summary={withOrder(items.scope === "me" ? mine : scoped)} loading={summaryLoad.status === "loading"}
             today={today} soonDays={soonDays} reloadKey={reloadKey} isManager={isManager} />
         )}
         {tab === "team" && isManager && <MyTeam state={team} patch={patchTeam} today={today} soonDays={soonDays} reloadKey={reloadKey} onChanged={loadSummary} />}
