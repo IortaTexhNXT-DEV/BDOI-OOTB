@@ -189,9 +189,12 @@ const Workspace = () => {
   };
   const typeName = (code) => types.find((x) => x.code === code)?.name || code;
 
+  // matching, adjustments, flags, statements and the account set-up need write:bank-reconciliation; a reader (Cash
+  // Control, the General Manager) follows the matching and opens the reconciliation of the period
+  const canWork = hasPermission("write:bank-reconciliation");
   const bankActions = (l) => (
     <div className="flex gap-1 justify-content-end">
-      {!l.matchId && !l.flag && !l.adjustmentJournalId && (
+      {canWork && !l.matchId && !l.flag && !l.adjustmentJournalId && (
         <Button icon="pi pi-file-edit" text rounded size="small" tooltip={t("bankReconciliation.createAdjustment")} tooltipOptions={{ position: "left" }}
           onClick={() => { setForm({ line: l }); setDialog("adjust"); }} aria-label={t("bankReconciliation.createAdjustment")} />
       )}
@@ -199,18 +202,18 @@ const Workspace = () => {
         <Button icon="pi pi-check-circle" text rounded size="small" tooltip={t("bankReconciliation.approveAdjustment")} tooltipOptions={{ position: "left" }}
           onClick={() => approveAdjustment(l)} aria-label={t("bankReconciliation.approveAdjustment")} />
       )}
-      {!l.matchId && (
+      {canWork && !l.matchId && (
         <Button icon={l.flag ? "pi pi-flag-fill" : "pi pi-flag"} text rounded size="small" severity={l.flag ? "danger" : "secondary"} tooltip={l.flag ? t("bankReconciliation.clearFlag") : t("bankReconciliation.flagBankError")}
           tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.flagBankError")}
           onClick={() => (l.flag ? clearFlag(l) : flagLine(l))} />
       )}
-      {l.matchId && !l.locked && (
+      {canWork && l.matchId && !l.locked && (
         <Button icon="pi pi-link" text rounded size="small" severity="secondary" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
           onClick={() => unmatch(l, bankFacts(l))} />
       )}
     </div>
   );
-  const bookActions = (v) => (v.matchId && !v.locked ? (
+  const bookActions = (v) => (canWork && v.matchId && !v.locked ? (
     <Button icon="pi pi-link" text rounded size="small" severity="secondary" tooltip={t("bankReconciliation.unmatch")} tooltipOptions={{ position: "left" }} aria-label={t("bankReconciliation.unmatch")}
       onClick={() => unmatch(v, bookFacts(v))} />
   ) : null);
@@ -220,8 +223,10 @@ const Workspace = () => {
       <Toast ref={toast} />
       <PageHeader title={t("bankReconciliation.title")} trail={[t("bankReconciliation.workspace")]}>
         <Button icon="pi pi-list" outlined label={t("bankReconciliation.reconciliations")} onClick={() => navigate("/accounts/bank-reconciliation/reconciliations")} />
-        <Button icon="pi pi-cog" outlined label={t("bankReconciliation.accountSetup")} disabled={!current}
-          onClick={() => { setForm({ glAccountCode: current?.glAccountCode || null, statementFormat: current?.statementFormat || null, reconcileFrom: current?.reconcileFrom || "" }); setDialog("setup"); }} />
+        {canWork && (
+          <Button icon="pi pi-cog" outlined label={t("bankReconciliation.accountSetup")} disabled={!current}
+            onClick={() => { setForm({ glAccountCode: current?.glAccountCode || null, statementFormat: current?.statementFormat || null, reconcileFrom: current?.reconcileFrom || "" }); setDialog("setup"); }} />
+        )}
       </PageHeader>
 
       <div className="pe-card">
@@ -236,8 +241,8 @@ const Workspace = () => {
             <Dropdown inputId="br-period" value={period} options={periods} onChange={(e) => setPeriod(e.value)} style={{ minWidth: 220 }} />
           </div>
           <div className="flex gap-2 flex-wrap ml-auto">
-            <Button icon="pi pi-upload" label={t("bankReconciliation.importStatement")} disabled={!linked} onClick={() => setDialog("import")} />
-            <Button icon="pi pi-bolt" label={t("bankReconciliation.autoMatch")} disabled={!linked} loading={busy === "auto"}
+            {canWork && <Button icon="pi pi-upload" label={t("bankReconciliation.importStatement")} disabled={!linked} onClick={() => setDialog("import")} />}
+            {canWork && <Button icon="pi pi-bolt" label={t("bankReconciliation.autoMatch")} disabled={!linked} loading={busy === "auto"}
               onClick={() => confirmAct({
                 title: t("bankReconciliation.autoMatchTitle"),
                 message: t("bankReconciliation.autoMatchMessage"),
@@ -248,16 +253,18 @@ const Workspace = () => {
                 ],
                 confirmLabel: t("bankReconciliation.autoMatch"),
                 confirmIcon: "pi pi-bolt",
-              }, () => bankReconciliationService.autoMatch(account), (r) => t("bankReconciliation.autoMatched", { count: r?.matched || 0 }))} />
-            <Button icon="pi pi-clock" outlined label={t("bankReconciliation.staleCheques")} disabled={!linked} onClick={() => setDialog("stale")} />
-            <Button icon="pi pi-file-check" label={rec ? `${t("bankReconciliation.reconciliation")} ${rec.recNumber}` : t("bankReconciliation.startReconciliation")}
-              disabled={!linked} loading={busy === "rec"} onClick={openRec} />
+              }, () => bankReconciliationService.autoMatch(account), (r) => t("bankReconciliation.autoMatched", { count: r?.matched || 0 }))} />}
+            {canWork && <Button icon="pi pi-clock" outlined label={t("bankReconciliation.staleCheques")} disabled={!linked} onClick={() => setDialog("stale")} />}
+            {(rec || canWork) && (
+              <Button icon="pi pi-file-check" label={rec ? `${t("bankReconciliation.reconciliation")} ${rec.recNumber}` : t("bankReconciliation.startReconciliation")}
+                disabled={!linked} loading={busy === "rec"} onClick={openRec} />
+            )}
           </div>
         </div>
         {current && !linked && (
           <div className="br-notice mt-3">
             {t("bankReconciliation.notLinkedHelp", { account: current.code })}{" "}
-            <Button link size="small" label={t("bankReconciliation.accountSetup")} onClick={() => { setForm({ glAccountCode: null, statementFormat: current.statementFormat || null, reconcileFrom: current.reconcileFrom || "" }); setDialog("setup"); }} />
+            {canWork && <Button link size="small" label={t("bankReconciliation.accountSetup")} onClick={() => { setForm({ glAccountCode: null, statementFormat: current.statementFormat || null, reconcileFrom: current.reconcileFrom || "" }); setDialog("setup"); }} />}
           </div>
         )}
       </div>
@@ -294,7 +301,7 @@ const Workspace = () => {
             </div>
             <DataTable value={bankRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bankSel} onSelectionChange={(e) => setBankSel(e.value.filter((x) => !x.matchId))}
               scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
-              <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />
+              {canWork && <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />}
               <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.description")} body={(l) => (
                 <div className="br-desc" title={l.description}>
@@ -316,7 +323,7 @@ const Workspace = () => {
             </div>
             <DataTable value={bookRows} dataKey="id" size="small" loading={loading} selectionMode="checkbox" selection={bookSel} onSelectionChange={(e) => setBookSel(e.value.filter((x) => !x.matchId))}
               scrollable scrollHeight="560px" emptyMessage={t("bankReconciliation.noLines")} rowClassName={(r) => (r.matchId ? "br-matched-row" : "")} isDataSelectable={(e) => !e.data.matchId}>
-              <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />
+              {canWork && <Column selectionMode="multiple" headerStyle={{ width: "2.5rem" }} />}
               <Column header={t("bankReconciliation.date")} body={(v) => date(v.date)} style={{ width: "6.5rem" }} />
               <Column header={t("bankReconciliation.document")} body={(v) => (
                 <div className="br-desc" title={v.description}>

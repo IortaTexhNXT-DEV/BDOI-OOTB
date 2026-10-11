@@ -14,6 +14,7 @@ import ImportDialog from "../../../components/ImportDialog";
 import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
 import useProspectStart from "./useProspectStart";
+import { hasPermission } from "../../../utils/canOpen";
 
 /**
  * Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). Prospects
@@ -118,6 +119,9 @@ const LeadListing = () => {
     handleGenerateReport();
   };
 
+  // creating and uploading prospects need write:leads; readers (Operations, Finance, IT AppSupport) list them
+  const canWrite = hasPermission("write:leads");
+
   return (
     <div className="leadlisting__overal__container">
       <Toast ref={toast} />
@@ -130,11 +134,13 @@ const LeadListing = () => {
             className="btn_lable_save_container"
             style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}
           >
-            <Button
-              label={t("leads.bulkUpload")}
-              className="p-button-outlined"
-              onClick={() => setShowBulkUpload(true)}
-            />
+            {canWrite && (
+              <Button
+                label={t("leads.bulkUpload")}
+                className="p-button-outlined"
+                onClick={() => setShowBulkUpload(true)}
+              />
+            )}
 
             <Button
               label={isGeneratingReport ? t("leads.generatingReport") : t("leads.generateReport")}
@@ -148,7 +154,7 @@ const LeadListing = () => {
               disabled={isGeneratingReport}
               loading={isGeneratingReport}
             />
-            <Button label={t("leads.createLead")} icon="pi pi-plus" onClick={() => setShowCreate(true)} />
+            {canWrite && <Button label={t("leads.createLead")} icon="pi pi-plus" onClick={() => setShowCreate(true)} />}
           </div>
         </div>
       </div>

@@ -297,14 +297,16 @@ const CollectionsList = () => {
       <PageHeader title={t("sidebar.Collections")} group={t("sidebar.Accounts")} />
 
       <div className="reminder-button-section">
-        <Button
-          label={t("collectionsList.sendPaymentRemindersNow")}
-          icon="pi pi-send"
-          className="p-button-rounded"
-          onClick={handleSendDueDateReminders}
-          loading={sendingReminders}
-          tooltipOptions={{ position: "top" }}
-        />
+        {hasPermission("write:collections") && (
+          <Button
+            label={t("collectionsList.sendPaymentRemindersNow")}
+            icon="pi pi-send"
+            className="p-button-rounded"
+            onClick={handleSendDueDateReminders}
+            loading={sendingReminders}
+            tooltipOptions={{ position: "top" }}
+          />
+        )}
         {hasPermission("write:receipts") && (
           <Button label={t("collectionsList.importOpenItems")} icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
         )}

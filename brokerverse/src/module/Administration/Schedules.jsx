@@ -14,6 +14,7 @@ import DetailDialog from "../../components/DetailDialog";
 import StatusChip from "../../components/StatusChip";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { ActivityLog, fromJobRuns, humanize } from "../../components/ActivityLog";
+import { hasPermission } from "../../utils/canOpen";
 import "./index.scss";
 
 import { formatInstant } from "../../utility/dateFormat";
@@ -137,11 +138,13 @@ const Schedules = () => {
     return { ...entry, changes: [], remarks: entry.remarks || counts || null };
   });
 
+  // running a job and changing its schedule need write:schedules; a reader sees the run history only
+  const canChange = hasPermission("write:schedules");
   const actions = (job) => (
     <div className="admin__actions">
-      <Button icon="pi pi-play" rounded text aria-label={t("schedules.runNow")} loading={busy === job.code} onClick={() => run(job)} tooltip={t("schedules.runNow")} tooltipOptions={{ position: "top" }} />
+      {canChange && <Button icon="pi pi-play" rounded text aria-label={t("schedules.runNow")} loading={busy === job.code} onClick={() => run(job)} tooltip={t("schedules.runNow")} tooltipOptions={{ position: "top" }} />}
       <Button icon="pi pi-history" rounded text aria-label={t("schedules.runHistory")} onClick={() => showRuns(job)} tooltip={t("schedules.runHistory")} tooltipOptions={{ position: "top" }} />
-      <Button icon="pi pi-pencil" rounded text aria-label={t("schedules.edit")} onClick={() => setEdit({ ...job })} tooltip={t("schedules.edit")} tooltipOptions={{ position: "top" }} />
+      {canChange && <Button icon="pi pi-pencil" rounded text aria-label={t("schedules.edit")} onClick={() => setEdit({ ...job })} tooltip={t("schedules.edit")} tooltipOptions={{ position: "top" }} />}
     </div>
   );
 

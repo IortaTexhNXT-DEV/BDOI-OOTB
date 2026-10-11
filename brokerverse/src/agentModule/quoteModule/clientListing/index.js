@@ -19,8 +19,8 @@ const ClientListing = () => {
     { label: t("clients.title") },
   ];
   const Initiate = { label: t("sidebar.Operations") };
-  // only roles that may open Leads/Prospects are offered "Create Lead" (claims users view clients only)
-  const canCreateLead = canOpen("/agent/createlead");
+  // only roles that may open Leads/Prospects and create prospects are offered "Create Lead" (readers view clients only)
+  const canCreateLead = canOpen("/agent/createlead") && hasPermission("write:leads");
 
   // "Create Lead": the line of business and product open the screen the product is quoted on, tagged with the product;
   // Skip - tag product later opens the prospect form without a product

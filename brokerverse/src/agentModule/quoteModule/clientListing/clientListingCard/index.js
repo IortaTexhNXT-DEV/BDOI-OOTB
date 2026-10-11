@@ -11,6 +11,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import clientService from "../../../../services/clientService";
 import { getClientEditMiddleWare } from "../store/clientsMiddleware";
+import { hasPermission } from "../../../../utils/canOpen";
 import { toClientRow } from "../store/clientsReducer";
 import { formatDate } from "../../../../utility/dateFormat";
 import { useListState, useServerList } from "../../../../hooks/useServerList";
@@ -54,8 +55,10 @@ const ClientListingCard = () => {
     <div className="flex gap-1 justify-content-end">
       <Button icon="pi pi-eye" text rounded size="small" aria-label={t("clients.view", { defaultValue: "View" })} tooltip={t("clients.view", { defaultValue: "View" })}
         tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openClient(row); }} />
-      <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("clients.edit", { defaultValue: "Edit" })} tooltip={t("clients.edit", { defaultValue: "Edit" })}
-        tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); editClient(row); }} />
+      {hasPermission("write:clients") && (
+        <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("clients.edit", { defaultValue: "Edit" })} tooltip={t("clients.edit", { defaultValue: "Edit" })}
+          tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); editClient(row); }} />
+      )}
     </div>
   );
   const latestStatus = (row) => (row.ProductDescription && row.ProductDescription !== "N/A"

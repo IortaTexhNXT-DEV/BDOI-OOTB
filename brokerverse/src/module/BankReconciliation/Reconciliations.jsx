@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import bankReconciliationService from "../../services/bankReconciliationService";
 import { BrTag, PageHeader, dateTime, money, previousPeriod, recentPeriods, showError } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Accounts > Bank Reconciliation > Reconciliations: runs per bank account and period, and a new run. */
 const Reconciliations = () => {
@@ -67,7 +68,7 @@ const Reconciliations = () => {
       <Toast ref={toast} />
       <PageHeader title={t("bankReconciliation.reconciliations")} trail={[t("bankReconciliation.reconciliations")]}>
         <Button icon="pi pi-arrow-left" text label={t("bankReconciliation.workspace")} onClick={() => navigate("/accounts/bank-reconciliation")} />
-        <Button icon="pi pi-plus" label={t("bankReconciliation.newReconciliation")} onClick={startNew} />
+        {hasPermission("write:bank-reconciliation") && <Button icon="pi pi-plus" label={t("bankReconciliation.newReconciliation")} onClick={startNew} />}
       </PageHeader>
       <div className="pe-card">
         <div className="br-toolbar mb-3">

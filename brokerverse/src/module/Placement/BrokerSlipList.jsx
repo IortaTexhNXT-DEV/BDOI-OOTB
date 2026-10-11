@@ -11,6 +11,7 @@ import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import StatCards from "../../components/StatCards";
 import { PageHeader, StatusTag, formatDate } from "./shared";
+import { hasPermission } from "../../utils/canOpen";
 import "./index.scss";
 
 const STATUSES = ["draft", "submitted", "responses-in", "closed", "cancelled"];
@@ -57,7 +58,7 @@ const BrokerSlipList = () => {
     <div className="placement-page">
       <Toast ref={toast} />
       <PageHeader title={t("placement.brokerSlip.listTitle")}>
-        <Button label={t("placement.brokerSlip.new")} icon="pi pi-plus" onClick={() => navigate("/placement/broker-slips/new")} />
+        {hasPermission("write:quotations") && <Button label={t("placement.brokerSlip.new")} icon="pi pi-plus" onClick={() => navigate("/placement/broker-slips/new")} />}
       </PageHeader>
 
       {/* the counts per status double as a status filter */}

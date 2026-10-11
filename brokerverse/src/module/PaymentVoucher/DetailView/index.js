@@ -30,6 +30,7 @@ import EligibilityNote from "../../../components/EligibilityNote";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import { statusLabel } from "../../../utils/statusSeverity";
+import { hasPermission } from "../../../utils/canOpen";
 
 function Detailview() {
   const { t } = useTranslation();
@@ -311,6 +312,7 @@ function Detailview() {
     return rest > 0 ? rest : 0;
   }, [disbursementDetails]);
   const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(v));
+  const canDecide = hasPermission("write:disbursements");
   const voucherChecker = useMakerChecker({ id: disbursementDetails?.createdBy });
   const chequeChecker = useMakerChecker({ id: selectedProducts?.rawData?.createdBy });
 
@@ -684,11 +686,12 @@ function Detailview() {
       <DetailSection title={t("paymentVoucher.chequeBookDetails")} className="pv-detail__section"
         actions={(
           <>
-            {/* the cheque actions act on the cheque picked in the list; the maker of the voucher or cheque cannot approve it */}
-            {hasPendingItems && (voucherChecker.blocked || chequeChecker.blocked) && (
+            {/* the cheque actions act on the cheque picked in the list; the maker of the voucher or cheque cannot approve it,
+                and approving needs write:disbursements */}
+            {canDecide && hasPendingItems && (voucherChecker.blocked || chequeChecker.blocked) && (
               <EligibilityNote reason={voucherChecker.reason || chequeChecker.reason} />
             )}
-            {hasPendingItems && !voucherChecker.blocked && !chequeChecker.blocked && (
+            {canDecide && hasPendingItems && !voucherChecker.blocked && !chequeChecker.blocked && (
               <Button type="button" icon="pi pi-check" size="small" label={t("paymentVoucher.detail.approveCheque")} onClick={handleApprove}
                 disabled={!selectedProducts || selectedProducts.status !== "Pending"}
                 tooltip={!selectedProducts || selectedProducts.status !== "Pending" ? t("paymentVoucher.detail.selectPendingCheque") : undefined}

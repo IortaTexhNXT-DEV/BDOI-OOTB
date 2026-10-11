@@ -18,6 +18,7 @@ import DetailSection from "../../components/DetailSection";
 import { formatValue, NUMERIC_TYPES } from "../../components/KeyValueGrid/formatValue";
 import { ActivityLog, fromWarrantyActions, humanize } from "../../components/ActivityLog";
 import { CcTag, PageHeader, date, isoOf, money, showError, showSuccess } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 import "./warrantyMonitor.scss";
 
 const FILTERS = ["attention", "breached", "at-risk", "all"];
@@ -29,6 +30,8 @@ const FILTERS = ["attention", "breached", "at-risk", "all"];
  */
 const WarrantyMonitor = () => {
   const { t } = useTranslation();
+  // reminders, extension and cancellation requests follow up the premium (write:collections); readers watch the warranty
+  const canFollowUp = hasPermission("write:collections");
   const toast = useRef(null);
   const [filter, setFilter] = useState("attention");
   const [search, setSearch] = useState("");
@@ -179,11 +182,15 @@ const WarrantyMonitor = () => {
           )} />
           <Column style={{ width: "11rem", minWidth: "11rem" }} body={(r) => (
             <div className="flex gap-1 flex-nowrap">
-              <Button icon="pi pi-envelope" text size="small" tooltip={t("creditControl.remind")} onClick={() => remind(r)} aria-label={t("creditControl.remind")} />
-              <Button icon="pi pi-calendar-plus" text size="small" tooltip={t("creditControl.requestExtension")} disabled={!!r.pendingExtension}
-                onClick={() => setExtension({ row: r, requestedDeadline: null, reason: "" })} aria-label={t("creditControl.requestExtension")}
-                />
-              <Button icon="pi pi-ban" text size="small" severity="danger" tooltip={t("creditControl.requestCancellation")} disabled={r.status !== "breached" || !!r.cancellationRequest} onClick={() => cancellation(r)} aria-label={t("creditControl.requestCancellation")} />
+              {canFollowUp && (
+                <>
+                  <Button icon="pi pi-envelope" text size="small" tooltip={t("creditControl.remind")} onClick={() => remind(r)} aria-label={t("creditControl.remind")} />
+                  <Button icon="pi pi-calendar-plus" text size="small" tooltip={t("creditControl.requestExtension")} disabled={!!r.pendingExtension}
+                    onClick={() => setExtension({ row: r, requestedDeadline: null, reason: "" })} aria-label={t("creditControl.requestExtension")}
+                    />
+                  <Button icon="pi pi-ban" text size="small" severity="danger" tooltip={t("creditControl.requestCancellation")} disabled={r.status !== "breached" || !!r.cancellationRequest} onClick={() => cancellation(r)} aria-label={t("creditControl.requestCancellation")} />
+                </>
+              )}
               <Button icon="pi pi-history" text size="small" tooltip={t("creditControl.history")} onClick={() => showActions(r)} aria-label={t("creditControl.history")} />
             </div>
           )} />

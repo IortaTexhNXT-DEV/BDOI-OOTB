@@ -8,6 +8,7 @@ import { Skeleton } from "primereact/skeleton";
 import myWorkService, { errorMessage } from "../../services/myWorkService";
 import { formatDate } from "../../utility/dateFormat";
 import { notifyError } from "../../utility/dialogs";
+import { canOpenLink } from "../../utils/canOpen";
 import { CATEGORY_ICONS, agendaDays, groupAgenda, priorityMeta, shiftDate } from "./logic";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -43,8 +44,11 @@ const Agenda = ({ state, patch, today, reloadKey, onEditTask, onNewTask, categor
       withLate ? myWorkService.items({ scope: "me", due: "overdue", category, page: 1, pageSize: 50 }) : Promise.resolve({ rows: [] }),
     ]).then(([tasks, agenda, lateTasks, lateItems]) => {
       if (!alive) return;
-      setData(groupAgenda(tasks.rows, agenda.items, days));
-      setLate([...lateTasks.rows.map((x) => ({ ...x, kindOf: "task" })), ...lateItems.rows.filter((x) => x.category !== "tasks" && x.dueDate < from).map((x) => ({ ...x, kindOf: "item" }))]);
+      // an item whose record the user cannot open is not offered
+      const reachable = (x) => !x.link || canOpenLink(x.link);
+      setData(groupAgenda(tasks.rows, agenda.items.filter(reachable), days));
+      setLate([...lateTasks.rows.map((x) => ({ ...x, kindOf: "task" })),
+        ...lateItems.rows.filter((x) => x.category !== "tasks" && x.dueDate < from && reachable(x)).map((x) => ({ ...x, kindOf: "item" }))]);
     }).catch((e) => {
       if (alive) { setData(groupAgenda([], [], days)); setLate([]); notifyError(errorMessage(e, t("myWork.loadFailed", "My Work could not be loaded"))); }
     });

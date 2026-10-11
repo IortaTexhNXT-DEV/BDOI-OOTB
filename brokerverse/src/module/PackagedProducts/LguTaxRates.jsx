@@ -20,6 +20,7 @@ import { formatDate } from "../../utility/dateFormat";
 import { PageHeader } from "../Placement/shared";
 import { ChargesBreakdown, PRODUCT_LINES, RULE_KINDS, RULE_METHODS, TAX_REGIMES, todayIso, usePackageOptions, lguOptions } from "./common";
 import DateField from "../../components/DateField";
+import { hasPermission } from "../../utils/canOpen";
 import "../Placement/index.scss";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -150,12 +151,15 @@ const LguTaxRates = () => {
   const active = (r) => <Tag value={r.active ? t("packagedProducts.active") : t("packagedProducts.inactive")} severity={r.active ? "success" : "secondary"} />;
   const howMuch = (r) => (r.method === "per_unit" ? k("perUnit", { amount: r.unitAmount, size: r.unitSize }) : r.method === "flat" ? k("flat", { amount: r.unitAmount }) : `${r.rate}%`);
 
+  // the rates and charge rules are kept with write:premium-charges; readers see them and use the calculator
+  const canChange = hasPermission("write:premium-charges");
+
   return (
     <div className="placement-page pkg-page">
       <PageHeader title={k("title")} />
       <TabView>
         <TabPanel header={k("lguTab")}>
-          <div className="pkg-toolbar"><Button label={k("addLgu")} icon="pi pi-plus" onClick={() => openLgu({ ...EMPTY_LGU })} /></div>
+          {canChange && <div className="pkg-toolbar"><Button label={k("addLgu")} icon="pi pi-plus" onClick={() => openLgu({ ...EMPTY_LGU })} /></div>}
           <DataTable value={lgus} loading={loading} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={k("noLgu")} responsiveLayout="scroll">
             <Column field="code" header={k("code")} sortable />
             <Column field="name" header={k("lguName")} sortable />
@@ -164,17 +168,17 @@ const LguTaxRates = () => {
             <Column header={k("effectiveFrom")} body={(r) => formatDate(r.effectiveFrom)} />
             <Column header={k("effectiveTo")} body={(r) => (r.effectiveTo ? formatDate(r.effectiveTo) : "-")} />
             <Column header={t("packagedProducts.active")} body={active} />
-            <Column body={(r) => (
+            {canChange && <Column body={(r) => (
               <div className="admin__actions">
                 <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => openLgu({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "" })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
                 <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeLgu(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
               </div>
-            )} style={{ width: "7rem" }} />
+            )} style={{ width: "7rem" }} />}
           </DataTable>
         </TabPanel>
         <TabPanel header={k("rulesTab")}>
           <p className="muted">{k("rulesHelp")}</p>
-          <div className="pkg-toolbar"><Button label={k("addRule")} icon="pi pi-plus" onClick={() => openRule({ ...EMPTY_RULE })} /></div>
+          {canChange && <div className="pkg-toolbar"><Button label={k("addRule")} icon="pi pi-plus" onClick={() => openRule({ ...EMPTY_RULE })} /></div>}
           <DataTable value={rules} loading={loading} dataKey="code" size="small" stripedRows emptyMessage={k("noRule")} responsiveLayout="scroll">
             <Column field="code" header={k("code")} />
             <Column field="name" header={k("ruleName")} />
@@ -183,12 +187,12 @@ const LguTaxRates = () => {
             <Column header={k("lines")} body={(r) => (r.lines || []).join(", ") || k("allLines")} />
             <Column header={k("regimes")} body={(r) => (r.regimes || []).map((x) => t(`packagedProducts.regimes.${x}`, { defaultValue: x })).join(", ") || k("allRegimes")} />
             <Column header={t("packagedProducts.active")} body={active} />
-            <Column body={(r) => (
+            {canChange && <Column body={(r) => (
               <div className="admin__actions">
                 <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => openRule({ ...r, lines: r.lines || [], regimes: r.regimes || [], effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", original: true })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
                 {r.kind === "other" && <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeRule(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />}
               </div>
-            )} style={{ width: "7rem" }} />
+            )} style={{ width: "7rem" }} />}
           </DataTable>
         </TabPanel>
         <TabPanel header={k("calculatorTab")}>

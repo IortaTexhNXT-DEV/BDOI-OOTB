@@ -24,6 +24,7 @@ import DetailDialog from "../../../components/DetailDialog";
 import DetailHeader from "../../../components/DetailHeader";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import { ActivityLog, fromConfigurationHistory } from "../../../components/ActivityLog";
+import { hasPermission } from "../../../utils/canOpen";
 import "./configurator.scss";
 
 /** Paginator props only when the rows fill more than one page. */
@@ -72,16 +73,20 @@ export const IconAction = ({ icon, label, onClick, disabled = false, testId }) =
 );
 IconAction.propTypes = { icon: PropTypes.string.isRequired, label: PropTypes.string.isRequired, onClick: PropTypes.func, disabled: PropTypes.bool, testId: PropTypes.string };
 
-/** The row actions of every configurator list: view, edit, activate / deactivate, history (each optional). */
+/**
+ * The row actions of every configurator list: view, edit, activate / deactivate, history (each optional). Edit and
+ * activate / deactivate change the configuration (write:products): a reader is not offered them.
+ */
 export const RowActions = ({ row, onView, onEdit, onToggle, onHistory, extra = null }) => {
   const { t } = useTranslation();
   const active = row?.status === "Active";
+  const canChange = hasPermission("write:products");
   return (
     <div className="pc-row-actions">
       {onView && <IconAction icon="pi pi-eye" label={t("productConfigurator.actions.view")} onClick={() => onView(row)} />}
-      {onEdit && <IconAction icon="pi pi-pencil" label={t("productConfigurator.actions.edit")} onClick={() => onEdit(row)} />}
+      {canChange && onEdit && <IconAction icon="pi pi-pencil" label={t("productConfigurator.actions.edit")} onClick={() => onEdit(row)} />}
       {extra}
-      {onToggle && (
+      {canChange && onToggle && (
         <IconAction
           icon={active ? "pi pi-ban" : "pi pi-check-circle"}
           label={active ? t("productConfigurator.actions.deactivate") : t("productConfigurator.actions.activate")}

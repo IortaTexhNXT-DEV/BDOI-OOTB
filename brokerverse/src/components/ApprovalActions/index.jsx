@@ -15,6 +15,9 @@
  *
  *     <ApprovalActions decision={approval.decision} onApprove={approve} onReject={() => setRejecting(true)} />
  *
+ * `permission` (such as "write:journal-vouchers"): the API permission the decision needs; a user without it is shown
+ * no buttons at all (the action is hidden, never offered and then refused).
+ *
  * Native buttons in reading order, so both are reached with Tab and pressed with Enter or Space.
  * `useMakerChecker(initiator)` gives { blocked, reason } for screens that place their own buttons.
  */
@@ -25,6 +28,7 @@ import { Button } from "primereact/button";
 import EligibilityNote from "../EligibilityNote";
 import { currentUser } from "../../utility/userIdentity";
 import { codeAmount } from "../../utility/currencyConverter";
+import { hasPermission } from "../../utils/canOpen";
 import "./approvalActions.scss";
 
 const keysOf = (who) => {
@@ -99,9 +103,12 @@ const ServerDecision = ({ decision, onApprove, onReject, approveLabel, rejectLab
   );
 };
 
-const ApprovalActions = ({ decision, initiator, canReject, currency, ...props }) => (decision
-  ? <ServerDecision decision={decision} canReject={canReject} currency={currency} {...props} />
-  : <MakerChecker initiator={initiator} {...props} />);
+const ApprovalActions = ({ decision, initiator, canReject, currency, permission, ...props }) => {
+  if (permission && !hasPermission(permission)) return null;
+  return decision
+    ? <ServerDecision decision={decision} canReject={canReject} currency={currency} {...props} />
+    : <MakerChecker initiator={initiator} {...props} />;
+};
 
 ApprovalActions.propTypes = {
   /** who initiated the record: { id, username } (or the id / user name alone) */
@@ -119,6 +126,8 @@ ApprovalActions.propTypes = {
   canReject: PropTypes.bool,
   /** with `decision`: the currency of the limit and the amount */
   currency: PropTypes.string,
+  /** the API permission the decision needs: without it nothing is shown */
+  permission: PropTypes.string,
   onApprove: PropTypes.func,
   /** rejects, or opens the confirmation with the reason of the rejection */
   onReject: PropTypes.func,
@@ -133,7 +142,7 @@ ApprovalActions.propTypes = {
 };
 
 ApprovalActions.defaultProps = {
-  initiator: null, decision: null, canReject: false, currency: "PHP", onApprove: null, onReject: null, approveLabel: null, rejectLabel: null,
+  initiator: null, decision: null, canReject: false, currency: "PHP", permission: null, onApprove: null, onReject: null, approveLabel: null, rejectLabel: null,
   disabled: false, busy: false, size: undefined, className: null,
 };
 

@@ -16,6 +16,7 @@ import { useChartTheme } from "../../../theme/chartTheme";
 import StatCards from "../../../components/StatCards";
 import { ChartCard, ShareChart, ThemedChart, formatValue } from "../../../components/Dashboard";
 import { openConfirm } from "../../../components/ConfirmDialog";
+import { canOpen, hasPermission } from "../../../utils/canOpen";
 import "./style.scss";
 
 /** Product Configurator > Dashboard: templates, what is configured and in force, and the production of the products. */
@@ -94,14 +95,17 @@ const ProductDashboard = () => {
     ["templates", "pi pi-list", "/product-configurator/templates"], ["coverages", "pi pi-shield", "/product-configurator/coverages"], ["rating", "pi pi-calculator", "/product-configurator/rating"],
     ["underwriting", "pi pi-check-circle", "/product-configurator/underwriting"], ["documents", "pi pi-file", "/product-configurator/documents"],
     ["marketMapping", "pi pi-map", "/product-configurator/market-mapping"], ["analytics", "pi pi-chart-bar", "/product-configurator/analytics"],
-  ];
+  ].filter(([, , path]) => canOpen(path));
+  // products are created and cloned with write:products; a figure or a link opens only a screen the user may open
+  const canChange = hasPermission("write:products");
+  const opens = (path) => (canOpen(path) ? () => navigate(path) : undefined);
 
   return (
-    <ConfiguratorPage screen="dashboard" actions={<Button label={t("productConfiguratorDashboard.createNewProduct")} icon="pi pi-plus" onClick={() => navigate("/product-configurator/create")} />}>
+    <ConfiguratorPage screen="dashboard" actions={canChange ? <Button label={t("productConfiguratorDashboard.createNewProduct")} icon="pi pi-plus" onClick={() => navigate("/product-configurator/create")} /> : null}>
       <Toast ref={toast} />
       <StatCards className="pc-stat-cards" items={[
-        { key: "active", label: t("productConfiguratorDashboard.activeProducts"), value: summary ? summary.active ?? 0 : null, onClick: () => navigate("/product-configurator/templates") },
-        { key: "rules", label: t("productConfiguratorDashboard.rulesInForce"), value: summary ? components["underwriting-rules"] ?? 0 : null, onClick: () => navigate("/product-configurator/underwriting") },
+        { key: "active", label: t("productConfiguratorDashboard.activeProducts"), value: summary ? summary.active ?? 0 : null, onClick: opens("/product-configurator/templates") },
+        { key: "rules", label: t("productConfiguratorDashboard.rulesInForce"), value: summary ? components["underwriting-rules"] ?? 0 : null, onClick: opens("/product-configurator/underwriting") },
         { key: "premium", label: t("productConfiguratorDashboard.totalPremium"), value: analytics ? formatValue("currency", analytics.totals?.premium ?? 0, { compact: true }) : null },
         { key: "loss", label: t("productConfiguratorDashboard.avgLossRatio"), value: analytics ? formatPercent(avgLossRatio) : null, note: t("productConfiguratorDashboard.premiumWeighted") },
       ]} />
@@ -122,7 +126,7 @@ const ProductDashboard = () => {
                 <RowActions
                   row={r}
                   onEdit={(row) => navigate(`/product-configurator/template/${row.id}`)}
-                  extra={<Button type="button" icon="pi pi-copy" className="p-button-text p-button-rounded pc-icon-action" tooltip={t("productConfiguratorDashboard.cloneProduct")} tooltipOptions={{ position: "top" }} aria-label={t("productConfiguratorDashboard.cloneProduct")} onClick={() => cloneProduct(r)} />}
+                  extra={canChange && <Button type="button" icon="pi pi-copy" className="p-button-text p-button-rounded pc-icon-action" tooltip={t("productConfiguratorDashboard.cloneProduct")} tooltipOptions={{ position: "top" }} aria-label={t("productConfiguratorDashboard.cloneProduct")} onClick={() => cloneProduct(r)} />}
                 />
               )}
             />
@@ -161,7 +165,9 @@ const ProductDashboard = () => {
             {links.map(([key, icon, path]) => (
               <Button key={key} label={t(`productConfigurator.screens.${key}`)} icon={icon} className="p-button-outlined" onClick={() => navigate(path)} />
             ))}
-            <Button label={t("productConfiguratorDashboard.commissionSetup")} icon="pi pi-percentage" className="p-button-outlined" onClick={() => navigate("/master/finance/commission-rate-matrix")} />
+            {canOpen("/master/finance/commission-rate-matrix") && (
+              <Button label={t("productConfiguratorDashboard.commissionSetup")} icon="pi pi-percentage" className="p-button-outlined" onClick={() => navigate("/master/finance/commission-rate-matrix")} />
+            )}
           </div>
         </TabPanel>
       </TabView>

@@ -9,6 +9,7 @@ import { Tag } from "primereact/tag";
 import { useServerList } from "../../hooks/useServerList";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import myWorkService, { errorMessage } from "../../services/myWorkService";
+import { canOpenLink } from "../../utils/canOpen";
 import { CATEGORY_ICONS, itemsQuery } from "./logic";
 import { DueCell, PriorityTag, cell, withSkeleton } from "./parts";
 
@@ -32,7 +33,7 @@ const ItemsTable = ({ filters, listKey, today, soonDays, showOwner, onReassign, 
   }, [filters, t, reloadKey]);
   const list = useServerList(fetchPage, { key: listKey });
 
-  const open = (row) => row.link && navigate(row.link);
+  const open = (row) => canOpenLink(row.link) && navigate(row.link);
   const label = (row) => t(`myWork.category.${row.category}`, { defaultValue: row.category });
 
   return (
@@ -47,7 +48,7 @@ const ItemsTable = ({ filters, listKey, today, soonDays, showOwner, onReassign, 
         <div className="mw-item">
           <i className={CATEGORY_ICONS[r.category] || "pi pi-circle"} aria-hidden="true" title={label(r)} />
           <div>
-            <button type="button" className="mw-link" onClick={() => open(r)}>{r.ref || r.kind}</button>
+            {canOpenLink(r.link) ? <button type="button" className="mw-link" onClick={() => open(r)}>{r.ref || r.kind}</button> : <span>{r.ref || r.kind}</span>}
             <span className="bv-cell-sub">{r.ref ? r.kind : label(r)}</span>
           </div>
         </div>
@@ -73,8 +74,10 @@ const ItemsTable = ({ filters, listKey, today, soonDays, showOwner, onReassign, 
               <Button icon="pi pi-user-edit" text rounded size="small" aria-label={t("myWork.reassign", "Reassign")} tooltip={t("myWork.reassign", "Reassign")}
                 tooltipOptions={{ position: "top" }} onClick={() => onReassign(r)} />
             )}
-            <Button icon="pi pi-arrow-right" text rounded size="small" aria-label={t("myWork.open", "Open")} tooltip={t("myWork.open", "Open")}
-              tooltipOptions={{ position: "top" }} disabled={!r.link} onClick={() => open(r)} />
+            {canOpenLink(r.link) && (
+              <Button icon="pi pi-arrow-right" text rounded size="small" aria-label={t("myWork.open", "Open")} tooltip={t("myWork.open", "Open")}
+                tooltipOptions={{ position: "top" }} onClick={() => open(r)} />
+            )}
           </div>
         ), "3rem")} />
     </DataTable>

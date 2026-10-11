@@ -13,6 +13,7 @@ import { loadQuotationForEdit } from "../../quoteModule/Store/quotationReducer";
 import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
 import quotationService from "../../../services/quotationService";
 import { useListState, useServerList } from "../../../hooks/useServerList";
+import { hasPermission } from "../../../utils/canOpen";
 
 /** Sales > Quotations list: paged and searched by the server; the search and page are kept when a quotation is opened. */
 const QuotationTable = () => {
@@ -45,14 +46,18 @@ const QuotationTable = () => {
     navigate(`/agent/quotedetailview/${rowData.id}`, { state: { quotationData: rowData.rawData, quotationId: rowData.id, fromListing: true } });
   };
 
+  // editing needs write:quotations (readers only view); the status decides whether the quotation can still change
+  const canWrite = hasPermission("write:quotations");
   const actions = (rowData) => {
     const canEdit = ["Draft", "PendingCustomer", "InProgress"].includes(rowData.Status);
     return (
       <div className="flex gap-1 justify-content-end">
         <Button icon="pi pi-eye" text rounded size="small" aria-label={t("quoteListing.viewDetails")} tooltip={t("quoteListing.viewDetails")} tooltipOptions={{ position: "top" }}
           onClick={() => handleViewDetail(rowData)} />
-        <Button icon="pi pi-pencil" text rounded size="small" disabled={!canEdit} aria-label={t("quoteListing.editQuotation")} tooltip={t("quoteListing.editQuotation")}
-          tooltipOptions={{ position: "top", showOnDisabled: true }} onClick={() => handleEdit(rowData)} />
+        {canWrite && (
+          <Button icon="pi pi-pencil" text rounded size="small" disabled={!canEdit} aria-label={t("quoteListing.editQuotation")} tooltip={t("quoteListing.editQuotation")}
+            tooltipOptions={{ position: "top", showOnDisabled: true }} onClick={() => handleEdit(rowData)} />
+        )}
       </div>
     );
   };

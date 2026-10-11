@@ -15,6 +15,7 @@ import { IrTag, PageHeader, date, insurerOptions, money, showError, showSuccess 
 import importService from "../../services/importService";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import FileField from "../../components/FileField";
+import { hasPermission } from "../../utils/canOpen";
 
 const STATUSES = ["draft", "submitted", "approved", "cancelled"];
 const iso = (d) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : "");
@@ -88,7 +89,7 @@ const Statements = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("insurerRec.statements")} trail={[t("insurerRec.statements")]}>
-        <Button icon="pi pi-upload" label={t("insurerRec.importStatement")} onClick={() => { setForm(EMPTY()); setPreview(null); }} />
+        {hasPermission("write:remittance") && <Button icon="pi pi-upload" label={t("insurerRec.importStatement")} onClick={() => { setForm(EMPTY()); setPreview(null); }} />}
       </PageHeader>
       <div className="pe-card">
         <div className="grid mb-2">

@@ -13,6 +13,7 @@ import { PageHeader, date, dateTime, isoDay, money, showError, showSuccess } fro
 import { openConfirm } from "../../components/ConfirmDialog";
 import TechnicalDetails from "../../components/TechnicalDetails";
 import { calendarDateFormat, formatDate } from "../../utility/dateFormat";
+import { hasPermission } from "../../utils/canOpen";
 
 const STATUSES = ["done", "empty", "failed", "running"];
 const SEVERITY = { done: "success", empty: "secondary", failed: "danger", running: "info" };
@@ -85,7 +86,7 @@ const SapGlExport = () => {
       <Toast ref={toast} />
       <PageHeader home={t("sidebar.Accounts")} title={t("sapGl.title")}>
         <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat={calendarDateFormat()} maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
-        <Button icon="pi pi-play" label={t("sapGl.runNow")} loading={busy} disabled={!day} onClick={run} />
+        {hasPermission("write:journal-vouchers") && <Button icon="pi pi-play" label={t("sapGl.runNow")} loading={busy} disabled={!day} onClick={run} />}
       </PageHeader>
       {settings && (
         <TechnicalDetails className="mb-2" blocks={[{ label: t("sapGl.folder"), text: settings.exportDir || settings.folder }, { label: t("sapGl.cutOff"), text: settings.cutOff }]} />

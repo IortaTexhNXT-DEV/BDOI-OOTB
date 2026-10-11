@@ -17,6 +17,7 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import UploadJournalVouchers from "./UploadJournalVouchers";
 import { OriginFilter } from "../../components/OriginChip";
+import { hasPermission } from "../../utils/canOpen";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
@@ -57,6 +58,8 @@ const JournalVoucher = () => {
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [uploading, setUploading] = useState(false);
+  // new vouchers and uploads need write:journal-vouchers; Operations, IT AppSupport and the General Manager read them
+  const canWrite = hasPermission("write:journal-vouchers");
   const [parked, setParked] = useState(false);
   const [origin, setOrigin] = useState("");
   const [reloads, setReloads] = useState(0);
@@ -108,20 +111,24 @@ const JournalVoucher = () => {
       <div className="menu-container">
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
-        <div
-          className="add__icon__view__Journal__Voture"
-          role="button"
-          tabIndex={0}
-          aria-label={t("accounts.voucher")}
-          onClick={handleNavigate}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleNavigate()}
-        >
-          <div className="add__icon__Journal__Voture">
-            <SvgAdd color={"#fff"} />
-          </div>
-          <div className="add__text__Journal__Voture">{t("accounts.voucher")}</div>
-        </div>
-        <Button className="ml-2" icon="pi pi-upload" label={t("jvTools.upload")} outlined onClick={() => setUploading(true)} />
+        {canWrite && (
+          <>
+            <div
+              className="add__icon__view__Journal__Voture"
+              role="button"
+              tabIndex={0}
+              aria-label={t("accounts.voucher")}
+              onClick={handleNavigate}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleNavigate()}
+            >
+              <div className="add__icon__Journal__Voture">
+                <SvgAdd color={"#fff"} />
+              </div>
+              <div className="add__text__Journal__Voture">{t("accounts.voucher")}</div>
+            </div>
+            <Button className="ml-2" icon="pi pi-upload" label={t("jvTools.upload")} outlined onClick={() => setUploading(true)} />
+          </>
+        )}
       </div>
       <UploadJournalVouchers visible={uploading} onHide={() => setUploading(false)} onUploaded={() => { setFirst(0); setReloads((n) => n + 1); }} />
       <div className="col-12 m-0 ">

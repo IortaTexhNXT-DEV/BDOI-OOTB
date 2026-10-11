@@ -23,12 +23,15 @@ import {
 } from "../store/userMiddleware";
 import RowActions, { actionsColumn } from "../../../../../components/RowActions";
 import PageActions from "../../../../../components/PageActions";
+import { hasPermission } from "../../../../../utils/canOpen";
 
 const UserMaster = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
+  // adding and editing users need write:users; the General Manager reads the user list
+  const canWrite = hasPermission("write:users");
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/user/add");
   };
@@ -90,7 +93,7 @@ const UserMaster = () => {
   };
 
   const renderViewButton = (rowData) => (
-    <RowActions onView={() => handleView(rowData)} onEdit={() => handlEdit(rowData)}>
+    <RowActions onView={() => handleView(rowData)} onEdit={canWrite ? () => handlEdit(rowData) : undefined}>
       <UserSecurityActions row={rowData} onChanged={search ? () => dispatch(getSearchUserMiddleware(search)) : reloadList} />
     </RowActions>
   );
@@ -138,7 +141,7 @@ const UserMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <PageActions onAdd={handleNavigate} />
+        <PageActions onAdd={canWrite ? handleNavigate : undefined} />
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">

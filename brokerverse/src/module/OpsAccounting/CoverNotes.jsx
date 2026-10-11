@@ -15,6 +15,7 @@ import { promptText } from "../../utility/dialogs";
 import StatCards from "../../components/StatCards";
 import { EmptyState, FilterBar, PageHeader as RecordHeader, RowActions, SectionCard } from "../../components/RecordPage";
 import { Field, OpsTag, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 const STATUSES = ["active", "superseded", "expired", "cancelled", "all"];
 
@@ -85,12 +86,14 @@ const CoverNotes = () => {
 
   const rows = data?.rows || [];
   const statusOptions = STATUSES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }));
-  const issueButton = <Button icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} />;
+  // issuing, sending and cancelling cover notes need write:policies; readers print them
+  const canIssue = hasPermission("write:policies");
+  const issueButton = canIssue ? <Button icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} /> : null;
   const actionsBody = (r) => (
     <RowActions
       actions={[{ icon: "pi pi-print", label: t("opsAcc.print"), onClick: () => act(() => service.printCoverNote(r.id)) },
-        { icon: "pi pi-envelope", label: t("opsAcc.coverNotes.send"), onClick: () => send(r), hidden: r.status !== "active" }]}
-      menu={[{ label: t("coverNotePage.cancel"), icon: "pi pi-times", command: () => cancel(r), className: "bv-menu-danger", hidden: r.status !== "active" }]} />
+        { icon: "pi pi-envelope", label: t("opsAcc.coverNotes.send"), onClick: () => send(r), hidden: !canIssue || r.status !== "active" }]}
+      menu={[{ label: t("coverNotePage.cancel"), icon: "pi pi-times", command: () => cancel(r), className: "bv-menu-danger", hidden: !canIssue || r.status !== "active" }]} />
   );
 
   return (
@@ -114,7 +117,7 @@ const CoverNotes = () => {
         <DataTable value={rows} dataKey="id" loading={loading} size="small" paginator rows={20}
           emptyMessage={(
             <EmptyState icon="pi-file" title={t("coverNotePage.emptyTitle", { status: t(`opsAcc.status.${status}`) })} text={t("coverNotePage.emptyText")}
-              action={status === "active" && !search ? <Button outlined icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} /> : null} />
+              action={canIssue && status === "active" && !search ? <Button outlined icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} /> : null} />
           )}>
           <Column field="coverNoteNumber" header={t("coverNotePage.col.note")}
             body={(r) => <span className="bv-cell-stack"><span className="bv-nowrap">{r.coverNoteNumber}</span><small>{r.insuredName || r.clientName}</small></span>} />

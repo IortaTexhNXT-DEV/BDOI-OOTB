@@ -44,6 +44,7 @@ import {
   RULE_ACTIONS, RULE_TYPES, OPERATORS, actionSeverity, conditionText, outcomeText, refers, authorityText, insurerText, ruleErrors,
   layoutFileError, layoutPlaceholders,
 } from "./shared/ruleLogic";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Runs a save call and shows the outcome on the screen's toast; resolves to true on success. */
 const persist = async (action, toast, { success, successDetail, error, errorDetail }) => {
@@ -247,7 +248,7 @@ export const ProductTemplateManager = () => {
     <ConfiguratorPage
       screen="templates"
       usage={t("productConfigurator.usage.templates")}
-      actions={<Button label={t("productTemplateManager.createTemplate")} icon="pi pi-plus" onClick={() => { setSelectedTemplate({ status: "Active" }); setTemplateErrors({}); setShowDialog(true); }} />}
+      actions={hasPermission("write:products") ? <Button label={t("productTemplateManager.createTemplate")} icon="pi pi-plus" onClick={() => { setSelectedTemplate({ status: "Active" }); setTemplateErrors({}); setShowDialog(true); }} /> : null}
     >
       <Toast ref={toast} />
       <FilterBar value={filters} onChange={setFilters} show={["lob", "status"]} options={{ lobs: lobOptions }} />

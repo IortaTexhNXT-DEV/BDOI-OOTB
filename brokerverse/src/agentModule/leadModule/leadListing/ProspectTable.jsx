@@ -118,12 +118,18 @@ const ProspectTable = () => {
 
   const nameOf = (r) => r.fullName || [r.firstName, r.lastName].filter(Boolean).join(" ") || r.companyName || "-";
   const statusOf = (r) => (r.status ? <Tag value={LEAD_STATUS_KEYS[r.status] ? t(`leads.${LEAD_STATUS_KEYS[r.status]}`) : statusLabel(r.status)} severity={statusSeverity(r.status)} /> : null);
+  // tagging a product and editing change the prospect (write:leads); readers view it
+  const canWrite = hasPermission("write:leads");
   const actions = (r) => (
     <div className="flex gap-1 justify-content-end">
       <Button icon="pi pi-eye" text rounded size="small" aria-label={t("leads.view")} tooltip={t("leads.view")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, false); }} />
-      <Button icon="pi pi-tag" text rounded size="small" aria-label={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")}
-        tooltip={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); setTagging(r); }} />
-      <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("leads.edit")} tooltip={t("leads.edit")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, true); }} />
+      {canWrite && (
+        <>
+          <Button icon="pi pi-tag" text rounded size="small" aria-label={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")}
+            tooltip={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); setTagging(r); }} />
+          <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("leads.edit")} tooltip={t("leads.edit")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, true); }} />
+        </>
+      )}
       {hasPermission("delete:leads") ? (
         <Button icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("leads.delete")} tooltip={t("leads.delete")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); removeLead(r); }} />
       ) : null}

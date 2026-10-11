@@ -15,6 +15,7 @@ import { ChartSkeleton } from "../../components/Skeletons";
 import { useChartTheme } from "../../theme/chartTheme";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import { canOpen, hasPermission } from "../../utils/canOpen";
 import Feature, { useFeature } from "../../features/Feature";
 import { formatPercent, progressValue } from "../../utility/numberFormat";
 import { formatDate } from "../../utility/dateFormat";
@@ -23,11 +24,11 @@ import "./index.scss";
 
 const SETTINGS_PATH = "/master/configuration/settings";
 
-/** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
+/** Quick actions of the dashboard; each is shown only when the user may open its screen (same rules as the side menu) and holds its permission. */
 const QUICK_ACTIONS = [
   { label: "executiveDashboard.viewClaims", icon: "pi pi-file", path: "/claims/dashboard" },
   { label: "executiveDashboard.processing", icon: "pi pi-check-square", path: "/processing/dashboard" },
-  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", path: "/agent/createlead" },
+  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", path: "/agent/createlead", permission: "write:leads" },
   { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", path: "/reports/operationalreports/production" },
   { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },
   { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", path: "/sales/dashboard" },
@@ -53,7 +54,7 @@ const ExecutiveDashboard = () => {
   const chart = useChartTheme();
   const [quickActions] = useState(() => {
     const roles = getUserRoles();
-    return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
+    return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles) && (!a.permission || hasPermission(a.permission)));
   });
   const toast = useRef(null);
   // Settings opens Configuration > Reports & Dashboards (the dashboard targets); only for roles that may open it
@@ -105,29 +106,31 @@ const ExecutiveDashboard = () => {
   // the lists behind the figures show the same business as the dashboard: issued in BrokerVerse, or all
   const listOrigin = origin === "issued" ? "issued" : "";
   const issued = () => drillDown(navigate, LISTS.policiesIssued(range?.from, range?.to, "", listOrigin));
+  // a figure opens the list behind it only for a user who may open that list
+  const opens = (path, onClick) => (canOpen(path) ? onClick : undefined);
   const targetNote = (key, format) => (k[key]?.target ? t("dashboards.targetNote", { target: formatValue(format, k[key].target, { compact: true }), achieved: formatPercent(k[key].achievement ?? 0), defaultValue: "Target {{target}} · {{achieved}} achieved" }) : null);
   const receivables = dashboard?.receivables;
   const sinceGoLive = dashboard?.issuedSinceGoLive;
 
   const retentionAnalytics = useFeature("renewal-analytics");
   const kpis = [
-    { key: "totalRevenue", label: t("executiveDashboard.totalRevenue"), value: dashboard ? money(k.totalRevenue?.value) : null, change: k.totalRevenue?.change, comparison, note: targetNote("totalRevenue", "currency"), onClick: issued },
-    { key: "newBusiness", label: t("executiveDashboard.newBusiness"), value: dashboard ? money(k.newBusiness?.value) : null, change: k.newBusiness?.change, comparison, note: targetNote("newBusiness", "currency"), onClick: issued },
+    { key: "totalRevenue", label: t("executiveDashboard.totalRevenue"), value: dashboard ? money(k.totalRevenue?.value) : null, change: k.totalRevenue?.change, comparison, note: targetNote("totalRevenue", "currency"), onClick: opens("/agent/policy", issued) },
+    { key: "newBusiness", label: t("executiveDashboard.newBusiness"), value: dashboard ? money(k.newBusiness?.value) : null, change: k.newBusiness?.change, comparison, note: targetNote("newBusiness", "currency"), onClick: opens("/agent/policy", issued) },
     { key: "activePolicies", label: t("executiveDashboard.activePolicies"), value: k.activePolicies?.value ?? null, change: k.activePolicies?.change, comparison, note: targetNote("activePolicies", "count"),
-      onClick: () => navigate("/agent/policy") },
+      onClick: opens("/agent/policy", () => navigate("/agent/policy")) },
     { key: "claimsRatio", label: t("executiveDashboard.claimsRatio"), value: dashboard ? formatPercent(k.claimsRatio?.value) : null, note: k.claimsRatio?.target ? t("dashboards.targetMax", { target: formatPercent(k.claimsRatio.target), defaultValue: "Target at most {{target}}" }) : null,
-      status: targetStatus(t, k.claimsRatio?.value, k.claimsRatio?.target, true), onClick: () => drillDown(navigate, LISTS.claims("")) },
+      status: targetStatus(t, k.claimsRatio?.value, k.claimsRatio?.target, true), onClick: opens("/agent/claim", () => drillDown(navigate, LISTS.claims(""))) },
     { key: "retentionRate", label: t("executiveDashboard.retentionRate"), value: dashboard ? formatPercent(k.retentionRate?.value) : null, note: k.retentionRate?.target ? t("dashboards.targetMin", { target: formatPercent(k.retentionRate.target), defaultValue: "Target {{target}}" }) : null,
-      status: targetStatus(t, k.retentionRate?.value, k.retentionRate?.target, false), onClick: retentionAnalytics.on ? () => navigate("/renewal/analytics") : undefined },
+      status: targetStatus(t, k.retentionRate?.value, k.retentionRate?.target, false), onClick: retentionAnalytics.on ? opens("/renewal/analytics", () => navigate("/renewal/analytics")) : undefined },
     { key: "receivableClients", label: t("executiveDashboard.premiumReceivable", "Premium receivable"), value: receivables ? money(receivables.premiumFromClients) : null,
       note: receivables ? t("executiveDashboard.overdueNote", { amount: money(receivables.premiumOverdue), defaultValue: "{{amount}} overdue" }) : null,
-      status: receivables && Number(receivables.premiumOverdue) > 0 ? { severity: "warning", label: t("dashboards.overdue", "Overdue items") } : null, onClick: () => navigate("/agent/collections") },
+      status: receivables && Number(receivables.premiumOverdue) > 0 ? { severity: "warning", label: t("dashboards.overdue", "Overdue items") } : null, onClick: opens("/agent/collections", () => navigate("/agent/collections")) },
     { key: "receivableInsurers", label: t("executiveDashboard.commissionReceivable", "Commission receivable"), value: receivables ? money(receivables.commissionFromInsurers) : null,
       note: receivables ? t("executiveDashboard.unbilledOverdueNote", { unbilled: money(receivables.commissionUnbilled), overdue: money(receivables.commissionOverdue), defaultValue: "{{unbilled}} unbilled · {{overdue}} overdue" }) : null,
-      onClick: () => navigate("/finance/remittance/directbill") },
+      onClick: opens("/finance/remittance/billing", () => navigate("/finance/remittance/billing")) },
     ...(sinceGoLive ? [{ key: "issuedSinceGoLive", label: t("dashboards.sinceGoLive.title", "Issued since go-live"), value: money(sinceGoLive.premium),
       note: t("dashboards.sinceGoLive.note", { count: sinceGoLive.policies, date: formatDate(sinceGoLive.cutoverDate), defaultValue: "{{count}} policies since {{date}}" }),
-      onClick: () => drillDown(navigate, LISTS.policiesIssued(sinceGoLive.cutoverDate, null, "", "issued")) }] : []),
+      onClick: opens("/agent/policy", () => drillDown(navigate, LISTS.policiesIssued(sinceGoLive.cutoverDate, null, "", "issued"))) }] : []),
   ];
 
   // premium written by month (12 months to date); the period target is drawn as a reference line on a monthly view

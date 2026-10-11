@@ -10,6 +10,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { PageHeader, StatusTag, dateTime, previousPeriod, showError } from "./common";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Run statuses of a close still in progress (the API allows one per period). */
 const ACTIVE_RUN = ["draft", "in-progress", "blocked", "ready", "pending-approval", "soft-closed"];
@@ -81,11 +82,13 @@ const MonthEndClose = () => {
       <Toast ref={toast} />
       <PageHeader title={t("periodEnd.monthEndClose")} trail={[t("periodEnd.monthEndClose")]}>
         <Dropdown value={fiscalYear} options={years.map((y) => ({ label: y.code, value: y.code }))} onChange={(e) => setFiscalYear(e.value)} style={{ minWidth: 160 }} />
-        <Button icon="pi pi-plus" label={t("periodEnd.newCloseRun")} onClick={() => {
-          const prev = previousPeriod();
-          const free = openPeriods.filter((o) => !openRun(o.value));
-          setCreating({ period: free.find((o) => o.value === prev)?.value || free[0]?.value || openPeriods[0]?.value || null, remarks: "" });
-        }} />
+        {hasPermission("write:period-end") && (
+          <Button icon="pi pi-plus" label={t("periodEnd.newCloseRun")} onClick={() => {
+            const prev = previousPeriod();
+            const free = openPeriods.filter((o) => !openRun(o.value));
+            setCreating({ period: free.find((o) => o.value === prev)?.value || free[0]?.value || openPeriods[0]?.value || null, remarks: "" });
+          }} />
+        )}
       </PageHeader>
 
       <div className="pe-card">

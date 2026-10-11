@@ -17,6 +17,7 @@ import useOpenItemAccounts from "./useOpenItemAccounts";
 import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { hasPermission } from "../../../utils/canOpen";
 
 const OpenEntryMatching = () => {
   const { t } = useTranslation();
@@ -476,12 +477,14 @@ const OpenEntryMatching = () => {
                 outlined
                 className="action__button__open__entry__matching"
               />
-              <Button
-                label={t("openEntryActions.match")}
-                onClick={handleMatch}
-                disabled={loading}
-                className="action__button__open__entry__matching"
-              />
+              {hasPermission("write:journal-vouchers") && (
+                <Button
+                  label={t("openEntryActions.match")}
+                  onClick={handleMatch}
+                  disabled={loading}
+                  className="action__button__open__entry__matching"
+                />
+              )}
               <div className="radio__group__open__entry__matching">
                 <div>{t("openEntryActions.side")}</div>
                 <div className="radio__item__open__entry__matching">

@@ -627,12 +627,14 @@ export default function BatchTable() {
             className="p-button-outlined"
             loading={batchesLoading}
           />
-          <Button
-            label={t("batchRenewal.createBatch")}
-            icon="pi pi-plus"
-            onClick={openCreateBatch}
-            className="p-button-primary"
-          />
+          {canQuote && (
+            <Button
+              label={t("batchRenewal.createBatch")}
+              icon="pi pi-plus"
+              onClick={openCreateBatch}
+              className="p-button-primary"
+            />
+          )}
         </div>
       </div>
 
@@ -702,12 +704,14 @@ export default function BatchTable() {
                     tooltip={t("batchRenewal.viewDetails")}
                     onClick={() => handleViewBatchDetails(rowData)} aria-label={t("batchRenewal.viewDetails")}
                   />
-                  <Button
-                    icon="pi pi-trash"
-                    className="p-button-outlined p-button-sm p-button-danger"
-                    tooltip={t("batchRenewal.deleteTitle")}
-                    onClick={() => deleteBatch(rowData)} aria-label={t("batchRenewal.deleteTitle")}
-                  />
+                  {canQuote && (
+                    <Button
+                      icon="pi pi-trash"
+                      className="p-button-outlined p-button-sm p-button-danger"
+                      tooltip={t("batchRenewal.deleteTitle")}
+                      onClick={() => deleteBatch(rowData)} aria-label={t("batchRenewal.deleteTitle")}
+                    />
+                  )}
                 </div>
               )}
             />

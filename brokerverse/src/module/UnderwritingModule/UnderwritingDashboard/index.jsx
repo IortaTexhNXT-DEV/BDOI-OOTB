@@ -15,6 +15,7 @@ import { businessDate, formatDate as formatAppDate } from "../../../utility/date
 import { useChartTheme } from "../../../theme/chartTheme";
 import StatusChip from "../../../components/StatusChip";
 import { statusLabel } from "../../../utils/statusSeverity";
+import { hasPermission } from "../../../utils/canOpen";
 import "./index.scss";
 
 const OPEN_TASK_LIMIT = 5;
@@ -137,7 +138,7 @@ const UnderwritingDashboard = () => {
     <div className="underwriting-dashboard bv-dash-page">
       <Toast ref={toast} />
       <DashboardToolbar title={t("underwritingDashboard.myWorkbench")} asOf={dashboard?.asOf} onRefresh={load} loading={loading}
-        actions={<Button label={t("underwritingDashboard.newSubmission")} icon="pi pi-plus" onClick={() => navigate("/agent/createlead")} />}>
+        actions={hasPermission("write:leads") ? <Button label={t("underwritingDashboard.newSubmission")} icon="pi pi-plus" onClick={() => navigate("/agent/createlead")} /> : null}>
         <span className="underwriting-dashboard__snapshot">{t("underwritingDashboard.snapshot")}</span>
       </DashboardToolbar>
 

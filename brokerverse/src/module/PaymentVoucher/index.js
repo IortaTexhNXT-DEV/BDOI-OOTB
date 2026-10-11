@@ -32,6 +32,7 @@ import { PAGE_SIZE, PAGE_SIZES } from "../../hooks/useServerList";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../utility/dateFormat";
 import logger from "../../utility/logger";
 import { printPdf } from "../../components/Print";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
 const UPLOAD_TARGETS = [{ label: "Payment vouchers", templatePath: "/disbursements/bulk-upload/template", uploadPath: "/disbursements/bulk-upload" }];
@@ -309,6 +310,8 @@ const Index = () => {
   const home = { label: t("paymentVoucher.accounts") };
 
   const navigate = useNavigate();
+  // new vouchers, bulk uploads and bulk disbursements need write:disbursements; approvers and readers list and print
+  const canWrite = hasPermission("write:disbursements");
   const location = useLocation();
   // the voucher just approved on the payment step: confirmed here and highlighted in the list
   const [recorded, setRecorded] = useState(location.state?.recorded || null);
@@ -405,30 +408,34 @@ const Index = () => {
               <p className="addtext">{t("paymentVoucher.bulkPrint")}</p>
             </button>
           </div>
-          <div className="filter_bulk_button_container">
-            <button
-              type="button"
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
-            </button>
-          </div>
-          <div className="filter_bulk_button_container">
-            <button
-              type="button"
-              className="bulk_button_container"
-              onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
-            >
-              <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
-            </button>
-          </div>
-          <div className="filterbutton_container">
-            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
-              <SvgAdd />
-              <p className="addtext">{t("paymentVoucher.create")}</p>
-            </button>
-          </div>
+          {canWrite && (
+            <>
+              <div className="filter_bulk_button_container">
+                <button
+                  type="button"
+                  className="bulk_button_container"
+                  onClick={handleBulkUploadModal}
+                >
+                  <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
+                </button>
+              </div>
+              <div className="filter_bulk_button_container">
+                <button
+                  type="button"
+                  className="bulk_button_container"
+                  onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
+                >
+                  <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
+                </button>
+              </div>
+              <div className="filterbutton_container">
+                <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
+                  <SvgAdd />
+                  <p className="addtext">{t("paymentVoucher.create")}</p>
+                </button>
+              </div>
+            </>
+          )}
         </div>
         <div className="mobile-header-actions">
           <div className="filter_bulk_button_container">
@@ -436,30 +443,34 @@ const Index = () => {
               <p className="addtext">{t("paymentVoucher.bulkPrint")}</p>
             </button>
           </div>
-          <div className="filter_bulk_button_container">
-            <button
-              type="button"
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
-            </button>
-          </div>
-          <div className="filter_bulk_button_container">
-            <button
-              type="button"
-              className="bulk_button_container"
-              onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
-            >
-              <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
-            </button>
-          </div>
-          <div className="filterbutton_container">
-            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
-              <SvgAdd />
-              <p className="addtext">{t("paymentVoucher.create")}</p>
-            </button>
-          </div>
+          {canWrite && (
+            <>
+              <div className="filter_bulk_button_container">
+                <button
+                  type="button"
+                  className="bulk_button_container"
+                  onClick={handleBulkUploadModal}
+                >
+                  <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
+                </button>
+              </div>
+              <div className="filter_bulk_button_container">
+                <button
+                  type="button"
+                  className="bulk_button_container"
+                  onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
+                >
+                  <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
+                </button>
+              </div>
+              <div className="filterbutton_container">
+                <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
+                  <SvgAdd />
+                  <p className="addtext">{t("paymentVoucher.create")}</p>
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

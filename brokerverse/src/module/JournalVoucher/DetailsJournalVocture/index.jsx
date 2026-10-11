@@ -223,6 +223,7 @@ const DetailsJournalVocture = () => {
               {voucher?.status === AWAITING_APPROVAL && (
                 <ApprovalActions
                   initiator={{ id: voucher.createdBy }}
+                  permission="write:journal-vouchers"
                   approveLabel={t("accounts.journalVoucherDetails.confirm.approve")}
                   rejectLabel={t("accounts.journalVoucherDetails.confirm.reject")}
                   onApprove={() => decide("approve")}

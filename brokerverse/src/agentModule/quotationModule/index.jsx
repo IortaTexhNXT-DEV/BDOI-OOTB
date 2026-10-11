@@ -12,6 +12,7 @@ import { RFQ_PATH, entryOf, rfqState } from "../../module/Sales/salesProducts";
 import { prospectFormState } from "../leadModule/leadListing/useProspectStart";
 import { ProductPickerDialog } from "../../module/Sales/ProductPicker";
 import CreditLifeQuoteDialog from "../quoteModule/creditLife/CreditLifeQuoteDialog";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
 const UPLOAD_TARGETS = [{ label: "Quotations", templatePath: "/quotations/bulk-upload/template", uploadPath: "/quotations/bulk-upload" }];
@@ -73,13 +74,17 @@ const ClientListingCard = () => {
               gap: "10px",
             }}
           >
-            <Button
-              label={t("quotationPage.bulkUpload")}
-              className="p-button-outlined"
-              onClick={() => setShowBulkUpload(true)}
-              style={{ borderRadius: "8px" }}
-            />
-            <Button label={t("quotationPage.createQuote")} icon="pi pi-plus" onClick={() => setChoosingProduct(true)} style={{ borderRadius: "8px" }} />
+            {hasPermission("write:quotations") && (
+              <>
+                <Button
+                  label={t("quotationPage.bulkUpload")}
+                  className="p-button-outlined"
+                  onClick={() => setShowBulkUpload(true)}
+                  style={{ borderRadius: "8px" }}
+                />
+                <Button label={t("quotationPage.createQuote")} icon="pi pi-plus" onClick={() => setChoosingProduct(true)} style={{ borderRadius: "8px" }} />
+              </>
+            )}
             <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={start}
               header={t("quotationPage.createQuote")} hint={t("productPicker.createQuoteHint")} />
             <CreditLifeQuoteDialog product={creditLife} onHide={() => setCreditLife(null)} />

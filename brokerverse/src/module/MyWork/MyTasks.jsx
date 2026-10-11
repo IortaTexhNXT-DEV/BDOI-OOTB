@@ -11,6 +11,7 @@ import { Tag } from "primereact/tag";
 import { useServerList } from "../../hooks/useServerList";
 import myWorkService, { errorMessage } from "../../services/myWorkService";
 import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
+import { canOpenLink } from "../../utils/canOpen";
 import { PRIORITIES } from "./logic";
 import { DueCell, PriorityTag, cell, withSkeleton } from "./parts";
 
@@ -98,7 +99,9 @@ const MyTasks = ({ state, patch, today, soonDays, isManager, reloadKey, onEdit, 
         ), "85%")} />
         <Column header={t("myWork.task.record", "Record")} style={{ minWidth: "10rem" }} body={cell((r) => (r.entity ? (
           <div>
-            <button type="button" className="mw-link" disabled={!r.link} onClick={() => navigate(r.link)}>{r.entityRef || t(`myWork.record.${r.entity}`, r.entity)}</button>
+            {canOpenLink(r.link)
+              ? <button type="button" className="mw-link" onClick={() => navigate(r.link)}>{r.entityRef || t(`myWork.record.${r.entity}`, r.entity)}</button>
+              : <span>{r.entityRef || t(`myWork.record.${r.entity}`, r.entity)}</span>}
             <span className="bv-cell-sub">{r.entityLabel || t(`myWork.record.${r.entity}`, r.entity)}</span>
           </div>
         ) : <span className="mw-muted">-</span>))} />
