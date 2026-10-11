@@ -30,7 +30,7 @@ describe('promotion path', () => {
     expect(r.body.data.path.map((p) => p.code)).toEqual(['dev', 'sit', 'uat', 'preprod', 'production']);
     expect(r.body.data).toMatchObject({ environment: 'dev', label: 'Development', onPath: true, previous: null, next: { code: 'sit' }, locked: false });
     expect(r.body.data.release.apiVersion).toBeTruthy();
-    expect(r.body.data.release.schema).toMatch(/^\d{4}_/);
+    expect(r.body.data.release.schema).toMatch(/^\d{4}$/);
     expect(r.body.data.choices.map((c) => c.code)).toContain('training');
     expect((await as('prom.ops', 'get', '/environment-promotion')).status).toBe(403);
     expect((await as('prom.it', 'get', '/environment-promotion/history')).status).toBe(200);

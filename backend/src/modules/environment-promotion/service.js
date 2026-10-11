@@ -27,8 +27,9 @@ export async function environmentCodes() {
 }
 
 async function schemaVersion() {
+  // the number of the latest migration applied (the file name stays in the database)
   const r = await one("SELECT name FROM schema_migrations ORDER BY name DESC LIMIT 1").catch(() => null);
-  return r?.name || null;
+  return r?.name ? String(r.name).split('_')[0] : null;
 }
 
 export async function promotionPath() {

@@ -22,7 +22,7 @@ const path = (extra = {}) => ({
     { code: "production", label: "Production", position: 5, current: false, done: false },
   ],
   choices: [{ code: "dev", label: "Development" }, { code: "uat", label: "User Acceptance Testing" }, { code: "preprod", label: "Pre-Production" }],
-  release: { apiVersion: "2026.1.3", webVersion: null, commit: "a1b2c3d", ref: null, buildTime: null, schema: "0595_environment_promotion.sql" },
+  release: { apiVersion: "2026.1.3", webVersion: null, commit: "a1b2c3d", ref: null, buildTime: null, schema: "0595" },
   cutoverDate: "2026-11-01", locked: false,
   lastExport: { at: "2026-10-10T02:00:00Z", by: "it.admin" }, lastLoad: null, lastComparison: null,
   ...extra,
@@ -44,7 +44,7 @@ test("shows the path with this environment marked, the release and the loads", a
   expect(steps).toHaveLength(5);
   expect(steps[2].className).toContain("ep-step--current");
   expect(screen.getByText("This environment")).toBeInTheDocument();
-  expect(screen.getByText("0595_environment_promotion.sql")).toBeInTheDocument();
+  expect(screen.getByText("0595")).toBeInTheDocument();
   expect(screen.getByText("a1b2c3d")).toBeInTheDocument();
   expect(screen.getByText("Setup_Workbook.xlsx")).toBeInTheDocument();
   expect(screen.getByText("Loaded")).toBeInTheDocument();

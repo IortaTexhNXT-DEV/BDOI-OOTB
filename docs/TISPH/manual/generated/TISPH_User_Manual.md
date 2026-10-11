@@ -6506,7 +6506,7 @@ Choose the workbook exported from another environment and select **Compare**: no
 |---|---|
 | TIS IT AppSupport / Admin | Create and edit |
 
-The path shows the environments in order with **This environment** marked, the previous and next environment, the cutover date and whether go-live is locked. **Release** shows the API and web releases, the schema (the latest database migration), the commit and the build time, so the same release can be confirmed on both sides of a promotion. **Workbook activity** shows the last export, load and comparison, and **Loads** the workbooks loaded here. **Mark environment** sets what this database is (a locked database is Production and stays so); the marker is set here only.
+The path shows the environments in order with **This environment** marked, the previous and next environment, the cutover date and whether go-live is locked. **Release** shows the API and web releases, the schema (the number of the latest database change), the commit and the build time, so the same release can be confirmed on both sides of a promotion. **Workbook activity** shows the last export, load and comparison, and **Loads** the workbooks loaded here. **Mark environment** sets what this database is (a locked database is Production and stays so); the marker is set here only.
 
 ### E-mail Outbox {#e-mail-outbox}
 **Menu:** Master > System > E-mail Outbox

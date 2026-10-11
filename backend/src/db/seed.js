@@ -126,7 +126,7 @@ Object.assign(ROLE_PERMS, {
   'tis-ccd-pdu': [...TIS_CCD],
   'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read'],
   // claim settlement funds from insurers with Receipting and Reconciliation; reversals with Reconciliation (migration 0502)
-  'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read', 'claim-funds:write'],
+  'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read', 'claim-funds:write', 'quotations:read'],
   // insurer statement reconciliation is prepared under write:remittance (see the role guide)
   'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read', 'claim-funds:write', 'claim-cash:reverse'],
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)

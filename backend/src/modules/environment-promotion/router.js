@@ -16,7 +16,7 @@ const canRead = [requireAuth, requirePermission('read:data-load')];
 const canWrite = [requireAuth, requirePermission('write:data-load')];
 const example = { environment: 'uat', label: 'User Acceptance Testing', onPath: true, previous: { code: 'sit', label: 'System Integration Testing' }, next: { code: 'preprod', label: 'Pre-Production' },
   path: [{ code: 'dev', label: 'Development', position: 1, current: false, done: true }], choices: [{ code: 'dev', label: 'Development' }],
-  release: { apiVersion: '2026.1.3', webVersion: null, environment: 'UAT', commit: 'a1b2c3d', ref: null, buildTime: null, schema: '0595_environment_promotion.sql' },
+  release: { apiVersion: '2026.1.3', webVersion: null, environment: 'UAT', commit: 'a1b2c3d', ref: null, buildTime: null, schema: '0595' },
   cutoverDate: '2026-11-01', locked: false, lastExport: { at: '2026-10-10T02:00:00Z', by: 'it.admin' }, lastLoad: null, lastComparison: null };
 
 define({
