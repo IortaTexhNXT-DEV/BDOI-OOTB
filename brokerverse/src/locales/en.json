@@ -7170,7 +7170,39 @@
     "settled": "Settled",
     "rejected": "Rejected",
     "aging": "Aging",
-    "trialBalance": "Trial Balance"
+    "trialBalance": "Trial Balance",
+    "centre": {
+      "all": "All reports",
+      "favourites": "Favourites",
+      "recent": "Recently run",
+      "unfavourite": "Remove from favourites",
+      "favourite": "Add to favourites",
+      "noMatch": "No reports match your search.",
+      "noFavourites": "No favourites yet. Star a report to keep it here.",
+      "noRecent": "Reports you open from this page appear here.",
+      "none": "No reports available.",
+      "title": "All Reports",
+      "help": "Every report your role may run. Search by name, description or code (press / to search), filter by category, and star the reports you use most.",
+      "categoriesLabel": "Report categories",
+      "searchPlaceholder": "Search reports by name, description or code",
+      "search": "Search reports",
+      "colReport": "Report",
+      "colCategory": "Category",
+      "colCode": "Code",
+      "run": "Run",
+      "categories": {
+        "production": "Production & Sales",
+        "claims": "Claims",
+        "renewals": "Renewals",
+        "remittance": "Remittance & Insurers",
+        "commission": "Commission & Incentive",
+        "collections": "Collections & Receivables",
+        "accounting": "Accounting & Financial Statements",
+        "tax": "Tax",
+        "coinsurance": "Co-insurance",
+        "other": "Other"
+      }
+    }
   },
   "claimsDashboard": {
     "title": "Claims Management Dashboard",
