@@ -214,7 +214,8 @@ define({
     const r = await svc.createRenewalQuote(req.params.policyId, req.body, req.user);
     const quotation = toQuote(r.quoteRow);
     await audit(req, { entity: 'quotation', entityId: quotation.id, action: r.created ? 'create' : 'update', after: { quotationNumber: quotation.quotationNumber, renewalId: r.renewal.id, policyId: r.renewal.policyId, grossPremium: quotation.grossPremium } });
-    res.status(r.created ? 201 : 200).json({ success: true, message: r.created ? 'Renewal quotation created' : 'Renewal quotation updated', data: { quotationId: quotation.id, quotationNumber: quotation.quotationNumber, quotation, renewal: r.renewal } });
+    res.status(r.created ? 201 : 200).json({ success: true, message: r.created ? 'Renewal quotation created' : 'Renewal quotation updated', ...(r.creditLife?.alert ? { warnings: [r.creditLife.alert] } : {}),
+      data: { quotationId: quotation.id, quotationNumber: quotation.quotationNumber, quotation, renewal: r.renewal, creditLife: r.creditLife } });
   },
 });
 define({
