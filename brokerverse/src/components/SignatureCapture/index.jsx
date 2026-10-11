@@ -5,6 +5,7 @@
  * link) and revokes a version with a reason.
  */
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import FileField from "../FileField";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
@@ -178,7 +179,7 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
             <SignaturePad onChange={setDrawn} />
           ) : (
             <div className="bv-sig__upload">
-              <input type="file" accept="image/png,image/jpeg" onChange={(e) => pickFile(e.target.files?.[0])} data-testid="signature-file" />
+              <FileField accept="image/png,image/jpeg" value={null} onChange={(f) => f && pickFile(f)} />
               <small>{t("signature.uploadHint", "PNG (transparent background preferred) or JPEG, up to 512 KB.")}</small>
               {filePreview && <img src={filePreview} alt="" className="bv-sig__img" />}
             </div>
