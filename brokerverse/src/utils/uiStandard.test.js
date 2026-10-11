@@ -45,6 +45,20 @@ describe("UI standard guard", () => {
   });
 });
 
+describe("help texts", () => {
+  // keys of the texts behind the info icon of a title (PageHeader help / subtitle / intro / description, HelpTip)
+  // eslint-disable-next-line global-require
+  const keys = require("./uiStandard.helpKeys.json");
+  const en = JSON.parse(fs.readFileSync(path.join(SRC, "locales", "en.json"), "utf8"));
+  const valueOf = (key) => key.split(".").reduce((n, p) => (n && typeof n === "object" ? n[p] : undefined), en);
+
+  it("keeps every help text to one sentence", () => {
+    const long = keys.filter((k) => typeof valueOf(k) === "string")
+      .filter((k) => valueOf(k).trim().split(/(?<=[.!?])\s+(?=[A-Z(])/).filter((s) => !/\b(e\.g|i\.e|etc|vs|No|Inc|Co|Corp|Ltd|approx|incl)\.$/.test(s)).length > 1);
+    expect(long).toEqual([]);
+  });
+});
+
 describe("visual rules", () => {
   const sheets = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
     const full = path.join(dir, e.name);

@@ -1413,7 +1413,7 @@
   "remittance": {
     "list": {
       "title": "Remittances",
-      "help": "The insurer remittances from draft to payment. A draft you prepare is approved by another user with remittance authority.",
+      "help": "The insurer remittances from draft to payment.",
       "submitSelected": "Submit for approval ({{count}})",
       "selectDrafts": "Select drafts to submit",
       "import": "Import policy list",
@@ -1923,7 +1923,7 @@
     },
     "inbox": {
       "title": "Approvals",
-      "help": "Remittances waiting for a decision. You can decide only items you did not prepare or submit, within your approval limit.",
+      "help": "Remittances waiting for a decision.",
       "approveSelected": "Approve selected ({{count}})",
       "export": "Export XLSX",
       "exportFailed": "Export failed",
@@ -2195,7 +2195,7 @@
     },
     "payments": {
       "title": "Insurer payments",
-      "help": "The payment vouchers of approved remittances, with their batch or cheque and the bank's result. Batches are approved and released in Bank Payment Files; cheques in Disbursement.",
+      "help": "The payment vouchers of approved remittances, with their batch or cheque and the bank's result.",
       "createBatch_one": "Create Metrobank batch ({{count}})",
       "createBatch_other": "Create Metrobank batch ({{count}})",
       "createBatchPlain": "Create Metrobank batch",
@@ -2465,7 +2465,7 @@
     },
     "billing": {
       "title": "Insurer billing",
-      "help": "Commission debit notes to insurers on direct-bill policies: raise one for a period, a second user approves it, then send it and record the insurer's payments. Billing mode moves an issued policy between direct bill and broker billing; it is refused once premium was collected or remitted, or the commission is on a debit note.",
+      "help": "Commission debit notes to insurers on direct-bill policies: raise one for a period, a second user approves it, then send it and record the insurer's payments.",
       "ageing": "Commission receivable ageing (XLSX)",
       "awaitingApproval_one": "{{count}} debit note awaiting approval",
       "awaitingApproval_other": "{{count}} debit notes awaiting approval",
@@ -2586,7 +2586,7 @@
     },
     "held": {
       "title": "Held policies",
-      "help": "Part-paid and instalment policies are not remitted until fully paid. A policy is released when its last payment is collected and goes on the next weekly run with its full premium.",
+      "help": "Part-paid and instalment policies are not remitted until fully paid.",
       "kpis": {
         "held": "Policies held",
         "released": "Policies released"
@@ -7315,7 +7315,7 @@
       "noRecent": "Reports you open from this page appear here.",
       "none": "No reports available.",
       "title": "All reports",
-      "help": "Every report your role may run. Search by name, description or code (press / to search), filter by category, and star the reports you use most.",
+      "help": "Every report your role may run.",
       "categoriesLabel": "Report categories",
       "searchPlaceholder": "Search reports by name, description or code",
       "search": "Search reports",
@@ -7541,7 +7541,7 @@
     "importOpenItems": "Import open items",
     "openItems": "Open items",
     "importOpenItemsTitle": "Import open items (go-live)",
-    "importOpenItemsNote": "Unpaid premium bills of the old system, loaded against policies already in the system. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped.",
+    "importOpenItemsNote": "Unpaid premium bills of the old system, loaded against policies already in the system.",
     "remindersScope_one": "A payment reminder is e-mailed for {{count}} premium due or overdue.",
     "remindersScope_other": "A payment reminder is e-mailed for {{count}} premiums due or overdue.",
     "remindClients": "Clients",
@@ -7967,7 +7967,7 @@
         "insurer": "Insurer default rate",
         "default": "System default rate"
       },
-      "help": "Commission rules by insurer, product, line of business, policy type, channel type, motor type and sum insured band for a date range: one rate of the net premium, or the issuing, TIS remitting and insurer net rate of each Motor peril. A rule applies once approved; an amendment is a new version.",
+      "help": "Commission rules by insurer, product, line of business, policy type, channel type, motor type and sum insured band for a date range: one rate of the net premium, or the issuing, TIS remitting and insurer net rate of each Motor peril.",
       "upload": "Upload rules",
       "uploadHelp": "One row per peril of a rule; rows with the same keys and dates form one rule, sent for approval.",
       "uploadTarget": "Commission rules (.xlsx)",
@@ -8427,7 +8427,7 @@
   },
   "birTax": {
     "withholdingReturns": "Withholding returns",
-    "withholdingReturnsHelp": "BIR Form 0619-E for the first and second month of each quarter, 1601-EQ per quarter (with the QAP), 2551Q for a non-VAT broker and the annual 1604-E, computed from the payment vouchers and the ledger. Open a return to see it on the BIR layout, check the reconciliation and record the filing.",
+    "withholdingReturnsHelp": "BIR Form 0619-E for the first and second month of each quarter, 1601-EQ per quarter (with the QAP), 2551Q for a non-VAT broker and the annual 1604-E, computed from the payment vouchers and the ledger.",
     "alphalist1604e": "Annual alphalist 1604-E",
     "alphalist1604eHelp": "Annual information return of creditable income taxes withheld (expanded): remittances per month from the filing records and the alphalist of payees (schedule 3 subject to withholding, schedule 4 exempt).",
     "percentageTax": "Percentage tax 2551Q",
@@ -8548,7 +8548,7 @@
     "payload": "Payload",
     "response": "Response",
     "cas": "CAS books and documents",
-    "casHelp": "Registration pack of the computerized accounting system. Books print per month with page numbers that run on through the year; the documents print their approved version.",
+    "casHelp": "Registration pack of the computerized accounting system.",
     "systemDescription": "System description",
     "backupProcedure": "Backup procedure",
     "readiness": "Readiness",
@@ -9435,7 +9435,7 @@
     },
     "recordEpolicy": {
       "title": "Record e-Policy",
-      "subtitle": "Placement slips sent to the insurer and waiting for the e-policy. Select one to record the e-policy the insurer sent.",
+      "subtitle": "Placement slips sent to the insurer and waiting for the e-policy.",
       "empty": "No placement slip is waiting for an e-policy"
     },
     "cancel": {
@@ -9992,11 +9992,11 @@
     },
     "usage": {
       "templates": "The template marked In use is the one the business flow applies to its product: motor quotations are priced with the motor pricing template; its acceptance rules, rating factors, insurer market and document templates take effect on quotations, Requests for Quotation, placements and printed documents.",
-      "coverages": "Covers of each product template. For the covers quoted (Priced on quotation as), the deductible and main exclusions are printed as Cover terms on the quotation slip and the policy schedule. Cover premiums themselves are priced on the quotation screens with the template's motor tariff.",
-      "rating": "Rating factors adjust the net premium of a quotation of the template in use: the factor of the band the risk falls in multiplies the premium (Multiplicative, Discount) or adds a percentage (Additive). A factor applies only when the quotation carries its field, for example the vehicle's model year for vehicle age.",
-      "underwriting": "Insurer underwriting guidelines, checked when a quotation is priced or saved, when a Request for Quotation approaches an insurer and when a placement is created. Auto-accept passes the risk when the condition holds and otherwise refers (or declines) it; Refer holds the quotation until a user of the authority role approves it within the authority matrix (Underwriting referral approval); Decline refuses it with the message; Apply loading adds the loading to the net premium. A rule applies to all insurers or to one insurer.",
-      "documents": "Document templates of each product template, printed from the policy and quotation screens and attached to e-mails. Upload a layout (text file with merge fields) to replace the standard layout of the policy schedule, quotation slip, CTPL certificate or member enrollment form; without an upload the standard layout is printed.",
-      "marketMapping": "The insurers that offer each product. Only insurers on a product's market (the template's insurer panel and the active mappings here) can be approached on a Request for Quotation. Year-to-date production is computed from the policies issued; the agreed commission is a reference, commission itself comes from the Commission Rate Matrix.",
+      "coverages": "Covers of each product template.",
+      "rating": "Rating factors adjust the net premium of a quotation of the template in use: the factor of the band the risk falls in multiplies the premium (Multiplicative, Discount) or adds a percentage (Additive).",
+      "underwriting": "Insurer underwriting guidelines, checked when a quotation is priced or saved, when a Request for Quotation approaches an insurer and when a placement is created.",
+      "documents": "Document templates of each product template, printed from the policy and quotation screens and attached to e-mails.",
+      "marketMapping": "The insurers that offer each product.",
       "analytics": "Computed from the policies issued and the claims recorded (cancelled policies and rejected claims left out)."
     },
     "actions": {
@@ -12703,7 +12703,7 @@
     "monitorTitle": "Integrations",
     "monitorIntro": "Connections to SMS gateways, the CTPL authentication provider, the LTO, insurer systems and banks: mode, credentials, messages waiting, failed or received.",
     "templatesTitle": "Message templates",
-    "templatesIntro": "SMS and Viber texts sent to clients: renewal notices, payment reminders, claim updates. Placeholders are filled when the message is sent.",
+    "templatesIntro": "SMS and Viber texts sent to clients: renewal notices, payment reminders, claim updates.",
     "insurerTitle": "Insurer integration",
     "insurerIntro": "How each insurer's system is called: connector, codes and field mapping, the requests sent and the claim status file.",
     "ctplTitle": "CTPL authentication",
@@ -12841,7 +12841,7 @@
     "brokerCode": "Broker code at the insurer",
     "products": "Product codes",
     "autoIssue": "Send the issuance request when a policy is issued",
-    "mapHelp": "Each map lists target field: source. A source is a path in the policy (insuredName, vehicle.plateNumber), a {{template}} or =literal. An empty request map uses the default.",
+    "mapHelp": "Each map lists target field: source.",
     "defaultRequestMap": "Default request map",
     "previewPolicy": "Policy number to preview the request",
     "allRequests": "All requests",
@@ -14024,7 +14024,7 @@
     "fa": {
       "menu": "Fixed assets",
       "register": "Asset register",
-      "registerIntro": "Fixed assets with their cost, accumulated depreciation and book value. Assets come from supplier invoice lines with an asset class or are registered here.",
+      "registerIntro": "Fixed assets with their cost, accumulated depreciation and book value.",
       "newAsset": "Register asset",
       "registered": "Fixed asset {{number}} registered",
       "assets": "Assets",
@@ -14047,7 +14047,7 @@
       "opening": "Accumulated depreciation at go-live",
       "depreciateFrom": "First period depreciated here",
       "run": "Depreciation run",
-      "runIntro": "Straight-line depreciation of a period, one journal per asset class. Also a step of the month-end close.",
+      "runIntro": "Straight-line depreciation of a period, one journal per asset class.",
       "post": "Post depreciation",
       "posted": "Depreciation of {{period}} posted: {{amount}} on {{assets}} asset(s)",
       "due": "Due",
@@ -14822,7 +14822,7 @@
       "rowsTotal": "Rows",
       "error": "Error",
       "shareWith": "Share with roles",
-      "shareHelp": "Empty: only you (and the administrator) see it. Each user still sees only the rows their access allows.",
+      "shareHelp": "Empty: only you (and the administrator) see it.",
       "op": {
         "eq": "equals",
         "neq": "is not",
@@ -15334,7 +15334,7 @@
     "frameTitle": "Document being printed"
   },
   "yearEndClose": {
-    "help": "Closes the fiscal year in five steps: prerequisites, adjustments, closing entries, the close by an Accounting Manager and the opening balances of the next year. The user who starts the close cannot close the year.",
+    "help": "Closes the fiscal year in five steps: prerequisites, adjustments, closing entries, the close by an Accounting Manager and the opening balances of the next year.",
     "stepsLabel": "Year-end close steps",
     "step": {
       "prerequisites": "Prerequisites",
@@ -15715,7 +15715,7 @@
   },
   "financialStatements": {
     "title": "Financial statements",
-    "help": "Statements from posted journals for a fiscal period or a date range. Select an account to see its postings.",
+    "help": "Statements from posted journals for a fiscal period or a date range.",
     "statement": {
       "income-statement": "Income statement",
       "balance-sheet": "Balance sheet",
@@ -16574,7 +16574,7 @@
     "title": "Accounting flow",
     "master": "Master",
     "finance": "Finance",
-    "help": "The journal each business event posts, read from the posting rules and accounts in force today. Read only: rules change in Posting Rules, accounts in Account Determination, both approved by a second user.",
+    "help": "The journal each business event posts, read from the posting rules and accounts in force today.",
     "export": {
       "action": "Export",
       "excel": "Accounting reference (Excel)",
@@ -16728,7 +16728,7 @@
   },
   "fsVersions": {
     "title": "Financial statement versions",
-    "help": "Each version lists the lines of the statements with the GL accounts each line carries. The financial statement reports group the ledger by the lines of the version chosen.",
+    "help": "Each version lists the lines of the statements with the GL accounts each line carries.",
     "add": "Add version",
     "code": "Code",
     "name": "Name",
@@ -16795,7 +16795,7 @@
   },
   "unapplied": {
     "title": "Unapplied collections",
-    "help": "Money received that no bill takes yet: a payment above what the policy owes, a bank credit not yet identified, or a payment before the bill. Allocate each to open bills by its date, or refund it.",
+    "help": "Money received that no bill takes yet: a payment above what the policy owes, a bank credit not yet identified, or a payment before the bill.",
     "record": "Record payment",
     "kpis": {
       "open": "Open items",
@@ -16874,7 +16874,7 @@
     "title": "Features & releases",
     "help": "Functions of the platform with their release tier and status in this environment. Phase 1 and platform functions are always on; Phase 2 is enabled by iorta TechNXT or by the SUPERID of TISPH; future releases are enabled by iorta TechNXT.",
     "tenantHelp": "Enable or disable the Phase 2 functions of this environment for TISPH: choose the functions or Enable Phase 2, check the impact and submit. Another SUPERID or the iorta TechNXT platform administrator approves; never the requester. Future releases stay with iorta TechNXT.",
-    "platformHelp": "Enable or disable Phase 2 and future-release features of this environment. Every change is approved by a second platform administrator.",
+    "platformHelp": "Enable or disable Phase 2 and future-release features of this environment.",
     "export": "Export to Excel",
     "search": "Search feature, module or requirement",
     "allTiers": "All tiers",
@@ -17227,7 +17227,7 @@
   },
   "securityControls": {
     "title": "Security controls",
-    "help": "The security, data-protection and operational controls of the requirements with their current state against the target. Controls met outside the application carry dated evidence.",
+    "help": "The security, data-protection and operational controls of the requirements with their current state against the target.",
     "allGroups": "All groups",
     "allStatuses": "All statuses",
     "empty": "No controls match the filters",
@@ -17274,7 +17274,7 @@
   },
   "serviceLevels": {
     "title": "Service levels",
-    "help": "The turnaround of every status a document waits in, in working time by the holiday calendar or in calendar time, and the roles told when it is breached. The open items are timed against the register.",
+    "help": "The turnaround of every status a document waits in, in working time by the holiday calendar or in calendar time, and the roles told when it is breached.",
     "runNow": "Run monitor",
     "runDone": "Monitor run: {{opened}} opened, {{closed}} closed, {{breached}} breached, {{escalated}} escalated",
     "statOpen": "Open items",
@@ -19297,7 +19297,7 @@
   },
   "motorRating": {
     "title": "Market value and rates",
-    "help": "The FMV is the reference value less the depreciation; the rates default to the issuing rates. Changing them needs the right to do so and a reason.",
+    "help": "The FMV is the reference value less the depreciation; the rates default to the issuing rates.",
     "source": {
       "rule": "Commission rule",
       "tariff": "Motor tariff",
