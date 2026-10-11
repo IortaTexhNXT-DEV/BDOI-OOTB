@@ -68,7 +68,7 @@ describe('commission rules register', () => {
     expect(c.body.data).toMatchObject({ approvalStatus: 'draft', rateBasis: 'issuing-remitting', level: 'insurer + product + motor type' });
     expect(c.body.data.perilRates.find((p) => p.peril === 'OD')).toMatchObject({ commissionPct: 1.05, variance: 0.3 });
     // a draft never applies
-    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01' })).source).not.toBe('matrix');
+    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01', perPeril: true })).source).not.toBe('matrix');
     const s = await ctx.as('maker')('post', `/commission-rates/${ruleId}/submit`).send({ changeNote: 'November schedule' });
     expect(s.status).toBe(200);
     expect(s.body.data.approvalStatus).toBe('pending');
@@ -86,11 +86,11 @@ describe('commission rules register', () => {
     expect(a.status).toBe(200);
     const rule = (await ctx.as('maker')('get', `/commission-rates/${ruleId}`)).body.data;
     expect(rule).toMatchObject({ approvalStatus: 'approved', active: true, approvedBy: 'Finance manager' });
-    const r = await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01' });
+    const r = await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01', perPeril: true });
     expect(r).toMatchObject({ source: 'matrix', ruleId, rateBasis: 'issuing-remitting', level: 'insurer + product + motor type' });
     expect(r.perilRates.find((p) => p.peril === 'OD')).toMatchObject({ insurerNet: 0.95, tisRemitting: 1.7 });
     // another motor type does not match the rule
-    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-SEDAN', date: '2030-06-01' })).source).not.toBe('matrix');
+    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-SEDAN', date: '2030-06-01', perPeril: true })).source).not.toBe('matrix');
     const dup = await ctx.as('maker')('post', '/commission-rates').send({ insuranceCompanyId: ins.id, productId: motor.id, policyType: 'new', motorType: 'PC-OTHER', rateBasis: 'issuing-remitting',
       effectiveFrom: '2030-12-01', perilRates: perils() });
     expect(dup.status).toBe(409);
@@ -106,8 +106,8 @@ describe('commission rules register', () => {
     const ok = await manager('post', `/posting-rules/changes/${amend.body.data.pendingChangeId}/approve`).send({});
     expect(ok.status).toBe(200);
     expect(String((await one('SELECT effective_to FROM commission_rates WHERE id = $1', [ruleId])).effective_to).slice(0, 10)).toBe('2030-12-31');
-    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2031-02-01' })).ruleId).toBe(v2);
-    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01' })).ruleId).toBe(ruleId);
+    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2031-02-01', perPeril: true })).ruleId).toBe(v2);
+    expect((await resolveCommissionRate({ insurerId: ins.id, productId: motor.id, lob: 'motor', motorType: 'PC-OTHER', date: '2030-06-01', perPeril: true })).ruleId).toBe(ruleId);
     const history = (await ctx.as('maker')('get', `/commission-rates/${ruleId}/history`)).body.data;
     expect(history.map((h) => h.version)).toEqual([1, 2]);
     expect((await one("SELECT count(*)::int AS n FROM audit_log WHERE entity = 'commission_rate' AND action IN ('submit', 'amend')")).n).toBeGreaterThanOrEqual(2);
