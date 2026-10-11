@@ -310,7 +310,10 @@ export async function motorRatingPreview(c, { doc, productId, productType, icId,
   const computed = ref ? round2(ref.value * (1 - ref.depreciationPct / 100)) : null;
   const defaults = await defaultIssuingRates(c, { doc, productId: product?.id ?? productId, icId, leadId, fmv: computed ?? (num(doc.lossAndDamageCoverage) || null) });
   const si = computed ?? num(doc.lossAndDamageCoverage);
+  const cap = product ? await capFor(product.id, await quoteChannelType(c, doc, leadId), await today(), c) : null;
+  const odFloor = Math.max(0, ...[s.minimumRates.OD, cap?.lowestOd].filter((x) => x !== null && x !== undefined).map(num));
   return {
+    minimumRates: { OD: odFloor > 0 ? odFloor : null, AON: s.minimumRates.AON },
     fmv: ref ? { referenceValue: ref.value, referenceBasis: ref.basis, depreciationPct: ref.depreciationPct, computedFmv: computed } : null,
     depreciationOptions: s.depreciationOptions, defaultDepreciationPct: s.depreciationPct, fmvReasonRequired: s.fmvReasonRequired,
     rates: { OD: defaults.OD, AON: defaults.AON, source: defaults.source, ruleId: defaults.ruleId, perils: defaults.perils },

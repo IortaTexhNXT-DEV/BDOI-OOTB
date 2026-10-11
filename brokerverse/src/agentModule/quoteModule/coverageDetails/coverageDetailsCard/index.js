@@ -32,6 +32,8 @@ import coverageInputErrors from "./coverageInputErrors";
 import useQuoteSetup from "../../utils/useQuoteSetup";
 import ProductCovers from "./ProductCovers";
 import QuoteSteps from "../../quoteSteps";
+import MotorRatingPanel from "../../motorRating/MotorRatingPanel";
+import { hasPermission } from "../../../../utils/canOpen";
 
 const CoverageDetailsCard = ({
   action,
@@ -305,6 +307,10 @@ const CoverageDetailsCard = ({
   const [includeAPPA, setIncludeAPPA] = useState(() => !isEditMode || Boolean(existingCoverageDetails?.autoPassengerPersonalAccident));
   // covers of the product template (Coverage Builder) and the optional covers without a quotation premium chosen
   const quoteSetup = useQuoteSetup({ lob: "MOTOR" });
+  // PROD-12: the FMV and the issuing rates change only with the rights override:motor-fmv / override:quotation-rates
+  const [ratingTerms, setRatingTerms] = useState(() => ({ fmvRating: currentQuoteCreation?.coverageDetails?.fmvRating, rateOverride: currentQuoteCreation?.coverageDetails?.rateOverride }));
+  const canEditFmv = hasPermission("override:motor-fmv");
+  const canChangeRates = hasPermission("override:quotation-rates");
   const [otherCovers, setOtherCovers] = useState(() => existingCoverageDetails?.selectedCovers || []);
   useEffect(() => {
     // The renewal flow sets these from the renewal prefill.
@@ -377,6 +383,9 @@ const CoverageDetailsCard = ({
       APPAtotalCoverage: includeAPPA ? values.APPATotalCoverage : "",
       APPAcoveragePremium: includeAPPA ? values.APPACoveragePremium : "",
       totalSumInsured: values.TotalSumInsured,
+      // reference value, depreciation and reasons of the market value and rates (MotorRatingPanel)
+      ...(ratingTerms.fmvRating ? { fmvRating: ratingTerms.fmvRating } : {}),
+      ...(ratingTerms.rateOverride ? { rateOverride: ratingTerms.rateOverride } : {}),
       // covers of the product template chosen (the server prices on the same choice)
       ...(selectedCovers ? { selectedCovers } : {}),
       // Include premium breakdown if calculated
@@ -909,6 +918,22 @@ const CoverageDetailsCard = ({
         </div>
         {flow !== "renewal" && <QuoteSteps current="coverage" />}
         <ProductCovers setup={quoteSetup} isSelected={coverSelected} onToggle={toggleCover} />
+        <MotorRatingPanel
+          draft={{
+            leadRefId: leadRefId || currentQuoteCreation?.leadRefId, productType: "Motor", insurancePolicyType: "COMP",
+            productId: currentQuoteCreation?.policyDetails?.productId, insuranceCompanyId: currentQuoteCreation?.policyDetails?.insuranceCompanyId,
+            insuranceCompanyName: currentQuoteCreation?.policyDetails?.insuranceCompanyName, vehicleType,
+            vehicleCondition: currentQuoteCreation?.policyDetails?.vehicleCondition,
+            ...(flow === "renewal" && policyId ? { renewal: { policyId } } : {}),
+          }}
+          values={{ fmv: formik.values.LossandDamagecoverage, odRate: formik.values.LossandDamagecoverageRate, aonRate: formik.values.ActsofNatureRate }}
+          onChange={(v) => {
+            formik.setFieldValue("LossandDamagecoverage", v.fmv ?? "");
+            formik.setFieldValue("LossandDamagecoverageRate", v.odRate ?? "");
+            if (includeActsOfNature) formik.setFieldValue("ActsofNatureRate", v.aonRate ?? "");
+            setRatingTerms({ fmvRating: v.fmvRating, rateOverride: v.rateOverride });
+          }}
+        />
         <div className="coverage__details__card__container__sub__title mt-2 mb-2">
           {t("coverageDetailsCard.coveragesDetails")}
         </div>
@@ -916,6 +941,7 @@ const CoverageDetailsCard = ({
           <div className="col-12 md:col-12 lg:col-12">
             <InputTextField
               label={t("coverageDetailsCard.ownDamageCoverage")}
+              disabled={!canEditFmv && Boolean(ratingTerms.fmvRating)}
               value={formik.values.LossandDamagecoverage}
               onChange={formik.handleChange("LossandDamagecoverage")}
             />
@@ -931,6 +957,7 @@ const CoverageDetailsCard = ({
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsCard.ownDamageCoverageRate")}
+              disabled={!canChangeRates}
               value={formik.values.LossandDamagecoverageRate}
               onChange={formik.handleChange("LossandDamagecoverageRate")}
             />
@@ -1032,6 +1059,7 @@ const CoverageDetailsCard = ({
             <div className="col-12 md:col-6 lg:col-6">
               <InputTextField
                 label={t("coverageDetailsCard.actsOfNatureRate")}
+                disabled={!canChangeRates}
                 value={formik.values.ActsofNatureRate}
                 onChange={formik.handleChange("ActsofNatureRate")}
               />
