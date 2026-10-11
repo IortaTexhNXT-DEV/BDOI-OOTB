@@ -39,6 +39,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Vehicle Variant master upload | Master > Generals > Insurance Management > Vehicle (choose Vehicle variants in the Upload dialog) | `POST /api/masters/vehicle-variant/upload` | `Vehicle_Variant_Upload_Template.xlsx` |
 | Vehicle master upload | Master > Generals > Insurance Management > Vehicle | `POST /api/masters/vehicle/upload` | `Vehicle_Upload_Template.xlsx` |
 | Scheme Document Checklist master upload | Master > Insurance Management > Scheme Document Checklist | `POST /api/masters/scheme-document-checklist/upload` | `Scheme_Document_Checklist_Upload_Template.xlsx` |
+| Motor Issuance Checklist master upload | Master > Insurance Management > Motor Issuance Checklist | `POST /api/masters/motor-issuance-checklist/upload` | `Motor_Issuance_Checklist_Upload_Template.xlsx` |
 | Country master upload | Master > Generals > Location > Country | `POST /api/masters/country/upload` | `Country_Upload_Template.xlsx` |
 | Region master upload | No Upload button: Master > Generals > Location > Province (regions are shown with their provinces; no Region screen of its own) | `POST /api/masters/region/upload` | `Region_Upload_Template.xlsx` |
 | Province master upload | Master > Generals > Location > Province | `POST /api/masters/state/upload` | `Province_Upload_Template.xlsx` |
