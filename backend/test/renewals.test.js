@@ -384,7 +384,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect((await request(ctx.app).post('/api/quotations/approve-by-customer').send({ token: tokenOf(sent.body.approvalUrl) })).status).toBe(200);
     expect((await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({})).status).toBe(400);
     const conv = await ctx.api('post', `/quotations/${q.id}/convert-to-policy`).send({ idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/renewal.jpg', chassisNumber: 'MHFXW42G5P0099999', motorNumber: '2NRX999999', plateNumber: 'NBC 1234' });
-    expect(conv.status).toBe(201);
+    expect(conv.status, JSON.stringify(conv.body)).toBe(201);
     expect((await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_crs_21\'')).renewed_to).toBe(conv.body.policyId);
     expect((await one('SELECT status FROM renewals WHERE id = \'rnw_crs_21\'')).status).toBe('renewed');
     await query("UPDATE app_settings SET value = 'true' WHERE key = 'placement.journey_applies_to_renewals'");

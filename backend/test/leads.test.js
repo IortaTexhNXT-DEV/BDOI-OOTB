@@ -175,8 +175,8 @@ describe('leads', () => {
 
 describe('prospect for an existing customer', () => {
   it('links the prospect to the client and converts without a second client', async () => {
-    const client = (await ctx.api('post', '/clients').send({ firstName: 'Existing', lastName: 'Customer', emailId: 'existing.customer@example.ph', contactNumber: '09171234567' })).body.data;
-    const found = await ctx.api('get', '/clients?search=09171234567');
+    const client = (await ctx.api('post', '/clients').send({ firstName: 'Existing', lastName: 'Customer', emailId: 'existing.customer@example.ph', contactNumber: '09175550178' })).body.data;
+    const found = await ctx.api('get', '/clients?search=09175550178');
     expect(found.body.data.clients.map((c) => c.clientId || c.id)).toContain(client.clientId || client.id);
     const lead = await ctx.api('post', '/leads').send({ firstName: 'Existing', lastName: 'Customer', clientId: client.clientId || client.id, lob: 'MOTOR' });
     expect(lead.status).toBe(201);

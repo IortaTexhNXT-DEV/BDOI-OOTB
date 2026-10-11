@@ -51,6 +51,8 @@ describe('KYC by source', () => {
     const vehicle = { chassisNumber: 'MHFXW42G5P0012345', motorNumber: '2NRX123456', plateNumber: 'NQQ 2025' };
     expect(await missingKyc({ lob: 'MOTOR', sources: [vehicle], clientId: 'cl_tfs' })).toEqual(['TFS KYC confirmation']);
     expect(await missingKyc({ lob: 'MOTOR', sources: [vehicle, { tfsKycReference: 'TFS-KYC-2026-0001' }], clientId: 'cl_tfs' })).toEqual([]);
+    // a full government ID on file satisfies a TFS-sourced deal too
+    expect(await missingKyc({ lob: 'MOTOR', sources: [motorId], clientId: 'cl_tfs' })).toEqual([]);
     expect(await missingKyc({ lob: 'MOTOR', sources: [vehicle], clientId: 'cl_walk' })).toEqual(['ID type', 'ID number', 'ID card image']);
     expect(await missingKyc({ lob: 'MOTOR', sources: [motorId], clientId: 'cl_walk' })).toEqual([]);
     // one primary ID or two secondary IDs: a secondary ID alone is not enough

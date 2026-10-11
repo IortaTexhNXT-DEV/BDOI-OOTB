@@ -155,8 +155,10 @@ export async function missingKyc({ lob, sources, clientId = null, leadId = null,
   if ((await getSetting('policy.kyc_checklist_enforced', false)) === true) {
     const checklist = await kycChecklist({ lob, mode, sources, clientId }, db);
     for (const c of checklist) if (c.required && !c.satisfied) missing.push(c.name);
-  } else if (mode === KYC_MODES.tfs && (await getSetting('policy.kyc_required_fields', KYC_DEFAULT_REQUIRED) || KYC_DEFAULT_REQUIRED)[String(lob || '').toUpperCase()]?.includes('idType')) {
-    // a TFS-sourced Motor deal still needs the TFS confirmation where the ID would have been collected
+  } else if (mode === KYC_MODES.tfs && (await getSetting('policy.kyc_required_fields', KYC_DEFAULT_REQUIRED) || KYC_DEFAULT_REQUIRED)[String(lob || '').toUpperCase()]?.includes('idType')
+    && ![...idItems].every((i) => kycValue(sources, i))) {
+    // a TFS-sourced Motor deal still needs the TFS confirmation where the ID would have been collected; a full
+    // government ID on file (a renewal, a client identified at onboarding) satisfies the KYC whatever the source
     const checklist = await kycChecklist({ lob, mode, sources, clientId }, db);
     const conf = checklist.find((c) => c.docType === 'tfs-kyc-confirmation');
     if (conf && !conf.satisfied) missing.push(conf.name);

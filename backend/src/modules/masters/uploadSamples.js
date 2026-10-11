@@ -230,6 +230,16 @@ export const MASTER_TEMPLATES = [
     samples: [{ code: 'SHOPEEPAY', name: 'ShopeePay', channel: 'online', referenceRequired: 'Yes', description: 'E-wallet payment', sortOrder: '110' }],
   },
   {
+    type: 'kyc-checklist', menu: 'Master > Configuration (reference list, API /api/masters/kyc-checklist; no screen of its own)',
+    notes: ['The documents asked at onboarding and at booking, by line of business (* = all), KYC mode (Full KYC, TFS confirmation or Any) and rule (Always, Customer aged 21 or under, Non-Filipino customer). Enforced at booking only with policy.kyc_checklist_enforced.'],
+    samples: [{ code: 'TIN-ID', name: 'TIN ID or BIR Form 1904', docType: 'tin', lob: '*', kycMode: 'Full KYC', required: 'No', rule: 'Always', sortOrder: '80', description: 'Tax identification of the customer' }],
+  },
+  {
+    type: 'numbering-segment', menu: 'Master > Configuration (reference list, API /api/masters/numbering-segment; no screen of its own)',
+    notes: ['The digit a product, sub-line or kind of business takes in the TISPH policy number ({PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}); * as Key is the default of the segment.'],
+    samples: [{ code: 'PRODUCT-MARINE', name: 'Marine Cargo', segment: 'PRODUCT', key: 'MARINE', value: '7', description: 'Marine cargo policies' }],
+  },
+  {
     type: 'holiday', menu: 'Master > Configuration (reference list, API /api/masters/holiday; no screen of its own)',
     notes: ['National holidays of the current and next year are shipped (Republic Act No. 9492 and the yearly proclamation). Add local special non-working days (city or province charter days) and correct a date when a proclamation moves it.'],
     samples: [{ code: '2026-08-19-QCDAY', name: 'Quezon City Day', date: '2026-08-19', holidayType: 'Special Non-working Day', scope: 'Local', location: 'Quezon City', legalBasis: 'Proclamation for the year', remarks: 'Confirm the date with the yearly proclamation' }],
