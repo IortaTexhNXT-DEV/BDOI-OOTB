@@ -2998,6 +2998,7 @@
     "searchDepartments": "Search by department code or name",
     "bankCode": "Bank Code",
     "bankName": "Bank Name",
+    "bankShortName": "Short Name",
     "bankBranch": "Bank Branch",
     "ifscCode": "SWIFT / BIC Code",
     "email": "Email",
