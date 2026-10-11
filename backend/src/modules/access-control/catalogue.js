@@ -91,6 +91,7 @@ const PERMISSION_LIST = {
   'write:promotion-rates': ['quotations', 'special', 'Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason'],
   'read:lead-assignment': ['lead-assignment', 'view', 'See assignment rules, the reassignment queue and every team\'s prospects'],
   'write:lead-assignment': ['lead-assignment', 'edit', 'Maintain assignment rules and reassign prospects'],
+  'write:callout-endorsement': ['lead-assignment', 'special', 'Endorse prospects as call-out leads of the telesales callers and keep call-out assignment rules (Team Leaders)'],
   'read:motor-programmes': ['motor-programmes', 'view', 'See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters'],
   'write:motor-programmes': ['motor-programmes', 'edit', 'Maintain programmes and upload dealer vehicle sales'],
   'read:promotions': ['promotions', 'view', 'See promotions, their vehicle lines, rates and versions'],

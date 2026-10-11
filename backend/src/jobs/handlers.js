@@ -99,6 +99,14 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/runs.js')).runDueSchedules();
 }
+/**
+ * Telesales incentive (TIS-BRD-COMM-08, FR-TSI-030): every day the telesales policies are attributed and dated; on the
+ * run day (incentive.telesales.run_day) the previous month is calculated for the Telesales program in force.
+ */
+export async function telesalesIncentiveCalc() {
+  if (!(await tableExists('telesales_policies'))) return { skipped: 'telesales_policies table missing' };
+  return (await import('../modules/incentive/telesales.js')).telesalesJob();
+}
 /** Insurer billing run: on a billing date (15th and 26th, moved off non-working days) draft the billing statements of the remitted policies (remittance/billing.js). */
 export async function insurerBillingRun() {
   if (!(await tableExists('insurer_billing_runs'))) return { skipped: 'insurer_billing_runs table missing' };

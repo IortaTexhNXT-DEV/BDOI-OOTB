@@ -6,6 +6,7 @@ import { created, ok } from '../../lib/respond.js';
 import { many } from '../../db/pool.js';
 import { canRead, canWrite } from '../masters/helpers.js';
 import * as svc from './service.js';
+import * as tsi from './telesales.js';
 
 /** Incentive (Accounts > Incentive, 4 screens + reports) and Master > Incentive Programs. */
 const { router, define } = moduleRouter('Incentive', '/incentive');
@@ -167,6 +168,135 @@ define({
   request: { templateId: 1, parameters: { period: '2026-08', program: 'INC-2026-002' }, format: 'Excel' },
   response: { success: true, data: { reportId: 'rpt_1', reportType: 'Monthly Payout Summary', generatedDate: '2026-09-28T00:00:00Z', fileUrl: 'http://host/api/s3/object/incentive-reports/x.csv' } },
   handler: async (req, res) => created(res, await run(req, 'incentive_report', 'generate', () => svc.generateReport(req.body || {}, req.user)), 'Report generated'),
+});
+
+// ---------- Telesales program (FR-TSI-001 to 005), callers (FR-TSI-004), batch policies (FR-TSI-035, 036, 042) ----------
+const M = 'Master > Finance > Incentive Programs';
+const tsRead = [requireAuth, requirePermission('write:masters', 'read:incentive', 'approve:incentive')];
+const tsProgram = { id: 7, programCode: 'TSI-2026-001', programName: 'Telesales Incentive Program', programType: 'Telesales', targetMetric: 'Average Net Commission (ANC)', calculationFrequency: 'Monthly',
+  status: 'Active', current: { version: 1, effectiveFrom: '2026-04-01', minPolicies: 15, whtPct: 5, products: [2, 3], displayStatus: 'In force',
+    tiers: [{ level: 1, ancFrom: 2500, ancTo: 3999.99, nbAmount: 300, renewalAmount: 150 }], bands: [{ band: 1, over: 30, upTo: 50, every: 5, amount: 2000 }] },
+  open: null, versions: [], callers: [{ id: 3, userId: 'usr_5', name: 'Geralyn Ramos', insurer: 'Apex Assurance', teamLeader: 'Marco Villanueva', dateFrom: '2026-04-01', status: 'Active' }],
+  versionLabel: 'v1 in force' };
+const tsVersion = { programName: 'Telesales Incentive Program', products: [2, 3], minPolicies: 18, whtPct: 5, effectiveFrom: '2026-11-01', changeReason: 'Agreed with management on 30/09/2026',
+  tiers: [{ ancFrom: 2500, nbAmount: 300, renewalAmount: 150 }, { ancFrom: 4000, nbAmount: 500, renewalAmount: 250 }], bands: [{ over: 30, every: 5, amount: 2000 }] };
+const tsCaller = { id: 3, programId: 7, userId: 'usr_5', name: 'Geralyn Ramos', code: 'TS-014', insuranceCompanyId: 4, insurer: 'Apex Assurance', teamLeaderId: 'usr_9', teamLeader: 'Marco Villanueva',
+  dateFrom: '2026-04-01', dateTo: null, status: 'Active' };
+const tsRun = async (req, entity, entityId, action, fn) => {
+  const out = await fn();
+  await audit(req, { entity, entityId: entityId(out), action, before: out?.before, after: out?.after ?? out });
+  return out?.after ?? out;
+};
+define({
+  method: 'GET', path: '/telesales/defaults', summary: 'Defaults of a new Telesales program (settings incentive.telesales.*): minimum policies, withholding tax %, ANC tier and production-excess tables, Motor products, next month', screen: M,
+  middleware: tsRead, response: { success: true, data: { minPolicies: 15, whtPct: 5, excessMethod: 'banded', effectiveFrom: '2026-11-01', products: [{ id: 2, code: 'MOTOR', name: 'Motor Vehicle Insurance' }] } },
+  handler: async (_req, res) => ok(res, await tsi.telesalesDefaults()),
+});
+define({
+  method: 'GET', path: '/telesales/options', summary: 'Users who may be callers (incentive.eligible_roles), Team Leaders (write:callout-endorsement) and insurance partners', screen: `${M} > Callers`,
+  middleware: tsRead, response: { success: true, data: { callers: [{ id: 'usr_5', name: 'Geralyn Ramos', code: 'TS-014' }], teamLeaders: [{ id: 'usr_9', name: 'Marco Villanueva' }], insurers: [{ id: 4, name: 'Apex Assurance' }] } },
+  handler: async (_req, res) => ok(res, await tsi.callerOptions()),
+});
+define({
+  method: 'GET', path: '/telesales/programs/:id', summary: 'A Telesales program with the version in force, the open version (Draft or Pending approval), every version (History) and its callers', screen: `${M} > Edit`,
+  middleware: tsRead, response: { success: true, data: tsProgram },
+  handler: async (req, res) => ok(res, await tsi.getTelesalesProgram(req.params.id)),
+});
+define({
+  method: 'POST', path: '/telesales/programs', summary: 'Create a Telesales program: version 1 in Draft (Motor products, minimum 1-999, withholding tax 0-100, effective from the first day of a month, tier and excess tables; MSG-TSI-001 to 019)',
+  screen: `${M} > Add Program`, middleware: programWrite, request: { ...tsVersion, effectiveFrom: '2026-04-01', changeReason: undefined }, response: { success: true, data: tsProgram },
+  handler: async (req, res) => created(res, await tsRun(req, 'incentive_program', (o) => o.id, 'create', () => tsi.createTelesalesProgram(req.body || {}, req.user)), 'Program saved'),
+});
+define({
+  method: 'PUT', path: '/telesales/programs/:id', summary: 'Save draft: update the Draft version, or open the next version as a copy of the one in force with the changes (refused while a version is pending approval, MSG-TSI-026)',
+  screen: `${M} > Edit`, middleware: programWrite, request: tsVersion, response: { success: true, data: tsProgram },
+  handler: async (req, res) => {
+    const out = await tsi.saveTelesalesDraft(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'incentive_program', entityId: req.params.id, action: 'save-version', before: out.before, after: out.after });
+    ok(res, { ...(await tsi.getTelesalesProgram(req.params.id)), warnings: out.warnings }, 'Program saved');
+  },
+});
+define({
+  method: 'POST', path: '/telesales/programs/:id/submit', summary: 'Submit the Draft version for approval on Configuration Approvals (change reason from version 2; decided with approve:incentive, never by its maker)',
+  screen: `${M} > Edit`, middleware: programWrite, request: { changeReason: 'Agreed with management on 30/09/2026' }, response: { success: true, data: tsProgram },
+  handler: async (req, res) => ok(res, await tsRun(req, 'incentive_program', (o) => o.id, 'submit-version', () => tsi.submitTelesalesVersion(req.params.id, req.body || {}, req.user)), 'Program version submitted for approval'),
+});
+define({
+  method: 'POST', path: '/telesales/programs/:id/recall', summary: 'Recall the version pending approval (back to Draft)', screen: `${M} > Edit`, middleware: programWrite, response: { success: true, data: tsProgram },
+  handler: async (req, res) => ok(res, await tsRun(req, 'incentive_program', (o) => o.id, 'recall-version', () => tsi.recallTelesalesVersion(req.params.id, req.user)), 'Program version recalled'),
+});
+define({
+  method: 'POST', path: '/telesales/programs/:id/callers', summary: 'Add a caller: an active user of an incentive role, the insurance partner, a Team Leader with write:callout-endorsement, From / To (MSG-TSI-020 to 022)',
+  screen: `${M} > Callers`, middleware: programWrite, request: { userId: 'usr_5', insuranceCompanyId: 4, teamLeaderId: 'usr_9', dateFrom: '2026-04-01' }, response: { success: true, data: tsCaller },
+  handler: async (req, res) => created(res, await tsRun(req, 'incentive_caller', (o) => o.id, 'create', () => tsi.addCaller(req.params.id, req.body || {}, req.user)), 'Caller added'),
+});
+define({
+  method: 'PUT', path: '/telesales/callers/:callerId', summary: 'Change a caller row: To date (end of participation) or Team Leader', screen: `${M} > Callers`, middleware: programWrite,
+  request: { dateTo: '2026-12-31' }, response: { success: true, data: { ...tsCaller, dateTo: '2026-12-31' } },
+  handler: async (req, res) => ok(res, await tsRun(req, 'incentive_caller', (o) => o.after.id, 'update', () => tsi.updateCaller(req.params.callerId, req.body || {}, req.user)), 'Caller saved'),
+});
+define({
+  method: 'POST', path: '/telesales/callers/:callerId/disqualify', summary: 'Disqualify a caller from a date with a reason (context incentive_disqualify) and a remark (approve:incentive; MSG-TSI-023, 024)',
+  screen: `${M} > Callers`, middleware: approve, request: { date: '2026-08-01', reasonCode: 'TDQ-GRAB', note: 'Took over accounts of another caller' },
+  response: { success: true, data: { ...tsCaller, status: 'Disqualified', disqualifiedFrom: '2026-08-01' } },
+  handler: async (req, res) => {
+    const out = await tsi.disqualifyCaller(req.params.callerId, req.body || {}, req.user);
+    await audit(req, { entity: 'incentive_caller', entityId: out.after.id, action: 'disqualify', before: out.before, after: out.after });
+    ok(res, out.after, out.message);
+  },
+});
+define({
+  method: 'POST', path: '/telesales/callers/:callerId/reinstate', summary: 'Reinstate a disqualified caller with a remark (approve:incentive; never the user who disqualified the row)',
+  screen: `${M} > Callers`, middleware: approve, request: { date: '2026-10-01', note: 'Cleared after review' }, response: { success: true, data: tsCaller },
+  handler: async (req, res) => ok(res, await tsRun(req, 'incentive_caller', (o) => o.after.id, 'reinstate', () => tsi.reinstateCaller(req.params.callerId, req.body || {}, req.user)), 'Caller reinstated'),
+});
+define({
+  method: 'GET', path: '/telesales/policies/:policyId', summary: 'The telesales link of a policy: caller, call-out endorsement, NB / renewal, payment, commission settlement, eligible date, batch',
+  screen: 'Operations > Policy > Related Records', middleware: [requireAuth, requirePermission('read:policies', 'read:incentive')],
+  response: { success: true, data: { telesales: true, policyNumber: 'POL-2026-004655', caller: 'Geralyn Ramos', kind: 'NB', endorsedOn: '2026-09-22', label: 'Telesales: Geralyn Ramos, call-out endorsed 22/09/2026' } },
+  handler: async (req, res) => ok(res, await tsi.policyLink(req.params.policyId)),
+});
+define({
+  method: 'POST', path: '/calculations/:batchId/recalculate', summary: 'Recalculate a Calculated or Rejected telesales batch: reads the policies again, keeps exclusions and adjustments', screen: S('Calculations > Details'), middleware: write,
+  response: { success: true, data: { ...batch, status: 'Calculated' } },
+  handler: async (req, res) => {
+    const before = await svc.getCalculation(req.params.batchId);
+    await tsi.recalculateTelesales(req.params.batchId, req.user);
+    const after = await svc.getCalculation(req.params.batchId);
+    await audit(req, { entity: 'incentive_calculation', entityId: req.params.batchId, action: 'recalculate', before, after });
+    ok(res, after, 'Calculation complete');
+  },
+});
+define({
+  method: 'GET', path: '/calculations/:batchId/policies', summary: 'Policies tab of a telesales batch: every policy considered with NB / renewal, fully paid, commission settled, eligible date, net commission and status (filters callerId, status)',
+  screen: S('Calculations > Details > Policies'), middleware: read, query: { callerId: 'usr_5', status: 'Counted' },
+  response: { success: true, data: [{ policyNumber: 'POL-2026-004655', caller: 'Geralyn Ramos', kind: 'NB', fullyPaidOn: '2026-09-30', commissionSettledOn: '2026-10-05', eligibleOn: '2026-10-05', netCommission: 5318.79, status: 'Counted' }] },
+  handler: async (req, res) => ok(res, await tsi.batchPolicies(req.params.batchId, req.query)),
+});
+for (const action of ['exclude', 'include']) {
+  define({
+    method: 'POST', path: `/calculations/:batchId/policies/:policyId/${action}`, screen: S('Calculations > Details > Policies'), middleware: write,
+    summary: action === 'exclude' ? 'Exclude a counted policy with a reason (context incentive_exclude) and a remark while the batch is Calculated or Rejected; the caller is recalculated (MSG-TSI-036 to 038)'
+      : 'Include an excluded policy again while the batch is Calculated or Rejected; the caller is recalculated',
+    request: action === 'exclude' ? { reasonCode: 'TEX-GRAB', note: 'Prospect of another caller' } : {},
+    response: { success: true, data: { policyNumber: 'POL-2026-004655', caller: 'Geralyn Ramos', message: 'Policy POL-2026-004655 excluded; Geralyn Ramos recalculated' } },
+    handler: async (req, res) => {
+      const out = action === 'exclude' ? await tsi.excludePolicy(req.params.batchId, req.params.policyId, req.body || {}, req.user) : await tsi.includePolicy(req.params.batchId, req.params.policyId, req.user);
+      await audit(req, { entity: 'incentive_policy', entityId: out.policyId, action, after: { ...out, batchId: req.params.batchId } });
+      ok(res, out, out.message);
+    },
+  });
+}
+define({
+  method: 'GET', path: '/calculations/:batchId/export', summary: 'Export a batch to Excel: one sheet of caller lines (policies, NB, renewal, ANC, level, base, additional, recovery / adjustment, tax, total, remarks) and one of policies',
+  screen: S('Calculations > Details > Export to Excel'), middleware: read, response: { success: true },
+  handler: async (req, res) => {
+    const out = await tsi.exportBatch(req.params.batchId);
+    await audit(req, { entity: 'incentive_calculation', entityId: req.params.batchId, action: 'export', after: { fileName: out.fileName } });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${out.fileName}"`);
+    res.send(out.content);
+  },
 });
 
 export default router;

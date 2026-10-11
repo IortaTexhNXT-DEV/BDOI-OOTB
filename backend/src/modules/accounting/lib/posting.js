@@ -95,8 +95,9 @@ export const EVENTS = {
   'insurer.refund_applied': { label: 'Insurer refund netted against a remittance', module: 'remittance',
     amounts: ['amount', 'due_to_insurer', 'vat', 'dst', 'lgt'], vars: ['insurer', 'voucherNumber', 'policyNumber'],
     sample: { amounts: { amount: 970, due_to_insurer: 970, vat: 0, dst: 0, lgt: 0 }, vars: { insurer: 'Sample Insurer', voucherNumber: 'PV-SAMPLE', policyNumber: 'POL-SAMPLE' } } },
-  'incentive.accrual': { label: 'Incentives approved', module: 'incentive', amounts: ['amount'], vars: ['batchId', 'period'],
-    sample: { amounts: { amount: 15000 }, vars: { batchId: 'INC-SAMPLE', period: '2026-09' } } },
+  // gross to the expense, the withholding tax of a telesales batch to WHT payable, the total (amount) to incentives payable
+  'incentive.accrual': { label: 'Incentives approved', module: 'incentive', amounts: ['amount', 'gross', 'tax'], vars: ['batchId', 'period'],
+    sample: { amounts: { amount: 14250, gross: 15000, tax: 750 }, vars: { batchId: 'INC-SAMPLE', period: '2026-09' } } },
   'incentive.payout': { label: 'Incentives paid', module: 'incentive', amounts: ['amount'], vars: ['batchId', 'period', 'memoRef'],
     sample: { amounts: { amount: 15000 }, vars: { batchId: 'INC-SAMPLE', period: '2026-09', memoRef: 'Incentive payout' } } },
   // BIR sales invoices (EOPT Act) and overriding commission from insurers (modules/bir, modules/insurer-overrides)
