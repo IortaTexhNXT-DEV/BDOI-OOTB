@@ -99,7 +99,7 @@ async function emailOtpChallenge(req, user, deviceId) {
   const minutes = Math.max(1, Number(await getSetting('security.email_otp_minutes', 10)) || 10);
   const vars = { code, minutes, companyName: await companyName() };
   const subject = renderTemplate(await getSetting('security.email_otp_subject', '{{companyName}}: your sign-in code'), vars, { html: false });
-  const html = renderTemplate(await getSetting('security.email_otp_body', '<p>Your sign-in code is <strong>{{code}}</strong>. It is valid for {{minutes}} minutes.</p>'), vars);
+  const html = renderTemplate(await getSetting('security.email_otp_body', '<p>Your sign-in code is <strong>{{code}}</strong>. It is valid for {{minutes}} minutes.</p><p>If you did not try to sign in, tell your administrator.</p>'), vars);
   await withTransaction(async (c) => {
     await c.query('UPDATE users SET email_otp_hash = $2, email_otp_expires_at = now() + ($3 || \' minutes\')::interval, email_otp_attempts = 0, failed_logins = 0 WHERE id = $1',
       [user.id, hashCode(code, user.id), String(minutes)]);

@@ -165,7 +165,7 @@ const ENFORCED = [
     managedBy: CONFIG,
     async evaluate() {
       const tz = String(await getSetting('general.timezone', 'Asia/Manila'));
-      const fmt = String(await getSetting('general.date_format', 'dd/MM/yyyy'));
+      const fmt = String(await getSetting('general.date_format', 'DD/MM/YYYY'));
       return { current: `${tz} (${validTimeZone(tz) ? 'valid' : 'unknown'}), dates ${fmt}`, target: 'Asia/Manila, dd/mm/yyyy', status: validTimeZone(tz) && tz === 'Asia/Manila' ? 'met' : 'review' };
     },
   },

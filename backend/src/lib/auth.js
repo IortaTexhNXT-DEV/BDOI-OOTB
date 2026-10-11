@@ -84,10 +84,12 @@ export async function authenticate(req) {
   }
   if (p.type !== 'access') throw unauthorized('Invalid or expired token');
   const row = await one(`SELECT u.status, u.token_version,
-      (SELECT max(t.last_seen_at) FROM refresh_tokens t WHERE t.family_id = $2 AND t.revoked_at IS NULL) AS last_seen
+      (SELECT max(t.last_seen_at) FROM refresh_tokens t WHERE t.family_id = $2 AND t.revoked_at IS NULL) AS last_seen,
+      EXISTS (SELECT 1 FROM refresh_tokens t WHERE t.family_id = $2) AS has_family
     FROM users u WHERE u.id = $1`, [p.sub, p.sid || null]);
   if (!row || row.status !== 'active' || Number(row.token_version) !== Number(p.tv || 0)) throw unauthorized('Session ended; sign in again');
-  if (p.sid) await touchSession(p.sid, row.last_seen);
+  // a sign-in whose tokens are no longer stored (cleared by the transaction reset) keeps the token's own expiry
+  if (p.sid && row.has_family) await touchSession(p.sid, row.last_seen);
   const restrict = p.restrict || (p.enrol2fa ? 'enrol2fa' : null);
   const user = {
     id: p.sub, username: p.username, roles: p.roles || [], permissions: p.permissions || [],
@@ -100,7 +102,7 @@ export async function authenticate(req) {
 /**
  * The idle timeout of a sign-in, enforced by the API: a sign-in whose last request is older than limits.session_idle_minutes
  * is ended (its refresh tokens revoked), else its last request is recorded (at most every SEEN_EVERY_SECONDS).
- * A sign-in without a live refresh token (signed out, superseded) is ended as well.
+ * A sign-in whose refresh tokens are all revoked (signed out, superseded) is ended as well.
  */
 async function touchSession(sid, lastSeen) {
   if (!lastSeen) throw unauthorized('Session ended; sign in again');

@@ -11,3 +11,8 @@ ON CONFLICT (key) DO NOTHING;
 INSERT INTO role_permissions(role_id, permission_id)
 SELECT r.id, p.id FROM roles r JOIN permissions p ON p.code IN ('read:data-load', 'write:data-load') WHERE r.code = 'tis-it-admin'
   AND NOT EXISTS (SELECT 1 FROM role_permissions x WHERE x.role_id = r.id AND x.permission_id = p.id);
+
+-- how long dated evidence of an operational control stays current on Security Controls (migration 0591)
+INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
+ ('controls.evidence_valid_days', '365', 'security', 'Days the dated evidence of an operational control stays current on Security Controls; older evidence shows the control as No evidence', 'number', true)
+ON CONFLICT (key) DO NOTHING;
