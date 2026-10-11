@@ -13,6 +13,7 @@ import { addDays, today } from '../src/lib/dates.js';
 import { achievement } from '../src/modules/incentive/service.js';
 import { ensureCalendar } from '../src/modules/period-end/fiscal.js';
 import { businessRows, startMigrationSuite, uploadAs, workbook } from './migration.fixtures.js';
+import { enableFeatures, withReferenceCommissionControls } from './helpers.js';
 
 let s;
 let day;
@@ -34,6 +35,9 @@ const overview = (origin) => s.api('get', `/dashboard/sales/overview?from=${from
 
 beforeAll(async () => {
   s = await startMigrationSuite({ approval: false });
+  // the sales dashboard is a Phase 2 feature; the commission figures assume the reference commission controls
+  await enableFeatures(s.app, ['sales-dashboard']);
+  await withReferenceCommissionControls();
   day = await today();
   from = addDays(day, -400);
   await ensureCalendar(pool, day);
@@ -47,7 +51,7 @@ beforeAll(async () => {
   migrated = await one('SELECT * FROM policies WHERE policy_number = \'MJ1-P\'');
   // a policy issued in BrokerVerse today, with its own premium, expiring next year
   await query(`INSERT INTO policies SELECT (jsonb_populate_record(NULL::policies, to_jsonb(p) || jsonb_build_object('id', 'pol_kpi_issued', 'policy_number', 'KPI-ISS-1',
-      'origin', 'issued', 'legacy_system', NULL, 'legacy_number', NULL, 'migrated_at', NULL, 'migrated_by', NULL, 'load_batch_id', NULL, 'doc', p.doc - 'source',
+      'payment_reference', NULL, 'origin', 'issued', 'legacy_system', NULL, 'legacy_number', NULL, 'migrated_at', NULL, 'migrated_by', NULL, 'load_batch_id', NULL, 'doc', p.doc - 'source',
       'issued_date', $1::date, 'inception_date', $1::date, 'expiry_date', $1::date + 365, 'premium_total', 40000, 'renewed_from', NULL))).*
     FROM policies p WHERE p.policy_number = 'MJ1-P'`, [day]);
   issued = await one('SELECT * FROM policies WHERE id = \'pol_kpi_issued\'');

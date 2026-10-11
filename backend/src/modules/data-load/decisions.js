@@ -30,6 +30,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { getSetting } from '../../lib/settings.js';
 import { ADMIN_ROLES, hasPermission, loadUser } from '../../lib/auth.js';
+import { PLATFORM_ROLE } from '../../lib/platform.js';
 import { notify } from '../notifications/service.js';
 import { notifyDecision } from '../notifications/approvals.js';
 import { MIGRATED_NUMBER_TARGETS, cocCollisions, collidingNumbers } from './numbering.js';
@@ -105,7 +106,9 @@ export const AUTO_CHECKS = {
     return result(c.verdict === 'mirrored', c.verdict === 'mirrored' ? `Comparison ${c.id} mirrored` : `Comparison ${c.id} found differences`, [{ comparisonId: Number(c.id), verdict: c.verdict }]);
   },
   async 'users-ready'() {
-    const demo = await many(`SELECT username FROM users WHERE status = 'active' AND created_by = 'seed' AND username <> $1 ORDER BY username`, [FIRST_ADMIN]);
+    // the platform administrators of iorta TechNXT are created from the environment's configuration, not sample data
+    const demo = await many(`SELECT username FROM users u WHERE status = 'active' AND created_by = 'seed' AND username <> $1
+      AND NOT EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.code = $2) ORDER BY username`, [FIRST_ADMIN, PLATFORM_ROLE]);
     const superid = await many(`SELECT DISTINCT u.username FROM users u JOIN user_roles ur ON ur.user_id = u.id JOIN roles r ON r.id = ur.role_id
       WHERE u.status = 'active' AND r.code = 'tis-superid' ORDER BY u.username`);
     const password = (await getSetting('security.password_sign_in_enabled', true)) !== false;

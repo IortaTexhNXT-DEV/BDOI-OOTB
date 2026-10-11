@@ -9,13 +9,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
+import { withReferenceCommissionControls } from './helpers.js';
 import { issuePolicy } from '../src/modules/policies/service.js';
 import { bookDirectBill } from '../src/modules/remittance/directbill.js';
 import { eligiblePolicies } from '../src/modules/remittance/service.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+beforeAll(async () => { ctx = await setupFinance(); await withReferenceCommissionControls(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;

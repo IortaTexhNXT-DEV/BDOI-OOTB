@@ -40,6 +40,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | Create and edit |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -97,6 +98,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | Create and edit | Calculate, submit and pay incentives |  |
 | Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -120,7 +122,7 @@ Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
-| Incentives | Approve or reject an incentive calculation batch submitted by another user | TIS Sales Unit Head |
+| Incentives | Approve or reject an incentive calculation batch submitted by another user | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |

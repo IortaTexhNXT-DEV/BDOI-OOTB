@@ -290,6 +290,15 @@
      ]
     },
     {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -555,6 +564,12 @@
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -963,6 +978,15 @@
      ]
     },
     {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -1264,6 +1288,12 @@
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -1739,6 +1769,15 @@
      ]
     },
     {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -2072,6 +2111,12 @@
      "meaning": "See commission, referrer accounts and insurer overrides"
     },
     {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
+    },
+    {
      "area": "Reports",
      "module": "Reports",
      "level": "View",
@@ -2147,7 +2192,9 @@
      "work": "Incentives",
      "approval": "Approve or reject an incentive calculation batch submitted by another user",
      "approvers": [
-      "TIS Sales Unit Head"
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "maker-checker"
     },
@@ -2521,6 +2568,24 @@
      ]
     },
     {
+     "section": "Commission",
+     "screen": "Commission Dashboard",
+     "path": "/commission/dashboard",
+     "access": "View",
+     "modules": [
+      "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -2792,6 +2857,12 @@
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -3274,6 +3345,24 @@
      ]
     },
     {
+     "section": "Commission",
+     "screen": "Commission Dashboard",
+     "path": "/commission/dashboard",
+     "access": "View",
+     "modules": [
+      "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -3557,6 +3646,18 @@
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "View",
+     "meaning": "See the commission rules register and test which rule applies"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -4066,6 +4167,69 @@
      ]
     },
     {
+     "section": "Accounts > Incentive",
+     "screen": "My Programs",
+     "path": "/incentive/my-programs",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Calculations",
+     "path": "/incentive/calculations",
+     "access": "Approve",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Approvals",
+     "path": "/incentive/approvals",
+     "access": "Approve",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Statement",
+     "path": "/incentive/statement",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Reports",
+     "path": "/incentive/reports",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Commission Dashboard",
+     "path": "/commission/dashboard",
+     "access": "Approve",
+     "modules": [
+      "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "All Reports",
      "path": "/reports/catalogue",
@@ -4402,10 +4566,34 @@
      "meaning": "See incentive programmes, calculations and statements"
     },
     {
+     "area": "Accounts",
+     "module": "Incentives",
+     "level": "Approve",
+     "meaning": "Approve or reject an incentive calculation batch submitted by another user"
+    },
+    {
      "area": "Commission",
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission",
+     "level": "Approve",
+     "meaning": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "View",
+     "meaning": "See the commission rules register and test which rule applies"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -4474,7 +4662,15 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or reject an incentive calculation batch submitted by another user",
      "kind": "maker-checker"
     },
     {
@@ -6256,7 +6452,7 @@
      "section": "Commission",
      "screen": "Commission Dashboard",
      "path": "/commission/dashboard",
-     "access": "Create and edit",
+     "access": "Approve",
      "modules": [
       "Commission"
      ]
@@ -6265,9 +6461,18 @@
      "section": "Commission",
      "screen": "Agents/Referrer Accounts",
      "path": "/commission/referrer-accounts",
-     "access": "Create and edit",
+     "access": "Approve",
      "modules": [
       "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "Create and edit",
+     "modules": [
+      "Sharing schemes"
      ]
     },
     {
@@ -6766,6 +6971,42 @@
      "meaning": "Process commission and insurer overrides"
     },
     {
+     "area": "Commission",
+     "module": "Commission",
+     "level": "Create and edit",
+     "meaning": "Change the share of a commission line within the limits of its sharing scheme"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission",
+     "level": "Approve",
+     "meaning": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "View",
+     "meaning": "See the commission rules register and test which rule applies"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "Create and edit",
+     "meaning": "Add, amend, upload, submit and end commission rules"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "Create and edit",
+     "meaning": "Add, amend and assign sharing schemes; set overrides on referrers and channels"
+    },
+    {
      "area": "Reports",
      "module": "Reports",
      "level": "View",
@@ -6856,6 +7097,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve premium warranty extensions and client credit limits (not the requester)",
      "kind": "maker-checker"
     },
@@ -6926,6 +7171,24 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Commission",
+     "approval": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user",
+     "approvers": [
+      "TIS Operations Unit Head",
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Commission rules register",
+     "approval": "Approve or return a commission rule submitted by another user",
+     "approvers": [
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Data migration and go-live",
      "approval": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
      "approvers": [
@@ -6984,6 +7247,14 @@
      "approval": "Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Sharing schemes",
+     "approval": "Approve or return sharing schemes and assignments; suspend, resume and end schemes",
+     "approvers": [
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -7385,6 +7656,15 @@
      "access": "View",
      "modules": [
       "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
      ]
     },
     {
@@ -7830,9 +8110,9 @@
      "section": "Master > Finance",
      "screen": "Commission Rate Matrix",
      "path": "/master/finance/commission-rate-matrix",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
-      "Reference masters"
+      "Commission rules register"
      ]
     },
     {
@@ -8148,6 +8428,18 @@
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "View",
+     "meaning": "See the commission rules register and test which rule applies"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
     },
     {
      "area": "Reports",
@@ -8986,7 +9278,7 @@
      "section": "Accounts > Incentive",
      "screen": "Calculations",
      "path": "/incentive/calculations",
-     "access": "View",
+     "access": "Approve",
      "modules": [
       "Incentives"
      ]
@@ -8995,7 +9287,7 @@
      "section": "Accounts > Incentive",
      "screen": "Approvals",
      "path": "/incentive/approvals",
-     "access": "View",
+     "access": "Approve",
      "modules": [
       "Incentives"
      ]
@@ -9022,7 +9314,7 @@
      "section": "Commission",
      "screen": "Commission Dashboard",
      "path": "/commission/dashboard",
-     "access": "View",
+     "access": "Approve",
      "modules": [
       "Commission"
      ]
@@ -9031,9 +9323,18 @@
      "section": "Commission",
      "screen": "Agents/Referrer Accounts",
      "path": "/commission/referrer-accounts",
-     "access": "View",
+     "access": "Approve",
      "modules": [
       "Commission"
+     ]
+    },
+    {
+     "section": "Commission",
+     "screen": "Sharing Schemes",
+     "path": "/commission/sharing-schemes",
+     "access": "View",
+     "modules": [
+      "Sharing schemes"
      ]
     },
     {
@@ -9257,6 +9558,24 @@
      "access": "View",
      "modules": [
       "Access control"
+     ]
+    },
+    {
+     "section": "Master > Finance",
+     "screen": "Configuration Approvals",
+     "path": "/master/finance/configuration-approvals",
+     "access": "View",
+     "modules": [
+      "Posting rules and account determination"
+     ]
+    },
+    {
+     "section": "Master > Finance",
+     "screen": "Commission Rate Matrix",
+     "path": "/master/finance/commission-rate-matrix",
+     "access": "View",
+     "modules": [
+      "Commission rules register"
      ]
     },
     {
@@ -9571,10 +9890,46 @@
      "meaning": "See incentive programmes, calculations and statements"
     },
     {
+     "area": "Accounts",
+     "module": "Incentives",
+     "level": "Approve",
+     "meaning": "Approve or reject an incentive calculation batch submitted by another user"
+    },
+    {
      "area": "Commission",
      "module": "Commission",
      "level": "View",
      "meaning": "See commission, referrer accounts and insurer overrides"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission",
+     "level": "Approve",
+     "meaning": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "View",
+     "meaning": "See the commission rules register and test which rule applies"
+    },
+    {
+     "area": "Commission",
+     "module": "Commission rules register",
+     "level": "Approve",
+     "meaning": "Approve or return a commission rule submitted by another user"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "View",
+     "meaning": "See the sharing schemes and the share of a policy"
+    },
+    {
+     "area": "Commission",
+     "module": "Sharing schemes",
+     "level": "Approve",
+     "meaning": "Approve or return sharing schemes and assignments; suspend, resume and end schemes"
     },
     {
      "area": "Reports",
@@ -9667,7 +10022,19 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return a commission rule submitted by another user",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or reject an incentive calculation batch submitted by another user",
      "kind": "maker-checker"
     },
     {
@@ -9692,6 +10059,10 @@
     },
     {
      "what": "Approve or return renewal terms of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return sharing schemes and assignments; suspend, resume and end schemes",
      "kind": "maker-checker"
     },
     {
@@ -11995,6 +12366,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
@@ -12012,12 +12387,16 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Operations Unit Head",
+     "access": "Approve"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
      "role": "TIS General Manager",
-     "access": "View"
+     "access": "Approve"
     }
    ]
   },
@@ -12029,12 +12408,16 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Operations Unit Head",
+     "access": "Approve"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
      "role": "TIS General Manager",
-     "access": "View"
+     "access": "Approve"
     }
    ]
   },
@@ -12054,6 +12437,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
@@ -12069,6 +12456,10 @@
     {
      "role": "TIS Sales Unit Head",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
     },
     {
      "role": "TIS Finance & General Accounting",
@@ -12096,8 +12487,20 @@
      "access": "View"
     },
     {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Approve"
+    },
+    {
      "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
+     "access": "Approve"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12105,7 +12508,7 @@
     },
     {
      "role": "TIS General Manager",
-     "access": "View"
+     "access": "Approve"
     }
    ]
   },
@@ -12114,7 +12517,48 @@
    "roles": [
     {
      "role": "TIS Finance & General Accounting",
+     "access": "Approve"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Approve"
+    }
+   ]
+  },
+  "/commission/sharing-schemes": {
+   "menu": "Commission > Sharing Schemes",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
     },
     {
      "role": "TIS General Manager",
@@ -13031,6 +13475,10 @@
     {
      "role": "TIS Finance & General Accounting",
      "access": "Approve"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },
@@ -13070,7 +13518,11 @@
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },
@@ -13439,6 +13891,14 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
+  "approve:commission": [
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS General Manager"
+  ],
+  "approve:commission-rules": [
+   "TIS General Manager"
+  ],
   "approve:credit-control": [
    "TIS Finance & General Accounting"
   ],
@@ -13448,7 +13908,9 @@
    "TIS General Manager"
   ],
   "approve:incentive": [
-   "TIS Sales Unit Head"
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
   ],
   "approve:insurer-billing": [
    "TIS Finance & General Accounting",
@@ -13496,6 +13958,9 @@
    "TIS Sales Officer",
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "approve:sharing-schemes": [
    "TIS General Manager"
   ],
   "assign:renewals": [
@@ -13595,6 +14060,13 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager",
    "TIS Audit (read only)"
+  ],
+  "read:commission-rules": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
   ],
   "read:data-load": [
    "TIS Operations Unit Head",
@@ -13892,6 +14364,17 @@
   "read:settings": [
    "TIS IT AppSupport / Admin"
   ],
+  "read:sharing-schemes": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
   "read:users": [
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
@@ -13949,6 +14432,12 @@
    "CCD-Recon (Reconciliation and Reversals)"
   ],
   "write:commission": [
+   "TIS Finance & General Accounting"
+  ],
+  "write:commission-rules": [
+   "TIS Finance & General Accounting"
+  ],
+  "write:commission-share": [
    "TIS Finance & General Accounting"
   ],
   "write:data-load": [
@@ -14082,6 +14571,9 @@
   ],
   "write:settings": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:sharing-schemes": [
+   "TIS Finance & General Accounting"
   ],
   "write:users": [
    "TIS IT AppSupport / Admin"

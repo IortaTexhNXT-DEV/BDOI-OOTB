@@ -1,0 +1,38 @@
+// Commission breakdown panel of a policy: per-peril table, the totals and the shares
+.cb {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .cb__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cb__recompute {
+    margin-left: auto;
+  }
+
+  .cb__muted {
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+
+  .cb__negative {
+    color: var(--red-600);
+  }
+
+  .cb__warnings {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--text-color-secondary);
+    font-size: 0.875rem;
+  }
+
+  .bv-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

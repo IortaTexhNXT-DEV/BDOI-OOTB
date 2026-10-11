@@ -82,6 +82,17 @@ EXC-PROOF. Runs on the fully paid basis group the policies per product line. A p
 is held (`remittance.instalment_hold`, job `remittance-hold-check`) and listed on Accounts > Remittance > Held policies
 until its last instalment is paid; `remittance.catch_up_days` lets a run take a policy paid in full after its window.
 
+A Motor policy booked without per-peril rates on the commission rules register (`commission.peril_based_motor`,
+`commissionBasis.status = 'rates-missing'`, `ratesMissing(p)` in `eligibility.js`) is kept out of the run on either basis and
+raised as a Rates missing exception (type EXC-RATES, seed `96_tisph_commission.sql`, assigned to Operations) until the
+rates are added and the policy recomputed (`POST /commission/policies/:policyId/recompute`).
+
+The approval of a remittance (`onRemittanceApproved`) marks its lines Remitted, stamps `receivables.remitted_at` /
+`remittance_id` and `policies.details.remittance`, and tells the commission module (`onPoliciesRemitted`) so that the
+commission lines of the policies become eligible where `commission.eligible_requires_remittance` is on. The approval of
+a remittance cannot be delegated by its initiator or maker, and the settlement voucher needs a reference number and a
+payment date from a user other than the maker and the approver of the remittance.
+
 Insurer billing run (`billing.js`, migration 0522): on the billing days (`insurer_billing.run_days`, 15 and 26, moved
 to the previous working day by `insurer_billing.non_working_day` and the Holiday master) the job `insurer-billing-run`,
 or Finance with Run billing for a billing date, drafts one billing statement per insurer, product line and basis from

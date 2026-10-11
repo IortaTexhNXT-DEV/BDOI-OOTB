@@ -176,6 +176,21 @@ for (const [role, items] of Object.entries(MIGRATION_PERMS)) ROLE_PERMS[role].pu
 // ledgers and the reports (migration 0445); personal data masked (no view:pii)
 ROLE_PERMS['tis-auditor'] = ['profile', 'notifications', 'data-load:read', 'audit:read', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read',
   'remittance:read', 'commission:read', 'incentive:read', ...TIS_ACCOUNTING_READS, 'period-end:read', 'bank-reconciliation:read'];
+// Commission rules register and sharing schemes (migration 0570, FRS PROD-16): Accounting keeps them, the Accounting
+// Manager approves; for TISPH Finance keeps them, the General Manager approves, the front office reads. Rate changes,
+// reversals and withholding tax changes on commission lines are approved by a second user (migration 0571, COMM-02).
+ROLE_PERMS.accounting.push('commission-rules', 'sharing-schemes', 'commission-share:write');
+ROLE_PERMS['accounting-manager'].push('commission-rules:approve', 'sharing-schemes:approve', 'commission:approve');
+ROLE_PERMS.processing.push('commission-rules:read', 'sharing-schemes:read');
+for (const role of ['sales', 'operations']) ROLE_PERMS[role].push('sharing-schemes:read');
+ROLE_PERMS['tis-finance'].push('commission-rules', 'sharing-schemes', 'commission-share:write', 'commission:approve');
+ROLE_PERMS['tis-general-manager'].push('commission-rules:read', 'commission-rules:approve', 'sharing-schemes:read', 'sharing-schemes:approve', 'commission:approve');
+ROLE_PERMS['tis-it-admin'].push('commission-rules:read', 'sharing-schemes:read');
+for (const role of ['tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('commission-rules:read');
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('sharing-schemes:read');
+ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
+// Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
+for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

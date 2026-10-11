@@ -1,11 +1,22 @@
 /**
- * Commission (comsub) lines per referrer: Accrued -> Eligible (premium collected) -> Approved (maker-checker, accrual
- * journal Dr Commission Expense / Cr Commission Payable) -> Paid (Dr Commission Payable / Cr Cash / Cr WHT Payable).
- * Reversal after payment is a clawback (Dr Receivable from Agents / Cr Commission Expense).
+ * Commission (comsub) lines per referrer: Accrued -> Eligible (premium collected; for TISPH also remitted to the
+ * insurer, commission.eligible_requires_remittance) -> Approved (maker-checker, accrual journal Dr Commission Expense /
+ * Cr Commission Payable) -> Paid (Dr Commission Payable / Cr Cash / Cr WHT Payable). Reversal after payment is a
+ * clawback (Dr Receivable from Agents / Cr Commission Expense).
+ *
+ * A line comes from the commission basis of the policy (breakdown.js: the variance share of an external agent, a TFS
+ * team member or a referral, or the split lines of the sharing scheme in force) when the policy carries one, else
+ * from the comsub rate by level of its commission details. A rate change, a reversal or a withholding tax change is a
+ * request approved by a second user holding approve:commission while commission.adjustment_approval_required is on
+ * (TISPH: TIS-BRD-COMM-02 "approval of the Heads and Accounting"); a share is changed inside the limits of its scheme
+ * by a holder of write:commission-share with a reason. The cycle of a line is the month of its inception date and the
+ * current cycle the month of the business date (Asia/Manila), never the UTC month.
  */
 import { getSetting } from '../../lib/settings.js';
 import { scopeSql } from '../../lib/scope.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { isoDate, today } from '../../lib/dates.js';
+import { requiredReason } from '../ops-masters/records.js';
 import { reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, round2, num } from '../accounting/lib/http.js';
@@ -18,11 +29,18 @@ import { MIGRATED, kpiOriginWhere } from '../../lib/origin.js';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cycleLabel = (d) => { const x = new Date(d); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
 const dayLabel = (d) => { if (!d) return null; const x = new Date(d); return `${String(x.getUTCDate()).padStart(2, '0')} ${MONTHS[x.getUTCMonth()]}`; };
-const monthStart = (d = new Date()) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString().slice(0, 10);
+/** The first day of the current cycle: the month of the business date (general.timezone). */
+const currentMonthStart = async () => `${(await today()).slice(0, 7)}-01`;
+const monthOf = (d) => `${(isoDate(d) || '').slice(0, 7)}-01`;
 export const LINE_STATUSES = ['Accrued', 'Eligible', 'Approved', 'Paid'];
+export const REFERRER_TYPES = ['Agent', 'Sub-agent', 'External', 'TFS team member', 'Referral', 'Dealer', 'Affinity partner'];
+export const REQUEST_KINDS = ['rate', 'reversal', 'wht'];
+const REQUEST_CONTEXT = { rate: 'commission_rate_change', reversal: 'commission_reversal', wht: 'commission_wht_change' };
 
-const LINE_SQL = `SELECT c.*, r.name AS referrer_name, r.wht_applicable AS referrer_wht_applicable FROM commissions c
-  LEFT JOIN commission_referrers r ON r.id = c.referrer_id`;
+const LINE_SQL = `SELECT c.*, r.name AS referrer_name, r.wht_applicable AS referrer_wht_applicable,
+  (SELECT to_jsonb(q) FROM (SELECT x.id, x.kind, x.to_value, x.reason_text, (SELECT display_name FROM users u WHERE u.id = x.requested_by) AS requested_by_name
+     FROM commission_line_requests x WHERE x.commission_id = c.id AND x.status = 'pending' ORDER BY x.id DESC LIMIT 1) q) AS pending_request
+  FROM commissions c LEFT JOIN commission_referrers r ON r.id = c.referrer_id`;
 
 /**
  * Withholding tax code of a referrer's commission: the payee's own choice (commission_referrers.wht_code), else the
@@ -84,6 +102,9 @@ export async function lineView(c) {
     lifecycle: { accruedAt: dayLabel(c.accrued_at), eligibleAt: dayLabel(c.eligible_at), approvedAt: dayLabel(c.approved_at), paidAt: dayLabel(c.paid_at) },
     receiptNo: c.receipt_no, voucherNo: c.voucher_no, disbursementId: c.disbursement_id, clawback: c.clawback,
     reversedAt: dayLabel(c.reversed_at),
+    share: c.share_basis ? { basis: c.share_basis, schemeCode: c.scheme_code, value: c.share_value === null ? null : Number(c.share_value), min: c.share_min === null ? null : Number(c.share_min),
+      max: c.share_max === null ? null : Number(c.share_max), note: c.share_note } : null,
+    pendingRequest: c.pending_request ? { id: Number(c.pending_request.id), kind: c.pending_request.kind, toValue: c.pending_request.to_value, reason: c.pending_request.reason_text, requestedBy: c.pending_request.requested_by_name } : null,
   };
 }
 
@@ -100,8 +121,8 @@ async function getLine(db, referrerId, lineId, lock = false) {
 const referrerLines = async (db, id) => (await db.query(`${LINE_SQL} WHERE c.referrer_id = $1 ORDER BY c.cycle_date NULLS LAST, c.created_at`, [id])).rows;
 
 /** Bucket lines for the referrer account screen. */
-function bucket(lines) {
-  const current = monthStart();
+async function bucket(lines) {
+  const current = await currentMonthStart();
   const past = lines.filter((l) => ['Paid', 'Reversed'].includes(l.status));
   const future = lines.filter((l) => l.status === 'Accrued' && l.cycle_date && String(l.cycle_date) > current);
   const cur = lines.filter((l) => !past.includes(l) && !future.includes(l));
@@ -111,7 +132,7 @@ const sumNet = (ls) => round2(ls.reduce((s, l) => s + Number(l.net_amount), 0));
 
 export async function referrerSummaryRow(db, ref) {
   const lines = await referrerLines(db, ref.id);
-  const { cur } = bucket(lines);
+  const { cur } = await bucket(lines);
   const wht = await whtTaxFor(ref);
   const whtPct = round2(wht.rate * 100);
   const payee = wht.payeeKind === 'corporate' || (wht.payeeKind !== 'individual' && ref.referrer_type === 'External') ? 'Company' : 'Individual';
@@ -119,6 +140,7 @@ export async function referrerSummaryRow(db, ref) {
     id: ref.id, name: ref.name, type: ref.referrer_type, level: ref.level, policies: new Set(lines.filter((l) => l.status !== 'Reversed').map((l) => l.policy_id)).size,
     netPayable: sumNet(cur), whtType: `${payee} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct, whtCode: wht.code,
     bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
+    schemeCode: ref.scheme_code || null, schemeOverride: ref.scheme_override === null || ref.scheme_override === undefined ? null : Number(ref.scheme_override), pendingScheme: ref.pending_scheme || null,
   };
 }
 
@@ -132,21 +154,24 @@ export async function listReferrers(db, scope = null) {
   const rp = [];
   const ownLines = scopeSql(scope, 'commission', 'c', rp);
   const ready = (await db.query(`SELECT COALESCE(sum(net_amount),0) AS n FROM commissions c WHERE status = 'Approved' AND disbursement_id IS NULL AND ${ownLines}`, rp)).rows[0].n;
-  return { summary: { cycleLabel: cycleLabel(monthStart()), dueThisCycle: round2(referrers.reduce((s, r) => s + r.netPayable, 0)), readyToPay: round2(ready) }, referrers };
+  return { summary: { cycleLabel: cycleLabel(await currentMonthStart()), dueThisCycle: round2(referrers.reduce((s, r) => s + r.netPayable, 0)), readyToPay: round2(ready) }, referrers };
 }
 
 /** Full referrer account (detail screen payload; also returned by every account-level action). */
 export async function buildAccount(db, id) {
   const ref = await getReferrer(db, id);
   const lines = await referrerLines(db, id);
-  const { past, future, cur } = bucket(lines);
+  const { past, future, cur } = await bucket(lines);
   const view = async (ls) => Promise.all(ls.map(lineView));
   const row = await referrerSummaryRow(db, ref);
+  const current = await currentMonthStart();
   return {
     referrer: { id: ref.id, name: ref.name, status: ref.status, type: ref.referrer_type, level: ref.level, whtType: row.whtType, whtApplicable: ref.wht_applicable,
-      whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin },
-    summary: { cycleLabel: cycleLabel(monthStart()), dueThisCycle: sumNet(cur), upcoming: sumNet(future), paidToDate: sumNet(past.filter((l) => l.status === 'Paid')) },
-    currentCycle: { label: cycleLabel(monthStart()), totalNet: sumNet(cur), lines: await view(cur) },
+      whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin,
+      schemeCode: ref.scheme_code, schemeOverride: ref.scheme_override === null ? null : Number(ref.scheme_override), pendingScheme: ref.pending_scheme || null, parentReferrerId: ref.parent_referrer_id },
+    controls: { adjustmentApproval: await adjustmentApprovalRequired(), eligibleRequiresRemittance: await eligibleRequiresRemittance() },
+    summary: { cycleLabel: cycleLabel(current), dueThisCycle: sumNet(cur), upcoming: sumNet(future), paidToDate: sumNet(past.filter((l) => l.status === 'Paid')) },
+    currentCycle: { label: cycleLabel(current), totalNet: sumNet(cur), lines: await view(cur) },
     futureCycles: { totalNet: sumNet(future), lines: await view(future) },
     past: { totalNet: sumNet(past.filter((l) => l.status === 'Paid')), lines: await view(past) },
     actions: {
@@ -173,6 +198,11 @@ export async function isPremiumCollected(db, policyId) {
   return r.total > 0 && r.open === 0;
 }
 
+/** Rate changes, reversals and withholding tax changes wait for a second user (commission.adjustment_approval_required). */
+export const adjustmentApprovalRequired = async () => (await getSetting('commission.adjustment_approval_required')) === true;
+/** A line is eligible only once its policy is fully paid and on an approved remittance (commission.eligible_requires_remittance; FRS FR-RMT-030). */
+export const eligibleRequiresRemittance = async () => (await getSetting('commission.eligible_requires_remittance')) === true;
+
 async function recompute(db, line, patch = {}) {
   const ref = await getReferrer(db, line.referrer_id);
   const whtPct = patch.whtPct ?? Number(line.wht_pct);
@@ -191,6 +221,10 @@ export async function accrueForPolicy(db, policyId, details) {
     LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1 OR p.policy_number = $1`, [policyId])).rows[0];
   if (!p) throw notFound('Policy not found');
   const d = details || p.details?.commissionDetails;
+  // a policy booked on the commission rules register carries its shares (breakdown.js): the variance share of its
+  // referrer or the split lines of its sharing scheme
+  const basis = p.details?.commissionBasis;
+  if (basis?.shares?.length && basis.status === 'ok') return accrueShares(db, p, basis);
   if (!d) return [];
   const byLevel = (await getSetting('commission.comsub_rate_by_level', { L1: 0.08, L2: 0.05 })) || {};
   const brokeragePct = num(d.brokeragePct) || round2(Number(await getSetting('commission.default_rate', 0.15)) * 100);
@@ -211,11 +245,61 @@ export async function accrueForPolicy(db, policyId, details) {
       VALUES ($1,$2,$3,$4,$5,$6,$7,to_char($7::date,'YYYY-MM'),$8,$9,$10,$11,$12,$13,$14,$15,$10,$16,$17,$18,$19,'Accrued',now(),$20)
       ON CONFLICT (policy_id, referrer_id, chain_position) WHERE policy_id IS NOT NULL AND referrer_id IS NOT NULL DO NOTHING RETURNING id`,
     [p.id, ref.user_id, ref.id, p.policy_number, d.productLabel?.split('·')[0]?.trim() || p.product_name || p.line, p.insurer_short || p.insurer_name,
-      monthStart(new Date(p.inception_date || Date.now())), Number(p.premium_total), discount, netPremium, brokeragePct, c.brokerageAmount,
+      monthOf(p.inception_date || new Date()), Number(p.premium_total), discount, netPremium, brokeragePct, c.brokerageAmount,
       num(e.comsubFixed), comsubPct, whtPct, round2(comsubPct / 100), c.comsub, c.wht, c.net, pos])).rows[0];
     if (r) created.push(r.id);
   }
   return created;
+}
+
+/**
+ * Accrue the shares of a policy's commission basis as lines of their payees (one per share with a referrer): the
+ * amount is the share itself (a fixed comsub), with the scheme, basis, value and limits it came from.
+ */
+async function accrueShares(db, p, basis) {
+  const created = [];
+  const netPremium = num(basis.netPremium) || Number(p.premium_total);
+  const brokeragePct = netPremium ? round2((num(basis.grossCommission) / netPremium) * 100) : 0;
+  for (const [pos, sh] of basis.shares.entries()) {
+    if (!sh.referrerId) continue;
+    const ref = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [sh.referrerId])).rows[0];
+    if (!ref) throw badRequest(`Unknown referrer ${sh.referrerId}`);
+    const whtPct = await whtPctFor(ref);
+    const c = computeLine({ netPremium, comsubFixed: num(sh.amount), comsubPct: 0, whtPct, whtApplicable: ref.wht_applicable, brokeragePct });
+    const r = (await db.query(`INSERT INTO commissions(policy_id, agent_user_id, referrer_id, policy_number, product_label, insurer_label, cycle_date, period,
+        gross_premium, discount_amount, net_premium, brokerage_pct, brokerage_amount, comsub_fixed, comsub_pct, wht_pct,
+        basis_amount, rate, amount, withholding, net_amount, status, accrued_at, chain_position, scheme_code, share_basis, share_value, share_min, share_max, share_note)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,to_char($7::date,'YYYY-MM'),$8,0,$9,$10,$11,$12,0,$13,$9,0,$14,$15,$16,'Accrued',now(),$17,$18,$19,$20,$21,$22,$23)
+      ON CONFLICT (policy_id, referrer_id, chain_position) WHERE policy_id IS NOT NULL AND referrer_id IS NOT NULL DO NOTHING RETURNING id`,
+    [p.id, ref.user_id, ref.id, p.policy_number, p.product_name || p.line, p.insurer_short || p.insurer_name, monthOf(p.inception_date || new Date()), Number(p.premium_total), netPremium,
+      brokeragePct, num(basis.grossCommission), num(sh.amount), whtPct, c.comsub, c.wht, c.net, pos, basis.scheme?.code || null, sh.basis, sh.value ?? null, sh.min ?? null, sh.max ?? null,
+      sh.note || (sh.perilValues ? Object.entries(sh.perilValues).map(([k, v]) => `${k} ${v}`).join(' / ') : null)])).rows[0];
+    if (r) created.push(r.id);
+  }
+  return created;
+}
+
+/** After a recompute: the unapproved share lines of the policy follow the new basis; missing shares are accrued. */
+export async function syncShareLines(db, policyId, basis) {
+  if (!basis?.shares?.length || basis.status !== 'ok') return [];
+  const p = (await db.query(`SELECT p.*, pr.name AS product_name, pr.line, ic.short_name AS insurer_short, ic.name AS insurer_name FROM policies p
+    LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
+  const lines = (await db.query(`${LINE_SQL} WHERE c.policy_id = $1 AND c.referrer_id IS NOT NULL AND c.status IN ('Accrued', 'Eligible') FOR UPDATE OF c`, [policyId])).rows;
+  for (const line of lines) {
+    const sh = basis.shares.find((x) => x.referrerId === line.referrer_id);
+    if (!sh) continue;
+    await recompute(db, line, { comsubFixed: num(sh.amount), comsubPct: 0 });
+    await db.query('UPDATE commissions SET scheme_code = $2, share_basis = $3, share_value = $4, share_min = $5, share_max = $6, updated_at = now() WHERE id = $1',
+      [line.id, basis.scheme?.code || null, sh.basis, sh.value ?? null, sh.min ?? null, sh.max ?? null]);
+  }
+  return accrueShares(db, { ...p, details: { ...(p.details || {}), commissionBasis: basis } }, basis);
+}
+
+/** Whether the policy is on an approved remittance to its insurer (kind direct-bill, approved or later). */
+export async function isPolicyRemitted(db, policyId) {
+  const r = (await db.query(`SELECT 1 FROM remittance_lines rl JOIN remittances r ON r.id = rl.remittance_id
+    WHERE rl.policy_id = $1 AND r.kind = 'direct-bill' AND r.status NOT IN ('draft', 'for-approval', 'rejected', 'cancelled') LIMIT 1`, [policyId])).rowCount;
+  return r > 0;
 }
 
 /**
@@ -229,6 +313,7 @@ export async function onPolicyPremiumCollected(db, policyId, receiptNo) {
   const existing = (await db.query('SELECT count(*)::int AS n FROM commissions WHERE policy_id = $1 AND referrer_id IS NOT NULL', [policyId])).rows[0].n;
   if (!existing) await accrueForPolicy(db, policyId, null);
   if (receiptNo) await db.query('UPDATE commissions SET receipt_no = COALESCE(receipt_no, $2) WHERE policy_id = $1', [policyId, receiptNo]);
+  if ((await eligibleRequiresRemittance()) && !(await isPolicyRemitted(db, policyId))) return;
   if (await getSetting('commission.auto_eligible_on_full_payment', true)) {
     const moved = await db.query('UPDATE commissions SET status = \'Eligible\', eligible_at = now(), eligible_by = NULL, updated_at = now() WHERE policy_id = $1 AND status = \'Accrued\' RETURNING referrer_id, policy_number', [policyId]);
     // inside the receipt's transaction: a notification that cannot be created is only logged
@@ -267,10 +352,38 @@ export async function tellPayoutApproved(db, referrerId, makers, user) {
   }
 }
 
+/**
+ * Hook from a remittance approval: the lines of the remitted policies that are fully paid become Eligible (FRS
+ * FR-RMT-030). Returns the referrers whose lines moved.
+ */
+export async function onPoliciesRemitted(db, policyIds) {
+  const moved = new Set();
+  for (const policyId of policyIds) {
+    if (!(await isPremiumCollected(db, policyId))) continue;
+    const r = await db.query("UPDATE commissions SET status = 'Eligible', eligible_at = now(), eligible_by = NULL, updated_at = now() WHERE policy_id = $1 AND status = 'Accrued' AND referrer_id IS NOT NULL RETURNING referrer_id", [policyId]);
+    for (const x of r.rows) moved.add(x.referrer_id);
+  }
+  for (const referrerId of moved) await askPayoutApproval(db, referrerId, { by: 'system', why: 'Premium remitted to the insurer' }).catch(() => {});
+  return [...moved];
+}
+
+/**
+ * Hook from a receipt reversal: when the premium of the policy is no longer fully collected, its Eligible lines go
+ * back to Accrued (nothing was posted for them); approved or paid lines are left to the clawback of a cancellation.
+ */
+export async function revertEligibility(db, policyId) {
+  if (await isPremiumCollected(db, policyId)) return 0;
+  const r = await db.query("UPDATE commissions SET status = 'Accrued', eligible_at = NULL, eligible_by = NULL, updated_at = now() WHERE policy_id = $1 AND status = 'Eligible' RETURNING id", [policyId]);
+  return r.rowCount;
+}
+
 async function markEligible(db, line, user) {
   if (line.status !== 'Accrued') throw conflict(`Line is ${line.status}; only Accrued lines can be marked eligible`);
   if ((await getSetting('commission.require_full_payment', true)) && line.policy_id && !(await isPremiumCollected(db, line.policy_id))) {
     throw conflict(`Premium for ${line.policy_number} is not fully collected yet`);
+  }
+  if ((await eligibleRequiresRemittance()) && line.policy_id && !(await isPolicyRemitted(db, line.policy_id))) {
+    throw conflict(`No Accrued lines have fully collected and remitted premium yet: ${line.policy_number} is not on an approved remittance`);
   }
   await db.query('UPDATE commissions SET status = \'Eligible\', eligible_at = now(), eligible_by = $2, updated_at = now() WHERE id = $1', [line.id, user.id]);
 }
@@ -341,6 +454,8 @@ async function reverse(db, line, user) {
  * Every adjustment is recorded in commission_adjustments. Returns { ratio, adjustments: [...], skipped: [...] }.
  */
 export async function adjustForReturnPremium(db, { policyId, returnedGross, baseGross = null, endorsementId = null, reference = null, user = null }) {
+  // TIS-BRD-CANC-03 proposal: the commission follows the premium unless TISPH switches the reversal off
+  if ((await getSetting('commission.reverse_on_cancellation', true)) === false) return { ratio: 0, adjustments: [], skipped: [{ reason: 'Commission reversal on cancellation is switched off' }] };
   const p = (await db.query('SELECT id, policy_number, premium_total FROM policies WHERE id = $1', [policyId])).rows[0];
   // baseGross: the policy's gross premium before this return (the endorsement updates premium_total first)
   const base = Number(baseGross ?? p?.premium_total) || 0;
@@ -397,9 +512,12 @@ export async function adjustForReturnPremium(db, { policyId, returnedGross, base
   return { ratio: round2(ratio * 10000) / 10000, adjustments, skipped };
 }
 
+const DIRECT_CHANGE_OFF = 'Rate changes, reversals and withholding tax changes are requested on the line and approved by a second user';
+
 /** Line-level action dispatcher; returns { account, line }. */
 export async function lineAction(db, referrerId, lineId, action, user, body = {}) {
   const line = await getLine(db, referrerId, lineId, true);
+  if ((action === 'reverse' || action === 'rate') && (await adjustmentApprovalRequired())) throw conflict(DIRECT_CHANGE_OFF);
   if (action === 'mark-eligible') await markEligible(db, line, user);
   else if (action === 'approve') await approve(db, line, user);
   else if (action === 'reverse') await reverse(db, line, user);
@@ -435,8 +553,9 @@ export async function accountAction(db, referrerId, action, user) {
   return buildAccount(db, referrerId);
 }
 
-export async function setWht(db, referrerId, applicable) {
+export async function setWht(db, referrerId, applicable, { approved = false } = {}) {
   await getReferrer(db, referrerId);
+  if (!approved && (await adjustmentApprovalRequired())) throw conflict(DIRECT_CHANGE_OFF);
   await db.query('UPDATE commission_referrers SET wht_applicable = $2, updated_at = now() WHERE id = $1', [referrerId, !!applicable]);
   const open = (await db.query(`${LINE_SQL} WHERE c.referrer_id = $1 AND c.status IN ('Accrued','Eligible','Approved') AND c.disbursement_id IS NULL`, [referrerId])).rows;
   for (const l of open) await recompute(db, l);
@@ -504,6 +623,115 @@ async function checkWhtCode(db, code) {
     throw badRequest('Validation failed', [{ path: 'whtCode', message: `${code} is not an active withholding tax code (Master > Finance > Taxation)` }]);
   }
   return row.code;
+}
+
+// ---------- requests: rate change, reversal, withholding tax (maker-checker, TIS-BRD-COMM-02 remark) ----------
+
+const requestOut = (r) => ({ id: Number(r.id), kind: r.kind, commissionId: r.commission_id, referrerId: r.referrer_id, referrerName: r.referrer_name, policyNumber: r.policy_number,
+  lineStatus: r.line_status, fromValue: r.from_value, toValue: r.to_value, reasonCode: r.reason_code, reason: r.reason_text, note: r.note, status: r.status,
+  requestedBy: r.requested_by_name || r.requested_by, requestedById: r.requested_by, requestedAt: r.requested_at, decidedBy: r.decided_by_name || r.decided_by, decidedAt: r.decided_at, decisionNote: r.decision_note });
+const REQUEST_SQL = `SELECT x.*, r.name AS referrer_name, c.policy_number, c.status AS line_status,
+  (SELECT display_name FROM users u WHERE u.id = x.requested_by) AS requested_by_name, (SELECT display_name FROM users u WHERE u.id = x.decided_by) AS decided_by_name
+  FROM commission_line_requests x JOIN commissions c ON c.id = x.commission_id LEFT JOIN commission_referrers r ON r.id = x.referrer_id`;
+
+/** Ask for a rate change, a reversal or a withholding tax change on a line; applied at once when no approval is required. */
+export async function requestLineChange(db, referrerId, lineId, b, user) {
+  const line = await getLine(db, referrerId, lineId, true);
+  const kind = REQUEST_KINDS.includes(b.kind) ? b.kind : null;
+  if (!kind) throw badRequest('Validation failed', [{ path: 'kind', message: `kind must be one of ${REQUEST_KINDS.join(', ')}` }]);
+  if (kind === 'rate' && !['Accrued', 'Eligible'].includes(line.status)) throw conflict(`Rate can only be changed before approval (line is ${line.status})`);
+  if (kind === 'reversal' && !['Accrued', 'Eligible', 'Approved', 'Paid'].includes(line.status)) throw conflict(`Line is ${line.status} and cannot be reversed`);
+  const pending = (await db.query("SELECT id FROM commission_line_requests WHERE commission_id = $1 AND status = 'pending'", [line.id])).rows[0];
+  if (pending) throw conflict('This line already has a request waiting for approval');
+  const reason = await requiredReason(db, REQUEST_CONTEXT[kind], { reasonCode: b.reasonCode, note: b.note });
+  const from = kind === 'rate' ? { comsubPct: Number(line.comsub_pct), comsubFixed: Number(line.comsub_fixed) } : kind === 'wht' ? { whtApplicable: line.referrer_wht_applicable } : { status: line.status, amount: Number(line.amount) };
+  const to = kind === 'rate' ? { comsubPct: b.comsubPct === undefined ? Number(line.comsub_pct) : num(b.comsubPct), comsubFixed: b.comsubFixed === undefined ? Number(line.comsub_fixed) : num(b.comsubFixed) }
+    : kind === 'wht' ? { whtApplicable: b.whtApplicable === true } : { status: 'Reversed' };
+  if (kind === 'rate' && (to.comsubPct < 0 || to.comsubPct > 100 || to.comsubFixed < 0)) throw badRequest('Validation failed', [{ path: 'comsubPct', message: 'The rate must be between 0 and 100' }]);
+  if (kind === 'rate' && line.share_basis && line.share_max !== null && to.comsubFixed > 0 && Number(line.share_max) > 0) {
+    const basis = (await db.query("SELECT details->'commissionBasis' AS b FROM policies WHERE id = $1", [line.policy_id])).rows[0]?.b;
+    const max = shareAmount(basis, line, Number(line.share_max));
+    if (max !== null && to.comsubFixed > max + 0.005) throw badRequest(`The share must be between 0 and ${max.toFixed(2)} for scheme ${line.scheme_code || 'of the policy'}`, [{ path: 'comsubFixed', message: `The share must be at most ${max.toFixed(2)}` }]);
+  }
+  const r = (await db.query(`INSERT INTO commission_line_requests(commission_id, referrer_id, kind, from_value, to_value, reason_code, reason_text, note, requested_by)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`, [line.id, referrerId, kind, JSON.stringify(from), JSON.stringify(to), reason.code, reason.text, b.note || null, user.id])).rows[0];
+  if (!(await adjustmentApprovalRequired())) {
+    await applyRequest(db, (await db.query(`${REQUEST_SQL} WHERE x.id = $1`, [r.id])).rows[0], user);
+    await db.query("UPDATE commission_line_requests SET status = 'approved', decided_by = $2, decided_at = now() WHERE id = $1", [r.id, user.id]);
+  } else {
+    await notifyApprovers({ audience: 'approve:commission', document: 'Commission change request', number: line.policy_number, by: user.username,
+      message: `${line.referrer_name}: ${kind === 'rate' ? 'rate change' : kind === 'wht' ? 'withholding tax change' : 'reversal'} on ${line.policy_number} (${reason.text}) awaits approval`,
+      link: accountLink(referrerId), entity: 'commission_line', entityId: line.id }).catch(() => {});
+  }
+  return { request: requestOut((await db.query(`${REQUEST_SQL} WHERE x.id = $1`, [r.id])).rows[0]), account: await buildAccount(db, referrerId), line: await lineView(await getLine(db, referrerId, lineId)) };
+}
+
+async function applyRequest(db, x, user) {
+  const line = await getLine(db, x.referrer_id, x.commission_id, true);
+  const to = x.to_value || {};
+  if (x.kind === 'rate') {
+    if (!['Accrued', 'Eligible'].includes(line.status)) throw conflict(`Rate can only be changed before approval (line is ${line.status})`);
+    await recompute(db, line, { comsubPct: num(to.comsubPct), comsubFixed: num(to.comsubFixed) });
+  } else if (x.kind === 'reversal') await reverse(db, line, user);
+  else if (x.kind === 'wht') await setWht(db, x.referrer_id, to.whtApplicable === true, { approved: true });
+}
+
+/** Approve or reject a request (approve:commission; never the requester); a rejection needs a note. */
+export async function decideLineRequest(db, id, action, b, user) {
+  const x = (await db.query(`${REQUEST_SQL} WHERE x.id = $1 FOR UPDATE OF x`, [Number(id) || 0])).rows[0];
+  if (!x) throw notFound('Commission change request not found');
+  if (x.status !== 'pending') throw conflict(`Request ${x.id} is already ${x.status}`);
+  await assertChecker(user, x.requested_by, 'commission change request', { configurable: false });
+  if (action === 'reject' && !String(b?.note || '').trim()) throw badRequest('Validation failed', [{ path: 'note', message: 'A reason is required to reject' }]);
+  if (action === 'approve') await applyRequest(db, x, user);
+  await db.query('UPDATE commission_line_requests SET status = $2, decided_by = $3, decided_at = now(), decision_note = $4 WHERE id = $1', [x.id, action === 'approve' ? 'approved' : 'rejected', user.id, b?.note || null]);
+  const after = requestOut((await db.query(`${REQUEST_SQL} WHERE x.id = $1`, [x.id])).rows[0]);
+  await notifyDecision({ userId: x.requested_by, decidedBy: user.id, document: 'Commission change request', number: x.policy_number, approved: action === 'approve', by: user.username,
+    reason: action === 'approve' ? null : b?.note || null, link: accountLink(x.referrer_id), entity: 'commission_line', entityId: x.commission_id }).catch(() => {});
+  return { request: after, account: await buildAccount(db, x.referrer_id) };
+}
+
+export async function listLineRequests(db, q = {}) {
+  const status = q.status || 'pending';
+  return (await db.query(`${REQUEST_SQL} WHERE ($1 = 'all' OR x.status = $1) AND ($2::text IS NULL OR x.referrer_id = $2) ORDER BY x.requested_at DESC LIMIT 200`, [status, q.referrerId || null])).rows.map(requestOut);
+}
+
+// ---------- shares inside the limits of the scheme (write:commission-share; FRS FR-CMR-022, 025) ----------
+
+/** The amount of a share line at `value` on the policy's basis (variance points, % of commission / net premium, fixed). */
+function shareAmount(basis, line, value) {
+  if (!basis || !line.share_basis) return null;
+  const perils = String(line.share_note || '').match(/\b(OD|AON|BI|PD|APPA)\b/g) || ['OD', 'AON'];
+  const rows = (basis.perils || []).filter((x) => perils.includes(x.code));
+  let amount = 0;
+  if (line.share_basis === 'variance') amount = rows.reduce((s, x) => s + ((x.sumInsured || 0) * Math.max(0, Math.min(value, (x.issuing || 0) - (x.tisRemitting || 0), (x.issuing || 0) - (x.insurerNet || 0)))) / 100, 0);
+  else if (line.share_basis === 'commission-pct') amount = ((rows.length ? rows.reduce((s, x) => s + (x.commission || 0), 0) : num(basis.grossCommission)) * value) / 100;
+  else if (line.share_basis === 'net-premium-pct') amount = (num(basis.netPremium) * value) / 100;
+  else amount = value;
+  return round2(Math.max(0, amount));
+}
+
+/** Change the share of an unapproved line inside the minimum and maximum of its scheme, with a reason. */
+export async function changeShare(db, referrerId, lineId, b, user) {
+  const line = await getLine(db, referrerId, lineId, true);
+  if (!['Accrued', 'Eligible'].includes(line.status)) throw conflict(`Rate can only be changed before approval (line is ${line.status})`);
+  if (!line.share_basis) throw conflict('This line has no sharing scheme; ask for a rate change instead');
+  const value = num(b.value);
+  const min = Number(line.share_min ?? 0);
+  const max = line.share_max === null ? null : Number(line.share_max);
+  if (value < min || (max !== null && value > max)) throw badRequest(`The share must be between ${min} and ${max ?? 'open'} for scheme ${line.scheme_code || 'of the policy'}`, [{ path: 'value', message: `The share must be between ${min} and ${max ?? 'open'}` }]);
+  const reason = (await getSetting('commission.share_change_reason_required', true)) !== false ? await requiredReason(db, 'commission_share_change', { reasonCode: b.reasonCode, note: b.note }) : null;
+  const basis = (await db.query("SELECT details->'commissionBasis' AS b FROM policies WHERE id = $1", [line.policy_id])).rows[0]?.b;
+  const amount = shareAmount(basis, line, value) ?? num(line.comsub_fixed);
+  await recompute(db, line, { comsubFixed: amount, comsubPct: 0 });
+  await db.query('UPDATE commissions SET share_value = $2, updated_at = now() WHERE id = $1', [line.id, value]);
+  if (basis?.shares) {
+    const shares = basis.shares.map((sh) => (sh.referrerId === line.referrer_id ? { ...sh, value, amount, changedBy: user.id, changedAt: new Date().toISOString(), reason: reason?.text || null } : sh));
+    const sharedTotal = round2(shares.reduce((s, x) => s + num(x.amount), 0));
+    await db.query("UPDATE policies SET details = details || jsonb_build_object('commissionBasis', (details->'commissionBasis') || $2::jsonb) WHERE id = $1",
+      [line.policy_id, JSON.stringify({ shares, sharedTotal, retained: round2(num(basis.grossCommission) - sharedTotal) })]);
+  }
+  return { account: await buildAccount(db, referrerId), line: await lineView(await getLine(db, referrerId, lineId)), reason: reason?.text || null };
 }
 
 export async function upsertReferrer(db, id, b, user) {

@@ -54,8 +54,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Approvals | View |
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | View |
-| Commission | Commission Dashboard | Create and edit |
-| Commission | Agents/Referrer Accounts | Create and edit |
+| Commission | Commission Dashboard | Approve |
+| Commission | Agents/Referrer Accounts | Approve |
+| Commission | Sharing Schemes | Create and edit |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
@@ -130,6 +131,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
 | Commission | Commission | Create and edit | Process commission and insurer overrides |  |
+| Commission | Commission | Create and edit | Change the share of a commission line within the limits of its sharing scheme |  |
+| Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
+| Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
+| Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
 | Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
@@ -150,6 +157,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
+- Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
 - Approve premium warranty extensions and client credit limits (not the requester)
 - Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
@@ -173,6 +181,8 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
+| Commission | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
+| Commission rules register | Approve or return a commission rule submitted by another user | TIS General Manager |
 | Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
@@ -180,6 +190,7 @@ Who approves the work of this role:
 | Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
+| Sharing schemes | Approve or return sharing schemes and assignments; suspend, resume and end schemes | TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |

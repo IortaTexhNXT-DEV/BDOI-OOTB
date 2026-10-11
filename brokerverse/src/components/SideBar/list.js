@@ -751,6 +751,14 @@ export const menuList = [
           "/commission/referrer-accounts/",
         ],
       },
+      // who is paid what of the commission: split lines with limits, assigned to referrers and channels (read:sharing-schemes)
+      {
+        id: 4,
+        name: "Sharing Schemes",
+        path: "/commission/sharing-schemes",
+        includes: ["/commission/sharing-schemes"],
+        permissions: ["read:sharing-schemes"],
+      },
       // overriding, profit and contingent commission from insurers
       {
         id: 3,

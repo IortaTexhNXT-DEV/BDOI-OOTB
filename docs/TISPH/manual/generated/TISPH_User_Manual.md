@@ -416,7 +416,7 @@ approves and who approves your work.
 | Bank reconciliation | TIS Finance & General Accounting |
 | Insurer statement reconciliation | CCD-Recon (Reconciliation and Reversals) |
 | Credit control decisions | TIS Finance & General Accounting |
-| Incentive calculation batch | TIS Sales Unit Head |
+| Incentive calculation batch | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Month-end and year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | TIS Finance & General Accounting |
 | Role access changes and authority limits | TIS IT AppSupport / Admin |
@@ -1028,6 +1028,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Statement | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -1073,6 +1074,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -1264,6 +1266,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Statement | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -1315,6 +1318,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -1501,6 +1505,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | Create and edit |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -1557,6 +1562,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | Create and edit | Calculate, submit and pay incentives |  |
 | Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -1579,7 +1585,7 @@ Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
-| Incentives | Approve or reject an incentive calculation batch submitted by another user | TIS Sales Unit Head |
+| Incentives | Approve or reject an incentive calculation batch submitted by another user | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
@@ -1710,6 +1716,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
+| Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -1754,7 +1762,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
@@ -2003,6 +2012,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
+| Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -2049,7 +2060,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
@@ -2190,6 +2203,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
+| Accounts > Incentive | My Programs | View |
+| Accounts > Incentive | Calculations | Approve |
+| Accounts > Incentive | Approvals | Approve |
+| Accounts > Incentive | Statement | View |
+| Accounts > Incentive | Reports | View |
+| Commission | Commission Dashboard | Approve |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -2244,8 +2264,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
+| Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
@@ -2261,7 +2285,9 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
 - Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
+- Approve or reject an incentive calculation batch submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
@@ -3222,8 +3248,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Incentive | Approvals | View |
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | View |
-| Commission | Commission Dashboard | Create and edit |
-| Commission | Agents/Referrer Accounts | Create and edit |
+| Commission | Commission Dashboard | Approve |
+| Commission | Agents/Referrer Accounts | Approve |
+| Commission | Sharing Schemes | Create and edit |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
@@ -3297,6 +3324,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
 | Commission | Commission | Create and edit | Process commission and insurer overrides |  |
+| Commission | Commission | Create and edit | Change the share of a commission line within the limits of its sharing scheme |  |
+| Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
+| Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
+| Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
 | Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
@@ -3316,6 +3349,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
+- Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
 - Approve premium warranty extensions and client credit limits (not the requester)
 - Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
@@ -3339,6 +3373,8 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
+| Commission | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
+| Commission rules register | Approve or return a commission rule submitted by another user | TIS General Manager |
 | Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
@@ -3346,6 +3382,7 @@ Who approves the work of this role:
 | Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
+| Sharing schemes | Approve or return sharing schemes and assignments; suspend, resume and end schemes | TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
@@ -3593,6 +3630,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -3642,7 +3680,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Segregation of Duties | Approve |
 | Master > Users and Access | Access Reviews | Approve |
 | Master > Finance | Premium Taxes & LGU Rates | Create and edit |
-| Master > Finance | Commission Rate Matrix | Create and edit |
+| Master > Finance | Commission Rate Matrix | View |
 | Master > Finance | Transaction Code | Create and edit |
 | Master > Finance | Currency | Create and edit |
 | Master > Finance | Bank | Create and edit |
@@ -3690,10 +3728,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
@@ -3996,12 +4036,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Period End | Year-End Close | View |
 | Accounts > Period End | Financial Statements | View |
 | Accounts > Incentive | My Programs | View |
-| Accounts > Incentive | Calculations | View |
-| Accounts > Incentive | Approvals | View |
+| Accounts > Incentive | Calculations | Approve |
+| Accounts > Incentive | Approvals | Approve |
 | Accounts > Incentive | Statement | View |
 | Accounts > Incentive | Reports | View |
-| Commission | Commission Dashboard | View |
-| Commission | Agents/Referrer Accounts | View |
+| Commission | Commission Dashboard | Approve |
+| Commission | Agents/Referrer Accounts | Approve |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -4027,6 +4068,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Role Permissions | View |
 | Master > Users and Access | Authority Matrix | View |
 | Master > Users and Access | Segregation of Duties | View |
+| Master > Finance | Configuration Approvals | View |
+| Master > Finance | Commission Rate Matrix | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
 | Master > System | Data Migration & Go-Live | View |
@@ -4082,7 +4125,13 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, Sales Invoices, CAS Books and Documents, Period Management, Month-End Close, Year-End Close and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
+| Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard and Agents/Referrer Accounts |
+| Commission | Commission | Approve | Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user |  |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
+| Commission | Commission rules register | Approve | Approve or return a commission rule submitted by another user |  |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
+| Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -4102,13 +4151,17 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject a rate change, reversal or withholding tax change on a commission line requested by another user
+- Approve or return a commission rule submitted by another user
 - Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
+- Approve or reject an incentive calculation batch submitted by another user
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 - Approve or return renewal terms of another user
+- Approve or return sharing schemes and assignments; suspend, resume and end schemes
 
 Approval limits of this role on the Authority Matrix:
 
@@ -5971,6 +6024,7 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | TIS Sales Associate | View |
 | TIS Sales Officer | View |
 | TIS Sales Unit Head | View |
+| TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
@@ -5979,16 +6033,18 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | Role | Access |
 |---|---|
 | TIS Sales Unit Head | Approve |
+| TIS Operations Unit Head | Approve |
 | TIS Finance & General Accounting | View |
-| TIS General Manager | View |
+| TIS General Manager | Approve |
 
 **Menu:** Accounts > Incentive > Approvals
 
 | Role | Access |
 |---|---|
 | TIS Sales Unit Head | Approve |
+| TIS Operations Unit Head | Approve |
 | TIS Finance & General Accounting | View |
-| TIS General Manager | View |
+| TIS General Manager | Approve |
 
 **Menu:** Accounts > Incentive > Statement
 
@@ -5997,6 +6053,7 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | TIS Sales Associate | View |
 | TIS Sales Officer | View |
 | TIS Sales Unit Head | View |
+| TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
@@ -6005,6 +6062,7 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | Role | Access |
 |---|---|
 | TIS Sales Unit Head | Create and edit |
+| TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
@@ -6014,7 +6072,7 @@ The incentive screens pay the account executives' incentives earned under the pr
 |---|---|
 | **My Programs** | Your progress in each running programme for its current period: **Target**, **Achieved**, **Achievement**, **Estimated payout** and **Status** (**Running**, **Ended**). |
 | **Calculations** | The calculation batches (CALC-YYYY-NNNNN) by period. **New Calculation** runs the calculation of a month for the active programmes; adjust the agent lines and submit the batch for approval. |
-| **Approvals** | The batches submitted for approval. A batch is approved or rejected by TIS Sales Unit Head, a user other than the one who ran or submitted it. |
+| **Approvals** | The batches submitted for approval. A batch is approved or rejected by TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who ran or submitted it. |
 | **Statement** | The earnings of an account executive for a month: the programmes, totals, the trend of the last 13 months and the payments. **Print** and **Export CSV**. |
 | **Reports** | The incentive reports (monthly payout summary, agent payout details, target achievement, top performers, programme effectiveness): **Generate report**. |
 
@@ -6091,16 +6149,19 @@ The list shows every referrer with **TYPE** (Agent, Sub-agent, External), **LEVE
 | TIS Sales Associate | View |
 | TIS Sales Officer | View |
 | TIS Sales Unit Head | View |
-| TIS Finance & General Accounting | Create and edit |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | Approve |
 | TIS IT AppSupport / Admin | View |
-| TIS General Manager | View |
+| TIS General Manager | Approve |
 
 **Menu:** Commission > Agents/Referrer Accounts
 
 | Role | Access |
 |---|---|
-| TIS Finance & General Accounting | Create and edit |
-| TIS General Manager | View |
+| TIS Finance & General Accounting | Approve |
+| TIS General Manager | Approve |
 
 The commission paid by TISPH to an agent, sub-agent or external referrer (for example a dealer) on a policy it brought in is computed when the policy is booked, from the commission details of the quotation. Each commission line goes through four statuses:
 
@@ -6123,9 +6184,35 @@ A commission line reversed after payment (for example on a cancellation that ret
 3. Approve the eligible lines. The approval is made by TIS Finance & General Accounting other than the user who prepared the lines.
 4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
 
-A new referrer is added with its type, level, tax details and bank account; the withholding tax can be switched off for a referrer, which recomputes its unpaid lines.
+A new referrer is added with its type (Agent, Sub-agent, External agent, TFS team member, Referral, Dealer), level, tax details and bank account, and the sharing scheme that pays it. The list shows the **SCHEME** of each payee.
+
+Where the **review of line changes** is on (TISPH), a rate change, a reversal or a withholding tax change on a line is a request with a reason: the line shows **Pending request** until TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager other than the requester approves or rejects it on the **Requests** panel at the top of the list. Where the **remitted** rule is on (TISPH), a line becomes eligible once the premium is fully paid and the policy is on an approved remittance; a receipt reversed before that returns the line to accrued.
+
+A line of a policy on a sharing scheme shows its **Share** (basis, value and the minimum and maximum of the scheme); TIS Finance & General Accounting can change the value within those limits with a reason.
 
 ![Figure 20.4: Commission > Agents/Referrer Accounts](../images/screens-dashboards-and-commission/referrer-accounts.png)
+### Sharing Schemes {#sharing-schemes}
+**Menu:** Commission > Sharing Schemes
+
+| Role | Access |
+|---|---|
+| TIS Sales Associate | View |
+| TIS Sales Officer | View |
+| TIS Sales Unit Head | View |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | Create and edit |
+| TIS IT AppSupport / Admin | View |
+| TIS General Manager | View |
+
+A sharing scheme says how the commission of a policy is shared with the agent, dealer or referrer that brought it in. A scheme has a **Code** (3 to 20 capitals, digits or hyphens), a **Name**, the **Party types** it pays (external agents, TFS team members, referrals, dealers, sub-agents), the **Products** and **Insurers** it covers (all when empty), the **Policy type**, **Effective from** and **Effective to**, and its **Lines**: one line per payee, with the **Basis** (percent of the commission, percent of the net premium, a fixed amount or the variance share in points), the **Value** and the **Minimum** and **Maximum** a user may set on a policy. A scheme is paid once the policy is fully paid (**Pay when fully paid**) and may be combined with the referrer's own share.
+
+**New scheme** adds a draft; **Example** shows the shares of a sample policy. A scheme is submitted and decided on [Configuration Approvals (21.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination) by TIS General Manager other than its maker; it is **Scheduled** until its effective date and **Active** from then. A change to an active scheme is a new version that supersedes it on approval. TIS General Manager can **Suspend**, **Resume** and **End** a scheme with a reason; an ended scheme names its replacement or confirms that its payees are no longer shared with. **Assign** attaches a scheme to a referrer or a distribution channel, with an override within the scheme's limits; the assignment is approved in the same way. The **Assignments** tab lists the payees and channels on the scheme.
+
+The commission of a policy and its shares are shown on the policy record (**Commission** section): per peril the premium, the issuing, insurer net and TIS remitting rates, the commission and the variance share; the gross commission, the shares of the scheme and what TISPH keeps; the remittance and billing statement that carry the policy. A Motor policy booked without rates on the register is marked **Rates missing** and raised as an exception by the remittance run; once the rates are added, **Recompute** (CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting) reads the register again while the policy is on no approved remittance.
+
+![Figure 20.5: Commission > Sharing Schemes](../images/screens-dashboards-and-commission/sharing-schemes.png)
 ## Screen reference: Master {#screens-master}
 The reference masters, users and access, and the system configuration of the Master menu.
 
@@ -6428,6 +6515,7 @@ The list shows **Review**, **Scope**, **Due**, **Progress**, **Removals**, **Sta
 | Role | Access |
 |---|---|
 | TIS Finance & General Accounting | Approve |
+| TIS General Manager | View |
 
 **Menu:** Master > Finance > Accounting Flow
 
@@ -6439,7 +6527,7 @@ These four screens decide how every business event is posted to the general ledg
 
 - **Account Determination** gives each account role its general ledger account, by tab (**Premium**, **Customer**, **Miscellaneous**, **Claims**, **Other**, **Payee & payment mode**, **Commission taxes**, **Write-off reasons**), and shows which events use it. For example the brokerage commission income goes to 3201001 Brokerage Commission Income. VAT, DST and LGT on premium are booked in their own accounts.
 - **Posting Rules** lists the business events (policy issued, endorsement, renewal, cancellation, premium collection, remittance, direct bill commission, claims, commission) with the version of the rule in force. Open a rule to see its lines (debit or credit, account role, amount); a change creates a new version.
-- **Configuration Approvals** lists the changes waiting: what changes, before and after, who requested it and when. **Approve** or **Reject** with a reason.
+- **Configuration Approvals** lists the changes waiting: what changes, before and after, who requested it and when. **Approve** or **Reject** with a reason. Besides the posting changes it carries the commission rules of the [Commission Rate Matrix (21.16)](#commission-rate-matrix) (decided by TIS General Manager) and the sharing schemes and their assignments (decided by TIS General Manager), each by a user other than its maker.
 - **Accounting Flow** is read only: the journal each business event posts with the rules and accounts in force today, grouped (premium billing, collections, remittance to insurers, commission, claims). It shows whether the account mapping is complete. **Export** and **Print** give it for audit.
 
 ### Other finance masters {#finance}
@@ -6476,11 +6564,17 @@ These four screens decide how every business event is posted to the general ledg
 
 | Role | Access |
 |---|---|
-| TIS IT AppSupport / Admin | Create and edit |
+| TIS IT AppSupport / Admin | View |
+| TIS General Manager | View |
 
-The Commission Rate Matrix sets the broker's commission rate that applies to a placement. Each row gives an **Insurer**, **Product**, **Line of business**, **Policy type** (new business or renewal), **Rate (%)**, **Effective from**, **Effective to** and **Applies at**. The rate is chosen in this order: insurer and product, insurer and line of business, insurer, product, line of business; an exact policy type before **Any**; then the insurer's default rate and the system default. With no row, the insurers' default rates apply.
+The Commission Rate Matrix is the register of the commission rules. A rule names the business it covers and the rates that apply: **Insurer**, **Product**, **Line of business**, **Policy type** (new business, renewal or any), **Channel type** (financing bank, dealer, affinity partner, agent, direct or any), **Motor type** (for example PC-SEDAN, PC-OTHER) and, where the rates depend on the value insured, a **Sum insured band**; **Effective from** and **Effective to**. The most specific rule in force on the date applies: insurer, product and motor type first, then insurer and product, insurer and line of business, insurer, product, line of business; an exact policy type and channel type before **Any**; a band before an open rule. With no rule, the insurer's default rate and then the system default apply.
 
-**Add rate** adds a row. **Test rate** finds the rate that would apply to a placement of an insurer, product, line of business, policy type and date.
+A rule has one of two **Rate basis** values:
+
+- **Net premium**: one **Rate (%)** of the net premium, as before.
+- **Issuing / remitting**: the rates per peril of a Motor policy on the **Peril rates** tab. For each peril (Own Damage, Acts of Nature, Bodily Injury, Property Damage, Personal Accident, Roadside Assistance) the rule holds the **Issuing rate** charged to the client, the **Insurer net rate** and the **TIS remitting rate** that TISPH remits to the insurer; the insurer net rate is never above the TIS remitting rate, which is never above the issuing rate. The commission of a policy is the premium at the issuing rate less the premium at the TIS remitting rate per peril; CTPL is remitted in full. The difference between the TIS remitting rate and the insurer net rate is the variance shared with the referrer of the policy where its sharing scheme says so.
+
+**Add rate** adds a draft; **Upload rules** loads several rules from the Excel template (**Template** downloads it); **Test rate** shows the rule and rates that apply to an insurer, product, channel, motor type, sum insured and date. A rule is submitted for approval (status **Pending**) and decided on [Configuration Approvals (21.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination) by TIS General Manager other than its maker; an approved rule is **In force** from its effective date. A change to an approved rule is a new version that replaces it on approval and end-dates the old one; the **History** tab lists the versions. A rule cannot overlap another rule with the same keys. A pending rule can be withdrawn; an approved rule is ended with an end date.
 
 ![Figure 21.6: Master > Finance > Commission Rate Matrix](../images/screens-master/commission-rate-matrix.png)
 ### Accounting masters {#finance-masters-kept-by-accounting}

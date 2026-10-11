@@ -284,6 +284,8 @@ export async function cancelReceipt(db, id, reason, user) {
   await reverseReceiptApplications(db, r, user);
   const { reverseHoldsOfReceipt } = await import('./unapplied.js');
   await reverseHoldsOfReceipt(db, r.id, user);
+  // the commission lines made eligible by this receipt go back to Accrued when the premium is no longer fully paid
+  if (r.policy_id) await (await import('../commission/service.js')).revertEligibility(db, r.policy_id);
   await db.query('UPDATE receipt_lines SET applied_amount = 0, updated_at = now() WHERE receipt_id = $1', [r.id]);
   await db.query(`UPDATE receipts SET receipt_status = 'Cancelled', status = 'cancelled', cancelled_by = $2, cancelled_at = now(), cancel_reason = $3, updated_at = now() WHERE id = $1`, [r.id, user.id, reason || null]);
   return { before, after: await getReceipt(db, r.id) };

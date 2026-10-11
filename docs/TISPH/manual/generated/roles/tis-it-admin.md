@@ -41,6 +41,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
 | Commission | Commission Dashboard | View |
+| Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
 | Reports > Operational Reports | Production | View |
 | Reports > Operational Reports | Claims | View |
@@ -90,7 +91,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Segregation of Duties | Approve |
 | Master > Users and Access | Access Reviews | Approve |
 | Master > Finance | Premium Taxes & LGU Rates | Create and edit |
-| Master > Finance | Commission Rate Matrix | Create and edit |
+| Master > Finance | Commission Rate Matrix | View |
 | Master > Finance | Transaction Code | Create and edit |
 | Master > Finance | Currency | Create and edit |
 | Master > Finance | Bank | Create and edit |
@@ -139,10 +140,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
+| Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |

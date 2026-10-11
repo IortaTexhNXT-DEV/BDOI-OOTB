@@ -109,6 +109,7 @@ export const HELP_ROUTES = [
   ["/accounts/tax/sales-invoices", "sales-invoices-eopt-act"],
   ["/accounts/tax/eis", "e-invoicing-eis", "screens-accounts"],
   ["/accounts/tax/cas", "cas-books-and-documents"],
+  ["/commission/sharing-schemes", "sharing-schemes", "screens-dashboards-and-commission"],
   ["/commission/insurer-overrides", "overriding-profit-and-contingent-commission-from-insurers", "screens-dashboards-and-commission"],
   ["/master/finance/bank", "masters-that-work-the-same-way"],
   ["/master/finance/taxation", "finance-masters-kept-by-accounting"],

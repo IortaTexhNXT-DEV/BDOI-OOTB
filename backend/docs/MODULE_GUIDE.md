@@ -33,8 +33,10 @@ minimal, clearly-correct front-end fix.
   `approve:renewals` (renewal terms) and `approve:claims` (claim decisions), and `approve:remittance` (remittance
   approvals, migration 0400; an approver needs no `write:remittance`), and those of Cash Control: `approve:pdc`
   (post-dated cheque cancellations, migration 0520), `approve:insurer-billing` (insurer billing statements, 0522),
-  `reverse:receipts` and `approve:receipt-reversal` (receipt reversals, 0524), and `approve:data-load` (second-person
-approval of data loads and of the go-live steps, migration 0440). An approval route requires the approval
+  `reverse:receipts` and `approve:receipt-reversal` (receipt reversals, 0524), and those of commission: `approve:commission-rules`
+  and `approve:sharing-schemes` (decisions on Configuration Approvals, 0570), `approve:commission` (line change requests, 0571),
+  `write:commission-share` (the share of a line within the scheme limits), and `approve:data-load` (second-person
+  approval of data loads and of the go-live steps, migration 0440). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Where the screens must
   explain a refused decision before anyone acts, the module answers a decision block with the shared codes
   (`canDecide`, `blockedCode` such as SUBMITTER, ABOVE_LIMIT, NO_AUTHORITY, ALREADY_DECIDED, and the sentence in

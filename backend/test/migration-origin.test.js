@@ -218,7 +218,7 @@ describe('business issued in BrokerVerse on a migrated policy', () => {
 
     // the renewed term is issued in BrokerVerse and points to the legacy term
     await query(`INSERT INTO policies SELECT (jsonb_populate_record(NULL::policies, to_jsonb(p) || jsonb_build_object('id', 'pol_orig_renewed', 'policy_number', 'POL-ORIG-1',
-        'origin', 'issued', 'legacy_system', NULL, 'legacy_number', NULL, 'migrated_at', NULL, 'migrated_by', NULL, 'load_batch_id', NULL, 'doc', p.doc - 'source',
+        'payment_reference', NULL, 'origin', 'issued', 'legacy_system', NULL, 'legacy_number', NULL, 'migrated_at', NULL, 'migrated_by', NULL, 'load_batch_id', NULL, 'doc', p.doc - 'source',
         'renewed_from', p.id))).* FROM policies p WHERE p.id = $1`, [policy.id]);
     const renewed = (await api('get', '/policies/POL-ORIG-1')).body.data;
     expect(renewed).toMatchObject({ origin: { kind: 'issued' }, renewedFrom: policy.id, renewedFromOrigin: 'migrated', renewedFromLegacyNumber: 'PC-MLY-2026-000101' });
