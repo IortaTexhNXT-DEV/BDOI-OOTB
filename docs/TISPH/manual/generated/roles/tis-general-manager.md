@@ -114,6 +114,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Configuration Approvals | View |
 | Master > Finance | Commission Rate Matrix | View |
 | Master > Finance | Discount Caps | View |
+| Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
 | Master > System | Data Migration & Go-Live | View |
@@ -190,7 +191,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Approve | Approve or return discount caps (not the requester) |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
 | Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live |

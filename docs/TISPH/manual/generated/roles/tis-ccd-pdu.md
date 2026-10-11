@@ -5,7 +5,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
-| Operations | Payments | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |

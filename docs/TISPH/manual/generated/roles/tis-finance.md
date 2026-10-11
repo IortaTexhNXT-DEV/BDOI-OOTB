@@ -7,7 +7,22 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
 | Operations > Sales & Marketing | Prospects | View |
+| Operations > Sales & Marketing | Quotations | View |
+| Operations > Sales & Marketing | Requests for Quotation | View |
+| Operations > Sales & Marketing | Placement Slips | View |
+| Operations > Sales & Marketing | Dealer & Bank Programmes | View |
+| Operations > Sales & Marketing | Promotions | View |
+| Operations | Clients | View |
+| Operations | Policy | View |
+| Operations | Claims | View |
+| Operations > Renewals | Renewal Policy | View |
+| Operations > Renewals | Renewal Batch | View |
+| Operations > Renewals | Renewal Queue | View |
+| Operations > Renewals | Negotiations | View |
+| Operations > Renewals | Lapse Management | View |
 | Operations | Payments | View |
+| Operations | Cover Notes | View |
+| Operations | Policy Cancellation | View |
 | Accounts | Receipts | View |
 | Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
@@ -61,6 +76,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
+| Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
@@ -94,6 +110,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
 | Master > System | Data Migration & Go-Live | Create and edit |
+| Product Configurator | Dashboard | View |
+| Product Configurator | Product Templates | View |
 
 ## What you can view, change and approve {#tis-finance-and-general-accounting-access}
 
@@ -102,14 +120,14 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
-| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | No screen of its own |
-| Operations | Clients | View | See clients | No screen of its own |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Payments |
-| Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
-| Operations | Renewals | View | See renewals | No screen of its own |
-| Operations | Claims | View | See claims | No screen of its own |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Operations | Clients | View | See clients | Clients |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
+| Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
 | Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
 | Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
@@ -144,8 +162,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
-| Product Configurator | Products | View | See products and product templates | No screen of its own |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |

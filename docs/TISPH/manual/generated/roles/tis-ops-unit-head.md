@@ -67,6 +67,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | Create and edit |
+| Master > System | Schedules | View |
 | Master > System | Data Migration & Go-Live | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
@@ -127,7 +128,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Create and edit | Propose and replace discount caps |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live |
 | Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |

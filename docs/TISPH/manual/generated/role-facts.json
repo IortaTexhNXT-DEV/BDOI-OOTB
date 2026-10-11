@@ -422,6 +422,15 @@
      ]
     },
     {
+     "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -1211,6 +1220,15 @@
      ]
     },
     {
+     "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -1946,15 +1964,6 @@
      ]
     },
     {
-     "section": "Accounts > Payables",
-     "screen": "Supplier 2307",
-     "path": "/accounts/payables/2307",
-     "access": "View",
-     "modules": [
-      "Payables"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Disbursement",
      "path": "/accounts/paymentvoucher",
@@ -2148,6 +2157,15 @@
      "access": "View",
      "modules": [
       "Discount caps"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
      ]
     },
     {
@@ -2986,6 +3004,24 @@
      ]
     },
     {
+     "section": "Accounts > Incentive",
+     "screen": "Calculations",
+     "path": "/incentive/calculations",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Reports",
+     "path": "/incentive/reports",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
      "section": "Commission",
      "screen": "Commission Dashboard",
      "path": "/commission/dashboard",
@@ -3143,6 +3179,15 @@
      "access": "View",
      "modules": [
       "Discount caps"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
      ]
     },
     {
@@ -3867,6 +3912,24 @@
      ]
     },
     {
+     "section": "Accounts > Incentive",
+     "screen": "Calculations",
+     "path": "/incentive/calculations",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Reports",
+     "path": "/incentive/reports",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
      "section": "Commission",
      "screen": "Commission Dashboard",
      "path": "/commission/dashboard",
@@ -4024,6 +4087,15 @@
      "access": "Create and edit",
      "modules": [
       "Discount caps"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
      ]
     },
     {
@@ -5029,6 +5101,15 @@
     },
     {
      "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
+     ]
+    },
+    {
+     "section": "Master > System",
      "screen": "Data Migration & Go-Live",
      "path": "/master/configuration/go-live",
      "access": "View",
@@ -5638,15 +5719,6 @@
      "path": "/my-work",
      "access": "View",
      "modules": []
-    },
-    {
-     "section": "Operations",
-     "screen": "Payments",
-     "path": "/agent/payments",
-     "access": "View",
-     "modules": [
-      "Policies"
-     ]
     },
     {
      "section": "Accounts",
@@ -6945,12 +7017,147 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "View",
+     "modules": [
+      "Quotations and placement"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Requests for Quotation",
+     "path": "/placement/broker-slips",
+     "access": "View",
+     "modules": [
+      "Quotations and placement"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Placement Slips",
+     "path": "/placement/placement-slips",
+     "access": "View",
+     "modules": [
+      "Quotations and placement"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Dealer & Bank Programmes",
+     "path": "/sales/dealer-programmes",
+     "access": "View",
+     "modules": [
+      "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Clients",
+     "path": "/agent/clientlisting",
+     "access": "View",
+     "modules": [
+      "Clients"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Policy",
+     "path": "/agent/policy",
+     "access": "View",
+     "modules": [
+      "Policies"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Claims",
+     "path": "/agent/claim",
+     "access": "View",
+     "modules": [
+      "Claims"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Renewal Policy",
+     "path": "/agent/expired-policies",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Renewal Batch",
+     "path": "/agent/renewal-batch",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Renewal Queue",
+     "path": "/renewal/queue",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Negotiations",
+     "path": "/renewal/negotiations",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Lapse Management",
+     "path": "/renewal/lapse-management",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
      "access": "View",
      "modules": [
       "Policies"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Cover Notes",
+     "path": "/operations/cover-notes",
+     "access": "View",
+     "modules": [
+      "Policies"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Policy Cancellation",
+     "path": "/operations/policy-cancellation",
+     "access": "View",
+     "modules": [
+      "Endorsements and cancellations"
      ]
     },
     {
@@ -7423,6 +7630,15 @@
     },
     {
      "section": "Reports > Operational Reports",
+     "screen": "Dealer Production",
+     "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
      "screen": "APR Operation Report",
      "path": "/reports/run/apr-operation",
      "access": "View",
@@ -7716,6 +7932,24 @@
      "access": "Create and edit",
      "modules": [
       "Data migration and go-live"
+     ]
+    },
+    {
+     "section": "Product Configurator",
+     "screen": "Dashboard",
+     "path": "/product-configurator/dashboard",
+     "access": "View",
+     "modules": [
+      "Products"
+     ]
+    },
+    {
+     "section": "Product Configurator",
+     "screen": "Product Templates",
+     "path": "/product-configurator/templates",
+     "access": "View",
+     "modules": [
+      "Products"
      ]
     }
    ],
@@ -8629,6 +8863,24 @@
      "access": "View",
      "modules": [
       "Journal vouchers"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Calculations",
+     "path": "/incentive/calculations",
+     "access": "View",
+     "modules": [
+      "Incentives"
+     ]
+    },
+    {
+     "section": "Accounts > Incentive",
+     "screen": "Reports",
+     "path": "/incentive/reports",
+     "access": "View",
+     "modules": [
+      "Incentives"
      ]
     },
     {
@@ -10709,6 +10961,15 @@
     },
     {
      "section": "Master > System",
+     "screen": "Schedules",
+     "path": "/master/configuration/schedules",
+     "access": "View",
+     "modules": [
+      "Schedules"
+     ]
+    },
+    {
+     "section": "Master > System",
      "screen": "Audit Trail",
      "path": "/master/configuration/audit-trail",
      "access": "View",
@@ -11926,6 +12187,10 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -11961,6 +12226,10 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12004,6 +12273,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12038,6 +12311,10 @@
     },
     {
      "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
@@ -12078,6 +12355,10 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS General Manager",
      "access": "View"
     }
@@ -12108,6 +12389,10 @@
     },
     {
      "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
@@ -12146,6 +12431,10 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Approve"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12251,6 +12540,10 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12288,6 +12581,10 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12323,6 +12620,10 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12395,6 +12696,10 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12465,6 +12770,10 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12502,6 +12811,10 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12537,10 +12850,6 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Create and edit"
-    },
-    {
-     "role": "CCD-PDU (Post-Dated Cheques)",
-     "access": "View"
     },
     {
      "role": "CCD-PDC / CCD-ADA",
@@ -12596,6 +12905,10 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -12631,6 +12944,10 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12959,10 +13276,6 @@
   "/accounts/payables/2307": {
    "menu": "Accounts > Payables > Supplier 2307",
    "roles": [
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
     {
      "role": "TIS Operations Unit Head",
      "access": "View"
@@ -13687,11 +14000,23 @@
      "access": "Approve"
     },
     {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
      "role": "TIS Operations Unit Head",
      "access": "Approve"
     },
     {
      "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -13758,11 +14083,23 @@
      "access": "Create and edit"
     },
     {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
      "role": "TIS Operations Unit Head",
      "access": "View"
     },
     {
      "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -14141,6 +14478,10 @@
     },
     {
      "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
@@ -15167,12 +15508,40 @@
    "menu": "Master > System > Schedules",
    "roles": [
     {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
      "access": "Create and edit"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },
@@ -15317,6 +15686,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "Create and edit"
     },
@@ -15351,6 +15724,10 @@
     },
     {
      "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {

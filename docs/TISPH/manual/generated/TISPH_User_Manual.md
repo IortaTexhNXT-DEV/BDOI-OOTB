@@ -1047,6 +1047,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -1092,7 +1093,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | No screen of its own |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
@@ -1296,6 +1297,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -1350,7 +1352,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | No screen of its own |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
@@ -1538,7 +1540,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts > Payables | Suppliers | View |
-| Accounts > Payables | Supplier 2307 | View |
 | Accounts | Disbursement | View |
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Calculations | Approve |
@@ -1561,6 +1562,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -1608,7 +1610,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
-| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
@@ -1622,7 +1624,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Approve | Approve or return discount caps (not the requester) |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
@@ -1787,6 +1789,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
+| Accounts > Incentive | Calculations | View |
+| Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
@@ -1805,6 +1809,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -1839,7 +1844,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
@@ -1847,7 +1852,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
@@ -2095,6 +2100,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts | Journal Voucher | View |
+| Accounts > Incentive | Calculations | View |
+| Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
@@ -2113,6 +2120,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | Create and edit |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -2150,7 +2158,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Exceptions, Held policies and Insurer billing |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | No screen of its own |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
@@ -2160,7 +2168,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Create and edit | Propose and replace discount caps |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
@@ -2326,6 +2334,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | Create and edit |
+| Master > System | Schedules | View |
 | Master > System | Data Migration & Go-Live | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
@@ -2385,7 +2394,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Create and edit | Propose and replace discount caps |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live |
 | Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
@@ -2581,7 +2590,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
-| Operations | Payments | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
@@ -3330,7 +3338,22 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
 | Operations > Sales & Marketing | Prospects | View |
+| Operations > Sales & Marketing | Quotations | View |
+| Operations > Sales & Marketing | Requests for Quotation | View |
+| Operations > Sales & Marketing | Placement Slips | View |
+| Operations > Sales & Marketing | Dealer & Bank Programmes | View |
+| Operations > Sales & Marketing | Promotions | View |
+| Operations | Clients | View |
+| Operations | Policy | View |
+| Operations | Claims | View |
+| Operations > Renewals | Renewal Policy | View |
+| Operations > Renewals | Renewal Batch | View |
+| Operations > Renewals | Renewal Queue | View |
+| Operations > Renewals | Negotiations | View |
+| Operations > Renewals | Lapse Management | View |
 | Operations | Payments | View |
+| Operations | Cover Notes | View |
+| Operations | Policy Cancellation | View |
 | Accounts | Receipts | View |
 | Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
@@ -3384,6 +3407,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
+| Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
@@ -3417,6 +3441,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
 | Master > System | Data Migration & Go-Live | Create and edit |
+| Product Configurator | Dashboard | View |
+| Product Configurator | Product Templates | View |
 
 ### What you can view, change and approve {#tis-finance-and-general-accounting-access}
 Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
@@ -3424,14 +3450,14 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
-| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | No screen of its own |
-| Operations | Clients | View | See clients | No screen of its own |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Payments |
-| Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
-| Operations | Renewals | View | See renewals | No screen of its own |
-| Operations | Claims | View | See claims | No screen of its own |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Operations | Clients | View | See clients | Clients |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
+| Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
 | Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
 | Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
@@ -3466,8 +3492,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
-| Product Configurator | Products | View | See products and product templates | No screen of its own |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
@@ -3766,6 +3792,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Setup | View |
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
+| Accounts > Incentive | Calculations | View |
+| Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
@@ -3871,7 +3899,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
@@ -4223,6 +4251,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Configuration Approvals | View |
 | Master > Finance | Commission Rate Matrix | View |
 | Master > Finance | Discount Caps | View |
+| Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
 | Master > System | Data Migration & Go-Live | View |
@@ -4298,7 +4327,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Discount caps | Approve | Approve or return discount caps (not the requester) |  |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
 | Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments, the promotion path | Data Migration & Go-Live |
@@ -4696,6 +4725,7 @@ The quotation (quotation slip) is the offer given to the client: the insurer, th
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -4772,6 +4802,7 @@ Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -4811,6 +4842,7 @@ The broker never issues cover. A placement slip goes to the insurer, the insurer
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
 | CCD-BP / QRPh (Receipting) | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -4866,6 +4898,7 @@ Choose Operations > Sales & Marketing > Dealer & Bank Programmes. A programme ho
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | Create and edit |
 | TIS General Manager | View |
 
@@ -4904,6 +4937,7 @@ Choose Operations > Sales & Marketing > Promotions. A promotion offers reduced r
 | TIS Operations Associate | View |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
 The list shows **Code**, **Name**, **Products**, **Insurers**, **Channel types**, **Period**, **Variants**, **Version**, **Units / quota** and **Status** (**Draft**, **Pending approval**, **Scheduled**, **Active**, **Suspended**, **Expired**, **Withdrawn**). Filter it by status, or search by code or name; **View** opens a promotion.
@@ -4942,6 +4976,7 @@ A client is created when a prospect's first policy is booked, or before it by on
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -4984,6 +5019,7 @@ Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **C
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -5077,6 +5113,7 @@ TISPH registers the client's claim, advises the insurer, collects the documents 
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -5160,6 +5197,7 @@ Renewal Policy lists the policies coming up for renewal and those already in pro
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -5184,6 +5222,7 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -5197,6 +5236,7 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -5260,6 +5300,7 @@ Mobile numbers are shown masked; the full number is only in the downloaded file.
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -5306,6 +5347,7 @@ Lock-in Accounts lists the lock-in (promotion, Scheme 1 ARA) and Scheme 2 accoun
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -5332,7 +5374,6 @@ Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivab
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
-| CCD-PDU (Post-Dated Cheques) | View |
 | CCD-PDC / CCD-ADA | View |
 | CCD-BP / QRPh (Receipting) | View |
 | CCD-Recon (Reconciliation and Reversals) | View |
@@ -5353,6 +5394,7 @@ Each row shows **Type**, **Assured Name**, **Client ID**, **Policy Number**, **G
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -5377,6 +5419,7 @@ The cards count the cover notes **Active** and **Expiring within 7 days**, and s
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Create and edit |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -5671,7 +5714,6 @@ The expanded withholding tax withheld from a supplier on an approved supplier in
 
 | Role | Access |
 |---|---|
-| TIS Sales Unit Head | View |
 | TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
@@ -6324,8 +6366,11 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | Role | Access |
 |---|---|
 | TIS Sales Unit Head | Approve |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
 | TIS Operations Unit Head | Approve |
 | TIS Finance & General Accounting | View |
+| TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
 **Menu:** Accounts > Incentive > Approvals
@@ -6353,8 +6398,11 @@ A closed year can be reversed only on a request with a reason, approved by anoth
 | Role | Access |
 |---|---|
 | TIS Sales Unit Head | Create and edit |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
+| TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
 The incentive screens pay the account executives' incentives earned under the programmes set for them (for example a quarterly motor premium target).
@@ -6522,6 +6570,7 @@ Choose Master > Insurance > Distribution Channels. A channel is a dealer group o
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
@@ -7024,8 +7073,15 @@ A format may also carry the issuing office (**Branch code** or **Office numberin
 
 | Role | Access |
 |---|---|
+| TIS Sales Associate | View |
+| TIS Sales Officer | View |
+| TIS Sales Unit Head | View |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
 | TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | Create and edit |
+| TIS General Manager | View |
 
 Schedules lists the jobs the system runs by itself: **Job**, **What it does**, **Schedule (Asia/Manila)**, **Status** (**Scheduled** or **Switched off**), **Next run**, **Last run** and **Last status**. Among them: bank reconciliation auto-match, month-end close reminder, recurring journals, accrual auto-reversal, period auto soft-close, My Work reminders, the e-invoicing outbox, the remittance schedules and the prospect reassignment queue.
 
@@ -7177,6 +7233,7 @@ A product is configured as a **product template**. Only the template marked **In
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | Create and edit |
 | TIS General Manager | View |
 
@@ -7193,6 +7250,7 @@ The dashboard shows the **Active Products**, the **Acceptance rules in force**, 
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | Create and edit |
 | TIS General Manager | View |
 

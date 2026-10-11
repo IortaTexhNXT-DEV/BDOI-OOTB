@@ -38,6 +38,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Setup | View |
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
+| Accounts > Incentive | Calculations | View |
+| Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
@@ -144,7 +146,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Commission rules register | View | See the commission rules register and test which rule applies | Commission Rate Matrix |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |

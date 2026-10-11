@@ -49,6 +49,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -95,7 +96,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | No screen of its own |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |

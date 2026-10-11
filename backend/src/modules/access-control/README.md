@@ -53,6 +53,12 @@ one-line summary) and `access.platform_roles` (the generic roles of the base pla
 platform roles"). `roleGroups()` reads them for both the access screens and `GET /api/roles`. A role in no department
 is listed under Other roles. Full access: the System Administrator role and every role that includes it (SUPERID).
 
+A TISPH user is given the RBAC v4 persona of their job and sees only its menu: the entries its grants name
+(`utils/menuPermissions.js`) whose screens its permissions can load (`components/SideBar/requires.js`). Full access
+sees every menu by design, so it is never given to a TISPH business user: the System Administrator is the
+administrator account of the tenant, and SUPERID (for UAT) must be inactive before go-live (Go-Live decision check
+"Demo accounts and SUPERID inactive").
+
 ## Role Permissions
 
 - Effective access of a role: its own grants plus the grants of the roles it includes (`roles.inherits`, recursively,

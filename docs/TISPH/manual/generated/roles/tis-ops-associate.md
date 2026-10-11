@@ -37,6 +37,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts > Remittance | Remittances | View |
+| Accounts > Incentive | Calculations | View |
+| Accounts > Incentive | Reports | View |
 | Commission | Commission Dashboard | View |
 | Commission | Sharing Schemes | View |
 | Reports | All Reports | View |
@@ -55,6 +57,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | View |
+| Master > System | Schedules | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -90,7 +93,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
@@ -98,7 +101,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
