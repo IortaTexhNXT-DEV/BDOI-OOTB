@@ -60,7 +60,8 @@ describe("Insurer billing", () => {
 
   it("?note= opens the debit note with the reason in place of the decision buttons", async () => {
     show("/finance/remittance/billing?note=dn_4");
-    expect(await screen.findByText("DN-2026-00004 · Pioneer Insurance")).toBeInTheDocument();
+    // the deep link fetches the note after the list has loaded, then opens the panel
+    expect(await screen.findByText("DN-2026-00004 · Pioneer Insurance", {}, { timeout: 3000 })).toBeInTheDocument();
     expect(remittanceService.getDebitNote).toHaveBeenCalledWith("dn_4");
     expect(screen.getAllByText(MAKER.blockedReason).length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument();

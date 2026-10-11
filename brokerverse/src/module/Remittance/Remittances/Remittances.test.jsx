@@ -158,7 +158,8 @@ describe("Remittances worklist", () => {
   it("says why a segment is empty, and offers Try again when the list cannot load", async () => {
     remittanceService.listRegister.mockResolvedValueOnce(page([])).mockRejectedValueOnce(new Error("boom")).mockResolvedValue(page([row(1)]));
     show();
-    expect(await screen.findByText("Nothing needs your action. Next run Mon 19/10/2026 06:15.")).toBeInTheDocument();
+    // the empty-segment text needs the register, the summary and the schedules to have loaded
+    expect(await screen.findByText("Nothing needs your action. Next run Mon 19/10/2026 06:15.", {}, { timeout: 3000 })).toBeInTheDocument();
     fireEvent.click(screen.getByText("Drafts (3)"));
     expect(await screen.findByText("Could not load remittances.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
