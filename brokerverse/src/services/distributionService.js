@@ -38,6 +38,13 @@ const upload = async (path, file) => {
   return handle(await fetch(`${BASE_URL}${path}`, { method: "POST", body: form, headers: { ...authService.getAuthHeader() } }));
 };
 /** Print a PDF of the API (components/Print printPdf), or fetch any other file with the session token and save it. */
+/** Upload a file with form fields; the whole answer ({ data, message }). */
+const uploadWith = async (path, file, fields = {}) => {
+  const form = new FormData();
+  form.append("file", file);
+  for (const [k, v] of Object.entries(fields)) if (v !== undefined && v !== null && v !== "") form.append(k, v);
+  return handle(await fetch(`${BASE_URL}${path}`, { method: "POST", body: form, headers: { ...authService.getAuthHeader() } }));
+};
 const fileFrom = async (path, fileName, { open = false, method = "GET", payload = null } = {}) => {
   if (open) return printPdf(path, { fileName });
   const response = await fetch(`${BASE_URL}${path}`, {
@@ -136,6 +143,28 @@ const distributionService = {
   billDeclaration: (declarationId) => post(`${MA}/declarations/${id(declarationId)}/bill`),
   deleteDeclaration: (declarationId) => remove(`${MA}/declarations/${id(declarationId)}`),
   printDeclaration: (declarationId) => fileFrom(`${MA}/declarations/${id(declarationId)}/print`, "declaration.pdf", { open: true }),
+  openCoverChoices: () => request(`${MA}/choices`),
+  coverCertificates: (coverId, params) => request(`${MA}/open-covers/${id(coverId)}/certificates${qs(params)}`),
+  certificateRegister: (coverId, params) => fileFrom(`${MA}/open-covers/${id(coverId)}/certificates/register${qs(params)}`, "certificate-register.xlsx"),
+  addParcel: (coverId, body) => post(`${MA}/open-covers/${id(coverId)}/parcels`, body),
+  parcelTemplate: () => fileFrom(`${MA}/parcels/template`, "Parcel_List_Upload_Template.xlsx"),
+  uploadParcels: (coverId, file, parcelDate) => uploadWith(`${MA}/open-covers/${id(coverId)}/parcels/upload`, file, { parcelDate }),
+  shipmentTemplate: () => fileFrom(`${MA}/shipments/template`, "Cargo_Shipments_Upload_Template.xlsx"),
+  uploadShipments: (coverId, file) => uploadWith(`${MA}/open-covers/${id(coverId)}/shipments/upload`, file),
+  coverUploads: (coverId) => request(`${MA}/open-covers/${id(coverId)}/uploads`),
+  printDay: (coverId, date) => fileFrom(`${MA}/open-covers/${id(coverId)}/certificates/day-print${qs({ date })}`, `parcel-certificates-${date}.pdf`, { open: true }),
+  requestReversal: (certificateId, reason) => post(`${MA}/certificates/${id(certificateId)}/reversal`, { reason }),
+  decideReversal: (certificateId, decision, remark) => post(`${MA}/certificates/${id(certificateId)}/reversal/decision`, { decision, remark }),
+  closeDays: (coverId) => post(`${MA}/open-covers/${id(coverId)}/daily/close`),
+  endorseCover: (coverId, body) => post(`${MA}/open-covers/${id(coverId)}/endorsements`, body),
+  endorsement: (endorsementId) => request(`${MA}/endorsements/${id(endorsementId)}`),
+  decideEndorsement: (endorsementId, decision, remark) => post(`${MA}/endorsements/${id(endorsementId)}/decision`, { decision, remark }),
+  recallEndorsement: (endorsementId) => post(`${MA}/endorsements/${id(endorsementId)}/recall`),
+  writeDeclarationFile: (declarationId) => post(`${MA}/declarations/${id(declarationId)}/file`),
+  declarationFile: (declarationId) => fileFrom(`${MA}/declarations/${id(declarationId)}/file`, "declaration.xlsx"),
+  sendDeclaration: (declarationId) => post(`${MA}/declarations/${id(declarationId)}/send`),
+  recordAcceptance: (declarationId, body) => post(`${MA}/declarations/${id(declarationId)}/acceptance`, body),
+  declarationRegister: (declarationId) => fileFrom(`${MA}/declarations/${id(declarationId)}/register`, "certificate-register.xlsx"),
 
   // comparison reports
   comparisonReports: (params) => request(`${CR}${qs(params)}`),
