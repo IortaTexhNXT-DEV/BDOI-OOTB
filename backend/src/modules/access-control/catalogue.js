@@ -89,6 +89,8 @@ const PERMISSION_LIST = {
   'approve:quotations': ['quotations', 'approve', 'Approve a quotation created by another user'],
   'extend:quotations': ['quotations', 'special', 'Extend the validity of a quotation once, within the longest validity'],
   'write:promotion-rates': ['quotations', 'special', 'Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason'],
+  'override:quotation-rates': ['quotations', 'special', 'Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate'],
+  'override:motor-fmv': ['quotations', 'special', 'Change the fair market value of a Motor quotation away from the value less depreciation, with a reason'],
   'read:lead-assignment': ['lead-assignment', 'view', 'See assignment rules, the reassignment queue and every team\'s prospects'],
   'write:lead-assignment': ['lead-assignment', 'edit', 'Maintain assignment rules and reassign prospects'],
   'read:motor-programmes': ['motor-programmes', 'view', 'See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters'],

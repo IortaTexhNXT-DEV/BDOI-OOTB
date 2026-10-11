@@ -212,6 +212,12 @@ for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-
 ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 // Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
 for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
+// Motor rating (migration 0615, PROD-12): changing a peril rate away from the issuing rate and the FMV away from the
+// value less depreciation is for the internal users who rate (Officers and Unit Heads of Sales and Operations, the
+// General Manager), never the associates; the broker roles keep what they could do.
+for (const role of ['sales', 'processing', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-general-manager']) {
+  ROLE_PERMS[role].push('quotation-rates:override', 'motor-fmv:override');
+}
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

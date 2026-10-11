@@ -108,7 +108,7 @@ export async function openPromotions(c, input) {
   return { reason: out.length ? null : 'No promotion is open to this vehicle', channelType: v.ctx.channelType, promotions: out };
 }
 
-async function userHolds(c, userId, perm) {
+export async function userHolds(c, userId, perm) {
   if (!userId) return false;
   return (await c.query(`SELECT EXISTS (SELECT 1 FROM user_effective_roles($1) r JOIN role_permissions rp ON rp.role_id = r.role_id
     JOIN permissions p ON p.id = rp.permission_id WHERE p.code = $2) AS ok`, [userId, perm])).rows[0].ok;
@@ -120,6 +120,18 @@ async function rolesCovering(c, pct, onDate) {
     WHERE l.transaction_type = 'quotation_discount' AND l.role_code IS NOT NULL AND l.status = 'active' AND (l.max_amount IS NULL OR l.max_amount >= $1)
       AND l.effective_from <= $2::date AND (l.effective_to IS NULL OR l.effective_to >= $2::date) ORDER BY 1`, [pct, onDate]);
   return rows;
+}
+
+/**
+ * The maker's Quotation discount authority (Authority Matrix, quotation_discount): above it the quotation is approved by
+ * a role whose limit covers the discount. The referral part for withDiscountReferral, or null within the maker's limit.
+ */
+export async function discountAuthority(c, userId, totalPct, date) {
+  const own = userId ? await effectiveAuthority(c, userId, 'quotation_discount', date) : { found: false };
+  if (!own.found || own.unlimited || totalPct <= num(own.limit)) return null;
+  const roles = await rolesCovering(c, totalPct, date);
+  return { ruleCode: DISCOUNT_RULE, pct: totalPct, limit: num(own.limit), authorityRoles: roles.map((r) => r.role_code), roleNames: Object.fromEntries(roles.map((r) => [r.role_code, r.name])),
+    message: `The discount of ${totalPct.toFixed(2)}% is above the maker's quotation discount limit of ${num(own.limit).toFixed(2)}%: approval needed` };
 }
 
 /**
@@ -213,14 +225,7 @@ export async function applyPromotion(c, { request, requested = true, previous = 
   if (totalPct > cap.maxPct) throw fail(`The discount of ${totalPct.toFixed(2)}% is above the maximum of ${cap.maxPct.toFixed(2)}% for ${where}`, 'discount');
   if (totalPct < cap.minPct) throw fail(`The discount of ${totalPct.toFixed(2)}% is below the minimum of ${cap.minPct.toFixed(2)}% for ${where}`, 'discount');
   if (p.benefit === 'rate' && odRate < cap.lowestOd) throw fail(`Own Damage coverage Rate cannot be lower than ${cap.lowestOd}% for ${where}`, 'promotion.odRate');
-  // the maker's Quotation discount authority: above it the quotation is approved by a role whose limit covers it
-  const own = userId ? await effectiveAuthority(c, userId, 'quotation_discount', date) : { found: false };
-  let authority = null;
-  if (own.found && !own.unlimited && totalPct > num(own.limit)) {
-    const roles = await rolesCovering(c, totalPct, date);
-    authority = { ruleCode: DISCOUNT_RULE, pct: totalPct, limit: num(own.limit), authorityRoles: roles.map((r) => r.role_code), roleNames: Object.fromEntries(roles.map((r) => [r.role_code, r.name])),
-      message: `The discount of ${totalPct.toFixed(2)}% is above the maker's quotation discount limit of ${num(own.limit).toFixed(2)}%: approval needed` };
-  }
+  const authority = await discountAuthority(c, userId, totalPct, date);
   const notice = kept && kept.version !== p.version ? `Promotion ${p.code} changed since this quotation was priced (version ${kept.version} to version ${p.version}). The new rates are used` : null;
   if (notice) doc.promotionNotice = notice; else delete doc.promotionNotice;
   doc.promotion = {
