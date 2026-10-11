@@ -19301,5 +19301,12 @@
     "fmvReason": "Reason for the FMV change",
     "rateReason": "Reason for the rate change",
     "belowMinimum": "Below the minimum issuing rate of {{rate}}%: the quotation is referred for approval"
+  },
+  "bir2307Batches": {
+    "title": "Batches",
+    "none": "No batch issued in this quarter",
+    "batch": "Batch",
+    "created": "Issued",
+    "excel": "Excel"
   }
 }
