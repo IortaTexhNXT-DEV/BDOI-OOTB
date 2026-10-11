@@ -1,7 +1,8 @@
 /**
  * Feature entitlements of this environment: the state of every feature of the catalogue (catalogue.js), the checks the
  * rest of the system makes (API gate, scheduler, connectors, settings), and the changes made by the iorta TechNXT
- * platform administrators with maker-checker.
+ * platform administrators with maker-checker, or for Phase 2 by the enablers of the tenant (channel 'tenant',
+ * tenant.js: SUPERID by default, approved by a second enabler or a platform administrator).
  *
  * State of a feature: 'on', 'read-only' (disabled while records exist: view and export only) or 'off'. Phase 1 and
  * platform features are always 'on'. The others are 'on' or 'read-only' only while feature_entitlements holds a row with
@@ -22,12 +23,18 @@ import { logger } from '../../lib/logger.js';
 import { notify } from '../notifications/service.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { MANAGE_FEATURES, PLATFORM_ROLE } from '../../lib/platform.js';
-import { FEATURES, TIERS, alwaysOn, featureOf, switchable } from './catalogue.js';
+import { FEATURES, TIERS, alwaysOn, decisionPending, featureOf, switchable } from './catalogue.js';
+import { TENANT_ENABLE, assertTenantTiers } from './tenant.js';
 
 export const ON = 'on';
 export const READ_ONLY = 'read-only';
 export const OFF = 'off';
 export const VENDOR_NAME = 'iorta TechNXT';
+/** Who raises a change: the platform administrator (Master > Platform) or an enabler of the tenant (Master > System Configuration). */
+export const CHANNELS = Object.freeze({
+  platform: { screen: 'Master > Platform > Features & Releases', link: '/master/platform/features?view=changes' },
+  tenant: { screen: 'Master > System Configuration > Features & Releases', link: '/master/configuration/features?view=changes' },
+});
 const STATUS_OF_ROW = { enabled: ON, read_only: READ_ONLY };
 const ROW_STATUS = { [ON]: 'enabled', [READ_ONLY]: 'read_only' };
 
@@ -170,6 +177,7 @@ const STATUS_NAME = { [ON]: 'Enabled', [READ_ONLY]: 'Read-only', [OFF]: 'Not ena
 export async function catalogueView({ full = false } = {}) {
   const state = await featureState();
   const names = new Map((await many('SELECT id, display_name FROM users WHERE id IN (SELECT approved_by FROM feature_entitlements)')).map((u) => [u.id, u.display_name]));
+  const tenantChanges = new Set((await many(`SELECT id FROM feature_changes WHERE channel = 'tenant' AND id IN (SELECT change_id FROM feature_entitlements)`)).map((c) => Number(c.id)));
   // Phase 1, platform, Phase 2, future releases; the catalogue order inside a tier
   const ordered = [...FEATURES].sort((a, b) => TIERS[a.tier].order - TIERS[b.tier].order);
   return ordered.map((f) => {
@@ -180,8 +188,10 @@ export async function catalogueView({ full = false } = {}) {
     return {
       key: f.key, name: f.name, description: f.description, module: f.module, tier: f.tier, tierName: TIERS[f.tier].name, alwaysOn: alwaysOn(f),
       requirements: f.requirements, dependsOn: f.dependsOn, status, statusName: STATUS_NAME[status],
-      decisionPending: !!f.decision, decision: f.decision,
-      enabledAt: on ? row.effective_from : null, enabledBy: on ? VENDOR_NAME : null, releaseRef: on ? row.release_ref : null,
+      decisionPending: decisionPending(f), decision: f.decision,
+      enabledAt: on ? row.effective_from : null, releaseRef: on ? row.release_ref : null,
+      // a change of the tenant names its approver; a change of the platform the supplier
+      enabledBy: on ? (tenantChanges.has(Number(row.change_id)) ? names.get(row.approved_by) || 'TISPH' : VENDOR_NAME) : null,
       scheduled: !!(on && status === OFF && new Date(row.effective_from) > new Date()),
       ...(full ? { controls: f.controls, approvedBy: on ? names.get(row.approved_by) || null : null, tampered: !!entry?.tampered } : {}),
     };
@@ -284,7 +294,7 @@ export async function preview(body) {
       if (records > 0) to = READ_ONLY;
     }
     features.push({ key, name: f.name, tier: f.tier, tierName: TIERS[f.tier].name, from, to, records, reason: why.reason,
-      because: why.of ? featureOf(why.of).name : null, decisionPending: !!f.decision });
+      because: why.of ? featureOf(why.of).name : null, decisionPending: decisionPending(f) });
   }
   const changing = features.filter((x) => x.from !== x.to);
   const list = (control) => [...new Set(changing.flatMap((x) => featureOf(x.key).controls[control]))];
@@ -312,6 +322,7 @@ const REF = (id) => `FCR-${String(id).padStart(5, '0')}`;
 const changeRow = (c, names = new Map()) => ({
   id: Number(c.id), ref: REF(c.id), action: c.action, tier: c.tier, tierName: c.tier ? TIERS[c.tier].name : null, features: c.features, plan: c.plan,
   reason: c.reason, releaseRef: c.release_ref, immediate: c.immediate, effectiveAt: c.effective_at, source: c.source, sourceEnvironment: c.source_environment,
+  channel: c.channel || 'platform', approval: c.approval || 'four-eyes',
   status: c.status, requestedBy: c.requested_by, requestedByName: names.get(c.requested_by) || null, requestedAt: c.requested_at,
   decidedBy: c.decided_by, decidedByName: names.get(c.decided_by) || null, decidedAt: c.decided_at, remarks: c.remarks, appliedAt: c.applied_at,
 });
@@ -329,12 +340,38 @@ async function getChange(id, db = { query }) {
   return c;
 }
 
+/** Active users who enable Phase 2 for the tenant (the permission through a role of the policy), but `except`. */
+async function tenantEnablers(policy, except = null) {
+  if (!policy?.roles.length) return [];
+  return many(`SELECT DISTINCT u.id FROM users u
+    WHERE u.status = 'active' AND u.id IS DISTINCT FROM $3
+      AND EXISTS (SELECT 1 FROM user_effective_roles(u.id) er WHERE er.code = ANY($1))
+      AND EXISTS (SELECT 1 FROM user_effective_roles(u.id) er JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id WHERE p.code = $2)`,
+  [policy.roles, TENANT_ENABLE, except]);
+}
+
+/** A change of the tenant stays within the tiers of its policy (the requested tier and every feature of the plan). */
+function assertTenantChange({ tier, features }, policy) {
+  if (tier && !policy.tiers.includes(tier)) {
+    throw refused('FEATURE_TIER_NOT_ALLOWED', `${TIERS[tier]?.name || tier} is enabled and disabled by the iorta TechNXT platform administrator only`);
+  }
+  assertTenantTiers(features.map((x) => ({ ...x, tierName: x.tierName || TIERS[x.tier]?.name })), policy);
+}
+/** Refuse the preview of a tenant enabler that reaches a tier outside its policy. */
+export const assertTenantPreview = (body, p, policy) => assertTenantChange({ tier: body.tier, features: p.features }, policy);
+
 /**
  * Request a change (maker): { action, features | tier, reasonCode, note, releaseRef, effective: 'immediate' | 'scheduled',
  * effectiveAt }. The reason is one of the Reason Codes master (context feature_change).
  * The plan of the preview is kept with it; nothing changes until another platform administrator approves.
+ *
+ * `channel` 'tenant' (with the `policy` of tenant.js): an enabler of the tenant asks; every feature of the plan must be
+ * of a tier of the policy; the other enablers and the platform administrators are told; with the approval 'single'
+ * the request is approved by its requester at once (recorded with approval 'single').
  */
-export async function requestChange(body, user, { source = 'request', sourceEnvironment = null } = {}) {
+export async function requestChange(body, user, { source = 'request', sourceEnvironment = null, channel = 'platform', policy = null } = {}) {
+  const tenant = channel === 'tenant';
+  if (tenant && !policy) throw new Error('requestChange: the policy of the tenant is required');
   const reason = (await requiredReason({ query }, 'feature_change', body)).text;
   const releaseRef = String(body.releaseRef || '').trim();
   const errors = [];
@@ -349,28 +386,41 @@ export async function requestChange(body, user, { source = 'request', sourceEnvi
   if (errors.length) throw badRequest('Validation failed', errors);
   const p = await preview(body);
   if (!p.changes) throw badRequest('Nothing to change: the features are already in that state');
+  if (tenant) assertTenantChange(p, policy);
   const busy = await one(`SELECT id FROM feature_changes WHERE status IN ('pending', 'scheduled') AND features && $1 LIMIT 1`, [p.features.map((x) => x.key)]);
   if (busy) throw conflict(`Change ${REF(busy.id)} for these features is waiting; decide or withdraw it first`);
-  const row = await one(`INSERT INTO feature_changes(action, tier, features, plan, reason, release_ref, immediate, effective_at, source, source_environment, requested_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-  [p.action, p.tier, p.features.map((x) => x.key), JSON.stringify(p.features), reason, releaseRef, immediate, effectiveAt, source, sourceEnvironment, user.id]);
-  await notify({ audience: MANAGE_FEATURES, type: 'approval', title: `Feature change ${REF(row.id)} awaiting approval`,
-    message: `${p.action === 'enable' ? 'Enable' : 'Disable'} ${p.features.length} feature(s): ${reason}`, link: '/master/platform/features?view=changes',
-    entity: 'feature_change', entityId: row.id });
+  const approval = tenant ? policy.approval : 'four-eyes';
+  const row = await one(`INSERT INTO feature_changes(action, tier, features, plan, reason, release_ref, immediate, effective_at, source, source_environment, requested_by, channel, approval)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+  [p.action, p.tier, p.features.map((x) => x.key), JSON.stringify(p.features), reason, releaseRef, immediate, effectiveAt, source, sourceEnvironment, user.id, channel, approval]);
+  if (approval === 'single') {
+    const done = await decideChange(row.id, { decision: 'approve', remarks: 'Single approval (features.tenant_enable_approval = single)' }, user, { channel, policy, selfApproval: true });
+    return { ...done, preview: p };
+  }
+  const notice = { type: 'approval', title: `Feature change ${REF(row.id)} awaiting approval`,
+    message: `${p.action === 'enable' ? 'Enable' : 'Disable'} ${p.features.length} feature(s): ${reason}`, entity: 'feature_change', entityId: row.id };
+  await notify({ ...notice, audience: MANAGE_FEATURES, link: CHANNELS.platform.link });
+  if (tenant) for (const u of await tenantEnablers(policy, user.id)) await notify({ ...notice, userId: u.id, link: CHANNELS.tenant.link });
   return { change: changeRow(row), preview: p };
 }
 
 /**
  * Decide a change (checker): approve (remarks optional) or reject with a reason of the Reason Codes master (context
- * feature_reject). The checker is never the requester.
+ * feature_reject). The checker is never the requester (but for the approval 'single' of the tenant, `selfApproval`).
+ * An enabler of the tenant (`channel` 'tenant') decides only the changes of the tenant, within the tiers of its policy;
+ * a platform administrator decides both.
  */
-export async function decideChange(id, { decision, remarks, reasonCode, note }, user) {
+export async function decideChange(id, { decision, remarks, reasonCode, note }, user, { channel = 'platform', policy = null, selfApproval = false } = {}) {
   if (!['approve', 'reject'].includes(decision)) throw badRequest('Validation failed', [{ path: 'decision', message: 'Decision must be approve or reject' }]);
   if (decision === 'reject') remarks = (await requiredReason({ query }, 'feature_reject', { reasonCode, note })).text;
   const result = await withTransaction(async (c) => {
     const ch = await getChange(id, c);
     if (ch.status !== 'pending') throw conflict(`Change ${REF(ch.id)} is ${ch.status}`);
-    await assertChecker(user, ch.requested_by, 'feature change', { configurable: false });
+    if (channel === 'tenant') {
+      if (ch.channel !== 'tenant') throw refused('PLATFORM_CHANGE', `Change ${REF(ch.id)} was raised by the platform administrator and is decided on Master > Platform`);
+      assertTenantChange({ tier: ch.tier, features: ch.plan }, policy);
+    }
+    if (!selfApproval) await assertChecker(user, ch.requested_by, 'feature change', { configurable: false });
     if (decision === 'reject') {
       await c.query(`UPDATE feature_changes SET status = 'rejected', decided_by = $2, decided_at = now(), remarks = $3 WHERE id = $1`, [ch.id, user.id, remarks]);
       return { ch, applied: [] };
@@ -389,9 +439,10 @@ export async function decideChange(id, { decision, remarks, reasonCode, note }, 
   return { change: after, applied: result.applied };
 }
 
-export async function withdrawChange(id, user) {
+export async function withdrawChange(id, user, { channel = 'platform' } = {}) {
   return withTransaction(async (c) => {
     const ch = await getChange(id, c);
+    if (channel === 'tenant' && ch.channel !== 'tenant') throw refused('PLATFORM_CHANGE', `Change ${REF(ch.id)} was raised by the platform administrator and is withdrawn on Master > Platform`);
     if (!['pending', 'scheduled'].includes(ch.status)) throw conflict(`Change ${REF(ch.id)} is ${ch.status}`);
     if (ch.status === 'pending' && ch.requested_by !== user.id) throw refused('NOT_REQUESTER', 'Only the requester withdraws a change waiting for approval; an approver rejects it');
     await c.query(`UPDATE feature_changes SET status = 'withdrawn', remarks = COALESCE(remarks, 'Withdrawn') WHERE id = $1`, [ch.id]);
@@ -428,7 +479,8 @@ async function applyChange(c, ch) {
     await c.query(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, before_data, after_data, source)
       SELECT $1, u.username, 'feature', $2, $3, $4, $5, $6 FROM users u WHERE u.id = $1`,
     [ch.decided_by, item.key, to === ON ? 'enable' : to === READ_ONLY ? 'read-only' : 'disable', JSON.stringify({ status: from }),
-      JSON.stringify({ status: to, change: REF(ch.id), releaseRef: ch.release_ref, reason: ch.reason }), JSON.stringify({ channel: 'screen', name: 'Master > Platform > Features & Releases' })]);
+      JSON.stringify({ status: to, change: REF(ch.id), releaseRef: ch.release_ref, reason: ch.reason, by: ch.channel || 'platform', approval: ch.approval || 'four-eyes' }),
+      JSON.stringify({ channel: 'screen', name: (CHANNELS[ch.channel] || CHANNELS.platform).screen })]);
     applied.push({ key: item.key, name: f.name, from, to });
   }
   await c.query(`UPDATE feature_changes SET status = 'applied', applied_at = now() WHERE id = $1`, [ch.id]);
@@ -460,13 +512,14 @@ const WORDS = { [ON]: 'enabled', [READ_ONLY]: 'set to read-only', [OFF]: 'disabl
 async function announce(change, applied) {
   const lines = applied.map((a) => `${a.name}: ${WORDS[a.to]}`);
   const title = `Platform features changed (${change.ref})`;
-  const message = `${lines.join('; ')}. Reference ${change.releaseRef}.`;
+  const by = change.channel === 'tenant' ? `${change.decidedByName || 'TISPH'} (TISPH)` : VENDOR_NAME;
+  const message = `${lines.join('; ')}. Changed by ${by}, reference ${change.releaseRef}.`;
   await notify({ audience: 'read:features', type: 'info', title, message, link: '/master/configuration/features', entity: 'feature_change', entityId: change.id });
   await notify({ audience: MANAGE_FEATURES, type: 'info', title, message, link: '/master/platform/features?view=changes', entity: 'feature_change', entityId: change.id });
   const roles = await getSetting('features.notify_roles', []);
   const people = Array.isArray(roles) && roles.length ? await many(`SELECT DISTINCT u.email FROM users u JOIN user_roles ur ON ur.user_id = u.id JOIN roles r ON r.id = ur.role_id
     WHERE r.code = ANY($1) AND u.status = 'active' AND u.email IS NOT NULL AND u.email <> ''`, [roles]) : [];
-  const html = `<p>The following platform features were changed by ${VENDOR_NAME} under ${escapeHtml(change.releaseRef)} (${change.ref}):</p>
+  const html = `<p>The following platform features were changed by ${escapeHtml(by)} under ${escapeHtml(change.releaseRef)} (${change.ref}):</p>
     <ul>${applied.map((a) => `<li>${escapeHtml(a.name)}: ${WORDS[a.to]}</li>`).join('')}</ul>
     <p>Master &gt; System Configuration &gt; Features &amp; Releases lists every feature with its status.</p>`;
   for (const p of people) {

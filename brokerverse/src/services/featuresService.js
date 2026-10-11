@@ -5,8 +5,9 @@ import { setFeatureState } from "../features/entitlements";
 
 /**
  * Features and releases API: the state of this environment (/features/state, every signed-in user), the read-only
- * catalogue (/features/catalogue) and the platform administrator's screen (/platform: preview, change requests with
- * maker-checker, promotion between environments, platform administrators).
+ * catalogue (/features/catalogue), the enabling of Phase 2 by TISPH (/features/enabling, /features/preview,
+ * /features/changes: SUPERID by default) and the platform administrator's screen (/platform: preview, change requests
+ * with maker-checker, promotion between environments, platform administrators).
  */
 const request = async (method, path, body) => {
   const response = await fetch(`${BASE_URL}${path}`, {
@@ -46,6 +47,13 @@ const featuresService = {
   },
   catalogue: () => request("GET", "/features/catalogue").then((r) => r.data),
   exportCatalogue: () => download("/features/catalogue/export", "features-and-releases.xlsx"),
+  // enabling of Phase 2 by TISPH (SUPERID by default): the policy, the preview, the changes and their approval
+  enabling: () => request("GET", "/features/enabling").then((r) => r.data),
+  tenantPreview: (body) => request("POST", "/features/preview", body).then((r) => r.data),
+  tenantChanges: (status) => request("GET", `/features/changes${status ? `?status=${encodeURIComponent(status)}` : ""}`).then((r) => r.data),
+  tenantRequestChange: (body) => request("POST", "/features/changes", body),
+  tenantDecide: (id, body) => request("POST", `/features/changes/${encodeURIComponent(id)}/decision`, body),
+  tenantWithdraw: (id) => request("POST", `/features/changes/${encodeURIComponent(id)}/withdraw`, {}),
   platformFeatures: () => request("GET", "/platform/features").then((r) => r.data),
   preview: (body) => request("POST", "/platform/features/preview", body).then((r) => r.data),
   changes: (status) => request("GET", `/platform/features/changes${status ? `?status=${encodeURIComponent(status)}` : ""}`).then((r) => r.data),

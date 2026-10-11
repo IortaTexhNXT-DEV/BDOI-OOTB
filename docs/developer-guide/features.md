@@ -7,13 +7,29 @@ tier decides whether the function runs in an environment; nothing is switched of
 |---|---|---|
 | `PHASE_1` | Core TISPH scope (BRD v2.2, FRS) | Always on; cannot be switched off from the tenant |
 | `PLATFORM` | Supporting functions: users and roles, configuration, audit, jobs, organisation masters | Always on |
-| `PHASE_2` | Built, delivered off | Enabled by the iorta TechNXT platform administrator ("Enable Phase 2") |
+| `PHASE_2` | Built, delivered off | Enabled by the iorta TechNXT platform administrator ("Enable Phase 2") or by the enablers of TISPH (SUPERID by default) |
 | `FUTURE` | In the platform but outside the BRD and FRS | Off until enabled for a later release |
 
 The catalogue is code: `backend/src/modules/features/catalogue.js`. The state of an environment is the table
-`feature_entitlements` (migration 0550), changed only by two platform administrators (maker-checker) on
-Master > Platform > Features & Releases. See `backend/src/modules/features/README.md` for the API, the signature and
-the enabling flow.
+`feature_entitlements` (migration 0550), changed only through an approved change request: by two platform
+administrators (maker-checker) on Master > Platform > Features & Releases, or, for Phase 2, by an enabler of TISPH on
+Master > System Configuration > Features & Releases approved by a second enabler or a platform administrator
+(`modules/features/tenant.js`, migration 0597; settings `features.tenant_enable_roles`, `features.tenant_enable_tiers`,
+`features.tenant_enable_approval`). See `backend/src/modules/features/README.md` for the API, the signature and the
+enabling flow.
+
+## Decisions of TISPH
+
+A feature whose release TISPH has to confirm carries a `decision` (`id` FT-Dnn of the feature catalogue document,
+`question`, `options`). The screens flag it **Decision pending** until the answer is recorded in the catalogue as
+`decided: { answer, by, on, note }`; the answer must be one of the options and match the tier (`catalogueProblems()`).
+
+| ID | Feature | Decision |
+|---|---|---|
+| FT-D01 | Fixed assets (with the asset master at requisition, MOM-S5-AP-ASSET-MASTER) | Phase 2, decided by TISPH on 11 October 2026; enabled by SUPERID or the platform administrator |
+| FT-D02 | Sales dashboard | Phase 2, decided by TISPH on 11 October 2026; enabled by SUPERID or the platform administrator |
+
+The other decisions (FT-D03 to FT-D16, future releases) are still pending.
 
 ## Registering a new screen
 
@@ -105,3 +121,4 @@ beforeAll(async () => {
 ```
 
 `enableFeatures` signs in two platform administrators (maker and checker) and requests and approves the change.
+`test/feature-tenant-enabling.test.js` covers the enabling of Phase 2 by SUPERID.

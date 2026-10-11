@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -15,52 +16,80 @@ import KeyValueGrid from "../../components/KeyValueGrid";
 import StatusChip from "../../components/StatusChip";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import featuresService from "../../services/featuresService";
+import ChangeDialog from "./ChangeDialog";
+import ChangesTable from "./ChangesTable";
 import { StatusOf, TIERS, TierTag, dateOf, filterFeatures } from "./shared";
 import "./featuresReleases.scss";
 
 /**
  * Master > System Configuration > Features & Releases (TIS IT AppSupport / Admin, General Manager): the functions of
- * the platform with their release tier and status in this environment, read only. Enabling is done by the iorta
- * TechNXT platform administrator; the future releases are listed so that TISPH can ask for them.
+ * the platform with their release tier and status in this environment, read only; the future releases are listed so
+ * that TISPH can ask for them. Enabling is done by the iorta TechNXT platform administrator and, for Phase 2, by the
+ * enablers of TISPH (SUPERID by default: the permission enable:phase2-features with a role of
+ * features.tenant_enable_roles): for them the screen offers Enable Phase 2, enable and disable of the selected Phase 2
+ * functions with the impact preview, and the tab Changes with the approval by a second enabler (never the requester).
  */
 const FeatureCatalogue = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
+  const [params, setParams] = useSearchParams();
   const [tier, setTier] = useState(null);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [request, setRequest] = useState(null);
   const loader = useCallback(() => featuresService.catalogue(), []);
-  const { data, loading, refreshing, error } = useStableLoad(loader);
+  const { data, loading, refreshing, error, reload } = useStableLoad(loader);
+  const enablingLoader = useCallback(() => featuresService.enabling().catch(() => null), []);
+  const { data: enabling } = useStableLoad(enablingLoader);
+  const canEnable = !!enabling?.canEnable;
+  const tiers = enabling?.tiers || [];
+  const changesLoader = useCallback(() => featuresService.tenantChanges(), []);
+  const changes = useStableLoad(changesLoader, { enabled: canEnable });
   const rows = useMemo(() => filterFeatures(data, { tier, search }), [data, tier, search]);
   const future = useMemo(() => (data || []).filter((r) => r.tier === "FUTURE"), [data]);
+  const tabs = canEnable ? ["catalogue", "future", "changes"] : ["catalogue", "future"];
+  const tab = Math.max(0, tabs.indexOf(params.get("view") || "catalogue"));
 
+  const notify = (severity, detail) => toast.current?.show({ severity, summary: t("features.title"), detail, life: 6000 });
   const exportExcel = async () => {
     setExporting(true);
     try {
       await featuresService.exportCatalogue();
     } catch (e) {
-      toast.current?.show({ severity: "error", summary: t("features.title"), detail: e.message });
+      notify("error", e.message);
     } finally {
       setExporting(false);
     }
   };
+  const reloadAll = () => Promise.all([reload(), changes.reload(), featuresService.refreshState().catch(() => undefined)]);
+  const switchable = (r) => canEnable && !r.alwaysOn && tiers.includes(r.tier);
+  const picked = selected.filter(switchable);
 
   const tierOptions = TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }));
   const name = (r) => (
     <span className="fr-name">
       <Button type="button" link label={r.name} className="fr-link" onClick={() => setOpen(r)} />
       {r.decisionPending ? <StatusChip label={t("features.decisionPending")} severity="warning" /> : null}
+      {r.decision?.decided ? <StatusChip label={t("features.decided", { id: r.decision.id || "" })} severity="success" /> : null}
     </span>
+  );
+  const headerActions = (
+    <>
+      <Button type="button" icon="pi pi-file-excel" label={t("features.export")} outlined loading={exporting} onClick={exportExcel} />
+      {canEnable && tiers.includes("PHASE_2") ? (
+        <Button type="button" icon="pi pi-unlock" label={t("features.enablePhase2")} onClick={() => setRequest({ action: "enable", tier: "PHASE_2" })} data-testid="enable-phase-2" />
+      ) : null}
+    </>
   );
 
   return (
     <div className="admin__page fr-page">
       <Toast ref={toast} />
       <PageHeader title={t("features.title")} home={t("sidebar.Master")} section={t("sidebar.System Configuration")} trail={[t("features.title")]}
-        help={t("features.help")}
-        actions={<Button type="button" icon="pi pi-file-excel" label={t("features.export")} outlined loading={exporting} onClick={exportExcel} />} />
-      <TabView className="fr-tabs">
+        help={t(canEnable ? "features.tenantHelp" : "features.help")} actions={headerActions} />
+      <TabView className="fr-tabs" activeIndex={tab} onTabChange={(e) => setParams({ view: tabs[e.index] }, { replace: true })}>
         <TabPanel header={t("features.tabs.catalogue")}>
           <div className="bv-list-toolbar">
             <span className="p-input-icon-left bv-list-search">
@@ -69,11 +98,21 @@ const FeatureCatalogue = () => {
             </span>
             <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value ?? null)} placeholder={t("features.allTiers")} showClear className="bv-list-filter"
               aria-label={t("features.columns.tier")} />
+            {canEnable ? (
+              <span className="fr-toolbar-actions">
+                <Button type="button" label={t("features.enableSelected", { count: picked.length })} disabled={!picked.length}
+                  onClick={() => setRequest({ action: "enable", features: picked.map((r) => r.key) })} data-testid="enable-selected" />
+                <Button type="button" label={t("features.disableSelected", { count: picked.length })} outlined severity="danger" disabled={!picked.length}
+                  onClick={() => setRequest({ action: "disable", features: picked.map((r) => r.key) })} data-testid="disable-selected" />
+              </span>
+            ) : null}
           </div>
           <div className="bv-loading-host">
             <LoadingBar active={refreshing} />
             <DataTable value={rows} dataKey="key" size="small" stripedRows loading={loading} paginator rows={25} rowsPerPageOptions={[25, 50, 100]}
+              {...(canEnable ? { selectionMode: "checkbox", selection: selected, onSelectionChange: (e) => setSelected(e.value), isDataSelectable: (e) => switchable(e.data) } : {})}
               emptyMessage={error || t("features.empty")} className="fr-table" data-testid="feature-catalogue">
+              {canEnable ? <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} /> : null}
               <Column header={t("features.columns.feature")} body={name} style={{ minWidth: "16rem" }} />
               <Column field="module" header={t("features.columns.module")} />
               <Column header={t("features.columns.tier")} body={(r) => <TierTag t={t} tier={r.tier} />} />
@@ -93,7 +132,24 @@ const FeatureCatalogue = () => {
             <Column header={t("features.columns.status")} body={(r) => <StatusOf t={t} status={r.status} />} />
           </DataTable>
         </TabPanel>
+        {canEnable ? (
+          <TabPanel header={t("features.tabs.changes", { count: (changes.data || []).filter((c) => c.status === "pending").length })}>
+            <ChangesTable changes={changes} decide={featuresService.tenantDecide} withdraw={featuresService.tenantWithdraw} notify={notify}
+              actionable={(r) => r.channel === "tenant"} onChanged={({ applied }) => (applied ? reloadAll() : changes.reload())}
+              ownRequestText={t("features.changes.ownRequestTenant")} testId="tenant-feature-changes" />
+          </TabPanel>
+        ) : null}
       </TabView>
+      {canEnable ? (
+        <ChangeDialog visible={!!request} onHide={() => setRequest(null)} request={request} scope="tenant" single={enabling?.approval === "single"}
+          onDone={async (r) => {
+            setRequest(null);
+            setSelected([]);
+            notify("success", r.message);
+            await reloadAll();
+            setParams({ view: "changes" }, { replace: true });
+          }} />
+      ) : null}
       <DetailDialog visible={!!open} onHide={() => setOpen(null)} header={open?.name} size="md">
         {open ? (
           <>
@@ -112,8 +168,15 @@ const FeatureCatalogue = () => {
             {open.decision ? (
               <DetailSection title={t("features.detail.decision")}>
                 <KeyValueGrid columns={2} items={[
+                  { label: t("features.detail.decisionId"), value: open.decision.id },
                   { label: t("features.detail.question"), value: open.decision.question, span: "full" },
                   { label: t("features.detail.options"), value: (open.decision.options || []).join("; "), span: "full" },
+                  ...(open.decision.decided ? [
+                    { label: t("features.detail.answer"), value: open.decision.decided.answer },
+                    { label: t("features.detail.decidedOn"), value: open.decision.decided.on, type: "date" },
+                    { label: t("features.detail.decidedBy"), value: open.decision.decided.by },
+                    { label: t("features.detail.decisionNote"), value: open.decision.decided.note, span: "full" },
+                  ] : [{ label: t("features.detail.answer"), value: t("features.decisionPending") }]),
                 ]} />
               </DetailSection>
             ) : null}

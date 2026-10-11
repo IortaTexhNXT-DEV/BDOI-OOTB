@@ -12,7 +12,6 @@ import { Toast } from "primereact/toast";
 import PageHeader from "../../components/PageHeader";
 import LoadingBar from "../../components/LoadingBar";
 import StatusChip from "../../components/StatusChip";
-import RowActions from "../../components/RowActions";
 import KeyValueGrid from "../../components/KeyValueGrid";
 import ReasonPicker, { reasonPayload, reasonProblem } from "../../components/ReasonPicker";
 import { openConfirm } from "../../components/ConfirmDialog";
@@ -20,10 +19,10 @@ import { useStableLoad } from "../../hooks/useStableLoad";
 import featuresService from "../../services/featuresService";
 import { formatDate } from "../../utility/dateFormat";
 import ChangeDialog from "./ChangeDialog";
+import ChangesTable from "./ChangesTable";
 import { StatusOf, TIERS, TierTag, filterFeatures } from "./shared";
 import "./featuresReleases.scss";
 
-const CHANGE_SEVERITY = { pending: "warning", scheduled: "info", applied: "success", rejected: "danger", withdrawn: "secondary" };
 const TABS = ["features", "changes", "admins"];
 
 /**
@@ -53,51 +52,10 @@ const PlatformFeatures = () => {
   const adminsLoader = useCallback(() => featuresService.admins(), []);
   const admins = useStableLoad(adminsLoader);
   const rows = useMemo(() => filterFeatures(features.data, { tier, search }), [features.data, tier, search]);
-  const myId = (() => {
-    try {
-      return localStorage.getItem("USER_ID");
-    } catch {
-      return null;
-    }
-  })();
 
   const notifyResult = (severity, detail) => toast.current?.show({ severity, summary: t("features.title"), detail, life: 6000 });
   const reloadAll = () => Promise.all([features.reload(), changes.reload(), featuresService.refreshState().catch(() => undefined)]);
   const open = (action, extra) => setRequest({ action, ...extra });
-
-  const decide = async (row, decision) => {
-    const facts = [
-      { label: t("features.changes.ref"), value: row.ref },
-      { label: t("features.changes.action"), value: t(`features.changes.actions.${row.action}`) },
-      { label: t("features.changes.features"), value: row.plan.map((p) => p.name).join(", ") },
-      { label: t("features.change.releaseRef"), value: row.releaseRef },
-      { label: t("features.changes.effective"), value: row.immediate ? t("features.change.immediate") : formatDate(row.effectiveAt) },
-    ];
-    const value = await openConfirm({
-      title: t(`features.changes.${decision}Title`, { ref: row.ref }), severity: decision === "approve" ? "info" : "danger", facts,
-      confirmLabel: t(`features.changes.${decision}`),
-      ...(decision === "reject" ? { reason: { context: "feature_reject" } } : {}),
-    });
-    if (!value) return;
-    try {
-      const r = await featuresService.decide(row.id, { decision, ...(decision === "reject" ? value : {}) });
-      notifyResult("success", r.message);
-      await reloadAll();
-    } catch (e) {
-      notifyResult("error", e.message);
-    }
-  };
-
-  const withdraw = async (row) => {
-    if (!(await openConfirm({ title: t("features.changes.withdrawTitle", { ref: row.ref }), confirmLabel: t("features.changes.withdraw"), severity: "warning" }))) return;
-    try {
-      const r = await featuresService.withdraw(row.id);
-      notifyResult("success", r.message);
-      await changes.reload();
-    } catch (e) {
-      notifyResult("error", e.message);
-    }
-  };
 
   const choosePromotion = async (event) => {
     const file = event.target.files?.[0];
@@ -143,17 +101,6 @@ const PlatformFeatures = () => {
       setBusy(false);
     }
   };
-
-  const changeActions = (row) => {
-    const mine = row.requestedBy === myId;
-    return [
-      row.status === "pending" && !mine ? { code: "approve", label: t("features.changes.approve"), allowed: true } : null,
-      row.status === "pending" && !mine ? { code: "reject", label: t("features.changes.reject"), allowed: true } : null,
-      row.status === "pending" && mine ? { code: "approve", label: t("features.changes.approve"), allowed: false, blockedReason: t("features.changes.ownRequest") } : null,
-      (row.status === "pending" && mine) || row.status === "scheduled" ? { code: "withdraw", label: t("features.changes.withdraw"), allowed: true } : null,
-    ].filter(Boolean);
-  };
-  const onChangeAction = (action, row) => (action.code === "withdraw" ? withdraw(row) : decide(row, action.code));
 
   const switchable = selected.filter((r) => !r.alwaysOn);
   const tierOptions = TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }));
@@ -211,24 +158,8 @@ const PlatformFeatures = () => {
           </div>
         </TabPanel>
         <TabPanel header={t("features.tabs.changes", { count: (changes.data || []).filter((c) => c.status === "pending").length })}>
-          <div className="bv-loading-host">
-            <LoadingBar active={changes.refreshing} />
-            <DataTable value={changes.data || []} dataKey="id" size="small" stripedRows loading={changes.loading} emptyMessage={changes.error || t("features.changes.empty")}
-              className="fr-table" data-testid="feature-changes">
-              <Column field="ref" header={t("features.changes.ref")} />
-              <Column header={t("features.changes.action")} body={(r) => (r.tier ? t(`features.change.${r.action}Tier`, { tier: t(`features.tiers.${r.tier}`) }) : t(`features.changes.actions.${r.action}`))} />
-              <Column header={t("features.changes.features")} body={(r) => r.plan.map((p) => p.name).join(", ")} style={{ maxWidth: "20rem" }} />
-              <Column field="reason" header={t("features.changes.reason")} />
-              <Column field="releaseRef" header={t("features.change.releaseRef")} />
-              <Column header={t("features.changes.effective")} body={(r) => (r.immediate ? t("features.change.immediate") : formatDate(r.effectiveAt))} />
-              <Column header={t("features.changes.requestedBy")} body={(r) => `${r.requestedByName || "-"} · ${formatDate(r.requestedAt)}`} />
-              <Column header={t("features.changes.decidedBy")} body={(r) => (r.decidedByName ? `${r.decidedByName} · ${formatDate(r.decidedAt)}` : "-")} />
-              <Column header={t("features.columns.status")} body={(r) => <StatusChip code={r.status} label={t(`features.changes.status.${r.status}`)} severity={CHANGE_SEVERITY[r.status]} />} />
-              <Column header="" body={(r) => (changeActions(r).length ? (
-                <RowActions label={t("features.changes.actionsFor", { ref: r.ref })} actions={changeActions(r)} onAction={(action) => onChangeAction(action, r)} />
-              ) : null)} />
-            </DataTable>
-          </div>
+          <ChangesTable changes={changes} decide={featuresService.decide} withdraw={featuresService.withdraw} notify={notifyResult}
+            onChanged={({ applied }) => (applied ? reloadAll() : changes.reload())} ownRequestText={t("features.changes.ownRequest")} />
         </TabPanel>
         <TabPanel header={t("features.tabs.admins")}>
           <div className="bv-list-toolbar">

@@ -192,6 +192,7 @@ const PERMISSION_LIST = {
   'write:data-load': ['data-load', 'edit', 'Upload, validate and submit loads, record checklist steps, evidence and defects, mark the environment'],
   'approve:data-load': ['data-load', 'approve', 'Approve another user\'s data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock'],
   'read:features': ['features', 'view', 'See the catalogue of features and releases with their status (read only)'],
+  'enable:phase2-features': ['features', 'special', 'Request, approve and withdraw the enabling and disabling of Phase 2 functions (with a role of the setting features.tenant_enable_roles; never the own request)'],
   'read:users': ['users', 'view', 'See users and their sign-in history'],
   'write:users': ['users', 'edit', 'Create users, change their roles, reset passwords, lock and unlock'],
   'read:roles': ['roles', 'view', 'Not used by any screen (every signed-in user sees the list of roles)', { checked: false }],

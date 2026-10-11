@@ -16594,13 +16594,15 @@
   },
   "features": {
     "title": "Features & Releases",
-    "help": "Functions of the platform with their release tier and status in this environment. Phase 1 and platform functions are always on; Phase 2 and future releases are enabled by iorta TechNXT.",
+    "help": "Functions of the platform with their release tier and status in this environment. Phase 1 and platform functions are always on; Phase 2 is enabled by iorta TechNXT or by the SUPERID of TISPH; future releases are enabled by iorta TechNXT.",
+    "tenantHelp": "Enable or disable the Phase 2 functions of this environment for TISPH: choose the functions or Enable Phase 2, check the impact and submit. Another SUPERID or the iorta TechNXT platform administrator approves; never the requester. Future releases stay with iorta TechNXT.",
     "platformHelp": "Enable or disable Phase 2 and future-release features of this environment. Every change is approved by a second platform administrator.",
     "export": "Export to Excel",
     "search": "Search feature, module or requirement",
     "allTiers": "All tiers",
     "empty": "No features",
     "decisionPending": "Decision pending",
+    "decided": "Decided by TISPH {{id}}",
     "tampered": "Not trusted",
     "enablePhase2": "Enable Phase 2",
     "enableSelected": "Enable selected ({{count}})",
@@ -16637,8 +16639,13 @@
     "detail": {
       "general": "Feature",
       "decision": "Decision for TISPH",
+      "decisionId": "Decision",
       "question": "Question",
-      "options": "Options"
+      "options": "Options",
+      "answer": "Answer",
+      "decidedOn": "Decided On",
+      "decidedBy": "Decided By",
+      "decisionNote": "Note"
     },
     "notInEdition": {
       "title": "Not available in this edition",
@@ -16655,6 +16662,7 @@
       "enableTier": "Enable {{tier}}",
       "disableTier": "Disable {{tier}}",
       "submit": "Submit for approval",
+      "submitSingle": "Submit and apply",
       "from": "Now",
       "to": "After the change",
       "records": "Records",
@@ -16684,11 +16692,17 @@
       "effective": "Effective",
       "requestedBy": "Requested By",
       "decidedBy": "Decided By",
+      "raisedBy": "Raised Through",
+      "channels": {
+        "platform": "Platform (iorta TechNXT)",
+        "tenant": "Features & Releases (TISPH)"
+      },
       "empty": "No change requests",
       "approve": "Approve",
       "reject": "Reject",
       "withdraw": "Withdraw",
       "ownRequest": "Requested by you: another platform administrator approves",
+      "ownRequestTenant": "Requested by you: another SUPERID or the platform administrator approves",
       "approveTitle": "Approve change {{ref}}",
       "rejectTitle": "Reject change {{ref}}",
       "withdrawTitle": "Withdraw change {{ref}}",
