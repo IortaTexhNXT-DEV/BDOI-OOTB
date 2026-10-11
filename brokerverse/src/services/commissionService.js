@@ -11,6 +11,27 @@ class CommissionService {
     return response.data;
   }
 
+  // payee enrolment (FGA EN-01, EN-02): the form lists, add, edit and the verification by a second user
+  static async getReferrerOptions() {
+    const response = await getRequest("commission/referrer-accounts/options");
+    return response.data;
+  }
+
+  static async createReferrer(payload) {
+    const response = await postRequest("commission/referrer-accounts", payload);
+    return response.data;
+  }
+
+  static async updateReferrer(id, payload) {
+    const response = await putRequest(`commission/referrer-accounts/${id}`, payload);
+    return response.data;
+  }
+
+  static async verifyReferrer(id, payload = {}) {
+    const response = await postRequest(`commission/referrer-accounts/${id}/verify`, payload);
+    return response.data;
+  }
+
   static async getReferrerAccount(id) {
     const response = await getRequest(`commission/referrer-accounts/${id}`);
     return response.data;

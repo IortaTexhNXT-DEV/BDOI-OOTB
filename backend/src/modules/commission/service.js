@@ -65,10 +65,16 @@ async function eligibleSql(alias, params) {
   return `(${alias}.user_id IS NULL OR EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = ${alias}.user_id AND lower(ro.code) = ANY($${params.length})))`;
 }
 
-/** Why a referrer cannot be approved / paid (null when payable): no bank account on file (commission.require_bank_account). */
+/**
+ * Why a referrer cannot be approved / paid (null when payable): no bank account on file (commission.require_bank_account),
+ * enrolment or payment details awaiting verification (commission.payee_verification_required).
+ */
 export async function payoutBlockReason(ref) {
   if ((await getSetting('commission.require_bank_account', true)) && (!ref.bank_account_no || !String(ref.bank_account_no).trim())) {
     return `${ref.name} has no bank account on file. Add the bank name and account number to the referrer before approving or paying commission.`;
+  }
+  if (ref.verification_status === 'pending' && await payeeVerificationRequired()) {
+    return `The enrolment of ${ref.name} or a change of its payment details awaits verification by a second user. Verify the payee before approving or paying commission.`;
   }
   return null;
 }
@@ -141,6 +147,17 @@ export async function referrerSummaryRow(db, ref) {
     netPayable: sumNet(cur), whtType: `${payee} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct, whtCode: wht.code,
     bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
     schemeCode: ref.scheme_code || null, schemeOverride: ref.scheme_override === null || ref.scheme_override === undefined ? null : Number(ref.scheme_override), pendingScheme: ref.pending_scheme || null,
+    vendorGroup: ref.vendor_group || null, vendorCode: ref.vendor_code || null, ...(await verificationView(ref)),
+  };
+}
+
+/** The verification state of a payee (FGA EN-01): verified, or awaiting a second user with the fields changed. */
+async function verificationView(ref) {
+  const pending = ref.verification_status === 'pending' && (await payeeVerificationRequired());
+  return {
+    verificationStatus: pending ? 'pending' : 'verified', verificationChanges: pending ? ref.verification_changes || {} : null,
+    verificationRequestedBy: pending ? ref.verification_requested_by || null : null, verificationRequestedAt: pending ? ref.verification_requested_at || null : null,
+    verifiedBy: ref.verified_by || null, verifiedAt: ref.verified_at || null,
   };
 }
 
@@ -168,7 +185,9 @@ export async function buildAccount(db, id) {
   return {
     referrer: { id: ref.id, name: ref.name, status: ref.status, type: ref.referrer_type, level: ref.level, whtType: row.whtType, whtApplicable: ref.wht_applicable,
       whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin,
-      schemeCode: ref.scheme_code, schemeOverride: ref.scheme_override === null ? null : Number(ref.scheme_override), pendingScheme: ref.pending_scheme || null, parentReferrerId: ref.parent_referrer_id },
+      schemeCode: ref.scheme_code, schemeOverride: ref.scheme_override === null ? null : Number(ref.scheme_override), pendingScheme: ref.pending_scheme || null, parentReferrerId: ref.parent_referrer_id,
+      vendorGroup: ref.vendor_group || null, vendorCode: ref.vendor_code || null, address: ref.address || null, contactPerson: ref.contact_person || null, bankName: ref.bank_name || null,
+      whtCode: ref.wht_code || null, userId: ref.user_id || null, ...(await verificationView(ref)) },
     controls: { adjustmentApproval: await adjustmentApprovalRequired(), eligibleRequiresRemittance: await eligibleRequiresRemittance() },
     summary: { cycleLabel: cycleLabel(current), dueThisCycle: sumNet(cur), upcoming: sumNet(future), paidToDate: sumNet(past.filter((l) => l.status === 'Paid')) },
     currentCycle: { label: cycleLabel(current), totalNet: sumNet(cur), lines: await view(cur) },
@@ -616,6 +635,16 @@ export async function dashboard(db, scope = null) {
 }
 
 /** A payee's withholding tax code: an active EWT code of the tax codes master (null: the referrer type's code). */
+/** The lists of the payee enrolment form (GET /commission/referrer-accounts/options). */
+export async function referrerOptions(db) {
+  const codes = (await db.query("SELECT code, description, rate FROM tax_codes WHERE active AND tax_type IN ('EWT', 'FWT') ORDER BY code")).rows;
+  return {
+    types: REFERRER_TYPES, levels: ['L1', 'L2'], vendorGroups: (await getSetting('commission.vendor_groups', [])) || [],
+    whtCodes: codes.map((c) => ({ code: c.code, label: `${c.code} · ${Number(c.rate)}%${c.description ? ` · ${c.description}` : ''}` })),
+    verificationRequired: await payeeVerificationRequired(),
+  };
+}
+
 async function checkWhtCode(db, code) {
   if (code === undefined || code === null || code === '') return null;
   const row = (await db.query('SELECT code, tax_type, active FROM tax_codes WHERE upper(code) = upper($1)', [String(code)])).rows[0];
@@ -734,22 +763,98 @@ export async function changeShare(db, referrerId, lineId, b, user) {
   return { account: await buildAccount(db, referrerId), line: await lineView(await getLine(db, referrerId, lineId)), reason: reason?.text || null };
 }
 
+/** Fields of a payee that decide who is paid and how: a change to one of them is verified (FGA EN-02). */
+export const PAYMENT_FIELDS = ['name', 'tin', 'bank_name', 'bank_account_no', 'wht_code', 'wht_applicable'];
+const PII_FIELDS = new Set(['tin', 'bank_account_no']);
+export const payeeVerificationRequired = async () => (await getSetting('commission.payee_verification_required')) === true;
+
+/** The value of a payee field as compared for a change (identifiers in clear). */
+function plainField(col, v) {
+  if (v === null || v === undefined || v === '') return '';
+  const text = String(v);
+  return PII_FIELDS.has(col) && text.startsWith('pii:') ? String(revealPii(text) ?? '') : text;
+}
+
+/** The vendor group of the enrolment form: one of commission.vendor_groups (case-insensitive), or none. */
+async function checkVendorGroup(group) {
+  if (group === undefined || group === null || String(group).trim() === '') return null;
+  const groups = (await getSetting('commission.vendor_groups', [])) || [];
+  const found = groups.find((g) => String(g).toLowerCase() === String(group).trim().toLowerCase());
+  if (!found) throw badRequest('Validation failed', [{ path: 'vendorGroup', message: `Choose a vendor group of ${groups.join(', ') || 'the list'}` }]);
+  return found;
+}
+
+/** A vendor code is unique among the payees (upper case, letters, digits and hyphens). */
+async function checkVendorCode(db, code, id) {
+  if (code === undefined || code === null || String(code).trim() === '') return null;
+  const c = String(code).trim().toUpperCase();
+  if (!/^[A-Z0-9-]{2,30}$/.test(c)) throw badRequest('Validation failed', [{ path: 'vendorCode', message: 'The vendor code has 2 to 30 letters, digits or hyphens' }]);
+  const other = (await db.query('SELECT id, name FROM commission_referrers WHERE upper(vendor_code) = $1 AND id IS DISTINCT FROM $2', [c, id])).rows[0];
+  if (other) throw conflict(`Vendor code ${c} is already used by ${other.name}`);
+  return c;
+}
+
+/**
+ * Enrol (id null) or change a payee (FGA EN-01, EN-02). While commission.payee_verification_required is on, a new payee
+ * and a change of its payment details (PAYMENT_FIELDS) await verification by a second user (verifyReferrer); the
+ * fields changed are kept (identifiers only as "changed"). Returns the id.
+ */
 export async function upsertReferrer(db, id, b, user) {
   if (b.whtRate !== undefined && b.whtRate !== null) {
     throw badRequest('Validation failed', [{ path: 'whtRate', message: 'Withholding tax is chosen by tax code (whtCode, Master > Finance > Taxation), not by rate' }]);
   }
+  const verify = await payeeVerificationRequired();
   const vals = [b.name, b.type || 'Agent', b.level ?? null, b.parentReferrerId || null, b.userId || null, b.tin || null, b.email || null, b.phone || null,
-    await checkWhtCode(db, b.whtCode), b.whtApplicable ?? true, b.bankName || null, b.bankAccountNo || null, b.status || 'Active'];
+    await checkWhtCode(db, b.whtCode), b.whtApplicable ?? true, b.bankName || null, b.bankAccountNo || null, b.status || 'Active',
+    await checkVendorGroup(b.vendorGroup), await checkVendorCode(db, b.vendorCode, id), b.address || null, b.contactPerson || null];
   if (id) {
-    await getReferrer(db, id);
+    const before = await getReferrer(db, id);
+    const next = { name: b.name ?? before.name, tin: vals[5], bank_name: vals[10], bank_account_no: vals[11], wht_code: vals[8], wht_applicable: vals[9] };
+    const changed = {};
+    for (const col of PAYMENT_FIELDS) {
+      const to = next[col];
+      // a masked identifier sent back by the form keeps the stored value
+      if (PII_FIELDS.has(col) && typeof to === 'string' && to.includes('**')) continue;
+      if (plainField(col, before[col]) === plainField(col, to)) continue;
+      changed[col] = PII_FIELDS.has(col) ? { from: before[col] ? 'on file' : null, to: to ? 'changed' : null } : { from: before[col] ?? null, to: to ?? null };
+    }
     await db.query(`UPDATE commission_referrers SET name = COALESCE($2,name), referrer_type = $3, level = $4, parent_referrer_id = $5, user_id = $6, tin = $7, email = $8,
-      phone = $9, wht_code = $10, wht_applicable = $11, bank_name = $12, bank_account_no = $13, status = $14, updated_at = now() WHERE id = $1`, [id, ...vals]);
+      phone = $9, wht_code = $10, wht_applicable = $11, bank_name = $12, bank_account_no = $13, status = $14, vendor_group = $15, vendor_code = $16, address = $17,
+      contact_person = $18, updated_at = now() WHERE id = $1`, [id, ...vals]);
+    if (verify && Object.keys(changed).length) {
+      // a second change before the verification adds to the fields under verification (the oldest value is kept)
+      const pending = before.verification_status === 'pending' ? { ...(before.verification_changes || {}) } : {};
+      for (const [k, v] of Object.entries(changed)) if (!pending[k]) pending[k] = v;
+      await db.query(`UPDATE commission_referrers SET verification_status = 'pending', verification_changes = $2, verification_requested_by = $3,
+        verification_requested_at = now(), verified_by = NULL, verified_at = NULL, verification_note = NULL WHERE id = $1`, [id, JSON.stringify(pending), user.id]);
+    }
     return id;
   }
   const newId = b.id || `ref-${String(b.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)}`;
   const exists = (await db.query('SELECT 1 FROM commission_referrers WHERE id = $1', [newId])).rows[0];
   if (exists) throw conflict(`Referrer ${newId} already exists`);
   await db.query(`INSERT INTO commission_referrers(id, name, referrer_type, level, parent_referrer_id, user_id, tin, email, phone, wht_code, wht_applicable,
-    bank_name, bank_account_no, status, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [newId, ...vals, user.id]);
+    bank_name, bank_account_no, status, vendor_group, vendor_code, address, contact_person, created_by, verification_status, verification_changes,
+    verification_requested_by, verification_requested_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,
+  [newId, ...vals, user.id, verify ? 'pending' : 'verified', verify ? JSON.stringify({ enrolment: { from: null, to: 'new payee' } }) : null, verify ? user.id : null,
+    verify ? new Date() : null]);
   return newId;
+}
+
+/**
+ * Verify the enrolment of a payee or the change of its payment details (approve:commission), never by the user who
+ * enrolled or changed it. Returns the payee row before.
+ */
+export async function verifyReferrer(db, id, user, { note } = {}) {
+  const ref = (await db.query('SELECT * FROM commission_referrers WHERE id = $1 FOR UPDATE', [id])).rows[0];
+  if (!ref) throw notFound('Referrer not found');
+  if (ref.verification_status !== 'pending') throw conflict(`${ref.name} has nothing awaiting verification`);
+  await assertChecker(user, ref.verification_requested_by, `enrolment of ${ref.name}`, { configurable: false });
+  await db.query(`UPDATE commission_referrers SET verification_status = 'verified', verified_by = $2, verified_at = now(), verification_note = $3,
+    verification_changes = NULL, updated_at = now() WHERE id = $1`, [id, user.id, note || null]);
+  if (ref.verification_requested_by) {
+    await notifyDecision({ userId: ref.verification_requested_by, decidedBy: user.id, document: 'Payee', number: ref.name, approved: true, status: 'verified',
+      by: user.username, reason: note || null, link: `/commission/referrer-accounts/${ref.id}`, entity: 'commission_referrer', entityId: ref.id });
+  }
+  return ref;
 }

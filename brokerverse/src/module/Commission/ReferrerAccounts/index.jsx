@@ -16,6 +16,7 @@ import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import { hasPermission } from "../../../utils/canOpen";
 import { formatAmount } from "../utils/formatAmount";
+import PayeeDialog from "./PayeeDialog";
 import "./style.scss";
 
 const REQUEST_KINDS = ["rate", "reversal", "wht"];
@@ -40,6 +41,8 @@ const ReferrerAccounts = () => {
   const [type, setType] = useState(null);
   const [version, setVersion] = useState(0);
   const canDecide = hasPermission("approve:commission");
+  const canWrite = hasPermission("write:commission");
+  const [payee, setPayee] = useState(null);
   const loader = useCallback(() => CommissionService.getReferrerAccounts().then((r) => r?.data || r), [version]); // eslint-disable-line react-hooks/exhaustive-deps
   const { data, loading, refreshing } = useStableLoad(loader);
   const requestsLoader = useCallback(() => (canDecide ? CommissionService.listRequests({ status: "pending" }).then((r) => r?.data || r || []) : Promise.resolve([])), [canDecide, version]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -72,10 +75,41 @@ const ReferrerAccounts = () => {
     setVersion((v) => v + 1);
   };
 
+  const openEdit = async (r) => {
+    try {
+      const acct = await CommissionService.getReferrerAccount(r.id);
+      setPayee((acct?.data || acct)?.referrer || { id: r.id, name: r.name });
+    } catch (e) {
+      toast.current?.show({ severity: "error", summary: k("title"), detail: e?.response?.data?.message || k("payee.loadFailed"), life: 5000 });
+    }
+  };
+
+  const saved = (account, message) => {
+    setPayee(null);
+    const pending = account?.referrer?.verificationStatus === "pending";
+    toast.current?.show({ severity: pending ? "warn" : "success", summary: k("title"), detail: message || k("payee.saved"), life: 5000 });
+    setVersion((v) => v + 1);
+  };
+
+  const verify = async (r) => {
+    const ok = await openConfirm({
+      title: k("payee.verifyTitle", { name: r.name }), severity: "neutral", message: k("payee.verifyMessage"),
+      facts: Object.entries(r.verificationChanges || {}).map(([field, change]) => ({ label: k(`payee.fields.${field}`, { defaultValue: field }), value: [change?.from ?? "—", change?.to ?? "—"].join(" → ") })),
+      input: { type: "textarea", label: k("requests.note"), maxLength: 500 },
+      confirmLabel: k("payee.verify"),
+      onConfirm: (note) => CommissionService.verifyReferrer(r.id, { note: note || undefined }),
+    });
+    if (!ok) return;
+    toast.current?.show({ severity: "success", summary: k("title"), detail: k("payee.verified", { name: r.name }), life: 4000 });
+    setVersion((v) => v + 1);
+  };
+
   return (
     <div className="referrer-accounts-page">
       <Toast ref={toast} />
-      <PageHeader title={k("title")} home={t("commissionLine.commission")} trail={[k("title")]} help={k("help")} />
+      <PageHeader title={k("title")} home={t("commissionLine.commission")} trail={[k("title")]} help={k("help")}
+        actions={canWrite ? <Button label={k("payee.add")} icon="pi pi-plus" onClick={() => setPayee({})} /> : null} />
+      <PayeeDialog payee={payee} onHide={() => setPayee(null)} onSaved={saved} />
       <StatCards items={[
         { key: "due", label: summary?.cycleLabel ? k("dueThisCycle", { cycle: summary.cycleLabel }) : k("dueThisCycleNoLabel"), value: summary ? formatAmount(summary.dueThisCycle) : undefined },
         { key: "ready", label: k("readyToPay"), value: summary ? formatAmount(summary.readyToPay) : undefined },
@@ -122,7 +156,20 @@ const ReferrerAccounts = () => {
           <Column header={k("columns.netPayable")} body={(r) => <span className="net-payable">{formatAmount(r.netPayable)}</span>} className="bv-num" headerClassName="bv-num" sortable sortField="netPayable" />
           <Column header={k("columns.wht")} body={(r) => (r.whtApplicable === false ? t("commissionLine.whtState.off") : r.whtType)} />
           <Column header={k("columns.bank")} body={(r) => r.bankAccount || <StatusChip code="on-hold" label={t("commissionLine.notOnFile")} />} />
-          <Column header={k("columns.status")} body={(r) => <StatusChip code={String(r.status || "").toLowerCase()} label={r.status} />} />
+          <Column header={k("columns.status")} body={(r) => (
+            <div className="flex gap-1 flex-wrap">
+              <StatusChip code={String(r.status || "").toLowerCase()} label={r.status} />
+              {r.verificationStatus === "pending" ? <StatusChip code="pending" severity="warning" label={k("payee.awaitingVerification")} /> : null}
+            </div>
+          )} />
+          {canWrite || canDecide ? (
+            <Column header="" body={(r) => (
+              <div className="flex gap-2" onClick={(e) => e.stopPropagation()} role="presentation">
+                {canWrite ? <Button icon="pi pi-pencil" text size="small" aria-label={k("payee.edit", { name: r.name })} tooltip={k("payee.editShort")} onClick={() => openEdit(r)} /> : null}
+                {canDecide && r.verificationStatus === "pending" ? <Button label={k("payee.verify")} size="small" outlined onClick={() => verify(r)} /> : null}
+              </div>
+            )} />
+          ) : null}
         </DataTable>
       </div>
     </div>

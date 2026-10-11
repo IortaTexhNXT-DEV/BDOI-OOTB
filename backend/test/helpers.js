@@ -61,7 +61,7 @@ export async function withReferenceCommissionControls() {
   const { query } = await import('../src/db/pool.js');
   const { clearSettingsCache } = await import('../src/lib/settings.js');
   await query(`UPDATE app_settings SET value = 'false' WHERE key IN ('commission.peril_based_motor', 'commission.rules_approval_required',
-    'commission.adjustment_approval_required', 'commission.eligible_requires_remittance')`);
+    'commission.adjustment_approval_required', 'commission.eligible_requires_remittance', 'commission.payee_verification_required')`);
   clearSettingsCache();
 }
 /**
