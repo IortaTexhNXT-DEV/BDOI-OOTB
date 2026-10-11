@@ -12,12 +12,41 @@
  *             paid. The remittance returns to the preparer (Returned); its lines, the client payment records and the
  *             policies no longer read remitted, and the variance shares made Eligible by the remittance go back to
  *             Accrued while commission.eligible_requires_remittance is on.
+ *   send      an approved or settled remittance is e-mailed to the insurer with its schedule (sendRemittance).
  */
-import { withTransaction } from '../../db/pool.js';
-import { conflict, forbidden, notFound } from '../../lib/errors.js';
+import { query, withTransaction } from '../../db/pool.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { documentAttachment, queueEmail } from '../../lib/mailer.js';
+import { companyName } from '../../lib/letterhead.js';
+import { isoDate } from '../../lib/dates.js';
+import { renderTemplate } from '../documents/common.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { statusLabels } from './service.js';
+
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/**
+ * E-mail an approved or settled remittance to the insurer (FR-RMT-015): to the address given, else the insurer's
+ * contact e-mail, with the insurer's copy of the remittance schedule (XLSX) attached while
+ * remittance.email_schedule_attachment is on. Recorded as sent on the remittance.
+ */
+export async function sendRemittance(id, body, user) {
+  const r = (await query(`SELECT r.*, i.name AS insurer_name, i.contact_email AS insurer_email FROM remittances r LEFT JOIN insurance_companies i ON i.id = r.insurance_company_id
+    WHERE (r.id = $1 OR r.remittance_number = $1) AND r.kind = 'direct-bill'`, [String(id)])).rows[0];
+  if (!r) throw notFound('Remittance not found');
+  if (!['approved', 'settled'].includes(r.status)) throw await wrongStatus(r, 'sent to the insurer', ['approved', 'settled']);
+  const to = String(body?.email || r.insurer_email || '').trim();
+  if (!to) throw badRequest('Validation failed', [{ path: 'email', message: `${r.insurer_name || 'The insurer'} has no e-mail address: enter one` }]);
+  const vars = { remittanceNo: r.remittance_number, insurerName: r.insurer_name || '', amount: Number(r.net_due).toLocaleString('en-US', { minimumFractionDigits: 2 }),
+    currency: r.currency || 'PHP', remittanceDate: isoDate(r.remittance_date) || '', companyName: await companyName() };
+  const attach = (await getSetting('remittance.email_schedule_attachment', true)) !== false;
+  const emailId = await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.schedule_email_subject', 'Remittance {{remittanceNo}}'), vars, { html: false }),
+    html: renderTemplate(await getSetting('remittance.schedule_email_body', '<p>Remittance {{remittanceNo}}</p>'), vars), template: 'remittance-schedule', entity: 'remittance',
+    entityId: r.id, attachments: attach ? [documentAttachment('remittance-schedule', { remittanceId: r.id }, `${r.remittance_number}_Schedule.xlsx`, XLSX)] : [] });
+  await query('UPDATE remittances SET sent_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [r.id, user.id]);
+  return { id: r.id, after: { emailedTo: to, emailId, scheduleAttached: attach }, message: `${r.remittance_number} e-mailed to ${to}${attach ? ' with its schedule' : ''}` };
+}
 
 const lockRemittance = async (c, id) => {
   const r = (await c.query("SELECT * FROM remittances WHERE (id = $1 OR remittance_number = $1) AND kind = 'direct-bill' FOR UPDATE", [String(id)])).rows[0];

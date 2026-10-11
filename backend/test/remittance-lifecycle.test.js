@@ -135,3 +135,37 @@ describe('revoke the approval of a remittance', () => {
     clearSettingsCache();
   });
 });
+
+describe('send a remittance to the insurer with its schedule (FR-RMT-015)', () => {
+  it('e-mails an approved remittance with the insurer copy of the schedule; not a draft; the attachment follows the setting', async () => {
+    await q("UPDATE insurance_companies SET contact_email = 'remit@lifecycle.ph' WHERE code = 'LCYINS'");
+    await policy('LCY-6');
+    const rem = await draft([{ policyNo: 'LCY-6' }]);
+    expect((await people.maker('post', `/remittance/remittances/${rem.id}/send`).send({})).status).toBe(409);
+    await submit(rem.id);
+    const a = await pendingOf(rem.id);
+    await people.checker('post', `/remittance/approvals/${a.id}/approve`).send({ version: a.version });
+    const s = await people.maker('post', `/remittance/remittances/${rem.id}/send`).send({});
+    expect(s.status, JSON.stringify(s.body)).toBe(200);
+    expect(s.body.message).toBe(`${rem.remittanceNo} e-mailed to remit@lifecycle.ph with its schedule`);
+    const [mail] = await q("SELECT to_address, attachments FROM email_outbox WHERE entity = 'remittance' AND entity_id = $1 AND template = 'remittance-schedule' ORDER BY id DESC LIMIT 1", [rem.id]);
+    expect(mail.to_address).toBe('remit@lifecycle.ph');
+    expect(mail.attachments).toEqual([expect.objectContaining({ kind: 'document', document: 'remittance-schedule', params: { remittanceId: rem.id } })]);
+    const { generateDocument } = await import('../src/modules/documents/emailDocuments.js');
+    const { readWorkbook } = await import('../src/modules/documents/xlsx.js');
+    const doc = await generateDocument('remittance-schedule', { remittanceId: rem.id });
+    const [sheet] = readWorkbook(doc.content);
+    const head = sheet.rows.find((r) => r[0] === 'ISSUED DATE');
+    expect(head).toContain('REMITTING OD/TH');
+    expect(head).not.toContain('VARIANCE SHARE');
+    expect(sheet.rows.some((r) => r.includes('LCY-6'))).toBe(true);
+
+    await q("UPDATE app_settings SET value = 'false' WHERE key = 'remittance.email_schedule_attachment'");
+    const { clearSettingsCache } = await import('../src/lib/settings.js');
+    clearSettingsCache();
+    const plain = await people.maker('post', `/remittance/remittances/${rem.id}/send`).send({ email: 'other@insurer.ph' });
+    expect(plain.body.message).toBe(`${rem.remittanceNo} e-mailed to other@insurer.ph`);
+    await q("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.email_schedule_attachment'");
+    clearSettingsCache();
+  });
+});

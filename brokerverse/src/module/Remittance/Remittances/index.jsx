@@ -125,6 +125,17 @@ const Remittances = () => {
     refresh();
   };
 
+  const sendToInsurer = async (row) => {
+    const done = await openConfirm({
+      title: t("remittance.list.send.title", { reference: row.remittanceNo }), severity: "neutral",
+      input: { type: "text", label: t("remittance.list.send.email"), required: false, maxLength: 200 },
+      confirmLabel: t("remittance.list.actions.send"), onConfirm: (email) => remittanceService.sendRemittance(row.id, email || undefined),
+    });
+    if (done === null) return;
+    toast.current?.show({ severity: "success", summary: row.remittanceNo, detail: t("remittance.list.send.done"), life: 5000 });
+    refresh();
+  };
+
   const setSegment = (key) => update({ segment: key, kpi: null, status: null });
   const segments = [
     ...(canWrite ? ["my-work"] : []), "drafts", "in-approval", "in-payment", "all",
@@ -182,6 +193,7 @@ const Remittances = () => {
     if (action.code === "view" || action.code === "open-voucher") navigate(action.link || row.link);
     else if (action.code === "submit") submitRows([row]);
     else if (LIFECYCLE[action.code]) changeStatus(row, action);
+    else if (action.code === "send") sendToInsurer(row);
     else if (DOWNLOADS.includes(action.code)) download(action.href, action.href.split("/").pop());
   };
 

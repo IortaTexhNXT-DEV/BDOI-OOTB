@@ -245,6 +245,14 @@ const lifecycleActions = [
   ['cancel', 'Cancel a draft or returned remittance (a remittance_cancel reason): its policies are free for the next run', write, 'RCN-DUPLICATE', 'cancelRemittance'],
   ['revoke', 'Revoke the approval of a remittance not yet paid (approve:remittance; a remittance_revoke reason): refused once it is on a settlement, billed, or a commission line it made payable is approved or paid; back to the preparer as Returned', approve, 'RRV-ERROR', 'revokeRemittance'],
 ];
+define({
+  method: 'POST', path: '/remittances/:id/send', summary: 'E-mail an approved or settled remittance to the insurer (email, else the insurer contact e-mail) with the insurer copy of its schedule (XLSX) attached while remittance.email_schedule_attachment is on',
+  screen: `${S('Remittances')} > Send to insurer`, middleware: write, request: { email: 'remittance@insurer.ph' }, response: { success: true, data: rem },
+  handler: async (req, res) => {
+    const out = await logged('remittance', 'send', (r) => lifecycle.sendRemittance(r.params.id, r.body || {}, r.user))(req, res);
+    ok(res, await svc.getRemittance(out.id), out.message);
+  },
+});
 for (const [action, summary, middleware, example, fn] of lifecycleActions) {
   define({
     method: 'POST', path: `/remittances/:id/${action}`, summary, screen: `${S('Remittances')} > ${action[0].toUpperCase()}${action.slice(1)}`, middleware,

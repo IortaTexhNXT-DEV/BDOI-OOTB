@@ -51,6 +51,8 @@ export const remittanceService = {
   withdrawRemittance: (remId, reason) => post(`${R}/remittances/${id(remId)}/withdraw`, reason),
   cancelRemittance: (remId, reason) => post(`${R}/remittances/${id(remId)}/cancel`, reason),
   revokeRemittance: (remId, reason) => post(`${R}/remittances/${id(remId)}/revoke`, reason),
+  // e-mail an approved or settled remittance to the insurer with its schedule
+  sendRemittance: (remId, email) => post(`${R}/remittances/${id(remId)}/send`, email ? { email } : {}),
   // policies held part-paid on the fully paid basis (instalment hold)
   heldPolicies: (params) => apiRequest("GET", `${R}/held`, { params }).then((r) => r.data),
 

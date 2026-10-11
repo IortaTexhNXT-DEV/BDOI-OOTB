@@ -139,6 +139,9 @@ export function actionsFor(r, user) {
   if (r.status === 'for-approval' && hasPermission(user, 'write:remittance') && [r.submitted_by, r.created_by].includes(user?.id)) {
     out.push({ code: 'withdraw', label: 'Withdraw from approval', allowed: true, reasonContext: 'remittance_withdraw' });
   }
+  if (['approved', 'settled'].includes(r.status) && hasPermission(user, 'write:remittance')) {
+    out.push({ code: 'send', label: 'Send to insurer', allowed: true });
+  }
   if (r.status === 'approved' && !r.voucher_id && hasPermission(user, 'approve:remittance')) {
     out.push({ code: 'revoke', label: 'Revoke approval', allowed: true, reasonContext: 'remittance_revoke' });
   }

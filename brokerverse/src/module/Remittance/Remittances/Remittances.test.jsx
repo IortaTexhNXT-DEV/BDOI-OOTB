@@ -13,7 +13,7 @@ jest.mock("../../../services/remittanceService", () => ({
   __esModule: true,
   remittanceService: {
     listRegister: jest.fn(), summary: jest.fn(), listSchedules: jest.fn(), submitRemittances: jest.fn(), download: jest.fn(),
-    withdrawRemittance: jest.fn(), cancelRemittance: jest.fn(), revokeRemittance: jest.fn(),
+    withdrawRemittance: jest.fn(), cancelRemittance: jest.fn(), revokeRemittance: jest.fn(), sendRemittance: jest.fn(),
     exportRegisterPath: jest.fn(() => "/remittance/remittances/export.xlsx"), listImports: jest.fn(), importLimits: jest.fn(), getImport: jest.fn(),
   },
   masterService: { options: jest.fn() },
@@ -138,6 +138,18 @@ describe("Remittances worklist", () => {
     fireEvent.click(dialog.getByRole("button", { name: "Cancel remittance" }));
     await waitFor(() => expect(remittanceService.cancelRemittance).toHaveBeenCalledWith("rm_31", { reasonCode: "RCN-DUPLICATE", note: undefined }));
     await waitFor(() => expect(remittanceService.listRegister.mock.calls.length).toBeGreaterThan(calls));
+  });
+
+  it("sends an approved remittance to the insurer from its row menu", async () => {
+    const SEND = { code: "send", label: "Send to insurer", allowed: true };
+    remittanceService.listRegister.mockResolvedValue(page([row(41, { status: "approved", statusLabel: "Approved", actions: [VIEW, SEND, ...DOWNLOADS] })]));
+    remittanceService.sendRemittance.mockResolvedValue({});
+    show();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for REM-2026-00041" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Send to insurer" }));
+    const dialog = within(await screen.findByRole("dialog"));
+    fireEvent.click(dialog.getByRole("button", { name: "Send to insurer" }));
+    await waitFor(() => expect(remittanceService.sendRemittance).toHaveBeenCalledWith("rm_41", undefined));
   });
 
   it("a General Manager views only: no tick box, primary button, Run now or Import; the row menu has View and downloads", async () => {

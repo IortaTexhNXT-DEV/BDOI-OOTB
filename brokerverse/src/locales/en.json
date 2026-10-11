@@ -1465,7 +1465,8 @@
         "open-voucher": "Open voucher",
         "withdraw": "Withdraw from approval",
         "cancel": "Cancel remittance",
-        "revoke": "Revoke approval"
+        "revoke": "Revoke approval",
+        "send": "Send to insurer"
       },
       "submit": {
         "title": "Submit for approval",
@@ -1553,6 +1554,11 @@
           "message": "The remittance returns to its preparer as Returned and its policies no longer read remitted. Only a remittance not yet on a settlement, billed or paid can be revoked.",
           "done": "Approval revoked; the remittance is returned to its preparer"
         }
+      },
+      "send": {
+        "title": "Send {{reference}} to the insurer",
+        "email": "E-mail (blank: the insurer's contact e-mail)",
+        "done": "E-mailed to the insurer"
       }
     },
     "import": {
