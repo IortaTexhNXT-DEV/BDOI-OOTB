@@ -3,6 +3,7 @@ import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { canRead, canWrite, sendList } from '../masters/helpers.js';
+import { requireAuth, requirePermission } from '../../lib/auth.js';
 import * as svc from './service.js';
 import { many } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -14,6 +15,7 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 const { router, define } = moduleRouter('Product Configurator', '/product-configurator');
 const read = canRead('products');
 const write = canWrite('products');
+const approve = [requireAuth, requirePermission('approve:products')];
 const tpl = {
   id: 3, templateCode: 'MOT-003-2025', name: 'Motor Insurance Basic Plan', category: 'Motor', lineOfBusiness: 'Motor Vehicle', status: 'Active', version: 'v3.2',
   effectiveDate: '2025-01-01', baseRate: 2.5, minPremium: 10000, commissionRate: 12, configuration: { premiumRates: { private_cars: '2' } }, features: {}, insurers: [], tags: [],
@@ -53,7 +55,7 @@ define({
   handler: async (req, res) => {
     const t = await svc.createTemplate(req.body || {}, req.user);
     await audit(req, { entity: 'product_template', entityId: t.id, action: 'create', after: t });
-    created(res, t, 'Template created');
+    created(res, t, t.status === 'Draft' && req.body?.status && req.body.status !== 'Draft' ? 'Template created as a draft: submit it for approval to put it in force' : 'Template created');
   },
 });
 define({
@@ -73,6 +75,38 @@ for (const action of ['retire', 'reactivate']) {
       const { before, after } = await svc.setTemplateLifecycle(req.params.id, action, req.body?.reason, req.user);
       await audit(req, { entity: 'product_template', entityId: req.params.id, action, before, after });
       ok(res, after, `Template ${action === 'retire' ? 'retired' : 'reactivated'}`);
+    },
+  });
+}
+// ---------- review: draft, submit, approve or return (product.approval_required; PROD-03, SEC-03) ----------
+define({
+  method: 'POST', path: '/products/:id/submit', summary: 'Submit a draft template (or an inactive or retired one to be put back in force) for approval', screen: 'Product Configurator > Product Templates > Submit for approval',
+  middleware: write, request: { note: 'New 2027 rates' }, response: { success: true, data: { ...tpl, status: 'Pending Approval', submittedBy: 'it.admin' } },
+  handler: async (req, res) => {
+    const { before, after } = await svc.submitTemplate(req.params.id, req.body?.note, req.user);
+    await audit(req, { entity: 'product_template', entityId: req.params.id, action: 'submit', before, after });
+    ok(res, after, 'Template submitted for approval');
+  },
+});
+define({
+  method: 'POST', path: '/products/:id/withdraw', summary: 'Withdraw a template from approval (back to Draft)', screen: 'Product Configurator > Product Templates > Withdraw',
+  middleware: write, response: { success: true, data: { ...tpl, status: 'Draft' } },
+  handler: async (req, res) => {
+    const { before, after } = await svc.withdrawTemplate(req.params.id, req.user);
+    await audit(req, { entity: 'product_template', entityId: req.params.id, action: 'withdraw', before, after });
+    ok(res, after, 'Template withdrawn from approval');
+  },
+});
+for (const decision of ['approve', 'return']) {
+  define({
+    method: 'POST', path: `/products/:id/${decision}`, summary: decision === 'approve' ? 'Approve a template waiting for approval: it goes in force (never one you created, changed or submitted)'
+      : 'Return a template waiting for approval to Draft with a note (never one you created, changed or submitted)',
+    screen: 'Product Configurator > Product Templates; My Work > Approvals', middleware: approve, request: { note: decision === 'approve' ? 'Checked against the insurer tariff' : 'Own Damage rate missing for SUVs' },
+    response: { success: true, data: { ...tpl, status: decision === 'approve' ? 'Active' : 'Draft', decision: decision === 'approve' ? 'approved' : 'returned' } },
+    handler: async (req, res) => {
+      const { before, after } = await svc.decideTemplate(req.params.id, decision, req.body?.note, req.user);
+      await audit(req, { entity: 'product_template', entityId: req.params.id, action: decision, before, after });
+      ok(res, after, decision === 'approve' ? 'Template approved and in force' : 'Template returned to draft');
     },
   });
 }

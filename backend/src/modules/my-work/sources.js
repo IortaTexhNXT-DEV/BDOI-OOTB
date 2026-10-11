@@ -364,6 +364,12 @@ async function approvals(ctx) {
       status: 'pm.status', link: "'/sales/promotions'", created_at: 'pm.created_at' })}
       FROM promotions pm WHERE pm.status = 'pending-approval' AND ${notMine(ctx, 'pm.created_by')} AND ${notMine(ctx, 'pm.updated_by')} AND ${notMine(ctx, 'pm.submitted_by')}`);
   }
+  // product templates submitted for review (PROD-03, migration 0660): never decided by who created, changed or submitted them
+  if (ctx.can('approve:products') && await has('product_templates')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Product template'", id: "'ptpl-' || pt.id", ref: "pt.template_code || ' ' || COALESCE(pt.version_label, 'v' || pt.version)", title: 'pt.name',
+      due_date: due('COALESCE(pt.submitted_at, pt.updated_at)'), status: 'pt.status', link: "'/product-configurator/templates'", created_at: 'COALESCE(pt.submitted_at, pt.created_at)' })}
+      FROM product_templates pt WHERE pt.status = 'Pending Approval' AND ${notMine(ctx, 'pt.created_by')} AND ${notMine(ctx, 'pt.updated_by')} AND ${notMine(ctx, 'pt.submitted_by')}`);
+  }
   if (ctx.can('approve:discount-caps') && await has('discount_caps')) {
     out.push(`SELECT ${select({ ...base, kind: "'Discount cap'", id: "'dc-' || dc.id", ref: "'DC-' || dc.id", title: "pr.name || ' - ' || replace(initcap(replace(dc.channel_type, '_', ' ')), 'Agent', 'Agent / referrer')",
       due_date: due('dc.created_at'), status: 'dc.status', link: "'/master/finance/discount-caps'", created_at: 'dc.created_at' })}

@@ -170,6 +170,7 @@ const PERMISSION_LIST = {
   'write:reports': ['reports', 'edit', 'Build and schedule reports (Report Builder)'],
   'read:products': ['products', 'view', 'See products and product templates'],
   'write:products': ['products', 'edit', 'Configure products, covers, rating and rules'],
+  'approve:products': ['products', 'approve', 'Approve or return product templates submitted for review (never one you submitted or last changed)'],
   'read:masters': ['masters', 'view', 'See reference masters'],
   'write:masters': ['masters', 'edit', 'Maintain reference masters'],
   'read:channels': ['channels', 'view', 'See dealers, financing banks, affinity partners and their production'],
