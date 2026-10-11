@@ -101,8 +101,10 @@ describe('open policy set-up (FR-PCL-001 to 004)', () => {
   it('activation issues the open policy without a bill, listing the covers and the remittance basis; an overlapping parcel cover is refused', async () => {
     const r = await as['pc.ops']('post', `/marine/open-covers/${cover.id}/activate`);
     expect(r.status, JSON.stringify(r.body)).toBe(200);
-    const p = (await q('SELECT premium_total, doc FROM policies WHERE id = $1', [r.body.data.policyId]))[0];
+    const p = (await q('SELECT premium_total, doc, details FROM policies WHERE id = $1', [r.body.data.policyId]))[0];
     expect(Number(p.premium_total)).toBe(0);
+    // remitted bill by bill (remittance per bill of open covers)
+    expect(p.details.openCover).toBe(true);
     expect(p.doc).toMatchObject({ openCoverType: 'parcel', remittanceBasis: 'gross' });
     expect(p.doc.riskDetails.covers).toContain('Personal Accident: sum insured 50000.00, premium 50.00');
     const again = await as['pc.ops']('post', '/marine/open-covers').send({ ...contract, periodFrom: T, periodTo: addDays(T, 300) });

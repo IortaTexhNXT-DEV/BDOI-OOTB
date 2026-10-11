@@ -1,6 +1,7 @@
 /**
- * Open covers (Operations > Marine Open Covers): Parcel / Courier for TISPH (TIS-BRD-PJRN-09, FRS PJRN-09); marine cargo
- * is a future-release feature (modules/features, marine-cargo).
+ * Open covers (Operations > Marine Open Covers): Parcel / Courier and Marine Cargo inland for TISPH (TIS-BRD-PJRN-09, FRS
+ * PJRN-09, features open-covers and marine-cargo-inland, Phase 1); cargo on another conveyance than the inland ones
+ * (marine.inland_conveyances) is the Phase 2 feature marine-cargo, enabled by SUPERID (terms.js#checkTerms).
  *
  * Contract: a client's open cover with an insurer for a period, of one of two types (FR-PCL-001):
  *   cargo   a rate and a limit per conveyance (any one sending), the mark-up on invoice value and a minimum premium per
@@ -24,7 +25,7 @@
  * the commission goes to Direct Bill Processing (FR-PCL-040 to 042).
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { badRequest, conflict, notFound, refused } from '../../lib/errors.js';
+import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate, addDays } from '../../lib/dates.js';
@@ -128,6 +129,7 @@ export async function coverChoices() {
   const layouts = await fileLayouts();
   return {
     types: [{ value: 'parcel', label: 'Parcel / Courier' }, { value: 'cargo', label: 'Marine Cargo' }], cargoEnabled: await isFeatureOn('marine-cargo'),
+    inlandConveyances: (await getSetting('marine.inland_conveyances', ['Land'])) || ['Land'],
     defaultCharge: num(await getSetting('parcel.default_charge', 500)), defaultCovers: (await getSetting('parcel.default_covers', [])) || [],
     deliveryTypes: (await getSetting('parcel.delivery_types', [])) || [], coverLines: (await getSetting('parcel.cover_lines', ['MARINE', 'PA'])) || [],
     maxCovers: Number(await getSetting('parcel.max_covers', 5)), dailyDeclaration: Boolean(await getSetting('marine.default_daily_declaration', true)),
@@ -174,12 +176,8 @@ export async function createCover(b, userId) {
     const o = await overlapping({ query }, { clientId: client.id, insurerId: b.insuranceCompanyId, from, to });
     if (o) throw overlapError(o);
   }
-  // marine cargo is a future-release feature (modules/features): the open covers of TISPH are parcel and courier
-  const cargo = await isFeatureOn('marine-cargo');
-  const productId = b.productId || (await one('SELECT id FROM products WHERE upper(code) = $1 LIMIT 1', [type === 'cargo' && cargo ? 'MARINE' : 'PARCEL']))?.id || null;
-  if (!cargo && b.productId && (await one('SELECT upper(code) AS code FROM products WHERE id = $1', [b.productId]))?.code === 'MARINE') {
-    throw refused('FEATURE_NOT_ENABLED', 'Marine cargo open covers are not available in this edition');
-  }
+  // a cargo cover is on the MARINE product, a parcel cover on PARCEL (the conveyances beyond inland are checked with the terms)
+  const productId = b.productId || (await one('SELECT id FROM products WHERE upper(code) = $1 LIMIT 1', [type === 'cargo' ? 'MARINE' : 'PARCEL']))?.id || null;
   const number = await nextDocumentNumber('open_cover', { unique: { table: 'open_covers', column: 'cover_number' } });
   const r = await one(`INSERT INTO open_covers(cover_number, client_id, insurance_company_id, product_id, insurer_reference, period_from, period_to, goods_description, voyage_scope,
       clauses, currency, rates, markup_percent, minimum_premium, estimated_annual_value, declaration_frequency, commission_rate, owner_user_id, created_by, updated_by,
@@ -259,6 +257,8 @@ export async function activateCover(id, user) {
         remittanceBasis: c.remittance_basis, riskDetails: riskDetailsOf(c) },
     }, { inception: c.period_from, expiry: c.period_to }, user.id);
     await db.query("UPDATE open_covers SET status = 'active', policy_id = $2, updated_by = $3, updated_at = now() WHERE id = $1", [c.id, issued.policyId, user.id]);
+    // the open policy is remitted bill by bill (remittance per bill: policies.details.openCover)
+    await db.query(`UPDATE policies SET details = COALESCE(details, '{}'::jsonb) || '{"openCover": true}'::jsonb WHERE id = $1`, [issued.policyId]);
     return { policyId: issued.policyId };
   });
 }

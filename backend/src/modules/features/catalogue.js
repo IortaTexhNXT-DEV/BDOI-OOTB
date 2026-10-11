@@ -275,10 +275,18 @@ export const FEATURES = Object.freeze([
     permissions: ['read:marine', 'write:marine', 'write:parcel-certificates', 'approve:marine'],
   }),
   feature({
-    key: 'marine-cargo', name: 'Marine cargo open covers', module: 'Operations', tier: FUT,
-    description: 'Marine cargo as an open cover product beside parcel and courier',
-    dependsOn: ['open-covers'],
-    sections: ['Marine Open Covers: open covers on the marine cargo product (parcel and courier otherwise)'],
+    key: 'marine-cargo-inland', name: 'Marine cargo inland open covers', module: 'Operations', tier: P1,
+    description: 'Marine Cargo inland open covers (FRS PJRN-09 4.4): the land conveyance on the MARINE product, shipment uploads, daily declarations and the monthly declaration file to the insurer',
+    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-030', 'FR-PCL-031'], dependsOn: ['open-covers'],
+    settings: ['marine.inland_conveyances'],
+    sections: ['Marine Open Covers: Marine Cargo covers rated on the inland conveyances (Land) with Upload shipments'],
+  }),
+  feature({
+    key: 'marine-cargo', name: 'Marine cargo open covers (sea and air)', module: 'Operations', tier: P2,
+    description: 'Marine Cargo open covers beyond inland: the sea and air conveyances (imports and exports), enabled by SUPERID on Features & Releases',
+    requirements: ['TIS-BRD-PJRN-09'], dependsOn: ['marine-cargo-inland'],
+    settings: ['marine.conveyances'],
+    sections: ['Marine Open Covers: Marine Cargo covers rated on a conveyance other than the inland ones (Sea, Air)'],
   }),
   feature({
     key: 'claims', name: 'Claims', module: 'Operations', tier: P1,

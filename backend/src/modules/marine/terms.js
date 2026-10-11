@@ -7,7 +7,8 @@
  * least the premium per certificate; the difference is the broker's service fee) and the delivery types (reference).
  * Every cover: remittance basis (net / gross), daily declaration, declaration file frequency, layout and e-mail.
  */
-import { badRequest } from '../../lib/errors.js';
+import { badRequest, refused } from '../../lib/errors.js';
+import { isFeatureOn } from '../features/service.js';
 import { getSetting } from '../../lib/settings.js';
 import { num, round2 } from '../documents/common.js';
 import { chargesFor } from '../premium-charges/service.js';
@@ -116,6 +117,12 @@ export async function checkTerms(type, t) {
     const r = await validRates(t.rates);
     errors.push(...r.errors);
     out.rates = r.rates;
+    // inland cargo (marine.inland_conveyances) is Phase 1; any other conveyance is the Phase 2 feature marine-cargo
+    const inland = ((await getSetting('marine.inland_conveyances', ['Land'])) || []).map(String);
+    const beyond = r.rates.map((x) => x.conveyance).filter((c) => !inland.includes(c));
+    if (beyond.length && !(await isFeatureOn('marine-cargo'))) {
+      throw refused('FEATURE_NOT_ENABLED', `Marine Cargo open covers on ${beyond.join(', ')} are a Phase 2 function, not enabled: rate the inland conveyances (${inland.join(', ')}) only`);
+    }
     out.covers = [];
     out.chargePerCertificate = null;
   }

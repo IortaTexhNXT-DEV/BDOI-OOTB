@@ -97,14 +97,15 @@ export const TermsFields = ({ type, form, setForm, choices, errors = {}, endorsi
         </div>
       ) : (
         <>
-          {form.rates.map((r, i) => (
+          {/* sea and air need the Phase 2 feature marine-cargo; inland (Land) is always offered */}
+          {form.rates.map((r, i) => (choices.cargoEnabled === false && !(choices.inlandConveyances || ["Land"]).includes(r.conveyance) ? null : (
             <Field key={r.conveyance} label={`${t(`distribution.oc.conveyance.${r.conveyance}`, r.conveyance)}: ${t("distribution.oc.rateAndLimit", "rate % and limit per conveyance")}`} full>
               <span className="flex gap-2">
                 <InputNumber value={r.ratePercent} min={0} maxFractionDigits={4} placeholder={t("distribution.oc.rate", "Rate %")} aria-label={t("distribution.oc.rate", "Rate %")} onValueChange={(e) => setRate(i, { ratePercent: e.value })} />
                 <InputNumber value={r.limit} min={0} placeholder={t("distribution.oc.limit", "Limit any one conveyance")} aria-label={t("distribution.oc.limit", "Limit any one conveyance")} onValueChange={(e) => setRate(i, { limit: e.value })} />
               </span>
             </Field>
-          ))}
+          )))}
           <Field label={t("distribution.oc.markup", "Mark-up on invoice %")} htmlFor="oc-markup"><InputNumber inputId="oc-markup" value={form.markupPercent} min={0} max={100} onValueChange={(e) => set({ markupPercent: e.value ?? 0 })} /></Field>
           <Field label={t("distribution.oc.minimum", "Minimum premium per certificate")} htmlFor="oc-min"><InputNumber inputId="oc-min" value={form.minimumPremium} min={0} onValueChange={(e) => set({ minimumPremium: e.value ?? 0 })} /></Field>
           <Field label={t("distribution.oc.frequency", "Declarations")} htmlFor="oc-freq">

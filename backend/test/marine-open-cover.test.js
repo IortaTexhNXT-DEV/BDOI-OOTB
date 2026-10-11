@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { clearFeatureCache } from '../src/modules/features/service.js';
 
 let ctx;
 let ops;
@@ -13,6 +14,17 @@ async function persona(username, roles) {
   return (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
 }
 
+/** Enable a Phase 2 feature as the tenant does: one SUPERID requests, another approves (Features & Releases). */
+async function enablePhase2(key) {
+  const s1 = await persona('mc.sid1', ['tis-superid']);
+  const s2 = await persona('mc.sid2', ['tis-superid']);
+  const r = await s1('post', '/features/changes').send({ action: 'enable', features: [key], reasonCode: 'FTR-DECISION', releaseRef: 'TISPH-MARINE-CARGO', effective: 'immediate' });
+  expect(r.status, JSON.stringify(r.body)).toBe(201);
+  const ok = await s2('post', `/features/changes/${r.body.data.change.id}/decision`).send({ decision: 'approve', remarks: 'Client decision on Marine Cargo' });
+  expect(ok.status, JSON.stringify(ok.body)).toBe(200);
+  clearFeatureCache();
+}
+
 beforeAll(async () => {
   ctx = await setup();
   ops = await persona('mc.ops', ['operations']);
@@ -20,6 +32,21 @@ beforeAll(async () => {
 });
 afterAll(async () => { await pool.end(); });
 
+describe('Marine Cargo inland (Phase 1) and beyond (Phase 2, marine-cargo)', () => {
+  const base = { coverType: 'cargo', clientId: 'cl_sls_06', insuranceCompanyId: 4, periodFrom: '2026-01-01', periodTo: '2026-12-31', goodsDescription: 'Auto parts', minimumPremium: 500, markupPercent: 0 };
+  it('an inland cover (Land) is always available on the MARINE product; Sea and Air are refused until SUPERID enables the Phase 2 feature', async () => {
+    const land = await ops('post', '/marine/open-covers').send({ ...base, rates: [{ conveyance: 'Land', ratePercent: 0.15, limit: 3000000 }] });
+    expect(land.status, JSON.stringify(land.body)).toBe(201);
+    expect(land.body.data.productName).toBe('Marine Cargo');
+    const sea = await ops('post', '/marine/open-covers').send({ ...base, rates: [{ conveyance: 'Sea', ratePercent: 0.15, limit: 20000000 }] });
+    expect(sea.status).toBe(403);
+    expect(sea.body.code).toBe('FEATURE_NOT_ENABLED');
+    expect(sea.body.message).toMatch(/on Sea are a Phase 2 function/);
+    await enablePhase2('marine-cargo');
+    const after = await ops('post', '/marine/open-covers').send({ ...base, rates: [{ conveyance: 'Sea', ratePercent: 0.15, limit: 20000000 }] });
+    expect(after.status, JSON.stringify(after.body)).toBe(201);
+  });
+});
 describe('marine cargo open cover', () => {
   let coverId;
   let policyId;
