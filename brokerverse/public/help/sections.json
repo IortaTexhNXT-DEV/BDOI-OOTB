@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "8dc92328d77d11290a646393d1df0f7e995f5944f446b384adeecc32cf8fa444",
+ "sourceHash": "31161e9a8ed112716854307ea6859a252b10a1a07fd7982a62cb398b58e8f8d2",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1879,6 +1879,13 @@
    "chapter": "Screen reference: Operations"
   },
   {
+   "id": "kyc-by-source-the-checklist-and-duplicate-accounts",
+   "number": "17.9.2",
+   "title": "KYC by source, the checklist and duplicate accounts",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
    "id": "policies",
    "number": "17.10",
    "title": "Policies",
@@ -1886,8 +1893,15 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "raise-an-endorsement-request",
+   "id": "policy-status",
    "number": "17.10.1",
+   "title": "Policy status",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "raise-an-endorsement-request",
+   "number": "17.10.2",
    "title": "Raise an endorsement request",
    "level": 3,
    "chapter": "Screen reference: Operations"
@@ -2481,22 +2495,64 @@
    "chapter": "Screen reference: Master"
   },
   {
-   "id": "features-and-releases",
+   "id": "service-levels",
    "number": "20.27",
+   "title": "Service Levels",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "security-controls",
+   "number": "20.28",
+   "title": "Security Controls",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "features-and-releases",
+   "number": "20.29",
    "title": "Features & Releases",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
+   "id": "environment-promotion",
+   "number": "20.30",
+   "title": "Environment Promotion",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "setup-workbook",
+   "number": "20.30.1",
+   "title": "Setup Workbook",
+   "level": 3,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "compare-environments",
+   "number": "20.30.2",
+   "title": "Compare Environments",
+   "level": 3,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "promotion-path",
+   "number": "20.30.3",
+   "title": "Promotion Path",
+   "level": 3,
+   "chapter": "Screen reference: Master"
+  },
+  {
    "id": "e-mail-outbox",
-   "number": "20.28",
+   "number": "20.31",
    "title": "E-mail Outbox",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "integrations",
-   "number": "20.29",
+   "number": "20.32",
    "title": "Integrations",
    "level": 2,
    "chapter": "Screen reference: Master"
@@ -2554,13 +2610,6 @@
    "id": "market-mapping",
    "number": "21.7",
    "title": "Market Mapping",
-   "level": 2,
-   "chapter": "Screen reference: Product Configurator"
-  },
-  {
-   "id": "risk-mapping",
-   "number": "21.8",
-   "title": "Risk Mapping",
    "level": 2,
    "chapter": "Screen reference: Product Configurator"
   },

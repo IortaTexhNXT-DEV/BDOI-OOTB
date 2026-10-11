@@ -5,6 +5,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
+| Operations > Sales & Marketing | Placement Slips | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
 | Accounts | Collections | Create and edit |

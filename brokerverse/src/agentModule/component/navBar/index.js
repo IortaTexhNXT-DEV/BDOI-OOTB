@@ -7,6 +7,7 @@ import { Menu } from "primereact/menu";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
 import { useTranslation } from "react-i18next";
@@ -106,6 +107,8 @@ const AgentNavBar = () => {
   const menuItem = (label, icon, command) => ({ label, icon: `pi ${icon}`, command, className: "bv-user-menu__item" });
   // "Show full identifiers": holders of view:pii unmask personal identifiers for this tab (recorded in the audit trail)
   const [revealOn, setReveal] = useState(isRevealOn());
+  // the switch exists only while the server masks identifiers until they are asked for (privacy.pii_reveal_mode)
+  const revealOnRequest = useSelector((s) => s.systemSettingsReducer?.piiRevealMode) === "on-request";
   const toggleReveal = () => {
     setRevealOn(!revealOn);
     setReveal(!revealOn);
@@ -128,7 +131,7 @@ const AgentNavBar = () => {
         menuItem(t("security.changePassword"), "pi-key", () => setSecurityDialog("password")),
         menuItem(t("security.twoFactor"), "pi-shield", () => setSecurityDialog("2fa")),
         menuItem(t("header.help"), "pi-question-circle", openHelp),
-        ...(canViewFullIdentifiers()
+        ...(revealOnRequest && canViewFullIdentifiers()
           ? [menuItem(revealOn ? t("header.hideFullIdentifiers") : t("header.showFullIdentifiers"), revealOn ? "pi-eye-slash" : "pi-eye", toggleReveal)]
           : []),
       ],

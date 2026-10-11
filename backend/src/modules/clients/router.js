@@ -125,7 +125,7 @@ const requireIdentity = (b, ctx) => {
   }
   need(!b.city && !b.province, 'city', 'Address (city or municipality) is required');
 };
-const onboardBody = z.object({ ...kycFields, signatories: z.array(signatory).max(20).optional(), beneficialOwners: z.array(owner).max(50).optional() }).superRefine(requireIdentity);
+const onboardBody = z.object({ ...kycFields, signatories: z.array(signatory).max(20).optional(), beneficialOwners: z.array(owner).max(50).optional(), allowDuplicate: z.boolean().optional() }).superRefine(requireIdentity);
 const onboardExample = { clientType: 'individual', firstName: 'Juan', middleName: 'Santos', lastName: 'Dela Cruz', DOB: '1985-04-12', nationality: 'Filipino', contactNumber: '09171234567',
   taxNumber: '123-456-789-000', idType: 'PhilSys National ID (PhilID / ePhilID)', idNumber: '1234-5678-9012-3456', province: 'Metro Manila', city: 'Makati City', barangay: 'Poblacion',
   occupation: 'Engineer', sourceOfFunds: 'Salary', expectedLines: ['MOTOR'], expectedPaymentMode: 'bank-transfer', expectedAnnualPremium: 45000 };

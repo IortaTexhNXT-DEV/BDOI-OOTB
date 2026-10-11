@@ -38,6 +38,12 @@ export const SETTING_OWNERS = [
     prefixes: [],
   },
   {
+    screen: 'Master > Environment Promotion > Promotion Path',
+    path: '/master/promotion/path',
+    keys: ['system.environment'],
+    prefixes: [],
+  },
+  {
     screen: 'Master > Users and Access > Role Permissions > Access controls, where a second administrator approves the change',
     path: '/master/generals/usermanagement/role-permissions?controls=1',
     keys: ['access.change_approval', 'access.sod_enforced', 'access.authority_enforced', 'access.authority_without_limit'],

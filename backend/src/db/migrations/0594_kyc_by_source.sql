@@ -52,3 +52,9 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  ('clients.duplicate_control', '"block"', 'clients', 'A new client matching an existing one (e-mail, mobile, or name with the same birth date): block, warn or off', 'string', true),
  ('placement.attach_kyc_documents', 'true', 'placement', 'Attach the customer''s government ID or TFS KYC confirmation to the placement order e-mailed to the insurer', 'boolean', true)
 ON CONFLICT (key) DO NOTHING;
+
+-- the checklist documents are kept with the KYC documents of the client
+ALTER TABLE client_kyc_documents DROP CONSTRAINT IF EXISTS client_kyc_documents_doc_type_check;
+ALTER TABLE client_kyc_documents ADD CONSTRAINT client_kyc_documents_doc_type_check CHECK (doc_type IN ('government-id', 'tfs-kyc-confirmation', 'or-cr', 'signed-proposal', 'vehicle-photos', 'birth-certificate', 'acr-srrv',
+  'proof-of-address', 'tin', 'sec-registration', 'dti-registration', 'cda-registration',
+  'articles-by-laws', 'gis', 'board-resolution', 'secretary-certificate', 'beneficial-owner-declaration', 'source-of-funds', 'edd-evidence', 'other'));

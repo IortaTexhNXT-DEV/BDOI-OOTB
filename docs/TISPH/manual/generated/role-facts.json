@@ -4882,6 +4882,15 @@
      "modules": []
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Placement Slips",
+     "path": "/placement/placement-slips",
+     "access": "View",
+     "modules": [
+      "Quotations and placement"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
@@ -7543,6 +7552,24 @@
     },
     {
      "section": "Master > System",
+     "screen": "Service Levels",
+     "path": "/master/configuration/service-levels",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > System",
+     "screen": "Security Controls",
+     "path": "/master/configuration/security-controls",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > System",
      "screen": "E-mail Outbox",
      "path": "/master/configuration/email-outbox",
      "access": "Create and edit",
@@ -7566,6 +7593,33 @@
      "access": "View",
      "modules": [
       "Features and releases"
+     ]
+    },
+    {
+     "section": "Master > Environment Promotion",
+     "screen": "Setup Workbook",
+     "path": "/master/promotion/workbook",
+     "access": "Create and edit",
+     "modules": [
+      "Environment promotion"
+     ]
+    },
+    {
+     "section": "Master > Environment Promotion",
+     "screen": "Compare Environments",
+     "path": "/master/promotion/compare",
+     "access": "Create and edit",
+     "modules": [
+      "Environment promotion"
+     ]
+    },
+    {
+     "section": "Master > Environment Promotion",
+     "screen": "Promotion Path",
+     "path": "/master/promotion/path",
+     "access": "Create and edit",
+     "modules": [
+      "Environment promotion"
      ]
     },
     {
@@ -7626,15 +7680,6 @@
      "section": "Product Configurator",
      "screen": "Market Mapping",
      "path": "/product-configurator/market-mapping",
-     "access": "Create and edit",
-     "modules": [
-      "Products"
-     ]
-    },
-    {
-     "section": "Product Configurator",
-     "screen": "Risk Mapping",
-     "path": "/product-configurator/risk-mapping",
      "access": "Create and edit",
      "modules": [
       "Products"
@@ -7839,6 +7884,18 @@
      "module": "Audit trail",
      "level": "View",
      "meaning": "See the audit trail"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Environment promotion",
+     "level": "View",
+     "meaning": "Download the Setup Workbook, see the uploads, compare environments and the promotion path"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Environment promotion",
+     "level": "Create and edit",
+     "meaning": "Upload, validate and load the Setup Workbook; mark the environment"
     },
     {
      "area": "Master data and configuration",
@@ -9648,6 +9705,10 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Approve"
+    },
+    {
+     "role": "CCD-BP / QRPh (Receipting)",
+     "access": "View"
     },
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12461,6 +12522,24 @@
     }
    ]
   },
+  "/master/configuration/service-levels": {
+   "menu": "Master > System > Service Levels",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/master/configuration/security-controls": {
+   "menu": "Master > System > Security Controls",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/master/configuration/email-outbox": {
    "menu": "Master > System > E-mail Outbox",
    "roles": [
@@ -12489,6 +12568,33 @@
     {
      "role": "TIS General Manager",
      "access": "View"
+    }
+   ]
+  },
+  "/master/promotion/workbook": {
+   "menu": "Master > Environment Promotion > Setup Workbook",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/master/promotion/compare": {
+   "menu": "Master > Environment Promotion > Compare Environments",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/master/promotion/path": {
+   "menu": "Master > Environment Promotion > Promotion Path",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
     }
    ]
   },
@@ -12604,15 +12710,6 @@
   },
   "/product-configurator/market-mapping": {
    "menu": "Product Configurator > Market Mapping",
-   "roles": [
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "Create and edit"
-    }
-   ]
-  },
-  "/product-configurator/risk-mapping": {
-   "menu": "Product Configurator > Risk Mapping",
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
@@ -12767,7 +12864,9 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
-  "read:data-load": [],
+  "read:data-load": [
+   "TIS IT AppSupport / Admin"
+  ],
   "read:disbursements": [
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
@@ -13084,7 +13183,9 @@
   "write:commission": [
    "TIS Finance & General Accounting"
   ],
-  "write:data-load": [],
+  "write:data-load": [
+   "TIS IT AppSupport / Admin"
+  ],
   "write:disbursements": [
    "TIS Finance & General Accounting"
   ],

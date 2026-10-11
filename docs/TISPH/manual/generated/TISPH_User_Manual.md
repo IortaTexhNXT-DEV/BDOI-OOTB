@@ -215,7 +215,7 @@ the title shows your role, today's date and the company.
 | Part | What it shows |
 |---|---|
 | **Overdue**, **Due today**, **Next 7 days**, **Open items**, **Open tasks** | The number of your items in each group. Select a figure to filter the list. |
-| **My Items** | Every open item you own or may act on, by category on the left: Quotations, Requests for quotation, Placement slips, Renewals, Premiums due, Collection follow-ups, Endorsements, Claims, Approvals, Missing documents and Tasks, and for finance and IT roles Bank reconciliations, Period close, Users and access and System health. You see only the categories your role may read. The red badge is the number overdue. |
+| **My Items** | Every open item you own or may act on, by category on the left: Quotations, Requests for quotation, Placement slips, Renewals, Premiums due, Collection follow-ups, Endorsements, Claims, Approvals, Missing documents, Service levels (your items timed against the service level register, with the deadline and the breaches first) and Tasks, and for finance and IT roles Bank reconciliations, Period close, Users and access and System health. You see only the categories your role may read. The red badge is the number overdue. |
 | **My Team** | Shown only to a user to whom other employees report: one row per person with open, overdue and due-today counts, and **Reassign** to move an item to yourself or to someone in the team. |
 | **My Tasks** | Your work diary: tasks you created, tasks given to you and tasks you gave to others. |
 | **Calendar** | Your tasks and items by due date, for one day or a week, with the overdue ones above. |
@@ -1194,7 +1194,7 @@ placement becomes **Insurer issued (Booked)** and the quotation **Converted to P
 
 An endorsement that adds premium is billed to the client at once. An endorsement that returns premium, and a
 cancellation, is completed by a TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General
-Manager. See [Raise an endorsement request (17.10.1)](#raise-an-endorsement-request) and
+Manager. See [Raise an endorsement request (17.10.2)](#raise-an-endorsement-request) and
 [Endorsements and cancellations (3.6.3)](#process-endorsement).
 
 #### Renew your clients' policies {#tis-sales-associate-renewal}
@@ -2713,6 +2713,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
+| Operations > Sales & Marketing | Placement Slips | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
 | Accounts | Collections | Create and edit |
@@ -3625,9 +3626,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | Document Numbering | Create and edit |
 | Master > System | Schedules | Create and edit |
 | Master > System | Audit Trail | View |
+| Master > System | Service Levels | Create and edit |
+| Master > System | Security Controls | Create and edit |
 | Master > System | E-mail Outbox | Create and edit |
 | Master > System | Integrations | Create and edit |
 | Master > System | Features & Releases | View |
+| Master > Environment Promotion | Setup Workbook | Create and edit |
+| Master > Environment Promotion | Compare Environments | Create and edit |
+| Master > Environment Promotion | Promotion Path | Create and edit |
 | Product Configurator | Dashboard | Create and edit |
 | Product Configurator | Product Templates | Create and edit |
 | Product Configurator | Coverage Builder | Create and edit |
@@ -3635,7 +3641,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Product Configurator | Acceptance Rules | Create and edit |
 | Product Configurator | Document Manager | Create and edit |
 | Product Configurator | Market Mapping | Create and edit |
-| Product Configurator | Risk Mapping | Create and edit |
 
 ### What you can view, change and approve {#tis-it-appsupport-admin-access}
 Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
@@ -3661,9 +3666,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
-| Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
+| Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager and Market Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
@@ -3675,6 +3680,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | Integrations |
 | Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |  |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Environment promotion | View | Download the Setup Workbook, see the uploads, compare environments and the promotion path | Setup Workbook, Compare Environments and Promotion Path |
+| Master data and configuration | Environment promotion | Create and edit | Upload, validate and load the Setup Workbook; mark the environment |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |  |
@@ -3711,7 +3718,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 |---|---|---|
 | Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work (2.3)](#my-work), [Role Permissions (20.8)](#roles-and-role-permissions) |
 | Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules (20.25)](#schedules) |
-| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (20.28)](#e-mail-outbox), [Integrations (20.29)](#integrations) |
+| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (20.31)](#e-mail-outbox), [Integrations (20.32)](#integrations) |
 | Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [User (20.7)](#users) |
 | Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [User (20.7)](#users) |
 | Change the access of a role | On an approved access request | [Role Permissions (20.8)](#roles-and-role-permissions) |
@@ -3870,7 +3877,7 @@ accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (2
 4. For e-mails, choose Master > System > E-mail Outbox: each e-mail shows its status, attempts and last
    error.
 
-See [Integrations (20.29)](#integrations) and [E-mail Outbox (20.28)](#e-mail-outbox).
+See [Integrations (20.32)](#integrations) and [E-mail Outbox (20.31)](#e-mail-outbox).
 
 ## TIS General Manager {#tis-general-manager}
 ### Role summary {#tis-general-manager-summary}
@@ -4373,6 +4380,7 @@ The broker never issues cover. A placement slip goes to the insurer, the insurer
 | TIS Operations Associate | Create and edit |
 | TIS Operations Officer | Create and edit |
 | TIS Operations Unit Head | Approve |
+| CCD-BP / QRPh (Receipting) | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
@@ -4396,7 +4404,7 @@ A placement slip is raised by the client's acceptance of a quotation, or directl
 
 Select **Create Placement Slip**. The status is **Placement raised**.
 
-On the placement slip the buttons follow the status: **Edit participants** and **Send to insurer(s)** (placement raised), **Record acknowledgement**, **Upload e-policy** or **Record decline** (sent), **Check against slip** (e-policy received), **Book (Insurer issued)** (checked), and at every step **Print slip** and **Cancel slip**. The page shows the stepper, the **e-Policy** panel with the result of the comparison, the **Security (participating insurers)** with each insurer's share, premium, taxes, commission and policy number, the **Premium** breakdown, the **Summary**, the **Risk** and the **History**.
+On the placement slip the buttons follow the status: **Edit participants** and **Send to insurer(s)** (placement raised), **Verify payment** for Cash Control (CCD-BP records the payment mode, reference and amount of the proof of payment, or an approved post-dated cheque instalment plan; where the control is on, the slip is sent and booked only after that), **Record acknowledgement**, **Upload e-policy** or **Record decline** (sent), **Check against slip** (e-policy received), **Book (Insurer issued)** (checked), and at every step **Print slip** and **Cancel slip**. The page shows the stepper, the **e-Policy** panel with the result of the comparison, the **Security (participating insurers)** with each insurer's share, premium, taxes, commission and policy number, the **Premium** breakdown, the **Summary** (with the **Proof of payment** line), the **Risk** and the **History**.
 
 The check against the slip compares the net and gross premium, the sum insured, the commission, the effective and expiry dates, the insured and, for motor, the chassis, engine and plate numbers. Amounts within PHP 1.00 of the slip match. The check is decided by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, never by the user who recorded the e-policy: **Confirm check**, **Accept differences** (with a reason) or **Return to insurer** (with a reason). See [Placement with the insurer (3.5)](#process-placement) and [Book the policy (3.6.1)](#process-booking).
 
@@ -4549,6 +4557,11 @@ A client can be created, identified and checked before any quotation or policy, 
 | **Expected business and PEP** | **Lines of business expected**, **Usual payment mode**, **Expected annual premium (PHP)**, **Politically exposed person (or family member or close associate)** | A politically exposed person needs enhanced due diligence |
 
 ![Figure 17.16: Onboard client: identity, ID, address and expected business](../images/screens-operations/client-onboarding.png)
+#### KYC by source, the checklist and duplicate accounts {#kyc-by-source-the-checklist-and-duplicate-accounts}
+The identification a customer needs follows the **KYC Mode** of the lead source of the client (Master > Insurance > Lead Sources): a deal sourced from TFS (CLI, SCR, UCFP, dealer programmes, redemption, promo and bundling) relies on the **TFS KYC confirmation**, every other source needs the **Full KYC** with a government ID. One primary ID is enough; a secondary ID (TIN ID, Postal ID, Senior Citizen ID, PhilHealth ID, Company ID) needs a second one. The **Onboarding Checklist** master (Master > Operational masters) lists the documents by line, KYC mode and customer (the vehicle OR/CR and photos for Motor, the signed proposal, the birth certificate of a customer aged 21 or under, the ACR I-Card or SRRV of a non-Filipino customer); the client view shows the **KYC mode** and each item **On file** or **To collect**, and **Print KYC form** prints the form the customer signs. The documents may be uploaded on the client or with the booking; the government ID or the TFS confirmation goes with the placement order to the insurer.
+
+A new client that matches an existing one by e-mail, by mobile number or by name with the same date of birth is refused with the client it duplicates; the user confirms a genuine namesake by choosing **Create anyway**. On the vehicle, the chassis number, motor number and plate or MV file number are checked at booking, and the product rule refuses a vehicle older than the product allows.
+
 ### Policies {#policies}
 Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **Client Name**, **Gross Premium**, **Policy Issued**, **Policy Expiry**, **Product Description** and **Payment** status. The search box finds a policy by number or client. **Show Filters** offers **Payment Status**, **Product Type**, **Insurance Company**, **Client Name**, issue and expiry date ranges and minimum and maximum premium.
 
@@ -4573,6 +4586,9 @@ In **Actions**, the eye (**View policy**) opens the policy and **More actions** 
 The policy page shows the cards **Gross Premium**, **Expiry Date** and **Client ID**, and the panels **Policy Details**, **Insured Details**, **Vehicle Details** (motor: motor, chassis and plate numbers, mortgagee), **Coverage Details**, **Premium Breakdown**, **Endorsements**, **History** and **Documents & Billing** (**Generate Policy Invoice**, **Premium Accounting Entries**, the policy document to **Preview**, **Open** or **Print**). **View Policy** opens the policy schedule.
 
 ![Figure 17.18: The policy page, with Documents & Billing](../images/screens-operations/policy-details.png)
+#### Policy status {#policy-status}
+A booked policy is **Active**. It becomes **Expired** on the night after its expiry date (each expiry is recorded in the policy's history), **Cancelled** by a completed cancellation endorsement and **Renewed** when its renewal term is booked. Between those, the policy page offers the moves of the policy's lifecycle to a user who may change policies: **Suspend** (the premium warranty is breached or a payment is dishonoured; cover is on hold), **Reinstate** (a suspended or lapsed policy returns to **Active**) and **Lapse** (the policy leaves the renewal pipeline). Each move asks for a reason from the Reason Codes master and a note where the reason needs one, and is recorded in the policy's **History** with the user and the time.
+
 #### Raise an endorsement request {#raise-an-endorsement-request}
 1. Choose Operations > Policy.
 2. In the row of the policy, select **More actions**, then **Endorsement** (or **Endorsement** on the policy page).
@@ -4924,7 +4940,7 @@ Policy Cancellation computes the return premium of a policy from the days left: 
 4. Choose **Cancellation**: **Whole policy**, or one risk of the policy.
 5. Select **Compute return premium**. The screen shows the method, the days in force and left, the return net premium with its taxes, the gross return, the commission taken back and the amount returned by the insurer.
 
-Nothing is saved by this screen. The cancellation itself is made as an endorsement of the policy (**More actions** > **Endorsement**, cancellation), which computes the same figures on the server; see [Raise an endorsement request (17.10.1)](#raise-an-endorsement-request). It is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who entered it. The return premium is credited to the client and commission already paid on it is clawed back. The short-period rates (the percentage of the annual premium earned for each period in force) are kept on Master > Insurance > Short-Period Rates.
+Nothing is saved by this screen. The cancellation itself is made as an endorsement of the policy (**More actions** > **Endorsement**, cancellation), which computes the same figures on the server; see [Raise an endorsement request (17.10.2)](#raise-an-endorsement-request). It is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who entered it. The return premium is credited to the client and commission already paid on it is clawed back. The short-period rates (the percentage of the annual premium earned for each period in force) are kept on Master > Insurance > Short-Period Rates.
 
 ![Figure 17.28: Operations > Policy Cancellation](../images/screens-operations/policy-cancellation.png)
 ### Claims awaiting documents {#claims-awaiting-documents}
@@ -5038,6 +5054,8 @@ Accounts > Collections lists every open premium with **Client Name**, **Policy N
 | TIS General Manager | View |
 
 The cards show the **Outstanding** and **Overdue** amounts, the items **Committed** (the client gave a payment date) and **Escalated**, and the amount **Collected this month**. **Send Payment Reminders Now** e-mails the reminders of the overdue items at once; **Import open items** loads open premiums from a file.
+
+The non-payment cadence runs by itself every morning: the customer is e-mailed 5, 10 and 15 days after the due date of an unpaid bill (each notice is recorded on the item under **Actions**), the account is flagged for cancellation at the last notice and the collectors are told to raise the cancellation request, Sales and the insurer are told once a policy is cancelled for non-payment, and on or before the 26th each insurer receives the month's non-payment cancellations. The **Non-Payment Report** lists the accounts without payment.
 
 Select **View** to open an item. **Collection Details** shows the client and policy, the overdue level, the financial breakdown of the bill (gross premium, net premium, VAT, DST, LGT, paid, outstanding), the ageing, the **Follow-Up History** and the **Payment History**. The **Collection Actions** are **Send Email**, **E-mail invoice**, **Add Note** and **Set Commitment Date**; **Record receipt** opens the receipt for this bill.
 
@@ -5984,7 +6002,7 @@ Every printed document and report PDF (quotation, request for quotation, placeme
 
 **Company** lists **Company Code**, **Company Name**, **License Number**, **Country**, **Email ID** and **Status**. The company record of Toyota Insurance Services Philippines Corporation holds its legal name, TIN, Insurance Commission licence, address, logo and contacts, and is marked as the letterhead company. **Add** creates a company; the pencil changes it.
 
-**Branch** lists **Branch Code**, **Branch Name**, **Country**, **Email ID** and **Status** (for example the head office and the Cebu branch). The branch is chosen on users, receipts, vouchers and journals.
+**Branch** lists **Branch Code**, **Branch Name**, **Country**, **Email ID** and **Status** (for example the head office and the Cebu branch). The branch is chosen on users, receipts, vouchers and journals. The branch record also carries **Region**, **Issuing office** (the office whose code enters the document numbers) and **Numbering Code** (the digit the office contributes to a numeric reference such as the TIS Policy Number). Users of a role limited to its office see the records of their own office only.
 
 ### Insurance companies {#insurance-companies}
 Requests for quotation, placement slips, Preliminary Loss Advices and remittance advices go to the insurer's e-mail. Keep it current.
@@ -6395,6 +6413,8 @@ Every number the system issues comes from a series on Master > Document Numberin
 
 The usual format is the prefix, the year and a sequence (for example OR-2026-00001), reset every year. Filter by module and status. A number already issued is never issued again; a change to a series applies to the next number.
 
+A format may also carry the issuing office (**Branch code** or **Office numbering code**), the **Product type**, **Sub-line** and **Business type** codes of the Numbering Segment master, and the **Parent document number** for a series that counts under its policy (counter reset **Per parent document**). **Apply numbering structure** shows the structure proposed for Toyota Insurance Services (TIS Policy Number of 10 digits, cover note CN-YY-HO-#######, endorsement ENDT-<policy number>-nn, cancellation notice CAN-<policy number>-n, placement slip PS/HO/YY/#####) with the first number each series would issue, and applies it once confirmed; numbers already issued keep their format.
+
 ### Schedules {#schedules}
 **Menu:** Master > System > Schedules
 
@@ -6422,6 +6442,28 @@ The history of a single record (claim history, policy and client **History** tab
 Master > System > Audit Trail shows every change made in the system: **Date & Time**, **User** (with the role), **Record**, **Event**, **Changes** (each field with its value before and after) and **Source** (screen, sign-in, file upload, scheduled job). Filter by user, record type and action; **Export** downloads the result.
 
 ![Figure 20.10: Master > System > Audit Trail](../images/screens-master/audit-trail.png)
+### Service Levels {#service-levels}
+**Menu:** Master > System > Service Levels
+
+| Role | Access |
+|---|---|
+| TIS IT AppSupport / Admin | Create and edit |
+
+Master > System Configuration > Service Levels holds the turnaround of every status a document waits in: the prospect first contact, the quotation despatch, the placement steps (verify KYC and payment, approve and send, insurer issues, e-policy checked and booked), the endorsement and cancellation steps and the claim handling. Each line shows the **Document**, the **Turnaround** in working hours (by the working week and the Holiday master) or in calendar hours, the roles **Escalated to** on a breach, whether a **Clock** is kept for it and its **Status**. The pencil changes the turnaround, the working-time switch, the escalation roles and the active flag.
+
+**Open items** lists the items timed against the register with **Started**, **Due** and **Running** or **Breached**; the figures above count the open, due within 8 hours and breached items. The monitor runs every 30 minutes (**Run monitor** runs it now): it opens a clock when an item enters a status, closes it when the item moves on, marks the breach and tells the escalation roles and the owner once. The owner sees the items under **Service levels** on My Work.
+
+### Security Controls {#security-controls}
+**Menu:** Master > System > Security Controls
+
+| Role | Access |
+|---|---|
+| TIS IT AppSupport / Admin | Create and edit |
+
+Master > System Configuration > Security Controls lists the security, data-protection and operational requirements as controls, in five groups: **Sign-in and sessions** (idle timeout, lockout, throttling, single session, second factor, password policy, dormant accounts), **Data protection and retention**, **Audit and change control**, **Operations and resilience** (backups and restore drills, availability, scalability, performance, monitoring, support, deployment) and **Security assurance** (scans and penetration tests, incident response, secure development, certifications). Each line shows the **Requirements** it answers, the **Current state** read from the configuration, the **Target**, the **Status** (**Met**, **Review** for a value that differs from the target and is set at go-live, **Not met**, **No evidence**) and the **Latest evidence**.
+
+A control enforced by the application is changed on its own screen (the cog opens it). A control met outside the application is kept current with **Record evidence**: the evidence date, the result, a reference (report, ticket, certificate) and remarks; the latest evidence sets the status and stays valid for a year. Open a control to read its evidence history.
+
 ### Features & Releases {#features-and-releases}
 **Menu:** Master > System > Features & Releases
 
@@ -6435,6 +6477,36 @@ Master > System > Features & Releases lists every function of the system with it
 The tab **Future releases** lists the functions TISPH can ask for, with their description. **Export to Excel** downloads both lists.
 
 The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
+
+### Environment Promotion {#environment-promotion}
+Master > Environment Promotion (IT AppSupport / Admin) moves the configuration of one environment to the next: Development, System Integration Testing, User Acceptance Testing, Pre-Production and Production.
+
+#### Setup Workbook {#setup-workbook}
+**Menu:** Master > Environment Promotion > Setup Workbook
+
+| Role | Access |
+|---|---|
+| TIS IT AppSupport / Admin | Create and edit |
+
+The Setup Workbook is the configuration of an environment in one Excel file: the masters, settings, users, chart of accounts, commission rates, taxes, authority limits, numbering series and payee bank accounts, one sheet each in load order. The table **Sheets** lists them with the **Screen** each belongs to and the **Key** that identifies a row. **Download with current data** exports the configuration of this environment to carry to the next one; **Download blank** gives the empty layout. **Upload workbook** validates the file of another environment first (nothing is saved; the rows in error are listed with the sheet, row and column, and **Download errors** returns them in the workbook layout to fix) and **Load** writes the validated rows in one transaction. **Uploads** lists every upload with its **Status** (**Validated**, **Errors**, **Loaded**), its rows and who made it; select one for the result per sheet. The marker of the environment and the secrets never travel in a workbook.
+
+#### Compare Environments {#compare-environments}
+**Menu:** Master > Environment Promotion > Compare Environments
+
+| Role | Access |
+|---|---|
+| TIS IT AppSupport / Admin | Create and edit |
+
+Choose the workbook exported from another environment and select **Compare**: nothing is loaded. The verdict is **Mirrored** or **Differences found**, with the rows **Identical**, **Different**, **Only in file** and **Only here** per sheet and the field-level changes of the rows that differ; values that differ by nature between environments (cutover date, addresses, e-mail senders, gateway modes) are set apart. **Include numbering counters** compares the next numbers too. **Download comparison** gives the workbook with a Difference column on every sheet. **Comparisons** keeps every comparison made.
+
+#### Promotion Path {#promotion-path}
+**Menu:** Master > Environment Promotion > Promotion Path
+
+| Role | Access |
+|---|---|
+| TIS IT AppSupport / Admin | Create and edit |
+
+The path shows the environments in order with **This environment** marked, the previous and next environment, the cutover date and whether go-live is locked. **Release** shows the API and web releases, the schema (the latest database migration), the commit and the build time, so the same release can be confirmed on both sides of a promotion. **Workbook activity** shows the last export, load and comparison, and **Loads** the workbooks loaded here. **Mark environment** sets what this database is (a locked database is Production and stays so); the marker is set here only.
 
 ### E-mail Outbox {#e-mail-outbox}
 **Menu:** Master > System > E-mail Outbox
@@ -6562,15 +6634,6 @@ Without an upload the standard layout is printed. To use TISPH's own layout, sel
 Market Mapping lists the insurers that offer each product: **Template / product**, **Insurer**, **Insurer Code** (the product's code at the insurer), **Agreed comm. % (ref.)**, **Target**, **YTD Performance** (premium of the policies issued this year, against the target) and **Status**. Only the insurers on a product's market can be approached on a request for quotation. The agreed commission here is a reference; the commission applied comes from the [Commission Rate Matrix (20.16)](#commission-rate-matrix). **Map Product** adds an insurer to a product.
 
 ![Figure 21.1: Product Configurator > Market Mapping: the panel insurers of the motor product](../images/screens-product-configurator/market-mapping.png)
-### Risk Mapping {#risk-mapping}
-**Menu:** Product Configurator > Risk Mapping
-
-| Role | Access |
-|---|---|
-| TIS IT AppSupport / Admin | Create and edit |
-
-Risk Mapping lists the risk definitions of the products: **Product**, **Definition** (for example vehicle details for motor, liability cover fields for CTPL), **Risk Sections**, **Used by** and **Status**. The definitions are kept for reference; the risk details of a motor quotation are those of the quotation screens.
-
 ## Reports {#reports}
 Reports open from the Reports menu. Each role sees the reports of its department, and a report shows only the records
 the role may read.
@@ -6813,6 +6876,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **SOA / Premium Receivable** | The statement of account: premium bills issued in the period with amount, paid, balance, age and ageing bucket as of the To Date |
 | **Collection Report** | Bills due in the period with the amount billed, collected (receipts posted up to the To Date), balance and collection rate |
 | **Receivables Ageing** | Outstanding premium receivables as of the To Date by ageing bucket |
+| **Non-Payment Report** | Accounts without payment past the report days after the due date (cancellation basis): policy, client, insurer, bill, days past due, balance, notices sent, last notice and the cancellation flag; overall, by insurer, agent or branch |
 | **Receipts Register** | Official receipts of the period with bill, policy, payment mode, bank and reference |
 | **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (18.15)](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |

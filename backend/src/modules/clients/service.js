@@ -241,11 +241,12 @@ export function customerCodes(scope = null) {
  * the KYC status is then set from what is still missing.
  */
 export async function onboardClient(body, userId) {
-  const { signatories = [], beneficialOwners = [], ...fields } = body;
+  const { signatories = [], beneficialOwners = [], allowDuplicate = false, ...fields } = body;
   const { cols, extra } = columnsFrom(fields);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   cols.onboarded_via = 'onboarding';
   await assertBirthDate(cols.birth_date);
+  await assertNoDuplicate(cols, { allowDuplicate: allowDuplicate === true });
   await fillRegion(cols);
   const id = await withTransaction(async (db) => {
     const clientId = await insertClient(db, cols, extra, userId);

@@ -73,6 +73,9 @@ import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import SecurityControlsPage from "../module/Administration/SecurityControls";
 import ServiceLevelsPage from "../module/Administration/ServiceLevels";
+import SetupWorkbookPage from "../module/Administration/EnvironmentPromotion/SetupWorkbook";
+import CompareEnvironmentsPage from "../module/Administration/EnvironmentPromotion/CompareEnvironments";
+import PromotionPathPage from "../module/Administration/EnvironmentPromotion/PromotionPath";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
@@ -325,10 +328,6 @@ import {
   DocumentManager,
   ProductAnalytics,
 } from "../module/ProductConfigurator/ProductConfiguratorScreens";
-import {
-  RiskMappingList,
-  RiskMappingDetail,
-} from "../module/ProductConfigurator/RiskMapping";
 
 import MyWork from "../module/MyWork";
 import { Navigate } from "react-router-dom";
@@ -888,6 +887,9 @@ const Maincomponent = () => {
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/security-controls" element={<SecurityControlsPage />} />
           <Route path="master/configuration/service-levels" element={<ServiceLevelsPage />} />
+          <Route path="master/promotion/workbook" element={<SetupWorkbookPage />} />
+          <Route path="master/promotion/compare" element={<CompareEnvironmentsPage />} />
+          <Route path="master/promotion/path" element={<PromotionPathPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
@@ -1174,14 +1176,6 @@ const Maincomponent = () => {
           <Route
             path="product-configurator/market-mapping"
             element={<MarketMapping />}
-          />
-          <Route
-            path="product-configurator/risk-mapping"
-            element={<RiskMappingList />}
-          />
-          <Route
-            path="product-configurator/risk-mapping/:id"
-            element={<RiskMappingDetail />}
           />
           <Route
             path="product-configurator/analytics"

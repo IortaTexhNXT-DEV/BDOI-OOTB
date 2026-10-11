@@ -26,6 +26,7 @@ const applyPayloadToState = (state, payload) => {
   state.defaultLanguage = payload.defaultLanguage ?? state.defaultLanguage;
   state.faviconUrl = payload.faviconUrl ?? state.faviconUrl;
   state.systemName = payload.systemName ?? state.systemName;
+  state.piiRevealMode = payload.piiRevealMode ?? state.piiRevealMode;
   if (payload.currencies) {
     state.currencies = payload.currencies;
   }
@@ -65,6 +66,7 @@ export const saveSystemSettings = createAsyncThunk(
 const initialState = {
   ...DEFAULT_SYSTEM_SETTINGS,
   systemName: "",
+  piiRevealMode: "always",
   logoUrl: "",
   logoPresets: mapLogoPresets(),
   currencies: [],

@@ -123,6 +123,9 @@
       "name": "Endorsements"
     },
     {
+      "name": "Environment Promotion"
+    },
+    {
       "name": "Features and Releases"
     },
     {
@@ -40693,10 +40696,56 @@
         }
       }
     },
+    "/clients/{id}/kyc-form.pdf": {
+      "get": {
+        "operationId": "getClientsIdKycForm.pdf",
+        "summary": "The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client > Print KYC form\n\nAccess: read:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "<pdf>",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client > Print KYC form",
+        "x-permissions": [
+          "read:clients"
+        ]
+      }
+    },
     "/clients/{id}/profile": {
       "get": {
         "operationId": "getClientsIdProfile",
-        "summary": "KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents",
+        "summary": "KYC profile of a client: identification still missing, KYC source and onboarding checklist, signatories, beneficial owners with their warnings, documents",
         "tags": [
           "Clients"
         ],
@@ -41081,6 +41130,102 @@
           }
         },
         "x-screen": "Operations > Clients > Client view",
+        "x-permissions": [
+          "read:clients"
+        ]
+      }
+    },
+    "/clients/duplicates": {
+      "get": {
+        "operationId": "getClientsDuplicates",
+        "summary": "Duplicate-account control: the clients a new record would duplicate by e-mail, mobile number, or name with the same date of birth (emailId, contactNumber, firstName, lastName, companyName, DOB)",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > New client\n\nAccess: read:clients",
+        "parameters": [
+          {
+            "name": "emailId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "juan@example.com"
+          },
+          {
+            "name": "contactNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "09171234567"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "clientCode": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "matchedOn": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "cl_1",
+                      "clientCode": "CL-2026-00001",
+                      "name": "Juan Dela Cruz",
+                      "matchedOn": [
+                        "email"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > New client",
         "x-permissions": [
           "read:clients"
         ]
@@ -61891,6 +62036,512 @@
         }
       }
     },
+    "/environment-promotion": {
+      "get": {
+        "operationId": "getEnvironmentPromotion",
+        "summary": "The promotion path with the position of this environment, the release identity (versions, commit, schema), the go-live state and the last export, load and comparison of the configuration workbook",
+        "tags": [
+          "Environment Promotion"
+        ],
+        "description": "Front-end touchpoint: Master > Environment Promotion > Promotion Path\n\nAccess: read:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "environment": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "onPath": {
+                          "type": "boolean"
+                        },
+                        "previous": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "next": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "path": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "position": {
+                                "type": "integer"
+                              },
+                              "current": {
+                                "type": "boolean"
+                              },
+                              "done": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "choices": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "release": {
+                          "type": "object",
+                          "properties": {
+                            "apiVersion": {
+                              "type": "string"
+                            },
+                            "webVersion": {},
+                            "environment": {
+                              "type": "string"
+                            },
+                            "commit": {
+                              "type": "string"
+                            },
+                            "ref": {},
+                            "buildTime": {},
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "lastExport": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "string"
+                            },
+                            "by": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "lastLoad": {},
+                        "lastComparison": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "environment": "uat",
+                    "label": "User Acceptance Testing",
+                    "onPath": true,
+                    "previous": {
+                      "code": "sit",
+                      "label": "System Integration Testing"
+                    },
+                    "next": {
+                      "code": "preprod",
+                      "label": "Pre-Production"
+                    },
+                    "path": [
+                      {
+                        "code": "dev",
+                        "label": "Development",
+                        "position": 1,
+                        "current": false,
+                        "done": true
+                      }
+                    ],
+                    "choices": [
+                      {
+                        "code": "dev",
+                        "label": "Development"
+                      }
+                    ],
+                    "release": {
+                      "apiVersion": "2026.1.3",
+                      "webVersion": null,
+                      "environment": "UAT",
+                      "commit": "a1b2c3d",
+                      "ref": null,
+                      "buildTime": null,
+                      "schema": "0595_environment_promotion.sql"
+                    },
+                    "cutoverDate": "2026-11-01",
+                    "locked": false,
+                    "lastExport": {
+                      "at": "2026-10-10T02:00:00Z",
+                      "by": "it.admin"
+                    },
+                    "lastLoad": null,
+                    "lastComparison": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Environment Promotion > Promotion Path",
+        "x-permissions": [
+          "read:data-load"
+        ]
+      }
+    },
+    "/environment-promotion/environment": {
+      "put": {
+        "operationId": "putEnvironmentPromotionEnvironment",
+        "summary": "Mark this database as an environment of the path (dev, sit, uat, preprod, training, production); a locked database stays production; audited",
+        "tags": [
+          "Environment Promotion"
+        ],
+        "description": "Front-end touchpoint: Master > Environment Promotion > Promotion Path > Mark environment\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "environment": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "onPath": {
+                          "type": "boolean"
+                        },
+                        "previous": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "next": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "path": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "position": {
+                                "type": "integer"
+                              },
+                              "current": {
+                                "type": "boolean"
+                              },
+                              "done": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "choices": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "release": {
+                          "type": "object",
+                          "properties": {
+                            "apiVersion": {
+                              "type": "string"
+                            },
+                            "webVersion": {},
+                            "environment": {
+                              "type": "string"
+                            },
+                            "commit": {
+                              "type": "string"
+                            },
+                            "ref": {},
+                            "buildTime": {},
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        },
+                        "lastExport": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "string"
+                            },
+                            "by": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "lastLoad": {},
+                        "lastComparison": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Environment marked as User Acceptance Testing",
+                  "data": {
+                    "environment": "uat",
+                    "label": "User Acceptance Testing",
+                    "onPath": true,
+                    "previous": {
+                      "code": "sit",
+                      "label": "System Integration Testing"
+                    },
+                    "next": {
+                      "code": "preprod",
+                      "label": "Pre-Production"
+                    },
+                    "path": [
+                      {
+                        "code": "dev",
+                        "label": "Development",
+                        "position": 1,
+                        "current": false,
+                        "done": true
+                      }
+                    ],
+                    "choices": [
+                      {
+                        "code": "dev",
+                        "label": "Development"
+                      }
+                    ],
+                    "release": {
+                      "apiVersion": "2026.1.3",
+                      "webVersion": null,
+                      "environment": "UAT",
+                      "commit": "a1b2c3d",
+                      "ref": null,
+                      "buildTime": null,
+                      "schema": "0595_environment_promotion.sql"
+                    },
+                    "cutoverDate": "2026-11-01",
+                    "locked": false,
+                    "lastExport": {
+                      "at": "2026-10-10T02:00:00Z",
+                      "by": "it.admin"
+                    },
+                    "lastLoad": null,
+                    "lastComparison": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Environment Promotion > Promotion Path > Mark environment",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environment": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "environment": "uat"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/environment-promotion/history": {
+      "get": {
+        "operationId": "getEnvironmentPromotionHistory",
+        "summary": "The loads of the configuration workbook into this environment, newest first",
+        "tags": [
+          "Environment Promotion"
+        ],
+        "description": "Front-end touchpoint: Master > Environment Promotion > Promotion Path > History\n\nAccess: read:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "rowsRead": {
+                            "type": "integer"
+                          },
+                          "rowsError": {
+                            "type": "integer"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "loadedAt": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "fileName": "GoLive_Configuration_Workbook.xlsx",
+                      "status": "loaded",
+                      "rowsRead": 412,
+                      "rowsError": 0,
+                      "createdAt": "2026-10-10T02:00:00Z",
+                      "loadedAt": "2026-10-10T02:05:00Z",
+                      "createdBy": "IT AppSupport"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Environment Promotion > Promotion Path > History",
+        "x-permissions": [
+          "read:data-load"
+        ]
+      }
+    },
     "/features/catalogue": {
       "get": {
         "operationId": "getFeaturesCatalogue",
@@ -65823,7 +66474,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > History\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "kit",
@@ -66020,7 +66671,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > History",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > History",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -66032,7 +66683,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Upload and validate\n\nAccess: write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -66223,7 +66874,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Upload and validate",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Upload and validate",
         "x-permissions": [
           "write:data-load"
         ],
@@ -66247,7 +66898,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -66447,7 +67098,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Validation result",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Validation result",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -66461,7 +67112,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Download errors\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -66494,7 +67145,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Download errors",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Download errors",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -66508,7 +67159,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Load\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -66702,7 +67353,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Load",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Load",
         "x-permissions": [
           "write:data-load"
         ],
@@ -66733,7 +67384,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > History > Reconciliation\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -66766,7 +67417,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > History > Reconciliation",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > History > Reconciliation",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -66780,7 +67431,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -66976,7 +67627,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Validation result",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Validation result",
         "x-permissions": [
           "write:data-load"
         ]
@@ -66989,7 +67640,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "page",
@@ -67219,7 +67870,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Compare environments",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Compare environments",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67231,7 +67882,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -67425,7 +68076,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Compare environments",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Compare environments",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67450,7 +68101,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -67729,7 +68380,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Compare environments",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Compare environments",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67743,7 +68394,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -67936,7 +68587,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Compare environments",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Compare environments",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67950,7 +68601,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Compare environments > Download\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments > Download\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -67983,7 +68634,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Compare environments > Download",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Compare environments > Download",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67997,7 +68648,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook\n\nAccess: read:data-load, write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -68094,7 +68745,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts)",
+        "x-screen": "Master > Environment Promotion > Setup Workbook",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -68108,7 +68759,7 @@
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > Environment Promotion > Setup Workbook > Download template\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "kit",
@@ -68150,7 +68801,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Download template",
+        "x-screen": "Master > Environment Promotion > Setup Workbook > Download template",
         "x-permissions": [
           "read:data-load",
           "write:data-load"

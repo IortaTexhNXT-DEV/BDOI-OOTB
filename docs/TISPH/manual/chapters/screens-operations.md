@@ -316,6 +316,12 @@ A client can be created, identified and checked before any quotation or policy, 
 
 ![Onboard client: identity, ID, address and expected business](images/screens-operations/client-onboarding.png)
 
+### KYC by source, the checklist and duplicate accounts {#kyc-by-source-the-checklist-and-duplicate-accounts}
+
+The identification a customer needs follows the **KYC Mode** of the lead source of the client (Master > Insurance > Lead Sources): a deal sourced from TFS (CLI, SCR, UCFP, dealer programmes, redemption, promo and bundling) relies on the **TFS KYC confirmation**, every other source needs the **Full KYC** with a government ID. One primary ID is enough; a secondary ID (TIN ID, Postal ID, Senior Citizen ID, PhilHealth ID, Company ID) needs a second one. The **Onboarding Checklist** master (Master > Operational masters) lists the documents by line, KYC mode and customer (the vehicle OR/CR and photos for Motor, the signed proposal, the birth certificate of a customer aged 21 or under, the ACR I-Card or SRRV of a non-Filipino customer); the client view shows the **KYC mode** and each item **On file** or **To collect**, and **Print KYC form** prints the form the customer signs. The documents may be uploaded on the client or with the booking; the government ID or the TFS confirmation goes with the placement order to the insurer.
+
+A new client that matches an existing one by e-mail, by mobile number or by name with the same date of birth is refused with the client it duplicates; the user confirms a genuine namesake by choosing **Create anyway**. On the vehicle, the chassis number, motor number and plate or MV file number are checked at booking, and the product rule refuses a vehicle older than the product allows.
+
 ## Policies {#policies}
 
 Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **Client Name**, **Gross Premium**, **Policy Issued**, **Policy Expiry**, **Product Description** and **Payment** status. The search box finds a policy by number or client. **Show Filters** offers **Payment Status**, **Product Type**, **Insurance Company**, **Client Name**, issue and expiry date ranges and minimum and maximum premium.

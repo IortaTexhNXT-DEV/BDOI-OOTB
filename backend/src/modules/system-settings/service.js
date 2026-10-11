@@ -88,7 +88,7 @@ export async function getSystemSettings() {
   const keys = [...Object.values(FIELD_KEYS), 'branding.default_logo_url', 'branding.logo_presets', 'currency.allowed', 'general.languages',
     'general.company_name', 'general.system_name', 'general.timezone', 'general.date_format', 'currency.symbol', 'currency.decimals',
     'general.phone_country_code', 'general.mobile_pattern', 'general.mobile_example', 'quote.vehicle_colours', 'quote.model_year_span',
-    'quote.bodily_injury_limits', 'quote.property_damage_limits'];
+    'quote.bodily_injury_limits', 'quote.property_damage_limits', 'privacy.pii_reveal_mode'];
   const { map, updatedAt } = await values(keys);
   return {
     logoUrl: map['branding.logo_url'] || map['branding.default_logo_url'] || '',
@@ -105,6 +105,8 @@ export async function getSystemSettings() {
     languages: map['general.languages'] || [],
     companyName: map['general.company_name'],
     systemName: map['general.system_name'],
+    // the user menu offers "Show full identifiers" only when personal identifiers are masked until asked for
+    piiRevealMode: map['privacy.pii_reveal_mode'] === 'on-request' ? 'on-request' : 'always',
     timezone: map['general.timezone'],
     dateFormat: map['general.date_format'],
     currencySymbol: map['currency.symbol'],

@@ -1,6 +1,7 @@
 import authService from "../services/authService";
 import { showLogoutSuccessMessage } from "./toastUtils";
 import logger from "./logger";
+import { setRevealOn } from "./piiReveal";
 
 /**
  * Logout utility function
@@ -8,6 +9,8 @@ import logger from "./logger";
  */
 export const logout = async () => {
   try {
+    // the "Show full identifiers" switch does not outlive the sign-in
+    setRevealOn(false);
     // Call logout API and clear localStorage
     await authService.logout();
     

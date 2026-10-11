@@ -26,6 +26,9 @@ beforeAll(async () => {
   expect(r.status).toBe(201);
   ids['kyc.ops'] = r.body.data.userId;
   tok['kyc.ops'] = await loginAs(ctx.app, 'kyc.ops', 'Welcome@123');
+  const s = await ctx.api('post', '/users').send({ username: 'kyc.sales', password: 'Welcome@123', displayName: 'kyc.sales', email: 'kyc.sales@example.ph', roles: ['tis-sales-associate'] });
+  expect(s.status).toBe(201);
+  tok['kyc.sales'] = await loginAs(ctx.app, 'kyc.sales', 'Welcome@123');
   await query(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, email, phone, source, birth_date, nationality, owner_user_id, created_by) VALUES
     ('cl_tfs', 'CL-KYC-TFS', 'Tfs Customer', 'Tfs', 'Customer', 'tfs.customer@example.ph', '09170000011', 'CLI', '1990-05-14', 'Filipino', $1, $1),
     ('cl_walk', 'CL-KYC-WALK', 'Walk In', 'Walk', 'In', 'walk.in@example.ph', '09170000012', 'WI', '1990-05-14', 'Filipino', $1, $1),
@@ -74,7 +77,7 @@ describe('KYC by source', () => {
     const photos = { vehicleLeftSidePhoto: 'p/1.jpg', vehicleRightSidePhoto: 'p/2.jpg', vehicleFrontSidePhoto: 'p/3.jpg', vehicleRearSidePhoto: 'p/4.jpg' };
     await query("INSERT INTO client_kyc_documents(client_id, doc_type, related_type, storage_key, file_name, uploaded_by) VALUES ('cl_walk', 'signed-proposal', 'client', 'kyc/cl_walk/proposal.pdf', 'proposal.pdf', $1)", [ids['kyc.ops']]);
     expect(await missingKyc({ lob: 'MOTOR', sources: [motorId, photos, { ltoDocumentKey: 'lto/orcr.pdf' }], clientId: 'cl_walk' })).toEqual([]);
-    expect(await missingKyc({ lob: 'PA', sources: [], clientId: 'cl_young' })).toEqual(['ID type', 'ID number', 'ID card image', 'Valid government ID', 'Signed proposal form', 'Birth certificate', 'ACR I-Card or SRRV']);
+    expect(await missingKyc({ lob: 'PA', sources: [], clientId: 'cl_young' })).toEqual(['Valid government ID', 'Signed proposal form', 'Birth certificate', 'ACR I-Card or SRRV']);
     await setSettings({ 'policy.kyc_checklist_enforced': false });
   });
 
@@ -95,21 +98,27 @@ describe('KYC by source', () => {
 describe('duplicate-account control', () => {
   it('refuses a client that duplicates an existing one by e-mail, mobile or name with birth date, unless confirmed or switched off', async () => {
     const body = { firstName: 'Walk', lastName: 'In', emailId: 'walk.in@example.ph', leadCategory: 'Retail' };
-    const dup = await as('kyc.ops', 'post', '/clients').send(body);
+    const dup = await as('kyc.sales', 'post', '/clients').send(body);
     expect(dup.status).toBe(409);
     expect(dup.body.message).toMatch(/same email already exists: Walk In \(CL-KYC-WALK\)/);
     expect(dup.body.errors[0]).toMatchObject({ path: 'duplicate', clientCode: 'CL-KYC-WALK' });
-    expect((await as('kyc.ops', 'post', '/clients').send({ firstName: 'Other', lastName: 'Person', contactNumber: '+63 917 000 0012', leadCategory: 'Retail' })).status).toBe(409);
-    expect((await as('kyc.ops', 'post', '/clients').send({ firstName: 'Walk', lastName: 'In', DOB: '1990-05-14', leadCategory: 'Retail' })).status).toBe(409);
+    expect((await as('kyc.sales', 'post', '/clients').send({ firstName: 'Other', lastName: 'Person', contactNumber: '+63 917 000 0012', leadCategory: 'Retail' })).status).toBe(409);
+    expect((await as('kyc.sales', 'post', '/clients').send({ firstName: 'Walk', lastName: 'In', DOB: '1990-05-14', leadCategory: 'Retail' })).status).toBe(409);
     // the same name with another birth date, or no birth date, is not a duplicate
-    expect((await as('kyc.ops', 'post', '/clients').send({ firstName: 'Walk', lastName: 'In', DOB: '1991-01-01', leadCategory: 'Retail' })).status).toBe(201);
-    const check = await as('kyc.ops', 'get', '/clients/duplicates?emailId=WALK.IN@example.ph');
+    expect((await as('kyc.sales', 'post', '/clients').send({ firstName: 'Walk', lastName: 'In', DOB: '1991-01-01', leadCategory: 'Retail' })).status).toBe(201);
+    const check = await as('kyc.sales', 'get', '/clients/duplicates?emailId=WALK.IN@example.ph');
     expect(check.status).toBe(200);
     expect(check.body.data).toEqual([expect.objectContaining({ clientCode: 'CL-KYC-WALK', matchedOn: ['email'] })]);
-    const confirmed = await as('kyc.ops', 'post', '/clients').send({ ...body, allowDuplicate: true });
+    const confirmed = await as('kyc.sales', 'post', '/clients').send({ ...body, allowDuplicate: true });
     expect(confirmed.status).toBe(201);
+    // onboarding before the first policy is controlled the same way
+    const onboard = { clientType: 'individual', firstName: 'Walk', lastName: 'In', emailId: 'walk.in@example.ph', contactNumber: '09170000099', DOB: '1990-05-14', nationality: 'Filipino', idType: 'PhilSys National ID (PhilID / ePhilID)', idNumber: '1234-5678-9012-3457', province: 'Metro Manila', city: 'Makati City' };
+    const dupOnboard = await as('kyc.sales', 'post', '/clients/onboard').send(onboard);
+    expect(dupOnboard.status, JSON.stringify(dupOnboard.body)).toBe(409);
+    expect(dupOnboard.body.errors[0]).toMatchObject({ path: 'duplicate' });
+    expect((await as('kyc.sales', 'post', '/clients/onboard').send({ ...onboard, allowDuplicate: true })).status).toBe(201);
     await setSettings({ 'clients.duplicate_control': 'off' });
-    expect((await as('kyc.ops', 'post', '/clients').send(body)).status).toBe(201);
+    expect((await as('kyc.sales', 'post', '/clients').send(body)).status).toBe(201);
     await setSettings({ 'clients.duplicate_control': 'block' });
   });
 });

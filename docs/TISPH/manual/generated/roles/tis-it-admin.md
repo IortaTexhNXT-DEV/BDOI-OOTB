@@ -100,9 +100,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | Document Numbering | Create and edit |
 | Master > System | Schedules | Create and edit |
 | Master > System | Audit Trail | View |
+| Master > System | Service Levels | Create and edit |
+| Master > System | Security Controls | Create and edit |
 | Master > System | E-mail Outbox | Create and edit |
 | Master > System | Integrations | Create and edit |
 | Master > System | Features & Releases | View |
+| Master > Environment Promotion | Setup Workbook | Create and edit |
+| Master > Environment Promotion | Compare Environments | Create and edit |
+| Master > Environment Promotion | Promotion Path | Create and edit |
 | Product Configurator | Dashboard | Create and edit |
 | Product Configurator | Product Templates | Create and edit |
 | Product Configurator | Coverage Builder | Create and edit |
@@ -110,7 +115,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Product Configurator | Acceptance Rules | Create and edit |
 | Product Configurator | Document Manager | Create and edit |
 | Product Configurator | Market Mapping | Create and edit |
-| Product Configurator | Risk Mapping | Create and edit |
 
 ## What you can view, change and approve {#tis-it-appsupport-admin-access}
 
@@ -137,9 +141,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
-| Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
+| Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager and Market Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Commission Rate Matrix, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
@@ -151,6 +155,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | Integrations |
 | Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |  |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Environment promotion | View | Download the Setup Workbook, see the uploads, compare environments and the promotion path | Setup Workbook, Compare Environments and Promotion Path |
+| Master data and configuration | Environment promotion | Create and edit | Upload, validate and load the Setup Workbook; mark the environment |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |  |

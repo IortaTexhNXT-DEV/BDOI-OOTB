@@ -350,6 +350,28 @@ The tab **Future releases** lists the functions TISPH can ask for, with their de
 
 The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
 
+## Environment Promotion {#environment-promotion}
+
+Master > Environment Promotion (IT AppSupport / Admin) moves the configuration of one environment to the next: Development, System Integration Testing, User Acceptance Testing, Pre-Production and Production.
+
+### Setup Workbook {#setup-workbook}
+
+{{screen:/master/promotion/workbook}}
+
+The Setup Workbook is the configuration of an environment in one Excel file: the masters, settings, users, chart of accounts, commission rates, taxes, authority limits, numbering series and payee bank accounts, one sheet each in load order. The table **Sheets** lists them with the **Screen** each belongs to and the **Key** that identifies a row. **Download with current data** exports the configuration of this environment to carry to the next one; **Download blank** gives the empty layout. **Upload workbook** validates the file of another environment first (nothing is saved; the rows in error are listed with the sheet, row and column, and **Download errors** returns them in the workbook layout to fix) and **Load** writes the validated rows in one transaction. **Uploads** lists every upload with its **Status** (**Validated**, **Errors**, **Loaded**), its rows and who made it; select one for the result per sheet. The marker of the environment and the secrets never travel in a workbook.
+
+### Compare Environments {#compare-environments}
+
+{{screen:/master/promotion/compare}}
+
+Choose the workbook exported from another environment and select **Compare**: nothing is loaded. The verdict is **Mirrored** or **Differences found**, with the rows **Identical**, **Different**, **Only in file** and **Only here** per sheet and the field-level changes of the rows that differ; values that differ by nature between environments (cutover date, addresses, e-mail senders, gateway modes) are set apart. **Include numbering counters** compares the next numbers too. **Download comparison** gives the workbook with a Difference column on every sheet. **Comparisons** keeps every comparison made.
+
+### Promotion Path {#promotion-path}
+
+{{screen:/master/promotion/path}}
+
+The path shows the environments in order with **This environment** marked, the previous and next environment, the cutover date and whether go-live is locked. **Release** shows the API and web releases, the schema (the latest database migration), the commit and the build time, so the same release can be confirmed on both sides of a promotion. **Workbook activity** shows the last export, load and comparison, and **Loads** the workbooks loaded here. **Mark environment** sets what this database is (a locked database is Production and stays so); the marker is set here only.
+
 ## E-mail Outbox {#e-mail-outbox}
 
 {{screen:/master/configuration/email-outbox}}

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1353 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1358 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -23790,7 +23790,72 @@
           ]
         },
         {
-          "name": "KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents",
+          "name": "The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/:id/kyc-form.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                ":id",
+                "kyc-form.pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines\n\nFront-end touchpoint: Operations > Clients > Onboard client > Print KYC form\n\nAccess: read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/clients/:id/kyc-form.pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clients",
+                    ":id",
+                    "kyc-form.pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines\n\nFront-end touchpoint: Operations > Clients > Onboard client > Print KYC form\n\nAccess: read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "<pdf>"
+            }
+          ]
+        },
+        {
+          "name": "KYC profile of a client: identification still missing, KYC source and onboarding checklist, signatories, beneficial owners with their warnings, documents",
           "request": {
             "method": "GET",
             "header": [],
@@ -23812,7 +23877,7 @@
                 }
               ]
             },
-            "description": "KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: read:clients"
+            "description": "KYC profile of a client: identification still missing, KYC source and onboarding checklist, signatories, beneficial owners with their warnings, documents\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: read:clients"
           },
           "response": [
             {
@@ -23838,7 +23903,7 @@
                     }
                   ]
                 },
-                "description": "KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: read:clients"
+                "description": "KYC profile of a client: identification still missing, KYC source and onboarding checklist, signatories, beneficial owners with their warnings, documents\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: read:clients"
               },
               "status": "OK",
               "code": 200,
@@ -24114,6 +24179,75 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"clientId\": \"cl_1\",\n    \"clientCode\": \"CL-2026-00001\",\n    \"activePolicies\": 2,\n    \"activePremium\": 56730,\n    \"openClaims\": 1,\n    \"openRenewals\": 1,\n    \"nextExpiry\": \"2026-10-28\",\n    \"outstanding\": 26350,\n    \"overdueBills\": 0,\n    \"counts\": {\n      \"policies\": 2,\n      \"quotations\": 3,\n      \"claims\": 2,\n      \"renewals\": 1,\n      \"endorsements\": 0,\n      \"receipts\": 4,\n      \"documents\": 2\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Duplicate-account control: the clients a new record would duplicate by e-mail, mobile number, or name with the same date of birth (emailId, contactNumber, firstName, lastName, companyName, DOB)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/duplicates?emailId=juan@example.com&contactNumber=09171234567",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "duplicates"
+              ],
+              "query": [
+                {
+                  "key": "emailId",
+                  "value": "juan@example.com"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "09171234567"
+                }
+              ]
+            },
+            "description": "Duplicate-account control: the clients a new record would duplicate by e-mail, mobile number, or name with the same date of birth (emailId, contactNumber, firstName, lastName, companyName, DOB)\n\nFront-end touchpoint: Operations > Clients > New client\n\nAccess: read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/clients/duplicates?emailId=juan@example.com&contactNumber=09171234567",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clients",
+                    "duplicates"
+                  ],
+                  "query": [
+                    {
+                      "key": "emailId",
+                      "value": "juan@example.com"
+                    },
+                    {
+                      "key": "contactNumber",
+                      "value": "09171234567"
+                    }
+                  ]
+                },
+                "description": "Duplicate-account control: the clients a new record would duplicate by e-mail, mobile number, or name with the same date of birth (emailId, contactNumber, firstName, lastName, companyName, DOB)\n\nFront-end touchpoint: Operations > Clients > New client\n\nAccess: read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"cl_1\",\n      \"clientCode\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\",\n      \"matchedOn\": [\n        \"email\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -36706,6 +36840,184 @@
       ]
     },
     {
+      "name": "Environment Promotion",
+      "item": [
+        {
+          "name": "The promotion path with the position of this environment, the release identity (versions, commit, schema), the go-live state and the last export, load and comparison of the configuration workbook",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/environment-promotion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "environment-promotion"
+              ]
+            },
+            "description": "The promotion path with the position of this environment, the release identity (versions, commit, schema), the go-live state and the last export, load and comparison of the configuration workbook\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path\n\nAccess: read:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/environment-promotion",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "environment-promotion"
+                  ]
+                },
+                "description": "The promotion path with the position of this environment, the release identity (versions, commit, schema), the go-live state and the last export, load and comparison of the configuration workbook\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path\n\nAccess: read:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"environment\": \"uat\",\n    \"label\": \"User Acceptance Testing\",\n    \"onPath\": true,\n    \"previous\": {\n      \"code\": \"sit\",\n      \"label\": \"System Integration Testing\"\n    },\n    \"next\": {\n      \"code\": \"preprod\",\n      \"label\": \"Pre-Production\"\n    },\n    \"path\": [\n      {\n        \"code\": \"dev\",\n        \"label\": \"Development\",\n        \"position\": 1,\n        \"current\": false,\n        \"done\": true\n      }\n    ],\n    \"choices\": [\n      {\n        \"code\": \"dev\",\n        \"label\": \"Development\"\n      }\n    ],\n    \"release\": {\n      \"apiVersion\": \"2026.1.3\",\n      \"webVersion\": null,\n      \"environment\": \"UAT\",\n      \"commit\": \"a1b2c3d\",\n      \"ref\": null,\n      \"buildTime\": null,\n      \"schema\": \"0595_environment_promotion.sql\"\n    },\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": false,\n    \"lastExport\": {\n      \"at\": \"2026-10-10T02:00:00Z\",\n      \"by\": \"it.admin\"\n    },\n    \"lastLoad\": null,\n    \"lastComparison\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark this database as an environment of the path (dev, sit, uat, preprod, training, production); a locked database stays production; audited",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/environment-promotion/environment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "environment-promotion",
+                "environment"
+              ]
+            },
+            "description": "Mark this database as an environment of the path (dev, sit, uat, preprod, training, production); a locked database stays production; audited\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path > Mark environment\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"environment\": \"uat\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/environment-promotion/environment",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "environment-promotion",
+                    "environment"
+                  ]
+                },
+                "description": "Mark this database as an environment of the path (dev, sit, uat, preprod, training, production); a locked database stays production; audited\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path > Mark environment\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"environment\": \"uat\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Environment marked as User Acceptance Testing\",\n  \"data\": {\n    \"environment\": \"uat\",\n    \"label\": \"User Acceptance Testing\",\n    \"onPath\": true,\n    \"previous\": {\n      \"code\": \"sit\",\n      \"label\": \"System Integration Testing\"\n    },\n    \"next\": {\n      \"code\": \"preprod\",\n      \"label\": \"Pre-Production\"\n    },\n    \"path\": [\n      {\n        \"code\": \"dev\",\n        \"label\": \"Development\",\n        \"position\": 1,\n        \"current\": false,\n        \"done\": true\n      }\n    ],\n    \"choices\": [\n      {\n        \"code\": \"dev\",\n        \"label\": \"Development\"\n      }\n    ],\n    \"release\": {\n      \"apiVersion\": \"2026.1.3\",\n      \"webVersion\": null,\n      \"environment\": \"UAT\",\n      \"commit\": \"a1b2c3d\",\n      \"ref\": null,\n      \"buildTime\": null,\n      \"schema\": \"0595_environment_promotion.sql\"\n    },\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": false,\n    \"lastExport\": {\n      \"at\": \"2026-10-10T02:00:00Z\",\n      \"by\": \"it.admin\"\n    },\n    \"lastLoad\": null,\n    \"lastComparison\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The loads of the configuration workbook into this environment, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/environment-promotion/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "environment-promotion",
+                "history"
+              ]
+            },
+            "description": "The loads of the configuration workbook into this environment, newest first\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path > History\n\nAccess: read:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/environment-promotion/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "environment-promotion",
+                    "history"
+                  ]
+                },
+                "description": "The loads of the configuration workbook into this environment, newest first\n\nFront-end touchpoint: Master > Environment Promotion > Promotion Path > History\n\nAccess: read:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"fileName\": \"GoLive_Configuration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"rowsRead\": 412,\n      \"rowsError\": 0,\n      \"createdAt\": \"2026-10-10T02:00:00Z\",\n      \"loadedAt\": \"2026-10-10T02:05:00Z\",\n      \"createdBy\": \"IT AppSupport\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Features and Releases",
       "item": [
         {
@@ -39730,7 +40042,7 @@
                 }
               ]
             },
-            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
+            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > History\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39762,7 +40074,7 @@
                     }
                   ]
                 },
-                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
+                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > History\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -39798,7 +40110,7 @@
                 "batches"
               ]
             },
-            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Upload and validate\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file, kit=configuration|migration\"",
@@ -39830,7 +40142,7 @@
                     "batches"
                   ]
                 },
-                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
+                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Upload and validate\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file, kit=configuration|migration\"",
@@ -39878,7 +40190,7 @@
                 }
               ]
             },
-            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
+            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39904,7 +40216,7 @@
                     }
                   ]
                 },
-                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
+                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -39944,7 +40256,7 @@
                 }
               ]
             },
-            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Download errors\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39971,7 +40283,7 @@
                     }
                   ]
                 },
-                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Download errors\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40016,7 +40328,7 @@
                 }
               ]
             },
-            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Load\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -40057,7 +40369,7 @@
                     }
                   ]
                 },
-                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Load\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -40106,7 +40418,7 @@
                 }
               ]
             },
-            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40133,7 +40445,7 @@
                     }
                   ]
                 },
-                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40173,7 +40485,7 @@
                 }
               ]
             },
-            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
+            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: write:data-load"
           },
           "response": [
             {
@@ -40200,7 +40512,7 @@
                     }
                   ]
                 },
-                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
+                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Validation result\n\nAccess: write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40241,7 +40553,7 @@
                 }
               ]
             },
-            "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40269,7 +40581,7 @@
                     }
                   ]
                 },
-                "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40305,7 +40617,7 @@
                 "compare"
               ]
             },
-            "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+            "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
@@ -40337,7 +40649,7 @@
                     "compare"
                   ]
                 },
-                "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
+                "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
@@ -40385,7 +40697,7 @@
                 }
               ]
             },
-            "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40411,7 +40723,7 @@
                     }
                   ]
                 },
-                "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40473,7 +40785,7 @@
                 }
               ]
             },
-            "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40522,7 +40834,7 @@
                     }
                   ]
                 },
-                "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40562,7 +40874,7 @@
                 }
               ]
             },
-            "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: API (go-live scripts) > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+            "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40589,7 +40901,7 @@
                     }
                   ]
                 },
-                "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: API (go-live scripts) > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+                "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40620,7 +40932,7 @@
                 "kits"
               ]
             },
-            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
+            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40638,7 +40950,7 @@
                     "kits"
                   ]
                 },
-                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
+                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -40684,7 +40996,7 @@
                 }
               ]
             },
-            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
+            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Download template\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -40717,7 +41029,7 @@
                     }
                   ]
                 },
-                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
+                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Environment Promotion > Setup Workbook > Download template\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,

@@ -102,7 +102,9 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'configuration-promotion', name: 'Configuration promotion', module: 'Platform', tier: PLAT,
     description: 'Configuration workbook, master data load at cutover and comparison of environments (Dev, UAT, Production)',
-    requirements: ['TIS-BRD-NFR-08', 'PBSM-MIG-MASTERS'],
+    requirements: ['TIS-BRD-NFR-08', 'TIS-BRD-NFR-8.2', 'PBSM-MIG-MASTERS'],
+    menus: ['Master > Environment Promotion > Setup Workbook', 'Master > Environment Promotion > Compare Environments', 'Master > Environment Promotion > Promotion Path'],
+    api: ['/data-load', '/environment-promotion'],
   }),
   feature({
     key: 'features-releases', name: 'Features and releases', module: 'Platform', tier: PLAT,
@@ -627,10 +629,10 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'product-configurator', name: 'Product configuration', module: 'Product Configurator', tier: P1,
-    description: 'Product templates, coverages, rating engine, acceptance rules, documents, market mapping and risk mapping',
+    description: 'Product templates, coverages, rating engine, acceptance rules, documents and market mapping; the risk details are the fields of the product template',
     requirements: ['TIS-BRD-PROD-01', 'TIS-BRD-PROD-04', 'TIS-BRD-PROD-07', 'TIS-BRD-PROD-09', 'TIS-BRD-PROD-10', 'TIS-BRD-PROD-12', 'TIS-BRD-PROD-13', 'TIS-BRD-PROD-14'],
     menus: ['Product Configurator > Product Templates', 'Product Configurator > Coverage Builder', 'Product Configurator > Rating Engine',
-      'Product Configurator > Acceptance Rules', 'Product Configurator > Document Manager', 'Product Configurator > Market Mapping', 'Product Configurator > Risk Mapping'],
+      'Product Configurator > Acceptance Rules', 'Product Configurator > Document Manager', 'Product Configurator > Market Mapping'],
   }),
   feature({
     key: 'product-analytics', name: 'Product analytics', module: 'Product Configurator', tier: FUT,

@@ -76,12 +76,6 @@ Market Mapping lists the insurers that offer each product: **Template / product*
 
 ![Product Configurator > Market Mapping: the panel insurers of the motor product](images/screens-product-configurator/market-mapping.png)
 
-## Risk Mapping {#risk-mapping}
-
-{{screen:/product-configurator/risk-mapping}}
-
-Risk Mapping lists the risk definitions of the products: **Product**, **Definition** (for example vehicle details for motor, liability cover fields for CTPL), **Risk Sections**, **Used by** and **Status**. The definitions are kept for reference; the risk details of a motor quotation are those of the quotation screens.
-
 ## Product Analytics {#product-analytics}
 
 {{screen:/product-configurator/analytics}}

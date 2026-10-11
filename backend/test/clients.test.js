@@ -116,7 +116,7 @@ describe('clients', () => {
 });
 
 const individual = (over = {}) => ({
-  clientType: 'individual', firstName: 'Ramon', middleName: 'Bautista', lastName: 'Villanueva', DOB: '1980-03-15', nationality: 'Filipino', contactNumber: '0917 123 4567',
+  clientType: 'individual', firstName: 'Ramon', middleName: 'Bautista', lastName: 'Villanueva', DOB: '1980-03-15', nationality: 'Filipino', contactNumber: '0917 555 1234',
   taxNumber: '123-456-789-000', idType: 'PhilSys National ID (PhilID / ePhilID)', idNumber: '1234-5678-9012-3456', idExpiry: '2031-03-15', province: 'Metro Manila',
   city: 'Makati City', barangay: 'Poblacion', street: 'J.P. Rizal Avenue', houseNo: '12', zipCode: '1210', occupation: 'Civil engineer', sourceOfFunds: 'Salary',
   expectedLines: ['MOTOR'], expectedPaymentMode: 'bank-transfer', expectedAnnualPremium: 35000, emailId: 'ramon.v@example.ph', ...over,
@@ -137,7 +137,7 @@ describe('client onboarding before the first policy (customer due diligence)', (
     const r = await sales('post', '/clients/onboard').send(individual());
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     const c = r.body.data.client;
-    expect(c).toMatchObject({ clientType: 'individual', onboardedVia: 'onboarding', nationality: 'Filipino', middleName: 'Bautista', contactNumber: '09171234567', idExpiry: '2031-03-15',
+    expect(c).toMatchObject({ clientType: 'individual', onboardedVia: 'onboarding', nationality: 'Filipino', middleName: 'Bautista', contactNumber: '09175551234', idExpiry: '2031-03-15',
       city: 'Makati City', province: 'Metro Manila', kycStatus: 'complete', policies: [] });
     expect(c.region).toBeTruthy();
     expect(c).not.toHaveProperty('riskRating');

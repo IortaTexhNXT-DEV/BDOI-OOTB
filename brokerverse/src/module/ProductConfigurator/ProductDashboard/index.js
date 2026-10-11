@@ -93,7 +93,7 @@ const ProductDashboard = () => {
   const links = [
     ["templates", "pi pi-list", "/product-configurator/templates"], ["coverages", "pi pi-shield", "/product-configurator/coverages"], ["rating", "pi pi-calculator", "/product-configurator/rating"],
     ["underwriting", "pi pi-check-circle", "/product-configurator/underwriting"], ["documents", "pi pi-file", "/product-configurator/documents"],
-    ["marketMapping", "pi pi-map", "/product-configurator/market-mapping"], ["riskMapping", "pi pi-sitemap", "/product-configurator/risk-mapping"], ["analytics", "pi pi-chart-bar", "/product-configurator/analytics"],
+    ["marketMapping", "pi pi-map", "/product-configurator/market-mapping"], ["analytics", "pi pi-chart-bar", "/product-configurator/analytics"],
   ];
 
   return (

@@ -108,7 +108,8 @@ export async function masterSheet(code) {
 // ------------------------------------------------------------------ system settings
 
 /** Settings never loaded from a workbook: secrets (none are kept in settings, the check is a safeguard) and the go-live lock. */
-const NOT_LOADED = /(secret|api_?key|credential|private_?key)/i;
+// never in a workbook: secrets, and the marker of the environment itself (system.environment is set on Promotion Path)
+const NOT_LOADED = /(secret|api_?key|credential|private_?key)|^system\.(environment|masked_at)$/i;
 const LOCK_KEY = 'golive.locked';
 
 /** Settings the workbook carries: editable, changed on Master > Configuration (not owned by another screen, not under approval). */

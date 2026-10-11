@@ -1468,6 +1468,34 @@ export const menuList = [
         ],
       },
       {
+        // the administrator moves the configuration from one environment to the next (read:data-load)
+        name: "Environment Promotion",
+        section: true,
+        submenu: [
+          {
+            id: 42,
+            name: "Setup Workbook",
+            path: "/master/promotion/workbook",
+            includes: ["/master/promotion/workbook"],
+            permissions: ["read:data-load"],
+          },
+          {
+            id: 43,
+            name: "Compare Environments",
+            path: "/master/promotion/compare",
+            includes: ["/master/promotion/compare"],
+            permissions: ["read:data-load"],
+          },
+          {
+            id: 44,
+            name: "Promotion Path",
+            path: "/master/promotion/path",
+            includes: ["/master/promotion/path"],
+            permissions: ["read:data-load"],
+          },
+        ],
+      },
+      {
         // the iorta TechNXT platform administrator only (utils/menuPermissions.js): enabling the releases of the platform
         name: "Platform",
         section: true,
@@ -1540,19 +1568,6 @@ export const menuList = [
         path: "/product-configurator/market-mapping",
         includes: ["/product-configurator/market-mapping"],
         permissions: ["read:product-market-mapping"],
-      },
-      {
-        id: 10,
-        name: "Risk Mapping",
-        path: "/product-configurator/risk-mapping",
-        includes: [
-          "/product-configurator/risk-mapping",
-          "/product-configurator/risk-mapping/",
-        ],
-        permissions: [
-          "read:product-risk-mapping",
-          "read:product-templates",
-        ],
       },
       {
         id: 9,

@@ -155,6 +155,9 @@ export const HELP_ROUTES = [
   ["/master/configuration/schedules", "schedules", "system-administrator-schedules"],
   ["/master/configuration/audit-trail", "audit-trail"],
   ["/master/configuration/security-controls", "security-controls"],
+  ["/master/promotion/workbook", "setup-workbook", "environment-promotion"],
+  ["/master/promotion/compare", "compare-environments", "environment-promotion"],
+  ["/master/promotion/path", "promotion-path", "environment-promotion"],
   ["/master/configuration/service-levels", "service-levels"],
   ["/master/configuration/features", "features-and-releases"],
   ["/master/platform/features", "features-and-releases"],
@@ -175,7 +178,6 @@ export const HELP_ROUTES = [
   ["/product-configurator/underwriting", "acceptance-rules", "module-reference-product-configurator"],
   ["/product-configurator/documents", "document-manager", "module-reference-product-configurator"],
   ["/product-configurator/market-mapping", "market-mapping", "module-reference-product-configurator"],
-  ["/product-configurator/risk-mapping", "risk-mapping", "module-reference-product-configurator"],
   ["/product-configurator/analytics", "product-analytics", "module-reference-product-configurator", "screens-product-configurator"],
   // distribution, programmes and products
   ["/sales/lead-assignment", "lead-assignment"],

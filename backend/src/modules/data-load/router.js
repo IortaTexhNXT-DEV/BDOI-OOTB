@@ -12,15 +12,16 @@ import * as svc from './service.js';
 import * as cmp from './comparisons.js';
 
 /**
- * Go-Live Data Workbench: the configuration and migration workbooks, through the API only (there is no screen; the
- * go-live scripts, npm run rehearsal:golive and npm run compare:environments, call it). Download a blank
+ * Go-Live Data Workbench: the configuration and migration workbooks. The configuration workbook is the Setup Workbook
+ * of Master > Environment Promotion (Setup Workbook, Compare Environments; modules/environment-promotion); the
+ * migration workbook stays with the go-live scripts (npm run rehearsal:golive, npm run compare:environments). Download a blank
  * template or the current data of this environment, upload (validated as a dry run, nothing saved), download the rows
  * in error, load, history and the reconciliation of a migration load; the environment comparison (an export of another
  * environment compared with this one, or two exports with each other: never loads). System Administrator only
  * (read:data-load / write:data-load, migrations 0244 and 0247).
  */
 const { router, define } = moduleRouter('Go-Live Data Workbench', '/data-load');
-const SCREEN = 'API (go-live scripts)';
+const SCREEN = 'Master > Environment Promotion > Setup Workbook';
 const canRead = [requireAuth, requirePermission('read:data-load', 'write:data-load')];
 const canWrite = [requireAuth, requirePermission('write:data-load')];
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -138,7 +139,8 @@ define({
     const kit = kitOf(req.body?.kit || req.query.kit);
     const r = await svc.createBatch({ kit, file: req.file, user: req.user });
     await audit(req, { entity: 'data_load_batch', entityId: r.batch.id, action: 'validate', after: { kit, fileName: r.batch.fileName, rowsRead: r.batch.rowsRead, rowsError: r.batch.rowsError } });
-    created(res, r, r.batch.rowsError ? `Validated: ${r.batch.rowsError} row(s) with errors` : 'Validated: no error');
+    // valid / canCommit: the shared import dialog loads a validated batch only while no row is in error
+    created(res, { ...r, valid: !r.batch.rowsError, canCommit: !r.batch.rowsError }, r.batch.rowsError ? `Validated: ${r.batch.rowsError} row(s) with errors` : 'Validated: no error');
   },
 });
 define({

@@ -16,6 +16,7 @@ import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import PhAddressFields from "../../component/PhAddressFields";
 import onboardingService, { errorMessage, fieldErrors } from "./onboardingService";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { AUTHORITY_DOCUMENTS, CONTROL_TYPES, KycStatusTag, PageHeader } from "./common";
 import KycDocuments from "./KycDocuments";
 import { printPdf } from "../../../components/Print";
@@ -116,7 +117,18 @@ const ClientOnboarding = () => {
           loadProfile(id);
         } else {
           const body = { ...toBody(v), ...(v.clientType === "corporate" ? { signatories: signatories.map(clean), beneficialOwners: owners.map(clean) } : {}) };
-          const r = await onboardingService.onboard(body);
+          const r = await onboardingService.onboard(body).catch(async (e) => {
+            // duplicate-account control: the user confirms a genuine namesake
+            const duplicates = (e?.response?.data?.errors || []).filter((x) => x.path === "duplicate");
+            if (e?.response?.status !== 409 || !duplicates.length) throw e;
+            const confirmed = await openConfirm({
+              title: t("onboarding.duplicateTitle"), message: e.response.data.message, severity: "warning",
+              facts: duplicates.map((d) => ({ label: d.clientCode, value: d.message })), confirmLabel: t("onboarding.createAnyway"),
+            });
+            if (!confirmed) return null;
+            return onboardingService.onboard({ ...body, allowDuplicate: true });
+          });
+          if (!r) return;
           toast.current?.show({ severity: "success", summary: r.message });
           navigate(`/agent/client-onboarding/${r.data.client.id}`, { replace: true });
         }
