@@ -262,6 +262,13 @@ describe('return premium, cancellation and write-off', () => {
     expect(reasons.map((x) => x.code)).toContain('SMALL_BALANCE');
     const tooMuch = await ctx.as('maker')('post', '/accounting/entries/match').send({ matchPairs: [{ debitTransactionId: debit.id, creditTransactionId: credit.id, matchedAmount: credit.amount, adjustmentAmount: 25, writeOffCode: 'NOPE' }] });
     expect(tooMuch.status).toBe(400);
+    expect(reasons.find((x) => x.code === 'WO-SMALL')).toMatchObject({ glAccount: '4401009', maxAmount: 100 });
+    // the write-off is within the user's write_off authority (Authority Matrix; GAP-FIN-23)
+    await query('UPDATE authority_limits SET max_amount = 10 WHERE transaction_type = \'write_off\' AND role_code = \'accounting\'');
+    const aboveAuthority = await ctx.as('maker')('post', '/accounting/entries/match').send({ matchPairs: [{ debitTransactionId: debit.id, creditTransactionId: credit.id, matchedAmount: credit.amount, adjustmentAmount: 25, writeOffCode: 'SMALL_BALANCE' }] });
+    expect(aboveAuthority.status).toBe(403);
+    expect(aboveAuthority.body.message).toMatch(/above your approval authority/);
+    await query('UPDATE authority_limits SET max_amount = 1000 WHERE transaction_type = \'write_off\' AND role_code = \'accounting\'');
     const mt = await ctx.as('maker')('post', '/accounting/entries/match').send({ matchPairs: [{ debitTransactionId: debit.id, creditTransactionId: credit.id, matchedAmount: credit.amount, adjustmentAmount: 25, writeOffCode: 'SMALL_BALANCE' }] });
     expect(mt.status).toBe(200);
     expect(mt.body.data[0].writeOff).toMatchObject({ amount: 25, reasonCode: 'SMALL_BALANCE', glAccount: '4409001', side: 'DEBIT' });

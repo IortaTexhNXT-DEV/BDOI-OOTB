@@ -1,5 +1,6 @@
 /** Ledger queries (entries, client / policy ledgers, trial balance), open-entry matching, periods, chart of accounts, payment entries. */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { assertAuthority } from '../access-control/service.js';
 import { currentBalance, periodOf } from './lib/ledger.js';
 import { postEvent } from './lib/posting.js';
 import { isoDate, num, round2, today } from './lib/http.js';
@@ -141,6 +142,8 @@ async function writeOffResidual(db, { dr, cr, matched, adjustment, reasonCode, n
   const reason = (await db.query('SELECT * FROM write_off_reasons WHERE (code = $1 OR id::text = $1) AND status = \'active\'', [String(reasonCode)])).rows[0];
   if (!reason) throw badRequest(`Write-off reason ${reasonCode} is not an active reason`);
   if (reason.max_amount !== null && adj > Number(reason.max_amount)) throw badRequest(`Write-off ${adj} exceeds the limit of reason ${reason.code} (${Number(reason.max_amount)})`);
+  // and the user's write-off authority of the Authority Matrix (Pre-BSM M32, PBSM-M23-WO)
+  await assertAuthority(db, user, 'write_off', adj);
   const drLeft = round2(Number(dr.remaining) - matched);
   const crLeft = round2(Number(cr.remaining) - matched);
   const debitSide = drLeft >= adj;

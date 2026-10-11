@@ -69,7 +69,8 @@ describe('the matrix', () => {
     expect(m.roles.find((r) => r.code === 'processing').approves).not.toContain('underwriting_referral');
     expect(m.roles.find((r) => r.code === 'accounting')).toMatchObject({ platform: true, department: null });
     expect(m.rows.find((r) => r.code === 'journal_voucher')).toMatchObject({ checked: true, step: 'Accounts > Journal Vouchers > Approve' });
-    expect(m.rows.find((r) => r.code === 'write_off')).toMatchObject({ checked: false, step: null });
+    expect(m.rows.find((r) => r.code === 'write_off')).toMatchObject({ checked: true, step: 'Accounts > Open Entry Matching > Write-off' });
+    expect(m.rows.find((r) => r.code === 'petty_cash')).toMatchObject({ checked: false, step: null });
     expect(m.rows.find((r) => r.code === 'quotation_discount')).toMatchObject({ checked: true });
     expect(m).toMatchObject({ withoutLimit: 'allow', referenceRequired: true, asOf: day, abilities: { edit: true, approve: true } });
     expect(m.rows.find((r) => r.code === 'payment_voucher').cells.accounting).toMatchObject({ set: true, maxAmount: 2000000, pending: null });
@@ -220,12 +221,13 @@ describe('upload', () => {
     const jv = sheets[0].rows.find((x) => x[11] === 'journal_voucher' && x[12] === 'tis-finance');
     expect(jv.slice(0, 7)).toEqual(['Journal voucher approval', 'TIS Finance & General Accounting', 'Finance and Accounting', 'Amount in PHP', 'PHP 1,000,000.00', '1000000', 'No']);
     expect(sheets[0].rows.some((x) => x[12] === 'accounting')).toBe(false);
-    expect(sheets[0].rows.some((x) => x[11] === 'write_off')).toBe(false);
+    expect(sheets[0].rows.some((x) => x[11] === 'petty_cash')).toBe(false);
+    expect(sheets[0].rows.some((x) => x[11] === 'write_off' && x[12] === 'tis-finance')).toBe(true);
     const base = readWorkbook((await binary(as['am.gm']('get', '/access-control/authority-matrix/template?base=1'))).body);
     expect(base[0].rows.some((x) => x[12] === 'accounting' && x[11] === 'payment_voucher')).toBe(true);
-    expect(base[0].rows.some((x) => x[11] === 'write_off')).toBe(false);
+    expect(base[0].rows.some((x) => x[11] === 'petty_cash')).toBe(false);
     const every = readWorkbook((await binary(as['am.gm']('get', '/access-control/authority-matrix/template?unchecked=1&all=1'))).body);
-    expect(every[0].rows.some((x) => x[12] === 'tis-sales-associate' && x[11] === 'write_off')).toBe(true);
+    expect(every[0].rows.some((x) => x[12] === 'tis-sales-associate' && x[11] === 'petty_cash')).toBe(true);
     const data = String(readZip(r.body).get('xl/worksheets/sheet1.xml'));
     expect(data).toContain('<formula1>Lists!$B$2:$B$');
   });

@@ -1,5 +1,5 @@
 import request from "../utility/interceptor";
-import { getRequest, postRequest } from "../utility/commonServices";
+import { getRequest, postRequest, putRequest } from "../utility/commonServices";
 import { apiErrorMessage as apiBodyMessage } from "../utility/apiError";
 
 const BASE = "journal-vouchers";
@@ -23,6 +23,14 @@ const journalVoucherService = {
   },
   async approve(id) {
     return (await postRequest(`${BASE}/${encodeURIComponent(id)}/approve`, {})).data;
+  },
+  /** The maker withdraws a voucher awaiting approval or returned (cancelled, never posted). */
+  async withdraw(id, reason) {
+    return (await postRequest(`${BASE}/${encodeURIComponent(id)}/withdraw`, { reason })).data;
+  },
+  /** The maker changes a voucher awaiting approval or returned; it waits for approval again. */
+  async update(id, payload) {
+    return (await putRequest(`${BASE}/${encodeURIComponent(id)}`, payload)).data;
   },
   async reject(id, reason) {
     return (await postRequest(`${BASE}/${encodeURIComponent(id)}/reject`, { reason })).data;

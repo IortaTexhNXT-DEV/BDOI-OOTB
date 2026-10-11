@@ -172,30 +172,66 @@ export async function certificate2307(db, { year, quarter, direction = 'issued',
  */
 export async function issueAll2307(db, { year, quarter, payeeType = null }, user) {
   const list = await payees2307(db, { year, quarter, direction: 'issued', payeeType });
+  const due = list.payees.filter((x) => !x.certificateNumber && x.totalTax > 0);
   const issued = [];
-  for (const p of list.payees.filter((x) => !x.certificateNumber && x.totalTax > 0)) {
-    const c = await issue2307(db, { year, quarter, direction: 'issued', payeeKey: p.payeeKey }, user);
+  let batch = null;
+  if (due.length) {
+    // each run is a batch (CWB-yyyyQq-n) with the EWT detail of its certificates (TIS-BRD-TAX-03)
+    const n = Number((await db.query('SELECT count(*) AS n FROM bir_2307_batches WHERE year = $1 AND quarter = $2', [Number(year), Number(quarter)])).rows[0].n) + 1;
+    batch = (await db.query('INSERT INTO bir_2307_batches(batch_number, year, quarter, payee_type, created_by) VALUES ($1,$2,$3,$4,$5) RETURNING id, batch_number',
+      [`CWB-${year}Q${quarter}-${String(n).padStart(3, '0')}`, Number(year), Number(quarter), payeeType, user?.id ?? null])).rows[0];
+  }
+  for (const p of due) {
+    const c = await issue2307(db, { year, quarter, direction: 'issued', payeeKey: p.payeeKey, batchId: batch.id }, user);
     issued.push({ payeeKey: c.payeeKey, payeeName: c.payee.name, certificateNumber: c.certificateNumber, certificateId: c.certificateId, totalTax: c.totalTax });
   }
-  return { year: Number(year), quarter: Number(quarter), payeeType, issued, alreadyIssued: list.payees.filter((x) => x.certificateNumber).length };
+  if (batch) {
+    await db.query(`UPDATE bir_2307_batches b SET certificates = x.n, total_income = x.income, total_tax = x.tax
+      FROM (SELECT count(*) AS n, COALESCE(sum(total_income), 0) AS income, COALESCE(sum(total_tax), 0) AS tax FROM bir_2307_certificates WHERE batch_id = $1) x WHERE b.id = $1`, [batch.id]);
+  }
+  return { year: Number(year), quarter: Number(quarter), payeeType, batchId: batch?.id || null, batchNumber: batch?.batch_number || null, issued,
+    alreadyIssued: list.payees.filter((x) => x.certificateNumber).length };
 }
 
-/** Issue (number and record) the certificate; an already issued one is returned unchanged. */
+/** Batches of a year (and quarter), newest first. */
+export async function list2307Batches(db, q = {}) {
+  const rows = (await db.query(`SELECT * FROM bir_2307_batches WHERE ($1::int IS NULL OR year = $1) AND ($2::int IS NULL OR quarter = $2) ORDER BY created_at DESC LIMIT 200`,
+    [q.year ? Number(q.year) : null, q.quarter ? Number(q.quarter) : null])).rows;
+  return rows.map((b) => ({ id: b.id, batchNumber: b.batch_number, year: b.year, quarter: b.quarter, payeeType: b.payee_type, certificates: b.certificates,
+    totalIncome: Number(b.total_income), totalTax: Number(b.total_tax), createdBy: b.created_by, createdAt: b.created_at }));
+}
+
+/** A batch with its EWT detail: one row per certificate and ATC (payee, TIN, nature, income per month, total, tax). */
+export async function batch2307(db, id) {
+  const row = (await db.query('SELECT * FROM bir_2307_batches WHERE id = $1 OR batch_number = $1', [id])).rows[0];
+  if (!row) throw notFound(`2307 batch ${id} not found`);
+  const b = { id: row.id, batchNumber: row.batch_number, year: row.year, quarter: row.quarter, payeeType: row.payee_type, certificates: row.certificates,
+    totalIncome: Number(row.total_income), totalTax: Number(row.total_tax), createdBy: row.created_by, createdAt: row.created_at };
+  const certs = (await db.query('SELECT * FROM bir_2307_certificates WHERE batch_id = $1 ORDER BY cert_number', [b.id])).rows;
+  const detail = certs.flatMap((c) => (c.lines || []).map((l) => ({ certificateNumber: c.cert_number, status: c.status, payeeName: c.payee_name, payeeTin: revealPii(c.payee_tin) || '',
+    atc: l.atc, nature: l.nature || '', month1: Number(l.month1) || 0, month2: Number(l.month2) || 0, month3: Number(l.month3) || 0, income: Number(l.total) || 0, tax: Number(l.tax) || 0 })));
+  return { ...b, detail };
+}
+
+/** Issue (number and record) the certificate; an already issued one is returned unchanged. A blank payor TIN is refused. */
 export async function issue2307(db, params, user) {
   const c = await certificate2307(db, params);
   if (c.certificateId) return { ...c, alreadyIssued: true };
+  if (!String(c.payor?.tin || '').replace(/[^0-9]/g, '')) {
+    throw conflict('The payor has no TIN: enter the TIN of the primary company on Master > Company before issuing BIR Form 2307');
+  }
   const number = await nextDocumentNumber('bir_2307');
   const row = (await db.query(`INSERT INTO bir_2307_certificates(cert_number, direction, payee_key, payee_name, payee_tin, payee_address, payor_name, payor_tin, payor_address,
-      year, quarter, period_from, period_to, lines, total_income, total_tax, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id, cert_number, created_at`,
+      year, quarter, period_from, period_to, lines, total_income, total_tax, created_by, batch_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING id, cert_number, created_at`,
   [number, c.direction, c.payeeKey, c.payee.name, c.payee.tin, c.payee.address, c.payor.name, c.payor.tin, c.payor.address, c.year, c.quarter, c.periodFrom, c.periodTo,
-    JSON.stringify(c.lines), c.totalIncome, c.totalTax, user?.id ?? null])).rows[0];
+    JSON.stringify(c.lines), c.totalIncome, c.totalTax, user?.id ?? null, params.batchId || null])).rows[0];
   return { ...c, certificateNumber: row.cert_number, certificateId: row.id, issuedAt: row.created_at, alreadyIssued: false };
 }
 
 export async function listCertificates(db, q = {}) {
   const rows = (await db.query(`SELECT * FROM bir_2307_certificates WHERE ($1::int IS NULL OR year = $1) AND ($2::int IS NULL OR quarter = $2) AND ($3::text IS NULL OR direction = $3)
     ORDER BY created_at DESC LIMIT 500`, [q.year ? Number(q.year) : null, q.quarter ? Number(q.quarter) : null, q.direction || null])).rows;
-  return rows.map((c) => ({ id: c.id, certificateNumber: c.cert_number, direction: c.direction, payeeKey: c.payee_key, payeeName: c.payee_name, payeeTin: c.payee_tin,
+  return rows.map((c) => ({ id: c.id, certificateNumber: c.cert_number, direction: c.direction, payeeKey: c.payee_key, payeeName: c.payee_name, payeeTin: revealPii(c.payee_tin) || '',
     payorName: c.payor_name, year: c.year, quarter: c.quarter, periodFrom: iso(c.period_from), periodTo: iso(c.period_to), lines: c.lines,
     totalIncome: Number(c.total_income), totalTax: Number(c.total_tax), status: c.status, createdAt: c.created_at, cancelReason: c.cancel_reason }));
 }

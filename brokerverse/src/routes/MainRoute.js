@@ -461,6 +461,10 @@ const Maincomponent = () => {
             element={<AddJournalVoucture />}
           />
           <Route
+            path="/accounts/journalvoucher/editjournalvoucture/:id"
+            element={<AddJournalVoucture />}
+          />
+          <Route
             path="/accounts/journalvoucher/detailsjournalvocture/:id"
             element={<DetailsJournalVocture />}
           />

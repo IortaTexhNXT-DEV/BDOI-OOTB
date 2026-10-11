@@ -701,8 +701,11 @@
         "correctionOf": "Correction of",
         "reversedBy": "Reversed by",
         "lines": "Entries",
-        "activity": "Activity"
-      }
+        "activity": "Activity",
+        "withdraw": "Withdraw",
+        "withdrawTitle": "Withdraw journal voucher {{number}}?"
+      },
+      "withdrawReason": "Reason (optional)"
     },
     "receiptDialogs": {
       "recordPaymentMessage": "An official receipt is issued for the payment.",
@@ -1055,7 +1058,10 @@
     },
     "bulkUploadTitle": "Bulk upload disbursements",
     "printVouchers": "Print vouchers",
-    "customerCodeFromRequired": "Customer code from is required"
+    "customerCodeFromRequired": "Customer code from is required",
+    "refundReason": "Refund reason",
+    "refundReasonRequired": "Choose the refund reason",
+    "refundNoteRequired": "Enter the note the refund reason asks for"
   },
   "renewal": {
     "renewals": "Renewals",
@@ -19337,5 +19343,18 @@
     "fmvReason": "Reason for the FMV change",
     "rateReason": "Reason for the rate change",
     "belowMinimum": "Below the minimum issuing rate of {{rate}}%: the quotation is referred for approval"
+  },
+  "bir2307Batches": {
+    "title": "Batches",
+    "none": "No batch issued in this quarter",
+    "batch": "Batch",
+    "created": "Issued",
+    "excel": "Excel"
+  },
+  "jvEdit": {
+    "edit": "Edit",
+    "saved": "Journal voucher saved and sent for approval",
+    "notSaved": "Journal voucher not saved",
+    "notLoaded": "Journal voucher not loaded"
   }
 }

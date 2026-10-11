@@ -11,6 +11,7 @@ import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import { printView } from "../../components/Print";
 import { PageHeader, date, money, showError, showSuccess } from "./common";
+import Bir2307Batches from "./Bir2307Batches";
 
 const MONTH = (ym) => new Date(`${ym}-01T00:00:00`).toLocaleString("en-US", { month: "short", year: "numeric" });
 
@@ -67,6 +68,8 @@ const Bir2307 = ({ payeeType = null }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cert, setCert] = useState(null);
+  const [batchesKey, setBatchesKey] = useState(0);
+  const batchError = useCallback((e) => showError(toast, e), []);
   const payees = data?.payees || [];
 
   const load = useCallback(async () => {
@@ -132,6 +135,7 @@ const Bir2307 = ({ payeeType = null }) => {
       const r = await periodEndService.issueAll2307({ year, quarter, payeeType: payeeType || undefined });
       showSuccess(toast, t("supplier2307.issuedAll", { count: r.issued.length }));
       load();
+      setBatchesKey((k) => k + 1);
     } catch (e) {
       showError(toast, e);
     }
@@ -168,6 +172,7 @@ const Bir2307 = ({ payeeType = null }) => {
           <Column body={(r) => <Button icon="pi pi-print" size="small" outlined label={t("periodEnd.bir.view")} onClick={() => open(r)} />} />
         </DataTable>
       </div>
+      {direction === "issued" && <Bir2307Batches year={year} quarter={quarter} reloadKey={batchesKey} onError={batchError} />}
       <DetailDialog header={cert ? `BIR Form 2307 – ${cert.payee.name}` : ""} visible={!!cert} onHide={() => setCert(null)} size="lg"
         footer={cert && (
           <>

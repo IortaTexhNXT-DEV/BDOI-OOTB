@@ -388,7 +388,7 @@ describe('bank payment files', () => {
     const payout = (await maker('post', '/disbursements/bulk-agent-disburse').send({ referrerIds: [ref], transactionCode: 'COMSUB', instrumentCurrency: 'PHP' })).body.data.vouchers[0];
     await admin('put', '/settings').send({ settings: { 'commission.auto_eligible_on_full_payment': true } });
     // a client refund without a bank account cannot go on a batch
-    const refund = (await maker('post', '/disbursements').send({ payeeType: 'Customer', customerCode: m.client.client_code, amount: '1500.00', transactionDescription: 'Refund' })).body.data;
+    const refund = (await maker('post', '/disbursements').send({ payeeType: 'Customer', customerCode: m.client.client_code, amount: '1500.00', transactionDescription: 'Refund', refundReasonCode: 'REF-CANCEL', refundNote: 'Mid-term cancellation' })).body.data;
     await maker('put', `/disbursements/${refund.disbursementId}`).send({ status: 'for-approval' });
 
     const eligible = (await maker('get', '/bank-payments/eligible-vouchers')).body.data;

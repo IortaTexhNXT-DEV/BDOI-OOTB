@@ -44,6 +44,10 @@ const journalVoucherReducer = createSlice({
     clearJournalVoucherTableData: (state) => {
       state.journalVoucherPostTabelData = [];
     },
+    // the lines of a voucher its maker edits (GAP-FIN-27)
+    loadJournalVoucherTableData: (state, action) => {
+      state.journalVoucherPostTabelData = action.payload || [];
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(journalVoucherMiddleware.pending, (state) => {
@@ -219,5 +223,5 @@ const journalVoucherReducer = createSlice({
   },
 });
 
-export const { clearJournalVoucherTableData } = journalVoucherReducer.actions;
+export const { clearJournalVoucherTableData, loadJournalVoucherTableData } = journalVoucherReducer.actions;
 export default journalVoucherReducer.reducer;

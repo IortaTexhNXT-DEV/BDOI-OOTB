@@ -11,7 +11,8 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "../AddJournalVoucture/index.scss";
 import useJvMasterData from "../useJvMasterData";
 import SvgAddBlue from "../../../assets/icons/SvgAddBlue";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import journalVoucherService from "../../../services/journalVoucherService";
 import { Button } from "primereact/button";
 import { useFormik } from "formik";
 import AddData from "./AddData/AddData";
@@ -23,7 +24,7 @@ import {
   postTCJournalVoucher,
   postApproveJournalVoucher,
 } from "../store/journalVoucherMiddleware";
-import { clearJournalVoucherTableData } from "../store/journalVoucherReducer";
+import { clearJournalVoucherTableData, loadJournalVoucherTableData } from "../store/journalVoucherReducer";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
 import { calendarDateFormat } from "../../../utility/dateFormat";
@@ -34,9 +35,19 @@ const toIsoDate = (value) => {
   return local.toISOString().slice(0, 10);
 };
 
+/** The lines of a saved voucher as rows of the entry table (edit of a parked or returned voucher by its maker). */
+export const entryRows = (entries = []) => entries.map((e, i) => ({
+  id: i + 1, mainAccount: e.mainAccount, mainAccountDescription: e.mainAccountDescription || "", subAccount: e.subAccount || "",
+  subAccountDescription: e.subAccountDescription || "", entryType: e.entryType, branchCode: e.branchCode || "", branchCodeDescription: e.branchCodeDescription || "",
+  departmentCode: e.departmentCode || "", departmentDescription: e.departmentDescription || "", currencyCode: e.currencyCode,
+  foreignAmount: e.foreignAmount ?? e.localAmount, localAmount: e.localAmount, remarks: e.remarks || "", costCentre: e.costCentre || undefined,
+}));
+
 const AddJournalVocture = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // /accounts/journalvoucher/editjournalvoucture/:id: the maker edits its voucher awaiting approval or returned
+  const { id: editId } = useParams();
 
   const toastRef = useRef(null);
 
@@ -96,6 +107,8 @@ const AddJournalVocture = () => {
   useEffect(() => {
     dispatch(clearJournalVoucherTableData());
   }, [dispatch]);
+  // a ref, not state: the submit handler is read from an earlier render of the button
+  const editing = useRef(null);
   const handleSubmit = (values) => {
     dispatch(postTCJournalVoucher(formik.values));
   };
@@ -112,6 +125,20 @@ const AddJournalVocture = () => {
     validate: customValidation,
     onSubmit: handleSubmit,
   });
+
+  // load the voucher being edited into the form and the entry table
+  useEffect(() => {
+    if (!editId) return undefined;
+    let live = true;
+    journalVoucherService.getVoucher(editId).then((v) => {
+      if (!live || !v) return;
+      editing.current = v;
+      formik.setValues({ ...formik.values, transationCode: v.transactionCode || "", transationDescription: v.description || v.transactionDescription || "",
+        date: v.date ? new Date(`${String(v.date).slice(0, 10)}T00:00:00`) : new Date() });
+      dispatch(loadJournalVoucherTableData(entryRows(v.entries)));
+    }).catch((e) => toastRef.current?.showToast("error", t("jvEdit.notLoaded"), e?.message || ""));
+    return () => { live = false; };
+  }, [editId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -171,6 +198,18 @@ const AddJournalVocture = () => {
         date: toIsoDate(formik.values.date),
         entries: entries,
       };
+
+      if (editing.current) {
+        const { id: voucherId } = editing.current;
+        try {
+          const saved = await journalVoucherService.update(voucherId, payload);
+          showSuccessMessage(saved?.message || t("jvEdit.saved"));
+          navigate(`/accounts/journalvoucher/detailsjournalvocture/${voucherId}`);
+        } catch (e) {
+          toastRef.current.showToast("error", t("jvEdit.notSaved"), e?.response?.data?.message || e?.message || "");
+        }
+        return;
+      }
 
       // Call API
       const result = await dispatch(postApproveJournalVoucher(payload));

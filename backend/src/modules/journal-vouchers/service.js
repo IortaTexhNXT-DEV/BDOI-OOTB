@@ -7,8 +7,8 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { baseCurrency, rateToBase } from '../../lib/currency.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { MANUAL_SOURCES, assertNotOpeningJournal, assertPeriodOpen, createJournal, postJournal, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
+import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { MANUAL_SOURCES, assertNotOpeningJournal, assertPeriodOpen, createJournal, postJournal, replaceJournalLines, reverseJournal, validateLines } from '../accounting/lib/ledger.js';
 import { OPENING_JOURNAL_SOURCE, openingJournalLines } from '../period-end/opening.js';
 import { assertCostCentres } from '../accounting/lib/costCentre.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
@@ -173,13 +173,41 @@ export async function reject(db, ref, reason, user) {
   return (await db.query('UPDATE journal_vouchers SET status = \'rejected\', rejected_by = $2, rejected_at = now(), rejection_reason = $3, updated_at = now() WHERE id = $1 RETURNING *', [j.id, user.id, reason])).rows[0];
 }
 
+/**
+ * The maker's own voucher before approval (GAP-FIN-27, FGA-JV-01/02): a manual voucher awaiting approval or returned
+ * by the checker, changed or withdrawn only by the user who made it.
+ */
+async function ownParkedVoucher(db, ref, user) {
+  const j = await getJv(db, ref, true);
+  if (j.source !== 'manual') throw conflict(`Journal ${j.jv_number} is a ${j.source} journal; only a manual voucher is changed or withdrawn by its maker`);
+  if (!['for-approval', 'rejected'].includes(j.status)) throw conflict(`Voucher ${j.jv_number} is ${j.status}; only a voucher awaiting approval or returned can be changed or withdrawn`);
+  if (j.created_by !== user?.id) throw forbidden(`Only the maker of ${j.jv_number} changes or withdraws it`);
+  return j;
+}
+
+/** Edit and (re)submit: new lines, date, description or transaction code; the voucher waits for approval again. */
+export async function editParked(db, ref, b, user) {
+  const j = await ownParkedVoucher(db, ref, user);
+  const date = isoDate(b.date || b.voucherDate) || isoDate(j.jv_date);
+  const row = await replaceJournalLines(db, j, { date, description: b.transactionDescription ?? b.description, transactionCode: b.transactionCode, lines: await toLines(db, b.entries, date) });
+  return (await db.query(`UPDATE journal_vouchers SET status = 'for-approval', rejected_by = NULL, rejected_at = NULL, rejection_reason = NULL, updated_at = now()
+    WHERE id = $1 RETURNING *`, [row.id])).rows[0];
+}
+
+/** Withdraw: the voucher is cancelled (kept with its number, never posted). */
+export async function withdrawParked(db, ref, reason, user) {
+  const j = await ownParkedVoucher(db, ref, user);
+  return (await db.query(`UPDATE journal_vouchers SET status = 'cancelled', cancelled_by = $2, cancelled_at = now(), rejection_reason = COALESCE($3, rejection_reason), updated_at = now()
+    WHERE id = $1 RETURNING *`, [j.id, user.id, reason || null])).rows[0];
+}
+
 // ---------- upload (TIS-BRD-NIA-05) ----------
 
 /** Columns of the journal voucher upload (Accounts > Journal Voucher > Upload; template from documents/uploadTemplates.js). */
 export const JV_UPLOAD_COLUMNS = [
   { key: 'voucherRef', header: 'Voucher Ref', aliases: ['voucher', 'jvRef', 'reference'], required: true, format: 'Groups the rows of one voucher: the rows with the same reference become one journal voucher (any text, e.g. ACCR-2026-10-01)', example: 'ACCR-2026-10-01' },
   { key: 'date', header: 'Voucher Date', aliases: ['date', 'documentDate', 'postingDate'], required: true, format: 'Date YYYY-MM-DD in an open accounting period; the same on every row of a voucher', example: '2026-10-31' },
-  { key: 'transactionCode', header: 'Transaction Code', required: true, format: 'Transaction code (Master > Finance > Transaction Code); the same on every row of a voucher', example: 'JV01' },
+  { key: 'transactionCode', header: 'Transaction Code', required: true, format: 'An active transaction code (Master > Finance > Transaction Code); the same on every row of a voucher', example: 'JV' },
   { key: 'description', header: 'Description', aliases: ['transactionDescription', 'textDescription', 'particulars'], format: 'Text of the voucher; the first one given for the voucher is used', example: 'Accrual of audit fees October 2026' },
   { key: 'accountCode', header: 'Account Code', aliases: ['glCode', 'glAccount', 'account'], required: true, format: 'GL account code of an active account that accepts manual entries', example: '658000' },
   { key: 'debit', header: 'Debit', format: 'Amount, no peso sign or thousands separator; Debit or Credit on each row, not both', example: '25000' },
@@ -198,8 +226,10 @@ export const JV_UPLOAD_COLUMNS = [
  * transaction code consistent within a voucher, one amount per row, debits equal credits, accounts active and open to
  * manual entries, cost centres valid, the period open for posting. Returns the vouchers created.
  */
-export async function uploadVouchers(db, rows, user) {
+export async function uploadVouchers(db, rows, user, { mode = 'all-or-nothing' } = {}) {
   const errors = [];
+  const checkCode = (await getSetting('journal.upload_check_transaction_code', true)) !== false;
+  const codes = checkCode ? new Set((await db.query("SELECT lower(code) AS c FROM master_records WHERE type_code = 'transaction-code' AND status = 'active'")).rows.map((r) => r.c)) : null;
   const fail = (row, voucherRef, message) => errors.push({ row, voucherRef, message });
   const groups = new Map();
   for (const [i, r] of rows.entries()) {
@@ -217,6 +247,7 @@ export async function uploadVouchers(db, rows, user) {
     const before = errors.length;
     if (!date) fail(first.row, ref, 'Voucher Date must be a date YYYY-MM-DD');
     if (!code) fail(first.row, ref, 'Transaction Code is required');
+    else if (codes && !codes.has(code.toLowerCase())) fail(first.row, ref, `Transaction Code ${code} is not an active code of Master > Finance > Transaction Code`);
     const entries = [];
     for (const r of list) {
       if (r.row !== first.row && isoDate(r.date) !== date) fail(r.row, ref, `Voucher Date differs from row ${first.row} of the same voucher`);
@@ -245,12 +276,16 @@ export async function uploadVouchers(db, rows, user) {
     vouchers.push({ ref, date, code, entries, description: list.map((r) => String(r.description ?? '').trim()).find(Boolean) || null });
   }
   if (!rows.length) fail(2, null, 'The file has no data rows');
-  if (errors.length) throw badRequest('Validation failed: nothing was saved', errors.map((e) => ({ path: `row ${e.row}${e.voucherRef ? ` (${e.voucherRef})` : ''}`, message: e.message })));
+  const listed = errors.map((e) => ({ path: `row ${e.row}${e.voucherRef ? ` (${e.voucherRef})` : ''}`, message: e.message }));
+  // all-or-nothing: one wrong voucher stops the file; partial (TIS-BRD-NFR-07.4): the valid vouchers are saved and the
+  // failed rows reported (a row without a Voucher Ref fails on its own)
+  if (errors.length && (mode !== 'partial' || !vouchers.length)) throw badRequest('Validation failed: nothing was saved', listed);
   const out = [];
   for (const v of vouchers) {
     const jv = await createJournal(db, { date: v.date, description: v.description, source: 'manual', manual: true, transactionCode: v.code, entryType: 'JOURNAL_VOUCHER',
       referenceType: 'JournalVoucherUpload', referenceId: v.ref, status: 'for-approval', requiresApproval: true, lines: await toLines(db, v.entries, v.date) }, user);
     out.push({ ...jv, voucher_ref: v.ref, line_count: v.entries.length });
   }
+  out.failed = listed;
   return out;
 }
