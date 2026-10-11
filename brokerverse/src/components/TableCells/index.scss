@@ -1,0 +1,43 @@
+@import "../../theme/bdoi/tokens";
+
+// shared list cells (components/TableCells)
+.bv-list-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+
+  .bv-list-cell__more {
+    display: inline-block;
+    padding: 0 8px;
+    border: 1px solid $color-border;
+    border-radius: 999px;
+    background: $color-surface-muted;
+    color: $color-text-muted;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 20px;
+    white-space: nowrap;
+    cursor: help;
+  }
+}
+
+.bv-name-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  .bv-name-chip__chip {
+    display: inline-block;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: $color-surface-muted;
+    color: $color-text;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 18px;
+    white-space: nowrap;
+  }
+}

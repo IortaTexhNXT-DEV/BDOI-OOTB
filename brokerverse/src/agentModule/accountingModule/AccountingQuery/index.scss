@@ -68,7 +68,7 @@
             transition: all 0.2s ease;
 
             &:focus {
-              border-color: #0066cc;
+              border-color: var(--bv-focus-color, #0072d8);
               box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
               outline: none;
             }
@@ -110,7 +110,7 @@
 
             &.p-focus,
             &.p-inputwrapper-focus {
-              border-color: #0066cc;
+              border-color: var(--bv-focus-color, #0072d8);
               box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
               outline: none;
             }
@@ -183,12 +183,12 @@
 
             &.p-inputwrapper.p-focus,
             &.p-inputwrapper.p-inputwrapper-focus {
-              border-color: #0066cc;
+              border-color: var(--bv-focus-color, #0072d8);
               box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
               outline: none;
 
               .p-datepicker-trigger {
-                border-color: #0066cc;
+                border-color: var(--bv-focus-color, #0072d8);
               }
             }
 
@@ -214,52 +214,9 @@
 
             .p-button {
               min-width: 100px;
-              min-height: 36px;
-              padding: 0.5rem 1.25rem;
-              font-weight: 500;
-              border-radius: 6px;
-              font-size: 0.875rem;
-              transition: all 0.2s ease;
               flex: 0 1 auto;
 
-              // Primary button (Search)
-              &.p-button-primary,
-              &.search-button {
-                background: #0066cc;
-                border-color: #0066cc;
-                color: white;
-
-                &:hover:not(:disabled) {
-                  background: #0072d8;
-                  border-color: #0072d8;
-                }
-
-                &:active:not(:disabled) {
-                  background: #004c99;
-                  border-color: #004c99;
-                }
-              }
-
-              // Secondary button (Reset)
-              &.p-button-secondary,
-              &.p-button-outlined {
-                background: $card-background;
-                border-color: #6c757d;
-                color: #6c757d;
-
-                &:hover:not(:disabled) {
-                  background: #6c757d;
-                  border-color: #6c757d;
-                  color: white;
-                }
-
-                &:active:not(:disabled) {
-                  background: #5a6268;
-                  border-color: #5a6268;
-                  color: white;
-                }
-              }
-
+              // colours come from the theme (primary filled, the others outlined), as on every other screen
               &:disabled {
                 opacity: 0.6;
                 cursor: not-allowed;
@@ -386,7 +343,7 @@
   .policy-link {
     background: none;
     border: none;
-    color: #0066cc;
+    color: var(--bv-focus-color, #0072d8);
     cursor: pointer;
     text-decoration: underline;
     font-size: inherit;

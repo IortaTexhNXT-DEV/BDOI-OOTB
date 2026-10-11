@@ -51,7 +51,7 @@ describe("approval actions with the server's decision", () => {
     expect(bar).toHaveTextContent("This item PHP 409,141.43");
     expect(screen.getByRole("button", { name: "Approve" })).not.toHaveClass("p-button-outlined");
     expect(screen.getByRole("button", { name: "Reject" })).toHaveClass("p-button-outlined", "p-button-danger");
-    expect(codeAmount(-1250.5)).toBe("PHP -1,250.50");
+    expect(codeAmount(-1250.5)).toBe("-PHP 1,250.50");
   });
 
   it("is used from the keyboard: Tab reaches Reject then Approve, Enter and Space press them", () => {

@@ -91,7 +91,9 @@ export const formatNumber = (value, options = {}) => {
 /** "PHP 409,141.43": the currency code, then the amount with two decimals and thousands separators. */
 export const codeAmount = (value, currency = "PHP") => {
   const text = formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  return text ? `${currency} ${text}` : "";
+  if (!text) return "";
+  // the sign leads the amount: "-PHP 5,000.00", never "PHP -5,000.00"
+  return text.startsWith("-") ? `-${currency} ${text.slice(1)}` : `${currency} ${text}`;
 };
 
 /**

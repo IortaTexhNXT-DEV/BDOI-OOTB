@@ -1,4 +1,4 @@
-import { findActiveTrail, matchLength, searchMenu } from "./menuTree";
+import { findActiveTrail, initialsOf, matchLength, searchMenu, visibleTrail } from "./menuTree";
 import { menuList } from "./list";
 
 const label = (name) => name;
@@ -35,5 +35,33 @@ describe("menu search", () => {
   });
   it("returns nothing for an empty query", () => {
     expect(searchMenu(menuList, "  ", label)).toEqual([]);
+  });
+});
+
+describe("abbreviations and groups found only by search", () => {
+  const tree = [
+    { name: "Accounts", submenu: [{ name: "Post-Dated Cheques", path: "/accounts/pdc" }, { name: "Journal Voucher", path: "/accounts/jv" }] },
+    { name: "Reports", submenu: [
+      { name: "All Reports", path: "/reports/catalogue", includes: ["/reports/catalogue", "/reports/run/"] },
+      { name: "Operational Reports", searchOnly: true, home: "All Reports", submenu: [{ name: "Dealer Production", path: "/reports/run/dealer-production" }] },
+    ] },
+  ];
+  const label = (name) => name;
+
+  it("finds a screen by the initials of its name", () => {
+    expect(initialsOf("Post-Dated Cheques")).toBe("pdc");
+    expect(searchMenu(tree, "PDC", label).map((r) => r.item.name)).toEqual(["Post-Dated Cheques"]);
+    expect(searchMenu(tree, "jv", label).map((r) => r.item.name)).toEqual(["Journal Voucher"]);
+  });
+
+  it("still finds a report under a group that the tree does not draw", () => {
+    expect(searchMenu(tree, "dealer", label).map((r) => r.item.name)).toEqual(["Dealer Production"]);
+  });
+
+  it("lights up the home entry of a hidden group", () => {
+    const trail = findActiveTrail(tree, "/reports/run/dealer-production");
+    expect(trail).toEqual(["Reports", "Operational Reports", "Dealer Production"]);
+    expect(visibleTrail(tree, trail)).toEqual(["Reports", "All Reports"]);
+    expect(visibleTrail(tree, ["Accounts", "Journal Voucher"])).toEqual(["Accounts", "Journal Voucher"]);
   });
 });

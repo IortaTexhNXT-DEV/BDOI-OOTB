@@ -140,7 +140,7 @@
 
   .num { text-align: right; }
   tr.clickable { cursor: pointer; }
-  .doc-number { font-weight: 600; color: $brand-blue; white-space: nowrap; }
+  .doc-number { font-weight: 600; color: var(--bv-link, #0072d8); white-space: nowrap; }
   .nowrap, .placement-status { white-space: nowrap; }
 }
 

@@ -801,7 +801,10 @@ export const menuList = [
       {
         id: 1,
         name: "Operational Reports",
-        // path: "/reports/operationalreports",
+        // every report is opened from All Reports (the catalogue); these entries stay for the role permissions, the
+        // route guard and the menu search, and are not drawn in the tree (searchOnly)
+        searchOnly: true,
+        home: "All Reports",
         submenu: [
           {
             id: 1,
@@ -883,7 +886,8 @@ export const menuList = [
       {
         id: 2,
         name: "Financial Reports",
-        // path: "/reports/operationalreports",
+        searchOnly: true,
+        home: "All Reports",
         submenu: [
           {
             id: 1,
