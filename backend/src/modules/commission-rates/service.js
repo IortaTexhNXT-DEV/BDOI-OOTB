@@ -26,7 +26,7 @@ const SELECT = `SELECT r.*, ic.name AS insurer_name, ic.code AS insurer_code, p.
   FROM commission_rates r LEFT JOIN insurance_companies ic ON ic.id = r.insurance_company_id LEFT JOIN products p ON p.id = r.product_id`;
 
 /** Whether rule changes wait for approval on Configuration Approvals (commission.rules_approval_required). */
-export const approvalRequired = async () => (await getSetting('commission.rules_approval_required', false)) === true;
+export const approvalRequired = async () => (await getSetting('commission.rules_approval_required')) === true;
 
 const motorTypeName = async (code) => ((await getSetting('commission.motor_types', [])) || []).find((m) => String(m.code).toUpperCase() === String(code || '').toUpperCase())?.name || code || null;
 

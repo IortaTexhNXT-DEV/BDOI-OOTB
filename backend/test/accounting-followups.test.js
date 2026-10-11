@@ -9,10 +9,12 @@ import { adjustForReturnPremium } from '../src/modules/commission/service.js';
 import { findPolicy, returnPremium } from '../src/modules/receipts/receivables.js';
 import { createInsurerRemittance } from '../src/modules/disbursements/service.js';
 import { postBrokerSettlement } from '../src/modules/claims/service.js';
+import { withReferenceCommissionControls } from './helpers.js';
 
 let ctx; let admin;
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withReferenceCommissionControls();
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
 });
 afterAll(async () => { await pool.end(); });

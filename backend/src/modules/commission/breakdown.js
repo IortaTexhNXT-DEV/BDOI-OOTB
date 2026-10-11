@@ -64,7 +64,7 @@ export async function computeBasis(db, p, { details = null } = {}) {
   const referrer = await referrerOf(db, det);
   const channelType = channelTypeOf({ channelType: p.channel_type, referrerId: referrer?.id || null });
   const line = p.lob || p.product_line;
-  const motor = (await isDualRateLine(line)) && (await getSetting('commission.peril_based_motor', false)) === true;
+  const motor = (await isDualRateLine(line)) && (await getSetting('commission.peril_based_motor')) === true;
   const motorType = motor ? await motorTypeOf(doc) : null;
   const rule = await resolveCommissionRate({ insurerId: p.insurance_company_id, productId: p.product_id, lob: line, policyType: businessType === 'RENEW' ? 'renewal' : 'new',
     channelType, motorType, sumInsured: num(doc.lossAndDamageCoverage) || null, date, perPeril: motor, db });

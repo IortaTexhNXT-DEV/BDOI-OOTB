@@ -198,9 +198,9 @@ export async function isPremiumCollected(db, policyId) {
 }
 
 /** Rate changes, reversals and withholding tax changes wait for a second user (commission.adjustment_approval_required). */
-export const adjustmentApprovalRequired = async () => (await getSetting('commission.adjustment_approval_required', false)) === true;
+export const adjustmentApprovalRequired = async () => (await getSetting('commission.adjustment_approval_required')) === true;
 /** A line is eligible only once its policy is fully paid and on an approved remittance (commission.eligible_requires_remittance; FRS FR-RMT-030). */
-export const eligibleRequiresRemittance = async () => (await getSetting('commission.eligible_requires_remittance', false)) === true;
+export const eligibleRequiresRemittance = async () => (await getSetting('commission.eligible_requires_remittance')) === true;
 
 async function recompute(db, line, patch = {}) {
   const ref = await getReferrer(db, line.referrer_id);

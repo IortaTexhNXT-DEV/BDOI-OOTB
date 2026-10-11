@@ -32,7 +32,7 @@ export const STATUS_LABELS = { draft: 'Draft', pending: 'Pending approval', sche
 const LIVE = ['active', 'scheduled', 'suspended'];
 const CODE = /^[A-Z0-9-]{3,20}$/;
 
-export const approvalRequired = async () => (await getSetting('commission.rules_approval_required', false)) === true;
+export const approvalRequired = async () => (await getSetting('commission.rules_approval_required')) === true;
 
 const SELECT = `SELECT s.*, (SELECT u.display_name FROM users u WHERE u.id = s.created_by) AS created_by_name, (SELECT u.display_name FROM users u WHERE u.id = s.submitted_by) AS submitted_by_name,
     (SELECT u.display_name FROM users u WHERE u.id = s.approved_by) AS approved_by_name,

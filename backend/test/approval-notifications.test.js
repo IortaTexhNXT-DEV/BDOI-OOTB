@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setupFinance, makePolicy } from './accounting.fixtures.js';
-import { remittanceBody } from './helpers.js';
+import { remittanceBody, withReferenceCommissionControls } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -22,6 +22,7 @@ const PASSWORD = 'Welcome@123';
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withReferenceCommissionControls();
   admin = ctx.api;
   maker = ctx.as('maker');
   checker = ctx.as('checker');
