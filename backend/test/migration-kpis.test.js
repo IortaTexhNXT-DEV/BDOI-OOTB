@@ -61,7 +61,10 @@ afterAll(async () => {
 });
 
 describe('dashboards', () => {
-  it('open on the business issued in BrokerVerse; origin=all counts the migrated policies too', async () => {
+  it('open on All business until a policy is issued after go-live (auto), on the business issued in BrokerVerse when set; origin=all counts the migrated policies too', async () => {
+    // auto, the delivered default: the policy issued in BrokerVerse predates the cutover date, so the dashboards open on all business
+    expect((await overview(null)).body.data.origin).toBe('all');
+    await setting('dashboard.default_origin', 'issued');
     const def = await overview(null);
     expect(def.status).toBe(200);
     expect(def.body.data.origin).toBe('issued');

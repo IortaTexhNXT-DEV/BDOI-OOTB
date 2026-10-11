@@ -72,7 +72,7 @@ define({
   method: 'GET', path: '/kits', summary: 'The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock, the settings of the workspace and the document file naming convention',
   screen: SCREEN, middleware: canRead,
   response: { success: true, data: { kits: [{ kit: 'configuration', title: 'Go-live configuration workbook', sheets: [{ key: 'users', name: 'Users', keyColumns: ['username'], columns: [] }] }], cutoverDate: '2026-11-01', locked: false,
-    settings: { legacySystemName: 'Legacy', loadApprovalRequired: true, dashboardDefaultOrigin: 'issued', unlockWindowDays: 7, unlockMaxHours: 4 },
+    settings: { legacySystemName: 'Legacy', loadApprovalRequired: true, dashboardDefaultOrigin: 'auto', unlockWindowDays: 7, unlockMaxHours: 4 },
     naming: { pattern: '<RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>', example: 'POL_PC-MLY-2026-000101_POLSCH_20260225.pdf',
       recordTypes: [{ code: 'POL', label: 'Policy' }], documentTypes: ['POLSCH', 'COC'], extensions: ['pdf', 'jpg'] } } },
   handler: async (_req, res) => ok(res, await svc.kits()),

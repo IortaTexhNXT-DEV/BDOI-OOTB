@@ -32,17 +32,50 @@ const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) /
 const renewalsDueDays = async () => Number(await getSetting('dashboard.renewals_due_days', 60)) || 0;
 const PRODUCT = "COALESCE(p.product_type, pr.name, p.lob, 'Other')";
 
-/** The business a dashboard counts: issued or all (?origin=), default dashboard.default_origin. */
+/** Values of dashboard.default_origin: auto (delivered) = Issued since go-live once a policy was issued after go-live, else All business. */
+export const DEFAULT_ORIGINS = ['auto', 'issued', 'all'];
+
+/** Policies the "Issued since go-live" view counts from the cutover date (every one counted when no cutover is set). */
+async function issuedViewPolicies() {
+  const cutover = String((await getSetting('golive.cutover_date', '')) || '').trim();
+  const live = await originCond('issued', '');
+  const params = [];
+  let since = '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cutover)) {
+    params.push(cutover, await businessTimeZone());
+    since = ' AND COALESCE(issued_date, (created_at AT TIME ZONE $2)::date) >= $1::date';
+  }
+  return (await one(`SELECT count(*)::int AS n FROM policies WHERE ${live}${since}`, params)).n;
+}
+
+/** The configured default view: auto, issued or all. */
+const configuredOrigin = async () => {
+  const v = await getSetting('dashboard.default_origin', 'auto');
+  return DEFAULT_ORIGINS.includes(v) ? v : 'auto';
+};
+
+/**
+ * The business a dashboard counts: issued or all (?origin=), default dashboard.default_origin. "auto" (the delivered
+ * default) opens on Issued since go-live once a policy was issued after go-live, and on All business until then, so a
+ * dashboard opened before the first policy is issued in BrokerVerse never shows only zeros.
+ */
 export async function dashboardOrigin(value) {
   const v = String(value ?? '').trim().toLowerCase();
   if (v === 'issued' || v === 'all') return v;
   if (v) throw badRequest('origin must be issued or all');
-  return (await getSetting('dashboard.default_origin', 'issued')) === 'all' ? 'all' : 'issued';
+  const configured = await configuredOrigin();
+  if (configured !== 'auto') return configured;
+  return (await issuedViewPolicies()) > 0 ? 'issued' : 'all';
 }
-/** Defaults of the dashboard screens: the origin view they open on and the cutover date ("Issued since go-live"). */
+/**
+ * Defaults of the dashboard screens: the origin view they open on (resolved), the configured value (auto / issued /
+ * all), the cutover date ("Issued since go-live") and the policies the issued view counts, so a screen can say why it is
+ * empty.
+ */
 export async function dashboardSettings() {
   const cutover = String((await getSetting('golive.cutover_date', '')) || '').trim();
-  return { defaultOrigin: await dashboardOrigin(), cutoverDate: /^\d{4}-\d{2}-\d{2}$/.test(cutover) ? cutover : null };
+  return { defaultOrigin: await dashboardOrigin(), configuredOrigin: await configuredOrigin(),
+    cutoverDate: /^\d{4}-\d{2}-\d{2}$/.test(cutover) ? cutover : null, issuedPolicies: await issuedViewPolicies() };
 }
 /** SQL condition on the policies of `alias` ('' for an unqualified column) counted by an origin view. */
 const originCond = async (origin, alias) => (origin === 'all' ? 'TRUE' : (await kpiOriginWhere(alias, 'kpi')) || 'TRUE');

@@ -234,11 +234,20 @@ describe('dashboard settings', () => {
   it('serve the origin view the dashboards open on and the cutover date to any signed-in user', async () => {
     const r = await api('get', '/dashboard/settings');
     expect(r.status).toBe(200);
-    expect(r.body.data).toEqual({ defaultOrigin: 'issued', cutoverDate: cutover });
-    await query("UPDATE app_settings SET value = '\"all\"' WHERE key = 'dashboard.default_origin'");
+    expect(r.body.data).toMatchObject({ configuredOrigin: 'auto', cutoverDate: cutover });
+    expect(r.body.data.defaultOrigin).toBe(r.body.data.issuedPolicies > 0 ? 'issued' : 'all');
+    const set = async (v) => { await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'dashboard.default_origin\'', [JSON.stringify(v)]); clearSettingsCache(); };
+    await set('all');
+    expect((await api('get', '/dashboard/settings')).body.data).toMatchObject({ defaultOrigin: 'all', configuredOrigin: 'all' });
+    await set('issued');
+    expect((await api('get', '/dashboard/settings')).body.data).toMatchObject({ defaultOrigin: 'issued', configuredOrigin: 'issued' });
+    // auto: All business while no policy was issued after the cutover date, Issued since go-live from the first one
+    await set('auto');
+    await query("UPDATE app_settings SET value = '\"2099-01-01\"' WHERE key = 'golive.cutover_date'");
     clearSettingsCache();
-    expect((await api('get', '/dashboard/settings')).body.data.defaultOrigin).toBe('all');
-    await query("UPDATE app_settings SET value = '\"issued\"' WHERE key = 'dashboard.default_origin'");
+    expect((await api('get', '/dashboard/settings')).body.data).toMatchObject({ defaultOrigin: 'all', configuredOrigin: 'auto', issuedPolicies: 0 });
+    expect((await api('get', '/dashboard/executive')).body.data.origin).toBe('all');
+    await query("UPDATE app_settings SET value = $1::jsonb WHERE key = 'golive.cutover_date'", [JSON.stringify(cutover)]);
     clearSettingsCache();
     expect((await request(app).get('/api/dashboard/settings')).status).toBe(401);
   });

@@ -18857,6 +18857,7 @@
       "approveMessage": "The settings change as listed, from now on.",
       "changes": "Changes",
       "choices": {
+        "auto": "Issued since go-live once a policy is issued, else All business",
         "issued": "Issued since go-live",
         "all": "All business"
       },
