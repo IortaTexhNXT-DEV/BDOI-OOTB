@@ -254,10 +254,11 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)',
+  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued), the approval to send (sendApproval, sendApprovalRequired, canApproveSend)',
   screen: `${PS} > Detail`, middleware: [...canRead, ownRecord('placement')],
   response: { success: true, ...placementExample, timeline: [{ key: 'quotationSlip', label: 'Quotation Slip', done: true, reference: 'QT-2026-00007' }, { key: 'acknowledged', label: 'Acknowledged', done: false }] },
-  handler: async (req, res) => sendEntity(res, await plc.placementById(req.params.id)),
+  // with the approval to send: whether it is needed (placement.send_requires_approval) and whether the signed-in user may give it
+  handler: async (req, res) => sendEntity(res, { ...await plc.placementById(req.params.id), sendApprovalRequired: await plc.sendApprovalRequired(), canApproveSend: await plc.canApproveSend(req.user) }),
 });
 define({
   method: 'PUT', path: '/:id', summary: 'Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again', screen: `${PS} > Edit`,
@@ -280,7 +281,28 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
+  method: 'POST', path: '/:id/request-approval', summary: 'Submit a raised placement slip for approval before it is sent to the insurer (placement.send_requires_approval): the approvers of placement.send_approval_roles are notified; a rejected slip is submitted again',
+  screen: `${PS} > Detail > Submit for approval`, middleware: [...canWrite, ownRecord('placement'), validate(z.object({ remarks: z.string().max(1000).optional().nullable() }))],
+  request: { remarks: 'Firm order for Malayan, premium as quoted' }, response: { success: true, data: { ...placementExample, sendApproval: { status: 'pending', requestedBy: 'Ana Cruz', requestedAt: '2026-10-11T02:00:00Z' } } },
+  handler: async (req, res) => {
+    const p = await plc.requestSendApproval(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'placement', entityId: p.id, action: 'submit-approval', after: { sendApproval: 'pending', remarks: req.body?.remarks || null } });
+    sendEntity(res, p, { message: `Placement slip ${p.placementNumber} submitted for approval` });
+  },
+});
+define({
+  method: 'POST', path: '/:id/approval', summary: 'Approve or reject (with the reason) a placement slip waiting for approval to send: a user of placement.send_approval_roles who neither raised nor submitted it (maker-checker enforced on the server)',
+  screen: `${PS} > Detail > Approve / Reject`, middleware: [...canRead, ownRecord('placement'), validate(z.object({ decision: z.enum(['approve', 'reject']), note: z.string().max(2000).optional().nullable() }))],
+  request: { decision: 'reject', note: 'Share of the co-insurer not confirmed' }, response: { success: true, data: { ...placementExample, sendApproval: { status: 'rejected', note: 'Share of the co-insurer not confirmed' } } },
+  handler: async (req, res) => {
+    const r = await plc.decideSendApproval(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: req.body.decision === 'approve' ? 'approve-send' : 'reject-send', before: { sendApproval: 'pending' },
+      after: { sendApproval: r.placement.sendApproval?.status, note: req.body.note || null } });
+    sendEntity(res, r.placement, { message: req.body.decision === 'approve' ? `Placement slip ${r.placement.placementNumber} approved: it can be sent to the insurer` : `Placement slip ${r.placement.placementNumber} rejected` });
+  },
+});
+define({
+  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A raised slip is sent once approved by a second user (placement.send_requires_approval). A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ insurerIds: z.array(z.union([z.number(), z.string()])).optional() }))], request: {},
   response: { success: true, data: { ...placementExample, status: 'sent' }, sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }] },
   handler: async (req, res) => {

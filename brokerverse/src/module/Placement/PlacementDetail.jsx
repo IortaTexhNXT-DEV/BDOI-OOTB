@@ -96,6 +96,32 @@ const PlacementDetail = () => {
   const editable = write && ["draft", "declined"].includes(p.status);
   const keyedByMe = Boolean(p.epolicy?.receivedById) && String(p.epolicy.receivedById) === userId;
   const canBook = p.status === "checked" && write && approver;
+  // approval to send by a second user (placement.send_requires_approval); the maker never approves, the server refuses it too
+  const approval = p.sendApproval;
+  const needsApproval = p.status === "draft" && p.sendApprovalRequired && approval?.status !== "approved";
+  const isMaker = [p.sendApproval?.requestedById, p.createdById].filter(Boolean).map(String).includes(userId);
+  const canDecide = approval?.status === "pending" && p.canApproveSend && !isMaker;
+  const submitForApproval = () => confirmAct({
+    title: t("placement.approval.submitTitle", { number: p.placementNumber }),
+    facts: slipFacts(),
+    input: { type: "textarea", label: t("placement.approval.remarks"), required: false },
+    confirmLabel: t("placement.actions.submitForApproval"),
+    confirmIcon: "pi pi-send",
+  }, (remarks) => placementService.requestApproval(p.id, remarks), t("placement.messages.approvalRequested"));
+  const approveSend = () => confirmAct({
+    title: t("placement.approval.approveTitle", { number: p.placementNumber }),
+    facts: [...slipFacts(), { label: t("placement.fields.createdBy"), value: approval?.requestedBy }],
+    confirmLabel: t("placement.actions.approveSend"),
+    confirmIcon: "pi pi-check",
+  }, () => placementService.decideApproval(p.id, "approve"), t("placement.messages.approvalApproved"));
+  const rejectSend = () => confirmAct({
+    title: t("placement.approval.rejectTitle", { number: p.placementNumber }),
+    severity: "danger",
+    facts: slipFacts(),
+    input: { type: "textarea", label: t("placement.approval.reason"), required: true },
+    confirmLabel: t("placement.actions.rejectSend"),
+    cancelLabel: t("placement.actions.back"),
+  }, (note) => placementService.decideApproval(p.id, "reject", note), t("placement.messages.approvalRejected"));
   const steps = (p.timeline || []).map((s) => ({ ...s, current: !s.done && (p.timeline.find((x) => !x.done)?.key === s.key) }));
   const pdf = (insurerId) => printPdf(`/placements/${encodeURIComponent(p.id)}/documents/placement-slip${insurerId ? `?insurerId=${encodeURIComponent(insurerId)}` : ""}`,
     { fileName: `${p.placementNumber}.pdf` }).catch((e) => notify("error", e.message));
@@ -204,7 +230,10 @@ const PlacementDetail = () => {
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
         {canVerifyPayment && !["issued", "cancelled"].includes(p.status) && <Button label={p.paymentVerification ? t("placement.actions.paymentVerified") : t("placement.actions.verifyPayment")} icon="pi pi-wallet" className="ml-2" severity="secondary" outlined
           onClick={() => setVerifying({ mode: "", reference: "", amount: p.grossPremium, remarks: "", pdcApproved: false })} />}
-        {write && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}
+        {write && needsApproval && approval?.status !== "pending" && <Button label={t("placement.actions.submitForApproval")} icon="pi pi-send" className="ml-2" onClick={submitForApproval} />}
+        {canDecide && <Button label={t("placement.actions.rejectSend")} icon="pi pi-times" severity="danger" outlined className="ml-2" onClick={rejectSend} />}
+        {canDecide && <Button label={t("placement.actions.approveSend")} icon="pi pi-check" className="ml-2" onClick={approveSend} />}
+        {write && !needsApproval && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}
           severity={p.status === "draft" ? undefined : "secondary"} outlined={p.status !== "draft"}
           onClick={() => sendToInsurers()} />}
         {write && p.status === "sent" && <Button label={t("placement.actions.acknowledge")} icon="pi pi-inbox" className="ml-2" onClick={() => setAcknowledging({ reference: "", remarks: "" })} />}
@@ -218,6 +247,9 @@ const PlacementDetail = () => {
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
 
       {p.status === "declined" && <Message severity="warn" className="w-full mb-3" text={t("placement.placementSlip.declinedNote")} />}
+      {p.status === "draft" && approval?.status === "pending" && <Message severity="info" className="w-full mb-3"
+        text={`${t("placement.approval.pending", { by: approval.requestedBy || "-", date: formatDate(approval.requestedAt) })}${isMaker ? ` · ${t("placement.approval.makerNote")}` : ""}`} />}
+      {p.status === "draft" && approval?.status === "rejected" && <Message severity="warn" className="w-full mb-3" text={t("placement.approval.rejected", { by: approval.decidedBy || "-", note: approval.note || "" })} />}
       {p.status === "epolicy_received" && keyedByMe && <Message severity="info" className="w-full mb-3" text={t("placement.check.makerNote")} />}
       {p.status === "checked" && !canBook && <Message severity="info" className="w-full mb-3" text={t("placement.placementSlip.checkedNoPermission")} />}
       {p.status === "acknowledged" && p.check?.decision === "returned" && <Message severity="warn" className="w-full mb-3" text={t("placement.check.returnedNote", { reason: p.check.reason || "" })} />}
@@ -276,6 +308,9 @@ const PlacementDetail = () => {
             <Field label={t("placement.fields.period")}>{`${formatDate(p.inceptionDate)} - ${formatDate(p.expiryDate)}`}</Field>
             <Field label={t("placement.fields.billingMode")}>{p.billingMode ? t(`placement.billing.${p.billingMode}`) : t("placement.billing.default")}</Field>
             <Field label={t("placement.fields.paymentVerified")}>{p.paymentVerification ? `${formatDate(p.paymentVerification.at)} · ${p.paymentVerification.mode} ${p.paymentVerification.reference}${p.paymentVerification.pdcApproved ? ` (${t("placement.payment.pdcApproved")})` : ""}` : t("placement.payment.notVerified")}</Field>
+            {(p.sendApprovalRequired || approval) && <Field label={t("placement.approval.field")}>{approval
+              ? `${t(`placement.approval.status${approval.status.charAt(0).toUpperCase()}${approval.status.slice(1)}`)}${approval.decidedBy ? ` · ${approval.decidedBy} ${formatDate(approval.decidedAt)}` : ""}`
+              : "-"}</Field>}
             <Field label={t("placement.fields.sent")}>{formatDate(p.sentAt)}</Field>
             <Field label={t("placement.fields.acknowledged")}>{p.acknowledgement ? `${formatDate(p.acknowledgement.at)}${p.acknowledgement.reference ? ` (${p.acknowledgement.reference})` : ""}` : "-"}</Field>
             {p.slipDocument && <Field label={t("placement.fields.placementFile")}><button type="button" className="journey-link" onClick={() => openFile(p.slipDocument.key)}>{p.slipDocument.fileName}</button></Field>}

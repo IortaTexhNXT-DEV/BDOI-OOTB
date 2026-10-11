@@ -8936,7 +8936,10 @@
       "book": "Book (Insurer issued)",
       "printSlip": "Print slip",
       "verifyPayment": "Verify payment",
-      "paymentVerified": "Payment verified"
+      "paymentVerified": "Payment verified",
+      "submitForApproval": "Submit for approval",
+      "approveSend": "Approve",
+      "rejectSend": "Reject"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -9158,7 +9161,10 @@
       "acknowledged": "Insurer acknowledgement recorded",
       "epolicyMatch": "e-Policy recorded: it matches the slip",
       "epolicyMismatch": "e-Policy recorded: it differs from the slip",
-      "booked": "Policy {{number}} booked"
+      "booked": "Policy {{number}} booked",
+      "approvalRequested": "Placement slip submitted for approval",
+      "approvalApproved": "Placement slip approved: it can be sent to the insurer",
+      "approvalRejected": "Placement slip rejected"
     },
     "quoteJourney": {
       "title": "Send to insurance company",
@@ -9295,6 +9301,20 @@
       "pdcApproved": "Approved post-dated cheque instalments",
       "verified": "Proof of payment verified",
       "notVerified": "Not verified"
+    },
+    "approval": {
+      "pending": "Waiting for approval - submitted by {{by}} on {{date}}",
+      "rejected": "Rejected by {{by}}: {{note}}",
+      "makerNote": "You raised or submitted this slip: another user approves it",
+      "submitTitle": "Submit placement slip {{number}} for approval",
+      "rejectTitle": "Reject placement slip {{number}}",
+      "approveTitle": "Approve placement slip {{number}}",
+      "remarks": "Remarks",
+      "reason": "Reason",
+      "field": "Approval to send",
+      "statusPending": "Waiting for approval",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected"
     }
   },
   "postingRules": {

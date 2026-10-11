@@ -54,7 +54,12 @@ the e-policy are `documents` rows (entity `placement`).
    payment on the slip (`verify-payment`: payment mode of the Payment Mode master, reference, amount; an approved
    post-dated cheque instalment plan counts when `placement.pdc_cover_before_cash` is on): cash before cover. The
    placement is then sent to the lead insurer and co-insurers, each with its own slip (`emailDocuments.js`
-   `placement-slip`) and, for a direct CTPL, the LTO document. The insurer acknowledges it. The service level clocks
+   `placement-slip`) and, for a direct CTPL, the LTO document. With `placement.send_requires_approval` (delivered on,
+   GAP-POLICY-21) a raised slip is first submitted for approval (`request-approval`) and approved or rejected with the
+   reason (`approval`) by a user holding a role of `placement.send_approval_roles` who neither raised nor submitted it;
+   only an approved slip is sent. The approvers find it under My Work > Approvals; an edit of the slip clears the
+   approval; a slip already with the insurer is sent again without one; a scheme slip has its own checklist and
+   waivers. The insurer acknowledges it. The service level clocks
    POL-KYC (before the verification) and POL-PEND (after it) time the step.
 5. The e-policy is recorded with both policy numbers, participant name, sum insured, premium, commission and the
    issue / issuance / effective / production dates; motor registration (plate or MV file) is required even where the
@@ -74,7 +79,8 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
 `placement.auto_raise`, `placement.auto_raise_statuses`, `placement.check_fields`, `placement.check_tolerance_amount`,
 `placement.check_tolerance_pct`, `placement.check_maker_checker`, `placement.schedule_email_on_booking`,
 `placement.direct_document_products`, `placement.lob_keywords`, `placement.offer_validity_days`,
-`placement.payment_verification_required`, `placement.pdc_cover_before_cash`,
+`placement.payment_verification_required`, `placement.pdc_cover_before_cash`, `placement.send_requires_approval`,
+`placement.send_approval_roles`,
 `placement.editable_statuses`, `placement.quote_statuses`, and the e-mail templates `email.template.broker_slip_request`,
 `email.template.placement_order`, `email.template.placement_discrepancy` and `email.template.policy_schedule`.
 
@@ -87,6 +93,9 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
   `placement.auto_raise_statuses`, its journey does not require a placement slip, or the raise failed (the owner has a
   "Placement slip not raised" notification with the reason).
 - Shares do not add up to 100% or two leads: `participants.js` refuses the save with the field that is wrong.
+- A raised slip cannot be sent: it waits for the approval of a second user (`sendApproval.status` pending, or none yet:
+  submit it), or it was rejected (`sendApproval.note`). The maker cannot approve it, nor a user without a role of
+  `placement.send_approval_roles`.
 - The check cannot be confirmed: the same user recorded the e-policy (maker-checker), or `GET /placements/:id/check`
   lists a difference beyond the tolerance.
 - The policy cannot be booked: the placement is not `checked`, the KYC items of `policy.kyc_required_fields` are
