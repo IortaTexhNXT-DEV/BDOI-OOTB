@@ -145,14 +145,15 @@ export async function executive(period = 'month', compare = 'previous', origin =
   const ret = await one(`SELECT count(*) FILTER (WHERE status = 'renewed')::int AS renewed, count(*) FILTER (WHERE status IN ('renewed','lapsed'))::int AS closed FROM renewals`);
   const targets = await getSetting('dashboard.targets', {});
   const kpi = (value, prev, target) => ({ value, change: change(value, prev), trend: value >= prev ? 'up' : 'down', target: target ?? null, achievement: target ? pct(value, target) : null });
-  const claimsRatio = pct(Number(claims.incurred), Number(k.premium_all));
+  // a ratio over nothing does not apply (null, shown as "–"), it is not 0 %
+  const claimsRatio = Number(k.premium_all) ? pct(Number(claims.incurred), Number(k.premium_all)) : null;
   return {
     executiveKPIs: {
       totalRevenue: kpi(round2(k.premium_cur), round2(k.premium_prev), targets.totalRevenue),
       activePolicies: kpi(k.active, k.active - k.new_cur + k.new_prev, targets.activePolicies),
       newBusiness: kpi(round2(k.new_business), round2(k.new_business_prev), targets.newBusiness),
-      claimsRatio: { value: claimsRatio, target: targets.claimsRatio ?? null, trend: claimsRatio <= (targets.claimsRatio ?? 100) ? 'down' : 'up' },
-      retentionRate: { value: pct(ret.renewed, ret.closed), target: targets.retentionRate ?? null },
+      claimsRatio: { value: claimsRatio, target: targets.claimsRatio ?? null, trend: (claimsRatio ?? 0) <= (targets.claimsRatio ?? 100) ? 'down' : 'up' },
+      retentionRate: { value: ret.closed ? pct(ret.renewed, ret.closed) : null, target: targets.retentionRate ?? null },
       customerSatisfaction: { value: null, target: targets.customerSatisfaction ?? null, note: 'No survey data captured' },
     },
     issuedSinceGoLive: await issuedSinceGoLive(),
