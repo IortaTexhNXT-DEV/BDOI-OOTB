@@ -45,6 +45,9 @@ const OPERATIONS_PROCESSING = [
   // brand-new vehicle programmes (write:motor-programmes), promotions (write:promotions) and client comparison reports
   "Sales & Marketing > Dealer Programmes",
   "Sales & Marketing > Promotions",
+  // dealer schemes: the Scheme Master and the scheme applications (write:schemes, write:scheme-issuance)
+  "Sales & Marketing > Scheme Master",
+  "Sales & Marketing > Scheme Issuance",
   "Sales & Marketing > Comparison Reports",
   // the sales activity timelines and report (read:sales-activities)
   "Sales & Marketing > Sales Activities",
@@ -87,7 +90,7 @@ export const roleMenuPermissions = {
     operations: OPERATIONS_PROCESSING,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     // distribution channels; the discount caps the promotions are checked against (write:discount-caps)
-    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps"],
+    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps", "Insurance Management > Scheme Document Checklist"],
   },
   // Operations (Client Servicing): client servicing, endorsement requests, renewals, My Work, documents
   operations: {
@@ -187,7 +190,7 @@ const TIS_CCD = (accounts, operations = ["Payments"]) => ({ "my work": true, ...
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
 // Sales & Marketing item by item, in the order of the TISPH journey (components/SideBar/list.js)
 const SALES_MARKETING = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips",
-  "Dealer Programmes", "Promotions", "Quick Quote", "Campaigns"];
+  "Dealer Programmes", "Promotions", "Scheme Master", "Scheme Issuance", "Quick Quote", "Campaigns"];
 // entries that map to no TISPH requirement (BRD, FRS, MOM): no TISPH persona is given them. Quick Quote: the BRD raises a
 // quotation per product from the Quotations screen; Campaigns: no requirement. Removing an entry here gives it back.
 const TIS_HIDDEN_SALES = ["Quick Quote", "Campaigns"];
@@ -214,6 +217,8 @@ const TIS_OPERATIONS = {
   commission: ["Commission Dashboard", "Sharing Schemes"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
+    // the document checklist of the scheme applications (Scheme Issuance)
+    "Insurance Management > Scheme Document Checklist",
     // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
     "Finance > Discount Caps", INTERFACE_MONITOR],
 };
@@ -292,7 +297,7 @@ Object.assign(roleMenuPermissions, {
 // Talkbot Calls (Operations > Renewals, TIS-BRD-LEAD-09): opened with read:talkbot-calls (Sales and Operations personas,
 // the General Manager); IT AppSupport reads the renewal screens without it.
 const RENEWALS_WITHOUT_TALKBOT = ["Renewal Policy", "Renewal Batch", "Renewal Queue", "Retention Analytics", "At-Risk Policies", "Negotiations",
-  "Lapse Management", "Performance"].map((item) => `Renewals > ${item}`);
+  "Lapse Management", "Performance", "Lock-in Review"].map((item) => `Renewals > ${item}`);
 roleMenuPermissions["tis-it-admin"].operations = [...roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Renewals"), ...RENEWALS_WITHOUT_TALKBOT];
 // Prospects and Lead Assignment by permission (RBAC v4): Finance reads prospects (read:leads); IT AppSupport has no
 // read:lead-assignment, so Lead Assignment is not in its menu.
@@ -304,7 +309,7 @@ Object.assign(roleMenuPermissions["tis-finance"], {
   dashboard: ["Executive Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   operations: [...roleMenuPermissions["tis-finance"].operations, "Clients", "Policy", "Claims", "Payments", "Cover Notes", "Policy Cancellation", ...RENEWALS_WITHOUT_TALKBOT,
-    ...["Quotations", "Request for Quotation", "Placement Slips", "Dealer Programmes", "Promotions"].map((item) => `Sales & Marketing > ${item}`)],
+    ...["Quotations", "Request for Quotation", "Placement Slips", "Dealer Programmes", "Promotions", "Scheme Master", "Scheme Issuance"].map((item) => `Sales & Marketing > ${item}`)],
 });
 // Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
 // Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).

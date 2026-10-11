@@ -308,7 +308,8 @@ describe('Posting Rules and Account Determination screens', () => {
     expect(ev.body.data.map((e) => e.eventCode)).toEqual(expect.arrayContaining(['policy.issue.broker_billed', 'receipt.apply', 'endorsement.return_premium', 'policy.cancel',
       'claim.settlement.paid_through_broker', 'write_off', 'remittance.transfer', 'incentive.accrual']));
     // premium bookings and returns are on version 2 (commission taxes, migration 0170)
-    const taxed = ['policy.issue.broker_billed', 'endorsement.additional_premium', 'policy.renewal.broker_billed', 'endorsement.return_premium', 'policy.cancel'];
+    // and the incentive accrual with its withholding tax line (migration 0610)
+    const taxed = ['policy.issue.broker_billed', 'endorsement.additional_premium', 'policy.renewal.broker_billed', 'endorsement.return_premium', 'policy.cancel', 'incentive.accrual'];
     expect(ev.body.data.every((e) => e.activeVersion === (taxed.includes(e.eventCode) ? 2 : 1))).toBe(true);
     const meta = await ctx.as('maker')('get', '/posting-rules/meta');
     expect(meta.body.data.roles.find((r) => r.role === 'premium_receivable').glCode).toBe('1202001');

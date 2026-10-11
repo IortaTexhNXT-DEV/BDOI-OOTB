@@ -28,6 +28,9 @@ import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
 import { IMPORT_COLUMNS as REMITTANCE_IMPORT_COLUMNS, PRODUCT_LINES } from '../remittance/imports.js';
 import { CALL_RECORD_COLUMNS } from '../talkbot/columns.js';
 import { TFS_COLUMNS } from '../leads/tfsImport.js';
+import { SCHEME_LINE_COLUMNS } from '../schemes/service.js';
+import { LOAN_BOOKING_COLUMNS } from '../scheme-issuance/upload.js';
+import { LOAN_STATUS_COLUMNS } from '../lock-in/upload.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -272,6 +275,47 @@ export function staticUploads() {
       notes: ['Choose the programme on the screen first: its insurer, rates, CTPL term, subsidy and issue mode apply to every row.',
         'Each accepted row creates the prospect (channel: the dealer branch) and the quotation; when the programme issues policies, also the client, the policy and the bills to whoever pays the premium.',
         'A financed sale names the bank (or the programme\'s bank applies when there is a loan amount): the bank is the mortgagee on the policy and the bank endorsement letter can be printed from the sale.'],
+    },
+    {
+      id: 'scheme-vehicle-lines', file: 'Scheme_Vehicle_Lines_Upload_Template.xlsx', title: 'Scheme vehicle lines (make and model range of a scheme)',
+      menu: 'Operations > Sales & Marketing > Scheme Master > Upload vehicle lines', route: 'POST /api/schemes/lines/upload (multipart field "file", fields schemeId and mode add | replace)',
+      columns: SCHEME_LINE_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting schemes.max_rows).',
+      onError: 'Each row is checked with the rules of the Vehicles tab and added on its own. The result lists the failed rows with their row number and the reason. In mode Replace the rows replace every line of the scheme, and only when at least one row is valid.',
+      samples: [
+        { schemeNo: 'S1-STD-2027', make: 'Toyota', model: 'Vios', variant: 'ALL', yearFrom: '2026', yearTo: '2027', siFrom: '500000', siTo: '1300000', vehicleClass: 'private_cars', odRate: '', aonRate: '' },
+        { schemeNo: 'S1-STD-2027', make: 'Toyota', model: 'Fortuner', variant: '2.4 G 4x2 AT', yearFrom: '2026', yearTo: '2027', siFrom: '1500000', siTo: '2500000', vehicleClass: 'private_cars', odRate: '2.2000', aonRate: '' },
+      ],
+      notes: ['Choose the Draft scheme and the mode (Add or Replace) on the screen. A row may name its scheme in SCHEME_NO; it must be a Draft scheme.',
+        'MODEL and VARIANT blank or ALL mean all models or all variants. When a vehicle is rated, a variant line wins over a model line and a model line over an All models line.'],
+    },
+    {
+      id: 'scheme-loan-bookings', file: 'Scheme_Loan_Bookings_Upload_Template.xlsx', title: 'TFSPH loan bookings (Scheme 1 and 2 applications)',
+      menu: 'Operations > Sales & Marketing > Scheme Issuance > Upload loan bookings', route: 'POST /api/scheme-issuance/bookings/upload (multipart field "file")',
+      columns: LOAN_BOOKING_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting schemes.max_rows).',
+      onError: 'Each row is checked, priced from its scheme and given its document checklist on its own. A row with any error creates nothing and is listed with its row number and the reason; the other rows become applications in Documents pending. Fix the failed rows and upload only those rows again (a loan account already on an application is refused).',
+      samples: [
+        { schemeNo: 'S1-STD-2026', loanAccount: '8005123456', bankCode: 'TFS-HQ', bookingDate: '2026-10-05', releaseDate: '2026-10-07', loanTermMonths: '60', firstName: 'Ramon', lastName: 'Villanueva',
+          birthday: '1992-03-14', nationality: 'Filipino', mobile: '09175550123', email: 'ramon.villanueva@example.ph', city: 'Makati City', province: 'Metro Manila', kycSource: 'TFSPH', idType: 'PhilID',
+          idNumber: '1234-5678-9012-3456', dealerCode: 'TMK-MKT', make: 'Toyota', model: 'Vios', variant: '1.3 XLE CVT', yearModel: '2026', color: 'Silver Metallic', chassisNumber: 'MR2B29F30R1123456',
+          engineNumber: '2NR-F123456', conductionSticker: 'A1B234', invoicePrice: '1015000', insurer: 'PIONEER', araSignedOn: '2026-10-05', araPaymentMode: 'ADA' },
+      ],
+      notes: ['Documents are not in the file: they are uploaded on each application (Scheme Issuance > application > Document checklist).',
+        'ARA Signed On and ARA Payment Mode are required for a Scheme 1 loan; a Scheme 2 loan pays through the monthly amortisation.'],
+    },
+    {
+      id: 'tfs-loan-status', file: 'TFS_Loan_Status_Upload_Template.xlsx', title: 'TFS account status (loan status of the financed accounts)',
+      menu: 'Operations > Renewals > Lock-in Review > Upload loan status', route: 'POST /api/lock-in/uploads (multipart field "file")',
+      columns: LOAN_STATUS_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 5,000 rows per file (Configuration setting lockin.upload_max_rows).',
+      onError: 'Each row is loaded on its own. A row with a bad loan account, status or date, or a loan account linked to no policy, is listed as failed with its row number; download the failed rows from the upload. A status date older than the one on the policy, and a status set by hand, are counted as Not changed.',
+      samples: [
+        { loanAccount: '8003828889', loanStatus: 'PAST DUE', statusDate: '30/09/2026', daysPastDue: '32', maturity: '02/12/2028', scheme: 'SCHEME 2', borrowerName: 'Mark Ileto', remarks: 'Two amortisations unpaid' },
+        { loanAccount: '8005123456', loanStatus: 'CURRENT', statusDate: '30/09/2026', scheme: 'SCHEME 1', borrowerName: 'Andrea Villanueva' },
+      ],
+      notes: ['The TFS status codes are mapped to the BrokerVerse loan statuses by the Configuration setting lockin.tfs_status_map (MISSED PAYMENT is Past due).',
+        'A blocking status (lockin.blocking_loan_statuses) holds the renewal notices of every policy of the loan account; a return to CURRENT lifts the hold.'],
     },
     {
       id: 'fleet-vehicles', file: 'Fleet_Vehicles_Upload_Template.xlsx', title: 'Fleet vehicles (schedule of a fleet policy)', menu: 'Operations > Fleet Schedules > Schedule > Upload Vehicles',

@@ -170,7 +170,7 @@ acceptable for data no other screen needs.
 | Charts, KPI cards and dashboards | `components/Dashboard` (toolbar with period, comparison and data as of; `ChartCard` with its table view and export; `ThemedChart`; `ShareChart`; drill-down) and the data colours of `useChartTheme()`; the rules are in [dashboards.md](dashboards.md) |
 | Buttons | the primary button, `outlined` or `text` for secondary actions, `severity="danger"` / `"warning"` only for destructive or cautionary actions; no `info` / `help` / `success` buttons |
 | Form fields and pickers | label above the field (`agentModule/component` fields and `components/LabelWrapper` follow `theme/bdoi/_fields.scss`); roles: `components/RoleChecklist`; shared patterns in `theme/bdoi/consistency.scss` |
-| Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
+| Masked identifiers | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
 | Diagnostics | `utility/logger` (silent in production, see section 8) |
 
 The display currency and the date format come from the configuration (Master > Configuration, served by GET
@@ -254,8 +254,8 @@ tab title. The Docker images (`brokerverse/Dockerfile`, `Dockerfile.railway`) se
 `index.html` so that deep links work, and adds the cache and Content-Security-Policy headers
 (`scripts/nginx-snippets.sh`). `.env.production` keeps the webpack runtime out of `index.html`
 (`INLINE_RUNTIME_CHUNK=false`) so the policy needs no inline script. Build warnings come from ESLint
-(`react-app` rules plus `no-console`); keep the count from growing. Deployment:
-[deploy/RELEASE_PIPELINE.md](../../deploy/RELEASE_PIPELINE.md).
+(`react-app` rules plus `no-console`); keep the count from growing. Deployment for TISPH:
+[deploy/README.md](../../deploy/README.md) (DEV on Railway today, Azure once provisioned).
 
 Tests live next to the code they test (`*.test.js`, 31 suites, 162 tests on 04 October 2026): formatting
 helpers, menu tree, permissions and route guard, help routes, the theme engine, the Philippine address

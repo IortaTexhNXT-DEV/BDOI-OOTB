@@ -23,14 +23,17 @@ defects in production.
 |---|---|
 | `backend/` | Node.js 22 API (Express, PostgreSQL). Modules in `backend/src/modules`, one folder per business area. |
 | `brokerverse/` | React front end. |
-| `deploy/REFERENCE.md` | Installing and upgrading a server; environment variables; rotating the personal data key (package B). |
-| `deploy/RELEASE_PIPELINE.md` | Build once, promote through Dev, SIT, UAT, Pre-Prod and Production with approvals; migrations policy; rollback; hotfix. |
-| `docs/onboarding/` | Go-live workbench, smoke test and transaction reset, client data masking, branding and e-signatures. |
-| `deploy/README.md` | What to check before a site goes live. |
+| `deploy/README.md` | Index of the deployment folder: which runbook applies to which TISPH environment. |
+| `deploy/REFERENCE.md` | Environment variables, seed data, scheduled jobs, health checks, production start-up rules, rotating the personal data key. |
+| `deploy/RAILWAY.md` | TISPH DEV as it runs today: Railway project `tisph-dev`, services deployed from branch `TISPH-DEV`. |
+| `deploy/AZURE.md` | TISPH on Microsoft Azure (Terraform, `azure-deploy.yml`, DEV, SIT, UAT and PROD), used once the Azure subscription is provisioned. |
+| `deploy/RELEASE_PIPELINE.md` | The product's other pipeline (`ci.yml` deploy jobs, `deploy.yml`, `rollback.yml`: EC2 and the product's own environments); its migrations policy (expand, then contract) applies to TISPH too. It does not deploy TISPH. |
+| `docs/onboarding/` | Getting started, go-live data set-up and workbench, smoke test and transaction reset, client data masking, support and escalation, UAT scripts for the TISPH roles. |
 | `docs/e2e/` | UAT scenario run, go-live rehearsal, document and report sweep, role walk, and the end-to-end test tooling. The earlier generic code reviews, end-to-end reports and defect register are in `docs/archive/2026-10-10/`. |
 | `docs/TISPH/` | TISPH documents: functional specifications, the document pack (architecture, security, data, environments, migration, operations, governance) and the test pack. Start with `docs/TISPH/README.md`. |
 | `docs/package/` | Product documents still used by the code or not yet replaced: user manual source, upload templates, brand packs, data dictionary workbook, templates. See `docs/package/README.md`. |
-| `docs/architecture/`, `docs/manual/`, `docs/decks/` | Table catalogue and indicative load test, user manual screenshots and their capture tools, role presentations. |
+| `docs/architecture/` | Table catalogue and indicative load test. |
+| `docs/archive/` | Generic product documents kept as records (earlier test runs, reviews, plans), by date of retirement. Not maintained. |
 | `backend/docs/api/` | Generated API list: OpenAPI, Postman collection, the API touchpoint workbook (screen to API). |
 | `docker-compose.yml` | Database, API and web server for a single-server installation. |
 
@@ -39,7 +42,7 @@ defects in production.
 ```bash
 # database: PostgreSQL 16 running locally
 cd backend && npm ci && cp .env.example .env    # edit DATABASE_URL, JWT_SECRET, DATA_ENCRYPTION_KEY, ADMIN_PASSWORD
-                                                # (and PII_ENCRYPTION_KEY once package B is merged)
+                                                # (PII_ENCRYPTION_KEY: a development key is used unless set; required in production)
 npm run db:reset && npm run dev                 # API on http://localhost:8000/api
 cd ../brokerverse && npm ci && npm start        # web on http://localhost:3000
 ```

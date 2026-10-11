@@ -148,6 +148,20 @@ export function coverageSection(x, f) {
   return { heading: `Coverage (${x.currency || f.currency || 'PHP'})`, table: { columns: ['Cover', { label: 'Sum insured', type: 'money' }, { label: 'Premium', type: 'money' }], widths: [255, 130, 130], rows } };
 }
 
+/** Motor terms of a quotation (motorRating, PROD-12 / PROD-10): the FMV and its basis, the excess; null without them. */
+export function motorTermsSection(x, f) {
+  const m = x.motorRating;
+  if (!m || lineOf(x) !== 'MOTOR') return null;
+  const basis = { 'previous-fmv': 'FMV of the expiring term', srp: 'Suggested retail price', reference: 'Reference value' };
+  const excess = m.excess ? (m.excess.basis === 'loss' ? `${m.excess.pct}% of each loss` : m.excess.amount !== null && m.excess.amount !== undefined ? f.ccy(m.excess.amount, x.currency) : '') : '';
+  const rows = kv([
+    ['Fair market value', m.fmv ? f.ccy(m.fmv.fmv, x.currency) : ''],
+    ['Basis', m.fmv ? `${basis[m.fmv.referenceBasis] || m.fmv.referenceBasis} ${f.ccy(m.fmv.referenceValue, x.currency)} less ${m.fmv.depreciationPct}% depreciation` : ''],
+    ['Excess (deductible)', excess],
+  ]);
+  return rows.length ? { heading: 'Motor terms', rows } : null;
+}
+
 const customerOf = (lead = {}) => [lead.firstName, lead.lastName].filter(Boolean).join(' ') || lead.companyName;
 const pct = (v) => `${Number(num(v).toFixed(4))}%`;
 const brokerName = (h) => String(h.letterhead?.name || '').replace(/\.$/, '');
@@ -191,7 +205,7 @@ export async function standardQuoteDoc(q) {
   return { ...h, watermark: sig.watermark, meta: kv([['Date', f.date(q.createdAt)], ['Valid until', f.date(q.validUntil)], ['Customer', customerOf(q.lead || {})], ['Status', q.quotationStatus],
     ['Product', q.productType], ['Policy type', await policyTypeLabel(q.insurancePolicyType)], ['Insurer', q.insuranceCompanyName], ['Currency', q.currency],
     ['Broker slip', q.brokerSlipNumber]]),
-  sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
+  sections: [riskSection(q, f), coverageSection(q, f), motorTermsSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
     { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' },
     sig.section] };
 }

@@ -10,8 +10,9 @@ import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { hasPermission } from "../../utils/canOpen";
-import { PageHeader, StatusTag, formatDate } from "./shared";
+import { PageHeader, StatusTag } from "./shared";
 import StatCards from "../../components/StatCards";
+import { NameChipCell, PeriodCell } from "../../components/TableCells";
 import "./index.scss";
 
 const STATUSES = ["draft", "sent", "acknowledged", "epolicy_received", "checked", "issued", "declined", "cancelled"];
@@ -94,9 +95,7 @@ const PlacementList = () => {
           onRowClick={(e) => navigate(`/placement/placement-slips/${e.data.id}`)} rowClassName={() => "clickable"}>
           <Column field="placementNumber" header={t("placement.fields.placementNumber")} body={(r) => <span className="doc-number">{r.placementNumber}</span>} />
           <Column field="insuredName" header={t("placement.fields.insured")} body={(r) => r.insuredName || r.customerName} style={{ minWidth: "11rem" }} />
-          <Column field="productType" header={t("placement.fields.product")} body={(r) => (
-            <span className="product-cell"><span className="product-name">{r.productType}</span>{r.lob && <span className="lob-chip">{r.lob}</span>}</span>
-          )} />
+          <Column field="productType" header={t("placement.fields.product")} body={(r) => <NameChipCell name={r.productType} chip={r.lob} />} />
           <Column field="insuranceCompanyName" header={t("placement.fields.leadInsurer")} body={(r) => (
             <span className="insurer-cell">
               <span>{r.insuranceCompanyName}</span>
@@ -104,7 +103,7 @@ const PlacementList = () => {
             </span>
           )} />
           <Column field="grossPremium" header={t("placement.fields.grossPremium")} body={(r) => formatCurrency(r.grossPremium)} className="num" headerClassName="num" />
-          <Column header={t("placement.fields.period")} body={(r) => <span className="period-cell"><span className="nowrap">{formatDate(r.inceptionDate)}</span> - <span className="nowrap">{formatDate(r.expiryDate)}</span></span>} />
+          <Column header={t("placement.fields.period")} body={(r) => <PeriodCell from={r.inceptionDate} to={r.expiryDate} />} />
           <Column field="source" header={t("placement.fields.source")} body={(r) => t(`placement.source.${r.source}`)} />
           <Column field="status" header={t("placement.fields.status")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("placement.fields.policy")} body={(r) => <span className="nowrap">{r.policyNumber || "-"}</span>} />

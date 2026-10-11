@@ -45,9 +45,28 @@ const referrerSchema = z.object({
   parentReferrerId: z.string().nullable().optional(), userId: z.string().nullable().optional(), tin: z.string().optional(), email: z.string().email().optional().or(z.literal('')),
   phone: z.string().optional(), whtCode: z.string().nullable().optional(), whtApplicable: z.boolean().optional(), bankName: z.string().optional(),
   bankAccountNo: z.string().optional(), status: z.enum(['Active', 'Inactive']).optional(),
+  vendorGroup: z.string().trim().max(60).nullable().optional(), vendorCode: z.string().trim().max(30).nullable().optional(), address: z.string().trim().max(300).nullable().optional(),
+  contactPerson: z.string().trim().max(120).nullable().optional(),
 }).passthrough();
 define({
-  method: 'POST', path: '/referrer-accounts', summary: 'Create a referrer (agent, sub-agent or external)', screen: SCREEN, middleware: [...write, validate(referrerSchema)],
+  method: 'GET', path: '/referrer-accounts/options', summary: 'Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user',
+  screen: `${SCREEN} > Add / Edit payee`, middleware: read,
+  response: { success: true, data: { types: svc.REFERRER_TYPES, levels: ['L1', 'L2'], vendorGroups: ['Agents', 'Dealers'], whtCodes: [{ code: 'WI515', label: 'WI515 · 5%' }], verificationRequired: true } },
+  handler: async (req, res) => ok(res, await svc.referrerOptions(pool)),
+});
+define({
+  method: 'POST', path: '/referrer-accounts/:id/verify', summary: 'Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid',
+  screen: `${SCREEN} > Verify payee`, middleware: [requireAuth, requirePermission('approve:commission'), validate(z.object({ note: z.string().trim().max(500).optional() }).passthrough())],
+  request: { note: 'Bank certificate checked' }, response: { success: true, data: accountExample },
+  handler: async (req, res) => {
+    const before = await withTransaction((db) => svc.verifyReferrer(db, req.params.id, req.user, req.body || {}));
+    await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'verify', before: { verificationStatus: 'pending', changes: before.verification_changes },
+      after: { verificationStatus: 'verified', note: req.body?.note || null } });
+    ok(res, await svc.buildAccount(pool, req.params.id), 'Payee verified');
+  },
+});
+define({
+  method: 'POST', path: '/referrer-accounts', summary: 'Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on', screen: SCREEN, middleware: [...write, validate(referrerSchema)],
   request: { name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '001234564521' }, response: { success: true, data: accountExample },
   handler: async (req, res) => {
     const id = await withTransaction((db) => svc.upsertReferrer(db, null, req.body, req.user));
@@ -61,10 +80,12 @@ define({
   handler: async (req, res) => {
     const before = await svc.getReferrer(pool, req.params.id);
     const b = { name: before.name, type: before.referrer_type, level: before.level, parentReferrerId: before.parent_referrer_id, userId: before.user_id, tin: before.tin, email: before.email, phone: before.phone,
-      whtCode: before.wht_code, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status, ...req.body };
+      whtCode: before.wht_code, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status,
+      vendorGroup: before.vendor_group, vendorCode: before.vendor_code, address: before.address, contactPerson: before.contact_person, ...req.body };
     await withTransaction((db) => svc.upsertReferrer(db, req.params.id, b, req.user));
     await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'update', before, after: req.body });
-    ok(res, await svc.buildAccount(pool, req.params.id), 'Referrer updated');
+    const account = await svc.buildAccount(pool, req.params.id);
+    ok(res, account, account.referrer.verificationStatus === 'pending' ? 'Payee updated; the change awaits verification by a second user' : 'Referrer updated');
   },
 });
 define({

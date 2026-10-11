@@ -276,6 +276,8 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
       coverageDetails: { lossAndDamageCoverage: '1,450,000.00', lossAndDamageCoverageRate: '1.6', bodilyInjury: '100,000.00', propertyDamage: '100,000.00', totalSumInsured: '1,650,000.00' },
       accessories: { aircon: '', stereo: '', magWheels: '', others: '', deductible: '', towing: '', repairLimit: '' },
       orderSummary: { discount: '0.00', commissionDetails: { primary: { referrerId: 'direct' }, chain: [] } },
+      // the FMV below the expiring term's less depreciation is an edit with its reason (migration 0615)
+      fmvRating: { reasonCode: 'FMV-CONDITION' },
     };
     const c = await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send(body);
     expect(c.status).toBe(201);
@@ -371,7 +373,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
   it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion where renewals convert directly)', async () => {
     await query("UPDATE app_settings SET value = 'false' WHERE key = 'placement.journey_applies_to_renewals'");
     clearSettingsCache();
-    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' } });
+    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' }, fmvRating: { reasonCode: 'FMV-CONDITION' } });
     expect(c.status).toBe(201);
     const q = await one('SELECT * FROM quotes WHERE id = $1', [c.body.data.quotationId]);
     expect(q.client_id).toBe('cl_crs_10');

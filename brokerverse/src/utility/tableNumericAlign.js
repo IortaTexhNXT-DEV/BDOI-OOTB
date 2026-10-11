@@ -7,8 +7,13 @@
  *  - "bv-date": most non-empty cells are dates (or date ranges, with or without a time): never wrap;
  *  - "bv-code": most non-empty cells are document numbers or codes (POL-2026-00001), or the heading names a code (a
  *    code made of digits, such as cost centre 900901, is still a code, left-aligned): never wrap;
- *  - "bv-actions": every cell holds only buttons or icons and no text: narrow, at the right, on one line.
- * theme/bdoi/enterprise.scss styles those classes. (A table waiting for its first rows shows skeleton rows:
+ *  - "bv-actions": every cell holds only buttons or icons and no text: narrow, at the right, on one line;
+ *  - "bv-status": every filled cell holds only a status tag: on one line, as narrow as its longest tag;
+ *  - "bv-short": the other columns whose values are all short ("4 days", "Buyer", "v1"): on one line;
+ *  - "bv-text" / "bv-text-wide": columns of names and descriptions get a sensible minimum width, so that a long insurer
+ *    or product name wraps to two lines instead of being squeezed into five by the columns beside it.
+ * A table wider than its card is marked "bv-scrolls" on its wrapper: only then is the pinned actions column set off by
+ * a rule. theme/bdoi/enterprise.scss styles those classes. (A table waiting for its first rows shows skeleton rows:
  * components/DataTable.)
  */
 const NUMERIC = /^[-+(]?\s*(?:[₱$€£¥฿]|PHP|USD|THB|EUR)?\s*-?[\d,]+(?:\.\d+)?\s*%?\)?$/i;
@@ -20,14 +25,23 @@ const CODE = /^[A-Z][A-Z0-9]{0,7}(?:[-/][A-Z0-9]{1,10}){1,4}$/;
 // mobile and landline numbers (09171234567, +639171234567) are text, not amounts
 const PHONE = /^(?:\+?63|0)\d{9,10}$/;
 const MIN_SHARE = 0.6;
+// a column whose values all fit this many characters stays on one line
+const SHORT_TEXT = 16;
+// a column whose values average more than this many characters gets the wide minimum width
+const WIDE_TEXT = 30;
 
-const cellText = (td) => (td.innerText || "").replace(/\s+/g, " ").trim();
+const cellText = (td) => (td.innerText !== undefined ? td.innerText || "" : td.textContent || "").replace(/\s+/g, " ").trim();
 // the placeholder of an empty cell ("—", "-") says nothing about the column: a column of amounts with some empty cells
 // stays a column of amounts
 const PLACEHOLDER = /^[—–-]$/;
 /** A column whose heading names a code ("Cost Centre Code", "Rank Code") holds identifiers, never amounts. */
 export const isCodeHeading = (text) => /\bcode\b/i.test(text || "");
 const onlyControls = (td) => !cellText(td) && !!td.querySelector("button, a, .pi, svg");
+// a cell whose whole text is that of its status tag
+const onlyTag = (td, text) => {
+  const tags = td.querySelectorAll(".p-tag");
+  return tags.length === 1 && cellText(tags[0]) === text;
+};
 
 /** Classify one cell text: "num", "date", "code" or null. */
 export const kindOfText = (text) => {
@@ -39,19 +53,22 @@ export const kindOfText = (text) => {
   return null;
 };
 
-const markTable = (table) => {
+export const markTable = (table) => {
   const rows = table.querySelectorAll(":scope > tbody > tr:not(.p-datatable-emptymessage)");
   if (!rows.length) return;
   const stats = [];
   rows.forEach((tr) => {
     Array.from(tr.children).forEach((td, i) => {
-      stats[i] = stats[i] || { filled: 0, num: 0, date: 0, code: 0, controls: 0, cells: 0 };
+      stats[i] = stats[i] || { filled: 0, num: 0, date: 0, code: 0, controls: 0, cells: 0, tags: 0, longest: 0, chars: 0 };
       const s = stats[i];
       s.cells += 1;
       if (onlyControls(td)) s.controls += 1;
       const text = cellText(td);
       if (!text || PLACEHOLDER.test(text)) return;
       s.filled += 1;
+      s.longest = Math.max(s.longest, text.length);
+      s.chars += text.length;
+      if (onlyTag(td, text)) s.tags += 1;
       const kind = kindOfText(text);
       if (kind) s[kind] += 1;
     });
@@ -64,16 +81,27 @@ const markTable = (table) => {
     const code = !!s && !numeric && !date && s.filled > 0 && (codeHeading || s.code / s.filled >= MIN_SHARE);
     // the last column of buttons only (not a selection checkbox column at the start)
     const actions = !!s && i > 0 && s.filled === 0 && s.controls === s.cells && i === stats.length - 1;
+    const typed = numeric || date || code || actions;
+    const status = !!s && !typed && s.filled > 0 && s.tags === s.filled;
+    const short = !!s && !typed && !status && s.filled > 0 && s.longest <= SHORT_TEXT;
+    const prose = !!s && !typed && !status && !short && s.filled > 0;
+    const wide = prose && s.chars / s.filled > WIDE_TEXT;
     const mark = (el) => {
       if (!el) return;
       el.classList.toggle("bv-num", numeric);
       el.classList.toggle("bv-date", date);
       el.classList.toggle("bv-code", code);
       el.classList.toggle("bv-actions", actions);
+      el.classList.toggle("bv-status", status);
+      el.classList.toggle("bv-short", short);
+      el.classList.toggle("bv-text", prose && !wide);
+      el.classList.toggle("bv-text-wide", wide);
     };
     rows.forEach((tr) => mark(tr.children[i]));
     mark(headCells[i]);
   });
+  const wrapper = table.parentElement;
+  if (wrapper) wrapper.classList.toggle("bv-scrolls", wrapper.scrollWidth > wrapper.clientWidth + 1);
 };
 
 let scheduled = false;

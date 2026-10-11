@@ -1,4 +1,4 @@
-import { isCodeHeading, kindOfText } from "./tableNumericAlign";
+import { isCodeHeading, kindOfText, markTable } from "./tableNumericAlign";
 
 describe("table column classification", () => {
   it("recognises amounts, counts and percentages as numbers", () => {
@@ -34,5 +34,37 @@ describe("table column classification", () => {
     expect(isCodeHeading("Rank Code")).toBe(true);
     expect(isCodeHeading("Amount")).toBe(false);
     expect(isCodeHeading("Encoded By")).toBe(false);
+  });
+});
+
+const buildTable = (heads, rows) => {
+  const wrapper = document.createElement("div");
+  const table = document.createElement("table");
+  table.innerHTML = `<thead><tr>${heads.map((h) => `<th>${h}</th>`).join("")}</tr></thead>`
+    + `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  wrapper.appendChild(table);
+  document.body.appendChild(wrapper);
+  markTable(table);
+  return table;
+};
+const classesOf = (table, column) => Array.from(table.querySelectorAll(`tbody tr td:nth-child(${column + 1})`)).map((td) => td.className);
+
+describe("table column sizing", () => {
+  it("keeps status tags and short values on one line and gives names a minimum width", () => {
+    const table = buildTable(["Slip No.", "Insured", "Insurer", "Age", "Status"], [
+      ["BS-2026-90002", "Mindanao Agri Trading Inc.", "AXA Philippines Life and General Insurance Corporation", "4 days", '<span class="p-tag">Submitted</span>'],
+      ["BS-2026-90001", "Northstar BPO Services Inc.", "Stronghold Insurance Company, Inc.", "10 days", '<span class="p-tag">Closed</span>'],
+    ]);
+    expect(classesOf(table, 0)).toEqual(["bv-code", "bv-code"]);
+    expect(classesOf(table, 1)).toEqual(["bv-text", "bv-text"]);
+    expect(classesOf(table, 2)).toEqual(["bv-text-wide", "bv-text-wide"]);
+    expect(classesOf(table, 3)).toEqual(["bv-short", "bv-short"]);
+    expect(classesOf(table, 4)).toEqual(["bv-status", "bv-status"]);
+    expect(table.querySelector("thead th:nth-child(5)").className).toBe("bv-status");
+  });
+
+  it("does not take a tag with text beside it for a status column", () => {
+    const table = buildTable(["Product"], [['Group Personal Accident <span class="p-tag">ACCIDENT</span>'], ['Motor <span class="p-tag">MOTOR</span>']]);
+    expect(classesOf(table, 0)).toEqual(["bv-text", "bv-text"]);
   });
 });

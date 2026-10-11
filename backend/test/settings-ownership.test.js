@@ -114,6 +114,23 @@ describe('settings owned by another screen', () => {
   });
 });
 
+describe('who saves Master > Configuration', () => {
+  it('a holder of write:settings saves it (IT AppSupport, GAP-PLAT-21); a user without it is refused', async () => {
+    const { default: request } = await import('supertest');
+    for (const [username, role] of [['so.it', 'tis-it-admin'], ['so.sales', 'tis-sales-associate']]) {
+      expect((await ctx.api('post', '/users').send({ username, password: 'Welcome@123', displayName: username, email: `${username}@example.ph`, roles: [role] })).status).toBe(201);
+    }
+    const token = async (username) => (await request(ctx.app).post('/api/auth/login').send({ username, password: 'Welcome@123' })).body.accessToken;
+    const put = async (username, settings) => request(ctx.app).put('/api/settings').set('Authorization', `Bearer ${await token(username)}`).send({ settings });
+    const saved = await put('so.it', { 'limits.bulk_upload_max_rows': 1500 });
+    expect(saved.status).toBe(200);
+    clearSettingsCache();
+    expect(await getSetting('limits.bulk_upload_max_rows')).toBe(1500);
+    expect((await put('so.sales', { 'limits.bulk_upload_max_rows': 10 })).status).toBe(403);
+    expect(await value('limits.bulk_upload_max_rows')).toBe(1500);
+  });
+});
+
 describe('one application name', () => {
   it('general.app_title is deprecated and read-only; a changed title moves to general.system_name (migration 0231)', async () => {
     const appTitle = async () => one('SELECT value, "group", editable FROM app_settings WHERE key = \'general.app_title\'');

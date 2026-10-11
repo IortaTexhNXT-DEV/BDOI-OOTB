@@ -21,7 +21,8 @@ import { hasPermission } from "../../../utils/canOpen";
 import { ExpiryCell, PolicyCell, RenewalHeader, StageChip, useRenewalParam } from "../shared";
 import "./index.scss";
 
-const UPDATE_TYPES = ["Update", "Meeting", "Counter Offer", "Competitor Quote", "Revised Offer"];
+// one action records every contact on a renewal: a call or e-mail already exchanged is the type "Communication"
+const UPDATE_TYPES = ["Update", "Communication", "Meeting", "Counter Offer", "Competitor Quote", "Revised Offer"];
 const METHODS = ["Phone", "Email", "Face-to-face", "Video Call", "SMS"];
 const URGENCY = ["Normal", "High", "Urgent"];
 const SPECIAL_TERMS = ["Extended payment terms", "Waived fees", "Additional coverage", "Multi-year discount", "Bundle discount", "Quarterly payment option", "Auto-debit setup"];
@@ -49,7 +50,6 @@ const NegotiationWorkspace = () => {
   const [update, setUpdate] = useState(null);
   const [updateErrors, setUpdateErrors] = useState({});
   const [approval, setApproval] = useState(null);
-  const [message, setMessage] = useState(null);
   const canApprove = hasPermission("approve:renewals");
 
   const showError = useCallback((e) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message || String(e), life: 5000 }), [t]);
@@ -92,11 +92,6 @@ const NegotiationWorkspace = () => {
     setUpdateErrors({});
     setUpdate({ type: "Update", method: "Phone", description: "", outcome: "", nextAction: "", followUpDate: tomorrow() });
   };
-  const openMessage = (row) => {
-    setTarget(row);
-    setUpdateErrors({});
-    setMessage({ method: "Email", subject: "", message: "", followUpDate: null });
-  };
   const saveUpdate = async () => {
     const errors = {};
     if (!update.description.trim()) errors.description = t("negotiations.required");
@@ -110,26 +105,6 @@ const NegotiationWorkspace = () => {
       });
       setUpdate(null);
       done(t("negotiations.updateSaved"), target.policyNumber);
-      load();
-    } catch (e) {
-      showError(e);
-    } finally {
-      setSaving(false);
-    }
-  };
-  const saveMessage = async () => {
-    if (!message.subject.trim() && !message.message.trim()) {
-      setUpdateErrors({ message: t("negotiations.required") });
-      return;
-    }
-    setSaving(true);
-    try {
-      await renewalsWorkspaceService.addActivity(target.id, {
-        type: "Communication", method: message.method, description: [message.subject.trim(), message.message.trim()].filter(Boolean).join(": "),
-        followUpDate: toIsoDate(message.followUpDate) || undefined,
-      });
-      setMessage(null);
-      done(t("negotiations.messageSaved"), target.policyNumber);
       load();
     } catch (e) {
       showError(e);
@@ -178,7 +153,6 @@ const NegotiationWorkspace = () => {
   /** The actions a negotiation allows in its state; `primary` is the main one. */
   const actionsOf = (row) => [
     { key: "note", label: t("negotiations.addUpdate"), icon: "pi pi-plus", onClick: () => openUpdate(row) },
-    { key: "message", label: t("negotiations.logMessage"), icon: "pi pi-envelope", onClick: () => openMessage(row) },
     { key: "submit", label: t("negotiations.submitForApproval"), icon: "pi pi-send", onClick: () => openApproval(row), hidden: row.statusCode !== "quoted", primary: true },
     { key: "reject", label: t("negotiations.reject"), icon: "pi pi-times", onClick: () => decide(row, "reject"), hidden: row.statusCode !== "pending-approval" || !canApprove, danger: true },
     { key: "approve", label: t("negotiations.approve"), icon: "pi pi-check", onClick: () => decide(row, "approve"), hidden: row.statusCode !== "pending-approval" || !canApprove, primary: true },
@@ -331,41 +305,11 @@ const NegotiationWorkspace = () => {
               <label htmlFor="ng-follow">{t("negotiations.followUp")}</label>
               <Calendar inputId="ng-follow" value={update.followUpDate} onChange={(e) => setUpdate({ ...update, followUpDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" />
             </div>
-          </div>
-        ) : null}
-      </Dialog>
-
-      <Dialog header={t("negotiations.logMessage")} visible={!!message} onHide={() => setMessage(null)} style={{ width: "40rem" }} breakpoints={{ "768px": "95vw" }}
-        footer={(
-          <div>
-            <Button label={t("common.cancel", "Cancel")} text onClick={() => setMessage(null)} />
-            <Button label={t("negotiations.save")} icon="pi pi-check" onClick={saveMessage} loading={saving} />
-          </div>
-        )}>
-        {message ? (
-          <div className="grid">
-            <div className="col-12 md:col-6">
-              <label htmlFor="ng-mmethod">{t("negotiations.channel")}</label>
-              <Dropdown inputId="ng-mmethod" value={message.method} onChange={(e) => setMessage({ ...message, method: e.value })} className="w-full"
-                options={METHODS.map((v) => ({ label: t(`negotiations.methods.${v}`, v), value: v }))} />
-            </div>
-            <div className="col-12 md:col-6">
-              <label htmlFor="ng-mfollow">{t("negotiations.followUp")}</label>
-              <Calendar inputId="ng-mfollow" value={message.followUpDate} onChange={(e) => setMessage({ ...message, followUpDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" />
-            </div>
-            <div className="col-12">
-              <label htmlFor="ng-subject">{t("negotiations.subject")}</label>
-              <InputText id="ng-subject" value={message.subject} onChange={(e) => setMessage({ ...message, subject: e.target.value })} className="w-full" />
-            </div>
-            <div className="col-12">
-              <label htmlFor="ng-message">{t("negotiations.message")}</label>
-              <InputTextarea id="ng-message" value={message.message} onChange={(e) => setMessage({ ...message, message: e.target.value })} rows={4} autoResize className="w-full" />
-              <FieldError error={updateErrors.message} />
-            </div>
             <div className="col-12"><p className="bv-panel-note m-0">{t("negotiations.logHint")}</p></div>
           </div>
         ) : null}
       </Dialog>
+
 
       <Dialog header={t("negotiations.submitForApproval")} visible={!!approval} onHide={() => setApproval(null)} style={{ width: "44rem" }} breakpoints={{ "768px": "95vw" }}
         footer={(

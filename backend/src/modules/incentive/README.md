@@ -63,3 +63,38 @@ who created / submitted / approved / rejected it, approval remarks, rejection re
   `from` / `to` incentive periods, `minAchievement`, `topN`) and a `format` the template lists (PDF or Excel) writes
   the file. A template with `layout: "summary"` (the Monthly Payout Summary, seed 89) totals the paid incentives by
   incentive period, program and branch; the others list the agent lines.
+
+## Telesales incentive (TIS-BRD-COMM-08, FRS COMM-08)
+
+`telesales.js` holds the program type Telesales (migration 0610). A Telesales program keeps its values as versions by
+month in `incentive_program_versions` (Motor products, minimum policies to qualify, withholding tax %, the ANC tier
+table with new-business and renewal amounts, the production-excess table). Save draft keeps the open version; Submit
+for approval raises a change of kind `incentive-program` on Master > Finance > Configuration Approvals, decided with
+`approve:incentive` by a user who neither created, saved nor submitted it (Return sends it back to Draft with the
+remark; Recall withdraws it). The version in force on the first day of a month calculates that month; no version may
+start in a month that already has a batch, and only one Telesales program is in force in a month.
+
+Callers (`incentive_callers`) carry the insurance partner, the Team Leader (who must hold `write:callout-endorsement`)
+and From / To; Disqualify and Reinstate need `approve:incentive` and two different users. Team Leaders endorse the
+prospects of their callers as call-out leads on Lead Assignment (`../leads/callout.js`, `callout_endorsements`).
+
+`syncTelesalesPolicies()` (the daily job, every calculation and My Programs) links a Motor policy to the caller who
+owned its prospect on the quotation date when the prospect was endorsed for that caller before the quotation and
+within `incentive.telesales.callout_validity_days`, with the caller's insurance partner
+(`incentive.telesales.same_insurer_only`); it dates the full payment and the commission settlement (approved remittance
+or settled direct-bill statement) and, once both are reached, stores the eligible date and the net commission
+(commission less referrer / agent shares). A policy whose eligible month already has a batch counts in the month of
+the sync.
+
+`calculateTelesales()` writes one batch per program and month (`program_kind = 'telesales'`): one line per caller
+active in the month with counted policies (NB / renewal), ANC, level, base, additional (`incentive.telesales.excess_method`),
+recovery of policies paid out and then cancelled or refunded, adjustments, gross, withholding tax and total, and the
+result (Qualified, Not qualified, Below level 1, Disqualified, Recovery outstanding); every policy considered goes to
+`incentive_batch_policies` with its status. A negative gross is carried to the next batch. Exclude / Include again
+(reason context `incentive_exclude`) and Recalculate keep exclusions and adjustments. Approval posts
+`incentive.accrual` version 2: Dr expense (gross) / Cr incentives payable (total) / Cr WHT payable (tax). The job
+`telesales-incentive-calc` runs daily at 06:00 and calculates the previous month on `incentive.telesales.run_day`.
+
+Settings: `incentive.telesales.excess_method` (banded), `run_day` (5), `callout_validity_days` (90),
+`same_insurer_only` (true), `default_min_policies` (15), `default_wht_pct` (5), `eligible_lines` (["motor"]),
+`default_tiers`, `default_bands` (the approved program values; renewal amounts illustrative until TISPH confirms them).

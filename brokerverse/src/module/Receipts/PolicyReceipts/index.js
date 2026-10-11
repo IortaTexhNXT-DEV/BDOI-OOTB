@@ -165,44 +165,6 @@ const PolicyReceipts = () => {
     },
   };
 
-  const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle1 = {
-    width: "10%",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle2 = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-  const headerStyle3 = {
-    width: "8%",
-
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
-
   const home = { label: t("sidebar.Accounts") };
 
   const navigate = useNavigate();
@@ -731,14 +693,6 @@ const PolicyReceipts = () => {
                   ? convertedFilteredReceipts
                   : safeReceiptsList
               }
-              tableStyle={{
-                minWidth: "50rem",
-                color: "var(--text-color)",
-                maxHeight: "50vh",
-                overflowy: "auto",
-              }}
-              scrollable={true}
-              scrollHeight="40vh"
               rowClassName={(row) => (recorded && row.receiptNumber === recorded.receiptNumber ? "receipt-row--recorded" : "")}
               paginator
               lazy
@@ -756,34 +710,29 @@ const PolicyReceipts = () => {
                 sortable
                 field="receiptNumber"
                 header={t("accounts.receipts.receiptNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 field="transactionCode"
                 header={t("accounts.transactionCode")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="transactionNumber"
                 header={t("accounts.transactionNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="policyNumber"
                 header={t("accounts.receipts.policyNumber")}
-                headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 sortable
                 field="name"
                 header={t("common.name")}
-                headerStyle={headerStyle1}
                 className="fieldvalue_container receipts_name_cell"
                 body={(rowData) => rowData.name}
               ></Column>
@@ -791,27 +740,23 @@ const PolicyReceipts = () => {
                 sortable
                 field="customerCode"
                 header={t("accounts.receipts.searchCustomerCode")}
-                headerStyle={headerStyle2}
                 className="fieldvalue_container"
               ></Column>
               <Column body={(row) => formatAppDate(row.date)}
                 sortable
                 field="date"
                 header={t("common.date")}
-                headerStyle={headerStyle1}
                 className="fieldvalue_container"
               ></Column>
               <Column
                 field="amount"
                 header={t("accounts.receipts.amount")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => formatCurrency(rowData.amount ?? 0)}
               ></Column>
               <Column
                 field="totalPaid"
                 header={t("accounts.paid")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const paymentsList = rowData.receiptsList || [];
@@ -857,7 +802,6 @@ const PolicyReceipts = () => {
               <Column
                 field="totalUnpaid"
                 header={t("accounts.unpaid")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   // Calculate total unpaid from receiptsList
@@ -872,7 +816,6 @@ const PolicyReceipts = () => {
               <Column
                 field="receiptStatus"
                 header={t("common.status")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const status = rowData.receiptStatus || "Draft";
@@ -888,7 +831,6 @@ const PolicyReceipts = () => {
               <Column
                 field="paymentCount"
                 header={t("accounts.receipts.payments")}
-                headerStyle={headerStyle3}
                 className="fieldvalue_container"
                 body={(rowData) => {
                   const count = rowData.receiptsList?.length || 0;

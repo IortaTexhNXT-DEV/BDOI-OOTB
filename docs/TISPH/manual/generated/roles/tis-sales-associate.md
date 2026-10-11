@@ -14,6 +14,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | Create and edit |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
 | Operations > Sales & Marketing | Promotions | View |
+| Operations > Sales & Marketing | Scheme Master | View |
+| Operations > Sales & Marketing | Scheme Issuance | View |
 | Operations | Clients | Create and edit |
 | Operations | Policy | Create and edit |
 | Operations | Fleet Schedules | Create and edit |
@@ -23,7 +25,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Batch | Create and edit |
 | Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
-| Operations > Renewals | Lock-in Accounts | Create and edit |
+| Operations > Renewals | Lock-in Review | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations | Payments | Create and edit |
@@ -66,6 +68,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
+| Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | No screen of its own |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Sales & Marketing | Sales activities | Create and edit | Log, change and cancel calls, meetings, e-mails and visits |  |
@@ -75,10 +79,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Lock-in Accounts, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
+| Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
+| Operations | Lock-in review and TFS loan status | Create and edit | Record lock-in review decisions and request lock-in changes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -109,6 +115,7 @@ Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
+| Lock-in review and TFS loan status | Approve or return Release, Not for renewal and lock-in changes (never one you requested) | TIS Sales Unit Head or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |

@@ -13,11 +13,13 @@ import { getSetting } from '../../lib/settings.js';
 import { sendSheet } from '../claims/docs.js';
 import { SYSTEM_ENVIRONMENT_KEY } from '../../lib/environment.js';
 import * as svc from './service.js';
+import { TENANT_ENABLE, isTenantEnabler, requireTenantEnabler, tenantPolicy } from './tenant.js';
 
 const { router, define } = moduleRouter('Features and Releases', '/features');
 const platform = moduleRouter('Platform Administration', '/platform');
 const reader = [requireAuth, requirePermission('read:features')];
 const vendor = [requireAuth, requirePlatformAdmin];
+const enabler = [requireAuth, requireTenantEnabler];
 const SCREEN = 'Master > System Configuration > Features & Releases';
 const VENDOR_SCREEN = 'Master > Platform > Features & Releases';
 
@@ -54,11 +56,74 @@ define({
   },
 });
 
-// ------------------------------------------------------------------ platform administrator (vendor)
 const changeSchema = z.object({
   action: z.enum(['enable', 'disable']), features: z.array(z.string()).optional(), tier: z.enum(['PHASE_2', 'FUTURE']).optional(),
   reasonCode: z.string().optional(), note: z.string().optional(), releaseRef: z.string().optional(), effective: z.enum(['immediate', 'scheduled']).optional(), effectiveAt: z.string().optional(),
 });
+const decisionSchema = z.object({ decision: z.enum(['approve', 'reject']), remarks: z.string().optional(), reasonCode: z.string().optional(), note: z.string().optional() });
+const decisionWord = (body, change) => (body.decision === 'reject' ? 'rejected' : change.status === 'scheduled' ? 'approved; it applies on its effective date' : 'approved and applied');
+
+// ------------------------------------------------------------------ enablers of the tenant (Phase 2, tenant.js)
+define({
+  method: 'GET', path: '/enabling', summary: 'Whether the signed-in user enables Phase 2 for TISPH, with the policy in force (roles, tiers, approval: four-eyes or single)',
+  screen: SCREEN, middleware: reader, response: { success: true, data: { canEnable: true, permission: TENANT_ENABLE, roles: ['tis-superid'], tiers: ['PHASE_2'], approval: 'four-eyes' } },
+  handler: async (req, res) => {
+    const policy = await tenantPolicy();
+    ok(res, { canEnable: policy.tiers.length > 0 && isTenantEnabler(req.user, policy), permission: TENANT_ENABLE, roles: policy.roles, tiers: policy.tiers,
+      approval: policy.approval, configuredApproval: policy.configuredApproval });
+  },
+});
+define({
+  method: 'POST', path: '/preview', summary: 'Impact of enabling or disabling Phase 2 features (or the Phase 2 bundle) for TISPH: dependencies, menus, roles that gain access, jobs, connectors, settings, read-only features; a plan that reaches a future release is refused',
+  screen: `${SCREEN} > Enable / Disable`, middleware: [...enabler, validate(changeSchema)],
+  request: { action: 'enable', tier: 'PHASE_2' }, response: { success: true, data: { action: 'enable', features: [{ key: 'payables', from: 'off', to: 'on' }], menus: [], roles: [] } },
+  handler: async (req, res) => {
+    const p = await svc.preview(req.body);
+    svc.assertTenantPreview(req.body, p, req.tenantPolicy);
+    ok(res, p);
+  },
+});
+define({
+  method: 'GET', path: '/changes', summary: 'Feature change requests of the environment (of TISPH and of the platform administrator), newest first',
+  screen: `${SCREEN} > Changes`, middleware: enabler, query: { status: 'pending' },
+  handler: async (req, res) => ok(res, await svc.listChanges({ status: req.query.status })),
+});
+define({
+  method: 'POST', path: '/changes', summary: 'Request the enabling or disabling of Phase 2 features for TISPH (maker): reason, contract or change request reference, effective date; approved by a second enabler or a platform administrator (features.tenant_enable_approval)',
+  screen: `${SCREEN} > Enable / Disable`, middleware: [...enabler, validate(changeSchema)],
+  request: { action: 'enable', tier: 'PHASE_2', reasonCode: 'FTR-CONTRACT', releaseRef: 'TISPH-FT-D01', effective: 'immediate' },
+  response: { success: true, data: { change: { id: 1, ref: 'FCR-00001', status: 'pending', channel: 'tenant' } } },
+  handler: async (req, res) => {
+    const r = await svc.requestChange(req.body, req.user, { channel: 'tenant', policy: req.tenantPolicy });
+    await audit(req, { entity: 'feature_change', entityId: r.change.id, action: 'request', after: r.change });
+    if (r.change.approval === 'single') {
+      await audit(req, { entity: 'feature_change', entityId: r.change.id, action: 'approve', after: r.change });
+      return created(res, r, `Change ${r.change.ref} ${decisionWord({ decision: 'approve' }, r.change)} (single approval)`);
+    }
+    return created(res, r, `Change ${r.change.ref} waits for approval by another enabler or a platform administrator`);
+  },
+});
+define({
+  method: 'POST', path: '/changes/:id/decision', summary: 'Approve or reject a change of TISPH (checker: another enabler, never the requester); an immediate change applies at once, a scheduled one on its date',
+  screen: `${SCREEN} > Changes > Approve / Reject`, middleware: [...enabler, validate(decisionSchema)],
+  request: { decision: 'approve', remarks: 'Checked' }, response: { success: true, data: { change: { id: 1, status: 'applied' }, applied: [{ key: 'payables', from: 'off', to: 'on' }] } },
+  handler: async (req, res) => {
+    const r = await svc.decideChange(req.params.id, req.body, req.user, { channel: 'tenant', policy: req.tenantPolicy });
+    await audit(req, { entity: 'feature_change', entityId: r.change.id, action: req.body.decision === 'approve' ? 'approve' : 'reject', after: r.change });
+    ok(res, r, `Change ${r.change.ref} ${decisionWord(req.body, r.change)}`);
+  },
+});
+define({
+  method: 'POST', path: '/changes/:id/withdraw', summary: 'Withdraw a change of TISPH waiting for approval (requester) or cancel a scheduled one',
+  screen: `${SCREEN} > Changes > Withdraw`, middleware: enabler, response: { success: true, data: { id: 1, status: 'withdrawn' } },
+  handler: async (req, res) => {
+    const c = await svc.withdrawChange(req.params.id, req.user, { channel: 'tenant' });
+    await audit(req, { entity: 'feature_change', entityId: c.id, action: 'withdraw', after: c });
+    ok(res, c, `Change ${c.ref} withdrawn`);
+  },
+});
+
+// ------------------------------------------------------------------ platform administrator (vendor)
 
 platform.define({
   method: 'GET', path: '/features', summary: 'Every feature with its state and what it controls (menus, API, jobs, connectors, settings, sections, documents)',
@@ -89,13 +154,12 @@ platform.define({
 });
 platform.define({
   method: 'POST', path: '/features/changes/:id/decision', summary: 'Approve or reject a change (checker, never the requester); an immediate change applies at once, a scheduled one on its date',
-  screen: `${VENDOR_SCREEN} > Changes > Approve / Reject`, middleware: [...vendor, validate(z.object({ decision: z.enum(['approve', 'reject']), remarks: z.string().optional(), reasonCode: z.string().optional(), note: z.string().optional() }))],
+  screen: `${VENDOR_SCREEN} > Changes > Approve / Reject`, middleware: [...vendor, validate(decisionSchema)],
   request: { decision: 'approve', remarks: 'Checked against CR-2027-004' }, response: { success: true, data: { change: { id: 1, status: 'applied' }, applied: [{ key: 'payables', from: 'off', to: 'on' }] } },
   handler: async (req, res) => {
     const r = await svc.decideChange(req.params.id, req.body, req.user);
     await audit(req, { entity: 'feature_change', entityId: r.change.id, action: req.body.decision === 'approve' ? 'approve' : 'reject', after: r.change });
-    const word = req.body.decision === 'reject' ? 'rejected' : r.change.status === 'scheduled' ? 'approved; it applies on its effective date' : 'approved and applied';
-    ok(res, r, `Change ${r.change.ref} ${word}`);
+    ok(res, r, `Change ${r.change.ref} ${decisionWord(req.body, r.change)}`);
   },
 });
 platform.define({

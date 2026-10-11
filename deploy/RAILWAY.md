@@ -1,23 +1,33 @@
-# Deploying BrokerVerse on Railway
+# TISPH DEV on Railway
 
-Railway builds straight from the connected GitHub repository (`IortaTexhNXT-DEV/BDOI-OOTB`). One Railway project
-holds three services: PostgreSQL, the API (`backend/`) and the web app (`brokerverse/`). Railway no longer reads
-`railway.json` files, so the build and health check settings below are entered on each service.
+The TISPH DEV environment runs on Railway until the Azure DEV environment is provisioned ([AZURE.md](AZURE.md); the
+Azure workflow `azure-deploy.yml` skips its build while the repository variable `ACR_NAME` is unset). The Railway
+project `tisph-dev` holds three services: PostgreSQL, the API (`api`, folder `backend/`) and the web app (`web`, folder
+`brokerverse/`). Railway builds them straight from the connected GitHub repository (`IortaTexhNXT-DEV/BDOI-OOTB`):
+**every push to `TISPH-DEV` redeploys `api` and `web` automatically**. No GitHub Actions workflow is involved; the
+product's own pipeline (`deploy.yml`, [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)) does not deploy TISPH.
 
-Do the steps in order. Put secrets only in Railway's variables, never in the repository.
+| Environment | Where it runs |
+|---|---|
+| DEV | Railway, project `tisph-dev` (this runbook) |
+| SIT, UAT | Microsoft Azure ([AZURE.md](AZURE.md)) or another environment TISPH approves, set up only after TISPH confirms. UAT builds are not deployed before that confirmation |
+| PROD | Microsoft Azure ([AZURE.md](AZURE.md)) |
+
+Railway no longer reads `railway.json` files, so the build and health check settings below are entered on each
+service. The steps describe how the project was set up and how to rebuild it. Put secrets only in Railway's
+variables, never in the repository.
 
 ## 1. Project and database
 
-1. In Railway, open the project (or create one) and choose **New > Database > PostgreSQL**.
-2. When the database is up, open it, go to **Data > Query** (or connect with `psql`) and run once:
-
-   Nothing else is needed on the database. The API sets Manila time on its own connections through the
-   `options` part of `DATABASE_URL` (step 2), which reports, cut-off times and scheduled jobs rely on.
+1. In Railway, open the project `tisph-dev` (or create it) and choose **New > Database > PostgreSQL**.
+2. Nothing has to be run on the database: the API creates its tables at start, and sets Manila time on its own
+   connections through the `options` part of `DATABASE_URL` (section 2), which reports, cut-off times and scheduled
+   jobs rely on.
 
 ## 2. API service (backend)
 
 1. **New > GitHub Repo >** `IortaTexhNXT-DEV/BDOI-OOTB`. Rename the service to `api`.
-2. **Settings > Source:** branch `brokerverse-platform`, **Root Directory** `/backend`.
+2. **Settings > Source:** branch `TISPH-DEV`, **Root Directory** `/backend`, automatic deployments on.
 3. **Settings > Build:** Dockerfile path `Dockerfile`. **Settings > Deploy:** healthcheck path `/api/health`,
    healthcheck timeout `300`, restart policy "On failure" (5 retries). The health check answers only after the
    migrations have run.
@@ -41,6 +51,8 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
    SCHEDULER_ENABLED=true
    LOG_LEVEL=info
    RAILWAY_RUN_UID=0
+   BRAND_PACK=toyota-insurance-services
+   APP_ENVIRONMENT=DEV
    ```
 
    - Generate each secret with `openssl rand -hex 32`. Keep `DATA_ENCRYPTION_KEY` safe with the database backups:
@@ -49,17 +61,20 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
    - `CORS_ORIGINS` and `PUBLIC_BASE_URL` are filled in after step 4 gives the addresses. Write several web addresses
      separated by commas (for example the Railway address and the BrokerVerse URL).
    - In the SMTP address, write the `@` of the user name as `%40` and URL-encode special characters of the password.
-   - A TISPH environment adds `BRAND_PACK=toyota-insurance-services`: the API enforces the Toyota Insurance Services
-     brand pack, enabling it at its first start and applying it again at any later start when the screens differ from
+   - `BRAND_PACK=toyota-insurance-services`: the API enforces the Toyota Insurance Services brand pack, enabling it at its first start and applying it again at any later start when the screens differ from
      it (deploy/REFERENCE.md, "Brand pack of the deployment"). Redeploy or restart the API to bring back a branding that
      was changed: the start-up log names what differed.
+   - `APP_ENVIRONMENT=DEV` is the environment Help > About and `GET /api/version` report.
+   - Optional: `TISPH_TEST_USERS_PASSWORD=<initial password>` makes the seed create one test user per TISPH role (names in
+     `backend/src/db/seeds/README.md`), each to change the password at the first sign-in (deploy/REFERENCE.md). Never
+     set it in production.
 6. **Settings > Networking > Generate Domain** (target port 8000). Note the address, e.g.
    `https://api-production-xxxx.up.railway.app`.
 
 ## 3. Web service (front end)
 
 1. **New > GitHub Repo >** the same repository again. Rename the service to `web`.
-2. **Settings > Source:** branch `brokerverse-platform`, **Root Directory** `/brokerverse`.
+2. **Settings > Source:** branch `TISPH-DEV`, **Root Directory** `/brokerverse`, automatic deployments on.
 3. **Settings > Build:** Dockerfile path `Dockerfile.railway` (React build, then nginx on Railway's port with the
    single-page fallback). **Settings > Deploy:** healthcheck path `/`, timeout `120`, restart policy "On failure".
 4. **Variables:**
@@ -67,10 +82,10 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
    ```
    PORT=8080
    API_UPSTREAM=http://api.railway.internal:8000
-   ENVIRONMENT_NAME=UAT
+   ENVIRONMENT_NAME=DEV
    ```
 
-   - The build holds no address: the same image serves every Railway environment. When the container starts it writes
+   - The build holds no address: the same image serves every environment. When the container starts it writes
      `/env-config.js` and forwards `/api` to `API_UPSTREAM` over Railway's private network, so the browser calls the
      API on the web address itself (no CORS, no public API domain needed). `api` is the API service's name; `8000`
      its `PORT`.
@@ -88,28 +103,28 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
 1. On `api`, set `CORS_ORIGINS` to the web address and `PUBLIC_BASE_URL` to the address the browser uses for the API:
    the web address when `web` forwards `/api` (`API_UPSTREAM`), else the API's own address. Railway redeploys.
 2. Open the web address, sign in as `BrokerVerse` with the `ADMIN_PASSWORD`, and change the password when asked.
-3. Continue with the smoke tests and go-live data in [README.md](README.md) sections 4 and 6.
+3. Check the deployment with the smoke test:
+   `APP_URL=https://<web address> EXPECTED_SHA=<commit> ENVIRONMENT_NAME=DEV deploy/smoke-test.sh`.
+4. Business set-up (company, users, insurers, products, accounts) follows
+   [docs/onboarding/GO_LIVE_DATA_SETUP.md](../docs/onboarding/GO_LIVE_DATA_SETUP.md).
 
-## 5. The existing BrokerVerse URL
+## 5. Custom domain
 
-To serve BrokerVerse on the existing address (for example `brokerverse-dev.inxtuniverse.com`):
+A custom address for DEV (if TISPH wants one) is set on `web` under **Settings > Networking > Custom Domain**, with
+the CNAME record Railway shows. Then add the address to `CORS_ORIGINS` on `api` and update `PUBLIC_BASE_URL`; with
+`API_UPSTREAM` nothing changes on `web`.
 
-1. On `web`, **Settings > Networking > Custom Domain**, enter the address and create the CNAME record Railway shows at
-   your DNS provider. Remove the old record that points to CloudFront.
-2. Optionally give `api` its own custom domain the same way (for example `brokerverse-api-dev.inxtuniverse.com`).
-3. Update the variables: `CORS_ORIGINS` on `api` (add the custom web address) and `PUBLIC_BASE_URL` on `api`; with
-   `API_UPSTREAM` nothing changes on `web`. With `API_BASE_URL` on `web`, set the new API address and restart `web`
-   (no rebuild).
-
-## Loading UAT data
+## Loading synthetic test data (optional)
 
 `backend/scripts/uat-scenario.js` loads six months of synthetic broking business (personas, insurers, retail and
 corporate clients, placements, billing, claims, renewals, remittances, reconciliations, month-end closes) through the
-public API of a running `api` service. It needs nothing but Node, so it runs as a one-off service built from the same
-repository; no Dockerfile is added. Run it once, on a UAT environment only, never on production data.
+public API of a running `api` service. Its personas hold the product's broker roles, not the TISPH roles, so the data
+set serves demonstrations and volume, not TISPH acceptance evidence. It needs nothing but Node, so it runs as a
+one-off service built from the same repository; no Dockerfile is added. Run it once, on a non-production
+environment only, never on production data.
 
 1. **New > GitHub Repo >** the same repository. Rename the service to `uat-loader`.
-2. **Settings > Source:** branch `brokerverse-platform`, **Root Directory** `/backend` (the same folder as `api`; its
+2. **Settings > Source:** branch `TISPH-DEV`, **Root Directory** `/backend` (the same folder as `api`; its
    build is reused and the script is part of it).
 3. **Settings > Deploy:**
    - **Custom Start Command:** `node scripts/uat-scenario.js`
@@ -153,8 +168,9 @@ repository; no Dockerfile is added. Run it once, on a UAT environment only, neve
 | The environment label (UAT, SIT...) is missing or wrong | `ENVIRONMENT_NAME` on `web`; restart `web`. A browser keeping an old `/env-config.js` is excluded: it is sent with `no-store`. |
 | Refreshing a page other than the home page gives 404 | The `web` service is not using `Dockerfile.railway`, whose nginx serves `index.html` for every address. |
 
-Releases, promotion between Railway environments and rollback follow [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)
-(section 13 for Railway). Railway runs one `api` instance. The scheduler and migrations are safe with more, but documents are on the volume,
+Every push to `TISPH-DEV` is a DEV release. To go back, open the service's **Deployments**, choose an earlier
+deployment and **Redeploy**; migrations only add (expand, then contract: [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)
+section 8), so an earlier API keeps working on the newer database. Railway runs one `api` instance. The scheduler and migrations are safe with more, but documents are on the volume,
 which Railway attaches to one instance only.
 
 ## Deploys paused

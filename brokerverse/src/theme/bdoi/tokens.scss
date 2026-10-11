@@ -38,6 +38,10 @@ $color-danger-050: #f7f4f3;
 $color-warning: #8a5a00;
 $color-warning-050: #fdf8ec;
 $color-success-050: #eff7f2;
+// open work moving normally (submitted, sent, in progress): a quiet blue of its own, so that a brand whose primary is
+// black or grey still tells an open record from a closed one
+$color-info: #1f4f8f;
+$color-info-050: #edf3fb;
 
 // Typography: Nunito, Arial as the approved fallback (a theme may choose another font of the safe list)
 $font-heading: var(--bv-font-family, "Nunito", Arial, sans-serif);

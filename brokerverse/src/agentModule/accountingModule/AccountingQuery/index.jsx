@@ -13,6 +13,7 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
+import PageHeader from "../../../components/PageHeader";
 import "./index.scss";
 import logger from "../../../utility/logger";
 
@@ -319,10 +320,7 @@ const AccountingQuery = () => {
     <div className="accounting-query">
       <Toast ref={toast} />
 
-      {/* Header */}
-      <div className="page-header">
-        <h1>{t("accounting.entriesQuery")}</h1>
-      </div>
+      <PageHeader home={t("sidebar.Accounts", "Accounts")} title={t("accounting.entriesQuery")} />
 
       {/* Search Form */}
       <Card className="search-card">

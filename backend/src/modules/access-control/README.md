@@ -45,6 +45,11 @@ module features) are not the tenant's: the role is not listed on the access scre
 catalogue, a change of a role's access or the Role form that grants it is refused, and the administrator role does not
 hold it.
 
+The tenant's permission `enable:phase2-features` (migration 0597, `modules/features/tenant.js`) is a normal catalogue
+entry (Features and releases, Special), granted to SUPERID; it enables Phase 2 only together with a role of the setting
+`features.tenant_enable_roles`, so the administrator role, which holds every tenant permission, does not enable Phase 2
+by itself.
+
 ## Role directory
 
 `roleDirectory(db)` reads the settings that also group the roles of the user form and the Role list (migration 0362;

@@ -61,6 +61,8 @@ export async function computeBasis(db, p, { details = null } = {}) {
   const netPremium = round2(num(p.net_premium) || num(det.netPremium) || num(doc.netPremium));
   const date = isoDate(p.inception_date) || (await today());
   const businessType = p.renewed_from ? 'RENEW' : 'NEW';
+  // a scheme policy carries its own commission (Scheme Master, FR-SCM-030, 031): the register is not read
+  if (doc.scheme?.schemeNo) return schemeBasis(db, doc.scheme, { netPremium, date, businessType });
   const referrer = await referrerOf(db, det);
   const channelType = channelTypeOf({ channelType: p.channel_type, referrerId: referrer?.id || null });
   const line = p.lob || p.product_line;
@@ -167,6 +169,35 @@ export async function computeBasis(db, p, { details = null } = {}) {
   return basis;
 }
 
+/**
+ * Commission basis of a policy issued on a dealer scheme (TIS-BRD-SCHM-02 FR-SCM-030, 031): the commission is the NET
+ * Premium x the Commission % kept on the policy (not the Commission Rate Matrix, the insurer rate or the rules
+ * register); the dealer share is the commission x the Dealer commission %, paid to the referrer account of the dealer
+ * branch of the loan, else of its dealer group. A dealer without a referrer account keeps its share held (warning)
+ * until Accounting sets the account up; TISPH keeps the rest.
+ */
+async function schemeBasis(db, s, { netPremium, date, businessType }) {
+  const pct = num(s.commissionPct);
+  const gross = round2((netPremium * pct) / 100);
+  const dealerPct = num(s.dealerCommissionPct);
+  const dealer = round2((gross * dealerPct) / 100);
+  const ch = s.dealerChannelId ? (await db.query(`SELECT c.name, c.referrer_id, r.name AS referrer_name, pc.referrer_id AS parent_referrer_id, pr.name AS parent_referrer_name
+    FROM distribution_channels c LEFT JOIN commission_referrers r ON r.id = c.referrer_id LEFT JOIN distribution_channels pc ON pc.id = c.parent_id
+    LEFT JOIN commission_referrers pr ON pr.id = pc.referrer_id WHERE c.id = $1`, [s.dealerChannelId])).rows[0] : null;
+  const referrerId = ch?.referrer_id || ch?.parent_referrer_id || null;
+  const warnings = [];
+  if (dealer > 0 && !referrerId) warnings.push(`${ch?.name || 'The dealer'} has no referrer account; the dealer share of ${dealer.toFixed(2)} is held`);
+  const shares = dealer > 0 ? [{ lineNo: 1, paidTo: 'dealer', referrerId, channelId: s.dealerChannelId || null, name: (ch?.referrer_id ? ch.referrer_name : ch?.parent_referrer_name) || ch?.name || 'Dealer',
+    basis: 'commission-pct', perils: [], value: dealerPct, min: 0, max: dealerPct, perilValues: null, amount: dealer, held: !referrerId,
+    note: `Dealer share, scheme ${s.schemeNo} v${s.version}` }] : [];
+  return { computedAt: new Date().toISOString(), date, businessType, channelType: 'dealer', motorType: null, netPremium, ruleId: null, ruleVersion: null, ruleLevel: 'scheme',
+    source: 'scheme', sourceLabel: `scheme ${s.schemeNo} v${s.version}`, rateBasis: 'scheme', rate: pct4(pct),
+    perils: [{ code: 'ALL', name: 'Net premium', basis: 'premium-pct', sumInsured: null, premium: netPremium, commissionPct: pct4(pct), insurerRemitting: round2(netPremium - gross), commission: gross, varianceShare: 0 }],
+    insurerRemitting: round2(netPremium - gross), grossCommission: gross, varianceShare: 0, shares, sharedTotal: dealer, retained: round2(gross - dealer),
+    scheme: { id: s.schemeId || null, code: s.schemeNo, name: `scheme ${s.schemeNo} v${s.version}`, version: s.version, source: 'scheme', override: null, payWhenFullyPaid: false },
+    status: 'ok', warnings, referrer: null };
+}
+
 /** The amounts of a scheme's split lines on a basis (FR-CMR-011): one share per line with a payee. */
 export function schemeShares(scheme, override, basis, { referrer, channelId }) {
   const out = [];
@@ -207,7 +238,7 @@ export function schemeShares(scheme, override, basis, { referrer, channelId }) {
 /** Store the basis on the policy and, when it comes from a per-peril rule, the policy's commission amount. */
 export async function storeBasis(db, policyId, basis, { updateCommission = true } = {}) {
   await db.query("UPDATE policies SET details = COALESCE(details, '{}'::jsonb) || jsonb_build_object('commissionBasis', $2::jsonb), updated_at = now() WHERE id = $1", [policyId, JSON.stringify(basis)]);
-  if (updateCommission && basis.rateBasis === 'issuing-remitting' && basis.status === 'ok') {
+  if (updateCommission && ['issuing-remitting', 'scheme'].includes(basis.rateBasis) && basis.status === 'ok') {
     await db.query('UPDATE policies SET commission_amount = $2 WHERE id = $1', [policyId, basis.grossCommission]);
   }
 }
@@ -248,7 +279,7 @@ export async function recomputeBasis(policyId, user) {
     await storeBasis(db, p.id, basis);
     // the draft remittance lines of the policy follow the new commission
     await db.query(`UPDATE remittance_lines rl SET commission = $2, net = round(rl.premium - $2 - rl.tax, 2) FROM remittances r
-      WHERE r.id = rl.remittance_id AND rl.policy_id = $1 AND r.kind = 'direct-bill' AND r.status IN ('draft', 'rejected') AND $3::boolean`, [p.id, basis.grossCommission, basis.status === 'ok' && basis.rateBasis === 'issuing-remitting']);
+      WHERE r.id = rl.remittance_id AND rl.policy_id = $1 AND r.kind = 'direct-bill' AND r.status IN ('draft', 'rejected') AND $3::boolean`, [p.id, basis.grossCommission, basis.status === 'ok' && ['issuing-remitting', 'scheme'].includes(basis.rateBasis)]);
     const { syncShareLines } = await import('./service.js');
     await syncShareLines(db, p.id, basis, user);
     const from = round2(before?.grossCommission ?? num(p.commission_amount));

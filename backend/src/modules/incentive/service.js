@@ -16,6 +16,7 @@ import { getLetterhead } from '../../lib/letterhead.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { renderReportPdf } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
+import * as tsi from './telesales.js';
 
 const need = (b, fields) => {
   const errors = fields.filter((f) => b[f] === undefined || b[f] === null || (typeof b[f] === 'string' && !b[f].trim()) || (Array.isArray(b[f]) && !b[f].length))
@@ -40,7 +41,7 @@ const PROGRAM_SELECT = `SELECT p.*, (SELECT display_name FROM users u WHERE u.id
 export async function listPrograms(qs = {}) {
   const rows = await many(`${PROGRAM_SELECT} WHERE p.status <> 'Deleted' AND ($1::text IS NULL OR p.status = $1) AND ($2::text IS NULL OR p.name ILIKE $2 OR p.program_code ILIKE $2)
                            ORDER BY p.period_from DESC, p.id`, [qs.status || null, qs.search ? `%${qs.search}%` : null]);
-  return rows.map(programOut);
+  return tsi.decoratePrograms(rows.map(programOut));
 }
 
 async function programRow(id) {
@@ -121,6 +122,8 @@ async function programValues(b, before) {
 }
 
 export async function createProgram(b, user) {
+  // a Telesales program has its own fields, versions and callers (telesales.js, FR-TSI-001)
+  if (b.programType === tsi.TELESALES) return tsi.createTelesalesProgram(b, user);
   need(b, ['programName', 'applicableTo', 'startDate', 'endDate', 'targetMetric', 'calculationFrequency', 'baseTarget']);
   const code = b.programCode ? String(b.programCode).trim() : await nextDocumentNumber('incentive_program');
   if (await one('SELECT 1 FROM incentive_programs WHERE lower(program_code) = lower($1)', [code])) throw conflict(`Program code ${code} already exists`);
@@ -133,6 +136,12 @@ export async function createProgram(b, user) {
 
 export async function updateProgram(id, b, user) {
   const before = await programRow(id);
+  if (before.program_type === tsi.TELESALES) {
+    // the Active toggle of the list; every other change is a new version (Save draft, Submit for approval)
+    if (b.status && Object.keys(b).filter((k) => k !== 'status').length === 0) return tsi.setTelesalesStatus(before.id, b.status, user);
+    const r = await tsi.saveTelesalesDraft(before.id, b, user);
+    return { before: r.before, after: await tsi.getTelesalesProgram(before.id) };
+  }
   if (b.programCode && b.programCode !== before.program_code && await one('SELECT 1 FROM incentive_programs WHERE lower(program_code) = lower($1) AND id <> $2', [b.programCode, before.id])) {
     throw conflict(`Program code ${b.programCode} already exists`);
   }
@@ -341,7 +350,7 @@ async function calcOut(c, withDetails = true) {
       FROM incentive_results r JOIN users u ON u.id = r.agent_user_id JOIN incentive_programs p ON p.id = r.program_id WHERE r.calculation_id = $1 ORDER BY u.display_name, p.name`, [c.batch_id]))
     .map((r) => ({ id: Number(r.id), agentId: r.agent_user_id, agentName: r.display_name, agentCode: r.code, programId: r.program_id, program: r.program_name, programCode: r.program_code,
       metric: r.metric, target: r.target, achieved: r.achieved, achievementPercent: r.achievement_percent, tier: r.tier, baseIncentive: r.base_incentive, adjustments: r.adjustments,
-      adjustmentReason: r.adjustment_reason, adjustmentReasonCode: r.adjustment_reason_code, finalAmount: r.payout, status: r.status })) : undefined;
+      adjustmentReason: r.adjustment_reason, adjustmentReasonCode: r.adjustment_reason_code, finalAmount: r.payout, status: r.status, ...tsi.lineFields(r) })) : undefined;
   const ts = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
   const at = (d) => (d ? new Date(d).toISOString() : null);
   return {
@@ -349,6 +358,9 @@ async function calcOut(c, withDetails = true) {
     totalAmount: c.total_amount, agentCount: c.agent_count, status: c.status, createdBy: c.created_by_name, submittedBy: c.submitted_by_name, submittedDate: ts(c.submitted_date),
     approvedBy: c.approved_by_name, approvalDate: ts(c.approval_date), rejectedBy: c.rejected_by_name, rejectionDate: ts(c.rejection_date), rejectionReason: c.rejection_reason,
     paymentDate: c.payment_date, paymentReference: c.payment_reference,
+    // a Telesales batch (one program and month): the gross and the withholding tax of its lines, the calculation steps
+    programKind: c.program_kind || null, isTelesales: c.program_kind === 'telesales', versionId: c.version_id ?? null, grossTotal: c.gross_total === null ? null : Number(c.gross_total),
+    taxTotal: c.tax_total === null ? null : Number(c.tax_total), executionLog: c.execution_log || [], triggeredBy: c.triggered_by || null,
     // who made the batch (maker-checker: neither may approve it) and the decision details
     createdById: c.created_by, createdByUsername: c.created_by_username, submittedById: c.submitted_by, submittedByUsername: c.submitted_by_username,
     createdAt: at(c.created_at), submittedAt: at(c.submitted_date), approvedAt: at(c.approval_date), rejectedAt: at(c.rejection_date),
@@ -385,8 +397,17 @@ export async function runCalculation(b, user) {
   const refs = b.selectedPrograms || b.programs || b.programIds || [];
   if (!Array.isArray(refs) || !refs.length) throw badRequest('Validation failed', [{ path: 'selectedPrograms', message: 'Select at least one program' }]);
   const programs = [];
-  for (const ref of refs) {
-    const p = await programRow(typeof ref === 'object' ? ref.value ?? ref.id : ref);
+  const picked = [];
+  for (const ref of refs) picked.push(await programRow(typeof ref === 'object' ? ref.value ?? ref.id : ref));
+  // a Telesales program is calculated in a batch of its own, one per month (FR-TSI-030)
+  const telesales = picked.find((p) => p.program_type === tsi.TELESALES);
+  if (telesales) {
+    if (picked.length > 1) throw badRequest('Validation failed', [{ path: 'selectedPrograms', message: 'A Telesales program is calculated in a batch of its own' }]);
+    if (telesales.status !== 'Active') throw badRequest('Validation failed', [{ path: 'selectedPrograms', message: `${telesales.program_code} is not active` }]);
+    const r = await tsi.calculateTelesales(telesales.id, period, { user, description: b.description || null });
+    return getCalculation(r.batchId);
+  }
+  for (const p of picked) {
     if (p.status !== 'Active') throw badRequest('Validation failed', [{ path: 'selectedPrograms', message: `${p.program_code} is not active` }]);
     if (p.period_to < period.from || p.period_from > period.to) throw badRequest('Validation failed', [{ path: 'selectedPrograms', message: `${p.program_code} does not run in ${period.label}` }]);
     const window = hasFrequency(p) ? programPeriodOn(p, minDate(period.to, p.period_to)) : { from: period.from, to: period.to };
@@ -458,6 +479,8 @@ export async function adjustCalculation(batchId, b, user) {
                                 WHERE id = $1 AND calculation_id = $2 RETURNING id`, [Number(l.id), c.batch_id, adj, reason.text, reason.code]);
       if (!r.rowCount) throw badRequest('Validation failed', [{ path: 'lines', message: `Line ${l.id} is not in batch ${c.batch_id}` }]);
     }
+    // a telesales line: the adjustment is part of the gross, so the withholding tax and the total follow (FR-TSI-037)
+    if (c.program_kind === 'telesales') await tsi.retotalAdjusted(tx, c.batch_id);
     await tx.query(`UPDATE incentive_calculations SET status = 'Calculated', adjusted_by = CASE WHEN $2 = ANY(adjusted_by) THEN adjusted_by ELSE array_append(adjusted_by, $2) END
                     WHERE batch_id = $1`, [c.batch_id, user.id]);
     await refreshTotals(tx, c.batch_id);
@@ -503,11 +526,12 @@ export async function decideCalculation(batchId, action, b, user) {
                       WHERE batch_id = $1`, [c.batch_id, user.id, remarks]);
       await tx.query('UPDATE incentive_results SET status = \'Approved\' WHERE calculation_id = $1', [c.batch_id]);
       // incentives earned are accrued (posting rule incentive.accrual)
-      const total = round2((await tx.query('SELECT COALESCE(sum(payout), 0) AS t FROM incentive_results WHERE calculation_id = $1', [c.batch_id])).rows[0].t);
-      if (total > 0) {
+      // gross to the expense, the withholding tax of telesales lines to WHT payable, the total to incentives payable
+      const amounts = await tsi.accrualAmounts(tx, c.batch_id);
+      if (amounts.gross > 0) {
         const { postEvent } = await import('../accounting/lib/posting.js');
         const jv = await postEvent('incentive.accrual', { source: 'incentive', entryType: 'INCENTIVE_ACCRUAL', transactionCode: c.batch_id, referenceType: 'IncentiveCalculation', referenceId: c.batch_id,
-          date: await accrualDate(tx, c), description: `Incentives ${c.batch_id} (${c.period}) approved`, amounts: { amount: total }, vars: { batchId: c.batch_id, period: c.period } }, { db: tx, user });
+          date: await accrualDate(tx, c), description: `Incentives ${c.batch_id} (${c.period}) approved`, amounts, vars: { batchId: c.batch_id, period: c.period } }, { db: tx, user });
         await tx.query('UPDATE incentive_calculations SET accrual_jv_id = $2 WHERE batch_id = $1', [c.batch_id, jv.id]);
       }
     } else {
@@ -595,7 +619,8 @@ export async function agentPrograms(agentId) {
   const agents = await eligibleAgents(agentId);
   const lookback = Number(await getSetting('incentive.program_lookback_days', 30)) || 0;
   const t = await today();
-  const programs = await many('SELECT * FROM incentive_programs WHERE status = \'Active\' AND period_to >= $1::date - $2::int ORDER BY period_from', [t, lookback]);
+  const programs = await many('SELECT * FROM incentive_programs WHERE status = \'Active\' AND period_to >= $1::date - $2::int AND program_type IS DISTINCT FROM $3 ORDER BY period_from', [t, lookback, tsi.TELESALES]);
+  if (agents.length) await tsi.syncTelesalesPolicies({ asOf: t });
   const out = [];
   for (const a of agents) {
     const assigned = [];
@@ -612,6 +637,8 @@ export async function agentPrograms(agentId) {
         metric: p.metric, programType: p.program_type, programStatus: p.status, applicableTo: p.applicable_to, currency: p.currency, ended: isoDate(p.period_to) < t,
         tiers: tiersOf(p), nextTier: nextTier(p, Number(achieved), Number(p.target)) });
     }
+    // a caller of a Telesales program: the month to date (policies counted, ANC, level, policies still needed)
+    assigned.push(...(await tsi.callerProgress(a.id, { asOf: t, sync: false })));
     // activity to date only: a policy incepting after today is not an achievement yet, a migrated one never is
     const acts = await many(`SELECT p.inception_date, p.premium_total, p.renewed_from, pr.name AS product FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
                              WHERE p.owner_user_id = $1 AND p.inception_date <= $2::date AND p.status <> 'cancelled' AND ${(await kpiOriginWhere('p', 'incentive')) || 'TRUE'}
@@ -676,10 +703,12 @@ export async function statement(agentId, periodRef) {
   const period = parsePeriod(periodRef || (await today()).slice(0, 7));
   const key = period.from.slice(0, 7);
   const lines = await many(`SELECT r.*, p.name, p.structure, p.metric FROM incentive_results r JOIN incentive_programs p ON p.id = r.program_id
-                            WHERE r.agent_user_id = $1 AND r.period = ANY($2) AND r.status <> 'Rejected'`, [a.id, keysEndingIn(key)]);
+                            WHERE r.agent_user_id = $1 AND r.period = ANY($2) AND r.status <> 'Rejected' AND p.program_type IS DISTINCT FROM $3`, [a.id, keysEndingIn(key), tsi.TELESALES]);
+  // telesales lines: counted policies, ANC, level, base, additional, recovery, tax; "Not approved" before approval
+  const telesales = await tsi.statementLines(a.id, key);
   // Programs running in the period that are not calculated yet: progress to date from the same source as My Programs
   const running = await many(`SELECT * FROM incentive_programs WHERE status = 'Active' AND period_from <= $2::date AND period_to >= $1::date
-                              AND id <> ALL($3::int[]) ORDER BY period_from`, [period.from, period.to, lines.map((l) => l.program_id)]);
+                              AND id <> ALL($3::int[]) AND program_type IS DISTINCT FROM $4 ORDER BY period_from`, [period.from, period.to, lines.map((l) => l.program_id), tsi.TELESALES]);
   const inProgress = [];
   for (const p of running) {
     const achieved = await programAchievement(p, a.id, period.from, period.to);
@@ -699,13 +728,13 @@ export async function statement(agentId, periodRef) {
     [a.id, months[0].key.slice(0, 4)])).map((r) => ({ period: parsePeriod(r.period).to.slice(0, 7), v: Number(r.v) }));
   return {
     agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, period: period.label, statementDate: (await today()),
-    totalEarnings: round2(lines.filter((l) => ['Approved', 'Paid'].includes(l.status)).reduce((s, l) => s + Number(l.payout), 0)), ytdEarnings: round2(ytd.v), pendingPayment: round2(pending.v),
+    totalEarnings: round2(lines.filter((l) => ['Approved', 'Paid'].includes(l.status)).reduce((s, l) => s + Number(l.payout), 0) + telesales.filter((l) => l.approved).reduce((s, l) => s + l.earnedAmount, 0)), ytdEarnings: round2(ytd.v), pendingPayment: round2(pending.v),
     lastPayment: last ? round2(last.v) : 0, lastPaymentDate: last?.paid_at ? new Date(last.paid_at).toISOString().slice(0, 10) : null,
     // incentive periods of the last payment and of the approved, unpaid results (labels such as "August 2026")
     lastPaymentPeriods: periodLabels(last?.periods || []), pendingPeriods: periodLabels(pendingPeriods), contact: await statementContact(),
     paymentHistory: await paymentHistory(a.id),
     programBreakdown: [...lines.map((l) => ({ program: l.name, metric: l.metric, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
-      ...inProgress],
+      ...telesales, ...inProgress],
     monthlyTrend: months.map(({ key: k }) => ({ month: new Date(`${k}-01T00:00:00Z`).toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }) + '-' + k.slice(2, 4), period: k, earnings: round2(trend.filter((t) => t.period === k).reduce((x, t) => x + t.v, 0)) })),
   };
 }

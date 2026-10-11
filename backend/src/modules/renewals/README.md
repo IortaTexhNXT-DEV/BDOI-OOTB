@@ -32,3 +32,10 @@ A policy issued (from a quotation or a placement slip) under a promotion that ha
 issuance (`noticeGate.js` `recordLockIn`, called by `policies/service.js` `issuePolicy`). The capture of the Scheme 1 and
 Scheme 2 lock-ins and the Talkbot filter on Generate Renewal Quotes belong to the sales screens; the filter plugs into
 the batch selection and reads the same notice gate.
+
+## Scheme policies and the lock-in review
+
+A renewal of a policy with a scheme (`policy_schemes`) is priced at the next year of the scheme (schemes/rating.js
+`renewalYear`); a premium other than the scheme premium needs a reason (MSG-SCM-060), and completing the renewal carries
+the scheme, its commission basis and the dealer share to the new term. The 60-day Lock-in Review, the TFS loan status
+upload and the Lock-in / Scheme 2 expiry report are in lock-in/README.md; early-terminated is a blocking loan status.

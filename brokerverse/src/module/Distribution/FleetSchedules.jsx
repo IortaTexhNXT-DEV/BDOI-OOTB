@@ -18,6 +18,7 @@ import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
 import { RecordActivityLog } from "../../components/ActivityLog";
+import { PeriodCell } from "../../components/TableCells";
 import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, fromIsoDay, isoDay, money, printFile, showError, showSuccess, useInsurers } from "./common";
 
 const BASE = "/operations/fleet-schedules";
@@ -103,7 +104,7 @@ const FleetList = () => {
           <Column field="clientName" header={t("distribution.fl.client", "Client")} />
           <Column field="insurerName" header={t("distribution.fl.insurer", "Insurer")} />
           <Column field="policyNumber" header={t("distribution.fl.policy", "Policy")} />
-          <Column header={t("distribution.fl.period", "Period")} body={(r) => `${date(r.inceptionDate)} to ${date(r.expiryDate)}`} />
+          <Column header={t("distribution.fl.period", "Period")} body={(r) => <PeriodCell from={r.inceptionDate} to={r.expiryDate} />} />
           <Column field="activeVehicles" header={t("distribution.fl.vehicles", "Vehicles on cover")} className="bv-num" headerClassName="bv-num" />
           <Column header={t("distribution.fl.sumInsured", "Sum insured")} body={(r) => money(r.sumInsured)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("distribution.fl.annualPremium", "Annual premium")} body={(r) => money(r.grossPremium)} className="bv-num" headerClassName="bv-num" />

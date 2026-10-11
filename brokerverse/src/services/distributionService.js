@@ -77,6 +77,9 @@ const distributionService = {
   reassign: (body) => post(`${LA}/reassign`, body),
   sendToQueue: (body) => post(`${LA}/queue`, body),
   takeFromQueue: (leadIds) => post(`${LA}/queue/take`, { leadIds }),
+  // call-out leads of the telesales callers (FRS COMM-08 FR-TSI-010): the Team Leader endorses or withdraws
+  endorseCallout: (leadIds) => post(`${LA}/callout/endorse`, { leadIds }),
+  withdrawCallout: (leadIds, reason) => post(`${LA}/callout/withdraw`, { leadIds, reason }),
   assignmentHistory: (leadId) => request(`${LA}/history/${id(leadId)}`),
   teamView: (params) => request(`${LA}/team${qs(params)}`),
   assignees: (leadIds) => request(`${LA}/assignees${qs({ leadIds: leadIds?.length ? leadIds.join(",") : undefined })}`),

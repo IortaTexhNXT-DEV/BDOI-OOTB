@@ -32,6 +32,7 @@ import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
 import OriginChip, { isMigrated } from "../../../components/OriginChip";
 import PromotionPanel from "../../quoteModule/promotion/PromotionPanel";
+import SchemeLockInPanel from "../SchemeLockInPanel";
 import PolicyCorrectionsPanel from "../policyCorrections/PolicyCorrectionsPanel";
 import { hasPermission } from "../../../utils/canOpen";
 import { openConfirm } from "../../../components/ConfirmDialog";
@@ -1793,6 +1794,7 @@ const PolicyDetailView = () => {
               </SectionCard>
               <PolicyCorrectionsPanel policy={rawPolicyData} onChanged={() => dispatch(policyDetailsDataMiddleWare({ policyId }))} />
               <PromotionPanel quotation={rawPolicyData} readOnly />
+              <SchemeLockInPanel policyId={policyId} />
 
               {showCoInsuranceSection && (
                 <SectionCard

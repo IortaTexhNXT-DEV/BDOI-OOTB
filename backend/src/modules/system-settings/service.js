@@ -11,6 +11,7 @@ import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
 import { detectType } from '../uploads/fileTypes.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
+import { tenantSettingErrors } from '../features/tenant.js';
 import { deploymentPackId } from '../branding/bundled.js';
 
 /**
@@ -51,8 +52,8 @@ export function validTimeZone(value) {
 /**
  * Errors of the display currency (an active currency of the Currency master), the default language and the journal
  * statuses of the trial balance (never the opening balance journal, status opening: its balances are the opening
- * balances the trial balance already reads) in a change ([key, value] pairs, the currency code normalised in place);
- * `paths` names the field of each key in the errors.
+ * balances the trial balance already reads) and the settings of the enabling of Phase 2 by TISPH (features/tenant.js)
+ * in a change ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
  */
 export async function localizationErrors(changes, paths = {}) {
   const errors = [];
@@ -67,6 +68,8 @@ export async function localizationErrors(changes, paths = {}) {
       errors.push({ path: paths[change[0]] || change[0], message: 'must list journal statuses; the opening balance journal (opening) is never part of the trial balance' });
     }
   }
+  // who enables Phase 2 for TISPH (features.tenant_enable_*): never a future release, never the platform role
+  errors.push(...tenantSettingErrors(changes, paths));
   return errors;
 }
 

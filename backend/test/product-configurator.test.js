@@ -10,6 +10,9 @@ beforeAll(async () => {
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['product-analytics']);
   await withProducts();
+  // the direct template lifecycle of the base platform (status set by write:products); the review of migration 0660
+  // (product.approval_required, on by default) is covered by test/product-approval.test.js
+  expect((await ctx.api('put', '/settings').send({ settings: { 'product.approval_required': false } })).status).toBe(200);
   await ctx.api('post', '/users').send({ username: 'p.sales', password: 'Welcome@123', displayName: 'P Sales', roles: ['sales'] });
   salesToken = await loginAs(ctx.app, 'p.sales', 'Welcome@123');
 });
