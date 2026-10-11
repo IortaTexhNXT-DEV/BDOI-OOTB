@@ -3,6 +3,7 @@
  * and /system-settings always agree.
  */
 import crypto from 'node:crypto';
+import { assertFinanceControlsAllowed } from '../../lib/financeControls.js';
 import { many, one } from '../../db/pool.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { baseCurrency, currencyChoices } from '../../lib/currency.js';
@@ -242,7 +243,7 @@ function coerceSetting(row, value) {
  * Apply { key: value } changes; every key must exist and be editable, values are coerced by type. A setting owned by
  * another screen (the brand pack, Company master, Premium Taxes) is refused with the name of that screen.
  */
-export async function updateConfiguration(changes, userId) {
+export async function updateConfiguration(changes, userId, user = null) {
   const keys = Object.keys(changes);
   if (!keys.length) throw badRequest('No settings to update');
   const rows = await many('SELECT key, type, editable, value FROM app_settings WHERE key = ANY($1)', [keys]);
@@ -263,6 +264,7 @@ export async function updateConfiguration(changes, userId) {
   const { assertNotControlled, assertParkedEvents } = await import('../posting-rules/service.js');
   await assertNotControlled(apply);
   assertParkedEvents(apply);
+  if (user) assertFinanceControlsAllowed(apply, user);
   for (const [k, v] of apply) await setSetting(k, v, userId);
   return { before: Object.fromEntries(apply.map(([k, , b]) => [k, b])), after: Object.fromEntries(apply.map(([k, v]) => [k, v])) };
 }

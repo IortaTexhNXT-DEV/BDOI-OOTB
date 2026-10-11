@@ -75,8 +75,10 @@ describe('accounting ledger', () => {
     const mt2 = await ctx.as('maker')('post', '/accounting/entries/match').send({ matchPairs: [{ debitTransactionId: debits[0].id, creditTransactionId: credits[0].id, matchedAmount: 50 }] });
     const un1 = await ctx.as('maker')('post', '/accounting/entries/unmatch').send({ matchingIds: [mt.body.data[0].id] });
     expect(un1.body.data).toEqual([mt.body.data[0].id]);
+    // a GET never changes the matching (GAP-FIN-25): the match stays until it is undone by POST
     const un2 = await ctx.as('maker')('get', `/accounting/entries/unmatch?matchingIds=${mt2.body.data[0].id}`);
-    expect(un2.status).toBe(200);
+    expect(un2.status).not.toBe(200);
+    expect((await ctx.as('maker')('post', '/accounting/entries/unmatch').send({ matchingIds: [mt2.body.data[0].id] })).status).toBe(200);
     expect((await ctx.as('maker')('post', '/accounting/entries/unmatch').send({ matchingIds: [mt2.body.data[0].id] })).status).toBe(404);
   });
 
@@ -103,17 +105,33 @@ describe('accounting ledger', () => {
     expect(tb.body.data.totals.balanced).toBe(true);
   });
 
-  it('period close blocks postings into the period; reopen allows them again', async () => {
+  it('period close blocks postings into the period; reopen allows them again (through Period Management)', async () => {
     const period = new Date().toISOString().slice(0, 7);
-    expect((await ctx.as('maker')('post', `/accounting/periods/${period}/close`).send({})).status).toBe(409);
+    const { clearSettingsCache } = await import('../src/lib/settings.js');
+    // GAP-FIN-03: the older route needs approve:period-end like Period Management, and a reason
+    expect((await ctx.as('maker')('post', `/accounting/periods/${period}/close`).send({ reasonCode: 'PCL-MONTHEND' })).status).toBe(403);
+    expect((await ctx.api('post', `/accounting/periods/${period}/close`).send({ remarks: 'Test close' })).status).toBe(400);
     await query('UPDATE journal_vouchers SET status = \'cancelled\' WHERE status IN (\'pending\',\'for-approval\',\'draft\',\'approved\')');
-    expect((await ctx.as('maker')('post', `/accounting/periods/${period}/close`).send({})).status).toBe(400);
-    const c = await ctx.as('maker')('post', `/accounting/periods/${period}/close`).send({ remarks: 'Test close' });
+    await query('UPDATE period_close_checklist SET active = false WHERE item_type = \'manual\'');
+    const c = await ctx.api('post', `/accounting/periods/${period}/close`).send({ reasonCode: 'PCL-OTHER', remarks: 'Test close' });
+    expect(c.status, JSON.stringify(c.body)).toBe(200);
     expect(c.body.data.status).toBe('closed');
+    const hist = (await query('SELECT reason_code, remarks FROM period_status_history WHERE period = $1 ORDER BY id DESC LIMIT 1', [period])).rows[0];
+    expect(hist).toEqual({ reason_code: 'PCL-OTHER', remarks: 'Other: Test close' });
     const p = await makePolicy({ net: 1000 });
     expect((await ctx.as('maker')('post', '/receipts').send({ policyId: p.policy.id, amount: p.gross })).status).toBe(409);
-    const o = await ctx.as('maker')('post', `/accounting/periods/${period}/reopen`).send({ remarks: 'Late receipts' });
+    expect((await ctx.as('maker')('post', `/accounting/periods/${period}/reopen`).send({ reasonCode: 'PRO-LATEDOC' })).status).toBe(403);
+    // GAP-FIN-02: a closed (hard-closed) period is final unless accounting.reopen_closed_periods
+    const hard = await ctx.api('post', `/accounting/periods/${period}/reopen`).send({ reasonCode: 'PRO-LATEDOC' });
+    expect(hard.status).toBe(409);
+    expect(hard.body.message).toMatch(/hard close/);
+    await query('UPDATE app_settings SET value = \'true\' WHERE key = \'accounting.reopen_closed_periods\'');
+    clearSettingsCache();
+    const o = await ctx.api('post', `/accounting/periods/${period}/reopen`).send({ reasonCode: 'PRO-LATEDOC', remarks: 'Late receipts' });
     expect(o.body.data.status).toBe('open');
+    await query('UPDATE app_settings SET value = \'false\' WHERE key = \'accounting.reopen_closed_periods\'');
+    await query('UPDATE period_close_checklist SET active = true WHERE item_type = \'manual\'');
+    clearSettingsCache();
     expect((await ctx.as('maker')('post', '/receipts').send({ policyId: p.policy.id, amount: p.gross })).status).toBe(201);
     const list = await ctx.as('maker')('get', '/accounting/periods');
     expect(list.body.data.find((x) => x.period === period).reopenedAt).toBeTruthy();

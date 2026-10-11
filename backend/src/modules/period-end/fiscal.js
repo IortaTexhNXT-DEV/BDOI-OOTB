@@ -147,6 +147,10 @@ export async function transitionProblem(db, p, to, user) {
   }
   if (RANK[to] < RANK[p.status]) {
     if (!hasPermission(user, APPROVE)) return fail(403, 'permission', `Reopening a period requires permission ${APPROVE}`);
+    // TIS-BRD-GL-04 / Pre-BSM M32: a period reopens only until it is hard-closed (closed); the alternative is a setting
+    if (p.status === 'closed' && !isAdjustmentPeriod(p.period) && (await getSetting('accounting.reopen_closed_periods', false)) !== true) {
+      return fail(409, 'hard-closed', `Period ${p.period} is closed (hard close) and cannot be reopened; post the correction in an open period (accounting.reopen_closed_periods)`);
+    }
     if (to === 'open' && isAdjustmentPeriod(p.period) && !(await getSetting('accounting.adjustment_period_enabled', true))) {
       return fail(409, 'adjustment-disabled', 'The adjustment period is disabled (accounting.adjustment_period_enabled)');
     }

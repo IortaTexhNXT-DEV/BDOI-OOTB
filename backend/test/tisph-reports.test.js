@@ -107,6 +107,10 @@ describe('CR-15 cash control', () => {
     expect(reversals.groups.find((g) => g.group === 'ACC-MBT-001')).toBeTruthy();
     const history = await run(bp, 'tisph-pdc-history', { FromDate: day, ToDate: day });
     expect(history.rows.find((r) => r.pdcNumber === 'PDC-RPT-0002')).toMatchObject({ event: 'Bounce', statusAfter: 'Bounced' });
+    // the history is dated by the business day (Manila): 17:00 UTC on the 1st is the 2nd in Manila
+    await q(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, after_data, at) VALUES ('usr_admin', 'admin', 'post_dated_cheque', 'pdc_rpt_1', 'cancel', '{"statusText":"Cancelled"}', '2026-03-01T17:00:00Z')`);
+    expect((await run(bp, 'tisph-pdc-history', { FromDate: '2026-03-02', ToDate: '2026-03-02' })).rows.map((r) => r.pdcNumber)).toEqual(['PDC-RPT-0001']);
+    expect((await run(bp, 'tisph-pdc-history', { FromDate: '2026-03-01', ToDate: '2026-03-01' })).rows).toEqual([]);
     const maturing = await run(bp, 'tisph-pdc-maturing', { FromDate: day, ToDate: day });
     expect(maturing.rows.find((r) => r.pdcNumber === 'PDC-RPT-0002')).toMatchObject({ status: 'Bounced' });
     expect(maturing.rows.find((r) => r.pdcNumber === 'PDC-RPT-0001')).toBeUndefined();

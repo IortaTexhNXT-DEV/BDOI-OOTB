@@ -10,7 +10,7 @@ import { pool, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { EVENTS, postEvent } from '../src/modules/accounting/lib/posting.js';
 import { cutoffPeriod } from '../src/modules/period-end/posting.js';
-import { adjustmentDeadline, financeCloseDate } from '../src/modules/period-end/jobs.js';
+import { adjustmentDeadline, closingCalendar, financeCloseDate } from '../src/modules/period-end/jobs.js';
 import { nthWorkingDay } from '../src/lib/workingDays.js';
 
 const setting = async (key, value) => {
@@ -19,7 +19,8 @@ const setting = async (key, value) => {
 };
 const post = (event, date) => withTransaction((db) => postEvent(event, { ...EVENTS[event].sample, date }, { db }));
 
-beforeAll(async () => { await setup(); });
+let ctx;
+beforeAll(async () => { ctx = await setup(); });
 afterAll(async () => { await pool.end(); });
 
 describe('operations cut-off (26th)', () => {
@@ -50,6 +51,29 @@ describe('finance close (29th) and adjustment window (6 working days)', () => {
     expect(await adjustmentDeadline({ end_date: '2026-10-31' }, 5)).toBe('2026-11-09');
     await setting('accounting.adjustment_window_working_days', 0);
     expect(await adjustmentDeadline({ end_date: '2026-10-31' }, 5)).toBe('2026-11-05');
+    await setting('accounting.adjustment_window_working_days', 6);
+  });
+});
+
+describe('closing calendar on Period Management', () => {
+  it('shows the operations cut-off, the finance close and the end of the adjustment window of each regular period', async () => {
+    expect(await closingCalendar({ end_date: '2026-10-31' })).toEqual({ operationsCutoff: '2026-10-26', financeClose: '2026-10-29', adjustmentWindowEnd: '2026-11-09' });
+    const fy = (await ctx.api('get', '/period-end/fiscal-years')).body.data;
+    const code = (Array.isArray(fy) ? fy : fy.rows || [])[0]?.code;
+    const year = (await ctx.api('get', `/period-end/fiscal-years/${code}`)).body.data;
+    const regular = year.periods.find((p) => !p.isAdjustment);
+    expect(regular.closing.operationsCutoff).toBe(`${regular.period}-26`);
+    expect(regular.closing.financeClose.slice(0, 7)).toBe(regular.period);
+    expect(year.periods.find((p) => p.isAdjustment)?.closing ?? null).toBeNull();
+  });
+
+  it('leaves out a date its setting switches off', async () => {
+    await setting('accounting.operations_cutoff_day', 0);
+    await setting('accounting.finance_close_day', 0);
+    await setting('accounting.adjustment_window_working_days', 0);
+    expect(await closingCalendar({ end_date: '2026-10-31' })).toEqual({ operationsCutoff: null, financeClose: null, adjustmentWindowEnd: null });
+    await setting('accounting.operations_cutoff_day', 26);
+    await setting('accounting.finance_close_day', 29);
     await setting('accounting.adjustment_window_working_days', 6);
   });
 });

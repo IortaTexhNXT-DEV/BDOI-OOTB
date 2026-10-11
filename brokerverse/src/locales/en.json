@@ -15348,7 +15348,8 @@
       "year-closed": "The fiscal year is closed.",
       "year-end-closed": "The fiscal year is closed by a year-end close run.",
       "adjustment-disabled": "The adjustment period is switched off.",
-      "approval": "Closed through the Month-End Close, approved by a second user."
+      "approval": "Closed through the Month-End Close, approved by a second user.",
+      "hard-closed": "A closed period is final (hard close); post the correction in an open period."
     },
     "done": "Period {{period}}: {{status}}",
     "system": "System",
@@ -15387,6 +15388,16 @@
       "confirmMessage": "The opening balances of {{fiscalYear}} are loaded for go-live date {{date}}.",
       "replaces": "This load replaces the earlier load for the same go-live date ({{accounts}} accounts, loaded by {{by}} on {{at}}).",
       "replaceRule": "Loading again for the same go-live date replaces this load."
+    },
+    "closing": "Closing calendar",
+    "closingText": "Operations cut-off {{cutoff}} · Finance close {{close}} · Adjustments until {{window}}",
+    "financeControls": {
+      "button": "Finance controls",
+      "title": "Finance controls",
+      "save": "Save controls",
+      "saved": "Finance controls saved",
+      "help": "The maker-checker and posting controls of Finance. Only Finance (approve:period-end) changes them; each change is kept in the audit trail.",
+      "readOnly": "The maker-checker and posting controls of Finance. Only Finance (approve:period-end) changes them."
     }
   },
   "pageHeader": {
