@@ -84,6 +84,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
+| Reports > Operational Reports | CLI Generated Report | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -135,6 +136,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
+| Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | No screen of its own |
+| Operations | Marine open covers | Approve | Approve or return open policy endorsements and reversals of declared certificates (never one you requested) |  |
 | Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
 | Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
@@ -168,7 +171,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
@@ -193,6 +196,7 @@ This role approves the work of other users:
 - Approve premium warranty extensions and client credit limits (not the requester)
 - Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
+- Approve or return open policy endorsements and reversals of declared certificates (never one you requested)
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
 - Approve changes to posting rules and account determination (not the requester)
@@ -205,6 +209,7 @@ Approval limits of this role on the Authority Matrix:
 |---|---|---|
 | Payment voucher and cheque release | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Not set: no amount limit applies |
 | Journal voucher approval | Accounts > Journal Vouchers > Approve | Not set: no amount limit applies |
+| Write-off | Accounts > Open Entry Matching > Write-off | Not set: no amount limit applies |
 | Remittance approval | Accounts > Remittance > Approvals | PHP 1,000,000.00 |
 | Remittance settlement, adjustment and transfer | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | PHP 1,000,000.00 |
 
@@ -225,6 +230,7 @@ Who approves the work of this role:
 | Sharing schemes | Approve or return sharing schemes and assignments; suspend, resume and end schemes | TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
+| Accounts > Open Entry Matching > Write-off | Write-off within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |

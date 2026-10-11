@@ -157,9 +157,18 @@
      "section": "Operations",
      "screen": "Marine Open Covers",
      "path": "/operations/open-covers",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "View",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -422,6 +431,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -639,8 +657,14 @@
     {
      "area": "Operations",
      "module": "Marine open covers",
-     "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
     },
     {
      "area": "Accounts",
@@ -1006,9 +1030,18 @@
      "section": "Operations",
      "screen": "Marine Open Covers",
      "path": "/operations/open-covers",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "View",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -1265,6 +1298,15 @@
      "section": "Reports > Operational Reports",
      "screen": "Renewal Notice Listing",
      "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
      "access": "View",
      "modules": [
       "Reports"
@@ -1560,8 +1602,14 @@
     {
      "area": "Operations",
      "module": "Marine open covers",
-     "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
     },
     {
      "area": "Accounts",
@@ -1907,7 +1955,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Promotions",
      "path": "/sales/promotions",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Promotions"
      ]
@@ -1916,7 +1964,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Scheme Master",
      "path": "/sales/scheme-master",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Scheme Master"
      ]
@@ -1961,9 +2009,18 @@
      "section": "Operations",
      "screen": "Marine Open Covers",
      "path": "/operations/open-covers",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "View",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -2271,6 +2328,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -2419,6 +2485,12 @@
     {
      "area": "Sales & Marketing",
      "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
      "level": "Approve",
      "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
@@ -2427,6 +2499,12 @@
      "module": "Scheme Master",
      "level": "View",
      "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Create and edit",
+     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
     },
     {
      "area": "Sales & Marketing",
@@ -2587,8 +2665,14 @@
     {
      "area": "Operations",
      "module": "Marine open covers",
-     "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
     },
     {
      "area": "Accounts",
@@ -2824,6 +2908,16 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Quotations and placement",
      "approval": "Approve a quotation created by another user",
      "approvers": [
@@ -2841,6 +2935,16 @@
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme Master",
+     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -3055,7 +3159,7 @@
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Clients"
      ]
@@ -3085,6 +3189,15 @@
      "access": "Create and edit",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "Create and edit",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -3374,6 +3487,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -3395,6 +3517,15 @@
      "section": "Master > Insurance",
      "screen": "Scheme Document Checklist",
      "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
+     "screen": "Motor Issuance Checklist",
+     "path": "/master/insurance/motor-issuance-checklist",
      "access": "View",
      "modules": [
       "Reference masters"
@@ -3524,6 +3655,12 @@
     },
     {
      "area": "Operations",
+     "module": "Clients",
+     "level": "Create and edit",
+     "meaning": "Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents"
+    },
+    {
+     "area": "Operations",
      "module": "Policies",
      "level": "View",
      "meaning": "See policies, cover notes, payments and CTPL authentication"
@@ -3616,7 +3753,25 @@
      "area": "Operations",
      "module": "Marine open covers",
      "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "meaning": "Set up and activate open covers, request endorsements, upload cargo shipments, submit, send and bill declarations"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "Create and edit",
+     "meaning": "Open Credit Life batches, upload or encode members, issue and cancel certificates, forward a batch to the insurer"
     },
     {
      "area": "Accounts",
@@ -3722,6 +3877,15 @@
      "approval": "Claim decisions: review, reject, settle, approve a settlement, close",
      "approvers": [
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Marine open covers",
+     "approval": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "approvers": [
+      "TIS Finance & General Accounting",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -3966,7 +4130,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Promotions",
      "path": "/sales/promotions",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Promotions"
      ]
@@ -3975,7 +4139,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Scheme Master",
      "path": "/sales/scheme-master",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Scheme Master"
      ]
@@ -3993,7 +4157,7 @@
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Clients"
      ]
@@ -4023,6 +4187,15 @@
      "access": "Create and edit",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "Create and edit",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -4348,6 +4521,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -4369,6 +4551,15 @@
      "section": "Master > Insurance",
      "screen": "Scheme Document Checklist",
      "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
+     "screen": "Motor Issuance Checklist",
+     "path": "/master/insurance/motor-issuance-checklist",
      "access": "View",
      "modules": [
       "Reference masters"
@@ -4480,21 +4671,9 @@
     },
     {
      "area": "Sales & Marketing",
-     "module": "Promotions",
-     "level": "Create and edit",
-     "meaning": "Add, amend and submit promotions"
-    },
-    {
-     "area": "Sales & Marketing",
      "module": "Scheme Master",
      "level": "View",
      "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
-    },
-    {
-     "area": "Sales & Marketing",
-     "module": "Scheme Master",
-     "level": "Create and edit",
-     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
     },
     {
      "area": "Sales & Marketing",
@@ -4519,6 +4698,12 @@
      "module": "Clients",
      "level": "View",
      "meaning": "See clients"
+    },
+    {
+     "area": "Operations",
+     "module": "Clients",
+     "level": "Create and edit",
+     "meaning": "Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents"
     },
     {
      "area": "Operations",
@@ -4620,7 +4805,25 @@
      "area": "Operations",
      "module": "Marine open covers",
      "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "meaning": "Set up and activate open covers, request endorsements, upload cargo shipments, submit, send and bill declarations"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "Create and edit",
+     "meaning": "Open Credit Life batches, upload or encode members, issue and cancel certificates, forward a batch to the insurer"
     },
     {
      "area": "Accounts",
@@ -4773,21 +4976,21 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Marine open covers",
+     "approval": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "approvers": [
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
-      "TIS General Manager"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Promotions",
-     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
-     "approvers": [
-      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -4819,15 +5022,6 @@
      "approval": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
      "approvers": [
       "TIS Operations Unit Head",
-      "TIS General Manager"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Scheme Master",
-     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
-     "approvers": [
-      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -5030,7 +5224,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Promotions",
      "path": "/sales/promotions",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Promotions"
      ]
@@ -5039,7 +5233,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Scheme Master",
      "path": "/sales/scheme-master",
-     "access": "Create and edit",
+     "access": "View",
      "modules": [
       "Scheme Master"
      ]
@@ -5057,7 +5251,7 @@
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Clients"
      ]
@@ -5087,6 +5281,15 @@
      "access": "Create and edit",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "Create and edit",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -5466,6 +5669,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -5487,6 +5699,15 @@
      "section": "Master > Insurance",
      "screen": "Scheme Document Checklist",
      "path": "/master/insurance/scheme-document-checklist",
+     "access": "View",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
+     "screen": "Motor Issuance Checklist",
+     "path": "/master/insurance/motor-issuance-checklist",
      "access": "View",
      "modules": [
       "Reference masters"
@@ -5619,21 +5840,9 @@
     },
     {
      "area": "Sales & Marketing",
-     "module": "Promotions",
-     "level": "Create and edit",
-     "meaning": "Add, amend and submit promotions"
-    },
-    {
-     "area": "Sales & Marketing",
      "module": "Scheme Master",
      "level": "View",
      "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
-    },
-    {
-     "area": "Sales & Marketing",
-     "module": "Scheme Master",
-     "level": "Create and edit",
-     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
     },
     {
      "area": "Sales & Marketing",
@@ -5664,6 +5873,12 @@
      "module": "Clients",
      "level": "View",
      "meaning": "See clients"
+    },
+    {
+     "area": "Operations",
+     "module": "Clients",
+     "level": "Create and edit",
+     "meaning": "Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents"
     },
     {
      "area": "Operations",
@@ -5789,7 +6004,25 @@
      "area": "Operations",
      "module": "Marine open covers",
      "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "meaning": "Set up and activate open covers, request endorsements, upload cargo shipments, submit, send and bill declarations"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "Create and edit",
+     "meaning": "Open Credit Life batches, upload or encode members, issue and cancel certificates, forward a batch to the insurer"
     },
     {
      "area": "Accounts",
@@ -6066,21 +6299,21 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Marine open covers",
+     "approval": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "approvers": [
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
-      "TIS General Manager"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Promotions",
-     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
-     "approvers": [
-      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -6112,15 +6345,6 @@
      "approval": "Approve or reject checklist waivers (never one you requested); cancel an application already sent to the insurer",
      "approvers": [
       "TIS Operations Unit Head",
-      "TIS General Manager"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Scheme Master",
-     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
-     "approvers": [
-      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -8222,6 +8446,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports > Financial Reports",
      "screen": "SOA/Premium Receivable",
      "path": "/reports/financialreports/soapremiumreceivable",
@@ -8581,6 +8814,18 @@
      "meaning": "Reverse claim settlement funds or a payment to the claimant recorded in error"
     },
     {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "View",
+     "meaning": "See open covers, certificates and declarations; print certificates"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Approve",
+     "meaning": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)"
+    },
+    {
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
@@ -8891,6 +9136,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -8922,6 +9171,13 @@
      "kind": "authority",
      "type": "journal_voucher",
      "step": "Accounts > Journal Vouchers > Approve",
+     "limit": "Not set"
+    },
+    {
+     "what": "Write-off",
+     "kind": "authority",
+     "type": "write_off",
+     "step": "Accounts > Open Entry Matching > Write-off",
      "limit": "Not set"
     },
     {
@@ -9048,6 +9304,14 @@
     {
      "work": "Accounts > Journal Vouchers > Approve",
      "approval": "Journal voucher approval within the approver's limit",
+     "approvers": [
+      "TIS Finance & General Accounting"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Accounts > Open Entry Matching > Write-off",
+     "approval": "Write-off within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting"
      ],
@@ -9189,9 +9453,18 @@
     },
     {
      "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "Create and edit",
+     "modules": [
+      "Promotions"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
      "screen": "Scheme Master",
      "path": "/sales/scheme-master",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Scheme Master"
      ]
@@ -9592,6 +9865,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports > Financial Reports",
      "screen": "SOA/Premium Receivable",
      "path": "/reports/financialreports/soapremiumreceivable",
@@ -9827,6 +10109,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Motor Issuance Checklist",
+     "path": "/master/insurance/motor-issuance-checklist",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Repair Shops",
      "path": "/master/insurance/repair-shops",
      "access": "Create and edit",
@@ -10025,7 +10316,7 @@
     },
     {
      "section": "Master > System",
-     "screen": "E-mail Layout",
+     "screen": "E-Mail Layout",
      "path": "/master/configuration/email-layout",
      "access": "Create and edit",
      "modules": [
@@ -10106,7 +10397,7 @@
     },
     {
      "section": "Master > System",
-     "screen": "E-mail Outbox",
+     "screen": "E-Mail Outbox",
      "path": "/master/configuration/email-outbox",
      "access": "Create and edit",
      "modules": [
@@ -10249,9 +10540,39 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Approve",
+     "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Scheme Master",
      "level": "View",
      "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Create and edit",
+     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Approve",
+     "meaning": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)"
     },
     {
      "area": "Sales & Marketing",
@@ -10522,6 +10843,14 @@
     {
      "what": "Approve role access changes and authority limits of another administrator",
      "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "kind": "maker-checker"
     }
    ],
    "approvedBy": [
@@ -10549,6 +10878,26 @@
      "approvers": [
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme Master",
+     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -10711,7 +11060,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Promotions",
      "path": "/sales/promotions",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Promotions"
      ]
@@ -10720,7 +11069,7 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Scheme Master",
      "path": "/sales/scheme-master",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Scheme Master"
      ]
@@ -10768,6 +11117,15 @@
      "access": "Create and edit",
      "modules": [
       "Marine open covers"
+     ]
+    },
+    {
+     "section": "Operations",
+     "screen": "Credit Life",
+     "path": "/operations/credit-life",
+     "access": "View",
+     "modules": [
+      "Credit Life batches"
      ]
     },
     {
@@ -11419,6 +11777,15 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "CLI Generated Report",
+     "path": "/reports/run/cli-generated",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports > Financial Reports",
      "screen": "SOA/Premium Receivable",
      "path": "/reports/financialreports/soapremiumreceivable",
@@ -11750,6 +12117,12 @@
     {
      "area": "Sales & Marketing",
      "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
      "level": "Approve",
      "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
@@ -11758,6 +12131,12 @@
      "module": "Scheme Master",
      "level": "View",
      "meaning": "See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Scheme Master",
+     "level": "Create and edit",
+     "meaning": "Add, edit, copy, amend and submit schemes; upload vehicle lines"
     },
     {
      "area": "Sales & Marketing",
@@ -11931,7 +12310,25 @@
      "area": "Operations",
      "module": "Marine open covers",
      "level": "Create and edit",
-     "meaning": "Set up open covers, issue certificates, submit and bill declarations"
+     "meaning": "Set up and activate open covers, request endorsements, upload cargo shipments, submit, send and bill declarations"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Approve",
+     "meaning": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)"
+    },
+    {
+     "area": "Operations",
+     "module": "Marine open covers",
+     "level": "Special",
+     "meaning": "Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day"
+    },
+    {
+     "area": "Operations",
+     "module": "Credit Life batches",
+     "level": "View",
+     "meaning": "See Credit Life batches, members, master policies and certificates of cover; print certificates"
     },
     {
      "area": "Accounts",
@@ -12196,6 +12593,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -12289,12 +12690,31 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Marine open covers",
+     "approval": "Approve or return open policy endorsements and reversals of declared certificates (never one you requested)",
+     "approvers": [
+      "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -12317,6 +12737,16 @@
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Scheme Master",
+     "approval": "Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS IT AppSupport / Admin",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -13058,7 +13488,7 @@
     },
     {
      "role": "TIS Sales Unit Head",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Associate",
@@ -13066,19 +13496,23 @@
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    },
+    {
      "role": "TIS General Manager",
-     "access": "View"
+     "access": "Create and edit"
     }
    ]
   },
@@ -13095,7 +13529,7 @@
     },
     {
      "role": "TIS Sales Unit Head",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Associate",
@@ -13103,11 +13537,11 @@
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Finance & General Accounting",
@@ -13115,11 +13549,11 @@
     },
     {
      "role": "TIS IT AppSupport / Admin",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS General Manager",
-     "access": "View"
+     "access": "Create and edit"
     }
    ]
   },
@@ -13181,15 +13615,15 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Finance & General Accounting",
@@ -13284,15 +13718,15 @@
    "roles": [
     {
      "role": "TIS Sales Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Associate",
@@ -13309,6 +13743,39 @@
     {
      "role": "TIS General Manager",
      "access": "Create and edit"
+    }
+   ]
+  },
+  "/operations/credit-life": {
+   "menu": "Operations > Credit Life",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
     }
    ]
   },
@@ -15466,6 +15933,47 @@
     }
    ]
   },
+  "/reports/run/cli-generated": {
+   "menu": "Reports > Operational Reports > CLI Generated Report",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
   "/reports/financialreports/soapremiumreceivable": {
    "menu": "Reports > Financial Reports > SOA/Premium Receivable",
    "roles": [
@@ -15858,6 +16366,27 @@
   },
   "/master/insurance/scheme-document-checklist": {
    "menu": "Master > Insurance > Scheme Document Checklist",
+   "roles": [
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/master/insurance/motor-issuance-checklist": {
+   "menu": "Master > Insurance > Motor Issuance Checklist",
    "roles": [
     {
      "role": "TIS Operations Associate",
@@ -16289,7 +16818,7 @@
    ]
   },
   "/master/configuration/email-layout": {
-   "menu": "Master > System > E-mail Layout",
+   "menu": "Master > System > E-Mail Layout",
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
@@ -16414,7 +16943,7 @@
    ]
   },
   "/master/configuration/email-outbox": {
-   "menu": "Master > System > E-mail Outbox",
+   "menu": "Master > System > E-Mail Outbox",
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
@@ -16662,6 +17191,10 @@
    "TIS Sales Unit Head",
    "TIS General Manager"
   ],
+  "approve:marine": [
+   "TIS Finance & General Accounting",
+   "TIS General Manager"
+  ],
   "approve:payables": [
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
@@ -16690,6 +17223,7 @@
   ],
   "approve:promotions": [
    "TIS Sales Unit Head",
+   "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
   "approve:quotations": [
@@ -16718,6 +17252,7 @@
   ],
   "approve:schemes": [
    "TIS Sales Unit Head",
+   "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
   "approve:sharing-schemes": [
@@ -16854,6 +17389,15 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
+  "read:credit-life": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "read:data-load": [
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
@@ -16983,6 +17527,7 @@
    "TIS Operations Associate",
    "TIS Operations Officer",
    "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
    "TIS General Manager"
   ],
   "read:masters": [
@@ -17086,6 +17631,7 @@
    "TIS Operations Officer",
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
+   "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
   "read:quotations": [
@@ -17274,6 +17820,11 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
+  "write:client-kyc": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
   "write:clients": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -17292,6 +17843,11 @@
   ],
   "write:commission-share": [
    "TIS Finance & General Accounting"
+  ],
+  "write:credit-life": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "write:data-load": [
    "TIS Finance & General Accounting",
@@ -17358,9 +17914,6 @@
    "TIS Operations Unit Head"
   ],
   "write:marine": [
-   "TIS Sales Associate",
-   "TIS Sales Officer",
-   "TIS Sales Unit Head",
    "TIS Operations Associate",
    "TIS Operations Officer",
    "TIS Operations Unit Head",
@@ -17371,6 +17924,15 @@
   ],
   "write:motor-programmes": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:parcel-certificates": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
   ],
   "write:payables": [
    "TIS Finance & General Accounting"
@@ -17406,8 +17968,9 @@
    "TIS General Manager"
   ],
   "write:promotions": [
-   "TIS Operations Officer",
-   "TIS Operations Unit Head"
+   "TIS Sales Unit Head",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
   ],
   "write:quotations": [
    "TIS Sales Associate",
@@ -17453,8 +18016,9 @@
    "TIS Operations Unit Head"
   ],
   "write:schemes": [
-   "TIS Operations Officer",
-   "TIS Operations Unit Head"
+   "TIS Sales Unit Head",
+   "TIS IT AppSupport / Admin",
+   "TIS General Manager"
   ],
   "write:settings": [
    "TIS IT AppSupport / Admin"

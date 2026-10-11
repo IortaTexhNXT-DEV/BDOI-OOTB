@@ -19,7 +19,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Clients | Create and edit |
 | Operations | Policy | Create and edit |
 | Operations | Fleet Schedules | Create and edit |
-| Operations | Marine Open Covers | Create and edit |
+| Operations | Marine Open Covers | View |
+| Operations | Credit Life | View |
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
@@ -49,6 +50,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
+| Reports > Operational Reports | CLI Generated Report | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > System | Schedules | View |
@@ -89,7 +91,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
-| Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
+| Operations | Marine open covers | Special | Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day |  |
+| Operations | Credit Life batches | View | See Credit Life batches, members, master policies and certificates of cover; print certificates | Credit Life |
 | Accounts | Receipts | View | See receipts | Receipts |
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
@@ -97,7 +100,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |

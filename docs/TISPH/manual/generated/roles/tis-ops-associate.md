@@ -18,10 +18,11 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Promotions | View |
 | Operations > Sales & Marketing | Scheme Master | View |
 | Operations > Sales & Marketing | Scheme Issuance | Create and edit |
-| Operations | Clients | View |
+| Operations | Clients | Create and edit |
 | Operations | Policy | Create and edit |
 | Operations | Fleet Schedules | Create and edit |
 | Operations | Marine Open Covers | Create and edit |
+| Operations | Credit Life | Create and edit |
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
@@ -54,9 +55,11 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Pipeline | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
+| Reports > Operational Reports | CLI Generated Report | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Scheme Document Checklist | View |
+| Master > Insurance | Motor Issuance Checklist | View |
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
 | Master > Finance | Discount Caps | View |
@@ -81,6 +84,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Scheme issuance | Create and edit | Create and upload scheme applications, receive documents, request waivers, send to the insurer, cancel before sending |  |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
+| Operations | Clients | Create and edit | Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents |  |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Policies | Create and edit | Record and issue policies, cover notes and CTPL certificates |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
@@ -96,7 +100,10 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
-| Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
+| Operations | Marine open covers | Create and edit | Set up and activate open covers, request endorsements, upload cargo shipments, submit, send and bill declarations |  |
+| Operations | Marine open covers | Special | Upload parcels, add a parcel, cancel a certificate not yet declared, request a reversal, print the certificates of the day |  |
+| Operations | Credit Life batches | View | See Credit Life batches, members, master policies and certificates of cover; print certificates | Credit Life |
+| Operations | Credit Life batches | Create and edit | Open Credit Life batches, upload or encode members, issue and cancel certificates, forward a batch to the insurer |  |
 | Accounts | Receipts | View | See receipts | Receipts |
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
@@ -104,9 +111,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | Calculations and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, CLI Generated Report and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
-| Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist, Scheme Document Checklist and Repair Shops |
+| Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist, Scheme Document Checklist, Motor Issuance Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
@@ -123,6 +130,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Claims | Claim decisions: review, reject, settle, approve a settlement, close | TIS Operations Unit Head or TIS General Manager |
+| Marine open covers | Approve or return open policy endorsements and reversals of declared certificates (never one you requested) | TIS Finance & General Accounting or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
