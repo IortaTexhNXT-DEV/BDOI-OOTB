@@ -312,7 +312,7 @@ describe('migration 0440', () => {
     expect(Object.fromEntries(grants.map((g) => [g.code, g.perms]))).toMatchObject({
       'system-admin': ['approve:data-load', 'read:data-load', 'write:data-load'],
       'tis-it-admin': ['read:data-load', 'write:data-load'],
-      'tis-finance': ['approve:data-load', 'read:data-load'],
+      'tis-finance': ['approve:data-load', 'read:data-load', 'write:data-load'],
       'tis-ops-unit-head': ['approve:data-load', 'read:data-load'],
       'tis-general-manager': ['approve:data-load', 'read:data-load'],
       'tis-auditor': ['read:data-load'],
@@ -320,5 +320,10 @@ describe('migration 0440', () => {
     const auditor = (await query(`SELECT p.code FROM roles r JOIN role_permissions rp ON rp.role_id = r.id JOIN permissions p ON p.id = rp.permission_id
       WHERE r.code = 'tis-auditor' AND p.code LIKE 'write:%' AND p.code NOT IN ('write:profile', 'write:notifications')`)).rows;
     expect(auditor).toEqual([]);
+    // the auditor reads the records and ledgers it reconciles (migration 0445), never personal data in full
+    const reads = (await query(`SELECT p.code FROM roles r JOIN role_permissions rp ON rp.role_id = r.id JOIN permissions p ON p.id = rp.permission_id
+      WHERE r.code = 'tis-auditor' ORDER BY p.code`)).rows.map((p) => p.code);
+    expect(reads).toEqual(expect.arrayContaining(['read:audit', 'read:clients', 'read:claims', 'read:journal-vouchers', 'read:period-end', 'read:policies', 'read:receipts', 'read:reports']));
+    expect(reads).not.toContain('view:pii');
   });
 });

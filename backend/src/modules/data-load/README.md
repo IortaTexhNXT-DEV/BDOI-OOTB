@@ -12,7 +12,7 @@ is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`.
 
 Master > System Configuration > Data Migration & Go-Live, one route per tab under `/master/configuration/go-live`:
 Overview (`GET /overview`), Templates (`GET /kits` with the naming convention, template downloads, value maps, name
-checker), Loads (`/loads`, `/loads/:id`), Reconciliation (`/reconciliation`, `/reconciliation/:id`), Mock Runs (`/runs`,
+checker), Loads (`/loads`, `/loads/:id`), Reconciliation (`/reconciliation`, `/reconciliation/:id`), Runs (`/runs`,
 `/runs/:id`), Cutover (`/cutover?run=`), Go-Live (`/decision`) and Hypercare. The screens read what they need to show a
 rule before the click, the server keeps the rule:
 
@@ -49,7 +49,7 @@ A load page follows its job by reading `GET /batches/:id` every 3 seconds while 
 | `sapOpening.js` | The one-time SAP opening file of the opening balance journal: request, approval by another user (after the lock), generation once |
 | `workbook.js` | Workbook builder and reader (per-object download, Lists, Instructions, the hidden Control sheet), errors and reconciliation workbooks |
 | `numbering.js` | Legacy numbers against the numbering series and the COC series |
-| `runs.js` | Mock Runs tab: runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), their checklist copied from the runbook, start, complete, cancel, timings, defects list, the run report (XLSX, PDF) |
+| `runs.js` | Runs tab: runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), their checklist copied from the runbook, start, complete, cancel, timings, defects list, the run report (XLSX, PDF) |
 | `cutover.js` | Cutover tab: checklist steps (start after the steps they depend on, done with evidence, block, skip, edit), the runbook template, defects |
 | `decisions.js` | Go / No-Go: decisions with their approvers, criteria copied from the template, automatic checks (`AUTO_CHECKS`), waivers, voting and outcome |
 | `evidence.js` | Evidence files of runs, steps, reconciliations, decisions and defects (storage folder `go-live-evidence`) |
@@ -137,7 +137,9 @@ balance left. Deposited after go-live like any cheque. Control Totals: the legac
 (object, measure, group, value), validated, never loaded.
 
 Amounts are pesos with at most two decimals (`pesoValue`; more is an error, never rounded); workbook totals are sums of
-per-cell centavos (`pesoSum`). Open items are in PHP only; a foreign-currency policy keeps its original currency, sum
+per-cell centavos (`pesoSum`). A number cell is read without the binary noise a spreadsheet may write
+(`numberText`: 9902.860000000001 is 9902.86). A date is a calendar date that exists (`isDate`: 2026-02-30 is refused,
+in the sheets and in the document names). Open items are in PHP only; a foreign-currency policy keeps its original currency, sum
 insured and rate in `doc` as reference.
 
 ## Result of each row, duplicates, value maps
@@ -156,10 +158,14 @@ The detector (`duplicateDetector(ctx)`) reads the stored side once per validatio
 numbers with their insurer, insurer names) and keeps the rows of the file as they are read. A duplicate row is not
 loadable until resolved (`POST /batches/:id/resolutions`): `load-as-new` (reason kept), `use-existing` (the row creates
 nothing; for a client rule the legacy client code, for an insurer variant the spelling, is mapped in
-`migration_value_maps`) or `insurer-suffix` (policy number of another insurer: loaded as `<number>/<insurer code>`,
+`migration_value_maps`; the target may be the client of an earlier row of the same workbook, created by the same load,
+so a Mock 1 on an empty database resolves its in-file duplicates; a Clients row whose code is mapped is Unchanged and
+stands for the client it is mapped to) or `insurer-suffix` (policy number of another insurer: loaded as `<number>/<insurer code>`,
 `legacy_number` the number as printed; `receipts/receivables.js` `findPolicy` finds it by the printed number when no
 other policy has it). A resolution holds while the next validation still finds the duplicate. The importers translate
-legacy values through the maps (`resolveValue`) before the master lookups; the batch keeps the version of the maps it
+legacy values through the maps (`resolveValue`) before the master lookups, and the row compare does the same for the
+code columns (client, insurer, product, account executive, branch, channel, payment status; an insurer or a product
+also by name), so a variant mapped to the stored insurer is Unchanged, never Changed; the batch keeps the version of the maps it
 read (`maps_version`) and the load refuses a batch whose maps changed since (`assertLoadable`, also the guard of a later
 submit). The batch keeps the SHA-256 of its file; a batch of the same kit loaded or waiting for approval with the same
 file is shown (`sameFileAs`) and warned.
@@ -226,15 +232,23 @@ and `golive.locked_by`. An unlock names the imports it reopens and its hours (up
 `migration.unlock_window_days` from the lock it needs a steering committee reference. The lock stays on during an
 unlock; the job `golive-relock` (every 5 minutes) ends it at `expires_at`. The settings `golive.*`,
 `migration.load_approval_required`, `migration.*_include_migrated`, `migration.sap_gl_include_opening` and
-`migration.subledger_tieouts` belong to the Go-Live tab (`lib/settingOwners.js`): `PUT /settings`, the system
-configuration and the Settings sheet refuse them; the cutover date is set by `PUT /golive/cutover-date` (refused once
-locked and while a migration load is loaded or in progress), the others by `PUT /golive/settings` (`approve:data-load`).
+`migration.subledger_tieouts`, `migration.unlock_max_hours`, `migration.unlock_window_days`,
+`migration.evidence_retention_years`, `migration.duplicate_rules`, `migration.document_types`,
+`migration.numbering_mask_series` and `dashboard.default_origin` belong to the Go-Live tab (`lib/settingOwners.js`):
+`PUT /settings`, the system configuration and the Settings sheet refuse them; the cutover date is set by
+`PUT /golive/cutover-date` (refused once locked and while a migration load is loaded or in progress); the others
+(`GO_LIVE_SETTINGS`, tie-outs aside) by a request `PUT /golive/settings` (write or approve:data-load, with a reason;
+action `settings` of `go_live_lock_requests`, one request of the tab waiting at a time) approved by another user on
+`POST /golive/lock-requests/:id/approve`; approval of loads, the SAP opening file and the duplicate checks no longer
+change once locked. The value maps are closed with the migration imports (`migrationImportOpen('migration')`).
 
 ## Reconciliation
 
 `reconciliation.js` (Data Migration & Go-Live > Reconciliation). A reconciliation covers the loaded migration batches
 of a run (`all_batches`: every one of them, refreshed on recompute; or the batches chosen) and counts the records of
-those batches only (`load_batch_id = ANY(batch_ids)`): clients (by type), policies (by product and insurer, gross and
+those batches only: the records their loaded rows created, changed or found unchanged (a load keeps the record of an
+Unchanged row, `recordOf` of the sheet), so a re-extract (Mock 2, the dress rehearsal, a cutover delta) covers what it
+carries whichever load created it; batches of any run of the cutover date may be chosen. Measures: clients (by type), policies (by product and insurer, gross and
 net premium, sum insured, expiring within 90 days), open items (by insurer and ageing bucket at the day before the
 cutover), post-dated cheques (by cheque month), open claims (by product), opening balances (debit, credit, balance per
 account on its normal side). Legacy figures: the Control Totals rows of the batches (summed), entry on screen
@@ -242,17 +256,27 @@ account on its normal side). Legacy figures: the Control Totals rows of the batc
 recompute. Check: trial balance debits = credits. Tie-outs (`migration.subledger_tieouts`, `saveTieouts`): source
 `open-items` (GL opening balance of the accounts against the open items loaded; per insurer the open items loaded
 against the Open Items open balance of the insurer), `pdc` (cheques loaded against the Post-Dated Cheques amount),
-`listing` (GL opening balance against the Sub-ledger measure of the definition), `bank` (per bank account of
-`bank_account_links`, against Sub-ledger cash in bank of the account) and `sap` (per account, against Sub-ledger sap
-trial balance). The tie-out lines of `open-items` per insurer and of `pdc` take the legacy figure of their measure line
-(`mirror`). Differences (`syncDifferences`): found again they keep their explanation and status, no longer found they
+`listing` (GL opening balance against the Sub-ledger measure of the definition), `bank` (in total: the GL opening
+balance of the tie-out's accounts, else of the bank accounts' GL accounts, else of the Cash in Bank accounts of the set;
+and per bank account of `bank_account_links`; against Sub-ledger cash in bank) and `sap` (in total: the debit total of
+the set; and per account; against Sub-ledger sap trial balance). Only the total lines need their legacy figure before
+the sign-off; a group line (per insurer, per account, per bank account) is compared when its figure is given. The
+legacy figures are uploaded as a Control Totals sheet or as a trial balance in its own layout (account code, debit,
+credit, a title above the header allowed; each account on its normal side and the debit total). The tie-out lines of `open-items` per insurer and of `pdc` take the legacy figure of their measure line
+(`mirror`), at once when that figure is entered (the line change computes the reconciliation again). Differences (`syncDifferences`): found again they keep their explanation and status, no longer found they
 are fixed (an open one is dropped). Tolerance other than zero, acceptance and sign-off: approve:data-load and never a
-user who uploaded, submitted or approved a batch of the reconciliation (`assertNotLoader`); one slot per user; signing
+user who uploaded, submitted or approved a batch of the reconciliation (`assertNotLoader`); a difference is explained (who and when kept: `explained_by`,
+`explained_at`) and accepted by another user with an acceptance note (the explanation stays); one slot per user, and a
+slot naming roles (`migration.recon_signoffs` `roles`, copied to `migration_recon_signoffs.roles`: Finance Head, the
+finance role) is signed by a holder of one of them; signing
 needs no open difference and every total with its legacy figure (status `missing`). The first signature freezes the
 reconciliation; the last builds the PDF (`reportPdf`) once, stores it in `go-live-evidence` (`EVIDENCE_FOLDER`, refused
 by `/api/s3/object` and the file delete) with its SHA-256. `afterBatchChange(batch, user)`, called by the load and undo
 jobs and the direct load, supersedes the signed (or partly signed) reconciliations of the run with a new one (the screen
-and upload figures and the tolerances carried over) and computes the open ones again; it never fails the load.
+and upload figures and the tolerances carried over) and computes the open ones again; a reconciliation of another run whose records the load (or the undo) changed is
+superseded with no successor, its signed report kept as signed; it never fails the load. The report prints counts
+without decimals, dates and times in the business format and time zone, the explanation with who gave it and the
+acceptance with its note.
 
 ## Mock runs and the cutover checklist
 
@@ -288,7 +312,8 @@ unresolved duplicate or valid rows only), G3 `reconciliation-checks` (the latest
 superseded: every check and tie-out line matched, or each of its differences accepted), G4 `reconciliation-signed`, G6
 `environment-mirrored` (latest comparison), G7 `users-ready` (no active seeded account but the first administrator, no
 active user with role `tis-superid`, `security.password_sign_in_enabled` off), G8 `numbering` (`collidingNumbers` of
-the client, policy, invoice and claim series over every form, and `cocCollisions`), G9 `restore-point` (CO-3 done with
+the client, policy, invoice and claim series over every form, `cocCollisions`, and the series of
+`migration.numbering_mask_series` without the branch of the TISPH numbering mask), G9 `restore-point` (CO-3 done with
 an evidence file, the run's restore point), G11 `evidence-archived` (the pack hash, matching a download, and the
 archive reference). They are computed when the decision is created, on refresh (draft) and when voting opens; a waived
 criterion found met becomes met. Manual criteria are set met or not met with their evidence (`write:data-load`). A
@@ -299,13 +324,15 @@ reads the latest Go decision of the production run (`golive.js` `lockConditions`
 
 ## Overview and hypercare
 
-`GET /overview` (`overview.js`): phases (Templates, Mock 1, Mock 2, Dress rehearsal, Cutover, Go-live, Hypercare), the
+`GET /overview` (`overview.js`): phases (Templates, Mock 1, Mock 2, Dress rehearsal, Cutover: done when the production run is completed, Go-live,
+Hypercare), the
 current run (production, else the latest open run) with checklist progress, reconciliation and decision, loads by status
-and rows by result, open defects of severity 1 and 2, and what waits for the user (loads, undos and lock requests to
+and rows by result, open defects of severity 1 and 2 of every run that is not cancelled (G1 is not set Met while one is open), and what waits for the user (loads, undos and lock requests to
 approve that are not their own, votes, steps they own). `GET /hypercare` (`hypercare.js`), once go-live is locked, for
 `migration.hypercare_days`: business issued since the cutover date, migrated open items collected, renewals of migrated
 policies due in 60 days, endorsements, claims and cancellations on migrated policies, edits to migrated records after
-the lock (audit entries other than `migrate-*`), daily checks (trial balance, sub-ledger tie-out of the month-end check,
+the lock (audit entries other than `migrate-*`), daily checks (trial balance, sub-ledger tie-out of the month-end check, whose GL side counts the go-live opening
+balances,
 yesterday's SAP GL file, numbering, lock), imports refused while locked, unlocks, open defects of the production run.
 
 ## Retention
@@ -339,7 +366,9 @@ set behind it (`writeOpeningJournal`).
 
 Dashboards (`dashboard/service.js`: `dashboardOrigin`, `issuedSinceGoLive`), incentives (`incentive/service.js`
 `achievement`), commission (`commission/service.js` `onPolicyPremiumCollected`, `dashboard`), the production register,
-premium by product, new business vs renewals and dealer production reports (Origin column, criteria and filter) and the
+premium by product, new business vs renewals and dealer production reports, and the claims position and ageing,
+premium receivable SOA, receivables ageing, collection report, receipts register, commission statement and renewal
+retention (Origin column, criteria and filter: the claim, the open item or bill, what a receipt collects, the policy) and the
 Report Builder (Origin column) read `origin` (`lib/origin.js` `kpiOriginWhere`). Rules and settings:
 `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`, *Migrated business in the figures*.
 
@@ -355,7 +384,7 @@ another layout is refused; a file without one is read by its headers.
 ## Document file naming
 
 `<RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>` (`naming.js`; record types CLT, POL, END, CLM, BIL;
-document types of `migration.document_types`). `POST /document-names/check` checks a list of names (never the files) and
+document types of `migration.document_types`). `POST /document-names/check` (write:data-load) checks a list of names (never the files) and
 whether each record is in BrokerVerse by legacy number; the result is kept in `generated_reports` (code
 `migration-document-names`) for its workbook.
 

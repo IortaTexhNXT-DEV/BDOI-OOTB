@@ -10711,7 +10711,7 @@
     }
   }
 }"
-455,Data Migration & Go-Live,POST,/api/data-load/document-names/check,"Check a list of legacy document file names against the naming convention (multipart ""file"": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming,Bearer JWT,"read:data-load, write:data-load",multipart/form-data file,"{
+455,Data Migration & Go-Live,POST,/api/data-load/document-names/check,"Check a list of legacy document file names against the naming convention (write:data-load; multipart ""file"": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming,Bearer JWT,write:data-load,multipart/form-data file,"{
   ""success"": true,
   ""message"": ""Checked 2 name(s): 1 invalid"",
   ""data"": {
@@ -10745,7 +10745,7 @@
   }
 }"
 456,Data Migration & Go-Live,GET,/api/data-load/document-names/check/:token/workbook,Result of a document name check (XLSX): summary and one row per name; only for the user who ran the check,Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming > Download,Bearer JWT,"read:data-load, write:data-load",,(xlsx file)
-457,Data Migration & Go-Live,GET,/api/data-load/evidence,"Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence,Bearer JWT,"read:data-load, write:data-load",Query: ?ownerType=step&ownerId=31,"{
+457,Data Migration & Go-Live,GET,/api/data-load/evidence,"Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)",Master > System Configuration > Data Migration & Go-Live > Runs > Evidence,Bearer JWT,"read:data-load, write:data-load",Query: ?ownerType=step&ownerId=31,"{
   ""success"": true,
   ""data"": [
     {
@@ -10762,7 +10762,7 @@
     }
   ]
 }"
-458,Data Migration & Go-Live,POST,/api/data-load/evidence,"Attach an evidence file (multipart ""file"", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach,Bearer JWT,write:data-load,"multipart/form-data file, ownerType, ownerId, note","{
+458,Data Migration & Go-Live,POST,/api/data-load/evidence,"Attach an evidence file (multipart ""file"", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256",Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Attach,Bearer JWT,write:data-load,"multipart/form-data file, ownerType, ownerId, note","{
   ""success"": true,
   ""message"": ""Evidence attached"",
   ""data"": {
@@ -10778,8 +10778,8 @@
     ""uploadedAt"": ""2026-10-31T14:20:00Z""
   }
 }"
-459,Data Migration & Go-Live,GET,/api/data-load/evidence/:id,Download an evidence file (the only way it is served; each download is audited),Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence,Bearer JWT,"read:data-load, write:data-load",,(file)
-460,Data Migration & Go-Live,DELETE,/api/data-load/evidence/:id,"Remove an evidence file: its uploader, while the run is planned or running",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove,Bearer JWT,write:data-load,,"{
+459,Data Migration & Go-Live,GET,/api/data-load/evidence/:id,Download an evidence file (the only way it is served; each download is audited),Master > System Configuration > Data Migration & Go-Live > Runs > Evidence,Bearer JWT,"read:data-load, write:data-load",,(file)
+460,Data Migration & Go-Live,DELETE,/api/data-load/evidence/:id,"Remove an evidence file: its uploader, while the run is planned or running",Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Remove,Bearer JWT,write:data-load,,"{
   ""success"": true,
   ""message"": ""Evidence removed"",
   ""data"": {
@@ -10826,7 +10826,8 @@
       ""requestedAt"": ""2026-11-03T02:00:00Z"",
       ""decidedBy"": null,
       ""decidedAt"": null,
-      ""decisionRemarks"": null
+      ""decisionRemarks"": null,
+      ""settings"": []
     },
     ""conditions"": [
       {
@@ -10885,7 +10886,8 @@
       ""requestedAt"": ""2026-11-03T02:00:00Z"",
       ""decidedBy"": null,
       ""decidedAt"": null,
-      ""decisionRemarks"": null
+      ""decisionRemarks"": null,
+      ""settings"": []
     },
     ""conditions"": [
       {
@@ -10934,7 +10936,8 @@
       ""requestedAt"": ""2026-11-03T02:00:00Z"",
       ""decidedBy"": null,
       ""decidedAt"": null,
-      ""decisionRemarks"": null
+      ""decisionRemarks"": null,
+      ""settings"": []
     }
   ]
 }"
@@ -10970,10 +10973,11 @@
     ""requestedAt"": ""2026-11-03T02:00:00Z"",
     ""decidedBy"": null,
     ""decidedAt"": null,
-    ""decisionRemarks"": null
+    ""decisionRemarks"": null,
+    ""settings"": []
   }
 }"
-465,Data Migration & Go-Live,POST,/api/data-load/golive/lock-requests/:id/approve,"Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself",Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve,Bearer JWT,approve:data-load,,"{
+465,Data Migration & Go-Live,POST,/api/data-load/golive/lock-requests/:id/approve,"Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings",Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve,Bearer JWT,approve:data-load,,"{
   ""success"": true,
   ""message"": ""Go-live unlock approved"",
   ""data"": {
@@ -10997,7 +11001,8 @@
     ""requestedAt"": ""2026-11-03T02:00:00Z"",
     ""decidedBy"": null,
     ""decidedAt"": null,
-    ""decisionRemarks"": null
+    ""decisionRemarks"": null,
+    ""settings"": []
   }
 }"
 466,Data Migration & Go-Live,POST,/api/data-load/golive/lock-requests/:id/reject,Reject a lock or unlock request with remarks (not its requester),Master > System Configuration > Data Migration & Go-Live > Go-Live > Reject,Bearer JWT,approve:data-load,"{
@@ -11026,10 +11031,11 @@
     ""requestedAt"": ""2026-11-03T02:00:00Z"",
     ""decidedBy"": null,
     ""decidedAt"": null,
-    ""decisionRemarks"": null
+    ""decisionRemarks"": null,
+    ""settings"": []
   }
 }"
-467,Data Migration & Go-Live,POST,/api/data-load/golive/lock-requests/:id/withdraw,Withdraw a lock or unlock request (its requester),Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw,Bearer JWT,write:data-load,,"{
+467,Data Migration & Go-Live,POST,/api/data-load/golive/lock-requests/:id/withdraw,"Withdraw a lock, unlock or settings request (its requester)",Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw,Bearer JWT,"write:data-load, approve:data-load",,"{
   ""success"": true,
   ""message"": ""Go-live unlock withdrawn"",
   ""data"": {
@@ -11053,7 +11059,8 @@
     ""requestedAt"": ""2026-11-03T02:00:00Z"",
     ""decidedBy"": null,
     ""decidedAt"": null,
-    ""decisionRemarks"": null
+    ""decisionRemarks"": null,
+    ""settings"": []
   }
 }"
 468,Data Migration & Go-Live,GET,/api/data-load/golive/sap-opening-file,"The one-time SAP opening file: whether BrokerVerse sends it (migration.sap_gl_include_opening), the opening balance journal, the requests and, once generated, its SAP GL run and files",Master > System Configuration > Data Migration & Go-Live > Go-Live > SAP opening file,Bearer JWT,"read:data-load, write:data-load",,"{
@@ -11183,18 +11190,40 @@
     ""run"": null
   }
 }"
-474,Data Migration & Go-Live,PUT,/api/data-load/golive/settings,"Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings,Bearer JWT,approve:data-load,"{
-  ""loadApprovalRequired"": true,
-  ""kpiIncludeMigrated"": false
+474,Data Migration & Go-Live,PUT,/api/data-load/golive/settings,"Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked",Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings,Bearer JWT,"write:data-load, approve:data-load","{
+  ""settings"": {
+    ""kpiIncludeMigrated"": true
+  },
+  ""reason"": ""Steering committee: count migrated renewals in the KPIs""
 }","{
   ""success"": true,
-  ""message"": ""Settings saved"",
+  ""message"": ""Go-live settings change requested"",
   ""data"": {
-    ""loadApprovalRequired"": true,
-    ""kpiIncludeMigrated"": false,
-    ""commissionIncludeMigrated"": false,
-    ""incentiveIncludeMigrated"": false,
-    ""sapGlIncludeOpening"": false
+    ""id"": 3,
+    ""action"": ""settings"",
+    ""actionLabel"": ""Go-live settings change"",
+    ""status"": ""pending"",
+    ""reason"": ""Late legacy claim found on day 2"",
+    ""decisionRef"": null,
+    ""scope"": [],
+    ""scopeLabels"": [],
+    ""hours"": null,
+    ""expiresAt"": null,
+    ""relockedAt"": null,
+    ""decisionId"": null,
+    ""requestedBy"": ""Andrea Lim"",
+    ""requestedAt"": ""2026-11-03T02:00:00Z"",
+    ""decidedBy"": null,
+    ""decidedAt"": null,
+    ""decisionRemarks"": null,
+    ""settings"": [
+      {
+        ""field"": ""kpiIncludeMigrated"",
+        ""label"": ""Migrated policies in dashboards and KPIs"",
+        ""before"": false,
+        ""after"": true
+      }
+    ]
   }
 }"
 475,Data Migration & Go-Live,GET,/api/data-load/hypercare,"Hypercare figures after the go-live lock: business issued since go-live, migrated open items collected, renewals of migrated policies, endorsements, claims and cancellations on migrated policies, edits to migrated records, daily checks and tie-outs, imports refused while locked, unlocks and relocks, open defects of the production run; { started: false } before the lock",Master > System Configuration > Data Migration & Go-Live > Hypercare,Bearer JWT,"read:data-load, write:data-load",,"{
@@ -12498,7 +12527,7 @@
     ""durationMinutes"": 45
   }
 }"
-492,Data Migration & Go-Live,GET,/api/data-load/runs,"Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status",Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,"read:data-load, write:data-load",Query: ?kind=mock-2&status=completed&page=1&perPage=50,"{
+492,Data Migration & Go-Live,GET,/api/data-load/runs,"Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status",Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,"read:data-load, write:data-load",Query: ?kind=mock-2&status=completed&page=1&perPage=50,"{
   ""success"": true,
   ""data"": [
     {
@@ -12541,7 +12570,7 @@
   ""perPage"": 50,
   ""totalPages"": 1
 }"
-493,Data Migration & Go-Live,POST,/api/data-load/runs,Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference,Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run,Bearer JWT,write:data-load,"{
+493,Data Migration & Go-Live,POST,/api/data-load/runs,Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference,Master > System Configuration > Data Migration & Go-Live > Runs > New run,Bearer JWT,write:data-load,"{
   ""kind"": ""mock-2"",
   ""title"": ""Mock 2 - full extract"",
   ""cutoverDate"": ""2026-11-02"",
@@ -12588,7 +12617,7 @@
     ""closedAt"": null
   }
 }"
-494,Data Migration & Go-Live,GET,/api/data-load/runs/:id,"A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals",Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,"read:data-load, write:data-load",,"{
+494,Data Migration & Go-Live,GET,/api/data-load/runs/:id,"A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals",Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,"read:data-load, write:data-load",,"{
   ""success"": true,
   ""data"": {
     ""id"": 3,
@@ -12642,7 +12671,7 @@
     }
   }
 }"
-495,Data Migration & Go-Live,PUT,/api/data-load/runs/:id,"Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)",Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,write:data-load,"{
+495,Data Migration & Go-Live,PUT,/api/data-load/runs/:id,"Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)",Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,write:data-load,"{
   ""evidencePackSha256"": ""9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"",
   ""archiveRef"": ""TISPH-ARCH-2026-0042""
 }","{
@@ -12683,7 +12712,7 @@
     ""closedAt"": null
   }
 }"
-496,Data Migration & Go-Live,POST,/api/data-load/runs/:id/cancel,Cancel a planned or running run with a reason (never the production run once go-live is locked),Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,write:data-load,"{
+496,Data Migration & Go-Live,POST,/api/data-load/runs/:id/cancel,Cancel a planned or running run with a reason (never the production run once go-live is locked),Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,write:data-load,"{
   ""reason"": ""Replaced by an extra mock after the cleansing""
 }","{
   ""success"": true,
@@ -12723,7 +12752,7 @@
     ""closedAt"": null
   }
 }"
-497,Data Migration & Go-Live,POST,/api/data-load/runs/:id/complete,"Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress",Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,write:data-load,"{
+497,Data Migration & Go-Live,POST,/api/data-load/runs/:id/complete,"Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress",Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,write:data-load,"{
   ""result"": ""passed-with-issues"",
   ""exitCriteriaMet"": true,
   ""summary"": ""Reconciled; two severity 3 defects deferred""
@@ -12765,7 +12794,7 @@
     ""closedAt"": null
   }
 }"
-498,Data Migration & Go-Live,GET,/api/data-load/runs/:id/defects,"Defects of a run, newest first",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects,Bearer JWT,"read:data-load, write:data-load",,"{
+498,Data Migration & Go-Live,GET,/api/data-load/runs/:id/defects,"Defects of a run, newest first",Master > System Configuration > Data Migration & Go-Live > Runs > Defects,Bearer JWT,"read:data-load, write:data-load",,"{
   ""success"": true,
   ""data"": [
     {
@@ -12789,7 +12818,7 @@
     }
   ]
 }"
-499,Data Migration & Go-Live,POST,/api/data-load/runs/:id/defects,"Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add,Bearer JWT,write:data-load,"{
+499,Data Migration & Go-Live,POST,/api/data-load/runs/:id/defects,"Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution",Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Add,Bearer JWT,write:data-load,"{
   ""title"": ""Plate number with a trailing space refused"",
   ""object"": ""Policies - Motor"",
   ""severity"": 3,
@@ -12818,7 +12847,7 @@
     ""closedAt"": null
   }
 }"
-500,Data Migration & Go-Live,PUT,/api/data-load/runs/:id/defects/:defectId,Change a defect (closing it records when),Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit,Bearer JWT,write:data-load,"{
+500,Data Migration & Go-Live,PUT,/api/data-load/runs/:id/defects/:defectId,Change a defect (closing it records when),Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Edit,Bearer JWT,write:data-load,"{
   ""status"": ""fixed"",
   ""resolution"": ""Trimmed in the extract""
 }","{
@@ -12844,9 +12873,9 @@
     ""closedAt"": null
   }
 }"
-501,Data Migration & Go-Live,GET,/api/data-load/runs/:id/evidence-pack,"Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack,Bearer JWT,"read:data-load, write:data-load",,(application/zip)
-502,Data Migration & Go-Live,GET,/api/data-load/runs/:id/report,"Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded",Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report,Bearer JWT,"read:data-load, write:data-load",Query: ?format=xlsx,(xlsx or pdf file)
-503,Data Migration & Go-Live,POST,/api/data-load/runs/:id/start,Start a planned run (actual start now),Master > System Configuration > Data Migration & Go-Live > Mock Runs,Bearer JWT,write:data-load,,"{
+501,Data Migration & Go-Live,GET,/api/data-load/runs/:id/evidence-pack,"Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail",Master > System Configuration > Data Migration & Go-Live > Runs > Evidence pack,Bearer JWT,"read:data-load, write:data-load",,(application/zip)
+502,Data Migration & Go-Live,GET,/api/data-load/runs/:id/report,"Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded",Master > System Configuration > Data Migration & Go-Live > Runs > Report,Bearer JWT,"read:data-load, write:data-load",Query: ?format=xlsx,(xlsx or pdf file)
+503,Data Migration & Go-Live,POST,/api/data-load/runs/:id/start,Start a planned run (actual start now),Master > System Configuration > Data Migration & Go-Live > Runs,Bearer JWT,write:data-load,,"{
   ""success"": true,
   ""message"": ""RUN-000003 started"",
   ""data"": {

@@ -83,6 +83,9 @@ describe('hypercare', () => {
     expect(h.defects.find((d) => d.severity === 2).open).toBe(1);
     expect(h.checks.map((c) => c.code)).toEqual(['trial-balance', 'subledger-tieout', 'sap-gl-file', 'numbering', 'lock']);
     expect(h.checks.find((c) => c.code === 'lock').ok).toBe(true);
+    // the migrated open items and their opening balance meet in the tie-out: the GL side counts the go-live set
+    expect(h.checks.find((c) => c.code === 'subledger-tieout')).toMatchObject({ ok: true, lines: expect.arrayContaining([
+      expect.objectContaining({ ledger: 'Premium receivable', account: '1202001', subledger: 10000, gl: 10000, difference: 0 })]) });
     expect(h.checks.find((c) => c.code === 'numbering').ok).toBe(true);
     expect(h.checks.find((c) => c.code === 'sap-gl-file')).toMatchObject({ ok: false, detail: 'No run' });
   });

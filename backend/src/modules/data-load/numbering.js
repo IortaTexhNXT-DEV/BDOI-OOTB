@@ -45,10 +45,22 @@ async function shapeWindow() {
  * pattern holds the token ({BRANCH}: every active branch code, {LOB}: every line of business of a product or policy),
  * plus the form without them.
  */
+/** The first day of each month from the month of `from` to `to` (YYYY-MM-DD). */
+function monthsOf(from, to) {
+  const out = [];
+  const d = new Date(`${from.slice(0, 7)}-01T00:00:00Z`);
+  while (d.toISOString().slice(0, 10) <= to) {
+    out.push(d.toISOString().slice(0, 10));
+    d.setUTCMonth(d.getUTCMonth() + 1);
+  }
+  return out;
+}
+
 export async function seriesShapes(code, { from = null, to = null } = {}) {
   const window = from && to ? { from, to } : await shapeWindow();
+  // the months as a list (not generate_series): the planner then sees a few rows and does not compile the query
   const rows = await many(`WITH s AS (SELECT * FROM document_numbering WHERE code = $1),
-      days AS (SELECT generate_series(date_trunc('month', $2::date), $3::date, interval '1 month')::date AS day),
+      days AS (SELECT unnest($2::date[]) AS day),
       branch_codes AS (SELECT NULL::text AS b UNION SELECT DISTINCT upper(btrim(b.code)) FROM branches b, s
                         WHERE position('{BRANCH}' IN s.pattern) > 0 AND b.status = 'active' AND btrim(COALESCE(b.code, '')) <> ''),
       lines AS (SELECT NULL::text AS l UNION SELECT DISTINCT upper(btrim(x.l)) FROM s,
@@ -60,7 +72,7 @@ export async function seriesShapes(code, { from = null, to = null } = {}) {
       FROM s CROSS JOIN days d CROSS JOIN LATERAL (SELECT numbering_period_key(s.reset_rule, d.day) AS period) k
       CROSS JOIN branch_codes bc CROSS JOIN lines ln
       LEFT JOIN sequences q ON q.name = s.code AND q.period = k.period
-     ORDER BY k.period`, [code, window.from, window.to]);
+     ORDER BY k.period`, [code, monthsOf(window.from, window.to)]);
   const shapes = new Map();
   for (const r of rows) {
     const { f0, f1 } = r;

@@ -100,14 +100,19 @@ export function loadOrder(entries) {
   return out;
 }
 
-/** The objects of a kit (or of a channel), with their sheets, in load order; objects not present here are left out. */
+/**
+ * The objects of a kit (or of a channel), with their sheets, in load order; objects not present here are left out, and
+ * so are they from the dependsOn of the others (no sheet names a sheet this workbook does not have).
+ */
 export async function objects({ kit = null, channel = null } = {}) {
   const chosen = [];
+  const absent = new Set();
   for (const e of ENTRIES) {
     if ((kit && e.kit !== kit) || (channel && !e.channels.includes(channel))) continue;
-    if (e.present && !(await e.present())) continue;
+    if (e.present && !(await e.present())) { absent.add(e.key); continue; }
     chosen.push(e);
   }
+  if (absent.size) chosen.splice(0, chosen.length, ...chosen.map((e) => ({ ...e, dependsOn: e.dependsOn.filter((d) => !absent.has(d)) })));
   const byKey = new Map(chosen.map((e) => [e.key, e]));
   const out = [];
   for (const key of loadOrder(chosen)) {

@@ -57,6 +57,12 @@ describe('owned settings', () => {
       expect(r.body.message).toMatch(/managed in Master > System Configuration > Data Migration & Go-Live > Go-Live/);
     }
     expect((await s.admin.api('put', '/system-settings/configuration').send({ settings: { 'golive.locked': true } })).status).toBe(400);
+    // the limits of an unlock, the evidence retention, the duplicate checks, the dashboards' view, the document types and
+    // the numbering mask belong to the Go-Live tab too: one administrator cannot change them alone
+    for (const [key, value] of [['migration.unlock_max_hours', 720], ['migration.unlock_window_days', 3650], ['migration.duplicate_rules', []],
+      ['dashboard.default_origin', 'all'], ['migration.evidence_retention_years', 0], ['migration.document_types', ['X1']], ['migration.numbering_mask_series', ['policy']]]) {
+      expect((await s.admin.api('put', '/system-settings/configuration').send({ settings: { [key]: value } })).status, key).toBe(400);
+    }
     const wb = workbook(s.kits, { Settings: [{ 'Setting Key': 'golive.locked', Value: 'true' }, { 'Setting Key': 'migration.sap_gl_include_opening', Value: 'true' }] }, 'configuration');
     const r = await uploadAs(s.admin.api, wb, 'configuration');
     expect(r.body.data.errors.map((e) => [e.row, e.column])).toEqual([[2, 'Setting Key'], [3, 'Setting Key']]);
@@ -151,6 +157,23 @@ describe('the lock', () => {
     expect(await isGoLiveLocked(pool)).toBe(true);
   });
 
+  it('closes the value maps and the settings the lock freezes; the others change by a request another user approves', async () => {
+    const map = await requester.api('post', '/data-load/value-maps').send({ object: 'insurer', legacyValue: 'Malayan Ins', targetCode: 'MALAYAN' });
+    expect(map.status).toBe(409);
+    const frozen = await approver.api('put', '/data-load/golive/settings').send({ settings: { sapGlIncludeOpening: true }, reason: 'SAP after go-live' });
+    expect(frozen.status).toBe(409);
+    expect(frozen.body.message).toMatch(/opening balances sent to sap once no longer change/);
+    expect(await getSetting('migration.sap_gl_include_opening')).toBe(false);
+    const kpi = await approver.api('put', '/data-load/golive/settings').send({ settings: { kpiIncludeMigrated: true }, reason: 'Steering committee: count migrated renewals' });
+    expect(kpi.status, JSON.stringify(kpi.body)).toBe(201);
+    expect(await getSetting('migration.kpi_include_migrated')).toBe(false);
+    expect((await decide(approver, kpi.body.data.id, 'approve')).status).toBe(403);
+    expect((await decide(requester, kpi.body.data.id, 'approve')).status).toBe(200);
+    expect(await getSetting('migration.kpi_include_migrated')).toBe(true);
+    const back = await approver.api('put', '/data-load/golive/settings').send({ settings: { kpiIncludeMigrated: false }, reason: 'Back to issued business only' });
+    expect((await decide(requester, back.body.data.id, 'approve')).status).toBe(200);
+  });
+
   it('refuses a file of the ordinary policy upload with rows issued before the cutover date; business issued after it still loads', async () => {
     const legacy = await bulk([policyRow('LK-NEW-1', addDays(s.cutover, 1)), policyRow('LK-OLD-1', addDays(s.cutover, -20))]);
     expect(legacy.status).toBe(409);
@@ -232,6 +255,8 @@ describe('route inventory', () => {
     'POST /receipts/opening-items/import': 'opening-items',
     'POST /period-end/opening-balances/validate': 'opening-balances',
     'POST /period-end/opening-balances/import': 'opening-balances',
+    'POST /data-load/value-maps': 'migration (the value maps serve the migration loads)',
+    'POST /data-load/value-maps/upload': 'migration (the value maps serve the migration loads)',
   };
   const EXEMPT = {
     'POST /data-load/batches/:id/withdraw': 'withdraws a request: loads nothing',
@@ -244,8 +269,6 @@ describe('route inventory', () => {
     'POST /data-load/golive/lock-requests/:id/approve': 'the lock and the unlock themselves',
     'POST /data-load/golive/lock-requests/:id/reject': 'the lock and the unlock themselves',
     'POST /data-load/golive/lock-requests/:id/withdraw': 'the lock and the unlock themselves',
-    'POST /data-load/value-maps': 'translation of legacy codes, creates no business record',
-    'POST /data-load/value-maps/upload': 'translation of legacy codes, creates no business record',
     'POST /data-load/document-names/check': 'checks file names, loads nothing',
     'POST /access-control/authority-limits': 'a configuration master, also loaded by the configuration workbook',
     'PUT /bank-reconciliation/bank-accounts/:code': 'bank reconciliation set-up of the live book (reconcile-from date and opening statement balance)',

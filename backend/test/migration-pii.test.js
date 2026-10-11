@@ -159,3 +159,31 @@ describe('masking', () => {
     expect(row.tin).toMatch(/^pii:1:/);
   });
 });
+
+describe('the audit trail of migrated records', () => {
+  it('is masked for the read-only auditor: the record images and the business events of a migrated client', async () => {
+    expect((await s.admin.api('post', '/users').send({ username: 'pii.auditor', password: 'Welcome@123', displayName: 'pii.auditor', email: 'pii.auditor@example.ph',
+      roles: ['tis-auditor'], mustChangePassword: false })).status).toBe(201);
+    const token = await loginAs(s.app, 'pii.auditor', 'Welcome@123');
+    const auditor = (m, p) => request(s.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
+    const client = await one('SELECT id FROM clients WHERE client_code = \'MJ1-C\'');
+    const raw = await auditor('get', `/settings/audit?entity=client&entityId=${client.id}`);
+    expect(raw.status).toBe(200);
+    const text = JSON.stringify(raw.body);
+    expect(raw.body.data.some((e) => e.action === 'migrate-create')).toBe(true);
+    expect(text).not.toContain(TIN);
+    expect(text).not.toContain('rosa1@example.ph');
+    const events = await auditor('get', `/settings/audit/events?entity=client&entityRef=${client.id}`);
+    expect(events.status).toBe(200);
+    expect(JSON.stringify(events.body)).not.toContain('rosa1@example.ph');
+    const history = await auditor('get', `/audit/records/client/${client.id}`);
+    expect(history.status).toBe(200);
+    expect(JSON.stringify(history.body)).not.toContain('rosa1@example.ph');
+    // the administrator, who holds view:pii, reads them in full
+    expect(JSON.stringify((await s.admin.api('get', `/settings/audit?entity=client&entityId=${client.id}`)).body)).toContain('rosa1@example.ph');
+    // and the auditor reads the records it reconciles, masked
+    const clients = await auditor('get', '/clients?origin=migrated');
+    expect(clients.status).toBe(200);
+    expect(JSON.stringify(clients.body)).not.toContain(TIN);
+  });
+});

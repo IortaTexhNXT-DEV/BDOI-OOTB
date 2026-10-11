@@ -26,6 +26,7 @@ const CONTROL_TOTALS = [
   control('Opening Balances', 'debit', '', '10000'), control('Opening Balances', 'credit', '', '10000'),
   control('Sub-ledger', 'due to insurers', 'MALAYAN', '10000'),
   control('Sub-ledger', 'sap trial balance', '1202001', '10000'), control('Sub-ledger', 'sap trial balance', '210245', '10000'),
+  control('Sub-ledger', 'sap trial balance', '', '10000'),
 ];
 
 let s;
@@ -148,6 +149,14 @@ describe('automatic criteria', () => {
 
   it('G8: lists a legacy number of next year\'s series form and a migrated COC inside an unused COC range', async () => {
     expect(criterion(decision, 'G8').status).toBe('met');
+    // a series of new business without the branch of the TISPH numbering mask
+    await query('UPDATE app_settings SET value = \'["policy"]\'::jsonb WHERE key = \'migration.numbering_mask_series\'');
+    clearSettingsCache();
+    const mask = criterion(await refresh(), 'G8');
+    expect(mask.status).toBe('not-met');
+    expect(mask.autoResult.items).toEqual([expect.objectContaining({ series: 'policy', issue: expect.stringMatching(/numbering mask/) })]);
+    await query('UPDATE app_settings SET value = \'[]\'::jsonb WHERE key = \'migration.numbering_mask_series\'');
+    clearSettingsCache();
     const next = Number(s.cutover.slice(0, 4)) + 1;
     const p = await one('SELECT id FROM policies WHERE origin = \'migrated\' LIMIT 1');
     await query('UPDATE policies SET policy_number = $2 WHERE id = $1', [p.id, `POL-${next}-00005`]);
@@ -208,6 +217,14 @@ describe('waivers, voting and the outcome', () => {
     const early = await lead.api('post', `/data-load/decisions/${decision.id}/open-voting`);
     expect(early.status).toBe(409);
     expect(early.body.message).toMatch(/G1, G5, G10/);
+    // an open defect of severity 1 or 2 of any run keeps G1 from being met, and shows on the overview
+    const mock = (await lead.api('post', '/data-load/runs').send({ kind: 'mock-1', title: 'Mock 1' })).body.data;
+    const defect = (await lead.api('post', `/data-load/runs/${mock.id}/defects`).send({ title: 'Ageing of two bills wrong', severity: 2 })).body.data;
+    expect((await lead.api('get', '/data-load/overview')).body.data.defects).toMatchObject({ severity2: 1 });
+    const blocked = await setCriterion(lead, 'G1', { status: 'met', evidence: 'UAT sign-off' });
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.message).toContain(defect.defectNumber);
+    expect((await lead.api('put', `/data-load/runs/${mock.id}/defects/${defect.id}`).send({ status: 'closed' })).status).toBe(200);
     for (const code of ['G1', 'G5', 'G10']) expect((await setCriterion(lead, code, { status: 'met', evidence: `Signed sheet ${code}` })).status).toBe(200);
     const open = await lead.api('post', `/data-load/decisions/${decision.id}/open-voting`);
     expect(open.status, JSON.stringify(open.body)).toBe(200);

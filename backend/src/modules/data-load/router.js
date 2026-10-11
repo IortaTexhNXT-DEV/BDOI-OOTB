@@ -4,6 +4,7 @@ import { audit } from '../../lib/audit.js';
 import { badRequest, forbidden } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { uploadFile } from '../documents/tabular.js';
+import { migrationImportOpen } from '../../lib/goLiveLock.js';
 import { memoryUpload } from '../../lib/uploadLimits.js';
 import { config } from '../../config.js';
 import { notify } from '../notifications/service.js';
@@ -41,6 +42,8 @@ const canRead = [requireAuth, requirePermission('read:data-load', 'write:data-lo
 const canWrite = [requireAuth, requirePermission('write:data-load')];
 const canApprove = [requireAuth, requirePermission('approve:data-load')];
 const canWriteOrApprove = [requireAuth, requirePermission('write:data-load', 'approve:data-load')];
+/** The value maps serve the migration loads: closed with them once go-live is locked (unless an unlock reopens them). */
+const mapsOpen = migrationImportOpen('migration');
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 const sendXlsx = (res, fileName, buffer) => {
@@ -109,7 +112,7 @@ define({
 });
 define({
   method: 'POST', path: '/value-maps/upload', summary: 'Upload the Value Maps sheet: each row adds a map or changes the map of the same legacy value; all or nothing (the rows in error are listed)',
-  screen: `${WORKSPACE} > Templates > Value Maps > Upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
+  screen: `${WORKSPACE} > Templates > Value Maps > Upload`, middleware: [...canWrite, mapsOpen, uploadFile], request: 'multipart/form-data file',
   response: { success: true, message: 'Value maps loaded: 3 added, 1 changed', data: { created: 3, updated: 1, errors: [] } },
   handler: async (req, res) => {
     if (!req.file?.buffer?.length) throw badRequest('Upload the value maps workbook (.xlsx) in the "file" field');
@@ -126,7 +129,7 @@ define({
 });
 define({
   method: 'POST', path: '/value-maps', summary: 'Add a value map (or change the target of the map of the same legacy value); the code is checked against its master',
-  screen: `${WORKSPACE} > Templates > Value Maps > Add`, middleware: canWrite, request: { object: 'insurer', legacyValue: 'Malayan Ins. Co., Inc.', targetCode: 'MALAYAN', note: 'Legacy insurer table' },
+  screen: `${WORKSPACE} > Templates > Value Maps > Add`, middleware: [...canWrite, mapsOpen], request: { object: 'insurer', legacyValue: 'Malayan Ins. Co., Inc.', targetCode: 'MALAYAN', note: 'Legacy insurer table' },
   response: { success: true, message: 'Value map saved', data: mapExample },
   handler: async (req, res) => {
     const r = await maps.saveMap(mapBody(req.body), req.user);
@@ -136,7 +139,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/value-maps/:id', summary: 'Change a value map', screen: `${WORKSPACE} > Templates > Value Maps > Edit`, middleware: canWrite,
+  method: 'PUT', path: '/value-maps/:id', summary: 'Change a value map', screen: `${WORKSPACE} > Templates > Value Maps > Edit`, middleware: [...canWrite, mapsOpen],
   request: { legacyValue: 'Malayan Ins. Co., Inc.', targetCode: 'MALAYAN', note: 'Legacy insurer table' }, response: { success: true, message: 'Value map saved', data: mapExample },
   handler: async (req, res) => {
     const { before, after } = await maps.updateMap(req.params.id, { legacyValue: req.body?.legacyValue, targetCode: req.body?.targetCode, note: req.body?.note }, req.user);
@@ -145,7 +148,7 @@ define({
   },
 });
 define({
-  method: 'DELETE', path: '/value-maps/:id', summary: 'Remove a value map (rows already loaded keep their records)', screen: `${WORKSPACE} > Templates > Value Maps > Remove`, middleware: canWrite,
+  method: 'DELETE', path: '/value-maps/:id', summary: 'Remove a value map (rows already loaded keep their records)', screen: `${WORKSPACE} > Templates > Value Maps > Remove`, middleware: [...canWrite, mapsOpen],
   response: { success: true, message: 'Value map removed', data: mapExample },
   handler: async (req, res) => {
     const before = await maps.deleteMap(req.params.id);
@@ -161,8 +164,8 @@ const nameCheckExample = { token: 'rpt_4f2a9c1d0e7b3a55', fileName: 'Legacy_File
     documentType: 'POLSCH', date: '2026-02-25', recordFound: true }, { name: 'scan001.pdf', valid: false, reason: 'The name must have the parts <RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>' }] };
 
 define({
-  method: 'POST', path: '/document-names/check', summary: 'Check a list of legacy document file names against the naming convention (multipart "file": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse',
-  screen: `${WORKSPACE} > Templates > Document Naming`, middleware: [...canRead, uploadFile], request: 'multipart/form-data file',
+  method: 'POST', path: '/document-names/check', summary: 'Check a list of legacy document file names against the naming convention (write:data-load; multipart "file": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse',
+  screen: `${WORKSPACE} > Templates > Document Naming`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
   response: { success: true, message: 'Checked 2 name(s): 1 invalid', data: nameCheckExample },
   handler: async (req, res) => {
     const r = await naming.checkUpload(req.file, req.user);
@@ -462,7 +465,7 @@ define({
 
 const lockRequestExample = { id: 3, action: 'unlock', actionLabel: 'Go-live unlock', status: 'pending', reason: 'Late legacy claim found on day 2', decisionRef: null, scope: ['migration'],
   scopeLabels: ['Migration workbook'], hours: 4, expiresAt: null, relockedAt: null, decisionId: null, requestedBy: 'Andrea Lim', requestedAt: '2026-11-03T02:00:00Z',
-  decidedBy: null, decidedAt: null, decisionRemarks: null };
+  decidedBy: null, decidedAt: null, decisionRemarks: null, settings: [] };
 const goLiveExample = { cutoverDate: '2026-11-01', locked: true, lockedAt: '2026-11-01T14:00:00Z', lockRequestId: 2, unlock: null, unlockWindowEndsAt: '2026-11-08T14:00:00Z', unlockMaxHours: 4,
   pendingRequest: lockRequestExample, conditions: [{ code: 'go-decision', label: 'Go decision of the production run', met: true, detail: null }],
   scopes: [{ key: 'migration', label: 'Migration workbook' }], settings: { loadApprovalRequired: true, kpiIncludeMigrated: false, commissionIncludeMigrated: false, incentiveIncludeMigrated: false, sapGlIncludeOpening: false } };
@@ -478,10 +481,11 @@ define({
   handler: async (req, res) => ok(res, await golive.setCutoverDate(req.body?.cutoverDate, req.user, req), 'Cutover date saved'),
 });
 define({
-  method: 'PUT', path: '/golive/settings', summary: 'Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once',
-  screen: `${WORKSPACE} > Go-Live > Settings`, middleware: canApprove, request: { loadApprovalRequired: true, kpiIncludeMigrated: false },
-  response: { success: true, message: 'Settings saved', data: goLiveExample.settings },
-  handler: async (req, res) => ok(res, await golive.updateSettings(req.body, req.user, req), 'Settings saved'),
+  method: 'PUT', path: '/golive/settings', summary: 'Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards\' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked',
+  screen: `${WORKSPACE} > Go-Live > Settings`, middleware: canWriteOrApprove, request: { settings: { kpiIncludeMigrated: true }, reason: 'Steering committee: count migrated renewals in the KPIs' },
+  response: { success: true, message: 'Go-live settings change requested', data: { ...lockRequestExample, action: 'settings', actionLabel: 'Go-live settings change', scope: [], scopeLabels: [], hours: null,
+    settings: [{ field: 'kpiIncludeMigrated', label: 'Migrated policies in dashboards and KPIs', before: false, after: true }] } },
+  handler: async (req, res) => created(res, await golive.requestSettings(req.body, req.user, req), 'Go-live settings change requested'),
 });
 define({
   method: 'GET', path: '/golive/lock-requests', summary: 'Requests to lock go-live or to lift the lock for named imports, newest first (filter status)',
@@ -498,7 +502,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/golive/lock-requests/:id/approve', summary: 'Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself',
+  method: 'POST', path: '/golive/lock-requests/:id/approve', summary: 'Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings',
   screen: `${WORKSPACE} > Go-Live > Approve`, middleware: canApprove, response: { success: true, message: 'Go-live unlock approved', data: { ...lockRequestExample, status: 'approved', expiresAt: '2026-11-03T06:05:00Z' } },
   handler: async (req, res) => {
     const r = await golive.approveLock(req.params.id, req.user, req);
@@ -515,8 +519,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/golive/lock-requests/:id/withdraw', summary: 'Withdraw a lock or unlock request (its requester)',
-  screen: `${WORKSPACE} > Go-Live > Withdraw`, middleware: canWrite, response: { success: true, message: 'Go-live unlock withdrawn', data: { ...lockRequestExample, status: 'withdrawn' } },
+  method: 'POST', path: '/golive/lock-requests/:id/withdraw', summary: 'Withdraw a lock, unlock or settings request (its requester)',
+  screen: `${WORKSPACE} > Go-Live > Withdraw`, middleware: canWriteOrApprove, response: { success: true, message: 'Go-live unlock withdrawn', data: { ...lockRequestExample, status: 'withdrawn' } },
   handler: async (req, res) => {
     const r = await golive.withdrawLock(req.params.id, req.user, req);
     ok(res, r, `${r.actionLabel} withdrawn`);

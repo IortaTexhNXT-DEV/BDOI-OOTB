@@ -60469,11 +60469,11 @@
     "/data-load/document-names/check": {
       "post": {
         "operationId": "postDataLoadDocumentNamesCheck",
-        "summary": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
+        "summary": "Check a list of legacy document file names against the naming convention (write:data-load; multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -60603,7 +60603,6 @@
         },
         "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming",
         "x-permissions": [
-          "read:data-load",
           "write:data-load"
         ],
         "requestBody": {
@@ -60673,7 +60672,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "ownerType",
@@ -60775,7 +60774,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Evidence",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -60787,7 +60786,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Attach\n\nAccess: write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -60869,7 +60868,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Attach",
         "x-permissions": [
           "write:data-load"
         ],
@@ -60893,7 +60892,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -60926,7 +60925,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Evidence",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -60938,7 +60937,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Remove\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -61029,7 +61028,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Remove",
         "x-permissions": [
           "write:data-load"
         ]
@@ -61122,7 +61121,11 @@
                             },
                             "decidedBy": {},
                             "decidedAt": {},
-                            "decisionRemarks": {}
+                            "decisionRemarks": {},
+                            "settings": {
+                              "type": "array",
+                              "items": {}
+                            }
                           }
                         },
                         "conditions": {
@@ -61212,7 +61215,8 @@
                       "requestedAt": "2026-11-03T02:00:00Z",
                       "decidedBy": null,
                       "decidedAt": null,
-                      "decisionRemarks": null
+                      "decisionRemarks": null,
+                      "settings": []
                     },
                     "conditions": [
                       {
@@ -61344,7 +61348,11 @@
                             },
                             "decidedBy": {},
                             "decidedAt": {},
-                            "decisionRemarks": {}
+                            "decisionRemarks": {},
+                            "settings": {
+                              "type": "array",
+                              "items": {}
+                            }
                           }
                         },
                         "conditions": {
@@ -61435,7 +61443,8 @@
                       "requestedAt": "2026-11-03T02:00:00Z",
                       "decidedBy": null,
                       "decidedAt": null,
-                      "decisionRemarks": null
+                      "decisionRemarks": null,
+                      "settings": []
                     },
                     "conditions": [
                       {
@@ -61574,7 +61583,11 @@
                           },
                           "decidedBy": {},
                           "decidedAt": {},
-                          "decisionRemarks": {}
+                          "decisionRemarks": {},
+                          "settings": {
+                            "type": "array",
+                            "items": {}
+                          }
                         }
                       }
                     }
@@ -61604,7 +61617,8 @@
                       "requestedAt": "2026-11-03T02:00:00Z",
                       "decidedBy": null,
                       "decidedAt": null,
-                      "decisionRemarks": null
+                      "decisionRemarks": null,
+                      "settings": []
                     }
                   ]
                 }
@@ -61694,7 +61708,11 @@
                         },
                         "decidedBy": {},
                         "decidedAt": {},
-                        "decisionRemarks": {}
+                        "decisionRemarks": {},
+                        "settings": {
+                          "type": "array",
+                          "items": {}
+                        }
                       }
                     }
                   }
@@ -61723,7 +61741,8 @@
                     "requestedAt": "2026-11-03T02:00:00Z",
                     "decidedBy": null,
                     "decidedAt": null,
-                    "decisionRemarks": null
+                    "decisionRemarks": null,
+                    "settings": []
                   }
                 }
               }
@@ -61785,7 +61804,7 @@
     "/data-load/golive/lock-requests/{id}/approve": {
       "post": {
         "operationId": "postDataLoadGoliveLockRequestsIdApprove",
-        "summary": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself",
+        "summary": "Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings",
         "tags": [
           "Data Migration & Go-Live"
         ],
@@ -61861,7 +61880,11 @@
                         },
                         "decidedBy": {},
                         "decidedAt": {},
-                        "decisionRemarks": {}
+                        "decisionRemarks": {},
+                        "settings": {
+                          "type": "array",
+                          "items": {}
+                        }
                       }
                     }
                   }
@@ -61890,7 +61913,8 @@
                     "requestedAt": "2026-11-03T02:00:00Z",
                     "decidedBy": null,
                     "decidedAt": null,
-                    "decisionRemarks": null
+                    "decisionRemarks": null,
+                    "settings": []
                   }
                 }
               }
@@ -61989,7 +62013,11 @@
                         },
                         "decidedBy": {},
                         "decidedAt": {},
-                        "decisionRemarks": {}
+                        "decisionRemarks": {},
+                        "settings": {
+                          "type": "array",
+                          "items": {}
+                        }
                       }
                     }
                   }
@@ -62018,7 +62046,8 @@
                     "requestedAt": "2026-11-03T02:00:00Z",
                     "decidedBy": null,
                     "decidedAt": null,
-                    "decisionRemarks": null
+                    "decisionRemarks": null,
+                    "settings": []
                   }
                 }
               }
@@ -62061,11 +62090,11 @@
     "/data-load/golive/lock-requests/{id}/withdraw": {
       "post": {
         "operationId": "postDataLoadGoliveLockRequestsIdWithdraw",
-        "summary": "Withdraw a lock or unlock request (its requester)",
+        "summary": "Withdraw a lock, unlock or settings request (its requester)",
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load, approve:data-load",
         "parameters": [
           {
             "name": "id",
@@ -62135,7 +62164,11 @@
                         },
                         "decidedBy": {},
                         "decidedAt": {},
-                        "decisionRemarks": {}
+                        "decisionRemarks": {},
+                        "settings": {
+                          "type": "array",
+                          "items": {}
+                        }
                       }
                     }
                   }
@@ -62164,7 +62197,8 @@
                     "requestedAt": "2026-11-03T02:00:00Z",
                     "decidedBy": null,
                     "decidedAt": null,
-                    "decisionRemarks": null
+                    "decisionRemarks": null,
+                    "settings": []
                   }
                 }
               }
@@ -62182,7 +62216,8 @@
         },
         "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw",
         "x-permissions": [
-          "write:data-load"
+          "write:data-load",
+          "approve:data-load"
         ]
       }
     },
@@ -62871,11 +62906,11 @@
     "/data-load/golive/settings": {
       "put": {
         "operationId": "putDataLoadGoliveSettings",
-        "summary": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",
+        "summary": "Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked",
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: write:data-load, approve:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -62894,20 +62929,62 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "loadApprovalRequired": {
-                          "type": "boolean"
+                        "id": {
+                          "type": "integer"
                         },
-                        "kpiIncludeMigrated": {
-                          "type": "boolean"
+                        "action": {
+                          "type": "string"
                         },
-                        "commissionIncludeMigrated": {
-                          "type": "boolean"
+                        "actionLabel": {
+                          "type": "string"
                         },
-                        "incentiveIncludeMigrated": {
-                          "type": "boolean"
+                        "status": {
+                          "type": "string"
                         },
-                        "sapGlIncludeOpening": {
-                          "type": "boolean"
+                        "reason": {
+                          "type": "string"
+                        },
+                        "decisionRef": {},
+                        "scope": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "scopeLabels": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "hours": {},
+                        "expiresAt": {},
+                        "relockedAt": {},
+                        "decisionId": {},
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "decidedBy": {},
+                        "decidedAt": {},
+                        "decisionRemarks": {},
+                        "settings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "before": {
+                                "type": "boolean"
+                              },
+                              "after": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -62915,13 +62992,33 @@
                 },
                 "example": {
                   "success": true,
-                  "message": "Settings saved",
+                  "message": "Go-live settings change requested",
                   "data": {
-                    "loadApprovalRequired": true,
-                    "kpiIncludeMigrated": false,
-                    "commissionIncludeMigrated": false,
-                    "incentiveIncludeMigrated": false,
-                    "sapGlIncludeOpening": false
+                    "id": 3,
+                    "action": "settings",
+                    "actionLabel": "Go-live settings change",
+                    "status": "pending",
+                    "reason": "Late legacy claim found on day 2",
+                    "decisionRef": null,
+                    "scope": [],
+                    "scopeLabels": [],
+                    "hours": null,
+                    "expiresAt": null,
+                    "relockedAt": null,
+                    "decisionId": null,
+                    "requestedBy": "Andrea Lim",
+                    "requestedAt": "2026-11-03T02:00:00Z",
+                    "decidedBy": null,
+                    "decidedAt": null,
+                    "decisionRemarks": null,
+                    "settings": [
+                      {
+                        "field": "kpiIncludeMigrated",
+                        "label": "Migrated policies in dashboards and KPIs",
+                        "before": false,
+                        "after": true
+                      }
+                    ]
                   }
                 }
               }
@@ -62939,6 +63036,7 @@
         },
         "x-screen": "Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings",
         "x-permissions": [
+          "write:data-load",
           "approve:data-load"
         ],
         "requestBody": {
@@ -62948,17 +63046,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "loadApprovalRequired": {
-                    "type": "boolean"
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "kpiIncludeMigrated": {
+                        "type": "boolean"
+                      }
+                    }
                   },
-                  "kpiIncludeMigrated": {
-                    "type": "boolean"
+                  "reason": {
+                    "type": "string"
                   }
                 }
               },
               "example": {
-                "loadApprovalRequired": true,
-                "kpiIncludeMigrated": false
+                "settings": {
+                  "kpiIncludeMigrated": true
+                },
+                "reason": "Steering committee: count migrated renewals in the KPIs"
               }
             }
           }
@@ -67641,7 +67746,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "kind",
@@ -67845,7 +67950,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -67857,7 +67962,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > New run\n\nAccess: write:data-load",
         "parameters": [],
         "responses": {
           "200": {
@@ -68007,7 +68112,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > New run",
         "x-permissions": [
           "write:data-load"
         ],
@@ -68064,7 +68169,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -68288,7 +68393,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -68300,7 +68405,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -68459,7 +68564,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "write:data-load"
         ],
@@ -68494,7 +68599,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -68653,7 +68758,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "write:data-load"
         ],
@@ -68684,7 +68789,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -68845,7 +68950,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "write:data-load"
         ],
@@ -68884,7 +68989,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69002,7 +69107,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Defects",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -69014,7 +69119,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Add\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69131,7 +69236,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Add",
         "x-permissions": [
           "write:data-load"
         ],
@@ -69178,7 +69283,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Edit\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69303,7 +69408,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Edit",
         "x-permissions": [
           "write:data-load"
         ],
@@ -69338,7 +69443,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence pack\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69371,7 +69476,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Evidence pack",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -69385,7 +69490,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Report\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69427,7 +69532,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs > Report",
         "x-permissions": [
           "read:data-load",
           "write:data-load"
@@ -69441,7 +69546,7 @@
         "tags": [
           "Data Migration & Go-Live"
         ],
-        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
         "parameters": [
           {
             "name": "id",
@@ -69600,7 +69705,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Mock Runs",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Runs",
         "x-permissions": [
           "write:data-load"
         ]

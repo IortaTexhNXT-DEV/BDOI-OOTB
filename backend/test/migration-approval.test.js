@@ -9,7 +9,7 @@
 import fs from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { one, pool, query } from '../src/db/pool.js';
-import { clearSettingsCache } from '../src/lib/settings.js';
+import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
 import { resolveKey } from '../src/modules/uploads/storage.js';
 import { settle, startMigrationSuite, uploadAs, workbook } from './migration.fixtures.js';
 
@@ -161,7 +161,7 @@ describe('direct load and the setting', () => {
     await query('UPDATE app_settings SET value = \'"production"\' WHERE key = \'system.environment\'');
     clearSettingsCache();
     try {
-      const r = await u.admin.api('put', '/data-load/golive/settings').send({ loadApprovalRequired: false });
+      const r = await u.admin.api('put', '/data-load/golive/settings').send({ settings: { loadApprovalRequired: false }, reason: 'Rehearsal' });
       expect(r.status).toBe(409);
       await query('UPDATE app_settings SET value = \'false\' WHERE key = \'migration.load_approval_required\'');
       clearSettingsCache();
@@ -172,13 +172,21 @@ describe('direct load and the setting', () => {
       await query('UPDATE app_settings SET value = \'true\' WHERE key = \'migration.load_approval_required\'');
       clearSettingsCache();
     }
-    // outside production the approver may switch it off for a rehearsal (audited), not a loader
-    expect((await u['ap.loader'].api('put', '/data-load/golive/settings').send({ loadApprovalRequired: false })).status).toBe(403);
-    const r = await u['ap.approver'].api('put', '/data-load/golive/settings').send({ loadApprovalRequired: false });
-    expect(r.status).toBe(200);
+    // outside production it may be switched off for a rehearsal: requested with a reason, approved by another user
+    // (audited); never by the requester
+    expect((await u['ap.loader'].api('put', '/data-load/golive/settings').send({ settings: { loadApprovalRequired: false } })).status).toBe(400);
+    const r = await u['ap.loader'].api('put', '/data-load/golive/settings').send({ settings: { loadApprovalRequired: false }, reason: 'Rehearsal of the cutover' });
+    expect(r.status).toBe(201);
+    expect(r.body.data).toMatchObject({ action: 'settings', status: 'pending', settings: [{ field: 'loadApprovalRequired', before: true, after: false }] });
+    expect((await u['ap.loader'].api('post', `/data-load/golive/lock-requests/${r.body.data.id}/approve`).send({})).status).toBe(403);
+    expect((await u['ap.approver'].api('post', `/data-load/golive/lock-requests/${r.body.data.id}/approve`).send({})).status).toBe(200);
     expect(await one('SELECT before_data->>\'loadApprovalRequired\' AS b, after_data->>\'loadApprovalRequired\' AS a FROM audit_log WHERE entity = \'golive_setting\' ORDER BY id DESC LIMIT 1'))
       .toEqual({ b: 'true', a: 'false' });
-    expect((await u['ap.approver'].api('put', '/data-load/golive/settings').send({ loadApprovalRequired: true })).status).toBe(200);
+    const back = await u['ap.approver'].api('put', '/data-load/golive/settings').send({ settings: { loadApprovalRequired: true }, reason: 'Rehearsal done' });
+    expect(back.status).toBe(201);
+    expect((await u['ap.loader'].api('post', `/data-load/golive/lock-requests/${back.body.data.id}/approve`).send({})).status).toBe(403);
+    expect((await u.admin.api('post', `/data-load/golive/lock-requests/${back.body.data.id}/approve`).send({})).status).toBe(200);
+    expect(await getSetting('migration.load_approval_required', null)).toBe(true);
   });
 
   it('a configuration load is approved the same way and numbered CFG-; it returns no temporary password', async () => {

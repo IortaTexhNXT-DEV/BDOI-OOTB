@@ -27,7 +27,12 @@ export function toIsoDate(v) {
   return m ? m[1] : s;
 }
 
-export const isDate = (s) => DATE.test(String(s || '')) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`));
+/** A calendar date YYYY-MM-DD that exists (2026-02-30 is not one: the parser would roll it over to March). */
+export const isDate = (s) => {
+  if (!DATE.test(String(s || ''))) return false;
+  const t = Date.parse(`${s}T00:00:00Z`);
+  return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === String(s);
+};
 
 /** Number from a cell (thousands separators allowed); NaN when it is not a number, null when empty. */
 export function numberCell(v) {
@@ -63,11 +68,22 @@ export function cell(v) {
  */
 export const cellString = (v) => String(v ?? '').normalize('NFC').replace(/\r\n?/g, '\n').trim();
 
-/** Clean a value read from a workbook for its column type (dates from Excel serial numbers, trimmed text). */
+/**
+ * A number cell as text without the binary noise a spreadsheet may write (9902.860000000001 is 9902.86): 15
+ * significant digits, so no digit typed in a cell is ever dropped. Text that is no plain number stays as it is.
+ */
+export function numberText(s) {
+  const t = cellString(s);
+  if (!/^-?\d+\.\d{10,}$/.test(t)) return t;
+  return String(Number(Number(t).toPrecision(15)));
+}
+
+/** Clean a value read from a workbook for its column type (dates from Excel serial numbers, numbers, trimmed text). */
 export function cleanValue(col, v) {
   const s = cellString(v);
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
+  if (col.type === 'number') return numberText(s);
   return s;
 }
 
@@ -77,7 +93,7 @@ export function comparable(col, v) {
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
   if (col.type === 'number') {
-    const n = numberCell(s);
+    const n = numberCell(numberText(s));
     return Number.isNaN(n) ? s : String(n);
   }
   if (col.type === 'bool') {

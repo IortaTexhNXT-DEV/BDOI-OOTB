@@ -81,13 +81,15 @@ export async function getMap(id) {
 
 /**
  * Add a map, or change the target of the map of the same legacy value (upsert on object + normalised value, so the
- * "Use existing" resolution of a second batch keeps one map). db: the caller's transaction (resolution).
+ * "Use existing" resolution of a second batch keeps one map). db: the caller's transaction (resolution); inFile: the
+ * target is the key of an earlier row of the batch being resolved (created by the same load), not yet a record.
  */
-export async function saveMap({ object, legacyValue, targetCode, note = null }, user, { db = null } = {}) {
+export async function saveMap({ object, legacyValue, targetCode, note = null }, user, { db = null, inFile = false } = {}) {
   const o = objectOf(object);
   const legacy = cellString(legacyValue);
   if (!legacy) throw badRequest('Validation failed', [{ path: 'legacyValue', message: 'Legacy value is required' }]);
-  const target = await checkedTarget(o, targetCode);
+  const target = inFile ? cellString(targetCode) : await checkedTarget(o, targetCode);
+  if (!target) throw badRequest('Validation failed', [{ path: 'targetCode', message: 'BrokerVerse code is required' }]);
   const run = db ? (sql, p) => db.query(sql, p) : query;
   const r = (await run(`INSERT INTO migration_value_maps(object, legacy_value, legacy_norm, target_code, note, created_by, updated_by, updated_at)
       VALUES ($1,$2,$3,$4,$5,$6,$6,now())

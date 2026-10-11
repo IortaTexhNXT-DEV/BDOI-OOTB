@@ -36,6 +36,7 @@ import { MIGRATED_NUMBER_TARGETS, cocCollisions, collidingNumbers } from './numb
 import { getReconciliation } from './reconciliation.js';
 import { runRow } from './runs.js';
 import { RESTORE_POINT_STEP } from './cutover.js';
+import { formatDateTime } from '../../lib/pdf/format.js';
 import { isDate } from './common.js';
 
 const APPROVE = 'approve:data-load';
@@ -53,6 +54,16 @@ const text = (v, max = 2000) => {
   return s ? s.slice(0, max) : null;
 };
 const result = (met, detail = null, items = []) => ({ met, detail, items, checkedAt: new Date().toISOString() });
+/** "1 load" / "3 loads": counts in the results as the screens show them. */
+const count = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+/** The criterion of the template that names the open defects (G1): it is not set Met while one of severity 1 or 2 is open. */
+const DEFECT_CRITERION = 'G1';
+
+/** Open defects of severity 1 and 2 of every run that is not cancelled (a defect of a mock stays open until closed or deferred). */
+export async function blockingDefects() {
+  return many(`SELECT d.defect_number, d.severity, d.title, r.run_number FROM migration_run_defects d JOIN migration_runs r ON r.id = d.run_id
+    WHERE d.severity IN (1, 2) AND d.status IN ('open', 'fixed', 'retest') AND r.status <> 'cancelled' ORDER BY d.severity, d.id`);
+}
 
 // ------------------------------------------------------------------ automatic checks
 
@@ -70,7 +81,7 @@ export const AUTO_CHECKS = {
     if (!loads.length) return result(false, 'No migration load of the run is loaded');
     const bad = loads.filter((b) => b.valid_rows_only || b.rows_error > 0 || b.bad_rows > 0)
       .map((b) => ({ loadNumber: b.load_number, validRowsOnly: b.valid_rows_only, rowsInError: Math.max(b.rows_error, b.bad_rows) }));
-    return result(!bad.length, bad.length ? `${bad.map((b) => b.loadNumber).join(', ')}: rows in error, unresolved duplicates or valid rows only` : `${loads.length} load(s) loaded in full`, bad);
+    return result(!bad.length, bad.length ? `${bad.map((b) => b.loadNumber).join(', ')}: rows in error, unresolved duplicates or valid rows only` : `${count(loads.length, 'load')} loaded in full`, bad);
   },
   async 'reconciliation-checks'(run) {
     const r = await latestReconciliation(run.id);
@@ -81,7 +92,7 @@ export const AUTO_CHECKS = {
         return l.status === 'missing' || !diffs.length || diffs.some((d) => d.status !== 'accepted');
       })
       .map((l) => ({ reconNumber: r.reconNumber, check: l.label || l.measure, group: l.group || null, status: l.status, difference: l.difference }));
-    return result(!items.length, items.length ? `${items.length} check(s) or tie-out(s) of ${r.reconNumber} differ without an accepted explanation` : `${r.reconNumber}: checks and tie-outs agree`, items);
+    return result(!items.length, items.length ? `${count(items.length, 'check or tie-out', 'checks or tie-outs')} of ${r.reconNumber} ${items.length === 1 ? 'differs' : 'differ'} without an accepted explanation` : `${r.reconNumber}: checks and tie-outs agree`, items);
   },
   async 'reconciliation-signed'(run) {
     const r = await latestReconciliation(run.id);
@@ -100,7 +111,7 @@ export const AUTO_CHECKS = {
     const password = (await getSetting('security.password_sign_in_enabled', true)) !== false;
     const items = [...demo.map((u) => ({ issue: 'Demo or sample account active', username: u.username })), ...superid.map((u) => ({ issue: 'SUPERID user active', username: u.username })),
       ...(password ? [{ issue: 'User ID and password sign-in on', username: null }] : [])];
-    return result(!items.length, items.length ? `${items.length} issue(s)` : 'Demo accounts and SUPERID inactive, password sign-in off', items);
+    return result(!items.length, items.length ? count(items.length, 'issue') : 'Demo accounts and SUPERID inactive, password sign-in off', items);
   },
   async numbering() {
     const items = [];
@@ -108,7 +119,15 @@ export const AUTO_CHECKS = {
       for (const n of await collidingNumbers(code, { limit: 50 })) items.push({ series: code, label: target.label, number: n.number, next: n.next, periods: n.periods });
     }
     for (const c of await cocCollisions({ limit: 50 })) items.push({ series: 'coc', label: 'COC number', number: c.number, next: c.next, policyNumber: c.policyNumber });
-    return result(!items.length, items.length ? `${items.length} legacy number(s) a series would issue again` : 'Every series continues above the legacy numbers', items);
+    // the series of new business carry the office code (the TISPH numbering mask, migration.numbering_mask_series)
+    const masked = await getSetting('migration.numbering_mask_series', []);
+    const generic = await many(`SELECT code, name, prefix, pattern FROM document_numbering WHERE code = ANY($1::text[]) AND pattern NOT LIKE '%{BRANCH}%' ORDER BY code`,
+      [Array.isArray(masked) ? masked.map(String) : []]);
+    for (const g of generic) items.push({ series: g.code, label: g.name, issue: `${g.name} numbering does not follow the numbering mask (no branch): ${g.prefix}, ${g.pattern}` });
+    const clashes = items.filter((i) => !i.issue).length;
+    const detail = [clashes ? `${count(clashes, 'legacy number')} a series would issue again` : null,
+      generic.length ? `${generic.map((g) => g.name).join(', ')} numbering without the numbering mask` : null].filter(Boolean).join('; ');
+    return result(!items.length, detail || 'Every series continues above the legacy numbers and follows the numbering mask', items);
   },
   async 'restore-point'(run) {
     const step = await one(`SELECT s.status, (SELECT count(*)::int FROM migration_evidence e WHERE e.owner_type = 'step' AND e.owner_id = s.id) AS evidence
@@ -117,7 +136,7 @@ export const AUTO_CHECKS = {
     if (!step || step.status !== 'done') items.push({ issue: `${RESTORE_POINT_STEP} not done` });
     else if (!step.evidence) items.push({ issue: `${RESTORE_POINT_STEP} has no evidence file` });
     if (!run.restore_point) items.push({ issue: 'Restore point not recorded' });
-    return result(!items.length, items.length ? items.map((i) => i.issue).join('; ') : `Restore point ${new Date(run.restore_point).toISOString()}`, items);
+    return result(!items.length, items.length ? items.map((i) => i.issue).join('; ') : `Restore point ${formatDateTime(run.restore_point)}`, items);
   },
   async 'evidence-archived'(run) {
     const items = [];
@@ -285,6 +304,11 @@ export async function setCriterion(id, code, body, user, req) {
     if (!hasPermission(user, WRITE)) throw forbidden('Recording a criterion needs the write permission of the workspace');
     if (status) {
       if (c.automatic) throw conflict(`${c.code} is computed from the records: refresh it`);
+      const open = status === 'met' && c.code === DEFECT_CRITERION ? await blockingDefects() : [];
+      if (open.length) {
+        throw Object.assign(conflict(`${c.code} cannot be met: ${count(open.length, 'defect')} of severity 1 or 2 ${open.length === 1 ? 'is' : 'are'} open (${open.slice(0, 5).map((x) => x.defect_number).join(', ')})`),
+          { details: open.map((x) => ({ path: x.defect_number, message: `${x.run_number}, severity ${x.severity}: ${x.title}` })) });
+      }
       Object.assign(cols, { status, waived_by: null, waiver_reason: null });
     }
   }

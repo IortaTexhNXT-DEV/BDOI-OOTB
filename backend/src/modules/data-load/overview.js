@@ -4,7 +4,7 @@
  *               or done, from the loads, the runs of each kind, the go-live lock and the hypercare period
  *   run         the current run (runs.js currentRun): checklist progress, latest reconciliation, latest decision
  *   loads       migration and configuration loads by status, rows of the loaded migration loads by result, latest five
- *   defects     open defects of severity 1 and 2 of the open runs
+ *   defects     open defects of severity 1 and 2 of every run that is not cancelled
  *   forMe       what waits for this user: loads, undos and lock requests to approve (not their own), votes on a decision
  *               in voting, checklist steps they own that are not done
  */
@@ -32,7 +32,8 @@ export async function overview(user) {
   const phases = [
     { key: 'templates', label: 'Templates', status: anyLoad ? 'done' : 'not-started' },
     ...PHASE_KINDS.map(([kind, label]) => ({ key: kind, label, status: phaseOf(runs.filter((r) => r.kind === kind)) })),
-    { key: 'cutover', label: 'Cutover', status: state.locked ? 'done' : phaseOf(production) === 'not-started' ? 'not-started' : 'in-progress' },
+    // the cutover is done when its run is completed (the checklist finished), not when the lock goes on
+    { key: 'cutover', label: 'Cutover', status: phaseOf(production) },
     { key: 'go-live', label: 'Go-live', status: state.locked ? 'done' : 'not-started' },
     { key: 'hypercare', label: 'Hypercare', status: !state.locked ? 'not-started' : sinceLock >= hypercareDays ? 'done' : 'in-progress' },
   ];
@@ -59,8 +60,9 @@ export async function overview(user) {
       COALESCE(sum(rows_duplicate), 0)::int AS duplicate FROM data_load_batches WHERE kit = 'migration' AND status = 'loaded'`);
   const latest = (await many(`SELECT id, load_number, kit, file_name, status, created_at, loaded_at FROM data_load_batches ORDER BY id DESC LIMIT 5`))
     .map((b) => ({ id: Number(b.id), loadNumber: b.load_number, kit: b.kit, fileName: b.file_name, status: b.status, createdAt: b.created_at, loadedAt: b.loaded_at }));
+  // a defect stays open until closed or deferred, whether its run is open or completed (a Mock 1 defect is still a defect)
   const defects = await one(`SELECT count(*) FILTER (WHERE d.severity = 1)::int AS sev1, count(*) FILTER (WHERE d.severity = 2)::int AS sev2 FROM migration_run_defects d
-    JOIN migration_runs r ON r.id = d.run_id WHERE d.status IN ('open', 'fixed', 'retest') AND r.status IN ('planned', 'running')`);
+    JOIN migration_runs r ON r.id = d.run_id WHERE d.status IN ('open', 'fixed', 'retest') AND r.status <> 'cancelled'`);
 
   const approver = hasPermission(user, APPROVE);
   const toApprove = approver ? (await many(`SELECT id, load_number, status FROM data_load_batches

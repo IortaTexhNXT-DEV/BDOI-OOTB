@@ -12,7 +12,8 @@ import { one, pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
-import { centavos, pesoSum } from '../src/modules/data-load/common.js';
+import { centavos, cleanValue, isDate, numberText, pesoSum } from '../src/modules/data-load/common.js';
+import { parseName } from '../src/modules/data-load/naming.js';
 import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
@@ -68,6 +69,23 @@ describe('two decimals at most', () => {
     expect(centavos(12.5)).toBe(1250);
     expect(centavos(12.505)).toBeNull();
     expect(centavos(0.001)).toBeNull();
+  });
+
+  it('reads a number cell without the binary noise of a spreadsheet, never dropping a digit typed', () => {
+    expect(numberText('9902.860000000001')).toBe('9902.86');
+    expect(numberText('8556.290000000001')).toBe('8556.29');
+    expect(numberText('12.505')).toBe('12.505');
+    expect(numberText('1,250.00')).toBe('1,250.00');
+    expect(cleanValue({ type: 'number' }, 9902.860000000001)).toBe('9902.86');
+  });
+
+  it('a date is a calendar date that exists, in the sheets and in the document names', () => {
+    expect(isDate('2026-02-28')).toBe(true);
+    expect(isDate('2028-02-29')).toBe(true);
+    expect(isDate('2026-02-30')).toBe(false);
+    expect(isDate('2026-04-31')).toBe(false);
+    expect(parseName('POL_PC-FPG-2026-000999_POLSCH_20260230.pdf', ['POLSCH'])).toMatchObject({ valid: false });
+    expect(parseName('POL_PC-FPG-2026-000999_POLSCH_20260228.pdf', ['POLSCH'])).toMatchObject({ valid: true, date: '2026-02-28' });
   });
 
   it('three decimals is an error on every sheet, never rounded', async () => {

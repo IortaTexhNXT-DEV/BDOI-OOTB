@@ -130,10 +130,15 @@ Object.assign(ROLE_PERMS, {
 });
 // Data Migration & Go-Live (migration 0440): IT AppSupport loads, Finance, the Operations Unit Head and the General
 // Manager approve another user's load, auditors read. The System Administrator holds all three.
-const MIGRATION_PERMS = { 'tis-it-admin': ['data-load'], 'tis-finance': ['data-load:read', 'data-load:approve'], 'tis-ops-unit-head': ['data-load:read', 'data-load:approve'],
+// Finance enters the legacy control totals, explains differences and runs its checklist steps (write, migration 0445)
+// and approves another user's load (maker-checker on every item).
+const MIGRATION_PERMS = { 'tis-it-admin': ['data-load'], 'tis-finance': ['data-load', 'data-load:approve'], 'tis-ops-unit-head': ['data-load:read', 'data-load:approve'],
   'tis-general-manager': ['data-load:read', 'data-load:approve'] };
 for (const [role, items] of Object.entries(MIGRATION_PERMS)) ROLE_PERMS[role].push(...items);
-ROLE_PERMS['tis-auditor'] = ['profile', 'notifications', 'data-load:read', 'audit:read'];
+// Audit reads everything it reconciles and changes nothing: the workspace, the audit trail, the business records, the
+// ledgers and the reports (migration 0445); personal data masked (no view:pii)
+ROLE_PERMS['tis-auditor'] = ['profile', 'notifications', 'data-load:read', 'audit:read', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read',
+  'remittance:read', 'commission:read', 'incentive:read', ...TIS_ACCOUNTING_READS, 'period-end:read', 'bank-reconciliation:read'];
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

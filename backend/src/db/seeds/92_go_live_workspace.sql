@@ -1,5 +1,5 @@
 -- Templates of Data Migration & Go-Live (migration 0444), from the TISPH Data Migration and Cutover Plan:
---   go_live_runbook_steps  the runbook copied into the checklist of each new run (Mock Runs, Cutover): the production
+--   go_live_runbook_steps  the runbook copied into the checklist of each new run (Runs, Cutover): the production
 --                          migration sequence before the cutover (PC-1 to PC-8, plan section 12), the cutover runbook
 --                          (CO-1 to CO-10, section 13.2), go-live floor support (GL-1) and hypercare (HC-1, HC-2,
 --                          section 18), each with its owner, timetable slot, planning duration, evidence and the steps

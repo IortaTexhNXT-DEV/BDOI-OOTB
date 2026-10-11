@@ -11,7 +11,7 @@
  *   edits             changes to migrated clients, policies, claims, open items and journals since the lock (audit
  *                     entries other than the migration's own), per entity and day
  *   checks            today: trial balance balanced, sub-ledgers against their control accounts, yesterday's SAP GL
- *                     file, numbering above the legacy numbers, lock on
+ *                     file, numbering above the legacy numbers and with the numbering mask, lock on
  *   lock              imports refused while locked; unlocks with their scope and when they relocked
  *   defects           defects of the production run still open, by severity
  */
@@ -23,6 +23,7 @@ import { lockState } from '../../lib/goLiveLock.js';
 import { AUTO_CHECKS as PERIOD_CHECKS } from '../period-end/checks.js';
 import { tieOutCheck } from '../period-end/tieout.js';
 import { AUTO_CHECKS as GO_LIVE_CHECKS } from './decisions.js';
+import { formatDateTime } from '../../lib/pdf/format.js';
 import { isDate } from './common.js';
 
 const n2 = (v) => round2(Number(v || 0));
@@ -100,8 +101,8 @@ export async function hypercare() {
       { code: 'subledger-tieout', label: 'Sub-ledgers agree with their control accounts', ok: tieout.status === 'passed', detail: tieout.status === 'passed' ? null : tieout.message,
         lines: tieout.detail.map((t) => ({ ledger: t.ledger, account: t.glAccount, subledger: t.subledger, gl: t.gl, difference: t.difference })) },
       { code: 'sap-gl-file', label: 'SAP GL file of yesterday', ok: !!sap && ['done', 'empty'].includes(sap.status), detail: sap ? sap.status : 'No run' },
-      { code: 'numbering', label: 'Numbering above the legacy numbers', ok: numbering.met, detail: numbering.met ? null : numbering.detail },
-      { code: 'lock', label: 'Go-live lock on', ok: state.locked && !state.unlock, detail: state.unlock ? `Unlocked until ${new Date(state.unlock.expiresAt).toISOString()}` : null },
+      { code: 'numbering', label: 'Numbering above the legacy numbers, with the numbering mask', ok: numbering.met, detail: numbering.met ? null : numbering.detail },
+      { code: 'lock', label: 'Go-live lock on', ok: state.locked && !state.unlock, detail: state.unlock ? `Unlocked until ${formatDateTime(state.unlock.expiresAt)}` : null },
     ],
     lock: { refused: refusedCount, latestRefused: refused.map((r) => ({ at: r.at, username: r.username, import: r.import, detail: r.after_data })),
       unlocks: unlocks.map((u) => ({ id: Number(u.id), scope: u.scope, hours: u.hours, reason: u.reason, approvedAt: u.decided_at, expiresAt: u.expires_at, relockedAt: u.relocked_at })) },

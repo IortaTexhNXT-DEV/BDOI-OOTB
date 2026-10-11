@@ -369,10 +369,11 @@ export const CATALOGUE = {
   'data_load_batches.decision_remarks': 'freeText',
   // remarks given with the rejection of a go-live lock or unlock request (migration 0442)
   'go_live_lock_requests.decision_remarks': 'freeText',
-  // remarks of the sign-off of a migration reconciliation, owner of a difference (a team or a person), remarks of the
+  // remarks of the sign-off of a migration reconciliation, owner and acceptance note of a difference, remarks of the
   // rejection of the SAP opening file (migration 0443)
   'migration_recon_signoffs.remarks': 'freeText',
   'migration_recon_differences.owner': 'freeText',
+  'migration_recon_differences.acceptance_note': 'freeText',
   'sap_opening_file_requests.decision_remarks': 'freeText',
   // notes of a cutover checklist step, owner of a defect (a team or a person), remarks of a Go / No-Go vote, file name and
   // note of an evidence file of a run (migration 0444)

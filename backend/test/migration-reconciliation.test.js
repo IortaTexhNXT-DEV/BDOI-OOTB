@@ -8,6 +8,7 @@
 import crypto from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { one, pool, query } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { addDays } from '../src/lib/dates.js';
@@ -19,6 +20,7 @@ let loader;
 let approver;
 let owner;
 let finance;
+let both;
 let recon;
 
 const bin = (req) => req.buffer(true).parse((res, cb) => {
@@ -39,6 +41,7 @@ const CONTROL_TOTALS = [
   control('Opening Balances', 'debit', '', '10000'), control('Opening Balances', 'credit', '', '10000'),
   control('Sub-ledger', 'due to insurers', 'MALAYAN', '10000'),
   control('Sub-ledger', 'sap trial balance', '1202001', '10000'), control('Sub-ledger', 'sap trial balance', '210245', '10000'),
+  control('Sub-ledger', 'sap trial balance', '', '10000'),
 ];
 const sheets = (n, extra = {}) => ({
   ...businessRows(s, n),
@@ -69,8 +72,9 @@ async function refreshed(id, from) {
 }
 
 beforeAll(async () => {
-  s = await startMigrationSuite({ users: { 'rec.loader': 'dl-loader', 'rec.approver': 'dl-approver', 'rec.owner': 'dl-approver', 'rec.finance': 'dl-approver' } });
-  ({ 'rec.loader': loader, 'rec.approver': approver, 'rec.owner': owner, 'rec.finance': finance } = s.users);
+  s = await startMigrationSuite({ users: { 'rec.loader': 'dl-loader', 'rec.approver': 'dl-approver', 'rec.owner': 'dl-approver', 'rec.finance': 'dl-approver',
+    'rec.both': 'dl-both' } });
+  ({ 'rec.loader': loader, 'rec.approver': approver, 'rec.owner': owner, 'rec.finance': finance, 'rec.both': both } = s.users);
   await ensureCalendar(pool, s.cutover);
 });
 afterAll(async () => {
@@ -115,6 +119,9 @@ describe('lines, tie-outs and differences', () => {
     expect(of('commission-receivable')).toMatchObject({ systemValue: 0, legacyValue: null, status: 'matched' });
     expect(of('sap-trial-balance', '1202001')).toMatchObject({ accounts: ['1202001'], systemValue: 10000, legacyValue: 10000, sides: { system: 'BrokerVerse opening balance', other: 'SAP trial balance' } });
     expect(of('sap-trial-balance', '210245')).toMatchObject({ systemValue: 10000, legacyValue: 10000 });
+    // the totals: the debit total of the set against the SAP trial balance total; no cash in bank account in the set
+    expect(of('sap-trial-balance')).toMatchObject({ systemValue: 10000, legacyValue: 10000, legacySource: 'workbook', status: 'matched' });
+    expect(of('cash-in-bank')).toMatchObject({ systemValue: 0, legacyValue: null, status: 'matched' });
   });
 
   it('counts per load: a record of a single-object import is an extra difference, not a figure of the load', async () => {
@@ -251,6 +258,72 @@ describe('sign-off and report', () => {
     expect(line(good.body.data, 'Clients', 'count')).toMatchObject({ legacyValue: 2, legacySource: 'upload', status: 'matched' });
     // a bank account BrokerVerse has no opening balance for: the legacy figure alone, a difference
     expect(good.body.data.lines.find((l) => l.measure === 'cash-in-bank' && l.group === 'BPI-001')).toMatchObject({ systemValue: 0, legacyValue: 1500, status: 'difference' });
+  });
+});
+
+describe('trial balance, mirrors, re-extracts and the four eyes', () => {
+  it('takes the legacy trial balance as it is: each account on its normal side and the debit total', async () => {
+    const tb = writeXlsx({ sheets: [{ name: 'TB', columns: ['TISPH - Trial Balance', '', '', ''].map((header) => ({ header })),
+      rows: [['Account Code', 'Account Name', 'Debit', 'Credit'], ['1202001', 'Premiums receivable', '20000', ''], ['210245', 'Due to insurers', '', '20000'], ['Total', '', '20000', '20000']] }] });
+    const r = await loader.api('post', `/data-load/reconciliations/${recon.id}/legacy`).attach('file', tb, 'tb.xlsx');
+    expect(r.status, JSON.stringify(r.body)).toBe(200);
+    const of = (group = null) => r.body.data.lines.find((l) => l.measure === 'sap-trial-balance' && (l.group || null) === group);
+    expect(of()).toMatchObject({ systemValue: 20000, legacyValue: 20000, legacySource: 'upload', status: 'matched' });
+    expect(of('210245')).toMatchObject({ systemValue: 20000, legacyValue: 20000, status: 'matched' });
+    const unbalanced = writeXlsx({ sheets: [{ name: 'TB', columns: ['Account Code', 'Debit', 'Credit'].map((header) => ({ header })), rows: [['1202001', '5', ''], ['210245', '', '4']] }] });
+    const bad = await loader.api('post', `/data-load/reconciliations/${recon.id}/legacy`).attach('file', unbalanced, 'tb.xlsx');
+    expect(bad.status).toBe(400);
+    expect(JSON.stringify(bad.body)).toContain('does not balance');
+  });
+
+  it('a tie-out per insurer takes the open balance of the insurer as soon as it is entered', async () => {
+    const r = await get();
+    const open = line(r, 'Open Items', 'open balance', 'MALAYAN');
+    const saved = (await loader.api('put', `/data-load/reconciliations/${recon.id}/lines/${open.id}`).send({ legacyValue: 19000 })).body.data;
+    expect(saved.lines.find((l) => l.measure === 'premiums-receivable' && l.group === 'MALAYAN')).toMatchObject({ legacyValue: 19000 });
+  });
+
+  it('a difference explained by a user is accepted by another, the explanation and its author kept', async () => {
+    const r = await get();
+    const d = r.differences.find((x) => x.status === 'open');
+    expect(d).toBeTruthy();
+    expect((await both.api('put', `/data-load/reconciliations/${recon.id}/differences/${d.id}`).send({ explanation: 'Part payment after the extract' })).status).toBe(200);
+    const self = await both.api('post', `/data-load/reconciliations/${recon.id}/differences/${d.id}/accept`).send({ explanation: 'OK' });
+    expect(self.status).toBe(403);
+    const ok = await owner.api('post', `/data-load/reconciliations/${recon.id}/differences/${d.id}/accept`).send({ explanation: 'Checked against the receipt' });
+    expect(ok.status, JSON.stringify(ok.body)).toBe(200);
+    expect(ok.body.data.differences.find((x) => x.id === d.id)).toMatchObject({ status: 'accepted', explanation: 'Part payment after the extract', explainedBy: 'rec.both',
+      acceptedBy: 'rec.owner', acceptanceNote: 'Checked against the receipt' });
+    if (d.lineId) expect(ok.body.data.lines.find((l) => l.id === d.lineId).status).toBe('accepted');
+  });
+
+  it('a slot named for a role is signed by a holder of that role only', async () => {
+    await query(`UPDATE app_settings SET value = '[{"slot":"data-owner","label":"Data owner"},{"slot":"finance-head","label":"Finance Head","roles":["dl-both"]}]'::jsonb
+      WHERE key = 'migration.recon_signoffs'`);
+    clearSettingsCache();
+    try {
+      const c = await loader.api('post', '/data-load/reconciliations').send({});
+      expect(c.status, JSON.stringify(c.body)).toBe(201);
+      expect(c.body.data.signoffs.find((x) => x.slot === 'finance-head').roles).toEqual(['dl-both']);
+      const refused = await finance.api('post', `/data-load/reconciliations/${c.body.data.id}/signoffs/finance-head`).send({ remarks: 'Agrees' });
+      expect(refused.status).toBe(403);
+      expect(refused.body.message).toMatch(/Finance Head is signed by a user of the role dl-both/);
+    } finally {
+      await query(`UPDATE app_settings SET value = '[{"slot":"data-owner","label":"Data owner"},{"slot":"finance-head","label":"Finance Head"}]'::jsonb WHERE key = 'migration.recon_signoffs'`);
+      clearSettingsCache();
+    }
+  });
+
+  it('a re-extract loaded over an earlier load reconciles every record it carries', async () => {
+    const again = await loaded(workbook(s.kits, businessRows(s, 1)));
+    const rows = (await loader.api('get', `/data-load/batches/${again.id}/rows?perPage=100`)).body.data;
+    // the business rows are found again (the opening balances set is replaced as a whole)
+    expect(rows.filter((x) => x.result === 'new' && x.sheet !== 'opening-balances').map((x) => `${x.sheet}:${x.key}`)).toEqual([]);
+    const c = await loader.api('post', '/data-load/reconciliations').send({ batchIds: [again.id] });
+    expect(c.status, JSON.stringify(c.body)).toBe(201);
+    expect(line(c.body.data, 'Clients', 'count')).toMatchObject({ systemValue: 1 });
+    expect(line(c.body.data, 'Policies', 'count')).toMatchObject({ systemValue: 1 });
+    expect(c.body.data.differences.filter((d) => d.kind === 'extra' && d.sheet === 'Clients').map((d) => d.recordKey)).not.toContain('MJ1-C');
   });
 });
 

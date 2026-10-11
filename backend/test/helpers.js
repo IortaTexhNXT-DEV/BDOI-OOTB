@@ -191,16 +191,22 @@ export async function withOwnDamageOnly(policyId, sumInsured, ratePercent) {
 }
 /**
  * Data Migration & Go-Live: validation, load and undo of a batch run as jobs. settledBatch waits until the job of a batch
- * has ended (its status is no longer validating, running or undoing) and returns GET /data-load/batches/:id.
+ * has ended (its status is no longer validating, running or undoing, and the job left the queue: the audit entry and
+ * the notification of the result are written after the status) and returns GET /data-load/batches/:id.
  */
 export async function settledBatch(api, id, { timeout = 60000 } = {}) {
+  const { one } = await import('../src/db/pool.js');
   const end = Date.now() + timeout;
+  const pause = () => new Promise((resolve) => { setTimeout(resolve, 50); });
   for (;;) {
     const r = await api('get', `/data-load/batches/${id}`);
-    const status = r.body.data?.batch?.status;
-    if (!['validating', 'running', 'undoing'].includes(status)) return r;
+    const { status, jobId } = r.body.data?.batch || {};
+    if (!['validating', 'running', 'undoing'].includes(status)) {
+      const job = jobId ? await one('SELECT status FROM job_queue WHERE id = $1', [jobId]) : null;
+      if (!job || !['waiting', 'processing'].includes(job.status)) return r;
+    }
     if (Date.now() > end) throw new Error(`batch ${id} is still ${status}`);
-    await new Promise((resolve) => { setTimeout(resolve, 50); });
+    await pause();
   }
 }
 /**

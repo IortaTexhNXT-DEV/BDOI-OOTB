@@ -39,6 +39,11 @@ export async function startMigrationSuite({ users = {}, approval = true } = {}) 
   d.setUTCMonth(d.getUTCMonth() + 1);
   const cutover = d.toISOString().slice(0, 10);
   await goLiveSetup(api, cutover, { approval });
+  // the suites sign with their own roles and number with the generic series: the sign-off roles and the numbering mask
+  // of TISPH are tested where they apply
+  await query(`UPDATE app_settings SET value = (SELECT jsonb_agg(x - 'roles') FROM jsonb_array_elements(value) x) WHERE key = 'migration.recon_signoffs'`);
+  await query('UPDATE app_settings SET value = \'[]\'::jsonb WHERE key = \'migration.numbering_mask_series\'');
+  clearSettingsCache();
   for (const role of new Set(Object.values(users))) {
     const r = await api('post', '/roles').send({ code: role, name: role, permissions: ['read:profile', 'write:profile', 'read:notifications', 'write:notifications', ...ROLES[role]] });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
@@ -94,7 +99,7 @@ export async function setLock(on) {
   clearSettingsCache();
 }
 
-/** The production run with its Go decision, signed reconciliation and restore point, as the Mock Runs, Reconciliation and Go-Live tabs record them. */
+/** The production run with its Go decision, signed reconciliation and restore point, as the Runs, Reconciliation and Go-Live tabs record them. */
 export async function productionRun({ decision = 'go', reconciliation = 'signed', restorePoint = true } = {}) {
   await query('DELETE FROM go_live_decisions');
   await query('DELETE FROM migration_reconciliations');

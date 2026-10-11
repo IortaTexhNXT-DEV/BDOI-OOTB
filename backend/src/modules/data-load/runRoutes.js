@@ -1,5 +1,5 @@
 /**
- * Routes of the Overview, Mock Runs, Cutover, Go-Live (Go / No-Go) and Hypercare tabs of Data Migration & Go-Live:
+ * Routes of the Overview, Runs, Cutover, Go-Live (Go / No-Go) and Hypercare tabs of Data Migration & Go-Live:
  * runs (runs.js), the checklist and defects (cutover.js), evidence files (evidence.js), the evidence pack
  * (evidence-pack.js), decisions (decisions.js), the overview (overview.js) and hypercare (hypercare.js), declared on the
  * data-load router (router.js).
@@ -43,7 +43,7 @@ const decisionExample = { id: 2, runId: 3, runNumber: 'RUN-000003', runKind: 'pr
 
 /** Declare the routes: define of the data-load router, its permission chains and the workspace screen name. */
 export function defineRunRoutes(define, { canRead, canWrite, canApprove, canWriteOrApprove, WORKSPACE, sendXlsx }) {
-  const RUNS = `${WORKSPACE} > Mock Runs`;
+  const RUNS = `${WORKSPACE} > Runs`;
   const CUTOVER = `${WORKSPACE} > Cutover`;
   const DECISION = `${WORKSPACE} > Go-Live > Go / No-Go`;
 

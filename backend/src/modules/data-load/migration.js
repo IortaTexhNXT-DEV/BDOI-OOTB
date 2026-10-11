@@ -120,7 +120,7 @@ const clientValues = (c) => ({ clientCode: c.client_code, clientType: c.client_t
   city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) });
 
 const clientsSheet = () => ({
-  key: 'clients', name: 'Clients', menu: 'Operations > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode),
+  key: 'clients', name: 'Clients', menu: 'Operations > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode), keyMap: 'client',
   sample: { clientCode: 'C-000123', clientType: 'individual', firstName: 'Maria', lastName: 'Santos', email: 'maria.santos@example.ph', phone: '09171234567', tin: '123-456-789-000',
     birthDate: '1988-04-12', address: 'Unit 4B, 12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', region: 'National Capital Region (NCR)', country: 'Philippines', postalCode: '1600' },
   async exportRows() {
@@ -129,9 +129,17 @@ const clientsSheet = () => ({
   check(ctx, v) {
     if (v.birthDate) beforeCutover(ctx, 'birthDate', v.birthDate, 'Birth Date');
   },
-  /** "Use existing": the client of BrokerVerse the legacy code is mapped to (value map client). */
+  /**
+   * "Use existing": the client of BrokerVerse the legacy code is mapped to (value map client), stored or created by an
+   * earlier row of the same load.
+   */
   async existingRecord(ctx, code) {
     const c = await one('SELECT id, client_code FROM clients WHERE client_code = $1', [code]);
+    return c && { table: 'clients', id: c.id, key: c.client_code };
+  },
+  /** The migrated record of an Unchanged row (the records a load covers, reconciliation). */
+  async recordOf(ctx, v) {
+    const c = await one('SELECT id, client_code FROM clients WHERE client_code = $1', [v.clientCode]);
     return c && { table: 'clients', id: c.id, key: c.client_code };
   },
   async importRow(ctx, v) {
@@ -379,6 +387,10 @@ function policySheet(def) {
       if (inception && expiry && expiry <= inception) fail('expiryDate', 'Expiry Date must be after the Inception Date');
       if (expiry && ctx.cutover && expiry < ctx.cutover) fail('expiryDate', `Expiry Date ${expiry} is before the cutover date ${ctx.cutover}: the policy is not in force (expired business stays in the old system)`);
     },
+    async recordOf(ctx, v) {
+      const p = await storedPolicy(v.policyNumber, (await insurerOf(ctx, v.insurer))?.id ?? null);
+      return p && { table: 'policies', id: p.id, key: v.policyNumber };
+    },
     importRow: (ctx, v) => importPolicy(ctx, sheet, v),
     totals: policyTotals,
   };
@@ -397,6 +409,11 @@ const openItemsSheet = () => ({
   { key: 'currency', header: 'Currency', list: 'Currencies', format: 'PHP when empty; an open item of another currency is loaded at its peso amount as booked' }],
   keyColumns: ['policyNumber', 'billReference'], keyOf: (v) => keyText(v.policyNumber, v.billReference),
   sample: { policyNumber: 'PC-MLY-2026-000101', billReference: 'DN-2026-08812', dueDate: '2026-11-30', originalAmount: '35946.88', openBalance: '20000' },
+  async recordOf(ctx, v) {
+    const r = await one(`SELECT r.id FROM receivables r JOIN policies p ON p.id = r.policy_id WHERE (p.policy_number = $1 OR (p.legacy_number = $1 AND p.origin = 'migrated'))
+      AND r.reference = $2 AND r.source = $3 AND r.go_live_date = $4::date ORDER BY (p.policy_number = $1) DESC LIMIT 1`, [v.policyNumber, v.billReference, OPENING_SOURCE, ctx.cutover]);
+    return r && { table: 'receivables', id: r.id, key: `${v.policyNumber} / ${v.billReference}` };
+  },
   async exportRows(ctx) {
     if (!ctx.cutover) return [];
     const rows = await many(`SELECT r.*, p.policy_number FROM receivables r JOIN policies p ON p.id = r.policy_id WHERE r.source = $1 AND r.go_live_date = $2::date
@@ -453,9 +470,14 @@ const pdcSheet = () => ({
     { key: 'billReference', header: 'Bill Reference', required: true, format: 'Bill Reference of the open item (Open Items sheet or already loaded)' },
     { key: 'receivedDate', header: 'Received Date', type: 'date', format: 'Date YYYY-MM-DD, before the cutover date; the day before the cutover when empty' },
     { key: 'storageLocation', header: 'Storage Location', format: 'Vault or safe where the cheque is kept' },
-    { key: 'branch', header: 'Drawee Branch' },
+    { key: 'branch', header: 'Drawee Branch', noMap: true },
   ],
   keyColumns: ['draweeBank', 'chequeNumber'], keyOf: (v) => keyText(v.draweeBank, v.chequeNumber),
+  async recordOf(ctx, v) {
+    const d = await one(`SELECT d.id FROM post_dated_cheques d LEFT JOIN banks b ON b.id = d.bank_id WHERE d.origin = $1 AND d.cheque_number = $2 AND d.status <> 'cancelled'
+      AND (lower(b.code) = lower($3) OR lower(b.name) = lower($3) OR lower(d.drawee_bank) = lower($3)) ORDER BY d.id LIMIT 1`, [MIGRATED, String(v.chequeNumber).trim(), v.draweeBank]);
+    return d && { table: 'post_dated_cheques', id: d.id, key: `${v.draweeBank} / ${v.chequeNumber}` };
+  },
   sample: { draweeBank: 'PNB', chequeNumber: '0001234567', chequeDate: '2026-11-15', amount: '10000.00', policyNumber: 'PC-MLY-2026-000101', billReference: 'DN-2026-08812',
     receivedDate: '2026-10-20', storageLocation: 'Head Office vault' },
   async exportRows() {
@@ -519,6 +541,10 @@ const claimsSheet = () => ({
     { key: 'handler', header: 'Handler', format: 'Username of the claims handler' },
   ],
   keyColumns: ['claimNumber'], keyOf: (v) => keyText(v.claimNumber),
+  async recordOf(ctx, v) {
+    const c = await one('SELECT id FROM claims WHERE claim_number = $1 AND origin = $2', [v.claimNumber, MIGRATED]);
+    return c && { table: 'claims', id: c.id, key: v.claimNumber };
+  },
   sample: { claimNumber: 'OLD-CLM-2026-0042', policyNumber: 'PC-MLY-2026-000101', lossDate: '2026-09-12', reportedDate: '2026-09-13', status: 'in-review', lossType: 'Collision',
     description: 'Rear-end collision on EDSA', estimateAmount: '85000', insurerClaimNumber: 'MLY-CL-77812' },
   async exportRows() {

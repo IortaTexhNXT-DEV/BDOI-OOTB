@@ -82,6 +82,8 @@ describe('object registry', () => {
 
   it('carries the Fire sheet only while an active product of line fire exists; a fire policy goes on Other Lines otherwise', async () => {
     expect((await kitObjects('migration')).some((s) => s.key === 'policies-fire')).toBe(false);
+    // and no sheet names it among the sheets it depends on
+    for (const sheet of await kitObjects('migration')) expect(sheet.dependsOn, sheet.key).not.toContain('policies-fire');
     const other = (await api('get', '/data-load/kits')).body.data.kits.find((k) => k.kit === 'migration').sheets.find((s) => s.key === 'policies-other');
     expect(other.products).toEqual(['PARCEL']);
     await query("UPDATE products SET status = 'active' WHERE code = 'FIRE'");
@@ -89,6 +91,7 @@ describe('object registry', () => {
       const sheets = await kitObjects('migration');
       expect(sheets.map((s) => s.key)).toContain('policies-fire');
       expect(sheets.find((s) => s.key === 'policies-fire')).toMatchObject({ name: 'Policies - Fire', productLines: ['fire'], policyKind: 'fire' });
+      expect(sheets.find((s) => s.key === 'open-items').dependsOn).toContain('policies-fire');
       const kits = (await api('get', '/data-load/kits')).body.data.kits.find((k) => k.kit === 'migration').sheets;
       expect(kits.find((s) => s.key === 'policies-fire').products).toEqual(['FIRE']);
       expect(kits.find((s) => s.key === 'policies-fire').columns.map((c) => c.header)).toEqual(expect.arrayContaining(['Risk Address', 'Occupancy', 'Construction Class']));

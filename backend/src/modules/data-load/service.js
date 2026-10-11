@@ -41,11 +41,11 @@ import { kitObjects } from './registry.js';
 import { reconciliation } from './migration.js';
 import { presentKinds, productsOfKind, sheetKindOf } from './products.js';
 import { RULE_COLUMNS, RULE_LABELS, duplicateDetector, matchText } from './duplicates.js';
-import { loadMaps, mapsVersion, saveMap } from './maps.js';
+import { loadMaps, mapsVersion, resolveValue, saveMap } from './maps.js';
 import { namingConvention } from './naming.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
 import { runForLoad } from './runs.js';
-import { comparable, fail, isDate } from './common.js';
+import { comparable, fail, isDate, keyText, numberText } from './common.js';
 
 export { KITS };
 const LOCK = "hashtext('brokerverse.data-load'), hashtext('data_load_batches')";
@@ -254,8 +254,42 @@ async function unmaskCells(sheet, v, storedOf, warnings) {
   }
 }
 
+/**
+ * Value-map object of the columns that hold a code of a master (the stored side of a row holds the code). The key of a
+ * sheet with keyMap (the Client Code of the Clients sheet) is never translated here: a mapped legacy client is a row of
+ * its own that creates nothing.
+ */
+const MAPPED_COLUMNS = { clientCode: 'client', insurer: 'insurer', product: 'product', accountExecutive: 'user', branch: 'branch', distributionChannel: 'channel',
+  paymentStatus: 'payment-status' };
+
+/** Insurer and product codes by lower-case code, name and short name, read once per validation for the row compare. */
+async function loadMasterCodes(ctx) {
+  const codes = { insurer: new Map(), product: new Map() };
+  for (const i of await many("SELECT code, name, short_name FROM insurance_companies WHERE status <> 'deleted' ORDER BY id DESC")) {
+    for (const n of [i.name, i.short_name, i.code].filter(Boolean)) codes.insurer.set(String(n).trim().toLowerCase(), i.code);
+  }
+  for (const p of await many("SELECT code, name FROM products WHERE status <> 'deleted' ORDER BY id DESC")) {
+    for (const n of [p.name, p.code].filter(Boolean)) codes.product.set(String(n).trim().toLowerCase(), p.code);
+  }
+  ctx.masterCodes = codes;
+}
+
+/**
+ * Comparable form of a cell of a row against its stored record: a legacy value of a mapped column is first translated
+ * through the value maps and, for an insurer or a product, to its code, so a variant mapped to the stored insurer is
+ * the same value ("Malayan Ins. Co., Inc." is MALAYAN), never a change.
+ */
+function rowComparable(ctx, sheet, c, value) {
+  const object = c.noMap || sheet.keyMap ? null : MAPPED_COLUMNS[c.key];
+  if (!object || value === undefined || value === null || value === '') return comparable(c, value);
+  const mapped = resolveValue(ctx, object, value);
+  const code = ctx.masterCodes?.[object]?.get(String(mapped).trim().toLowerCase()) ?? mapped;
+  return comparable(c, code);
+}
+
 /** Keys of the columns a row changes on its stored record (only the columns the row fills). */
-const changedColumns = (sheet, v, before) => sheet.columns.filter((c) => v[c.key] !== undefined && comparable(c, v[c.key]) !== comparable(c, before[c.key])).map((c) => c.key);
+const changedColumns = (ctx, sheet, v, before) => sheet.columns.filter((c) => v[c.key] !== undefined && rowComparable(ctx, sheet, c, v[c.key]) !== comparable(c, before[c.key]))
+  .map((c) => c.key);
 
 /**
  * Run the sheets in load order (inside the caller's ambient transaction). rowsBySheet: { key: [{ id, rowNumber,
@@ -266,6 +300,7 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
   const results = new Map();
   const summary = [];
   const detector = await duplicateDetector(ctx);
+  await loadMasterCodes(ctx);
   // progress of a job: rows started, every PROGRESS_ROWS rows
   const total = Object.values(rowsBySheet).reduce((n, r) => n + r.length, 0);
   let started = 0;
@@ -310,7 +345,7 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
     };
     const storedList = async (v) => (await storedFor())?.get(sheet.keyOf(v)) || [];
     const pick = (list, v) => (list.length ? (sheet.pickStored ? sheet.pickStored(list, v) : list[0]) : null);
-    const same = (values, r) => sheet.columns.every((c) => values[c.key] === undefined || comparable(c, values[c.key]) === comparable(c, r[c.key]));
+    const same = (values, r) => sheet.columns.every((c) => values[c.key] === undefined || rowComparable(ctx, sheet, c, values[c.key]) === comparable(c, r[c.key]));
     if (!groups.has(sheet.keyGroup || sheet.key)) groups.set(sheet.keyGroup || sheet.key, new Map());
     const seen = groups.get(sheet.keyGroup || sheet.key);
     const seenAt = (key) => {
@@ -337,7 +372,9 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
           const at = seenAt(key);
           if (at) throw badRequest(at, [{ path: sheet.keyColumns[0], message: at }]);
           seen.set(key, { row: row.rowNumber, sheet: sheet.name });
-          done(row, { status: 'valid', action: 'unchanged', errors: [], warnings });
+          // a load keeps the record an Unchanged row stands for: the records of a load are what it reconciles
+          const record = !ctx.dryRun && sheet.recordOf ? await sheet.recordOf(ctx, v) : null;
+          done(row, { status: 'valid', action: 'unchanged', errors: [], warnings, record });
           continue;
         }
         const missing = sheet.columns.filter((c) => c.required && (v[c.key] === undefined || v[c.key] === ''));
@@ -346,6 +383,16 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
         if (at) throw badRequest('Duplicate', [{ path: sheet.keyColumns[0], message: at }]);
         seen.set(key, { row: row.rowNumber, sheet: sheet.name });
         if (sheet.importSheet) { pending.push(row); continue; }
+        // a legacy key mapped to another record (a "Use existing" of an earlier validation or load): the row creates
+        // nothing and stands for that record, stored or created by an earlier row of this load
+        const mappedTo = sheet.keyMap ? resolveValue(ctx, sheet.keyMap, v[sheet.keyColumns[0]]) : null;
+        if (mappedTo && keyText(mappedTo) !== key) {
+          const record = sheet.existingRecord ? await sheet.existingRecord(ctx, mappedTo) : null;
+          if (!record) fail(sheet.keyColumns[0], `${v[sheet.keyColumns[0]]} is mapped to ${mappedTo}, which is neither in BrokerVerse nor on an earlier row of this load`);
+          warnings.push(`Mapped to ${mappedTo}: the row creates nothing`);
+          done(row, { status: 'valid', action: 'unchanged', errors: [], warnings, resolution: row.resolution || null, record });
+          continue;
+        }
         const subject = sheet.duplicateSubject ? await sheet.duplicateSubject(ctx, v) : {};
         const duplicates = await detector.find(sheet, v, { ...subject, rowNumber: row.rowNumber, sheetRows: storedRows });
         // a resolution holds while the duplicate is still found
@@ -374,7 +421,7 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
         }
         const before = action === 'updated' ? pick(list, v) : null;
         done(row, { status: unresolved ? 'duplicate' : 'valid', action, errors: importError ? rowErrors(importError, sheet) : [], warnings, duplicates,
-          resolution, record: ctx.rowRecord, before, changes: before ? changedColumns(sheet, v, before) : [] });
+          resolution, record: ctx.rowRecord, before, changes: before ? changedColumns(ctx, sheet, v, before) : [] });
         detector.remember(sheet, v, { ...subject, rowNumber: row.rowNumber });
       } catch (e) {
         // the session or the server went away: not an error of the row, the whole run stops
@@ -401,7 +448,7 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
         else if (x.errors) done(row, { status: 'error', action: null, errors: x.errors });
         else {
           const before = x.action === 'updated' ? pick(await storedList(row.values), row.values) : null;
-          done(row, { status: 'valid', action: x.action, errors: [], before, changes: before ? changedColumns(sheet, row.values, before) : [] });
+          done(row, { status: 'valid', action: x.action, errors: [], before, changes: before ? changedColumns(ctx, sheet, row.values, before) : [] });
         }
       }
       if (out.sheetError) sum.message = out.sheetError;
@@ -456,10 +503,14 @@ async function saveResults(batchId, results, statusOf) {
   [cols.ids, cols.statuses, cols.actions, cols.errors, cols.tables, cols.records, cols.keys, cols.before, cols.changes, cols.warnings, cols.duplicates, cols.keep, batchId]);
 }
 
-/** Counts per result of the rows: { new, changed, unchanged, duplicate, error }. */
+/**
+ * Counts per result of the rows: { new, changed, unchanged, duplicate, error }. A row accepted with nothing to load
+ * (ignored: a Control Totals figure, a zero balance) is counted under Ignored of its sheet only, as on the summary.
+ */
 function resultCounts(results) {
   const c = { new: 0, changed: 0, unchanged: 0, duplicate: 0, error: 0 };
   for (const r of results.values()) {
+    if (r.action === 'ignored' && r.status !== 'error' && r.status !== 'duplicate') continue;
     const k = resultOf(r.status, r.action);
     if (k in c) c[k] += 1;
   }
@@ -861,6 +912,11 @@ function shown(c, value, mask) {
   return kind ? maskValue(kind, String(value)) : value;
 }
 
+/** A value of the review: numbers without the binary noise of the workbook, masked for the request. */
+function shownValue(c, value, mask) {
+  return shown(c, c?.type === 'number' && value !== null && value !== undefined && value !== '' ? numberText(value) : value, mask);
+}
+
 /**
  * Rows of a batch for the review, with their result, the changed columns (old -> new), duplicates, errors and
  * warnings, masked for a user without view:pii. Filters: sheet, result (new, changed, unchanged, duplicate, error),
@@ -885,11 +941,11 @@ export async function batchRows(id, { sheet = null, result = null, search = null
       const data = protectPayload(r.data);
       const before = r.before ? protectPayload(r.before) : null;
       const col = (k) => s?.columns.find((c) => c.key === k) || null;
-      const values = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, shown(col(k), v, mask)]));
+      const values = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, shownValue(col(k), v, mask)]));
       return {
         id: Number(r.id), sheet: r.sheet, sheetName: s?.name || r.sheet, row: r.row_number, key: s ? s.keyColumns.map((k) => shown(col(k), data[k], mask) || '-').join(' / ') : r.record_key,
         result: r.result, values,
-        changes: (r.changes || []).map((k) => ({ column: k, header: col(k)?.header || k, old: shown(col(k), before?.[k], mask), new: shown(col(k), data[k], mask) })),
+        changes: (r.changes || []).map((k) => ({ column: k, header: col(k)?.header || k, old: shownValue(col(k), before?.[k], mask), new: shownValue(col(k), data[k], mask) })),
         duplicates: (r.duplicates || []).map((m) => ({ ...m, label: RULE_LABELS[m.rule] || m.rule })),
         errors: (r.errors || []).filter((e) => !e.held).map((e) => ({ column: e.column ? col(e.column)?.header || e.column : null, message: e.message })),
         warnings: r.warnings || [], resolution: r.resolution, resolutionReason: r.resolution_reason, resolvedBy: r.resolved_by_name || r.resolved_by, resolvedAt: r.resolved_at,
@@ -945,8 +1001,10 @@ export async function resolveDuplicates(id, { rows = null, rule = null, resoluti
         if (!target) throw badRequest(`${sheets[r.sheet]?.name || r.sheet} row ${r.row_number} matches ${stored.join(', ')}: choose the record to use (targetCode)`);
         if (!stored.includes(target)) throw badRequest(`${target} is not a record the row matches (${stored.join(', ')})`);
         const rules = new Set(matches.filter((m) => m.number === target).map((m) => m.rule));
+        // the client of an earlier row of this file is created by the same load, before this row
+        const inFile = !matches.some((m) => m.number === target && m.kind === 'stored');
         if (['tin', 'name-birth-date', 'company-name'].some((x) => rules.has(x)) && v.clientCode) {
-          maps.push(await saveMap({ object: 'client', legacyValue: v.clientCode, targetCode: target, note: why }, user, { db }));
+          maps.push(await saveMap({ object: 'client', legacyValue: v.clientCode, targetCode: target, note: why }, user, { db, inFile }));
         }
         if (rules.has('insurer-variant') && v.insurer) maps.push(await saveMap({ object: 'insurer', legacyValue: v.insurer, targetCode: target, note: why }, user, { db }));
       }

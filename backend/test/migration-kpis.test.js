@@ -76,9 +76,9 @@ describe('dashboards', () => {
     await setting('dashboard.default_origin', 'all');
     expect((await overview(null)).body.data).toMatchObject({ origin: 'all', kpis: { policies: 3 } });
     await setting('dashboard.default_origin', 'issued');
-    expect((await s.api('put', '/data-load/golive/settings').send({ kpiIncludeMigrated: true })).status).toBe(200);
+    await setting('migration.kpi_include_migrated', true);
     expect((await overview('issued')).body.data.kpis).toMatchObject({ policies: 3, premium: 90000 });
-    expect((await s.api('put', '/data-load/golive/settings').send({ kpiIncludeMigrated: false })).status).toBe(200);
+    await setting('migration.kpi_include_migrated', false);
     expect((await overview('issued')).body.data.kpis.policies).toBe(1);
   });
 
@@ -162,6 +162,29 @@ describe('reports', () => {
     expect(def.parameters.properties.ReportCriteria.enum).not.toContain('Source');
     expect(def.parameters.properties.Origin.enum).toEqual(['Issued in BrokerVerse', 'Migrated']);
     expect(def.columns.map((c) => c.key)).toContain('origin');
+  });
+
+  it('the claims, receivables, collections, receipts, commission and renewal reports split migrated and issued business too', async () => {
+    for (const code of ['claims-position', 'claims-ageing', 'premium-receivable-soa', 'collections-ageing', 'collections-summary', 'commission-statement', 'receipts-register',
+      'renewal-retention']) {
+      const def = (await s.api('get', `/reports/${code}`)).body.data;
+      expect(def.parameters.properties.Origin, code).toMatchObject({ enum: ['Issued in BrokerVerse', 'Migrated'] });
+      expect(def.parameters.properties.ReportCriteria.enum, code).toContain('Origin');
+    }
+    const run = async (code, body) => {
+      const r = await s.api('post', `/reports/${code}/run`).send({ FromDate: addDays(from, -400), ToDate: addDays(day, 400), ...body });
+      expect(r.status, JSON.stringify(r.body)).toBe(200);
+      return r.body.data;
+    };
+    const claims = await run('claims-position', { ReportCriteria: 'All' });
+    expect(claims.rows.length).toBeGreaterThan(0);
+    expect(claims.rows.every((x) => x.origin === 'Migrated')).toBe(true);
+    expect((await run('claims-position', { ReportCriteria: 'All', Origin: 'issued' })).rows).toHaveLength(0);
+    const soa = await run('premium-receivable-soa', { ReportCriteria: 'Origin' });
+    expect(soa.groups.map((g) => g.group)).toContain('Migrated');
+    const migrated = await run('premium-receivable-soa', { ReportCriteria: 'Overall', Origin: 'Migrated' });
+    expect(migrated.rows.length).toBeGreaterThan(0);
+    expect(migrated.rows.every((x) => x.origin === 'Migrated')).toBe(true);
   });
 
   it('the report builder offers the Origin of policies, clients, bills and claims', async () => {

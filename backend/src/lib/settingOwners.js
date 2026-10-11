@@ -17,8 +17,9 @@
  *                                  approval limits: a change waits for a second administrator (access-control/controls.js)
  *   Master > System Configuration > Data Migration & Go-Live > Go-Live
  *                                  the cutover date, the go-live lock (switched on and lifted by two users) and the
- *                                  settings that decide how loads are approved and how migrated business counts in the
- *                                  KPIs, commission, incentives and the SAP files (data-load/golive.js)
+ *                                  settings that decide how loads are approved and checked, how migrated business counts
+ *                                  in the KPIs, commission, incentives, the dashboards and the SAP files, how long an
+ *                                  unlock lasts and the evidence is kept (data-load/golive.js: changed by two users)
  */
 import { badRequest } from './errors.js';
 
@@ -51,7 +52,8 @@ export const SETTING_OWNERS = [
     screen: 'Master > System Configuration > Data Migration & Go-Live > Go-Live',
     path: '/master/configuration/go-live/decision',
     keys: ['migration.load_approval_required', 'migration.sap_gl_include_opening', 'migration.kpi_include_migrated', 'migration.commission_include_migrated',
-      'migration.incentive_include_migrated', 'migration.subledger_tieouts'],
+      'migration.incentive_include_migrated', 'migration.subledger_tieouts', 'migration.unlock_max_hours', 'migration.unlock_window_days',
+      'migration.evidence_retention_years', 'migration.duplicate_rules', 'migration.document_types', 'migration.numbering_mask_series', 'dashboard.default_origin'],
     prefixes: ['golive.'],
   },
 ];

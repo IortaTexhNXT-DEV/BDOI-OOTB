@@ -1,5 +1,5 @@
 /**
- * Mock Runs of Data Migration & Go-Live (migration 0444): Mock 1, Mock 2, the dress rehearsal, an extra mock and the
+ * Runs of Data Migration & Go-Live (migration 0444): Mock 1, Mock 2, the dress rehearsal, an extra mock and the
  * production run (one at a time that is not cancelled). A run is the frame of a migration attempt: its loads
  * (data_load_batches.run_id), reconciliations, checklist (cutover.js), defects, Go / No-Go decisions (decisions.js) and
  * evidence (evidence.js) belong to it.
@@ -61,6 +61,18 @@ const RUN_SELECT = `SELECT r.*, cu.display_name AS created_by_name, xu.display_n
     (SELECT count(*) FROM migration_run_defects d WHERE d.run_id = r.id AND d.status IN ('open', 'fixed', 'retest')) AS defects_open,
     (SELECT count(*) FROM migration_run_defects d WHERE d.run_id = r.id) AS defects_total
   FROM migration_runs r LEFT JOIN users cu ON cu.id = r.created_by LEFT JOIN users xu ON xu.id = r.closed_by`;
+
+/**
+ * Time a run has taken: from its actual start to its end, or to now while it runs; null before it starts. The Cutover
+ * tab and the run's timings show the same figure.
+ */
+export const runElapsedMs = (r) => (r.actual_start ? (r.actual_end ? new Date(r.actual_end) : new Date()).getTime() - new Date(r.actual_start).getTime() : null);
+/** Time planned for a run: its planned window, else the planned durations of its steps; null when nothing is planned. */
+export const runPlannedMs = (r, steps = []) => {
+  if (r.planned_start && r.planned_end) return new Date(r.planned_end).getTime() - new Date(r.planned_start).getTime();
+  const sum = steps.reduce((t, s) => t + (s.plannedMs || 0), 0);
+  return sum || null;
+};
 
 /** The run row (404 when missing). */
 export async function runRow(id) {
@@ -133,7 +145,8 @@ export async function getRun(id) {
   return {
     ...run, loadsList: loads, steps, reconciliations, decisions, defectsByStatus: defects,
     timings: { validateMs: sum('validateMs'), loadMs: sum('loadMs'), undoMs: sum('undoMs'), rowsLoaded: loads.filter((b) => b.status === 'loaded').reduce((s, b) => s + b.rowsRead, 0),
-      stepsDone: steps.filter((s) => ['done', 'skipped'].includes(s.status)).length, steps: steps.length, lateSteps: steps.filter((s) => s.late).map((s) => s.code), elapsedMs: run.durationMs },
+      stepsDone: steps.filter((s) => ['done', 'skipped'].includes(s.status)).length, steps: steps.length, lateSteps: steps.filter((s) => s.late).map((s) => s.code),
+      elapsedMs: runElapsedMs(r), plannedMs: runPlannedMs(r, steps) },
   };
 }
 

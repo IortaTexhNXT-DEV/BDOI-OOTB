@@ -23,7 +23,7 @@ the tab or the record directly:
 | Templates | `/templates` | Each kit in load order with its keys and dependencies, the policy templates per product, a download per kit and per object (blank or current data), the value maps (add, edit, remove, download, upload) and the document file naming convention with the name checker |
 | Loads | `/loads`, `/loads/:id` | The load history with filters (workbook, run, status, dates) and **Upload Workbook** (workbook, run, legacy system, file): the upload validates and opens the load. The load page shows the progress of its job while it validates, loads or undoes (refreshed every 3 seconds, also after the page is opened again), the place in the queue and a warning when the file is the file of another load; its actions follow its status (Validate Again, Download Errors, Submit for Approval, Withdraw Load, Approve / Reject Load, Reconcile Run) and the tabs Summary, Rows (old -> new), Duplicates (resolution with a reason), Approval (activity log) and Undo (dependents check, request, decision) |
 | Reconciliation | `/reconciliation`, `/reconciliation/:id` | Lines by object with the legacy figures (entered or uploaded), checks and sub-ledger tie-outs (their GL accounts and tolerance kept by an approver), the difference list (Explain, Accept), the sign-off slots and the report (PDF, Excel, the signed PDF) |
-| Mock Runs | `/runs`, `/runs/:id` | Runs with their timings, loads, results, defects, evidence and report; the personal data used (a production extract needs the DPO approval reference); the evidence pack download and the record of its fingerprint and archive reference |
+| Runs | `/runs`, `/runs/:id` | Runs with their timings, loads, results, defects, evidence and report; the personal data used (a production extract needs the DPO approval reference); the evidence pack download and the record of its fingerprint and archive reference |
 | Cutover | `/cutover` | The checklist of the production run (or of the run chosen) by phase: owner, planned and actual times, status, evidence and notes; Start, Mark Done (evidence or a note; the restore point on CO-3), Block, Skip, Edit Step |
 | Go-Live | `/decision` | The cutover date, the Go / No-Go of the production run (criteria, waivers, approvers, votes), the go-live lock and the scoped, time-boxed unlock with the time left before it relocks, the history of the requests, and the SAP opening file when BrokerVerse sends it |
 | Hypercare | `/hypercare` | After the lock: business issued since go-live, migrated open items collected and their age, renewals and endorsements and claims of migrated policies, edits to migrated records by day, the daily checks, imports refused while locked and the unlocks, open defects of the production run |
@@ -258,8 +258,11 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
   load) and `approve:data-load` (second-person approval of loads, undo, reconciliation sign-off, Go / No-Go and the
   go-live lock; never the maker of the same item). Default grants (migration `0440_migration_origin.sql` and the seed,
   to be confirmed by TISPH): System Administrator all three; TIS IT AppSupport / Admin read and write; TIS Finance &
-  General Accounting, TIS Operations Unit Head and TIS General Manager read and approve; **TIS Audit (read only)**
-  (`tis-auditor`, new) read only, with the audit trail. The segregation of duties rule *Load and approve migration
+  General Accounting all three (migration `0445_migration_controls.sql`: Finance enters the legacy control totals,
+  explains differences and runs the checklist steps it owns; it never approves an item it made); TIS Operations Unit
+  Head and TIS General Manager read and approve; **TIS Audit (read only)** (`tis-auditor`) reads the workspace, the
+  audit trail and the records it reconciles (clients, policies, claims, receivables, receipts, journals, period-end
+  statements and the reports the General Manager sees), personal data masked, and changes nothing. The segregation of duties rule *Load and approve migration
   data* (`SOD-ACC-LOAD-APPROVE`) flags anyone holding both `write:data-load` and `approve:data-load`; the named cutover
   administrators are recorded as exceptions until the end of hypercare.
 - **Personal data.** `/api/data-load` is no longer answered unmasked (removed from `privacy.masking_exempt_paths` where
@@ -288,9 +291,12 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
 - **Cutover date.** The first day of live transactions, set on *Data Migration & Go-Live > Go-Live*
   (`PUT /api/data-load/golive/cutover-date`, audited). The migration workbook is refused until it is set. It cannot
   change once go-live is locked, nor while a migration load is loaded or in progress (undo it first). `PUT /settings`,
-  Master > Configuration and the Settings sheet refuse it, like the go-live lock and the settings
-  `migration.load_approval_required`, `migration.*_include_migrated` and `migration.sap_gl_include_opening`, which an
-  approver changes on the Go-Live tab (`PUT /api/data-load/golive/settings`).
+  Master > Configuration and the Settings sheet refuse it, like the go-live lock and the settings of the Go-Live tab
+  (approval of loads, migrated business in the KPIs, commission and incentives, the SAP opening file, the dashboards'
+  default view, duplicate checks, unlock hours and window, evidence retention, document types, numbering mask series).
+  Those are shown on the **Settings** card of the Go-Live tab and changed by a request with a reason
+  (`PUT /api/data-load/golive/settings`, write or approve:data-load) that another approver approves on the lock card;
+  approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked.
 - **Undo of a load.** A loaded migration load is undone before the go-live lock: requested with a reason
   (`POST /api/data-load/batches/:id/undo-request`, `write:data-load`), approved by another user (`/undo-approve`,
   `approve:data-load`; also `/undo-reject`, `/undo-withdraw`). It runs as a job in one transaction, the objects in
@@ -528,8 +534,10 @@ the user who ran the check).
 | Period-end check "policies without accounting" | Migrated policies are not expected to have a bill or journal (`origin`) | none |
 | SAP GL daily file | Never carries the opening balance journal (it reads posted journals and their lines) | none; the one-time opening file below |
 
-The four `migration.*` settings and `dashboard.default_origin` are changed on Data Migration & Go-Live > Go-Live
-(`PUT /api/data-load/golive/settings`, approve:data-load); `migration.sap_gl_include_opening` only before the lock.
+The four `migration.*` settings and `dashboard.default_origin` are changed on Data Migration & Go-Live > Go-Live >
+Settings by a request approved by a second user (`PUT /api/data-load/golive/settings`); `migration.sap_gl_include_opening`
+only before the lock. The claims position and ageing, SOA / premium receivable, receivables ageing, collection report,
+receipts register, commission statement and renewal retention reports take the Origin column, criteria and filter too.
 
 ## Migrated and issued on the screens
 
@@ -590,26 +598,33 @@ loads chosen) and counts the records **of those loads** (`load_batch_id`), never
   credit totals, balance per account on its normal side). Each line has the BrokerVerse value, the legacy value, the
   difference, the tolerance and a status (agrees, difference, no legacy figure, legacy figure missing).
 - **Legacy figures** come from the Control Totals sheet of the loads, from entry on screen
-  (`PUT /reconciliations/:id/lines/:lineId`) or from an upload of a Control Totals sheet (`POST /reconciliations/:id/legacy`,
-  all or nothing). A figure entered on screen or uploaded is kept by a recompute. A legacy group is matched without
+  (`PUT /reconciliations/:id/lines/:lineId`) or from an upload (`POST /reconciliations/:id/legacy`, all or nothing) of a Control Totals sheet or of the legacy
+  trial balance as it is (Account Code, Debit, Credit; a title above the header is fine): each account on its normal
+  side against the SAP trial balance tie-out, and its debit total against the total. A figure entered on screen or uploaded is kept by a recompute. A legacy group is matched without
   case (`motor` is the line `MOTOR`).
 - **Checks and tie-outs.** Trial balance debits = credits. The sub-ledger tie-outs of `migration.subledger_tieouts`
   (maintained on the Reconciliation tab, `PUT /api/data-load/settings/tieouts`, approve:data-load; the accounts seeded
   from `accounting.account.*`): premiums receivable (GL opening balance against the open items loaded, and per insurer
   the open items loaded against the legacy listing), post-dated cheques (cheques loaded against the legacy register),
   due to insurers, commission receivable and unapplied collections (GL opening balance against the legacy listing of
-  the Control Totals object Sub-ledger), cash in bank (per bank account of Bank Reconciliation: GL opening balance
-  against the legacy book balance) and BrokerVerse against the SAP trial balance at the day before the cutover (per
-  account). Each line shows both sides, their labels and the accounts used.
+  the Control Totals object Sub-ledger), cash in bank (in total: the GL opening balance of the tie-out's accounts, else of the bank accounts' GL accounts,
+  else of the Cash in Bank accounts; and per bank account of Bank Reconciliation: against the legacy book balance) and
+  BrokerVerse against the SAP trial balance at the day before the cutover (in total: the debit total; and per account).
+  Only the totals need a legacy figure before the sign-off; a line per insurer, account or bank account is compared
+  when its figure is given. Entering the open balance of an insurer updates its tie-out at once. Each line shows both sides, their labels and the accounts used.
 - **Tolerance.** Counts are exact; amounts agree to the centavo unless `migration.recon_amount_tolerance` or the
   tie-out's tolerance allows more. A tolerance other than zero on a line is set by a holder of approve:data-load who
   did not upload, submit or approve one of the loads, with a reason (audited and printed on the report).
 - **Differences.** A line out of tolerance, a tie-out or check that does not agree, each workbook row of the loads not
   loaded (error, unresolved duplicate) and each migrated record outside the loads (an earlier load, a single-object
-  import). Each is explained (write:data-load: explanation, action, owner; or marked fixed) and accepted
-  (approve:data-load, never by a user who uploaded, submitted or approved one of the loads).
+  import). Each is explained (write:data-load: explanation, action, owner; or marked fixed; who explained it is kept) and
+  accepted with a note (approve:data-load, never by a user who uploaded, submitted or approved one of the loads, nor by
+  the user who explained it; the explanation stays). A line whose difference is accepted shows **Difference accepted**.
+  A reconciliation counts the records its loads created, changed or found unchanged, so a Mock 2 or a cutover delta
+  loaded over an earlier load reconciles all the records it carries; a load of another run that changes them
+  supersedes the earlier reconciliation (its signed report stays as signed).
 - **Sign-off.** The slots of `migration.recon_signoffs` (Data owner, Finance Head), each signed with a remark by a holder
-  of approve:data-load who did not load and signed no other slot, once no difference is open and every total has its
+  of approve:data-load who did not load and signed no other slot (the Finance Head slot by a user of the finance role), once no difference is open and every total has its
   legacy figure. The first signature freezes the reconciliation; the last makes it **Signed** and keeps its PDF in the
   storage folder `go-live-evidence` with its SHA-256 (`GET /reconciliations/:id/report?format=pdf&version=signed`, header
   `X-Content-SHA256`); the stored file never changes afterwards. The go-live lock needs the signed reconciliation of the
@@ -623,7 +638,7 @@ loads chosen) and counts the records **of those loads** (`load_batch_id`), never
 
 ## Mock runs and the cutover checklist
 
-Data Migration & Go-Live > Mock Runs (`/api/data-load/runs`, migration 0444). Each attempt is a **run**: Mock 1, Mock 2,
+Data Migration & Go-Live > Runs (`/api/data-load/runs`, migration 0444). Each attempt is a **run**: Mock 1, Mock 2,
 the dress rehearsal, an extra mock or the production run (one at a time). A run records its cutover date, planned and
 actual start and end, the personal data it used (synthetic, masked copy or production extract, the last with the
 reference of the DPO approval), its exit criteria, result (passed, passed with issues, failed) and summary, the restore

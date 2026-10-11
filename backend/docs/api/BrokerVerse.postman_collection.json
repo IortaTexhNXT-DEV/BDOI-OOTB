@@ -33329,7 +33329,7 @@
           ]
         },
         {
-          "name": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
+          "name": "Check a list of legacy document file names against the naming convention (write:data-load; multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
           "request": {
             "method": "POST",
             "header": [
@@ -33349,7 +33349,7 @@
                 "check"
               ]
             },
-            "description": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+            "description": "Check a list of legacy document file names against the naming convention (write:data-load; multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file\"",
@@ -33382,7 +33382,7 @@
                     "check"
                   ]
                 },
-                "description": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+                "description": "Check a list of legacy document file names against the naming convention (write:data-load; multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file\"",
@@ -33501,7 +33501,7 @@
                 }
               ]
             },
-            "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+            "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -33529,7 +33529,7 @@
                     }
                   ]
                 },
-                "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+                "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -33565,7 +33565,7 @@
                 "evidence"
               ]
             },
-            "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach\n\nAccess: write:data-load",
+            "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Attach\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file, ownerType, ownerId, note\"",
@@ -33597,7 +33597,7 @@
                     "evidence"
                   ]
                 },
-                "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach\n\nAccess: write:data-load",
+                "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Attach\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file, ownerType, ownerId, note\"",
@@ -33645,7 +33645,7 @@
                 }
               ]
             },
-            "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+            "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -33671,7 +33671,7 @@
                     }
                   ]
                 },
-                "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+                "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -33710,7 +33710,7 @@
                 }
               ]
             },
-            "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove\n\nAccess: write:data-load"
+            "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Remove\n\nAccess: write:data-load"
           },
           "response": [
             {
@@ -33736,7 +33736,7 @@
                     }
                   ]
                 },
-                "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove\n\nAccess: write:data-load"
+                "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence > Remove\n\nAccess: write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -33797,7 +33797,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null,\n      \"settings\": []\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
             }
           ]
         },
@@ -33876,7 +33876,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Cutover date saved\",\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Cutover date saved\",\n  \"data\": {\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": true,\n    \"lockedAt\": \"2026-11-01T14:00:00Z\",\n    \"lockRequestId\": 2,\n    \"unlock\": null,\n    \"unlockWindowEndsAt\": \"2026-11-08T14:00:00Z\",\n    \"unlockMaxHours\": 4,\n    \"pendingRequest\": {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null,\n      \"settings\": []\n    },\n    \"conditions\": [\n      {\n        \"code\": \"go-decision\",\n        \"label\": \"Go decision of the production run\",\n        \"met\": true,\n        \"detail\": null\n      }\n    ],\n    \"scopes\": [\n      {\n        \"key\": \"migration\",\n        \"label\": \"Migration workbook\"\n      }\n    ],\n    \"settings\": {\n      \"loadApprovalRequired\": true,\n      \"kpiIncludeMigrated\": false,\n      \"commissionIncludeMigrated\": false,\n      \"incentiveIncludeMigrated\": false,\n      \"sapGlIncludeOpening\": false\n    }\n  }\n}"
             }
           ]
         },
@@ -33939,7 +33939,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"action\": \"unlock\",\n      \"actionLabel\": \"Go-live unlock\",\n      \"status\": \"pending\",\n      \"reason\": \"Late legacy claim found on day 2\",\n      \"decisionRef\": null,\n      \"scope\": [\n        \"migration\"\n      ],\n      \"scopeLabels\": [\n        \"Migration workbook\"\n      ],\n      \"hours\": 4,\n      \"expiresAt\": null,\n      \"relockedAt\": null,\n      \"decisionId\": null,\n      \"requestedBy\": \"Andrea Lim\",\n      \"requestedAt\": \"2026-11-03T02:00:00Z\",\n      \"decidedBy\": null,\n      \"decidedAt\": null,\n      \"decisionRemarks\": null,\n      \"settings\": []\n    }\n  ]\n}"
             }
           ]
         },
@@ -34018,12 +34018,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock requested\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"pending\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock requested\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"pending\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null,\n    \"settings\": []\n  }\n}"
             }
           ]
         },
         {
-          "name": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself",
+          "name": "Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings",
           "request": {
             "method": "POST",
             "header": [],
@@ -34047,7 +34047,7 @@
                 }
               ]
             },
-            "description": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
+            "description": "Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
           },
           "response": [
             {
@@ -34075,7 +34075,7 @@
                     }
                   ]
                 },
-                "description": "Approve a lock or unlock request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
+                "description": "Approve a lock, unlock or settings request (approve:data-load, not its requester); the conditions are checked again. A lock switches golive.locked on; an unlock reopens its imports for its hours, then relocks by itself; a settings request writes its settings\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Approve\n\nAccess: approve:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -34087,7 +34087,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock approved\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"approved\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": \"2026-11-03T06:05:00Z\",\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock approved\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"approved\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": \"2026-11-03T06:05:00Z\",\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null,\n    \"settings\": []\n  }\n}"
             }
           ]
         },
@@ -34184,12 +34184,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock rejected\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"rejected\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock rejected\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"rejected\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null,\n    \"settings\": []\n  }\n}"
             }
           ]
         },
         {
-          "name": "Withdraw a lock or unlock request (its requester)",
+          "name": "Withdraw a lock, unlock or settings request (its requester)",
           "request": {
             "method": "POST",
             "header": [],
@@ -34213,7 +34213,7 @@
                 }
               ]
             },
-            "description": "Withdraw a lock or unlock request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load"
+            "description": "Withdraw a lock, unlock or settings request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load, approve:data-load"
           },
           "response": [
             {
@@ -34241,7 +34241,7 @@
                     }
                   ]
                 },
-                "description": "Withdraw a lock or unlock request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load"
+                "description": "Withdraw a lock, unlock or settings request (its requester)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Withdraw\n\nAccess: write:data-load, approve:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -34253,7 +34253,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock withdrawn\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"withdrawn\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live unlock withdrawn\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"unlock\",\n    \"actionLabel\": \"Go-live unlock\",\n    \"status\": \"withdrawn\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [\n      \"migration\"\n    ],\n    \"scopeLabels\": [\n      \"Migration workbook\"\n    ],\n    \"hours\": 4,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null,\n    \"settings\": []\n  }\n}"
             }
           ]
         },
@@ -34644,7 +34644,7 @@
           ]
         },
         {
-          "name": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once",
+          "name": "Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked",
           "request": {
             "method": "PUT",
             "header": [
@@ -34664,10 +34664,10 @@
                 "settings"
               ]
             },
-            "description": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+            "description": "Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: write:data-load, approve:data-load",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"loadApprovalRequired\": true,\n  \"kpiIncludeMigrated\": false\n}",
+              "raw": "{\n  \"settings\": {\n    \"kpiIncludeMigrated\": true\n  },\n  \"reason\": \"Steering committee: count migrated renewals in the KPIs\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -34697,10 +34697,10 @@
                     "settings"
                   ]
                 },
-                "description": "Settings of the workspace (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: approve:data-load",
+                "description": "Request a change of the settings of the workspace, with a reason (write or approve:data-load), approved by another user on the lock requests (approve:data-load): approval of each load by a second user (stays on in production and pre-production), migrated policies in dashboards and KPIs, commission and incentives, opening balances sent to SAP once, the dashboards' default view, duplicate checks, unlock hours and window, evidence retention, document types. Approval of loads, the SAP opening file and the duplicate checks no longer change once go-live is locked\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Settings\n\nAccess: write:data-load, approve:data-load",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"loadApprovalRequired\": true,\n  \"kpiIncludeMigrated\": false\n}",
+                  "raw": "{\n  \"settings\": {\n    \"kpiIncludeMigrated\": true\n  },\n  \"reason\": \"Steering committee: count migrated renewals in the KPIs\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -34718,7 +34718,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Settings saved\",\n  \"data\": {\n    \"loadApprovalRequired\": true,\n    \"kpiIncludeMigrated\": false,\n    \"commissionIncludeMigrated\": false,\n    \"incentiveIncludeMigrated\": false,\n    \"sapGlIncludeOpening\": false\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Go-live settings change requested\",\n  \"data\": {\n    \"id\": 3,\n    \"action\": \"settings\",\n    \"actionLabel\": \"Go-live settings change\",\n    \"status\": \"pending\",\n    \"reason\": \"Late legacy claim found on day 2\",\n    \"decisionRef\": null,\n    \"scope\": [],\n    \"scopeLabels\": [],\n    \"hours\": null,\n    \"expiresAt\": null,\n    \"relockedAt\": null,\n    \"decisionId\": null,\n    \"requestedBy\": \"Andrea Lim\",\n    \"requestedAt\": \"2026-11-03T02:00:00Z\",\n    \"decidedBy\": null,\n    \"decidedAt\": null,\n    \"decisionRemarks\": null,\n    \"settings\": [\n      {\n        \"field\": \"kpiIncludeMigrated\",\n        \"label\": \"Migrated policies in dashboards and KPIs\",\n        \"before\": false,\n        \"after\": true\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -36104,7 +36104,7 @@
                 }
               ]
             },
-            "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+            "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36140,7 +36140,7 @@
                     }
                   ]
                 },
-                "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+                "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36176,7 +36176,7 @@
                 "runs"
               ]
             },
-            "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run\n\nAccess: write:data-load",
+            "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > New run\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"kind\": \"mock-2\",\n  \"title\": \"Mock 2 - full extract\",\n  \"cutoverDate\": \"2026-11-02\",\n  \"plannedStart\": \"2026-10-10T01:00:00Z\",\n  \"plannedEnd\": \"2026-10-11T09:00:00Z\",\n  \"personalData\": \"masked-copy\",\n  \"dpoApprovalRef\": null,\n  \"exitCriteria\": \"No validation error; every control figure reconciles\"\n}",
@@ -36208,7 +36208,7 @@
                     "runs"
                   ]
                 },
-                "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run\n\nAccess: write:data-load",
+                "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > New run\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"kind\": \"mock-2\",\n  \"title\": \"Mock 2 - full extract\",\n  \"cutoverDate\": \"2026-11-02\",\n  \"plannedStart\": \"2026-10-10T01:00:00Z\",\n  \"plannedEnd\": \"2026-10-11T09:00:00Z\",\n  \"personalData\": \"masked-copy\",\n  \"dpoApprovalRef\": null,\n  \"exitCriteria\": \"No validation error; every control figure reconciles\"\n}",
@@ -36256,7 +36256,7 @@
                 }
               ]
             },
-            "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+            "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36282,7 +36282,7 @@
                     }
                   ]
                 },
-                "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+                "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36326,7 +36326,7 @@
                 }
               ]
             },
-            "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"evidencePackSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n  \"archiveRef\": \"TISPH-ARCH-2026-0042\"\n}",
@@ -36366,7 +36366,7 @@
                     }
                   ]
                 },
-                "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"evidencePackSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n  \"archiveRef\": \"TISPH-ARCH-2026-0042\"\n}",
@@ -36420,7 +36420,7 @@
                 }
               ]
             },
-            "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Replaced by an extra mock after the cleansing\"\n}",
@@ -36461,7 +36461,7 @@
                     }
                   ]
                 },
-                "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reason\": \"Replaced by an extra mock after the cleansing\"\n}",
@@ -36515,7 +36515,7 @@
                 }
               ]
             },
-            "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"result\": \"passed-with-issues\",\n  \"exitCriteriaMet\": true,\n  \"summary\": \"Reconciled; two severity 3 defects deferred\"\n}",
@@ -36556,7 +36556,7 @@
                     }
                   ]
                 },
-                "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"result\": \"passed-with-issues\",\n  \"exitCriteriaMet\": true,\n  \"summary\": \"Reconciled; two severity 3 defects deferred\"\n}",
@@ -36605,7 +36605,7 @@
                 }
               ]
             },
-            "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects\n\nAccess: read:data-load, write:data-load"
+            "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36632,7 +36632,7 @@
                     }
                   ]
                 },
-                "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects\n\nAccess: read:data-load, write:data-load"
+                "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36677,7 +36677,7 @@
                 }
               ]
             },
-            "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add\n\nAccess: write:data-load",
+            "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Add\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Plate number with a trailing space refused\",\n  \"object\": \"Policies - Motor\",\n  \"severity\": 3,\n  \"batchId\": 12,\n  \"stepId\": 32\n}",
@@ -36718,7 +36718,7 @@
                     }
                   ]
                 },
-                "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add\n\nAccess: write:data-load",
+                "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Add\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"title\": \"Plate number with a trailing space refused\",\n  \"object\": \"Policies - Motor\",\n  \"severity\": 3,\n  \"batchId\": 12,\n  \"stepId\": 32\n}",
@@ -36778,7 +36778,7 @@
                 }
               ]
             },
-            "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit\n\nAccess: write:data-load",
+            "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Edit\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"fixed\",\n  \"resolution\": \"Trimmed in the extract\"\n}",
@@ -36825,7 +36825,7 @@
                     }
                   ]
                 },
-                "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit\n\nAccess: write:data-load",
+                "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Defects > Edit\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"fixed\",\n  \"resolution\": \"Trimmed in the extract\"\n}",
@@ -36874,7 +36874,7 @@
                 }
               ]
             },
-            "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
+            "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36901,7 +36901,7 @@
                     }
                   ]
                 },
-                "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
+                "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36947,7 +36947,7 @@
                 }
               ]
             },
-            "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report\n\nAccess: read:data-load, write:data-load"
+            "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Report\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36980,7 +36980,7 @@
                     }
                   ]
                 },
-                "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report\n\nAccess: read:data-load, write:data-load"
+                "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs > Report\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -37020,7 +37020,7 @@
                 }
               ]
             },
-            "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load"
+            "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load"
           },
           "response": [
             {
@@ -37047,7 +37047,7 @@
                     }
                   ]
                 },
-                "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load"
+                "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Runs\n\nAccess: write:data-load"
               },
               "status": "OK",
               "code": 200,

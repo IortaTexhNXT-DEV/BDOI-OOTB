@@ -121,13 +121,16 @@ describe('client rules', () => {
   });
 
   it('a rule switched off in the setting does not run', async () => {
-    expect((await api('put', '/settings').send({ settings: { 'migration.duplicate_rules': ['vehicle', 'coc', 'policy-number', 'insurer-variant', 'master-name'] } })).status).toBe(200);
+    // the checks are a setting of the Go-Live tab, changed by two users: never on the generic settings
+    expect((await api('put', '/settings').send({ settings: { 'migration.duplicate_rules': ['vehicle'] } })).status).toBe(400);
+    await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'migration.duplicate_rules\'', [JSON.stringify(['vehicle', 'coc', 'policy-number', 'insurer-variant', 'master-name'])]);
     clearSettingsCache();
     try {
       const r = await upload(book({ Clients: [person('DP-OFF', { TIN: '555-666-777-000' })] }));
       expect(r.body.data.batch.rowsDuplicate).toBe(0);
     } finally {
-      await api('put', '/settings').send({ settings: { 'migration.duplicate_rules': ['tin', 'name-birth-date', 'company-name', 'vehicle', 'coc', 'policy-number', 'insurer-variant', 'master-name'] } });
+      await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'migration.duplicate_rules\'',
+        [JSON.stringify(['tin', 'name-birth-date', 'company-name', 'vehicle', 'coc', 'policy-number', 'insurer-variant', 'master-name'])]);
       clearSettingsCache();
     }
   });
@@ -176,6 +179,9 @@ describe('policy rules', () => {
     expect(second.body.data.batch).toMatchObject({ rowsDuplicate: 0, rowsNew: 1 });
     expect((await load(second.body.data.batch.id)).status).toBe(200);
     expect((await one("SELECT ic.code FROM policies p JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.policy_number = 'DP-V2'")).code).toBe('MALAYAN');
+    // the same workbook again: the mapped spelling is the stored insurer, so the policy is Unchanged, not Changed
+    const again = await upload(book({ 'Policies - Motor': [policy('motor', 'DP-V1', { Insurer: 'Malayan Ins. Co., Inc.', 'Plate Number': 'V1' })] }));
+    expect(again.body.data.batch).toMatchObject({ rowsChanged: 0, rowsUnchanged: 1, rowsDuplicate: 0 });
   });
 });
 
@@ -208,6 +214,27 @@ describe('resolutions', () => {
     expect(p.body.data.errors).toEqual([]);
     expect((await load(p.body.data.batch.id)).status).toBe(200);
     expect((await one("SELECT c.client_code FROM policies p JOIN clients c ON c.id = p.client_id WHERE p.policy_number = 'DP-U1'")).client_code).toBe('BV-002');
+  });
+
+  it('Use existing on an earlier row of the same workbook: one client is created and the later rows attach to it', async () => {
+    const wb = book({
+      Clients: [company('DP-IF1', 'Mindanao Trading Inc', { TIN: '444-555-666-000' }), company('DP-IF2', 'Mindanao Trading Inc.', { TIN: '444-555-666-000' })],
+      'Policies - Motor': [policy('motor', 'DP-IFP', { 'Client Code': 'DP-IF2', 'Plate Number': 'IF1' })],
+    });
+    const r = await upload(wb);
+    const id = r.body.data.batch.id;
+    const dup = (await rowsOf(id)).find((x) => x.key === 'DP-IF2');
+    expect(dup).toMatchObject({ result: 'duplicate', duplicates: [expect.objectContaining({ rule: 'tin', kind: 'file', number: 'DP-IF1' })] });
+    const res = await resolve(id, { rows: [dup.id], resolution: 'use-existing', reason: 'Same company in the legacy file twice' });
+    expect(res.status, JSON.stringify(res.body)).toBe(202);
+    expect(res.body.data.maps).toBe(1);
+    expect((await rowsOf(id)).find((x) => x.key === 'DP-IF2')).toMatchObject({ result: 'unchanged', resolution: 'use-existing' });
+    expect((await load(id)).status).toBe(200);
+    expect(await one("SELECT count(*)::int AS n FROM clients WHERE client_code IN ('DP-IF1', 'DP-IF2')")).toEqual({ n: 1 });
+    expect((await one("SELECT c.client_code FROM policies p JOIN clients c ON c.id = p.client_id WHERE p.policy_number = 'DP-IFP'")).client_code).toBe('DP-IF1');
+    // the same workbook again: nothing new, nothing changed
+    const again = await upload(wb);
+    expect(again.body.data.batch).toMatchObject({ rowsNew: 0, rowsChanged: 0, rowsDuplicate: 0 });
   });
 
   it('a resolution lapses when the next validation no longer finds the duplicate', async () => {

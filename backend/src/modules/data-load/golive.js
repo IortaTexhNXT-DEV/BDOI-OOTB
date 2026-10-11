@@ -12,6 +12,10 @@
  * after migration.unlock_window_days from the lock, the reference of a steering committee decision. The lock stays on:
  * only the named imports open again, until expires_at, when the job golive-relock (every 5 minutes) ends the unlock.
  * The undo of a load and the transaction reset stay refused.
+ *
+ * Settings (GO_LIVE_SETTINGS): changed the same way, by a request (write or approve:data-load) with a reason that
+ * another user approves (approve:data-load); one request of the tab waits at a time. Approval of each load, the opening
+ * balances sent to SAP and the duplicate checks only change before the lock; the others also after it.
  */
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
@@ -20,26 +24,59 @@ import { clearSettingsCache, getSetting, setSetting } from '../../lib/settings.j
 import { assertChecker } from '../../lib/makerChecker.js';
 import { IMPORT_SCOPES, lockState } from '../../lib/goLiveLock.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
+import { DUPLICATE_RULES } from './duplicates.js';
 import { isDate } from './common.js';
 
 const APPROVE = 'approve:data-load';
 const LINK = '/master/configuration/go-live/decision';
-const ACTION_LABELS = { lock: 'Go-live lock', unlock: 'Go-live unlock' };
+const ACTION_LABELS = { lock: 'Go-live lock', unlock: 'Go-live unlock', settings: 'Go-live settings change' };
 
-/** The owned settings changed on the Go-Live tab: key, field of the API, label. */
+/**
+ * The owned settings changed on the Go-Live tab: key, field of the API, label, type (boolean, choice, list of choices,
+ * whole number between min and max, list of codes), default, and beforeLock: changed only before the go-live lock.
+ */
 export const GO_LIVE_SETTINGS = [
-  { key: 'migration.load_approval_required', field: 'loadApprovalRequired', label: 'Approval of each load by a second user' },
-  { key: 'migration.kpi_include_migrated', field: 'kpiIncludeMigrated', label: 'Migrated policies in dashboards and KPIs' },
-  { key: 'migration.commission_include_migrated', field: 'commissionIncludeMigrated', label: 'Migrated policies in commission figures' },
-  { key: 'migration.incentive_include_migrated', field: 'incentiveIncludeMigrated', label: 'Migrated policies in incentives' },
-  { key: 'migration.sap_gl_include_opening', field: 'sapGlIncludeOpening', label: 'Opening balances sent to SAP once' },
+  { key: 'migration.load_approval_required', field: 'loadApprovalRequired', label: 'Approval of each load by a second user', type: 'boolean', fallback: true, beforeLock: true },
+  { key: 'migration.kpi_include_migrated', field: 'kpiIncludeMigrated', label: 'Migrated policies in dashboards and KPIs', type: 'boolean', fallback: false },
+  { key: 'migration.commission_include_migrated', field: 'commissionIncludeMigrated', label: 'Migrated policies in commission figures', type: 'boolean', fallback: false },
+  { key: 'migration.incentive_include_migrated', field: 'incentiveIncludeMigrated', label: 'Migrated policies in incentives', type: 'boolean', fallback: false },
+  { key: 'migration.sap_gl_include_opening', field: 'sapGlIncludeOpening', label: 'Opening balances sent to SAP once', type: 'boolean', fallback: false, beforeLock: true },
+  { key: 'dashboard.default_origin', field: 'dashboardDefaultOrigin', label: 'Business the dashboards open on', type: 'choice', choices: ['issued', 'all'], fallback: 'issued' },
+  { key: 'migration.duplicate_rules', field: 'duplicateRules', label: 'Duplicate checks of each load', type: 'list', choices: DUPLICATE_RULES, fallback: DUPLICATE_RULES, beforeLock: true },
+  { key: 'migration.unlock_max_hours', field: 'unlockMaxHours', label: 'Hours an unlock lasts at most', type: 'integer', min: 1, max: 24, fallback: 4 },
+  { key: 'migration.unlock_window_days', field: 'unlockWindowDays', label: 'Days after the lock an unlock needs no steering committee decision', type: 'integer', min: 0, max: 90,
+    fallback: 7 },
+  { key: 'migration.evidence_retention_years', field: 'evidenceRetentionYears', label: 'Years the production load files and rows are kept after the lock (0: for ever)',
+    type: 'integer', min: 0, max: 50, floor: 10, fallback: 10 },
+  { key: 'migration.document_types', field: 'documentTypes', label: 'Document types of the file naming convention', type: 'codes', fallback: [] },
+  { key: 'migration.numbering_mask_series', field: 'numberingMaskSeries', label: 'Numbering series of new business that follow the numbering mask', type: 'series', fallback: [] },
 ];
+
+/** A requested value checked against its setting: the value to store, or an error message. */
+function settingValue(s, v) {
+  if (s.type === 'boolean') return typeof v === 'boolean' ? { value: v } : { error: `${s.label}: true or false` };
+  if (s.type === 'choice') return s.choices.includes(v) ? { value: v } : { error: `${s.label}: one of ${s.choices.join(', ')}` };
+  if (s.type === 'list') {
+    const list = Array.isArray(v) ? [...new Set(v.map(String))] : null;
+    return list && list.every((x) => s.choices.includes(x)) ? { value: s.choices.filter((x) => list.includes(x)) } : { error: `${s.label}: some of ${s.choices.join(', ')}` };
+  }
+  if (s.type === 'integer') {
+    const ok = Number.isInteger(v) && v >= s.min && v <= s.max && (!s.floor || v === 0 || v >= s.floor);
+    return ok ? { value: v } : { error: `${s.label}: a whole number from ${s.floor ? `${s.floor}` : s.min} to ${s.max}${s.floor ? ', or 0' : ''}` };
+  }
+  if (s.type === 'series') {
+    const series = Array.isArray(v) ? [...new Set(v.map((x) => String(x).trim().toLowerCase()).filter(Boolean))] : null;
+    return series && series.length ? { value: series } : { error: `${s.label}: one or more numbering series` };
+  }
+  const codes = Array.isArray(v) ? [...new Set(v.map((x) => String(x).trim().toUpperCase()).filter(Boolean))] : null;
+  return codes && codes.length && codes.every((c) => /^[A-Z0-9]{2,12}$/.test(c)) ? { value: codes } : { error: `${s.label}: codes of 2 to 12 letters or digits` };
+}
 
 const tableExists = async (t) => (await one('SELECT to_regclass($1) IS NOT NULL AS ok', [t])).ok;
 
 /**
  * Conditions of the lock: [{ code, label, met, detail }] and the Go decision it rests on (decisionId). The production
- * run, its Go decision, reconciliation and restore point are recorded on the Mock Runs, Reconciliation and Go-Live tabs.
+ * run, its Go decision, reconciliation and restore point are recorded on the Runs, Reconciliation and Go-Live tabs.
  */
 export async function lockConditions() {
   const run = await tableExists('migration_runs')
@@ -61,8 +98,12 @@ export async function lockConditions() {
   };
 }
 
+/** The settings of a settings request, as label, value before and value requested. */
+const settingChanges = (r) => (r.action !== 'settings' ? [] : GO_LIVE_SETTINGS.filter((s) => r.settings && r.settings[s.field] !== undefined)
+  .map((s) => ({ field: s.field, label: s.label, before: r.settings_before?.[s.field] ?? null, after: r.settings[s.field] })));
+
 const toRequest = (r) => r && ({
-  id: Number(r.id), action: r.action, actionLabel: ACTION_LABELS[r.action], status: r.status, reason: r.reason, decisionRef: r.decision_ref,
+  id: Number(r.id), action: r.action, actionLabel: ACTION_LABELS[r.action], status: r.status, reason: r.reason, decisionRef: r.decision_ref, settings: settingChanges(r),
   scope: r.scope || [], scopeLabels: (r.scope || []).map((s) => IMPORT_SCOPES[s] || s), hours: r.hours, expiresAt: r.expires_at, relockedAt: r.relocked_at, decisionId: r.decision_id,
   requestedBy: r.requested_by_name || r.requested_by, requestedById: r.requested_by, requestedAt: r.requested_at,
   decidedBy: r.decided_by_name || r.decided_by, decidedById: r.decided_by, decidedAt: r.decided_at, decisionRemarks: r.decision_remarks,
@@ -83,8 +124,21 @@ export async function listLockRequests({ status = null } = {}) {
 /** Owned settings of the workspace as the Go-Live tab shows them. */
 async function ownedSettings() {
   const out = {};
-  for (const s of GO_LIVE_SETTINGS) out[s.field] = (await getSetting(s.key, s.key === 'migration.load_approval_required')) === true;
+  for (const s of GO_LIVE_SETTINGS) {
+    const v = await getSetting(s.key, s.fallback);
+    out[s.field] = s.type === 'boolean' ? v === true : s.type === 'integer' ? Number(v) : v ?? s.fallback;
+  }
   return out;
+}
+
+/**
+ * The settings as the Go-Live tab lists them: field, label, type, choices (series: the numbering series with their
+ * names), bounds and whether the lock freezes them.
+ */
+async function settingDefinitions() {
+  const series = (await many('SELECT code, name FROM document_numbering ORDER BY name')).map((r) => ({ value: r.code, label: r.name }));
+  return GO_LIVE_SETTINGS.map((s) => ({ field: s.field, label: s.label, type: s.type, ...(s.choices ? { choices: s.choices } : {}), ...(s.type === 'series' ? { choices: series } : {}),
+    ...(s.type === 'integer' ? { min: s.floor || s.min, max: s.max, allowZero: !!s.floor } : {}), beforeLock: !!s.beforeLock }));
 }
 
 /** The Go-Live tab: cutover date, lock, unlock in force, waiting request, lock conditions, windows and the owned settings. */
@@ -97,7 +151,7 @@ export async function goLive() {
     cutoverDate: isDate(cutover) ? cutover : null, locked: state.locked, lockedAt: state.lockedAt, lockRequestId: state.lockedBy ? Number(state.lockedBy) : null,
     unlock: state.unlock, unlockWindowEndsAt: state.lockedAt ? new Date(new Date(state.lockedAt).getTime() + windowDays * 86400000).toISOString() : null,
     unlockMaxHours: Number(await getSetting('migration.unlock_max_hours', 4)), pendingRequest: (await listLockRequests({ status: 'pending' }))[0] || null,
-    conditions, scopes: Object.entries(IMPORT_SCOPES).map(([key, label]) => ({ key, label })), settings: await ownedSettings(),
+    conditions, scopes: Object.entries(IMPORT_SCOPES).map(([key, label]) => ({ key, label })), settings: await ownedSettings(), settingDefinitions: await settingDefinitions(),
   };
 }
 
@@ -118,21 +172,57 @@ export async function setCutoverDate(value, user, req) {
   return goLive();
 }
 
-/** Change the owned settings of the workspace (approve:data-load); approval of loads stays on in production and pre-production. */
-export async function updateSettings(body, user, req) {
-  const changes = GO_LIVE_SETTINGS.filter((s) => body?.[s.field] !== undefined);
-  if (!changes.length) throw badRequest('Nothing to change');
-  for (const s of changes) if (typeof body[s.field] !== 'boolean') throw badRequest('Validation failed', [{ path: s.field, message: `${s.label}: true or false` }]);
+/**
+ * The changes of a settings request checked now (at the request and again at the approval): { field: value } of the
+ * settings that change. Refused: a value out of its bounds, a setting the lock freezes once locked, the approval of
+ * loads switched off in production and pre-production.
+ */
+async function checkedSettings(requested) {
+  const current = await ownedSettings();
+  const errors = [];
+  const out = {};
+  for (const s of GO_LIVE_SETTINGS) {
+    if (requested?.[s.field] === undefined) continue;
+    const r = settingValue(s, requested[s.field]);
+    if (r.error) errors.push({ path: s.field, message: r.error });
+    else if (JSON.stringify(r.value) !== JSON.stringify(current[s.field])) out[s.field] = r.value;
+  }
+  if (out.numberingMaskSeries) {
+    const known = new Set((await many('SELECT code FROM document_numbering WHERE code = ANY($1::text[])', [out.numberingMaskSeries])).map((r) => r.code));
+    const unknown = out.numberingMaskSeries.filter((c) => !known.has(c));
+    if (unknown.length) errors.push({ path: 'numberingMaskSeries', message: `Not a numbering series: ${unknown.join(', ')}` });
+  }
+  if (errors.length) throw badRequest('Validation failed', errors);
+  if (!Object.keys(out).length) throw badRequest('Nothing to change: the settings already have these values');
+  if ((await lockState(pool)).locked) {
+    const frozen = GO_LIVE_SETTINGS.filter((s) => s.beforeLock && out[s.field] !== undefined);
+    if (frozen.length) throw conflict(`Go-live is locked: ${frozen.map((s) => s.label.toLowerCase()).join(', ')} no longer change`);
+  }
   const env = String(await getSetting('system.environment', 'dev') || '').toLowerCase();
-  if (body.loadApprovalRequired === false && ['production', 'preprod'].includes(env)) {
+  if (out.loadApprovalRequired === false && ['production', 'preprod'].includes(env)) {
     throw conflict('Each load is approved by a second user in production and pre-production');
   }
-  const before = await ownedSettings();
-  for (const s of changes) await setSetting(s.key, body[s.field], user.id);
-  clearSettingsCache();
-  const after = await ownedSettings();
-  await audit(req, { entity: 'golive_setting', entityId: 'workspace', action: 'update', before, after });
-  return after;
+  return { changes: out, before: Object.fromEntries(Object.keys(out).map((f) => [f, current[f]])) };
+}
+
+/** Request a change of the owned settings, with a reason (write or approve:data-load); another user approves it. */
+export async function requestSettings(body, user, req) {
+  const reason = String(body?.reason || '').trim();
+  if (!reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'Give the reason' }]);
+  const { changes, before } = await checkedSettings(body?.settings || body);
+  let r;
+  try {
+    r = await one(`INSERT INTO go_live_lock_requests(action, reason, settings, settings_before, requested_by) VALUES ('settings', $1, $2, $3, $4) RETURNING id`,
+      [reason.slice(0, 1000), JSON.stringify(changes), JSON.stringify(before), user.id]);
+  } catch (e) {
+    if (e.code === '23505') throw conflict('A request of the Go-Live tab is already waiting for approval');
+    throw e;
+  }
+  const request = await getLockRequest(r.id);
+  await audit(req, { entity: 'go_live_lock', entityId: request.id, action: 'request', after: request });
+  await notifyApprovers({ audience: APPROVE, document: ACTION_LABELS.settings, number: `#${request.id}`, by: user.username,
+    detail: request.settings.map((x) => x.label).join(', '), link: LINK, entity: 'go_live_lock', entityId: request.id });
+  return request;
 }
 
 /** Hours of an unlock: a whole number from 1 to migration.unlock_max_hours. */
@@ -189,7 +279,7 @@ export async function requestLock(body, user, req) {
     r = await one(`INSERT INTO go_live_lock_requests(action, reason, decision_ref, scope, hours, decision_id, requested_by) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
       [action, reason.slice(0, 1000), decisionRef, scope, hours, decisionId, user.id]);
   } catch (e) {
-    if (e.code === '23505') throw conflict('A lock or unlock request is already waiting for approval');
+    if (e.code === '23505') throw conflict('A request of the Go-Live tab is already waiting for approval');
     throw e;
   }
   const request = await getLockRequest(r.id);
@@ -209,6 +299,7 @@ async function pendingRequest(id) {
 export async function approveLock(id, user, req) {
   const request = await pendingRequest(id);
   await assertChecker(user, request.requestedById, 'lock request', { configurable: false });
+  if (request.action === 'settings') return approveSettings(request, user, req);
   const { decisionId } = await assertActionAllowed(request.action, { decisionRef: request.decisionRef });
   await withTransaction(async (db) => {
     const moved = (await db.query(`UPDATE go_live_lock_requests SET status = 'approved', decided_by = $2, decided_at = now(), decision_id = COALESCE($3, decision_id),
@@ -225,6 +316,28 @@ export async function approveLock(id, user, req) {
   const done = await getLockRequest(id);
   await audit(req, { entity: 'go_live_lock', entityId: done.id, action: 'approve', before: request, after: done });
   await notifyDecision({ userId: done.requestedById, decidedBy: user.id, document: ACTION_LABELS[done.action], number: `#${done.id}`, approved: true, by: user.username,
+    link: LINK, entity: 'go_live_lock', entityId: done.id });
+  return done;
+}
+
+/** Approve a settings request: the values are checked again and written with the decision, in one transaction. */
+async function approveSettings(request, user, req) {
+  const requested = Object.fromEntries(request.settings.map((x) => [x.field, x.after]));
+  const { changes } = await checkedSettings(requested);
+  const before = await ownedSettings();
+  await withTransaction(async (db) => {
+    const moved = (await db.query('UPDATE go_live_lock_requests SET status = \'approved\', decided_by = $2, decided_at = now() WHERE id = $1 AND status = \'pending\' RETURNING id',
+      [request.id, user.id])).rows[0];
+    if (!moved) throw conflict('The request was decided by another user');
+    for (const s of GO_LIVE_SETTINGS.filter((x) => changes[x.field] !== undefined)) {
+      await db.query('UPDATE app_settings SET value = $2, updated_by = $3, updated_at = now() WHERE key = $1', [s.key, JSON.stringify(changes[s.field]), user.id]);
+    }
+  });
+  clearSettingsCache();
+  const done = await getLockRequest(request.id);
+  await audit(req, { entity: 'golive_setting', entityId: 'workspace', action: 'update', before, after: await ownedSettings() });
+  await audit(req, { entity: 'go_live_lock', entityId: done.id, action: 'approve', before: request, after: done });
+  await notifyDecision({ userId: done.requestedById, decidedBy: user.id, document: ACTION_LABELS.settings, number: `#${done.id}`, approved: true, by: user.username,
     link: LINK, entity: 'go_live_lock', entityId: done.id });
   return done;
 }

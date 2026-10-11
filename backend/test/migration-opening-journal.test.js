@@ -133,6 +133,16 @@ describe('the opening balance journal', () => {
     expect(JSON.stringify(tb)).toContain('1202001');
   });
 
+  it('counts the opening balances in the trial balance API and keeps an account with an opening balance active', async () => {
+    const tb = await s.api('get', `/accounting/trial-balance?asOf=${s.cutover}`);
+    expect(tb.status).toBe(200);
+    expect(tb.body.data.rows.find((r) => r.accountCode === '2201001')).toMatchObject({ opening: -10000, credit: 10000, balance: -10000 });
+    expect(tb.body.data.totals).toMatchObject({ balanced: true });
+    const off = await s.api('put', '/accounting/accounts/2201001').send({ status: 'inactive' });
+    expect(off.status).toBe(409);
+    expect(off.body.message).toMatch(/has a balance of -10000.00/);
+  });
+
   it('the trial balance statuses can never include it', async () => {
     const r = await s.api('put', '/settings').send({ settings: { 'reports.trial_balance_statuses': ['approved', 'posted', 'opening'] } });
     expect(r.status).toBe(400);
@@ -174,7 +184,9 @@ describe('SAP GL files', () => {
     const state = (await loader.api('get', '/data-load/golive/sap-opening-file')).body.data;
     expect(state).toMatchObject({ enabled: false, journal: { journalNumber: (await journalOf()).jv_number, sapExportedAt: null }, run: null });
     expect((await loader.api('post', '/data-load/golive/sap-opening-file').send({ reason: 'SAP takes the opening position from BrokerVerse' })).status).toBe(409);
-    expect((await approver.api('put', '/data-load/golive/settings').send({ sapGlIncludeOpening: true })).status).toBe(200);
+    const on = await loader.api('put', '/data-load/golive/settings').send({ settings: { sapGlIncludeOpening: true }, reason: 'SAP takes the opening position from BrokerVerse' });
+    expect(on.status, JSON.stringify(on.body)).toBe(201);
+    expect((await approver.api('post', `/data-load/golive/lock-requests/${on.body.data.id}/approve`).send({})).status).toBe(200);
     expect((await loader.api('post', '/data-load/golive/sap-opening-file').send({})).status).toBe(400);
     const req = await loader.api('post', '/data-load/golive/sap-opening-file').send({ reason: 'SAP takes the opening position from BrokerVerse' });
     expect(req.status, JSON.stringify(req.body)).toBe(201);

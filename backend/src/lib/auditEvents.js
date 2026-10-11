@@ -7,7 +7,8 @@
  * one row per changed claim field; both are read here and turned into events.
  *
  * Privacy: secrets (passwords, tokens, 2FA secrets, PINs ...) are never shown; government ID and bank account numbers
- * are shown masked (last four characters) unless the viewer holds view:pii; the personal data of an anonymised
+ * are shown masked (last four characters), e-mail addresses, phone numbers and birth dates masked as the masked API
+ * answers show them, unless the viewer holds view:pii; the personal data of an anonymised
  * client or prospect are shown as "Anonymised".
  */
 import { many } from '../db/pool.js';
@@ -16,7 +17,7 @@ import { hasPermission } from './auth.js';
 import { DEFAULT_FORMAT, applyDatePattern, formatAmount } from './pdf/format.js';
 import { printFormat } from './pdf/index.js';
 import { actionTitle, entityLabel, pathLabel, sentenceCase, statusText } from './auditLabels.js';
-import { revealPii } from './pii.js';
+import { maskKind, maskValue, revealPii } from './pii.js';
 import { VIEW_PII } from './piiPolicy.js';
 
 export const EMPTY = null;
@@ -129,6 +130,9 @@ export function formatValue(path, value, ctx, currency) {
   if (isSecretKey(path)) return MASK;
   if (ctx.anonymised && isPersonalKey(path)) return ANONYMISED;
   if (isIdentifierKey(path) && !ctx.canSeePersonal) return maskTail(value);
+  // e-mail, phone and birth date as every masked answer shows them (catalogue of lib/pii.js)
+  const personal = ctx.canSeePersonal ? null : maskKind(leaf(path));
+  if (personal) return maskValue(personal, value instanceof Date ? value : String(value));
   const key = norm(leaf(path));
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (Array.isArray(value)) {

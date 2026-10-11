@@ -1,5 +1,5 @@
 /**
- * Cutover checklist and defects of a run (Data Migration & Go-Live > Cutover and Mock Runs, migration 0444).
+ * Cutover checklist and defects of a run (Data Migration & Go-Live > Cutover and Runs, migration 0444).
  *
  * The checklist is the runbook template copied when the run was created (runs.js). Each step has an owner (a user or a
  * role), planned and actual start and end, a status and notes:
@@ -16,7 +16,7 @@
 import { many, one } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
-import { isLate, openRunRow, runDefects, runRow } from './runs.js';
+import { isLate, openRunRow, runDefects, runElapsedMs, runPlannedMs, runRow } from './runs.js';
 
 export const STEP_STATUSES = { 'not-started': 'Not started', 'in-progress': 'In progress', done: 'Done', blocked: 'Blocked', skipped: 'Skipped', failed: 'Failed' };
 export const PHASES = { 'pre-cutover': 'Pre-cutover', cutover: 'Cutover', 'go-live': 'Go-live', hypercare: 'Hypercare' };
@@ -52,8 +52,9 @@ export async function listSteps(runId) {
   const steps = (await many(`${STEP_SELECT} WHERE s.run_id = $1 ORDER BY s.sort, s.code`, [run.id])).map(toStep);
   const finished = steps.filter((s) => FINISHED.includes(s.status)).length;
   const next = steps.find((s) => !FINISHED.includes(s.status) && !s.waitingFor.length) || null;
-  const plannedMs = steps.reduce((t, s) => t + (s.plannedStart && s.plannedEnd ? new Date(s.plannedEnd) - new Date(s.plannedStart) : 0), 0);
-  const elapsedMs = steps.reduce((t, s) => t + (s.elapsedMs || 0), 0);
+  // the run's own elapsed and planned time, as its timings show them
+  const plannedMs = runPlannedMs(run, steps.map((s) => ({ plannedMs: s.plannedStart && s.plannedEnd ? new Date(s.plannedEnd) - new Date(s.plannedStart) : 0 })));
+  const elapsedMs = runElapsedMs(run);
   return {
     runId: Number(run.id), runNumber: run.run_number, runStatus: run.status, steps,
     progress: { done: finished, total: steps.length, percent: steps.length ? Math.round((finished * 100) / steps.length) : 0, plannedMs, elapsedMs,
