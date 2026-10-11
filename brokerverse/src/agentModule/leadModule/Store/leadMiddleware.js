@@ -70,6 +70,9 @@ export const postCreateleadMiddleware = createAsyncThunk(
         taxInformationNumber: payload?.TaxNumber || null,
         // where the prospect came from (Lead Source master)
         ...(payload?.Source ? { source: payload.Source } : {}),
+        // TISPH: customer type (TFS, Non-TFS, Direct Customer) and the TFS loan of the prospect
+        ...(payload?.CustomerType ? { customerType: payload.CustomerType } : {}),
+        ...(payload?.LoanId ? { loanId: payload.LoanId } : {}),
         ...(payload?.clientId ? { clientId: payload.clientId } : {}),
         // line of business and product (lob null: the product is tagged later)
         ...(payload?.lob !== undefined ? { lob: payload.lob } : {}),
@@ -140,6 +143,8 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
         companyName: payload?.CompanyName || null,
         taxInformationNumber: payload?.TaxNumber || null,
         ...(payload?.Source !== undefined ? { source: payload.Source || null } : {}),
+        ...(payload?.CustomerType !== undefined ? { customerType: payload.CustomerType || null } : {}),
+        ...(payload?.LoanId !== undefined ? { loanId: payload.LoanId || null } : {}),
         updatedBy: (() => {
           try {
             const userData = JSON.parse(localStorage.getItem('user') || '{}');

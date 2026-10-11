@@ -28,7 +28,7 @@ const MODULE_OF = {
   period_close_run: 'period-end', year_end_run: 'period-end', recurring_journal: 'period-end', bank_reconciliation: 'bank-reconciliation',
   fleet_schedule: 'fleet', open_cover: 'marine', marine_declaration: 'marine', marine_certificate: 'marine',
   product_template: 'products', risk_mapping: 'products', posting_rule: 'masters', accounting_config_change: 'masters',
-  authority_limit: 'access-control', scheduled_job: 'schedules',
+  authority_limit: 'access-control', scheduled_job: 'schedules', talkbot_call_list: 'talkbot-calls',
   // Data Migration & Go-Live: loads, reconciliations, runs, decisions and the go-live lock requests
   data_load_batch: 'data-load', migration_reconciliation: 'data-load', migration_run: 'data-load', migration_run_step: 'data-load',
   migration_run_defect: 'data-load', go_live_decision: 'data-load', go_live_lock: 'data-load', migration_value_map: 'data-load',

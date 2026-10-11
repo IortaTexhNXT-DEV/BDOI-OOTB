@@ -6,6 +6,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
+| Operations > Sales & Marketing | Prospects | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
 | Accounts | Unapplied Collections | View |
@@ -60,6 +61,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports | All Reports | View |
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
+| Reports > Operational Reports | APR Operation Report | View |
+| Reports > Operational Reports | Production per Line | View |
+| Reports > Operational Reports | Agent Pipeline | View |
+| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -95,7 +100,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |
@@ -137,7 +142,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Create and edit | Add, amend, upload, submit and end commission rules |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Create and edit | Add, amend and assign sharing schemes; set overrides on referrers and channels |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |

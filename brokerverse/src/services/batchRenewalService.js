@@ -190,6 +190,18 @@ class BatchRenewalService {
   }
 
   /**
+   * Generate Renewal Quotes for the selected policies of a batch (background job); Motor policies not confirmed by
+   * Talkbot are skipped with the reason
+   * @param {string} batchId - Batch ID
+   * @param {string[]} selectedPolicyIds - Policy ids
+   * @returns {Promise<Object>} { success, message, data: { jobId, queued, skipped } }
+   */
+  static async generateRenewalQuotes(batchId, selectedPolicyIds) {
+    const response = await postRequest(`policy-renewals/batches/${batchId}/generate-quotes`, { selectedPolicyIds });
+    return response.data;
+  }
+
+  /**
    * Get batch statistics
    * @param {string} batchId - Batch ID
    * @returns {Promise<Object>} Batch statistics

@@ -29,6 +29,13 @@ The list shows **Prospect ID** (LD-YYYY-NNNNN), **Name**, **Category**, **Produc
 
 The buttons above the list are **Bulk Upload** (prospects from an Excel file, validated before they are created), **Generate Report** (the list as an Excel file) and **Create Prospect**.
 
+### Upload prospects and TFS accounts {#upload-prospects-and-tfs-accounts}
+
+**Bulk Upload** loads a file into **Prospects** or **TFS accounts**; **Download template** gives the columns of each. Every upload is stamped with a batch number (LIB-YYYY-NNNNN) shown on the prospects it created, and the result lists the rows created, updated and failed, with the row number and reason of each failed row. A failed row does not stop the others.
+
+- **Prospects**: the prospects of calls, e-mail, walk-ins, referrals and the other channels of the Lead Source list, in batches of a few hundred rows. A row with the **Lead Number** of a prospect already loaded (or its **Loan ID**) updates its **Status** and **Disposition** instead of creating a second prospect: the call results of a list are loaded by uploading the same file again with the new status.
+- **TFS accounts**: the account file of Toyota Financial Services. Each account becomes a prospect with **Source** TFS and **Customer Type** TFS, and keeps the TFS details: **Reference No.**, **Loan ID**, the vehicle, the **Insurance Provider**, the **Policy Expiry Date**, the loan start, booking and maturity dates, the **Product Group** and the **SRP**. There is one prospect per loan: a fleet customer with several loans has several prospects, and a Loan ID already loaded updates its prospect. An account without a policy expiry date gives no prospect, and an insurance provider that is not an insurer of the Insurance Company list is refused.
+
 ![Operations > Sales & Marketing > Prospects, with the prospects by product line and status](images/screens-operations/prospects-list.png)
 
 ### Create a prospect {#create-a-prospect}
@@ -46,10 +53,12 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
-| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes](#lead-sources-and-reason-codes) |
+| **Customer Type** | No | **TFS**, **Non-TFS** or **Direct Customer** | |
+| **Loan ID** | No | The TFS loan the prospect is for | One prospect per loan |
+| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **E-mail**, **Customer Service**, **Dealer** | From [Lead sources and reason codes](#lead-sources-and-reason-codes) |
 | **Product** | No | The product chosen in step 3 | **Product not yet tagged** when skipped |
 
-The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment](#lead-assignment) give it an account executive.
+Before the prospect is saved, the system looks for a client or an open prospect with the same first name, last name, mobile number and date of birth, or the same Loan ID, and shows it; you may still save. The category, customer type, status and disposition only take the values of their lists. The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment](#lead-assignment) give it an account executive.
 
 ![Create prospect: the choice between a new customer and an existing client](images/screens-operations/prospect-create.png)
 
@@ -59,7 +68,9 @@ The prospect is created with the status **New** and the next number of the prosp
 
 Select a row (or the eye in **Actions**) to open the prospect. The prospect page shows the prospect's quotations with the same counters as the quotations list, **Add Quote** to quote the prospect, and **Convert** on an approved quotation. The pencil opens the prospect form for a change.
 
-A prospect is not deleted once it has a quotation or a sales activity: set it to **Lost** instead. Every change is kept in the history of the prospect.
+The **Account** section shows the customer type, the source, the disposition of the last call and, for a TFS account, the TFS reference, Loan ID, insurance provider, policy expiry, vehicle, product group, SRP, loan dates and the upload batch.
+
+Only the roles allowed to delete prospects see **Delete**, and a prospect with a policy is never deleted: set it to **Lost** instead. A **Converted** prospect keeps its status. A prospect not converted and not changed for 90 days is closed as **Lost** by the daily job. Every change is kept in the history of the prospect.
 
 ## Quick Quote {#quick-quote}
 
@@ -205,7 +216,9 @@ The screen has three tabs:
 
 - **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
 - **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
-- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. **Method** is **Round robin** between the rule's **Account executives**, or a fixed account executive. **Add rule** creates a rule; the switch in **Active** turns it off.
+- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. The conditions include the **Insurance provider** and the **Customer type** of the prospect, so the TFS accounts of each insurer go to that insurer's group of account executives. **Method** is **Round robin** between the rule's **Account executives**, **Load** (the one with the fewest open prospects) or a fixed account executive. **Bandwidth** caps the open prospects one account executive may hold under the rule; when all are full the prospect waits in the queue. **Add rule** creates a rule; the switch in **Active** turns it off.
+
+A prospect with an insurance provider is reassigned only to an account executive of that insurer's rules. A prospect still **New** three working days (72 hours, weekends and holidays not counted) after it was assigned goes to the **Reassignment Queue** and the lead assignment team is told.
 
 At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
 
@@ -491,6 +504,8 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 ![Create Batch Renewal: the selection criteria](images/screens-operations/renewal-batch-create.png)
 
+With the Talkbot call lists in use, **Create Batch Renewal** also has the criteria **Talkbot outcome** and **Talkbot call list**; for a Motor product the Talkbot outcome starts at **Willing to renew**. The policy list shows each policy's **Talkbot outcome** and **Confirmed on**. In a batch, **Generate Renewal Quotes** prepares the renewal quotes of the selected policies: a Motor policy that Talkbot has not confirmed, or whose confirmation is older than the validity period, is **Skipped** with the reason, and the others are quoted. The **Quote status** of each policy (**Not quoted**, **Queued**, **Quoted**, **Skipped**, **Failed**) is shown in the batch and in its report. A single renewal from Renewal Policy is not affected.
+
 **Lapse Management** shows the policies **Lapsed**, **In grace period** and that **Can be reinstated**, with the **Premium lost or at risk**. The tab **Lapsed and grace period** lists each policy with its days lapsed or left in the grace period, the **Lapse reason** and the win-back offers made. The tab **Win-back campaigns** holds the campaigns offering lapsed clients a discount to come back, with the clients contacted and converted and the premium recovered; **New campaign** creates one.
 
 ![Operations > Renewals > Lapse Management](images/screens-operations/lapse-management.png)
@@ -501,13 +516,42 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 ![Operations > Renewals > Performance, the KPI scorecard](images/screens-operations/renewal-performance.png)
 
+## Talkbot Calls {#talkbot-calls}
+
+Talkbot calls Motor clients a few days before their policy expires and asks whether they will renew. The call list is prepared here, loaded on the Talkbot platform, and the call results come back as a file.
+
+{{screen:/renewal/talkbot}}
+
+The list shows each **Call list** (TCL-YYYY-NNNNN), its **Talkbot task name**, the **Expiry date** of its accounts, the **Accounts**, those **Willing to renew** and those **Not called**, the **Renewal batch** made from it and the **Status**: **Draft**, **Sent to Talkbot**, **Results loaded**, **Closed** or **Cancelled**.
+
+### Prepare and send a call list {#prepare-and-send-a-call-list}
+
+1. Choose {{menu:/renewal/talkbot}} and select **New call list**.
+2. The expiry dates are proposed for the list of the day; on the last working day before a weekend or a holiday they cover the days nobody works. Choose the **Insurance Company**, **Sales person** or **Source of business** if needed, tick **Include expired policies still renewable**, or pick a list in **Re-call accounts not reached on** to call its missed and uncontacted accounts again. The dialog shows the accounts to call and those left out, with the reason (for example no mobile number, a lock-in or Scheme 2 account, a TFS loan status that holds the renewal notices, client asked not to be called, already on another call list).
+3. Select **Create call list**. The list opens in **Draft**. **Remove** takes an account off the list with a reason; **Put back** restores it.
+4. Select **Download call list**: the Contact Import file for the Talkbot platform. Accounts no longer eligible (renewed, cancelled, already quoted) are left out of the file and shown as **Removed**.
+5. Load the file on the Talkbot platform, then select **Mark as sent** and enter the Talkbot task name.
+
+A list that will not be called is ended with **Cancel list** and a reason.
+
+### Load the results and create the renewal batch {#load-the-talkbot-results}
+
+1. Export the Call Records of the campaign from the Talkbot platform.
+2. On the call list, select **Upload results** and choose the file. A file of another Talkbot task is loaded only after you confirm. The result line gives the rows loaded and failed, with the row number and reason of each failed row.
+3. Each account gets one **Talkbot outcome** from all its calls: **Willing to renew**, **Not willing to renew**, **Already renewed**, **Call back**, **Wrong contact**, **Uncontacted**, **Missed call** or **Not called**. **Calls** shows the calls of an account. The outcome is written on the renewal timeline; a call back date becomes the follow-up date on Negotiations.
+4. **Record outcome** sets the outcome of an account by hand, with the date and a remark (for example when the client called the hotline).
+5. **Create renewal batch** puts the accounts confirmed **Willing to renew** into a renewal batch in **Draft**; open it on [Renewal Batch](#renewal-batch-lapse-management-and-the-analytics) and select **Generate Renewal Quotes**.
+6. **Close list** ends a list whose results are worked; a list is also closed 30 days after its last upload.
+
+Mobile numbers are shown masked; the full number is only in the downloaded file. The Operations team can open the call lists and create the renewal batch; Sales prepares, sends and loads them.
+
 ## Renewal Queue and At-Risk Policies {#renewal-queue-and-at-risk-policies}
 
 {{screen:/renewal/queue}}
 
 {{screen:/renewal/at-risk}}
 
-The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, risk level and account executive. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
+The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, Talkbot outcome, risk level and account executive. The **Talkbot** column shows the latest Talkbot outcome of the policy with its call list and date, the call back date or the number of calls. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
 
 The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed**, lapsed or **Not for renewal**. The renewal notices are e-mailed to the client 90, 60 and 30 days before expiry (30 and 15 days for Credit Life), on working days; a notice missed on a holiday goes out on the next working day.
 

@@ -19,9 +19,16 @@ const FIELD_MAP = {
   city: 'city', province: 'state', region: 'region', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
   mooVillage: 'moo', street: 'road', leadCategory: 'lead_category', taxInformationNumber: 'tax_number', source: 'source', notes: 'notes',
   productType: 'product_interest', status: 'status', channelId: 'channel_id', branchCode: 'branch_code',
+  customerType: 'customer_type', loanId: 'loan_id', tfsReference: 'tfs_reference', productGroup: 'product_group', disposition: 'disposition',
+  insuranceProviderId: 'insurance_provider_id', srp: 'srp',
 };
+/** Dates of a TFS account, as given (YYYY-MM-DD or a date). */
+const DATE_FIELDS = { policyExpiryDate: 'policy_expiry_date', loanStartDate: 'loan_start_date', loanBookingDate: 'loan_booking_date', loanMaturityDate: 'loan_maturity_date' };
+/** The vehicle of a TFS account (leads.vehicle). */
+export const VEHICLE_KEYS = ['make', 'model', 'variant', 'modelYear', 'plateNumber', 'chassisNumber', 'engineNumber'];
 const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'lob', 'productId', 'product', 'productName', 'email', 'mobileNumber', 'createdBy', 'updatedBy', 'leadId', 'id',
-  'generatedLeadId', 'createdAt', 'updatedAt', 'quotationsCount', 'clientId', 'ownerUserId', 'ownerName', 'channelName', 'assignmentStatus', 'queueReason']);
+  'generatedLeadId', 'leadNumber', 'createdAt', 'updatedAt', 'quotationsCount', 'clientId', 'ownerUserId', 'ownerName', 'channelName', 'assignmentStatus', 'queueReason',
+  ...Object.keys(DATE_FIELDS), 'vehicle', 'insuranceProviderName', 'importBatchId', 'importBatchNumber']);
 
 /** Row -> the lead object the screens read (leadId, generatedLeadId, emailId, contactNumber, DOB ...). */
 export function toLead(r) {
@@ -38,6 +45,11 @@ export function toLead(r) {
     status: r.status, clientId: r.client_id, ownerUserId: r.owner_user_id, quotationsCount: r.quotations_count ?? 0,
     channelId: r.channel_id ?? null, channelName: r.channel_name ?? null, branchCode: r.branch_code ?? null, ownerName: r.owner_name ?? null,
     assignmentStatus: r.assignment_status ?? null, queueReason: r.queue_reason ?? null,
+    customerType: r.customer_type ?? null, loanId: r.loan_id ?? null, tfsReference: r.tfs_reference ?? null, insuranceProviderId: r.insurance_provider_id ?? null,
+    insuranceProviderName: r.insurance_provider_name ?? null, policyExpiryDate: r.policy_expiry_date ?? null, loanStartDate: r.loan_start_date ?? null,
+    loanBookingDate: r.loan_booking_date ?? null, loanMaturityDate: r.loan_maturity_date ?? null, srp: r.srp ?? null, productGroup: r.product_group ?? null,
+    vehicle: r.vehicle && Object.keys(r.vehicle).length ? r.vehicle : null, disposition: r.disposition ?? null, importBatchId: r.import_batch_id ?? null,
+    importBatchNumber: r.import_batch_number ?? null,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
@@ -56,6 +68,10 @@ function columnsFrom(body) {
   if (body.contactNumber === undefined && body.mobileNumber !== undefined) cols.phone = body.mobileNumber || null;
   if (body.DOB !== undefined) cols.birth_date = isoDate(body.DOB);
   if (body.lob !== undefined) cols.lob = body.lob ? lobOf(body.lob) : null;
+  for (const [k, c] of Object.entries(DATE_FIELDS)) if (body[k] !== undefined) cols[c] = isoDate(body[k]);
+  if (body.vehicle !== undefined) cols.vehicle = JSON.stringify(Object.fromEntries(VEHICLE_KEYS.filter((k) => body.vehicle?.[k] !== undefined && body.vehicle?.[k] !== '').map((k) => [k, body.vehicle[k]])));
+  if (cols.srp !== undefined) cols.srp = cols.srp === null || cols.srp === '' ? null : Number(String(cols.srp).replace(/,/g, ''));
+  if (cols.insurance_provider_id !== undefined) cols.insurance_provider_id = cols.insurance_provider_id ? Number(cols.insurance_provider_id) : null;
   const extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)));
   return { cols, extra };
 }
@@ -64,7 +80,9 @@ const SELECT = `SELECT l.*, (SELECT count(*)::int FROM quotes q WHERE q.lead_id 
   (SELECT u.display_name FROM users u WHERE u.id = l.created_by) AS created_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = l.owner_user_id) AS owner_name,
   (SELECT ch.name FROM distribution_channels ch WHERE ch.id = l.channel_id) AS channel_name,
-  (SELECT p.name FROM products p WHERE p.id = l.product_id) AS product_name FROM leads l`;
+  (SELECT p.name FROM products p WHERE p.id = l.product_id) AS product_name,
+  (SELECT ic.name FROM insurance_companies ic WHERE ic.id = l.insurance_provider_id) AS insurance_provider_name,
+  (SELECT b.batch_number FROM lead_import_batches b WHERE b.id = l.import_batch_id) AS import_batch_number FROM leads l`;
 
 /**
  * Line of business and product columns from a body naming a product (productId, else `product` by code or name): the
@@ -109,8 +127,49 @@ export async function leadSource(db, value) {
   return v;
 }
 
+/** Prospect statuses that end the prospect: a converted prospect is never reopened (its client account exists). */
+const FINAL_STATUSES = ['Converted', 'converted'];
+
+/**
+ * The values of a prospect that come from lists (TIS-BRD-LEAD-05, LEAD-07, MAS-10): Lead Category (leads.categories),
+ * Customer Type (leads.customer_types), status (leads.statuses), disposition (leads.dispositions) and the insurance
+ * provider (an insurer of the Insurance Company master). before: the prospect being changed.
+ */
+export async function assertLeadValues(cols, before = null, db = { query }) {
+  const errors = [];
+  const oneOf = async (col, key, fallback, path, label) => {
+    if (cols[col] === undefined || cols[col] === null || cols[col] === '') return;
+    const list = (await getSetting(key, fallback)) || fallback;
+    const hit = list.find((x) => String(x).toLowerCase() === String(cols[col]).trim().toLowerCase());
+    if (hit) cols[col] = hit;
+    else errors.push({ path, message: `${label} must be one of ${list.join(', ')}` });
+  };
+  await oneOf('lead_category', 'leads.categories', ['Retail', 'Corporate'], 'leadCategory', 'Lead Category');
+  await oneOf('customer_type', 'leads.customer_types', ['TFS', 'Non-TFS', 'Direct Customer'], 'customerType', 'Customer Type');
+  await oneOf('status', 'leads.statuses', ['New', 'Contacted', 'Qualified', 'QuoteGenerated', 'Converted', 'Lost'], 'status', 'Status');
+  await oneOf('disposition', 'leads.dispositions', [], 'disposition', 'Disposition');
+  if (before && FINAL_STATUSES.includes(before.status) && cols.status !== undefined && !FINAL_STATUSES.includes(cols.status)) {
+    errors.push({ path: 'status', message: `Prospect ${before.lead_number} is converted; its status cannot change` });
+  }
+  if (cols.insurance_provider_id) {
+    const ic = (await db.query("SELECT id FROM insurance_companies WHERE id = $1 AND status = 'active'", [cols.insurance_provider_id])).rows[0];
+    if (!ic) errors.push({ path: 'insuranceProviderId', message: 'The insurance provider is not an active insurer of Master > Insurance Company' });
+  }
+  if (cols.srp !== undefined && cols.srp !== null && !(Number.isFinite(cols.srp) && cols.srp >= 0)) errors.push({ path: 'srp', message: 'SRP must be an amount in pesos' });
+  if (errors.length) throw badRequest(errors[0].message, errors);
+}
+
+/** A Loan ID already on another prospect: the TFS loan is the de-duplication key (TIS-BRD-LEAD-02). */
+async function assertLoanFree(db, loanId, leadId = null) {
+  if (!loanId) return;
+  const other = (await db.query('SELECT lead_number FROM leads WHERE lower(loan_id) = lower($1) AND deleted_at IS NULL AND ($2::text IS NULL OR id <> $2)', [loanId, leadId])).rows[0];
+  if (other) throw badRequest(`Loan ID ${loanId} is already on prospect ${other.lead_number}`, [{ path: 'loanId', message: `Loan ID ${loanId} is already on prospect ${other.lead_number}` }]);
+}
+
 export async function createLead(body, userId, db = null) {
   const { cols, extra } = columnsFrom(body);
+  await assertLeadValues(cols, null, db || { query });
+  await assertLoanFree(db || { query }, cols.loan_id);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   if (cols.source !== undefined) cols.source = await leadSource(db || { query }, cols.source);
   // the product may be tagged later (Create Prospect > Skip - tag product later) unless leads.product_required is on
@@ -147,6 +206,8 @@ export async function createLead(body, userId, db = null) {
 export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
+  await assertLeadValues(cols, before);
+  if (cols.loan_id !== undefined) await assertLoanFree({ query }, cols.loan_id, before.id);
   if (cols.source !== undefined && cols.source !== before.source) cols.source = await leadSource({ query }, cols.source);
   Object.assign(cols, await productColumns({ query }, body));
   // a new line without a product drops the product of the old line
@@ -211,20 +272,40 @@ export async function possibleDuplicates(q = {}) {
   const mobile = lastDigits(q.contactNumber ?? q.mobileNumber);
   const name = (String(q.companyName ?? '').trim() || [q.firstName, q.lastName].map((x) => String(x ?? '').trim()).filter(Boolean).join(' ')).toLowerCase() || null;
   const dob = isoDate(q.DOB) || null;
-  if (!email && !mobile && !name) return [];
-  const cond = (t) => `(($1::text IS NOT NULL AND lower(${t}.email) = $1)
-    OR ($2::text IS NOT NULL AND right(regexp_replace(COALESCE(${t}.phone, ''), '\\D', '', 'g'), 10) = $2)
-    OR ($3::text IS NOT NULL AND (lower(${t}.display_name) = $3 OR lower(${t}.company_name) = $3) AND ($4::date IS NULL OR ${t}.birth_date IS NULL OR ${t}.birth_date = $4)))`;
-  const params = [email, mobile, name, dob];
+  const loanId = String(q.loanId ?? '').trim() || null;
+  const fourKey = (await getSetting('leads.duplicate_rule')) === 'four-key';
+  if (!email && !mobile && !name && !loanId) return [];
+  if (fourKey && !loanId && !(name && mobile)) return [];
+  // placeholders: the values each rule compares, numbered in the order given
+  const values = fourKey ? { mobile, name, dob, loanId } : { email, mobile, name, dob, loanId };
+  const keys = Object.keys(values);
+  const $ = (k) => `$${keys.indexOf(k) + 1}`;
+  const nameIs = (t) => `(lower(${t}.display_name) = ${$('name')} OR lower(${t}.company_name) = ${$('name')})`;
+  const dobFits = (t) => `(${$('dob')}::date IS NULL OR ${t}.birth_date IS NULL OR ${t}.birth_date = ${$('dob')})`;
+  const mobileIs = (t) => `right(regexp_replace(COALESCE(${t}.phone, ''), '\\D', '', 'g'), 10) = ${$('mobile')}`;
+  const loanIs = (t) => `(${$('loanId')}::text IS NOT NULL AND lower(${t}.loan_id) = lower(${$('loanId')}))`;
+  // four-key (TIS-BRD-LEAD-03): first name, last name, mobile and date of birth together; a TFS loan of its own
+  // (another Loan ID) is never a duplicate of the same customer's other loan (fleet accounts, LEAD-02). Clients have no loan.
+  const cond = (t, withLoan) => {
+    const loan = withLoan ? loanIs(t) : `(${$('loanId')}::text IS NULL AND false)`;
+    if (fourKey) {
+      const otherLoan = withLoan ? ` AND (${$('loanId')}::text IS NULL OR ${t}.loan_id IS NULL OR lower(${t}.loan_id) = lower(${$('loanId')}))` : '';
+      return `(${loan} OR (${$('name')}::text IS NOT NULL AND ${$('mobile')}::text IS NOT NULL AND ${nameIs(t)} AND ${mobileIs(t)} AND ${dobFits(t)}${otherLoan}))`;
+    }
+    return `((${$('email')}::text IS NOT NULL AND lower(${t}.email) = ${$('email')}) OR (${$('mobile')}::text IS NOT NULL AND ${mobileIs(t)})
+      OR (${$('name')}::text IS NOT NULL AND ${nameIs(t)} AND ${dobFits(t)}) OR ${loan})`;
+  };
+  const params = Object.values(values);
   const clients = await many(`SELECT c.id, c.client_code, c.display_name, c.company_name, c.email, c.phone, c.birth_date, u.display_name AS owner_name
-    FROM clients c LEFT JOIN users u ON u.id = c.owner_user_id WHERE c.status <> 'deleted' AND ${cond('c')} ORDER BY c.created_at DESC LIMIT 10`, params);
-  const leads = await many(`${SELECT} WHERE l.deleted_at IS NULL AND l.client_id IS NULL AND NOT (l.status = ANY($5)) AND ${cond('l')} ORDER BY l.created_at DESC LIMIT 10`,
-    [...params, CLOSED_STATUSES]);
+    FROM clients c LEFT JOIN users u ON u.id = c.owner_user_id WHERE c.status <> 'deleted' AND ${cond('c', false)} ORDER BY c.created_at DESC LIMIT 10`, params);
+  const leads = await many(`${SELECT} WHERE l.deleted_at IS NULL AND l.client_id IS NULL AND NOT (l.status = ANY($${params.length + 1})) AND ${cond('l', true)}
+    ORDER BY l.created_at DESC LIMIT 10`, [...params, CLOSED_STATUSES]);
   const matchedOn = (r) => [
     email && String(r.email || '').toLowerCase() === email && 'email',
     mobile && lastDigits(r.phone) === mobile && 'mobile',
     name && [r.display_name, r.company_name].some((x) => String(x || '').toLowerCase() === name) && 'name',
     dob && r.birth_date && isoDate(r.birth_date) === dob && 'birthDate',
+    loanId && r.loan_id && r.loan_id.toLowerCase() === loanId.toLowerCase() && 'loanId',
   ].filter(Boolean);
   return [
     ...clients.map((r) => ({ kind: 'client', id: r.id, number: r.client_code, name: r.display_name, ownerName: r.owner_name, matchedOn: matchedOn(r) })),
@@ -341,6 +422,11 @@ export const LEAD_UPLOAD_COLUMNS = [
   { key: 'lob', header: 'LOB', aliases: ['line of business'], format: 'Line of business (Line of Business master code or name); empty: the product is tagged later', example: 'MOTOR' },
   { key: 'product', header: 'Product', aliases: ['product code', 'product name'], format: 'Active product of Master > Product (code or name) of the LOB; empty: the product is tagged later', example: 'CTPL' },
   { key: 'source', header: 'Source', aliases: ['lead source'], format: 'Lead source of Master > Insurance Management > Lead Sources (code or name); bulk-upload when empty', example: 'Referral' },
+  { key: 'customerType', header: 'Customer Type', aliases: ['customer type'], format: 'TFS, Non-TFS or Direct Customer', allowed: ['TFS', 'Non-TFS', 'Direct Customer'], example: 'Direct Customer' },
+  { key: 'loanId', header: 'Loan ID', aliases: ['loan number'], format: 'TFS loan of the prospect; a Loan ID already loaded updates that prospect', example: '' },
+  { key: 'leadNumber', header: 'Lead Number', aliases: ['prospect number', 'lead no'], format: 'LD number of a prospect already loaded: the row updates its status and disposition', example: '' },
+  { key: 'status', header: 'Status', aliases: ['call status', 'lead status'], format: 'Prospect status: New, Contacted, Qualified, QuoteGenerated, Converted, Lost', example: '' },
+  { key: 'disposition', header: 'Disposition', aliases: ['call disposition'], format: 'Interested, Not Interested, Uncontacted, Call back or Renewed', example: '' },
 ];
 
 /** Uploaded row -> lead body. */
@@ -348,3 +434,36 @@ export const leadFromRow = (row) => {
   const v = mapColumns(row, LEAD_UPLOAD_COLUMNS);
   return { ...v, source: v.source || UPLOAD_SOURCE };
 };
+
+/**
+ * The prospect an uploaded row names (Lead Number, else Loan ID), already loaded: the row updates its status and
+ * disposition instead of creating a second prospect (bulk status update by re-upload, TIS-BRD-LEAD-07). null when none.
+ */
+export async function leadOfRow(body) {
+  const ref = String(body.leadNumber ?? '').trim();
+  const loan = String(body.loanId ?? '').trim();
+  if (!ref && !loan) return null;
+  const r = await one(`SELECT * FROM leads WHERE deleted_at IS NULL AND (($1 <> '' AND lead_number = $1) OR ($1 = '' AND $2 <> '' AND lower(loan_id) = lower($2))) LIMIT 1`, [ref, loan]);
+  if (!r && ref) throw notFound(`Prospect ${ref} not found`);
+  return r;
+}
+
+/** Status and disposition of an uploaded row written on the prospect it names. */
+export async function updateStatusFromRow(lead, body, userId, batchId) {
+  const cols = { ...(body.status ? { status: body.status } : {}), ...(body.disposition ? { disposition: body.disposition } : {}) };
+  if (!Object.keys(cols).length) throw badRequest('Status or Disposition is required to update a prospect already loaded');
+  await assertLeadValues(cols, lead);
+  const keys = Object.keys(cols);
+  await query(`UPDATE leads SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')}, import_batch_id = $${keys.length + 2}, updated_by = $${keys.length + 3}, updated_at = now() WHERE id = $1`,
+    [lead.id, ...Object.values(cols), batchId, userId]);
+  return getLead(lead.id);
+}
+
+/** The lists of the prospect form (GET /leads/options). */
+export async function leadOptions() {
+  return {
+    categories: await getSetting('leads.categories', ['Retail', 'Corporate']), customerTypes: await getSetting('leads.customer_types', ['TFS', 'Non-TFS', 'Direct Customer']),
+    statuses: await getSetting('leads.statuses', ['New', 'Contacted', 'Qualified', 'QuoteGenerated', 'Converted', 'Lost']), dispositions: await getSetting('leads.dispositions', []),
+    insurers: await many("SELECT id, name FROM insurance_companies WHERE status = 'active' ORDER BY name"),
+  };
+}

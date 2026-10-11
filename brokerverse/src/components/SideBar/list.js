@@ -274,6 +274,14 @@ export const menuList = [
             includes: ["/agent/renewal-batch"],
           },
           {
+            // Talkbot call lists of Motor renewals (TIS-BRD-LEAD-09)
+            id: 20,
+            name: "Talkbot Calls",
+            path: "/renewal/talkbot",
+            includes: ["/renewal/talkbot"],
+            permissions: ["read:talkbot-calls"],
+          },
+          {
             id: 1,
             name: "Renewal Queue",
             path: "/renewal/queue",
@@ -826,6 +834,38 @@ export const menuList = [
             name: "Dealer Production",
             path: "/reports/run/dealer-production",
             includes: ["/reports/run/dealer-production"],
+            permissions: ["read:reports"],
+          },
+          {
+            // policies written month or year to date per business category (TIS-BRD-RPT-SLS-01)
+            id: 7,
+            name: "APR Operation Report",
+            path: "/reports/run/apr-operation",
+            includes: ["/reports/run/apr-operation"],
+            permissions: ["read:reports"],
+          },
+          {
+            // policy count, sum insured, premium and commission per product line (TIS-BRD-RPT-SLS-02)
+            id: 8,
+            name: "Production per Line",
+            path: "/reports/run/production-by-line",
+            includes: ["/reports/run/production-by-line"],
+            permissions: ["read:reports"],
+          },
+          {
+            // prospects, quotations and policies per agent per month with the incentive (TIS-BRD-RPT-SLS-03)
+            id: 9,
+            name: "Agent Pipeline",
+            path: "/reports/run/agent-pipeline",
+            includes: ["/reports/run/agent-pipeline"],
+            permissions: ["read:reports"],
+          },
+          {
+            // policies expiring in 30/60/90 days with the calling template fields (TIS-BRD-RPT-SLS-04)
+            id: 10,
+            name: "Renewal Notice Listing",
+            path: "/reports/run/renewal-notice-listing",
+            includes: ["/reports/run/renewal-notice-listing"],
             permissions: ["read:reports"],
           },
         ],

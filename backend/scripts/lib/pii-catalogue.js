@@ -406,6 +406,16 @@ export const CATALOGUE = {
   'migration_evidence.note': 'freeText',
   'campaign_recipients.party_name': 'partyName',
   'campaign_recipients.email': 'email',
+  // TFS account uploads and the Talkbot call lists: the contact on each line and call record, the uploaded files
+  // (migrations 0460, 0461)
+  'lead_import_batches.file_name': 'fileName',
+  'talkbot_call_lines.contact_name': 'partyName',
+  'talkbot_call_lines.phone': 'phone',
+  'talkbot_call_lines.email': 'email',
+  'talkbot_call_lines.manual_remark': 'freeText',
+  'talkbot_call_attempts.contact_name': 'partyName',
+  'talkbot_call_attempts.contact_number': 'phone',
+  'talkbot_call_uploads.file_name': 'fileName',
 };
 
 /** Tables emptied: credentials, sign-in sessions and history, and messages addressed to real people. */

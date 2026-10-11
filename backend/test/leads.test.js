@@ -188,6 +188,9 @@ describe('prospect for an existing customer', () => {
 
 describe('possible duplicates of a new prospect', () => {
   it('finds the client and the open prospects with the same e-mail, mobile number, or name and date of birth', async () => {
+    // the delivered rule (TISPH checks the four keys together: test/lead-tfs.test.js)
+    await pool.query("UPDATE app_settings SET value = '\"any\"' WHERE key = 'leads.duplicate_rule'");
+    clearSettingsCache();
     const client = (await ctx.api('post', '/clients').send({ firstName: 'Dupe', lastName: 'Santos', DOB: '1985-03-04', emailId: 'dupe.santos@example.ph', contactNumber: '09175550001' })).body.data;
     const lead = (await sales('post', '/leads').send({ firstName: 'Lito', lastName: 'Garcia', emailId: 'lito.garcia@example.ph', contactNumber: '+63 917 555 0002' })).body.data;
     const byMobile = await sales('get', '/leads/duplicates?firstName=Someone&contactNumber=%2B639175550001');

@@ -75,6 +75,8 @@ export const TRANSACTION_TABLES = [
   'comparison_reports', 'campaigns', 'campaign_recipients',
   // sales activities of account executives and fixed asset disposals (migrations 0320 and 0321)
   'sales_activities', 'fixed_asset_disposals',
+  // TFS account uploads and the Talkbot call lists with their lines, call records and uploaded result files (migrations 0460, 0461)
+  'lead_import_batches', 'talkbot_call_lists', 'talkbot_call_lines', 'talkbot_call_attempts', 'talkbot_call_uploads',
 ];
 
 /**

@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "97c33c463b5aa196ac3b8a635a70aaf582f7ab1b9c3bf7eef9ec154137f6aabf",
+ "sourceHash": "c52536dfea38360d1013359d9ed14e738f1d3181e0e9899875571081bed7f844",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1883,15 +1883,22 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "create-a-prospect",
+   "id": "upload-prospects-and-tfs-accounts",
    "number": "18.1.1",
+   "title": "Upload prospects and TFS accounts",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "create-a-prospect",
+   "number": "18.1.2",
    "title": "Create a prospect",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "view-edit-or-delete-a-prospect",
-   "number": "18.1.2",
+   "number": "18.1.3",
    "title": "View, edit or delete a prospect",
    "level": 3,
    "chapter": "Screen reference: Operations"
@@ -2079,57 +2086,78 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "renewal-queue-and-at-risk-policies",
+   "id": "talkbot-calls",
    "number": "18.16",
+   "title": "Talkbot Calls",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "prepare-and-send-a-call-list",
+   "number": "18.16.1",
+   "title": "Prepare and send a call list",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "load-the-talkbot-results",
+   "number": "18.16.2",
+   "title": "Load the results and create the renewal batch",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renewal-queue-and-at-risk-policies",
+   "number": "18.17",
    "title": "Renewal Queue and At-Risk Policies",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "lock-in-accounts",
-   "number": "18.17",
+   "number": "18.18",
    "title": "Lock-in Accounts",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "negotiations",
-   "number": "18.18",
+   "number": "18.19",
    "title": "Negotiations",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "payments",
-   "number": "18.19",
+   "number": "18.20",
    "title": "Payments",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cover-notes-binders",
-   "number": "18.20",
+   "number": "18.21",
    "title": "Cover notes (binders)",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cancel-a-policy-computed-return-premium",
-   "number": "18.21",
+   "number": "18.22",
    "title": "Cancel a policy: computed return premium",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claims-awaiting-documents",
-   "number": "18.22",
+   "number": "18.23",
    "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
-   "number": "18.23",
+   "number": "18.24",
    "title": "Motor claim repairs and letters of authority",
    "level": 2,
    "chapter": "Screen reference: Operations"
@@ -2740,6 +2768,13 @@
    "id": "reports-by-department",
    "number": "23.1.3",
    "title": "The reports of each department",
+   "level": 3,
+   "chapter": "Reports"
+  },
+  {
+   "id": "reports-sales",
+   "number": "23.1.4",
+   "title": "Sales reports",
    "level": 3,
    "chapter": "Reports"
   },

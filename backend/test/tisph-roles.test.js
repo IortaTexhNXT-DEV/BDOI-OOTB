@@ -194,7 +194,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     // or to the TISPH roles (0502: claim settlement cash, 0504: claim processing, 0520: the post-dated cheque log,
     // 0522: the insurer billing approval, 0524: the receipt reversal, 0531: the receipting grants, 0570-0572: the commission
     // rules, schemes, line approvals and incentive approvers) run again after it
-    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql', '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql', '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql')");
+    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0460_talkbot_calls.sql', '0461_lead_tfs_accounts.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql', '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql', '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql')");
     // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
     await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });

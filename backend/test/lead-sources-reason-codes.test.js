@@ -28,10 +28,11 @@ beforeAll(async () => {
 afterAll(async () => { await pool.end(); });
 
 describe('masters', () => {
-  it('ships the 14 TISPH lead sources, the 32 reason codes without a master of their own and the 8 reassignment reasons', async () => {
+  it('ships the 20 TISPH lead sources (the 14 of the Pre-BSM list and the 6 channels the BRD confirms), the 32 reason codes without a master of their own and the 8 reassignment reasons', async () => {
     const sources = await q("SELECT code, name, data FROM master_records WHERE type_code = 'lead-source' AND status = 'active' ORDER BY (data->>'sortOrder')::int");
-    expect(sources).toHaveLength(14);
-    expect(sources[0]).toMatchObject({ code: 'CL', name: 'Call', data: { channelType: 'Direct', branchCode: 'HO' } });
+    expect(sources).toHaveLength(20);
+    expect(sources[0]).toMatchObject({ code: 'TFS', name: 'TFS', data: { branchCode: 'HO' } });
+    expect(sources.map((s) => s.name)).toEqual(expect.arrayContaining(['Call', 'E-mail', 'Customer Service', 'Dealer', 'Commission', 'Renewals via Toyota Dealer']));
     expect(sources.map((s) => s.code)).toContain('UCFP');
     // the reasons of the accounting decisions (seed 88) are counted in accounting-reasons.test.js, those of the remittance
     // decisions (seed 89) in remittance-authority.test.js, the invoice cancellations (seed 89) in bir-forms.test.js,
@@ -43,7 +44,7 @@ describe('masters', () => {
       'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review',
       'renewal_reassign', 'non_renewal', 'claim_cancel', 'claim_cash_reversal', 'pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject',
       'unapplied_refund', 'commission_rate_change', 'commission_reversal', 'commission_share_change', 'commission_wht_change', 'scheme_end', 'data_load_reject')
-      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|feature)_' GROUP BY 1 ORDER BY 1`);
+      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|talkbot|feature)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
       { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);
     const type = (await q("SELECT fields FROM master_types WHERE code = 'reason-code'"))[0];
@@ -52,7 +53,7 @@ describe('masters', () => {
   });
 
   it('the teams read them through their module; only masters maintenance changes them', async () => {
-    expect((await as['ls.sales']('get', '/ops-masters/lead-source')).body.data).toHaveLength(14);
+    expect((await as['ls.sales']('get', '/ops-masters/lead-source')).body.data).toHaveLength(20);
     expect((await as['ls.ops']('get', '/ops-masters/reason-code')).status).toBe(200);
     expect((await as['ls.sales']('post', '/ops-masters/lead-source').send({ code: 'X', name: 'X' })).status).toBe(403);
     expect((await as['ls.ops']('post', '/ops-masters/reason-code').send({ code: 'X', name: 'X', context: 'lapse' })).status).toBe(403);

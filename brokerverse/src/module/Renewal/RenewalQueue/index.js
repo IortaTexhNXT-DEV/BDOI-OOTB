@@ -21,6 +21,7 @@ import OriginChip, { OriginFilter, policyOriginOf } from "../../../components/Or
 import { hasPermission } from "../../../utils/canOpen";
 import BvConfirmDialog from "../../../components/ConfirmDialog";
 import { ExpiryCell, NoticeChip, PolicyCell, RenewalHeader, RiskChip, StageChip, useRenewalParam } from "../shared";
+import { TalkbotCell, TALKBOT_OUTCOMES } from "../TalkbotCalls/TalkbotCell";
 import "./index.scss";
 
 const METHODS = ["Email", "SMS", "Phone", "Letter"];
@@ -49,6 +50,9 @@ const RenewalQueue = () => {
   const [range, setRange] = useState(null);
   const [due, setDue] = useState("");
   const [origin, setOrigin] = useState("");
+  // the Talkbot outcome of each renewal (filter and column) for the users who see the Talkbot call lists
+  const talkbotOn = hasPermission("read:talkbot-calls");
+  const [talkbot, setTalkbot] = useState("");
   const [panelId, setPanelId] = useState(null);
   const [reminder, setReminder] = useState(null);
   const [focus, setFocus] = useState(null);
@@ -90,11 +94,11 @@ const RenewalQueue = () => {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const [from, to] = range || [];
-    return rows.filter((r) => (!stage || r.status === stage) && (!risk || r.retentionRisk === risk) && (!agent || r.assignedAgent === agent)
+    return rows.filter((r) => (!talkbot || (r.talkbot?.outcome || "not-called") === talkbot) && (!stage || r.status === stage) && (!risk || r.retentionRisk === risk) && (!agent || r.assignedAgent === agent)
       && (!due || (due === "soon" && r.daysToExpiry > 0 && r.daysToExpiry <= 30) || (due === "risk" && ["High", "Critical"].includes(r.retentionRisk)) || (due === "grace" && r.inGracePeriod))
       && (!from || !to || (new Date(`${r.expiryDate}T00:00:00`) >= from && new Date(`${r.expiryDate}T00:00:00`) <= to))
       && (!q || [r.policyNumber, r.insuredName, r.renewalNumber, r.product].some((v) => String(v || "").toLowerCase().includes(q))));
-  }, [rows, search, stage, risk, agent, range, due]);
+  }, [rows, search, stage, risk, agent, range, due, talkbot]);
   const selected = rows.find((r) => r.id === panelId) || (focus?.id === panelId ? focus : null);
   const openRow = useCallback((row) => setPanelId(row.id), []);
   const asked = useRenewalParam(rows, openRow);
@@ -224,14 +228,18 @@ const RenewalQueue = () => {
       <StatCards items={figures} />
 
       <SectionCard>
-        <FilterBar active={!!(search || stage || risk || agent || range || due || origin)}
-          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setOrigin(""); }}>
+        <FilterBar active={!!(search || stage || risk || agent || range || due || origin || talkbot)}
+          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setOrigin(""); setTalkbot(""); }}>
           <span className="p-input-icon-left bv-filter-bar__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("queue.searchHint")} aria-label={t("queue.searchHint")} />
           </span>
           <Dropdown value={stage} onChange={(e) => setStage(e.value || "")} aria-label={t("queue.col.stage")}
             options={[{ label: t("queue.allStages"), value: "" }, ...stages.map((s) => ({ label: s, value: s }))]} />
+          {talkbotOn ? (
+            <Dropdown value={talkbot} onChange={(e) => setTalkbot(e.value || "")} aria-label={t("queue.col.talkbot")}
+              options={[{ label: t("queue.allTalkbot"), value: "" }, ...TALKBOT_OUTCOMES.map((o) => ({ label: t(`talkbot.outcomes.${o}`), value: o }))]} />
+          ) : null}
           <Dropdown value={risk} onChange={(e) => setRisk(e.value || "")} aria-label={t("queue.col.risk")}
             options={[{ label: t("queue.allRisks"), value: "" }, ...["Low", "Medium", "High", "Critical"].map((l) => ({ label: t(`renewalPages.risk.${l}`, l), value: l }))]} />
           <Dropdown value={agent} onChange={(e) => setAgent(e.value || "")} filter aria-label={t("queue.col.agent")}
@@ -250,6 +258,7 @@ const RenewalQueue = () => {
           <Column field="status" header={t("queue.col.stage")} sortable body={(r) => (
             <span className="bv-cell-stack"><StageChip row={r} /><NoticeChip treatment={r.noticeTreatment} /></span>
           )} />
+          {talkbotOn ? <Column header={t("queue.col.talkbot")} body={(r) => <TalkbotCell talkbot={r.talkbot} />} /> : null}
           <Column field="retentionRisk" header={t("queue.col.risk")} sortable body={(r) => <RiskChip level={r.retentionRisk} />} />
           <Column field="assignedAgent" header={t("queue.col.agent")} sortable />
           <Column header={t("queue.col.actions")} body={actionsBody} className="bv-actions" headerClassName="bv-actions" />

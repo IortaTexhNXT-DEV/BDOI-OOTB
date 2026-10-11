@@ -16,6 +16,8 @@ import TagProductDialog from '../leadListing/TagProductDialog';
 import confirmDeleteProspect from '../confirmDeleteProspect';
 import DetailSection from '../../../components/DetailSection';
 import { RecordActivityLog } from '../../../components/ActivityLog';
+import KeyValueGrid from '../../../components/KeyValueGrid';
+import { hasPermission } from '../../../utils/canOpen';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -165,12 +167,14 @@ const LeadDetail = () => {
             className="p-button-secondary mr-2"
             onClick={handleEdit}
           />
-          <Button
-            label={t('leadDetail.delete')}
-            icon="pi pi-trash"
-            className="p-button-danger mr-2"
-            onClick={handleDelete}
-          />
+          {hasPermission('delete:leads') ? (
+            <Button
+              label={t('leadDetail.delete')}
+              icon="pi pi-trash"
+              className="p-button-danger mr-2"
+              onClick={handleDelete}
+            />
+          ) : null}
           <Button
             label={t('leadDetail.back')}
             icon="pi pi-arrow-left"
@@ -304,6 +308,31 @@ const LeadDetail = () => {
                 <span className="value">{currentLeadDetails.quotationsCount || '0'}</span>
               </div>
             </Card>
+        </div>
+
+        {/* the account the prospect comes from: TFS reference, loan, vehicle and expiring policy (TIS-BRD-LEAD-01) */}
+        <div className="col-12">
+          <DetailSection title={t('leadDetail.account')}>
+            <KeyValueGrid columns={4} items={[
+              { label: t('leadDetail.customerType'), value: currentLeadDetails.customerType },
+              { label: t('leadDetail.source'), value: currentLeadDetails.source },
+              { label: t('leadDetail.disposition'), value: currentLeadDetails.disposition, hidden: !currentLeadDetails.disposition },
+              { label: t('leadDetail.tfsReference'), value: currentLeadDetails.tfsReference, hidden: !currentLeadDetails.tfsReference },
+              { label: t('leadDetail.loanId'), value: currentLeadDetails.loanId, hidden: !currentLeadDetails.loanId },
+              { label: t('leadDetail.insuranceProvider'), value: currentLeadDetails.insuranceProviderName, hidden: !currentLeadDetails.insuranceProviderName },
+              { label: t('leadDetail.policyExpiry'), value: currentLeadDetails.policyExpiryDate, type: 'date', hidden: !currentLeadDetails.policyExpiryDate },
+              { label: t('leadDetail.vehicle'), value: [currentLeadDetails.vehicle?.modelYear, currentLeadDetails.vehicle?.make, currentLeadDetails.vehicle?.model, currentLeadDetails.vehicle?.variant].filter(Boolean).join(' '),
+                hidden: !currentLeadDetails.vehicle },
+              { label: t('leadDetail.plateNumber'), value: currentLeadDetails.vehicle?.plateNumber, hidden: !currentLeadDetails.vehicle?.plateNumber },
+              { label: t('leadDetail.chassisNumber'), value: currentLeadDetails.vehicle?.chassisNumber, hidden: !currentLeadDetails.vehicle?.chassisNumber },
+              { label: t('leadDetail.productGroup'), value: currentLeadDetails.productGroup, hidden: !currentLeadDetails.productGroup },
+              { label: t('leadDetail.srp'), value: currentLeadDetails.srp, type: 'amount', hidden: currentLeadDetails.srp === null || currentLeadDetails.srp === undefined },
+              { label: t('leadDetail.loanStart'), value: currentLeadDetails.loanStartDate, type: 'date', hidden: !currentLeadDetails.loanStartDate },
+              { label: t('leadDetail.loanBooking'), value: currentLeadDetails.loanBookingDate, type: 'date', hidden: !currentLeadDetails.loanBookingDate },
+              { label: t('leadDetail.loanMaturity'), value: currentLeadDetails.loanMaturityDate, type: 'date', hidden: !currentLeadDetails.loanMaturityDate },
+              { label: t('leadDetail.importBatch'), value: currentLeadDetails.importBatchNumber, hidden: !currentLeadDetails.importBatchNumber },
+            ]} />
+          </DetailSection>
         </div>
 
         <div className="col-12">

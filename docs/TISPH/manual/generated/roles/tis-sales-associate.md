@@ -21,6 +21,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
@@ -42,6 +43,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
+| Reports > Operational Reports | APR Operation Report | View |
+| Reports > Operational Reports | Production per Line | View |
+| Reports > Operational Reports | Agent Pipeline | View |
+| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Distribution Channels | View |
 | Product Configurator | Dashboard | View |
@@ -70,6 +75,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Lock-in Accounts, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -82,7 +89,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs and Statement |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
