@@ -1,6 +1,7 @@
 /**
  * Seeds: roles, permissions, the BrokerVerse admin, configuration defaults, scheduled jobs and the reference data in
- * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on (see seeds/README.md). Idempotent.
+ * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on, the TISPH test users only when
+ * TISPH_TEST_USERS_PASSWORD is set outside the production environment (see seeds/README.md). Idempotent.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
 import { encryptSecret, isEncrypted } from '../lib/secrets.js';
 import { assertPasswordAllowed, recordHistory } from '../lib/password.js';
+import { getSetting } from '../lib/settings.js';
 import { PLATFORM_PERMISSIONS, PLATFORM_ROLE, isPlatformPermission } from '../lib/platform.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -228,6 +230,56 @@ export async function seedPlatformAdmin({ log = console.log, warn = log, source 
   return id;
 }
 
+/** "carla.mendoza" -> ["Carla", "Mendoza"]: the first and last name of a test user, from its user name. */
+const nameParts = (username) => {
+  const parts = username.split('.').map((p) => p.charAt(0).toUpperCase() + p.slice(1));
+  return [parts[0], parts.slice(1).join(' ') || parts[0]];
+};
+
+/**
+ * Whether this deployment is the production environment: APP_ENVIRONMENT "production" or "prod" (any case) or, when
+ * APP_ENVIRONMENT is not set, the environment name of Help > About (setting release.environment_label) being Production.
+ * NODE_ENV says nothing about it: every deployed site (DEV, SIT, UAT, PROD) runs with NODE_ENV=production.
+ */
+export async function isProductionEnvironment(source = process.env) {
+  const label = typeof source.APP_ENVIRONMENT === 'string' && source.APP_ENVIRONMENT.trim()
+    ? source.APP_ENVIRONMENT
+    : await getSetting('release.environment_label', '');
+  const name = String(label || '').trim().toLowerCase();
+  return name === 'production' || name === 'prod';
+}
+
+/**
+ * One test user per TISPH role (seeds/tisph_test_users.json), for user acceptance testing and demonstrations, only when
+ * TISPH_TEST_USERS_PASSWORD is set and never in the production environment (isProductionEnvironment). Every user gets
+ * that password (checked against the password policy) and must change it at the first sign-in. An existing user keeps
+ * its password and its roles. Returns the user names created.
+ */
+export async function seedTisphTestUsers({ log = console.log, warn = log, source = process.env } = {}) {
+  const password = String(source.TISPH_TEST_USERS_PASSWORD || '');
+  if (!password) return [];
+  if (await isProductionEnvironment(source)) {
+    warn('WARNING: TISPH_TEST_USERS_PASSWORD is set in production; the TISPH test users are for UAT and demo sites only and were not created');
+    return [];
+  }
+  await assertPasswordAllowed(password);
+  const hash = await bcrypt.hash(password, 10);
+  const users = JSON.parse(fs.readFileSync(path.join(here, 'seeds', 'tisph_test_users.json'), 'utf8'));
+  const created = [];
+  for (const { username, role } of users) {
+    const existing = await query('SELECT id FROM users WHERE lower(username) = $1', [username.toLowerCase()]);
+    if (existing.rows[0]) continue;
+    const [first, last] = nameParts(username);
+    const id = (await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by, must_change_password)
+      VALUES ($1,$2,$3,$4,$5,$6,'active','seed',true) RETURNING id`, [username, hash, `${first} ${last}`, first, last, `${username}@tisph.example.ph`])).rows[0].id;
+    await recordHistory(id, hash);
+    await query('INSERT INTO user_roles(user_id, role_id) SELECT $1, id FROM roles WHERE code = $2 ON CONFLICT DO NOTHING', [id, role]);
+    created.push(username);
+  }
+  log(`TISPH test users: ${created.length} created, ${users.length - created.length} already present`);
+  return created;
+}
+
 /** Applies the seed. `log` receives the progress lines and `warn` the warnings (a line starting with WARNING:; default `log`). */
 export async function seed({ log = console.log, warn = log, sampleData } = {}) {
   for (const [code, name, description, isSystem] of ROLES) {
@@ -267,6 +319,7 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
       [s.key, JSON.stringify(s.value), s.group, s.label, s.type || 'string', s.editable !== false]);
   }
   await seedPlatformAdmin({ log, warn });
+  await seedTisphTestUsers({ log, warn });
   // Two-factor secrets stored before encryption at rest (DATA_ENCRYPTION_KEY) was introduced are encrypted now.
   const plain = await query(`SELECT id, totp_secret, totp_pending_secret FROM users
     WHERE (totp_secret IS NOT NULL AND totp_secret NOT LIKE 'enc:%') OR (totp_pending_secret IS NOT NULL AND totp_pending_secret NOT LIKE 'enc:%')`);
