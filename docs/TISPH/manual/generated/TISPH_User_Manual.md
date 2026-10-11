@@ -298,7 +298,7 @@ AppSupport.
 have been signed out.**
 
 **My e-signature** records the signature printed on the documents you issue or approve, where
-[Document Signatures (20.23)](#document-signatures) maps it:
+[Document Signatures (21.23)](#document-signatures) maps it:
 
 1. Select **My e-signature**.
 2. **Draw** the signature on screen, or **Upload image** (PNG or JPEG, up to 512 KB).
@@ -355,7 +355,7 @@ pesos on the right, dates as DD/MM/YYYY) and says what follows. The button names
 changes nothing.
 
 - A rejection, return, reversal, cancellation or escalation asks for the **Reason**, chosen from the list of reasons
-  that TIS IT AppSupport / Admin keeps on [Reason Codes (20.6)](#lead-sources-and-reason-codes). The reason **Other** also needs a **Note**.
+  that TIS IT AppSupport / Admin keeps on [Reason Codes (21.6)](#lead-sources-and-reason-codes). The reason **Other** also needs a **Note**.
 - The button shows that the action is running. The confirmation closes when the action is done; if the system refuses
   it, the confirmation stays open with the message, and nothing is changed.
 
@@ -421,7 +421,7 @@ approves and who approves your work.
 | Posting rules and account determination | TIS Finance & General Accounting |
 | Role access changes and authority limits | TIS IT AppSupport / Admin |
 
-**Approval limits.** The [Authority Matrix (20.10)](#authority-matrix) sets the largest amount each role may approve per
+**Approval limits.** The [Authority Matrix (21.10)](#authority-matrix) sets the largest amount each role may approve per
 transaction. As delivered:
 
 - a remittance, and its settlement or adjustment, is approved by TIS Finance & General Accounting up to
@@ -446,11 +446,11 @@ decide. The system applies the same rule when the decision is sent.
 ![Figure 2.13: Approvals in My Work of the TIS Operations Unit Head: a renewal premium and a claim settlement](../images/getting-started/my-work-approvals.png)
 On top of maker-checker:
 
-- once a limit is set on the [Authority Matrix (20.10)](#authority-matrix), an approval above the approver's limit is
+- once a limit is set on the [Authority Matrix (21.10)](#authority-matrix), an approval above the approver's limit is
   refused;
-- the [Segregation of Duties (20.12)](#segregation-of-duties) rules warn or block when one person is given roles that should
+- the [Segregation of Duties (21.12)](#segregation-of-duties) rules warn or block when one person is given roles that should
   stay apart;
-- a [Delegation (20.11)](#delegations) lends your approval limit to the person who covers for you during an absence, for the
+- a [Delegation (21.11)](#delegations) lends your approval limit to the person who covers for you during an absence, for the
   transactions and dates chosen; it applies once TIS IT AppSupport / Admin approves it.
 
 ### Where the audit trail is {#where-the-audit-trail-is}
@@ -459,7 +459,7 @@ after.
 
 | Where | What you see | Who |
 |---|---|---|
-| Master > System > Audit Trail | Every recorded action of every user | TIS Finance & General Accounting, TIS IT AppSupport / Admin or TIS General Manager |
+| Master > System > Audit Trail | Every recorded action of every user | TIS Finance & General Accounting, TIS IT AppSupport / Admin, TIS General Manager or TIS Audit (read only) |
 | The **Audit Trail**, **History** or **Activity** tab of a record (quotation, policy, endorsement, claim, prospect, receipt, collection, voucher, period) | The events of that record | Users who may open the record |
 | **Sign-in history** of a user (Master > Users and Access > User) | Every sign-in attempt with its result and method | TIS IT AppSupport / Admin |
 
@@ -520,7 +520,7 @@ Press F1, or **?** outside a text field, or choose **Help** in the account menu.
 | An error on a claim decision (**Proceed to adjuster report**, **Proceed to settlement**, **Reject claim**) | Claim decisions are made by TIS Operations Unit Head or TIS General Manager | Hand the claim to a user of that role |
 | An approval is refused for its amount | The amount is above your limit on the Authority Matrix | Ask an approver with a higher limit |
 | A cancellation or a return premium cannot be completed | Money going back to the client is completed by another user | A user who approves policy checks completes it (see [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)) |
-| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy's payment on [Payments (17.19)](#payments) |
+| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy's payment on [Payments (18.19)](#payments) |
 
 ## The TISPH process end to end {#the-business-process-end-to-end}
 The work of Toyota Insurance Services Philippines follows one chain: a lead becomes a quotation, the quotation is
@@ -543,27 +543,27 @@ From the booking onwards both policies follow the same steps.
 ### The chain at a glance {#process-at-a-glance}
 | Step | Who does it | Screen | Result |
 |---|---|---|---|
-| Prospect | the Sales roles or TIS General Manager | [Prospects (17.1)](#prospects) | Prospect **New**, assigned to an account executive |
-| Dealer sales | TIS IT AppSupport / Admin | [Dealer Programmes (17.7)](#dealer-programmes) | Prospects and quotations, or booked policies |
-| Quotation | the Sales roles, the Operations roles or TIS General Manager | [Quotations (17.4)](#quotations), [Quick Quote (17.2)](#quick-quote) | Quotation **Pending Customer**, then **Customer Accepted** |
-| Request for quotation | the Sales roles, the Operations roles or TIS General Manager | [Requests for Quotation (17.3)](#requests-for-quotation-broker-slips) | Insurers' offers compared |
-| Placement | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | **Sent to insurer**, **Acknowledged**, **e-Policy received** |
-| Check of the e-policy | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | **Checked against slip** |
-| Booking | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (17.5)](#placement-slips) | Policy, bill, journal and commission; **Insurer issued (Booked)** |
-| Collection | CCD-BP / QRPh (Receipting) | [Receipts (18.1)](#verify-payments-and-post-official-receipts), [Post-Dated Cheques (18.5)](#post-dated-cheques) | Official receipt; policy payment **Completed** |
-| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (18.10)](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
-| Commission | TIS Finance & General Accounting | [Commission to agents and referrers (19.4)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
-| Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (17.10)](#policies) | Policy changed; additional premium billed |
-| Claim | the Operations roles or TIS General Manager | [The claims list (17.13)](#the-claims-list) | Claim **Pending** to **Closed** |
-| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
-| Month-end and tax | TIS Finance & General Accounting | [Period end (18.21)](#period-end), [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
+| Prospect | the Sales roles or TIS General Manager | [Prospects (18.1)](#prospects) | Prospect **New**, assigned to an account executive |
+| Dealer sales | TIS IT AppSupport / Admin | [Dealer Programmes (18.7)](#dealer-programmes) | Prospects and quotations, or booked policies |
+| Quotation | the Sales roles, the Operations roles or TIS General Manager | [Quotations (18.4)](#quotations), [Quick Quote (18.2)](#quick-quote) | Quotation **Pending Customer**, then **Customer Accepted** |
+| Request for quotation | the Sales roles, the Operations roles or TIS General Manager | [Requests for Quotation (18.3)](#requests-for-quotation-broker-slips) | Insurers' offers compared |
+| Placement | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (18.5)](#placement-slips) | **Sent to insurer**, **Acknowledged**, **e-Policy received** |
+| Check of the e-policy | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager | [Placement Slips (18.5)](#placement-slips) | **Checked against slip** |
+| Booking | the Sales roles, the Operations roles or TIS General Manager | [Placement Slips (18.5)](#placement-slips) | Policy, bill, journal and commission; **Insurer issued (Booked)** |
+| Collection | CCD-BP / QRPh (Receipting) | [Receipts (19.1)](#verify-payments-and-post-official-receipts), [Post-Dated Cheques (19.5)](#post-dated-cheques) | Official receipt; policy payment **Completed** |
+| Remittance | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting | [Remittance to insurers (19.10)](#remittance-to-insurers) | Remittance approved, settled and paid to the insurer |
+| Commission | TIS Finance & General Accounting | [Commission to agents and referrers (20.4)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
+| Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (18.10)](#policies) | Policy changed; additional premium billed |
+| Claim | the Operations roles or TIS General Manager | [The claims list (18.13)](#the-claims-list) | Claim **Pending** to **Closed** |
+| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
+| Month-end and tax | TIS Finance & General Accounting | [Period end (19.21)](#period-end), [Tax: BIR forms and returns (19.18)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
 
 Work that waits for you appears in [My Work (2.3)](#my-work). Each approval in the chain is made by another user than the
 one who entered the record (see [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)).
 
 ### Leads from TFS, dealers and walk-in clients {#process-leads}
-Prospects are entered by the Sales roles or TIS General Manager, on [Prospects (17.1)](#prospects). Leads are assigned to the sales team on
-[Lead Assignment (17.6)](#lead-assignment) by TIS Sales Officer, TIS Sales Unit Head or TIS General Manager.
+Prospects are entered by the Sales roles or TIS General Manager, on [Prospects (18.1)](#prospects). Leads are assigned to the sales team on
+[Lead Assignment (18.6)](#lead-assignment) by TIS Sales Officer, TIS Sales Unit Head or TIS General Manager.
 
 TISPH receives its leads from four sources:
 
@@ -588,10 +588,10 @@ To record a TFS referral:
 4. Select the TFS office as the channel and the lead source of the referral.
 5. Save the prospect. It is created with the status **New**.
 
-The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give the prospect to an account executive of the sales
+The assignment rules of [Lead Assignment (18.6)](#lead-assignment) give the prospect to an account executive of the sales
 team; a prospect that no rule can assign waits in the **Reassignment Queue** for TIS Sales Officer, TIS Sales Unit Head or TIS General Manager. The
 account executive follows the prospect up from [My Work (2.3)](#my-work) and logs the calls and visits on
-[Sales activities (17.8)](#sales-activities). Logging the first activity marks the prospect **Contacted**. The prospect
+[Sales activities (18.8)](#sales-activities). Logging the first activity marks the prospect **Contacted**. The prospect
 becomes **Quote Generated** with its first quotation, **Converted** when the policy is booked, or **Lost**.
 
 ### Dealer programme policies {#process-dealer-programme}
@@ -645,7 +645,7 @@ quotation; a request for quotation to several insurers is optional.
 6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
    **Pending Customer**.
 
-For a package product, [Quick Quote (17.2)](#quick-quote) prices the quotation from the product's rates in one screen.
+For a package product, [Quick Quote (18.2)](#quick-quote) prices the quotation from the product's rates in one screen.
 
 ![Figure 3.3: Quotation of a financed Fortuner waiting for the client, with Copy approval link and Record customer response](../images/process/quotation-pending-customer.png)
 #### The client's answer {#process-client-acceptance}
@@ -680,7 +680,7 @@ insurers first:
 ### Placement with the insurer {#process-placement}
 The placement slip goes to the insurer, which returns the e-policy. The check of the e-policy against the slip is
 decided by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, never by the user who recorded the e-policy. See
-[Placement Slips (17.5)](#placement-slips).
+[Placement Slips (18.5)](#placement-slips).
 
 The placement slip is a firm order to the insurer. TISPH never issues the cover itself: a policy exists only once the
 insurer's e-policy has been received, checked against the slip and booked.
@@ -723,7 +723,7 @@ After **Confirm check** or **Accept differences** the status is **Checked agains
 ![Figure 3.6: Check against slip: every item of the e-policy matches the placement slip](../images/process/placement-check-dialog.png)
 ### Policy, billing and endorsements {#process-policy}
 Policies, cover notes and CTPL certificates are recorded by the Sales roles, the Operations roles or TIS General Manager; endorsements and cancellations by
-the Sales roles, the Operations roles or TIS General Manager. See [Policies (17.10)](#policies).
+the Sales roles, the Operations roles or TIS General Manager. See [Policies (18.10)](#policies).
 
 #### Book the policy {#process-booking}
 1. Open the placement slip (status **Checked against slip**).
@@ -738,7 +738,7 @@ to the client. The placement becomes **Insurer issued (Booked)** and the quotati
 TFS-financed car, the policy shows TFS in **Mortgage**.
 
 When the client needs proof of cover before the e-policy arrives, issue a cover note on
-[Cover Notes (17.20)](#cover-notes-binders).
+[Cover Notes (18.20)](#cover-notes-binders).
 
 #### Billing statement {#process-billing}
 The booked policy appears on Operations > Policy with its payment status in the **Payment** column (**Pending**,
@@ -758,7 +758,7 @@ A change to a policy in force (insured details, vehicle, cover, an extension) is
 
 An endorsement that returns premium, and a cancellation, is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than
 the one who entered it. The return premium of a cancellation is computed on
-[Cancel a policy: computed return premium (17.21)](#cancel-a-policy-computed-return-premium). Commission already paid on the
+[Cancel a policy: computed return premium (18.21)](#cancel-a-policy-computed-return-premium). Commission already paid on the
 returned premium is clawed back from the referrer.
 
 ![Figure 3.7: Operations > Policy, with the actions Claim and Endorsement of a paid policy](../images/process/policy-actions.png)
@@ -768,10 +768,10 @@ role works only on its own part:
 
 | Collection | Role | Screen |
 |---|---|---|
-| Over-the-counter payments, bank transfers, bills payment and QRPh | [CCD-BP / QRPh (Receipting) (chapter 12)](#ccd-bp-qrph-receipting) | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Post-dated cheques | [CCD-PDU (Post-Dated Cheques) (chapter 10)](#ccd-pdu-post-dated-cheques), [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Post-dated cheques (18.5)](#post-dated-cheques) |
-| Auto-debit arrangements | [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals) (chapter 13)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation (18.16)](#bank-reconciliation), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
+| Over-the-counter payments, bank transfers, bills payment and QRPh | [CCD-BP / QRPh (Receipting) (chapter 12)](#ccd-bp-qrph-receipting) | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Post-dated cheques | [CCD-PDU (Post-Dated Cheques) (chapter 10)](#ccd-pdu-post-dated-cheques), [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Post-dated cheques (19.5)](#post-dated-cheques) |
+| Auto-debit arrangements | [CCD-PDC / CCD-ADA (chapter 11)](#ccd-pdc-ccd-ada) | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals) (chapter 13)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation (19.16)](#bank-reconciliation), [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
 
 The roles that issue receipts do not cancel or reverse them: see [Reconciliation and reversals (3.7.3)](#process-reversals).
 
@@ -810,55 +810,55 @@ received.
 ![Figure 3.9: Accounts > Post-Dated Cheques, with the cheques at TIS](../images/process/post-dated-cheques.png)
 #### Reconciliation and reversals {#process-reversals}
 Each day the bank statements are matched by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting with the receipts on
-[Bank reconciliation (18.16)](#bank-reconciliation), and the reconciliation is approved by TIS Finance & General Accounting.
+[Bank reconciliation (19.16)](#bank-reconciliation), and the reconciliation is approved by TIS Finance & General Accounting.
 
 A receipt is reversed from the receipt page by CCD-Recon (Reconciliation and Reversals) with a reason, and another
-user approves the reversal: CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting (see [Reverse a receipt (18.1.1)](#reverse-a-receipt)). On
+user approves the reversal: CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting (see [Reverse a receipt (19.1.1)](#reverse-a-receipt)). On
 approval the payment journals are reversed and the bill is open again. The receipt of a cheque that the bank returns
 is also cancelled on the Reconciliation Workspace (adjustment **RCHQ – Returned cheque**) or, for a post-dated cheque,
 by recording the bounce on Post-Dated Cheques. CCD-BP / QRPh (Receipting), who issues the receipts, does not reverse
 them.
 
 Premium warranty extensions, instalment plans and client credit limits are handled on
-[Credit control (18.4)](#credit-control) and approved by TIS Finance & General Accounting.
+[Credit control (19.4)](#credit-control) and approved by TIS Finance & General Accounting.
 
 ### Remittance to the insurers {#process-remittance}
 Remittances to the insurers are prepared and submitted by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, and approved by
 TIS Finance & General Accounting or TIS General Manager within their approval limit, never by the user who prepared or submitted them. See
-[Remittance to insurers (18.10)](#remittance-to-insurers).
+[Remittance to insurers (19.10)](#remittance-to-insurers).
 
 TISPH collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
 the premium collected, less the commission and the output VAT on it, plus the withholding tax the insurer deducts
 from the commission. For an insurer and product remitted gross, the whole premium is remitted and the commission is
-billed to the insurer separately on [Insurer billing (18.11)](#direct-bill-commission-debit-notes).
+billed to the insurer separately on [Insurer billing (19.11)](#direct-bill-commission-debit-notes).
 
 1. Every Monday at 06:15 the weekly run creates the draft remittances of the policies paid in the Monday to Friday
-   before, one per insurer and product line ([Setup: remittance schedules (18.10.7)](#remittance-schedules)). An off-cycle
+   before, one per insurer and product line ([Setup: remittance schedules (19.10.7)](#remittance-schedules)). An off-cycle
    remittance is created from a list of policies with
-   [Import policy list (18.10.2)](#remittance-import-policy-list).
+   [Import policy list (19.10.2)](#remittance-import-policy-list).
 2. Choose Accounts > Remittance > Remittances. On **My work**, check each draft (policies and amounts), tick it and
    select **Submit for approval (n)**.
 3. The approver decides on Accounts > Remittance > Approvals: **Approve**, or **Reject** with a reason, which
    returns the remittance to its maker as **Returned**.
 4. The approved remittance is settled on Accounts > Remittance > Settlement. The approved settlement
-   raises the insurer's payment voucher on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques) and the
+   raises the insurer's payment voucher on [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques) and the
    remittance shows **Settled (voucher raised)**.
-5. The voucher is paid from [Insurer payments (18.10.5)](#insurer-payments): by a bank payment batch on
-   [Bank payment files (18.9)](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
+5. The voucher is paid from [Insurer payments (19.10.5)](#insurer-payments): by a bank payment batch on
+   [Bank payment files (19.9)](#bank-payment-files) or by cheque on Disbursement. The payment posts the journal and the
    remittance reaches the step **Paid**.
 6. The remittance schedule (XLSX and PDF) and, once the voucher is raised, the remittance advice are downloaded from
    the remittance and sent to the insurer.
 
 ![Figure 3.10: Accounts > Remittance > Remittances of TIS Finance & General Accounting: the drafts to submit, the next run and Automation Off](../images/process/remittances.png)
 Each month the insurers' statements are matched with TISPH's records on
-[Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation); the reconciliation and its adjustments are
+[Insurer statement reconciliation (19.17)](#insurer-statement-reconciliation); the reconciliation and its adjustments are
 approved by CCD-Recon (Reconciliation and Reversals).
 
 ### Commission and incentives {#process-commission}
 Commission is processed by TIS Finance & General Accounting. The telesales incentive is calculated by a
 TIS Sales Unit Head user and approved by another user of that role: the user who runs a calculation never
-approves it. See [Commission to agents and referrers (19.4)](#commission-to-agents-and-referrers) and
-[Incentives (18.23)](#incentives).
+approves it. See [Commission to agents and referrers (20.4)](#commission-to-agents-and-referrers) and
+[Incentives (19.23)](#incentives).
 
 TISPH earns its brokerage commission from the insurer: it is kept when the premium is remitted net, or billed to the
 insurer for gross and direct-bill business.
@@ -879,7 +879,7 @@ To pay a referrer:
 1. Choose Commission > Agents/Referrer Accounts and open the referrer.
 2. Approve the **Eligible** lines.
 3. Generate the payout: the approved lines go to a payment voucher on
-   [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), with the withholding tax of the referrer (5% for an
+   [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques), with the withholding tax of the referrer (5% for an
    individual, 10% for a company in the delivered setup).
 
 When premium is returned (an endorsement or a cancellation), the referrer commission of a paid line is clawed back
@@ -888,7 +888,7 @@ from the referrer.
 ![Figure 3.11: Commission > Agents/Referrer Accounts, with the net payable of each referrer](../images/process/referrer-accounts.png)
 ### Claims {#process-claims}
 Claims are registered and followed up by the Operations roles or TIS General Manager. Claim decisions and settlement approvals are made by
-TIS Operations Unit Head or TIS General Manager. See [Claims (17.13)](#the-claims-list).
+TIS Operations Unit Head or TIS General Manager. See [Claims (18.13)](#the-claims-list).
 
 TISPH registers the client's claim, advises the insurer and follows the claim up to the settlement; the insurer decides
 and pays.
@@ -900,11 +900,11 @@ and pays.
 3. Save the claim. The claim is **Pending**. The system refuses a claim on a policy whose premium is unpaid or whose
    loss date is outside the policy period, and sends the Preliminary Loss Advice to the insurer by e-mail.
 4. Collect the claim documents of the checklist of the line; claims still missing documents are listed on
-   [Claims awaiting documents (17.22)](#claims-awaiting-documents). The claim goes **Processing** while the insurer reviews
+   [Claims awaiting documents (18.22)](#claims-awaiting-documents). The claim goes **Processing** while the insurer reviews
    it.
 5. Record the adjuster's report when it arrives.
 6. For a motor claim, follow the repair on
-   [Motor claim repairs and letters of authority (17.23)](#motor-claim-repairs-and-letters-of-authority): the shop's estimate,
+   [Motor claim repairs and letters of authority (18.23)](#motor-claim-repairs-and-letters-of-authority): the shop's estimate,
    the insurer adjuster's decision, the letter of authority to the shop and the release of the vehicle.
 7. Enter the settlement agreed by the insurer and submit it. The claim is **Pending Approval**.
 8. The approver (TIS Operations Unit Head or TIS General Manager) approves or returns the settlement; the approver must be another user than
@@ -915,18 +915,18 @@ and pays.
 ![Figure 3.12: Operations > Claims, with the open claims, the settlement to approve and the settled claims](../images/process/claims-list.png)
 ### Renewals {#process-renewals}
 Renewals are prepared by the Sales roles, the Operations roles or TIS General Manager; renewal terms are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. See
-[Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies).
+[Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies).
 
 Policies come into the renewal pipeline 90 days before their expiry.
 
 1. Choose Operations > Renewals > Renewal Queue. The queue lists the policies due for renewal with their stage, their risk of not
    renewing and the account executive.
 2. Send the renewal notices in order (**First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**), one by one
-   or for many policies at once with [Renewal Batch (17.15)](#renewal-batch-lapse-management-and-the-analytics).
-3. Prepare the renewal terms: open the policy on [Renewal Policy (17.14)](#renewal-policy) and complete the renewal (cover,
+   or for many policies at once with [Renewal Batch (18.15)](#renewal-batch-lapse-management-and-the-analytics).
+3. Prepare the renewal terms: open the policy on [Renewal Policy (18.14)](#renewal-policy) and complete the renewal (cover,
    dates, premium). The renewal quotation is linked to the expiring policy, is valid for 30 days and is sent to the
    client: the renewal is **Quote Sent**. Price and cover discussions with the client or the insurer are followed on
-   [Negotiations (17.18)](#negotiations).
+   [Negotiations (18.18)](#negotiations).
 4. When the terms are agreed, select **Submit for approval** on Negotiations. The renewal is **Pending Approval**.
 5. The approver (TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager) approves the terms (**Approved**) or returns them (back to
    **Quote Sent**, to revise); the approver must be another user than the one who submitted them.
@@ -935,18 +935,18 @@ Policies come into the renewal pipeline 90 days before their expiry.
    by Cash Control.
 
 A policy not renewed by its expiry stays **In Grace Period** for 30 days and is then **Lapsed**; a lapsed policy can
-still be renewed within 90 days on [Lapse Management (17.15)](#renewal-batch-lapse-management-and-the-analytics).
+still be renewed within 90 days on [Lapse Management (18.15)](#renewal-batch-lapse-management-and-the-analytics).
 
 ![Figure 3.13: Operations > Renewals > Renewal Batch, with a batch of renewal notices in preparation](../images/process/renewal-batch.png)
 ### Month-end and tax {#process-month-end}
 The month-end and year-end steps and the BIR returns are run by TIS Finance & General Accounting; the close is approved by
-TIS Finance & General Accounting. See [Period end (18.21)](#period-end) and [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns).
+TIS Finance & General Accounting. See [Period end (19.21)](#period-end) and [Tax: BIR forms and returns (19.18)](#tax-bir-forms-and-returns).
 
 The TISPH fiscal year runs from April to March (FY2027: 01/04/2026 to 31/03/2027), with twelve monthly periods and an
 adjustment period 13.
 
 #### Every day {#process-daily}
-- The day's journals are sent to SAP in the [SAP GL export (18.13)](#sap-gl-export) file.
+- The day's journals are sent to SAP in the [SAP GL export (19.13)](#sap-gl-export) file.
 - Cash Control reconciles the bank accounts (see [Reconciliation and reversals (3.7.3)](#process-reversals)).
 
 #### Month-end {#process-month-end-close}
@@ -968,12 +968,12 @@ The BIR forms and returns are prepared on Accounts > Tax from the payment vouche
 
 | Return | When | Screen |
 |---|---|---|
-| BIR Form 2307 to suppliers | With each payment subject to withholding | [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers) |
-| VAT Summary, SAWT, SLSP Sales and Purchases | Each quarter | [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) |
+| BIR Form 2307 to suppliers | With each payment subject to withholding | [BIR Form 2307 for suppliers (19.7)](#bir-form-2307-for-suppliers) |
+| VAT Summary, SAWT, SLSP Sales and Purchases | Each quarter | [Tax: BIR forms and returns (19.18)](#tax-bir-forms-and-returns) |
 
 #### Year-end {#process-year-end}
 After the twelve periods are closed, a user of TIS Finance & General Accounting starts the year-end close on
-[Year-end close (18.22)](#year-end-close-preparer). The pre-checks must pass (periods closed, no unposted journal in the year,
+[Year-end close (19.22)](#year-end-close-preparer). The pre-checks must pass (periods closed, no unposted journal in the year,
 suspense account nil, trial balance balanced, closing accounts set up, previous year closed); the adjustments of
 period 13 are posted and approved. A user of TIS Finance & General Accounting other than the one who started the run then
 closes the year: the system posts the closing entries, carries the balances forward as the opening balances of the
@@ -1111,18 +1111,18 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through your prospects, quotations, placement slips and renewals | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Contact the new prospects assigned to you and log each call, meeting, e-mail or visit | Daily | [Prospects (17.1)](#prospects), [Sales Activities (17.8)](#sales-activities) |
-| Record walk-in clients and referrals as prospects | As they come in | [Prospects (17.1)](#prospects) |
-| Prepare motor and package quotations and send them to the client | Daily | [Quotations (17.4)](#quotations), [Quick Quote (17.2)](#quick-quote) |
-| Record the client's answer to a quotation | As the client answers | [Quotations (17.4)](#quotations) |
-| Ask the panel insurers for terms on fleet and corporate risks | As needed | [Requests for Quotation (17.3)](#requests-for-quotation-broker-slips) |
-| Send the placement slips, record the acknowledgements and upload the e-policies | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Book the policies checked against the slip | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes (17.20)](#cover-notes-binders) |
-| Raise the endorsements and cancellations your clients ask for | As requested | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
-| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies), [Negotiations (17.18)](#negotiations) |
-| Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management (17.15)](#renewal-batch-lapse-management-and-the-analytics) |
-| Check your pipeline and your incentive progress | Weekly and at month-end | [Incentive (18.23)](#incentives) |
+| Contact the new prospects assigned to you and log each call, meeting, e-mail or visit | Daily | [Prospects (18.1)](#prospects), [Sales Activities (18.8)](#sales-activities) |
+| Record walk-in clients and referrals as prospects | As they come in | [Prospects (18.1)](#prospects) |
+| Prepare motor and package quotations and send them to the client | Daily | [Quotations (18.4)](#quotations), [Quick Quote (18.2)](#quick-quote) |
+| Record the client's answer to a quotation | As the client answers | [Quotations (18.4)](#quotations) |
+| Ask the panel insurers for terms on fleet and corporate risks | As needed | [Requests for Quotation (18.3)](#requests-for-quotation-broker-slips) |
+| Send the placement slips, record the acknowledgements and upload the e-policies | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Book the policies checked against the slip | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes (18.20)](#cover-notes-binders) |
+| Raise the endorsements and cancellations your clients ask for | As requested | [Policy (18.10)](#policies), [Policy Cancellation (18.21)](#cancel-a-policy-computed-return-premium) |
+| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies), [Negotiations (18.18)](#negotiations) |
+| Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management (18.15)](#renewal-batch-lapse-management-and-the-analytics) |
+| Check your pipeline and your incentive progress | Weekly and at month-end | [Incentive (19.23)](#incentives) |
 
 ### Procedures {#tis-sales-associate-procedures}
 #### Start the day from My Work {#tis-sales-associate-my-work}
@@ -1135,12 +1135,12 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 See [My Work (2.3)](#my-work) for the filters, tasks and calendar.
 
 #### Work a new prospect {#tis-sales-associate-prospect}
-A prospect from TFS or a dealer reaches you through the assignment rules of [Lead Assignment (17.6)](#lead-assignment): it
+A prospect from TFS or a dealer reaches you through the assignment rules of [Lead Assignment (18.6)](#lead-assignment): it
 appears in My Work and you receive a notification. When no rule matches a prospect, it stays with the user who
 created it. A walk-in client or a referral you record yourself is yours.
 
 1. Choose Operations > Sales & Marketing > Prospects. To record a new prospect, select **Create Prospect** and follow
-   [Create a prospect (17.1.1)](#create-a-prospect).
+   [Create a prospect (18.1.1)](#create-a-prospect).
 2. Contact the prospect. Choose Operations > Sales & Marketing > Sales Activities and log the call, meeting, e-mail or visit with its
    outcome and, where there is one, the next step and its follow-up date. Logging the first activity marks a
    **New** prospect **Contacted**.
@@ -1152,7 +1152,7 @@ Open follow-ups are counted on the Sales Activities screen; follow them up on th
 
 #### Quote and close the sale {#tis-sales-associate-quotation}
 1. Choose Operations > Sales & Marketing > Quotations and select **Create Quote**, or use Operations > Sales & Marketing > Quick Quote for a package
-   product priced from its rates in one screen. See [Create a motor quotation (17.4.1)](#create-a-motor-quotation) for the
+   product priced from its rates in one screen. See [Create a motor quotation (18.4.1)](#create-a-motor-quotation) for the
    fields of a motor quotation.
 2. Save the quotation. It is **Draft**.
 3. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**
@@ -1184,7 +1184,7 @@ For a risk that needs the insurers' own terms, send a request for quotation to t
 
 Booking creates the policy and its bill, and e-mails the policy schedule with the e-policy to the client. The
 placement becomes **Insurer issued (Booked)** and the quotation **Converted to Policy**. See
-[Placement Slips (17.5)](#placement-slips) and [Book the policy (3.6.1)](#process-booking).
+[Placement Slips (18.5)](#placement-slips) and [Book the policy (3.6.1)](#process-booking).
 
 #### Raise an endorsement for your client {#tis-sales-associate-endorsement}
 1. Choose Operations > Policy.
@@ -1195,7 +1195,7 @@ placement becomes **Insurer issued (Booked)** and the quotation **Converted to P
 
 An endorsement that adds premium is billed to the client at once. An endorsement that returns premium, and a
 cancellation, is completed by a TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General
-Manager. See [Raise an endorsement request (17.10.1)](#raise-an-endorsement-request) and
+Manager. See [Raise an endorsement request (18.10.1)](#raise-an-endorsement-request) and
 [Endorsements and cancellations (3.6.3)](#process-endorsement).
 
 #### Renew your clients' policies {#tis-sales-associate-renewal}
@@ -1205,7 +1205,7 @@ Policies enter the renewal pipeline 90 days before they expire.
 2. In the row of a policy, select **More actions** and send the next notice: **Send First Notice**, then
    **Send Second Notice**, then the final notice. The notices go in this order. Use **Record reminder** for a
    reminder given by phone or in person.
-3. Prepare the renewal terms on [Renewal Policy (17.14.1)](#renew-a-policy). The renewal quotation is valid for 30 days and is
+3. Prepare the renewal terms on [Renewal Policy (18.14.1)](#renew-a-policy). The renewal quotation is valid for 30 days and is
    sent to the client (**Quote Sent**).
 4. Choose Operations > Renewals > Negotiations, select **View** on the renewal and record the discussions with
    **Log communication** or **Add update**.
@@ -1357,14 +1357,14 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through your own records and the work waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Approve or return the renewal terms submitted by your team | Daily | [Negotiations (17.18)](#negotiations) |
-| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
-| Check the team's open prospects and reassign those not worked | Daily | [Lead Assignment (17.6)](#lead-assignment) |
-| Assign the prospects waiting in the reassignment queue | Daily | [Lead Assignment (17.6)](#lead-assignment) |
-| Review the team's activities and open follow-ups | Weekly | [Sales Activities (17.8)](#sales-activities) |
-| Keep the assignment rules in line with the team and the TFS offices | When the team or the channels change | [Lead Assignment (17.6)](#lead-assignment) |
-| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies) |
+| Check the e-policies received against their placement slips | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Approve or return the renewal terms submitted by your team | Daily | [Negotiations (18.18)](#negotiations) |
+| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy (18.10)](#policies), [Policy Cancellation (18.21)](#cancel-a-policy-computed-return-premium) |
+| Check the team's open prospects and reassign those not worked | Daily | [Lead Assignment (18.6)](#lead-assignment) |
+| Assign the prospects waiting in the reassignment queue | Daily | [Lead Assignment (18.6)](#lead-assignment) |
+| Review the team's activities and open follow-ups | Weekly | [Sales Activities (18.8)](#sales-activities) |
+| Keep the assignment rules in line with the team and the TFS offices | When the team or the channels change | [Lead Assignment (18.6)](#lead-assignment) |
+| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies) |
 
 The sales work on your own accounts (prospects, quotations, placement, booking, endorsements, renewals) follows the
 procedures of the [TIS Sales Associate (4.7)](#tis-sales-associate-procedures).
@@ -1415,7 +1415,7 @@ the endorsement number, the policy and the amount.
    already paid on the returned premium is clawed back from the referrer.
 
 See [Endorsements and cancellations (3.6.3)](#process-endorsement) and
-[Cancel a policy: computed return premium (17.21)](#cancel-a-policy-computed-return-premium).
+[Cancel a policy: computed return premium (18.21)](#cancel-a-policy-computed-return-premium).
 
 #### Reassign prospects {#tis-sales-officer-reassign}
 1. Choose Operations > Sales & Marketing > Lead Assignment. The **Team View** tab lists the team members with their open, new,
@@ -1602,15 +1602,15 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.18)](#negotiations) |
-| Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.16)](#renewal-queue-and-at-risk-policies) |
-| Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (18.6)](#accounts-payable) |
-| Review the team assignment and the reassignment queue | Weekly | [Lead Assignment (17.6)](#lead-assignment) |
-| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentive (18.23)](#incentives) |
-| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentive (18.23)](#incentives) |
-| Mark the approved incentives as paid | When paid | [Incentive (18.23)](#incentives) |
-| Run the incentive and production reports | Month-end | [Incentive (18.23)](#incentives), [All Reports (22.1)](#reports-catalogue) |
+| Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (18.18)](#negotiations) |
+| Check the e-policies received against their placement slips | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Follow up the renewals escalated to you | As notified | [At-Risk Policies (18.16)](#renewal-queue-and-at-risk-policies) |
+| Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (19.6)](#accounts-payable) |
+| Review the team assignment and the reassignment queue | Weekly | [Lead Assignment (18.6)](#lead-assignment) |
+| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentive (19.23)](#incentives) |
+| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentive (19.23)](#incentives) |
+| Mark the approved incentives as paid | When paid | [Incentive (19.23)](#incentives) |
+| Run the incentive and production reports | Month-end | [Incentive (19.23)](#incentives), [All Reports (23.1)](#reports-catalogue) |
 
 The sales work, lead assignment, campaigns, the check of the e-policies and the approval of renewal terms follow the
 procedures of the [TIS Sales Associate (4.7)](#tis-sales-associate-procedures) and the
@@ -1626,7 +1626,7 @@ TIS Sales Unit Head and the TIS Operations Unit Head. You receive the notificati
 2. Check the risk factors of the renewal (premium increase, claims, unpaid premium, no contact, expiry) and the
    suggested actions.
 3. Agree the next step with the account executive and record it on the renewal timeline on
-   [Negotiations (17.18)](#negotiations).
+   [Negotiations (18.18)](#negotiations).
 
 #### Run the incentive calculation {#tis-sales-unit-head-incentive-run}
 The incentive programmes give the sales force (TIS Sales Associates, Sales Officers and Sales Unit Heads) a payout by
@@ -1796,19 +1796,19 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the placement slips, renewals, endorsements and claims assigned to you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Send new placement slips to the insurers and record their acknowledgements | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Upload the e-policies received from the insurers | Daily, as they arrive | [Placement Slips (17.5)](#placement-slips), [Record e-Policy (17.5.1)](#record-e-policy) |
-| Book the policies checked against the slip | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes while the insurer's policy is pending; follow up those expiring | Daily | [Cover Notes (17.20)](#cover-notes-binders) |
-| Register new claims and advise the insurers | Daily, as clients report losses | [Policy (17.10)](#policies), [Claims (17.13)](#the-claims-list) |
-| Collect claim documents and remind claimants | Daily | [Claims Awaiting Documents (17.22)](#claims-awaiting-documents) |
-| Record repair estimates, adjuster decisions, letters of authority and vehicle releases | Daily | [Motor Claim Repairs (17.23)](#motor-claim-repairs-and-letters-of-authority) |
-| Raise endorsements and cancellations requested by clients | As requested | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
-| Check the payment status of policies before an endorsement or a claim | As needed | [Payments (17.19)](#payments) |
-| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies), [Renewal Batch (17.15)](#renewal-batch-lapse-management-and-the-analytics) |
-| Follow up lapsed policies and the policies in their grace period | Weekly | [Lapse Management (17.15)](#renewal-batch-lapse-management-and-the-analytics) |
-| Maintain fleet schedules and marine open covers of corporate clients | As requested | [Fleet Schedules (17.11)](#fleet-schedules), [Marine Open Covers (17.12)](#marine-open-covers) |
-| Run the claims and renewal reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Send new placement slips to the insurers and record their acknowledgements | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Upload the e-policies received from the insurers | Daily, as they arrive | [Placement Slips (18.5)](#placement-slips), [Record e-Policy (18.5.1)](#record-e-policy) |
+| Book the policies checked against the slip | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Issue cover notes while the insurer's policy is pending; follow up those expiring | Daily | [Cover Notes (18.20)](#cover-notes-binders) |
+| Register new claims and advise the insurers | Daily, as clients report losses | [Policy (18.10)](#policies), [Claims (18.13)](#the-claims-list) |
+| Collect claim documents and remind claimants | Daily | [Claims Awaiting Documents (18.22)](#claims-awaiting-documents) |
+| Record repair estimates, adjuster decisions, letters of authority and vehicle releases | Daily | [Motor Claim Repairs (18.23)](#motor-claim-repairs-and-letters-of-authority) |
+| Raise endorsements and cancellations requested by clients | As requested | [Policy (18.10)](#policies), [Policy Cancellation (18.21)](#cancel-a-policy-computed-return-premium) |
+| Check the payment status of policies before an endorsement or a claim | As needed | [Payments (18.19)](#payments) |
+| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies), [Renewal Batch (18.15)](#renewal-batch-lapse-management-and-the-analytics) |
+| Follow up lapsed policies and the policies in their grace period | Weekly | [Lapse Management (18.15)](#renewal-batch-lapse-management-and-the-analytics) |
+| Maintain fleet schedules and marine open covers of corporate clients | As requested | [Fleet Schedules (18.11)](#fleet-schedules), [Marine Open Covers (18.12)](#marine-open-covers) |
+| Run the claims and renewal reports | Month-end | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#tis-operations-associate-procedures}
 #### Start the day from My Work {#tis-operations-associate-my-work}
@@ -1822,7 +1822,7 @@ See [My Work (2.3)](#my-work) for the filters, tasks and calendar.
 
 #### Place the business with the insurer {#tis-operations-associate-placement}
 The quotation accepted by the client raises a placement slip with the status **Placement raised**. See
-[Placement Slips (17.5)](#placement-slips) for the whole screen.
+[Placement Slips (18.5)](#placement-slips) for the whole screen.
 
 1. Choose Operations > Sales & Marketing > Placement Slips and open the placement slip.
 2. Check the insurer, its share, the sum insured and the premium under **Security (participating insurers)**.
@@ -1881,7 +1881,7 @@ endorsement**.
 
 > A cancellation, and an endorsement that returns premium, is completed by the TIS Operations Unit Head or the TIS
 > General Manager, never by you. They are notified when you send it. See
-> [Cancel a policy: computed return premium (17.21)](#cancel-a-policy-computed-return-premium).
+> [Cancel a policy: computed return premium (18.21)](#cancel-a-policy-computed-return-premium).
 
 #### Register a claim {#tis-operations-associate-register-claim}
 1. Choose Operations > Policy, select **More actions** in the row of the policy, then **Claim**. The action is not
@@ -1914,7 +1914,7 @@ The system refuses the claim when the premium is unpaid or the date of loss is o
 > decision made by the TIS Operations Unit Head or the TIS General Manager. Ask your unit head to take the claim on.
 
 Once the claim is **Processing**, you record the adjuster's name and report on the claim's **Adjuster** step. See
-[Adjuster report (17.13.2)](#adjuster-report).
+[Adjuster report (18.13.2)](#adjuster-report).
 
 #### Follow a motor repair {#tis-operations-associate-motor-repair}
 1. Choose Operations > Motor Claim Repairs. The list shows each motor claim with the stage of its repair:
@@ -1929,12 +1929,12 @@ Once the claim is **Processing**, you record the adjuster's name and report on t
    released to, and print the release form for the insured's signature.
 
 ![Figure 7.4: Repair file of a motor claim with Record estimate, Issue letter of authority and Release vehicle](../images/role-tis-ops-associate/motor-claim-repair-file.png)
-See [Motor claim repairs and letters of authority (17.23)](#motor-claim-repairs-and-letters-of-authority).
+See [Motor claim repairs and letters of authority (18.23)](#motor-claim-repairs-and-letters-of-authority).
 
 #### Prepare a renewal {#tis-operations-associate-renewal}
 1. Choose Operations > Renewals > Renewal Queue. The queue lists the policies due for renewal with their stage and risk.
 2. In the row of a policy, open the menu and select the next notice to send it (first, second, final notice). For
-   many policies at once, use [Renewal Batch (17.15)](#renewal-batch-lapse-management-and-the-analytics).
+   many policies at once, use [Renewal Batch (18.15)](#renewal-batch-lapse-management-and-the-analytics).
 3. Record each call or e-mail with the client with **Record reminder**.
 4. Select **Prepare renewal quote**. Go through **Policy Review**, **Premium Calculation**, **Retention Offers** and
    **Quote Summary**, then select **Generate Quote**.
@@ -1944,7 +1944,7 @@ See [Motor claim repairs and letters of authority (17.23)](#motor-claim-repairs-
    marks the expiring policy renewed and raises the premium to collect.
 
 If the terms are rejected, the renewal comes back to you to prepare again. Price discussions with the client are
-logged on [Negotiations (17.18)](#negotiations).
+logged on [Negotiations (18.18)](#negotiations).
 
 When the system refuses one of these actions, see [When the system refuses an action (2.13)](#when-the-system-refuses-an-action).
 
@@ -2091,14 +2091,14 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the placement slips, renewals, endorsements and claims waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Send placement slips, record acknowledgements, upload e-policies, book checked policies | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes (17.20)](#cover-notes-binders) |
-| Register claims, collect their documents, follow motor repairs | Daily | [Claims (17.13)](#the-claims-list), [Claims Awaiting Documents (17.22)](#claims-awaiting-documents), [Motor Claim Repairs (17.23)](#motor-claim-repairs-and-letters-of-authority) |
-| Raise endorsements and cancellations | As requested | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
-| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.16)](#renewal-queue-and-at-risk-policies) |
-| Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (18.12)](#journal-vouchers) |
-| Follow the work in flight and the claims position | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
-| Run the production, claims and renewal reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Send placement slips, record acknowledgements, upload e-policies, book checked policies | Daily | [Placement Slips (18.5)](#placement-slips) |
+| Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes (18.20)](#cover-notes-binders) |
+| Register claims, collect their documents, follow motor repairs | Daily | [Claims (18.13)](#the-claims-list), [Claims Awaiting Documents (18.22)](#claims-awaiting-documents), [Motor Claim Repairs (18.23)](#motor-claim-repairs-and-letters-of-authority) |
+| Raise endorsements and cancellations | As requested | [Policy (18.10)](#policies), [Policy Cancellation (18.21)](#cancel-a-policy-computed-return-premium) |
+| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (18.16)](#renewal-queue-and-at-risk-policies) |
+| Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (19.12)](#journal-vouchers) |
+| Follow the work in flight and the claims position | Weekly | [Processing Dashboard (20.3)](#processing-dashboard), [Claims Dashboard (20.2)](#claims-dashboard) |
+| Run the production, claims and renewal reports | Month-end | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#tis-operations-officer-procedures}
 The operations procedures of this role are those of the TIS Operations Associate:
@@ -2129,7 +2129,7 @@ TIS Finance & General Accounting approver.
 
 ![Figure 8.1: Accounts > Journal Voucher as the TIS Operations Officer: the journal history with its status](../images/role-tis-ops-officer/journal-vouchers.png)
 > Your access to journal vouchers is View only. The **Voucher** and **Upload** buttons are for TIS Finance & General
-> Accounting: the system refuses a voucher entered or uploaded by your role. See [Journal vouchers (18.12)](#journal-vouchers).
+> Accounting: the system refuses a voucher entered or uploaded by your role. See [Journal vouchers (19.12)](#journal-vouchers).
 
 ## TIS Operations Unit Head {#tis-operations-unit-head}
 ### Role summary {#tis-operations-unit-head-summary}
@@ -2201,6 +2201,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
+| Master > System | Data Migration & Go-Live | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -2251,6 +2252,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
 
@@ -2258,6 +2261,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user
@@ -2290,6 +2294,7 @@ The user who enters a record never approves it: the approval is always another u
 |---|---|---|---|
 | Administration and transactions | Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Claims and payment | Claims (create and edit) with Disbursements and petty cash (create and edit) held by the same person | Warning | The claims handler should not also prepare the claim payments |
+| Load and approve migration data | Data migration and go-live (approve) with Data migration and go-live (create and edit) held by the same person | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 | Placing and paying insurers | Quotations and placement (create and edit), Policies (create and edit) with Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
 | Receipting and selling | Quotations and placement (create and edit), Policies (create and edit) with Receipts (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
 
@@ -2299,17 +2304,17 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Decide the claim settlements and renewal terms waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) (**Approvals**) |
-| Check the e-policies received against the placement slips | Daily, as the team uploads them | [Placement Slips (17.5)](#placement-slips) |
-| Take registered claims into processing; reject claims the insurer repudiates | Daily | [Claims (17.13)](#the-claims-list) |
-| Submit the settlements agreed by the insurers | Daily | [Assessment and settlement (17.13.3)](#assessment-and-settlement-maker) |
-| Approve the claim settlements of other users | Daily | [Approve a settlement (17.13.4)](#approve-a-settlement-checker) |
-| Complete the cancellations and return premiums raised by the team | Daily | [Policy (17.10)](#policies), [Policy Cancellation (17.21)](#cancel-a-policy-computed-return-premium) |
-| Approve or return renewal terms | Daily | [Negotiations (17.18)](#negotiations) |
-| Approve quotations and decide underwriting referrals | As referred | [Quotations (17.4)](#quotations) |
-| Approve supplier invoices | As submitted | [Payables (18.6)](#accounts-payable) |
-| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.16)](#renewal-queue-and-at-risk-policies) |
-| Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
-| Review the claims, renewal and production reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Check the e-policies received against the placement slips | Daily, as the team uploads them | [Placement Slips (18.5)](#placement-slips) |
+| Take registered claims into processing; reject claims the insurer repudiates | Daily | [Claims (18.13)](#the-claims-list) |
+| Submit the settlements agreed by the insurers | Daily | [Assessment and settlement (18.13.3)](#assessment-and-settlement-maker) |
+| Approve the claim settlements of other users | Daily | [Approve a settlement (18.13.4)](#approve-a-settlement-checker) |
+| Complete the cancellations and return premiums raised by the team | Daily | [Policy (18.10)](#policies), [Policy Cancellation (18.21)](#cancel-a-policy-computed-return-premium) |
+| Approve or return renewal terms | Daily | [Negotiations (18.18)](#negotiations) |
+| Approve quotations and decide underwriting referrals | As referred | [Quotations (18.4)](#quotations) |
+| Approve supplier invoices | As submitted | [Payables (19.6)](#accounts-payable) |
+| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (18.16)](#renewal-queue-and-at-risk-policies) |
+| Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard (20.3)](#processing-dashboard), [Claims Dashboard (20.2)](#claims-dashboard) |
+| Review the claims, renewal and production reports | Month-end | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#tis-operations-unit-head-procedures}
 For the operations work you do yourself, follow the procedures of the
@@ -2382,7 +2387,7 @@ When a user of your team sends a cancellation, or an endorsement that returns pr
 
 You cannot complete a cancellation or return premium you raised yourself. When the Authority Matrix sets you a limit
 for return premiums, the amount must be within it. See
-[Cancel a policy: computed return premium (17.21)](#cancel-a-policy-computed-return-premium).
+[Cancel a policy: computed return premium (18.21)](#cancel-a-policy-computed-return-premium).
 
 #### Approve or reject renewal terms {#tis-operations-unit-head-renewals}
 1. Choose Operations > Renewals > Negotiations and select **Pending approval** (the arrow of a **Renewal premium** item in
@@ -2394,7 +2399,7 @@ for return premiums, the amount must be within it. See
 An approved renewal is completed by the team on the Renewal Queue. You cannot approve terms you submitted yourself.
 
 #### Approve a quotation or an underwriting referral {#tis-operations-unit-head-quotations}
-Quotations created by other users are approved on [Quotations (17.4)](#quotations). You cannot approve a quotation you
+Quotations created by other users are approved on [Quotations (18.4)](#quotations). You cannot approve a quotation you
 created.
 
 When an acceptance rule of the product refers a quotation, the quotation shows the panel **Underwriting referral**
@@ -2470,13 +2475,13 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Read the morning notifications: cheques due for deposit, cheques to follow up | Every morning | [Notifications (2.4)](#notifications) |
-| Encode the post-dated cheques received from clients and print their acknowledgement | Daily, as cheques arrive | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Forward the cheques payable to an Insurance Partner | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Record the partners' receipts and their cleared or bounced advices | As they arrive | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Deposit the cheques payable to TISPH on their dates | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Ask for the cancellation of a cheque; replace or return cheques | As requested | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Count the cheques in the vault against the log | Month-end | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Run the PDC reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Encode the post-dated cheques received from clients and print their acknowledgement | Daily, as cheques arrive | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Forward the cheques payable to an Insurance Partner | Daily | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Record the partners' receipts and their cleared or bounced advices | As they arrive | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Deposit the cheques payable to TISPH on their dates | Daily | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Ask for the cancellation of a cheque; replace or return cheques | As requested | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Count the cheques in the vault against the log | Month-end | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Run the PDC reports | Month-end | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-pdu-post-dated-cheques-procedures}
 #### Find a cheque in the log {#ccd-pdu-post-dated-cheques-register}
@@ -2531,7 +2536,7 @@ Select a row to see the cheque, its set with every instalment and its history.
 - **Replace**: on a bounced or cancelled cheque, enter the new cheque for the same instalment.
 - **Return to client**: a cheque kept at TIS goes back to the client with the reason.
 
-See [Post-dated cheques (18.5)](#post-dated-cheques) for the whole screen and [Post-dated cheques (3.7.2)](#process-pdc) in the
+See [Post-dated cheques (19.5)](#post-dated-cheques) for the whole screen and [Post-dated cheques (3.7.2)](#process-pdc) in the
 TISPH process.
 
 ## CCD-PDC / CCD-ADA {#ccd-pdc-ccd-ada}
@@ -2614,14 +2619,14 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Read the morning notifications of the cheques due for deposit and to follow up | Every morning | [Notifications (2.4)](#notifications) |
-| Encode and forward post-dated cheques and deposit those due | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Record the partners' advices and the cleared and bounced cheques | Daily | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Approve or return the cancellations asked by CCD-PDU | Daily, from My Work | [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Check the auto-debits receipted from the bank's debit advice | On each debit date | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Check the premiums still open and their ageing | Daily | [Collections (18.3)](#collections) |
-| Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
-| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports (22.1)](#reports-catalogue), [Bank Reconciliation (18.16)](#bank-reconciliation) |
+| Encode and forward post-dated cheques and deposit those due | Daily | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Record the partners' advices and the cleared and bounced cheques | Daily | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Approve or return the cancellations asked by CCD-PDU | Daily, from My Work | [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Check the auto-debits receipted from the bank's debit advice | On each debit date | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Check the premiums still open and their ageing | Daily | [Collections (19.3)](#collections) |
+| Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements (19.17)](#insurer-statement-reconciliation) |
+| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports (23.1)](#reports-catalogue), [Bank Reconciliation (19.16)](#bank-reconciliation) |
 
 ### Procedures {#ccd-pdc-ccd-ada-procedures}
 #### Post-dated cheques {#ccd-pdc-ccd-ada-cheques}
@@ -2642,7 +2647,7 @@ then **Cancelled**; one the Insurance Partner holds is pulled out on the next tr
 Pass the bank's debit advice to CCD-BP / QRPh (Receipting), who issues the official receipt with the receipt mode
 **Authority to Debit** (see [Issue an official receipt (12.7.1)](#ccd-bp-qrph-receipting-official-receipt)). Check the receipt on
 Accounts > Receipts. If the bank reports that a debit failed after it was receipted, tell CCD-Recon
-(Reconciliation and Reversals), who reverses the receipt (see [Reverse a receipt (18.1.1)](#reverse-a-receipt)).
+(Reconciliation and Reversals), who reverses the receipt (see [Reverse a receipt (19.1.1)](#reverse-a-receipt)).
 
 #### Follow the open premiums {#ccd-pdc-ccd-ada-collections}
 1. Choose Accounts > Collections. The cards show the premium **Outstanding**, **Overdue**, **Committed**,
@@ -2651,7 +2656,7 @@ Accounts > Receipts. If the bank reports that a debit failed after it was receip
 3. Select **View** in a row to see the bill, its ageing, the follow-up history and the payments.
 
 Your role reads this screen; the follow-up of overdue premiums is done by CCD-BP / QRPh (Receipting) and CCD-Recon
-(Reconciliation and Reversals). See [Collections (18.3)](#collections).
+(Reconciliation and Reversals). See [Collections (19.3)](#collections).
 
 ![Figure 11.1: Accounts > Collections, the open premiums with their ageing](../images/role-tis-ccd-pdc/collections.png)
 #### Check that a deposit or a debit reached the bank {#ccd-pdc-ccd-ada-bank}
@@ -2661,7 +2666,7 @@ Your role reads this screen; the follow-up of overdue premiums is done by CCD-BP
 3. For a list, choose Accounts > Bank Reconciliation > Deposits in Transit, type the dates and select **Generate**.
 
 Your role reads the bank reconciliation; the matching and adjustments are the work of CCD-Recon (Reconciliation and
-Reversals). See [Bank reconciliation (18.16)](#bank-reconciliation).
+Reversals). See [Bank reconciliation (19.16)](#bank-reconciliation).
 
 ## CCD-BP / QRPh (Receipting) {#ccd-bp-qrph-receipting}
 ### Role summary {#ccd-bp-qrph-receipting-summary}
@@ -2756,16 +2761,16 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the overdue premiums and the promises to pay assigned to Cash Control | Every morning | [My Work (2.3)](#my-work) |
-| Issue official receipts for payments over the counter and bank transfers | Daily, as payments arrive | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Receipt the bills payment and QRPh collections of the day | Daily, from the settlement report | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Print or e-mail the receipts to the clients | Daily | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Follow up overdue premiums, record notes and promises to pay | Daily | [Collections (18.3)](#collections) |
-| Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections (18.3)](#collections) |
-| Upload the bank's payment report and the payments made to the insurers | Daily | [Receipts (18.1.2)](#receipt-batches) |
-| Allocate or refund the unapplied collections by their date | Daily, from My Work | [Unapplied Collections (18.2)](#unapplied-collections) |
-| Attach the proof of payment of the receipts | Daily | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Print the receipts of a client for a period | As requested | [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
-| Run the collection report and the statement of account | Month-end | [All Reports (22.1)](#reports-catalogue) |
+| Issue official receipts for payments over the counter and bank transfers | Daily, as payments arrive | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Receipt the bills payment and QRPh collections of the day | Daily, from the settlement report | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Print or e-mail the receipts to the clients | Daily | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Follow up overdue premiums, record notes and promises to pay | Daily | [Collections (19.3)](#collections) |
+| Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections (19.3)](#collections) |
+| Upload the bank's payment report and the payments made to the insurers | Daily | [Receipts (19.1.2)](#receipt-batches) |
+| Allocate or refund the unapplied collections by their date | Daily, from My Work | [Unapplied Collections (19.2)](#unapplied-collections) |
+| Attach the proof of payment of the receipts | Daily | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Print the receipts of a client for a period | As requested | [Receipts (19.1)](#verify-payments-and-post-official-receipts) |
+| Run the collection report and the statement of account | Month-end | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-bp-qrph-receipting-procedures}
 #### Issue an official receipt {#ccd-bp-qrph-receipting-official-receipt}
@@ -2870,7 +2875,7 @@ Accounts > Post-Dated Cheques; their receipts are raised when they are collected
 3. Upload the file. The result says how many lines were matched, overpaid, underpaid, not found or failed, with the
    reason of each failed row.
 4. Open **Receipt batches** to see the batch and export its lines. Allocate what was held On Account or not found on
-   [Unapplied Collections (18.2)](#unapplied-collections).
+   [Unapplied Collections (19.2)](#unapplied-collections).
 
 #### Allocate an unapplied collection {#ccd-bp-qrph-receipting-unapplied}
 1. Choose Accounts > Unapplied Collections, or open the item from My Work.
@@ -2982,19 +2987,19 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the follow-ups and approvals waiting for you | Every morning | [My Work (2.3)](#my-work) |
-| Import the bank statement of each bank account | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Match the statement lines with the receipts and payments | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Post bank charges, interest and direct credits not yet booked | Daily | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank Reconciliation (18.16)](#bank-reconciliation), [Post-Dated Cheques (18.5)](#post-dated-cheques) |
-| Follow up overdue premiums and promises to pay | Daily | [Collections (18.3)](#collections) |
-| Cancel stale cheques not presented within the stale period | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
-| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
-| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances (18.10.1)](#remittances-worklist) |
-| Follow the remittances you submitted until they are approved | Daily | [Approvals (18.10.4)](#remittance-approvals) |
-| Follow up the remittance exceptions assigned to you | Daily | [Exceptions (18.10.6)](#remittance-exceptions) |
-| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation), [All Reports (22.1)](#reports-catalogue) |
+| Import the bank statement of each bank account | Daily | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Match the statement lines with the receipts and payments | Daily | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Post bank charges, interest and direct credits not yet booked | Daily | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank Reconciliation (19.16)](#bank-reconciliation), [Post-Dated Cheques (19.5)](#post-dated-cheques) |
+| Follow up overdue premiums and promises to pay | Daily | [Collections (19.3)](#collections) |
+| Cancel stale cheques not presented within the stale period | Month-end | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements (19.17)](#insurer-statement-reconciliation) |
+| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements (19.17)](#insurer-statement-reconciliation) |
+| Check and submit the weekly draft remittances to the insurers | Every Monday, after the weekly run | [Remittances (19.10.1)](#remittances-worklist) |
+| Follow the remittances you submitted until they are approved | Daily | [Approvals (19.10.4)](#remittance-approvals) |
+| Follow up the remittance exceptions assigned to you | Daily | [Exceptions (19.10.6)](#remittance-exceptions) |
+| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation (19.16)](#bank-reconciliation), [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#ccd-recon-reconciliation-and-reversals-procedures}
 #### Start the day from My Work {#ccd-recon-reconciliation-and-reversals-my-work}
@@ -3114,12 +3119,12 @@ approver.
    reconciliation**: the statement returns to **Draft** for the preparer.
 
 You cannot approve a reconciliation you submitted yourself: another CCD-Recon (Reconciliation and Reversals) user
-approves it. See [Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation).
+approves it. See [Insurer statement reconciliation (19.17)](#insurer-statement-reconciliation).
 
 #### Prepare a remittance to an insurer {#ccd-recon-reconciliation-and-reversals-remittance}
 1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit: those of the weekly run
    and those created from a list of policies with
-   [Import policy list (18.10.2)](#remittance-import-policy-list).
+   [Import policy list (19.10.2)](#remittance-import-policy-list).
 2. Select the remittance number to open it. On **Lines**, check its policies, the total premium, the commission, the
    tax and the amount due to the insurer against the collections.
 3. Select **Submit for approval** and confirm. To submit several drafts at once, tick them on **My work** and select
@@ -3139,7 +3144,7 @@ remittance yourself.
 ![Figure 13.5: Accounts > Remittance > Approvals of CCD-Recon (Reconciliation and Reversals): a remittance submitted, waiting for its approvers](../images/role-tis-ccd-recon/remittance-approvals.png)
 #### Reverse a receipt and decide reversals {#ccd-recon-reconciliation-and-reversals-other}
 A receipt issued in error is reversed from its page with a reason, and another user approves: a second CCD-Recon
-user or TIS Finance & General Accounting. See [Reverse a receipt (18.1.1)](#reverse-a-receipt). The reversals waiting for you
+user or TIS Finance & General Accounting. See [Reverse a receipt (19.1.1)](#reverse-a-receipt). The reversals waiting for you
 are on My Work; you never approve your own.
 
 You read the receipts, the unapplied collections and the collections of CCD-BP / QRPh (Receipting), who issues the
@@ -3249,6 +3254,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Bank File Layouts | View |
 | Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
+| Master > System | Data Migration & Go-Live | Create and edit |
 
 ### What you can view, change and approve {#tis-finance-and-general-accounting-access}
 Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
@@ -3300,6 +3306,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Create and edit | Upload, validate and submit loads, record checklist steps, evidence and defects |  |
+| Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
 
@@ -3308,6 +3317,7 @@ This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
 - Approve premium warranty extensions and client credit limits (not the requester)
+- Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
@@ -3329,6 +3339,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
+| Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |
@@ -3347,6 +3358,7 @@ The user who enters a record never approves it: the approval is always another u
 |---|---|---|---|
 | Administration and transactions | Disbursements and petty cash (create and edit), Journal vouchers (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Claims and payment | Disbursements and petty cash (create and edit) with Claims (create and edit) held by the same person | Warning | The claims handler should not also prepare the claim payments |
+| Load and approve migration data | This role itself combines Data migration and go-live (create and edit) with Data migration and go-live (approve) | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 | Placing and paying insurers | Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
@@ -3355,19 +3367,19 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Decide the cheques, journal vouchers, remittances, petty cash requests and other approvals waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL Export (18.13)](#sap-gl-export) |
-| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files (18.9)](#bank-payment-files) |
-| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables (18.6)](#accounts-payable), [BIR Form 2307 for suppliers (18.7)](#bir-form-2307-for-suppliers) |
-| Enter, correct or reverse journal vouchers | As needed | [Journal Voucher (18.12)](#journal-vouchers) |
-| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance (18.10)](#remittance-to-insurers) |
-| Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts (19.4)](#commission-to-agents-and-referrers) |
-| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation (18.16)](#bank-reconciliation) |
-| Reconcile the insurers' statements | Month-end | [Insurer Statements (18.17)](#insurer-statement-reconciliation) |
-| Run the month-end close and approve the close of another user | Month-end | [Period End (18.21)](#period-end) |
-| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns (3.12.3)](#process-bir)) | [Tax (18.18)](#tax-bir-forms-and-returns) |
-| Approve changes to the posting rules and account determination | When another user proposes one | [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination) |
-| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-End Close (18.22)](#year-end-close-preparer) |
-| Run the financial reports | Month-end and on request | [All Reports (22.1)](#reports-catalogue) |
+| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL Export (19.13)](#sap-gl-export) |
+| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files (19.9)](#bank-payment-files) |
+| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables (19.6)](#accounts-payable), [BIR Form 2307 for suppliers (19.7)](#bir-form-2307-for-suppliers) |
+| Enter, correct or reverse journal vouchers | As needed | [Journal Voucher (19.12)](#journal-vouchers) |
+| Prepare the remittances to the insurers and decide those of another user | Every Monday, after the weekly run, and as submitted | [Remittance (19.10)](#remittance-to-insurers) |
+| Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts (20.4)](#commission-to-agents-and-referrers) |
+| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation (19.16)](#bank-reconciliation) |
+| Reconcile the insurers' statements | Month-end | [Insurer Statements (19.17)](#insurer-statement-reconciliation) |
+| Run the month-end close and approve the close of another user | Month-end | [Period End (19.21)](#period-end) |
+| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns (3.12.3)](#process-bir)) | [Tax (19.18)](#tax-bir-forms-and-returns) |
+| Approve changes to the posting rules and account determination | When another user proposes one | [Posting configuration (21.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination) |
+| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-End Close (19.22)](#year-end-close-preparer) |
+| Run the financial reports | Month-end and on request | [All Reports (23.1)](#reports-catalogue) |
 
 ### Procedures {#tis-finance-and-general-accounting-procedures}
 #### Start the day from My Work {#tis-finance-and-general-accounting-my-work}
@@ -3396,7 +3408,7 @@ Items you entered yourself are not listed for your approval: they wait for anoth
 Another user of TIS Finance & General Accounting approves the voucher from My Work or from the journal voucher list;
 the voucher is then **Posted** and goes into the SAP GL file of the day it is approved. The approver must not be the
 user who entered it, and must be within the approver's limit for journal vouchers on the
-[Authority Matrix (20.10)](#authority-matrix).
+[Authority Matrix (21.10)](#authority-matrix).
 
 ![Figure 14.2: Accounts > Journal Voucher > Add Journal Voucher, the window for one line of the voucher](../images/role-tis-finance/journal-voucher-line.png)
 To enter many vouchers at once, select **Upload** and use the template of the screen: one row per line, the same
@@ -3407,7 +3419,7 @@ vouchers always wait for approval.
 The system's own journals that are parked for approval (for example the bank charges of a statement) are listed when
 you tick **System journals parked for approval**, and are approved in the same way. To correct or reverse a posted
 voucher, use Accounts > Correction JV or Accounts > Reversal JV.
-See [Journal vouchers (18.12)](#journal-vouchers).
+See [Journal vouchers (19.12)](#journal-vouchers).
 
 #### Check the SAP GL export {#tis-finance-and-general-accounting-sap-gl}
 The SAP GL header and line files are written every night at the cut-off with the journals posted since the previous
@@ -3419,7 +3431,7 @@ cut-off.
 3. To send a day again, select **Run now / re-generate**. A re-generation is a new run; every run keeps its files,
    which you download from **Files**.
 
-A journal approved after the cut-off is in the next day's file. See [SAP GL export (18.13)](#sap-gl-export).
+A journal approved after the cut-off is in the next day's file. See [SAP GL export (19.13)](#sap-gl-export).
 
 #### Pay by cheque: payment voucher and cheque release {#tis-finance-and-general-accounting-disbursement}
 1. Choose Accounts > Disbursement and select **Create**.
@@ -3441,13 +3453,13 @@ Payment vouchers are also raised by the system: an approved remittance settlemen
 payout raises the referrer's voucher. A voucher paid by bank transfer goes into a batch of
 Accounts > Bank Payment Files (**New batch**): the batch is approved, its file is uploaded to the bank portal
 and the bank's results post each payment. See
-[Disbursement: payment vouchers and cheques (18.8)](#disbursement-payment-vouchers-and-cheques) and
-[Bank payment files (18.9)](#bank-payment-files).
+[Disbursement: payment vouchers and cheques (19.8)](#disbursement-payment-vouchers-and-cheques) and
+[Bank payment files (19.9)](#bank-payment-files).
 
 ![Figure 14.3: Accounts > Disbursement, a voucher to an insurer with its cheque waiting for approval by another user](../images/role-tis-finance/disbursement-cheque-approval.png)
 #### Prepare and approve a remittance to an insurer {#tis-finance-and-general-accounting-remittance}
 1. Choose Accounts > Remittance > Remittances. **My work** lists the drafts to submit, from the weekly run or
-   from [Import policy list (18.10.2)](#remittance-import-policy-list).
+   from [Import policy list (19.10.2)](#remittance-import-policy-list).
 2. Open a draft, check its policies and amounts, and select **Submit for approval**. The remittance is **Pending
    approval**.
 3. To decide the remittances of another user, choose Accounts > Remittance > Approvals. **Awaiting my decision**
@@ -3458,7 +3470,7 @@ and the bank's results post each payment. See
 5. Pay the voucher from Accounts > Remittance > Insurer payments: in a bank payment batch, or by cheque on Disbursement.
 
 You cannot approve a remittance you prepared or submitted. A remittance above your limit waits for the TIS General
-Manager. See [Remittance to insurers (18.10)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
+Manager. See [Remittance to insurers (19.10)](#remittance-to-insurers) and [Remittance to the insurers (3.8)](#process-remittance).
 
 #### Pay the commission of agents and referrers {#tis-finance-and-general-accounting-commission}
 1. Choose Commission > Agents/Referrer Accounts and open the agent or referrer.
@@ -3481,7 +3493,7 @@ Manager. See [Remittance to insurers (18.10)](#remittance-to-insurers) and [Remi
 
 To change an approved reconciliation, the approver reopens it with remarks: it returns to draft and its matches are
 unlocked. Cheques not presented after the stale period are listed with **Stale cheques**. See
-[Bank reconciliation (18.16)](#bank-reconciliation).
+[Bank reconciliation (19.16)](#bank-reconciliation).
 
 ![Figure 14.4: Accounts > Bank Reconciliation > Reconciliation Workspace, September of the operating account before the reconciliation is started](../images/role-tis-finance/bank-reconciliation-workspace.png)
 #### Close the month {#tis-finance-and-general-accounting-month-end}
@@ -3498,7 +3510,7 @@ unlocked. Cheques not presented after the stale period are listed with **Stale c
    **Return to preparer** with a reason. On approval the period is **Closed**.
 
 A period can first be soft-closed on Accounts > Period End > Period Management: only the approvers of the close can then
-still post into it. Closing or reopening a period asks for a reason. See [Period end (18.21)](#period-end) and
+still post into it. Closing or reopening a period asks for a reason. See [Period end (19.21)](#period-end) and
 [Month-end (3.12.2)](#process-month-end-close).
 
 ![Figure 14.5: Accounts > Period End > Month-End Close, the New close run window](../images/role-tis-finance/month-end-new-close-run.png)
@@ -3511,7 +3523,7 @@ another user approves it.
 2. Check the change; for a posting rule, look at its sample journal on Master > Finance > Posting Rules.
 3. Approve it, or reject it with a reason. You cannot decide a change you requested.
 
-See [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination).
+See [Posting configuration (21.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination).
 
 #### Close the fiscal year {#tis-finance-and-general-accounting-year-end}
 1. After period 12 (March) is closed, choose Accounts > Period End > Year-End Close and select
@@ -3520,7 +3532,7 @@ See [Posting configuration (20.14)](#posting-configuration-configuration-approva
 3. Another user of TIS Finance & General Accounting, not the one who started the run, closes the year: the closing
    entries are posted, the balances are carried forward to the next year, the year is locked and the next one created.
 
-See [Year-end (3.12.4)](#process-year-end) and [Year-end close (18.22)](#year-end-close-preparer).
+See [Year-end (3.12.4)](#process-year-end) and [Year-end close (19.22)](#year-end-close-preparer).
 
 ## TIS IT AppSupport / Admin {#tis-it-appsupport-admin}
 ### Role summary {#tis-it-appsupport-admin-summary}
@@ -3644,6 +3656,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > System | E-mail Outbox | Create and edit |
 | Master > System | Integrations | Create and edit |
 | Master > System | Features & Releases | View |
+| Master > System | Data Migration & Go-Live | Create and edit |
 | Product Configurator | Dashboard | Create and edit |
 | Product Configurator | Product Templates | Create and edit |
 | Product Configurator | Coverage Builder | Create and edit |
@@ -3692,6 +3705,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | Integrations |
 | Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |  |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Create and edit | Upload, validate and submit loads, record checklist steps, evidence and defects |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |  |
@@ -3711,6 +3726,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Access control | Approve role access changes and authority limits of another administrator | TIS IT AppSupport / Admin |
+| Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
@@ -3720,27 +3736,28 @@ The user who enters a record never approves it: the approval is always another u
 | Rule | Conflict | When given together | Reason |
 |---|---|---|---|
 | Administration and transactions | Users (create and edit), Roles (create and edit), Access control (create and edit) with Receipts (create and edit), Collections and credit control (create and edit), Disbursements and petty cash (create and edit), Journal vouchers (create and edit), Remittance and insurer reconciliation (create and edit), Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
+| Load and approve migration data | Data migration and go-live (create and edit) with Data migration and go-live (approve) held by the same person | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
 
 ### Daily and periodic tasks {#tis-it-appsupport-admin-tasks}
 | Task | When | Screen |
 |---|---|---|
-| Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work (2.3)](#my-work), [Role Permissions (20.8)](#roles-and-role-permissions) |
-| Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules (20.26)](#schedules) |
-| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (20.29)](#e-mail-outbox), [Integrations (20.30)](#integrations) |
-| Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [User (20.7)](#users) |
-| Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [User (20.7)](#users) |
-| Change the access of a role | On an approved access request | [Role Permissions (20.8)](#roles-and-role-permissions) |
-| Record the approval limits decided by Management | When Management changes them | [Authority Matrix (20.10)](#authority-matrix) |
-| Record the cover for an approver who is away | Before the leave | [Delegations (20.11)](#delegations) |
-| Follow the segregation-of-duties conflicts and their exceptions | Weekly | [Segregation of Duties (20.12)](#segregation-of-duties), [User Access Matrix (20.9)](#user-access-matrix) |
-| Review the access of every user | At least every quarter | [Access Reviews (20.13)](#access-reviews) |
-| Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer Programmes (17.7)](#dealer-programmes) |
-| Maintain the reference masters | On the request of the business | [Masters that work the same way (20.4)](#masters-that-work-the-same-way) |
-| Configure products, covers, rating and acceptance rules | On the request of the business | [Product Templates (21.2)](#product-templates) |
-| Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout (20.22)](#documents-and-reports-layout), [Document Numbering (20.25)](#document-numbering) |
-| Answer audit questions: who changed what and when | On request | [Audit Trail (20.27)](#audit-trail) |
+| Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work (2.3)](#my-work), [Role Permissions (21.8)](#roles-and-role-permissions) |
+| Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules (21.26)](#schedules) |
+| Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox (21.30)](#e-mail-outbox), [Integrations (21.31)](#integrations) |
+| Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [User (21.7)](#users) |
+| Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [User (21.7)](#users) |
+| Change the access of a role | On an approved access request | [Role Permissions (21.8)](#roles-and-role-permissions) |
+| Record the approval limits decided by Management | When Management changes them | [Authority Matrix (21.10)](#authority-matrix) |
+| Record the cover for an approver who is away | Before the leave | [Delegations (21.11)](#delegations) |
+| Follow the segregation-of-duties conflicts and their exceptions | Weekly | [Segregation of Duties (21.12)](#segregation-of-duties), [User Access Matrix (21.9)](#user-access-matrix) |
+| Review the access of every user | At least every quarter | [Access Reviews (21.13)](#access-reviews) |
+| Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer Programmes (18.7)](#dealer-programmes) |
+| Maintain the reference masters | On the request of the business | [Masters that work the same way (21.4)](#masters-that-work-the-same-way) |
+| Configure products, covers, rating and acceptance rules | On the request of the business | [Product Templates (22.2)](#product-templates) |
+| Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout (21.22)](#documents-and-reports-layout), [Document Numbering (21.25)](#document-numbering) |
+| Answer audit questions: who changed what and when | On request | [Audit Trail (21.27)](#audit-trail) |
 
 ### Procedures {#tis-it-appsupport-admin-procedures}
 #### Create a user account {#tis-it-appsupport-admin-create-user}
@@ -3756,7 +3773,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 Users who sign in with **Sign in with Microsoft** are matched to their account by e-mail: the **E-mail** (or the
 **Username**) must be the user's Microsoft 365 address. At the first sign-in the account is bound to that Microsoft
 account; later sign-ins must come from the same Microsoft account. When you give roles that one person should not hold together, the system warns
-you, or refuses a combination its rule blocks; see [Segregation of Duties (20.12)](#segregation-of-duties).
+you, or refuses a combination its rule blocks; see [Segregation of Duties (21.12)](#segregation-of-duties).
 
 ![Figure 15.1: Master > Users and Access > User > Add User, with the TISPH roles grouped by department](../images/role-tis-it-admin/add-user.png)
 > You cannot change your own account or roles, nor give a role that includes the built-in administrator. Another
@@ -3773,7 +3790,7 @@ you, or refuses a combination its rule blocks; see [Segregation of Duties (20.12
    - **Sign-in history**: the user's sign-ins with the device and the result.
 
 To stop a leaver from signing in, switch off the **Status** of the user in the list; the account is inactive. Each action is recorded in the
-[Audit Trail (20.27)](#audit-trail). See [Users (20.7)](#users).
+[Audit Trail (21.27)](#audit-trail). See [Users (21.7)](#users).
 
 #### Change the access of a role {#tis-it-appsupport-admin-role-access}
 1. Choose Master > Users and Access > Role Permissions.
@@ -3790,7 +3807,7 @@ To stop a leaver from signing in, switch off the **Status** of the user in the l
 The approver is never the requester and must not hold the role changed. You cannot change a role you hold: a change to
 the TIS IT AppSupport / Admin role itself is made by the built-in administrator. The requester can **Withdraw** a change
 before it is decided. Use **Compare roles** to see two roles side by side and **Export to Excel** for the access of
-every role. See [Roles and role permissions (20.8)](#roles-and-role-permissions).
+every role. See [Roles and role permissions (21.8)](#roles-and-role-permissions).
 
 ![Figure 15.2: Master > Users and Access > Role Permissions, the access of the TIS Sales Associate open with Edit access](../images/role-tis-it-admin/role-permissions-edit.png)
 #### Record approval limits {#tis-it-appsupport-admin-authority-matrix}
@@ -3806,7 +3823,7 @@ every role. See [Roles and role permissions (20.8)](#roles-and-role-permissions)
 
 Nobody approves a change to his or her own personal limit or to the limit of a role he or she holds. While a cell is
 **Not set**, the delivered rule lets the approver approve without an amount check (shown as "Approver without a limit:
-may approve"). See [Authority Matrix (20.10)](#authority-matrix).
+may approve"). See [Authority Matrix (21.10)](#authority-matrix).
 
 #### Record a delegation {#tis-it-appsupport-admin-delegation}
 1. Choose Master > Users and Access > Delegations and select **New delegation**.
@@ -3817,7 +3834,7 @@ may approve"). See [Authority Matrix (20.10)](#authority-matrix).
 
 Once approved, the person covering approves the chosen transactions with the limit of the approver who is away, for
 the dates chosen; both people are told. Select **End early** with the **Reason for ending** to stop a delegation. See
-[Delegations (20.11)](#delegations).
+[Delegations (21.11)](#delegations).
 
 #### Follow segregation-of-duties conflicts {#tis-it-appsupport-admin-conflicts}
 1. Choose Master > Users and Access > Segregation of Duties.
@@ -3829,7 +3846,7 @@ New rules (**New rule**), changes (**Edit rule**) and switching a rule off (**Sw
 another administrator. A **Block** rule refuses the combination of roles when they are given; a **Warn** rule allows it
 and lists the person here. The delivered TISPH rules warn. The Master > Users and Access > User Access Matrix
 shows, for each user, the roles, the last sign-in, two-step verification, the password age and the conflicts. See
-[Segregation of Duties (20.12)](#segregation-of-duties) and [User Access Matrix (20.9)](#user-access-matrix).
+[Segregation of Duties (21.12)](#segregation-of-duties) and [User Access Matrix (21.9)](#user-access-matrix).
 
 #### Run the quarterly access review {#tis-it-appsupport-admin-access-review}
 1. Choose Master > Users and Access > Access Reviews and select **Start a review**.
@@ -3841,7 +3858,7 @@ shows, for each user, the roles, the last sign-in, two-step verification, the pa
 5. Another user of TIS IT AppSupport / Admin, who decided none of its lines, selects **Sign off**. The roles removed are taken away, the
    accounts deactivated and the users' sessions renewed; the review is closed.
 
-See [Access Reviews (20.13)](#access-reviews).
+See [Access Reviews (21.13)](#access-reviews).
 
 ![Figure 15.3: Master > Users and Access > Access Reviews, the Start a review window](../images/role-tis-it-admin/access-review-start.png)
 #### Maintain a reference master {#tis-it-appsupport-admin-masters}
@@ -3852,8 +3869,8 @@ See [Access Reviews (20.13)](#access-reviews).
 
 Some finance masters (posting rules, account determination, account roles) are maintained by TIS Finance &
 General Accounting; a change you propose to the accounting accounts waits for their approval on
-Master > Finance > Configuration Approvals. See [Masters that work the same way (20.4)](#masters-that-work-the-same-way),
-[Insurance companies (20.3)](#insurance-companies) and [Distribution Channels (20.1)](#distribution-channels).
+Master > Finance > Configuration Approvals. See [Masters that work the same way (21.4)](#masters-that-work-the-same-way),
+[Insurance companies (21.3)](#insurance-companies) and [Distribution Channels (21.1)](#distribution-channels).
 
 #### Configure a product {#tis-it-appsupport-admin-product}
 1. Choose Product Configurator > Product Templates. The template marked **In use** is the one the business applies to
@@ -3865,7 +3882,7 @@ Master > Finance > Configuration Approvals. See [Masters that work the same way 
 3. Select **Activate** and confirm with **Activate template**. The template applies to new quotations; quotations
    already issued are not changed. **Deactivate** stops its use for new quotations.
 
-See [Product Templates (21.2)](#product-templates) and the other sections of the Product Configurator.
+See [Product Templates (22.2)](#product-templates) and the other sections of the Product Configurator.
 
 #### Watch the scheduled jobs {#tis-it-appsupport-admin-schedules}
 1. Choose Master > System > Schedules. Each job shows what it does, its schedule (Asia/Manila time), its
@@ -3876,7 +3893,7 @@ See [Product Templates (21.2)](#product-templates) and the other sections of the
 4. To change the schedule of a job or switch it on or off (**Enabled**), select **Edit schedule**.
 
 Agree with TIS Finance & General Accounting before you switch on or reschedule an accounting job (recurring journals,
-accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (20.26)](#schedules).
+accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (21.26)](#schedules).
 
 ![Figure 15.4: Master > System > Schedules, the jobs with their schedule and status](../images/role-tis-it-admin/schedules.png)
 #### Resend a message that failed {#tis-it-appsupport-admin-messages}
@@ -3887,7 +3904,7 @@ accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules (2
 4. For e-mails, choose Master > System > E-mail Outbox: each e-mail shows its status, attempts and last
    error.
 
-See [Integrations (20.30)](#integrations) and [E-mail Outbox (20.29)](#e-mail-outbox).
+See [Integrations (21.31)](#integrations) and [E-mail Outbox (21.30)](#e-mail-outbox).
 
 ## TIS General Manager {#tis-general-manager}
 ### Role summary {#tis-general-manager-summary}
@@ -4012,6 +4029,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Segregation of Duties | View |
 | Master > System | Audit Trail | View |
 | Master > System | Features & Releases | View |
+| Master > System | Data Migration & Go-Live | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -4072,6 +4090,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
 | Master data and configuration | Features and releases | View | See the catalogue of features and releases with their status (read only) | Features & Releases |
 | Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
 | Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews | Authority Matrix and Segregation of Duties |
@@ -4082,6 +4102,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
@@ -4117,6 +4138,7 @@ The user who enters a record never approves it: the approval is always another u
 |---|---|---|---|
 | Administration and transactions | Policies (create and edit), Quotations and placement (create and edit), Claims (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Claims and payment | Claims (create and edit) with Disbursements and petty cash (create and edit) held by the same person | Warning | The claims handler should not also prepare the claim payments |
+| Load and approve migration data | Data migration and go-live (approve) with Data migration and go-live (create and edit) held by the same person | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 | Placing and paying insurers | Quotations and placement (create and edit), Policies (create and edit) with Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
 | Receipting and selling | Quotations and placement (create and edit), Policies (create and edit) with Receipts (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
 
@@ -4126,17 +4148,17 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Decide the approvals waiting for you (claim settlements and the other queues) | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Approve or return claim settlements | Daily | [Approve a settlement (checker) (17.13.4)](#approve-a-settlement-checker) |
-| Decide claims: review, reject, settle, close | As needed | [Claims (17.13)](#the-claims-list) |
-| Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips (17.5)](#placement-slips) |
-| Approve or return renewal terms and complete return premiums | As needed | [Negotiations (17.18)](#negotiations), [Policy (17.10)](#policies) |
-| Approve or reject supplier invoices | As notified | [Payables (18.6)](#accounts-payable) |
-| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (18.10.4)](#remittance-approvals) |
-| Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard (19.1)](#dashboard), [Claims Dashboard (19.2)](#claims-dashboard), [Processing Dashboard (19.3)](#processing-dashboard) |
-| Review the month's financial reports after the month-end close | Monthly | [All Reports (22.1)](#reports-catalogue) |
-| Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20.12)](#segregation-of-duties) |
-| Review the approval limits of the roles | Quarterly | [Authority Matrix (20.10)](#authority-matrix) |
-| Look up who changed a record and when | As needed | [Audit Trail (20.27)](#audit-trail) |
+| Approve or return claim settlements | Daily | [Approve a settlement (checker) (18.13.4)](#approve-a-settlement-checker) |
+| Decide claims: review, reject, settle, close | As needed | [Claims (18.13)](#the-claims-list) |
+| Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips (18.5)](#placement-slips) |
+| Approve or return renewal terms and complete return premiums | As needed | [Negotiations (18.18)](#negotiations), [Policy (18.10)](#policies) |
+| Approve or reject supplier invoices | As notified | [Payables (19.6)](#accounts-payable) |
+| Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (19.10.4)](#remittance-approvals) |
+| Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard (20.1)](#dashboard), [Claims Dashboard (20.2)](#claims-dashboard), [Processing Dashboard (20.3)](#processing-dashboard) |
+| Review the month's financial reports after the month-end close | Monthly | [All Reports (23.1)](#reports-catalogue) |
+| Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix (21.9)](#user-access-matrix), [Segregation of Duties (21.12)](#segregation-of-duties) |
+| Review the approval limits of the roles | Quarterly | [Authority Matrix (21.10)](#authority-matrix) |
+| Look up who changed a record and when | As needed | [Audit Trail (21.27)](#audit-trail) |
 
 ### Procedures {#tis-general-manager-procedures}
 #### Decide the approvals in My Work {#tis-general-manager-my-work}
@@ -4157,7 +4179,7 @@ General Manager has no amount limit set as delivered (see [Approvals (16.4)](#ti
 3. Select **Approve settlement**, or **Return for correction** when the settlement must be revised.
 
 An approved settlement settles the claim at once (**Settled**) and the user who submitted it is notified. A returned
-settlement goes back to **Processing** for correction. See [Approve a settlement (checker) (17.13.4)](#approve-a-settlement-checker).
+settlement goes back to **Processing** for correction. See [Approve a settlement (checker) (18.13.4)](#approve-a-settlement-checker).
 
 ![Figure 16.2: Claim settlement to approve: the claim's steps, the settlement amount and the decision](../images/role-tis-general-manager/claim-settlement-approval.png)
 #### Approve the decisions of the front office {#tis-general-manager-front-office}
@@ -4184,7 +4206,7 @@ An underwriting referral of a quotation is decided by the TIS Operations Unit He
 5. Select **Export Report** to save the dashboard.
 
 Choose another dashboard in the first list, or on the side bar: Claims Dashboard, Processing Dashboard, Sales
-Dashboard. See [Dashboard (19.1)](#dashboard).
+Dashboard. See [Dashboard (20.1)](#dashboard).
 
 ![Figure 16.3: Dashboard > Executive Dashboard for the current month, compared with the previous period](../images/role-tis-general-manager/executive-dashboard.png)
 #### Review access and segregation of duties {#tis-general-manager-access-review}
@@ -4201,8 +4223,8 @@ You review access; changes are made and approved by TIS IT AppSupport / Admin.
    per transaction. A limit shown as **Not set** means the role may approve any amount.
 6. Ask TIS IT AppSupport / Admin to correct what you find: remove a role, end a user, set a limit.
 
-See [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20.12)](#segregation-of-duties) and
-[Authority Matrix (20.10)](#authority-matrix).
+See [User Access Matrix (21.9)](#user-access-matrix), [Segregation of Duties (21.12)](#segregation-of-duties) and
+[Authority Matrix (21.10)](#authority-matrix).
 
 #### Look up a change in the audit trail {#tis-general-manager-audit-trail}
 1. Choose Master > System > Audit Trail.
@@ -4210,7 +4232,97 @@ See [User Access Matrix (20.9)](#user-access-matrix), [Segregation of Duties (20
    the fields changed and the source (for example **Sign-in**).
 3. Select **Export** to keep the result.
 
-See [Audit Trail (20.27)](#audit-trail).
+See [Audit Trail (21.27)](#audit-trail).
+
+## TIS Audit {#tis-audit-read-only}
+### Role summary {#tis-audit-read-only-summary}
+**Department:** Audit. Internal and external audit: reads the migration workspace, the audit trail, the business records, the ledgers and the reports; changes nothing.
+
+TIS Audit is the role of the internal and external auditors of the cut-over. You read the Data Migration & Go-Live
+workspace (the loads and their approvals, the reconciliation and its signatures, the runs, the checklist, the Go / No-Go
+decision, the lock and the hypercare figures) and the audit trail, and you change nothing: no tab of the workspace
+offers you an action. Through the reports and the records you read, you tie the opening balances, the migrated
+receivables and the business issued since go-live to the books. Personal data in every download and review is masked.
+
+### Menus available {#tis-audit-read-only-menus}
+The menus of this role as delivered. Access: View (open and read), Create and edit (enter and change records), Approve (decide the records of other users).
+
+| Menu | Screen | Access |
+|---|---|---|
+| Master > System | Audit Trail | View |
+| Master > System | Data Migration & Go-Live | View |
+
+### What you can view, change and approve {#tis-audit-read-only-access}
+Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
+
+| Area | Module | Access | What it allows | Where |
+|---|---|---|---|---|
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
+| Operations | Clients | View | See clients | No screen of its own |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | No screen of its own |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
+| Operations | Renewals | View | See renewals | No screen of its own |
+| Operations | Claims | View | See claims | No screen of its own |
+| Accounts | Receipts | View | See receipts | No screen of its own |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | No screen of its own |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | No screen of its own |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | No screen of its own |
+| Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | No screen of its own |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | No screen of its own |
+| Accounts | Bank reconciliation | View | See bank reconciliations | No screen of its own |
+| Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | No screen of its own |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | No screen of its own |
+| Reports | Reports | View | Run and download reports | No screen of its own |
+| Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
+
+### Approvals {#tis-audit-read-only-approvals}
+This role approves nothing.
+
+Who approves the work of this role:
+
+| Work | Approval | Approved by |
+|---|---|---|
+| Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+
+The user who enters a record never approves it: the approval is always another user's.
+
+### Segregation of duties {#tis-audit-read-only-sod}
+No delivered segregation-of-duties rule concerns this role.
+
+These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
+
+### Daily and periodic tasks {#tis-audit-read-only-tasks}
+| Task | When | Screen |
+|---|---|---|
+| Read the loads of the production run: who uploaded, submitted and approved each one, the counts per result | During the cut-over and the hypercare | [Data Migration & Go-Live (21.29)](#data-migration-and-go-live) |
+| Check the reconciliation: every difference explained and accepted by a user who did not load the data; the signed report | Before and after the Go / No-Go decision | [Data Migration & Go-Live (21.29)](#data-migration-and-go-live) |
+| Read the Go / No-Go decision, the criteria, the waivers and the votes, and the lock and unlock requests | At the decision; after every unlock | [Data Migration & Go-Live (21.29)](#data-migration-and-go-live) |
+| Check who changed what and when, with the values before and after | On request; monthly during the hypercare | [Audit Trail (21.27)](#audit-trail) |
+
+### Procedures {#tis-audit-read-only-procedures}
+#### Review a load {#tis-audit-read-only-review-load}
+1. Choose Master > System > Data Migration & Go-Live and open **Loads**.
+2. Open the load. The header shows its number, the run, the file and its hash, who uploaded, submitted and approved it
+   and when, and the counts per result.
+3. **Rows** lists every row with its result; a **Changed** row shows the fields changed with the values before.
+   **Duplicates** lists the matches and the decision taken on each, with the user and the reason.
+4. **Activity** lists every action on the load: validation, submission, approval or rejection with its reason, load,
+   undo request and decision.
+
+#### Review the reconciliation and the decision {#tis-audit-read-only-review-reconciliation}
+1. On **Reconciliation**, open the reconciliation of the run. Each line shows the figure of the old system, the figure
+   loaded, the difference and its explanation, who accepted it and who signed each slot. **Download report** gives the
+   signed report; its hash is shown next to it.
+2. On **Go-Live**, read the criteria with their results, the waivers with their reasons, the votes of the named
+   approvers and the lock and unlock requests with their two users.
+3. On **Runs**, open the production run for its checklist steps with owner, times and evidence, its defects and the
+   **Evidence pack**.
 
 ## Screen reference: Operations {#screens-operations}
 The screens of the Operations menu, in menu order: prospects, quotations and placement, clients, policies, claims, renewals and the policy services.
@@ -4247,7 +4359,7 @@ The list shows **Prospect ID** (LD-YYYY-NNNNN), **Name**, **Category**, **Produc
 
 The buttons above the list are **Bulk Upload** (prospects from an Excel file, validated before they are created), **Generate Report** (the list as an Excel file) and **Create Prospect**.
 
-![Figure 17.1: Operations > Sales & Marketing > Prospects, with the prospects by product line and status](../images/screens-operations/prospects-list.png)
+![Figure 18.1: Operations > Sales & Marketing > Prospects, with the prospects by product line and status](../images/screens-operations/prospects-list.png)
 #### Create a prospect {#create-a-prospect}
 1. Choose Operations > Sales & Marketing > Prospects and select **Create Prospect**.
 2. Choose **New customer**, or **Existing client** to find a client by name, mobile number or e-mail (the prospect is then linked to that client). Select **Continue**.
@@ -4262,13 +4374,13 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
-| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes (20.6)](#lead-sources-and-reason-codes) |
+| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes (21.6)](#lead-sources-and-reason-codes) |
 | **Product** | No | The product chosen in step 3 | **Product not yet tagged** when skipped |
 
-The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give it an account executive.
+The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (18.6)](#lead-assignment) give it an account executive.
 
-![Figure 17.2: Create prospect: the choice between a new customer and an existing client](../images/screens-operations/prospect-create.png)
-![Figure 17.3: The prospect form](../images/screens-operations/prospect-form.png)
+![Figure 18.2: Create prospect: the choice between a new customer and an existing client](../images/screens-operations/prospect-create.png)
+![Figure 18.3: The prospect form](../images/screens-operations/prospect-form.png)
 #### View, edit or delete a prospect {#view-edit-or-delete-a-prospect}
 Select a row (or the eye in **Actions**) to open the prospect. The prospect page shows the prospect's quotations with the same counters as the quotations list, **Add Quote** to quote the prospect, and **Convert** on an approved quotation. The pencil opens the prospect form for a change.
 
@@ -4294,9 +4406,9 @@ Quick Quote prices a package product on the spot from the product's rates, witho
 3. Choose the plan or package and enter the details the product asks for (insured, sum insured or plan, period).
 4. Check the premium shown with its taxes and create the quotation.
 
-The quotation is created in **Draft** on [Quotations (17.4)](#quotations) and follows the same steps as any quotation. When a product has no quick quote on this build (for example **Credit Life - Compulsory**), the screen says so and offers **Request quotation**, which opens a request for quotation to the insurers. For a product that is not a package, use **Request for Quotation (non-package)** at the top of the screen, which opens [Requests for quotation (17.3)](#requests-for-quotation-broker-slips).
+The quotation is created in **Draft** on [Quotations (18.4)](#quotations) and follows the same steps as any quotation. When a product has no quick quote on this build (for example **Credit Life - Compulsory**), the screen says so and offers **Request quotation**, which opens a request for quotation to the insurers. For a product that is not a package, use **Request for Quotation (non-package)** at the top of the screen, which opens [Requests for quotation (18.3)](#requests-for-quotation-broker-slips).
 
-![Figure 17.4: Operations > Sales & Marketing > Quick Quote](../images/screens-operations/quick-quote.png)
+![Figure 18.4: Operations > Sales & Marketing > Quick Quote](../images/screens-operations/quick-quote.png)
 ### Requests for quotation (broker slips) {#requests-for-quotation-broker-slips}
 A request for quotation asks several panel insurers for their terms on one risk, for example a fleet or a group personal accident cover. It is optional: most motor quotations are priced on the motor tariff.
 
@@ -4315,7 +4427,7 @@ Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
-![Figure 17.5: Operations > Sales & Marketing > Requests for Quotation, with the offers received per request](../images/screens-operations/requests-for-quotation.png)
+![Figure 18.5: Operations > Sales & Marketing > Requests for Quotation, with the offers received per request](../images/screens-operations/requests-for-quotation.png)
 To create a request, select **New Request for Quotation**:
 
 | Field | Required | What to enter | Rule |
@@ -4332,7 +4444,7 @@ To create a request, select **New Request for Quotation**:
 
 **Save draft** keeps the request as **Draft**. **Save and submit to market** sends it to the insurers: the status becomes **Submitted**.
 
-![Figure 17.6: New Request for Quotation (Broker Slip)](../images/screens-operations/rfq-new.png)
+![Figure 18.6: New Request for Quotation (Broker Slip)](../images/screens-operations/rfq-new.png)
 On the request, the tabs are **Market responses**, **Compare offers**, **Risk and covers** and **History**. Record each insurer's answer (premium, rate, deductibles, special terms, the line it writes) or its decline; with the answers in, the status becomes **Responses in**. On **Compare offers**, the best offer is marked **Best** and the others show their difference (**vs best**). Select the offer or offers to place and the lead insurer: the shares must total exactly 100%. Then select **Prepare Quotation Slip**.
 
 The buttons of the request are **Print slip**, **Client comparison report** (see Comparison Reports), **Add insurer**, **Close (not taken up)** and **Cancel slip**. The stepper at the top shows the journey: **Request for Quotation**, **Quotation Slip**, **Placement raised**, **Insurer issued (Booked)**.
@@ -4365,10 +4477,10 @@ The cards count **Total Quotations**, **Active Quotations**, **Pending Review**,
 | **Rejected** | Turned down, with a reason |
 | **Converted to Policy** | The insurer's policy has been booked |
 
-![Figure 17.7: Operations > Sales & Marketing > Quotations](../images/screens-operations/quotations-list.png)
+![Figure 18.7: Operations > Sales & Marketing > Quotations](../images/screens-operations/quotations-list.png)
 The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Send for Customer Approval** on a draft, **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation (3.4)](#process-quotation).
 
-![Figure 17.8: A motor quotation waiting for the client, with Copy approval link and Record customer response](../images/screens-operations/quotation-pending-customer.png)
+![Figure 18.8: A motor quotation waiting for the client, with Copy approval link and Record customer response](../images/screens-operations/quotation-pending-customer.png)
 #### Create a motor quotation {#create-a-motor-quotation}
 A motor quotation is made for a prospect and has four steps: **Policy details**, **Coverage**, **Accessories** and **Summary**. Nothing is saved until the last step, so you can move with **Back** and **Next**.
 
@@ -4381,7 +4493,7 @@ A motor quotation is made for a prospect and has four steps: **Policy details**,
 
 The quotation is created in **Draft**. Open it and select **Send for Customer Approval** to send it to the client.
 
-![Figure 17.9: Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](../images/screens-operations/motor-quotation-policy-details.png)
+![Figure 18.9: Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](../images/screens-operations/motor-quotation-policy-details.png)
 ### Placement Slips {#placement-slips}
 The broker never issues cover. A placement slip goes to the insurer, the insurer acknowledges it and returns the e-policy, the e-policy is checked against the slip and only then is the policy booked. No screen lets a user complete cover without the insurer.
 
@@ -4400,7 +4512,7 @@ The broker never issues cover. A placement slip goes to the insurer, the insurer
 
 The cards count the placements at each step: **Placement raised**, **Sent to insurer**, **Acknowledged**, **e-Policy received**, **Checked against slip** and **Insurer issued (Booked)**. The list shows **Placement No.** (PS-YYYY-NNNNN), **Insured**, **Product**, **Lead insurer**, **Gross premium**, **Period**, **Source** (**From quotation slip** or **Direct placement**), **Status** and the booked **Policy**. Filter by status and by source.
 
-![Figure 17.10: Operations > Sales & Marketing > Placement Slips, with the count of placements at each step](../images/screens-operations/placement-slips.png)
+![Figure 18.10: Operations > Sales & Marketing > Placement Slips, with the count of placements at each step](../images/screens-operations/placement-slips.png)
 A placement slip is raised by the client's acceptance of a quotation, or directly with **New direct placement** for a risk that needs no quotation (for example a CTPL cover):
 
 | Field | Required | What to enter | Rule |
@@ -4436,7 +4548,7 @@ Use **Record e-Policy** to key the e-policies the insurers send back without sea
 
 The placement slip becomes **e-Policy received** and opens afterwards for the check against the slip by another user.
 
-![Figure 17.11: Record e-Policy: the placement slips waiting for the insurer's e-policy](../images/screens-operations/record-epolicy.png)
+![Figure 18.11: Record e-Policy: the placement slips waiting for the insurer's e-policy](../images/screens-operations/record-epolicy.png)
 ### Lead Assignment {#lead-assignment}
 Lead Assignment decides who works each prospect.
 
@@ -4461,7 +4573,7 @@ The screen has three tabs:
 
 At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
 
-![Figure 17.12: Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](../images/screens-operations/assignment-rules.png)
+![Figure 18.12: Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](../images/screens-operations/assignment-rules.png)
 ### Dealer Programmes {#dealer-programmes}
 Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
 
@@ -4483,7 +4595,7 @@ The **Programmes** tab lists **Code**, **Name**, **Dealer**, **Financing bank**,
 | Field | Required | What to enter | Rule |
 |---|---|---|---|
 | **Code**, **Name** | Yes | For example TMK-TFS-2026, "Toyota Makati x TFS financed cars 2026" | The code is unique |
-| **Dealer** | Yes | The dealer of [Distribution Channels (20.1)](#distribution-channels) | |
+| **Dealer** | Yes | The dealer of [Distribution Channels (21.1)](#distribution-channels) | |
 | **Financing bank**, **Mortgagee of the financed cars** | No | The bank, for financed cars | The bank is the mortgagee on the policy |
 | **Insurer** | Yes | The panel insurer of the programme | |
 | **Default vehicle class** | Yes | The tariff class of the cars sold | |
@@ -4499,7 +4611,7 @@ The **Programmes** tab lists **Code**, **Name**, **Dealer**, **Financing bank**,
 
 The **Dealer Sales Upload** tab takes the dealer's sales file: choose the programme, download the **Template** if needed and select **Upload sales**. Each upload is a batch (DSB-YYYY-NNNNN) with its **Created** and **Failed** rows and its status (**Completed** or **Partial**). See [Dealer programme policies (3.3)](#process-dealer-programme).
 
-![Figure 17.13: Add programme: the terms of a dealer programme](../images/screens-operations/dealer-programme-add.png)
+![Figure 18.13: Add programme: the terms of a dealer programme](../images/screens-operations/dealer-programme-add.png)
 ### Sales activities {#sales-activities}
 Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
 
@@ -4533,7 +4645,7 @@ To log an activity, open the prospect, client or quotation, select the activity 
 
 The activity types (phone call, meeting, e-mail, visit, proposal presentation) and outcomes are kept on Master > Organization > Sales Activity Types and Master > Organization > Sales Activity Outcomes, by TIS IT AppSupport / Admin.
 
-![Figure 17.14: Operations > Sales & Marketing > Sales Activities](../images/screens-operations/sales-activities.png)
+![Figure 18.14: Operations > Sales & Marketing > Sales Activities](../images/screens-operations/sales-activities.png)
 ### Clients {#clients}
 A client is created when a prospect's first policy is booked, or before it by onboarding.
 
@@ -4554,7 +4666,7 @@ The list shows **Client ID** (CL-YYYY-NNNNN), **Assured Name**, **Category**, **
 
 Select a client to open the client view: the cards **Active policies**, **Premium in force**, **Open claims**, **Renewals due** and **Outstanding balance**, and the tabs **Policies**, **Quotations**, **Claims**, **Renewals**, **Endorsements**, **Receipts**, **Documents**, **Activity** and **History**. The header shows whether the identification is **Complete** or **Incomplete**; **Identification and due diligence** opens it.
 
-![Figure 17.15: The client view, with the client's policies, claims, renewals and receipts](../images/screens-operations/client-view.png)
+![Figure 18.15: The client view, with the client's policies, claims, renewals and receipts](../images/screens-operations/client-view.png)
 #### Onboard a client before the first policy {#onboard-a-client-before-the-first-policy}
 A client can be created, identified and checked before any quotation or policy, as customer due diligence requires. A client created by the first policy (a prospect converted, a direct placement) is completed the same way, from **Identification and due diligence** on the client view.
 
@@ -4570,7 +4682,7 @@ A client can be created, identified and checked before any quotation or policy, 
 | **Contact and address** | **Mobile number**, **E-mail**, **Country**, **Region**, **Province**, **City / Municipality** (required), **Barangay**, **ZIP Code**, **House / Unit No.**, **Street / Subdivision** | The city list follows the province |
 | **Expected business and PEP** | **Lines of business expected**, **Usual payment mode**, **Expected annual premium (PHP)**, **Politically exposed person (or family member or close associate)** | A politically exposed person needs enhanced due diligence |
 
-![Figure 17.16: Onboard client: identity, ID, address and expected business](../images/screens-operations/client-onboarding.png)
+![Figure 18.16: Onboard client: identity, ID, address and expected business](../images/screens-operations/client-onboarding.png)
 ### Policies {#policies}
 Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **Client Name**, **Gross Premium**, **Policy Issued**, **Policy Expiry**, **Product Description** and **Payment** status. The search box finds a policy by number or client. **Show Filters** offers **Payment Status**, **Product Type**, **Insurance Company**, **Client Name**, issue and expiry date ranges and minimum and maximum premium.
 
@@ -4587,14 +4699,14 @@ Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **C
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Approve |
 
-Policies are booked from the placement slip (see [Placement Slips (17.5)](#placement-slips)); **Bulk Upload** loads policies from a file, validated first. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
+Policies are booked from the placement slip (see [Placement Slips (18.5)](#placement-slips)); **Bulk Upload** loads policies from a file, validated first. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
 
-In **Actions**, the eye (**View policy**) opens the policy and **More actions** offers **Claim** (register a claim on the policy, see [Register a claim (17.13.1)](#register-a-claim)) and **Endorsement**.
+In **Actions**, the eye (**View policy**) opens the policy and **More actions** offers **Claim** (register a claim on the policy, see [Register a claim (18.13.1)](#register-a-claim)) and **Endorsement**.
 
-![Figure 17.17: Operations > Policy, with More actions: Claim and Endorsement](../images/screens-operations/policy-more-actions.png)
+![Figure 18.17: Operations > Policy, with More actions: Claim and Endorsement](../images/screens-operations/policy-more-actions.png)
 The policy page shows the cards **Gross Premium**, **Expiry Date** and **Client ID**, and the panels **Policy Details**, **Insured Details**, **Vehicle Details** (motor: motor, chassis and plate numbers, mortgagee), **Coverage Details**, **Premium Breakdown**, **Endorsements**, **History** and **Documents & Billing** (**Generate Policy Invoice**, **Premium Accounting Entries**, the policy document to **Preview**, **Open** or **Print**). **View Policy** opens the policy schedule.
 
-![Figure 17.18: The policy page, with Documents & Billing](../images/screens-operations/policy-details.png)
+![Figure 18.18: The policy page, with Documents & Billing](../images/screens-operations/policy-details.png)
 #### Raise an endorsement request {#raise-an-endorsement-request}
 1. Choose Operations > Policy.
 2. In the row of the policy, select **More actions**, then **Endorsement** (or **Endorsement** on the policy page).
@@ -4626,7 +4738,7 @@ Each vehicle has its own premium and CTPL; vehicles added or deleted during the 
 3. Select **Start**. Add the vehicles one by one or from a file; each line is rated on the motor tariff.
 4. Place the schedule with the insurer; the policy is booked like any other.
 
-![Figure 17.19: New fleet schedule](../images/screens-operations/fleet-schedule-new.png)
+![Figure 18.19: New fleet schedule](../images/screens-operations/fleet-schedule-new.png)
 ### Marine Open Covers {#marine-open-covers}
 Choose Operations > Marine Open Covers. An open cover insures a client's cargo shipments for a period: each shipment is certified or declared and the premium is billed per declaration period.
 
@@ -4646,7 +4758,7 @@ The list shows **Open cover** (MOC-YYYY-NNNNN), **Client**, **Insurer**, **Polic
 
 The open cover page has the tabs **Contract**, **Certificates** (one per shipment, rated at the conveyance rate with the minimum premium), **Declarations** (the shipments of each period, billed on the open policy) and **History**. **Cancel cover** ends it. At TISPH the parcel cover of TFS (registration papers, plates, keys and loan documents couriered to its customers) is kept this way.
 
-![Figure 17.20: A marine open cover with its rates per conveyance](../images/screens-operations/open-cover.png)
+![Figure 18.20: A marine open cover with its rates per conveyance](../images/screens-operations/open-cover.png)
 ### The claims list {#the-claims-list}
 TISPH registers the client's claim, advises the insurer, collects the documents and follows the claim to its settlement. The insurer decides and pays.
 
@@ -4678,7 +4790,7 @@ The cards count **Open claims**, **Settlement to approve**, **Approved, to be pa
 
 A claim follows nine steps, shown at the top of the claim: **Notification**, **Insurer advice**, **Documents**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval** and **Payment**. The **Next step** bar at the bottom names what is to be done and leads to it.
 
-![Figure 17.21: Operations > Claims](../images/screens-operations/claims-list.png)
+![Figure 18.21: Operations > Claims](../images/screens-operations/claims-list.png)
 #### Register a claim {#register-a-claim}
 1. Choose Operations > Policy, select **More actions** in the row of the policy, then **Claim**. (Or select **Register claim** in [My Work (2.3)](#my-work).)
 2. On **Claim notification**, check the policy and insured, and the insured's address.
@@ -4690,12 +4802,12 @@ A claim follows nine steps, shown at the top of the claim: **Notification**, **I
 
 The date of loss must fall within the period of cover of the policy and cannot be in the future. A claim reported more than the late intimation days after the loss (30 as delivered) is marked **Late** and the claims handlers are alerted. The follow-up date of the claim depends on the line and the loss extent (for example 30 days for a partial motor loss, 60 for a total loss, 90 for fire, marine and engineering). For Credit Life the claim is a death benefit claim on the TFS loan.
 
-![Figure 17.22: New claim, step 1: Claim notification](../images/screens-operations/claim-new.png)
-On **Documents**, the claim lists the documents its cause of loss needs (from [Claim documents (20.5)](#claim-documents)) with their status **Missing**, **Received** or **Waived**. Upload each document as it arrives, or waive it. **Remind the claimant** e-mails the list of missing documents; **Continue to review** moves on once the documents are in.
+![Figure 18.22: New claim, step 1: Claim notification](../images/screens-operations/claim-new.png)
+On **Documents**, the claim lists the documents its cause of loss needs (from [Claim documents (21.5)](#claim-documents)) with their status **Missing**, **Received** or **Waived**. Upload each document as it arrives, or waive it. **Remind the claimant** e-mails the list of missing documents; **Continue to review** moves on once the documents are in.
 
-![Figure 17.23: Claim, step 3: the documents the claim needs](../images/screens-operations/claim-documents-step.png)
+![Figure 18.23: Claim, step 3: the documents the claim needs](../images/screens-operations/claim-documents-step.png)
 #### Adjuster report {#adjuster-report}
-On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), the **Adjuster status** (assigned, report received) and upload the adjuster's report with the amount the adjuster recommends. For a motor repair, the estimates and the letter of authority are kept on [Motor claim repairs (17.23)](#motor-claim-repairs-and-letters-of-authority).
+On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), the **Adjuster status** (assigned, report received) and upload the adjuster's report with the amount the adjuster recommends. For a motor repair, the estimates and the letter of authority are kept on [Motor claim repairs (18.23)](#motor-claim-repairs-and-letters-of-authority).
 
 #### Assessment and settlement (maker) {#assessment-and-settlement-maker}
 The claim is moved to review and its settlement submitted by the Operations roles. Rejection, cancellation and closing are decisions of TIS Operations Unit Head or TIS General Manager.
@@ -4711,7 +4823,7 @@ The settlement is approved by TIS Operations Unit Head or TIS General Manager, n
 2. On **Approval**, check the settlement against the adjuster's report and the documents: the **Settlement** (partial or final), **Requested by** and what was **Settled before**.
 3. Enter the **Approved amount** (the amount requested, or less), then approve it, or return it with a reason.
 
-The approved amount must be within the approver's claim settlement limit on the [Authority Matrix (20.10)](#authority-matrix) when the limit is enforced. **Requested by** and **Approved by** show the users' names.
+The approved amount must be within the approver's claim settlement limit on the [Authority Matrix (21.10)](#authority-matrix) when the limit is enforced. **Requested by** and **Approved by** show the users' names.
 
 As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between.
 
@@ -4754,7 +4866,7 @@ The cards count **Due for renewal**, **In grace period**, **Lapsed, renewable**,
 3. Check the covers (mandatory covers are always included; tick the optional ones), the sums insured and the rates, and select **Calculate**. Then **Next** to the following steps, as for a new quotation.
 4. Save the renewal quotation and send it to the client.
 
-From the client's acceptance the renewal follows the same steps as a new policy: placement slip, e-policy, check and booking. Renewal terms submitted for approval on [Negotiations (17.18)](#negotiations) are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. A lapsed policy (**Lapsed, renewable**) can still be renewed.
+From the client's acceptance the renewal follows the same steps as a new policy: placement slip, e-policy, check and booking. Renewal terms submitted for approval on [Negotiations (18.18)](#negotiations) are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. A lapsed policy (**Lapsed, renewable**) can still be renewed.
 
 ### Renewal Batch, Lapse Management and the analytics {#renewal-batch-lapse-management-and-the-analytics}
 **Menu:** Operations > Renewals > Renewal Batch
@@ -4785,15 +4897,15 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 **Renewal Batch** prepares the renewal quotations of many policies at once. Select **Create Batch**, choose the **Selection Criteria** (**Expiry Date From**, **Expiry Date To**, **Insurance Company**, **Product Type**, **Min premium**, **Max premium**, **Client Name**, **Payment Status**) and select **Generate policy list**. Check the list and process the batch. The list of batches shows **Batch ID** (RB-YYYY-NNNNN), **Status** (**Draft**, **Partially completed**, **Completed**), **Total policies**, **Processed** and **Created on**.
 
-![Figure 17.24: Create Batch Renewal: the selection criteria](../images/screens-operations/renewal-batch-create.png)
+![Figure 18.24: Create Batch Renewal: the selection criteria](../images/screens-operations/renewal-batch-create.png)
 **Lapse Management** shows the policies **Lapsed**, **In grace period** and that **Can be reinstated**, with the **Premium lost or at risk**. The tab **Lapsed and grace period** lists each policy with its days lapsed or left in the grace period, the **Lapse reason** and the win-back offers made. The tab **Win-back campaigns** holds the campaigns offering lapsed clients a discount to come back, with the clients contacted and converted and the premium recovered; **New campaign** creates one.
 
-![Figure 17.25: Operations > Renewals > Lapse Management](../images/screens-operations/lapse-management.png)
+![Figure 18.25: Operations > Renewals > Lapse Management](../images/screens-operations/lapse-management.png)
 **Retention Analytics** shows, for the period, line of business and account executive chosen, the **Renewal rate**, the **Premium retention**, the **Average cycle time** (from renewal opened to renewed) and the **Open renewals now**, with the tabs **Monthly trend**, **By line of business**, **By account executive** and **Open renewals profile**.
 
 **Performance** compares the renewal results with the targets: the **KPI scorecard** shows each KPI (renewal rate, premium retention, average cycle time) with **Target**, **Achieved**, **Variance** and the status **Met** or **Below target**, also **By account executive**, **By line of business** and as a **Monthly trend**. **Export** downloads each view.
 
-![Figure 17.26: Operations > Renewals > Performance, the KPI scorecard](../images/screens-operations/renewal-performance.png)
+![Figure 18.26: Operations > Renewals > Performance, the KPI scorecard](../images/screens-operations/renewal-performance.png)
 ### Renewal Queue and At-Risk Policies {#renewal-queue-and-at-risk-policies}
 **Menu:** Operations > Renewals > Renewal Queue
 
@@ -4863,7 +4975,7 @@ Select a renewal to see its **Renewal terms** (RN-YYYY-NNNNN), and the **Timelin
 - **Log communication**: a call, e-mail or meeting with the client, its outcome and the next step.
 - **Submit for approval**: the renewal terms go to TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who submitted them.
 
-While the terms wait for approval they cannot be changed. The approved premium is the premium booked on the renewed policy, and an expired renewal quote cannot be submitted or completed. When the renewal terms limit is enforced, the premium must be within the approver's limit on the [Authority Matrix (20.10)](#authority-matrix). The new term starts the day after the expiring term ends.
+While the terms wait for approval they cannot be changed. The approved premium is the premium booked on the renewed policy, and an expired renewal quote cannot be submitted or completed. When the renewal terms limit is enforced, the premium must be within the approver's limit on the [Authority Matrix (21.10)](#authority-matrix). The new term starts the day after the expiring term ends.
 
 ### Payments {#payments}
 Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivables** and **Earned Commission**, and the bills in the tabs **Paid**, **Pending** and **Reviewing**. The **Type** column says whether the bill is for a **Policy**, a **Renewal Policy** or an **Endorsement**. Receipts are posted by Accounting; this screen shows the result.
@@ -4886,7 +4998,7 @@ Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivab
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
-Each row shows **Type**, **Assured Name**, **Client ID**, **Policy Number**, **Gross Premium**, **Bill date**, **Due date**, **Status** and **Actions**. When a client pays you directly, record the payment from the bill: the bill moves to **Reviewing** and Cash Control receives it to verify and receipt on [Verify payments and post official receipts (18.1)](#verify-payments-and-post-official-receipts). Once receipted, the bill is **Paid**.
+Each row shows **Type**, **Assured Name**, **Client ID**, **Policy Number**, **Gross Premium**, **Bill date**, **Due date**, **Status** and **Actions**. When a client pays you directly, record the payment from the bill: the bill moves to **Reviewing** and Cash Control receives it to verify and receipt on [Verify payments and post official receipts (19.1)](#verify-payments-and-post-official-receipts). Once receipted, the bill is **Paid**.
 
 ### Cover notes (binders) {#cover-notes-binders}
 **Menu:** Operations > Cover Notes
@@ -4911,7 +5023,7 @@ The cards count the cover notes **Active** and **Expiring within 7 days**, and s
 3. Enter **Cover from**, **Cover period (days)** (the default applies if left empty), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. Print it or e-mail it to the client.
 
-![Figure 17.27: Issue cover note from an accepted quotation or a placement slip](../images/screens-operations/cover-note-issue.png)
+![Figure 18.27: Issue cover note from an accepted quotation or a placement slip](../images/screens-operations/cover-note-issue.png)
 ### Cancel a policy: computed return premium {#cancel-a-policy-computed-return-premium}
 **Menu:** Operations > Policy Cancellation
 
@@ -4946,9 +5058,9 @@ Policy Cancellation computes the return premium of a policy from the days left: 
 4. Choose **Cancellation**: **Whole policy**, or one risk of the policy.
 5. Select **Compute return premium**. The screen shows the method, the days in force and left, the return net premium with its taxes, the gross return, the commission taken back and the amount returned by the insurer.
 
-Nothing is saved by this screen. The cancellation itself is made as an endorsement of the policy (**More actions** > **Endorsement**, cancellation), which computes the same figures on the server; see [Raise an endorsement request (17.10.1)](#raise-an-endorsement-request). It is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who entered it. The return premium is credited to the client and commission already paid on it is clawed back. The short-period rates (the percentage of the annual premium earned for each period in force) are kept on Master > Insurance > Short-Period Rates.
+Nothing is saved by this screen. The cancellation itself is made as an endorsement of the policy (**More actions** > **Endorsement**, cancellation), which computes the same figures on the server; see [Raise an endorsement request (18.10.1)](#raise-an-endorsement-request). It is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than the one who entered it. The return premium is credited to the client and commission already paid on it is clawed back. The short-period rates (the percentage of the annual premium earned for each period in force) are kept on Master > Insurance > Short-Period Rates.
 
-![Figure 17.28: Operations > Policy Cancellation](../images/screens-operations/policy-cancellation.png)
+![Figure 18.28: Operations > Policy Cancellation](../images/screens-operations/policy-cancellation.png)
 ### Claims awaiting documents {#claims-awaiting-documents}
 **Menu:** Operations > Claims Awaiting Documents
 
@@ -4963,7 +5075,7 @@ This screen lists the open claims that still miss documents. The cards count the
 
 Select a claim to open its **Documents** step: upload or waive each document, or select **Remind the claimant** to e-mail the list of what is missing. The reminder date is recorded.
 
-![Figure 17.29: Operations > Claims Awaiting Documents](../images/screens-operations/claims-awaiting-documents.png)
+![Figure 18.29: Operations > Claims Awaiting Documents](../images/screens-operations/claims-awaiting-documents.png)
 ### Motor claim repairs and letters of authority {#motor-claim-repairs-and-letters-of-authority}
 Operations > Motor Claim Repairs lists the motor claims with the stage of their repair: no estimate yet, awaiting approval, approved, in repair, released. Select a claim to open its repair file.
 
@@ -4991,11 +5103,11 @@ The repair file shows the plate number, insured, insurer, sum insured and the pa
 - **Issue letter of authority**: the insurer's authority to the shop to repair, with the **Approved repair**, the **Participation** and the amount **Payable by insurer**.
 - **Release vehicle**: the date the repaired vehicle was released to the insured.
 
-![Figure 17.30: The repair file of a motor claim: estimates and letters of authority](../images/screens-operations/motor-claim-repair.png)
+![Figure 18.30: The repair file of a motor claim: estimates and letters of authority](../images/screens-operations/motor-claim-repair.png)
 ## Screen reference: Accounts {#screens-accounts}
 The screens of the Accounts menu, in menu order: receipts and collections, Cash Control, disbursements and payables, remittance to insurers, journal vouchers, reconciliations, tax, period end and incentives.
 
-Each section names the menu of the screen and the roles that open it, with their access. Your own menu shows only the screens of your role. Every amount is in pesos; every posting goes to the general ledger through the posting rules of [Posting configuration (20.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination), and each document can be traced to its journal on [Accounting Query (18.15)](#accounting-query-and-all-clients-accounting).
+Each section names the menu of the screen and the roles that open it, with their access. Your own menu shows only the screens of your role. Every amount is in pesos; every posting goes to the general ledger through the posting rules of [Posting configuration (21.14)](#posting-configuration-configuration-approvals-posting-rules-account-determination), and each document can be traced to its journal on [Accounting Query (19.15)](#accounting-query-and-all-clients-accounting).
 
 ### Verify payments and post official receipts {#verify-payments-and-post-official-receipts}
 When Operations or Sales record a client payment on the policy, the system issues the acknowledgement receipt (AR), the policy payment status becomes **Reviewing** and Cash Control receives the notification to verify it. Open the notification, check the payment against the bank statement and confirm it (the official receipt is posted, with the transaction code **PAYMENT**) or reject it with a reason.
@@ -5019,7 +5131,7 @@ When Operations or Sales record a client payment on the policy, the system issue
 
 The list (**Receipts history**) shows **Receipt Number** (OR-YYYY-NNNNN), **Transaction Code**, **Transaction Number** (RT-YYYY-NNNNN), **Policy Number**, **Name**, **Customer Code**, **Date**, **Amount**, **Paid**, **UnPaid**, **Status**, **Payments** and **Action**. **Status** is **Converted** when every line of the receipt is paid and posted (the usual status of an issued receipt), **Draft** while a line is not yet paid, and **Cancelled** after a cancellation. **Transaction Code** is **OR** for a receipt issued on Add Receipts or by Bulk Upload, **PAYMENT** for a receipt issued on the confirmation of a payment recorded on the policy, and **CM** for a credit memo. **Search by** chooses the column searched. The buttons are **Bulk Print** (receipts of a period as one PDF), **Bulk Upload** (bills payment and QRPh settlement files: each row pays a policy; the file is validated before anything is posted) and **Receipt**.
 
-![Figure 18.1: Accounts > Receipts](../images/screens-accounts/receipts-list.png)
+![Figure 19.1: Accounts > Receipts](../images/screens-accounts/receipts-list.png)
 To issue an official receipt, select **Receipt**:
 
 | Field | Required | What to enter | Rule |
@@ -5035,14 +5147,14 @@ To issue an official receipt, select **Receipt**:
 | **Receipt Mode** | Yes | **Dollar/Peso** (cash), **Cheque**, **Managers Check/Demand Draft**, **Direct Credit/Transfer to Account**, **Telegraphic Transfer**, **Authority to Debit**, **Online Banking** or **Credit Ticket-Inter Office** | A cheque asks for the cheque details; the mode gives the bank account debited |
 | **Remarks** | No | | |
 
-Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A payment above what the policy owes is not billed again: the excess is held On Account on [Unapplied Collections (18.2)](#unapplied-collections). See [Collection by Cash Control (3.7)](#process-collection).
+Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A payment above what the policy owes is not billed again: the excess is held On Account on [Unapplied Collections (19.2)](#unapplied-collections). See [Collection by Cash Control (3.7)](#process-collection).
 
 A payment recorded on the policy carries its proof of payment (deposit slip, cheque image or transfer confirmation): the payment cannot be saved without it. The receipt page shows the proof under **Proof of payment**, where a receipting user attaches or replaces it, and **Paid to**: **TISPH**, or **Insurance company** for a payment made to the insurer.
 
 #### Reverse a receipt {#reverse-a-receipt}
 A receipt issued in error, or paid by a cheque that bounced, is reversed from the receipt page, section **Reversal**. CCD-Recon selects **Reverse receipt**, chooses the reason (cheque returned DAIF, duplicate receipt, wrong amount, applied to the wrong policy or client, payment not received in the bank, other with a note) and sends it for approval. The receipt stays posted until another user approves: CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting, never the user who asked. On approval the receipt is cancelled, its journals are reversed, the bills it paid are open again and an amount it held On Account is taken back. The approver can instead **Return** the request with a reason; the receipt is unchanged. The request is on My Work of the approvers.
 
-![Figure 18.2: The Reversal section of a receipt, approved](../images/screens-accounts/receipt-reversal.png)
+![Figure 19.2: The Reversal section of a receipt, approved](../images/screens-accounts/receipt-reversal.png)
 #### Bulk upload and receipt batches {#receipt-batches}
 **Bulk Upload** takes three files, each with its template:
 
@@ -5070,7 +5182,7 @@ Accounts > Unapplied Collections lists the money received that no bill takes yet
 | TIS Finance & General Accounting | View |
 | TIS General Manager | View |
 
-![Figure 18.3: Accounts > Unapplied Collections](../images/screens-accounts/unapplied-collections.png)
+![Figure 19.3: Accounts > Unapplied Collections](../images/screens-accounts/unapplied-collections.png)
 Each is posted to the clients' deposits and unapplied collections account and must be allocated within two working days (**Allocate by**; past it, the row shows **Overdue** and the item is on My Work of Cash Control). The cards show the open items, the open amount and the items past their date. Filter by status and kind, or search by client, policy, receipt or reference.
 
 **Record payment** records a floating payment (amount, date received, reference, the payer if known) or an advance payment (with the client code). The actions of a row are:
@@ -5081,7 +5193,7 @@ Each is posted to the clients' deposits and unapplied collections account and mu
 
 **View** shows the item with its allocations and its activity.
 
-![Figure 18.4: Accounts > Receipts > Add Receipts](../images/screens-accounts/add-receipts.png)
+![Figure 19.4: Accounts > Receipts > Add Receipts](../images/screens-accounts/add-receipts.png)
 ### Collections {#collections}
 Accounts > Collections lists every open premium with **Client Name**, **Policy No.**, **Outstanding** spread over the ageing buckets (**Current**, **1-30 Days**, **31-60 Days**, **61-90 Days**, **Over 90 Days**), **Due Date**, **Status** (Pending, Committed, Overdue), **Days Overdue** and **View**. Filter by status and overdue level.
 
@@ -5106,7 +5218,7 @@ The cards show the **Outstanding** and **Overdue** amounts, the items **Committe
 
 Select **View** to open an item. **Collection Details** shows the client and policy, the overdue level, the financial breakdown of the bill (gross premium, net premium, VAT, DST, LGT, paid, outstanding), the ageing, the **Follow-Up History** and the **Payment History**. The **Collection Actions** are **Send Email**, **E-mail invoice**, **Add Note** and **Set Commitment Date**; **Record receipt** opens the receipt for this bill.
 
-![Figure 18.5: Accounts > Collections, the open premiums by ageing bucket](../images/screens-accounts/collections.png)
+![Figure 19.5: Accounts > Collections, the open premiums by ageing bucket](../images/screens-accounts/collections.png)
 ### Credit control {#credit-control}
 **Menu:** Accounts > Credit Control > Instalment Plans
 
@@ -5142,7 +5254,7 @@ Changes on the Credit Control screens that need approval (a credit limit, a warr
 - **Client Credit Limits** shows each client's **Credit limit** (or **No limit**), **Open premium**, **Available** and **Last changed**. Set or change a client's limit from the row. **Issued over the limit** lists the policies booked over a client's limit.
 - **Remittance Ageing** ages the premium collected and not yet remitted to each insurer, by the insurer's remittance terms (**Not yet due**, **1-30**, **31-60**, **61-90**, **Over 90**), with the detail by policy and receipt. **Excel** downloads it.
 
-![Figure 18.6: Accounts > Credit Control > Premium Warranty Monitor](../images/screens-accounts/premium-warranty-monitor.png)
+![Figure 19.6: Accounts > Credit Control > Premium Warranty Monitor](../images/screens-accounts/premium-warranty-monitor.png)
 ### Post-dated cheques {#post-dated-cheques}
 Accounts > Post-Dated Cheques follows the cheques of clients paying by instalment, from receipt to collection.
 
@@ -5203,7 +5315,7 @@ Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registr
 
 The invoice is approved by TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager, a user other than the one who submitted it, and is posted on approval: expense (or asset), input VAT, EWT payable and the payable to the supplier. A line with an asset class creates the asset on the Asset Register.
 
-![Figure 18.7: New supplier invoice](../images/screens-accounts/supplier-invoice-new.png)
+![Figure 19.7: New supplier invoice](../images/screens-accounts/supplier-invoice-new.png)
 **Supplier Payments** pays approved invoices: select **New supplier payment**, choose the **Supplier**, the **Date**, the **Payment mode** (for example **Cheque**), the **Bank account** (required), the **Cheque no.** and **Reference**, tick the invoices to pay and select **Pay**. The payment is posted and the invoices' balance reduced.
 
 **AP Ageing** ages the open supplier invoices on their due dates (**Not due**, **1-30**, **31-60**, **61-90**, **Over 90**), by supplier and by invoice. **Export to Excel** downloads it.
@@ -5221,7 +5333,7 @@ The expanded withholding tax withheld from a supplier on an approved supplier in
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
 
-Choose the year and the quarter. The cards show the number of **Payees**, the **Income payments subject to expanded withholding tax** and the **Tax withheld for the quarter**. Each row is one supplier: **Payee's name**, **Taxpayer Identification Number (TIN)**, **ATC**, **Transactions**, the income payments, the tax withheld and the **Certificate no.** Print the certificate of a supplier from its row. The same figures are in the QAP of [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns).
+Choose the year and the quarter. The cards show the number of **Payees**, the **Income payments subject to expanded withholding tax** and the **Tax withheld for the quarter**. Each row is one supplier: **Payee's name**, **Taxpayer Identification Number (TIN)**, **ATC**, **Transactions**, the income payments, the tax withheld and the **Certificate no.** Print the certificate of a supplier from its row. The same figures are in the QAP of [Tax: BIR forms and returns (19.18)](#tax-bir-forms-and-returns).
 
 ### Disbursement: payment vouchers and cheques {#disbursement-payment-vouchers-and-cheques}
 A payment voucher (PV-YYYY-NNNNN, with the disbursement transaction DT-YYYY-NNNNN) pays an insurer, an agent or referrer, a client or a supplier.
@@ -5239,7 +5351,7 @@ A payment voucher (PV-YYYY-NNNNN, with the disbursement transaction DT-YYYY-NNNN
 
 The list (**Disbursement history**) shows **Disbursement Number**, **Transaction Number**, **Customer Code**, **Disbursement Date**, **Amount**, **Status** (**Draft**, **Approved**, **Paid**) and **Action**. The buttons are **Bulk Print**, **Bulk Upload**, **Bulk Disburse** (one voucher per referrer with approved commission) and **Create**.
 
-![Figure 18.8: Accounts > Disbursement](../images/screens-accounts/disbursement-list.png)
+![Figure 19.8: Accounts > Disbursement](../images/screens-accounts/disbursement-list.png)
 To create a payment voucher, select **Create**:
 
 1. Enter the **Disbursement Date**, **Department Code** and **Branch Code**.
@@ -5248,9 +5360,9 @@ To create a payment voucher, select **Create**:
 4. Enter the amounts and the accounts debited, and the withholding tax where it applies.
 5. Choose the bank account and the payment method (cheque, bank transfer or bank payment file) and save.
 
-The voucher is approved by a user other than the one who prepared it, within his or her limit of the [Authority Matrix (20.10)](#authority-matrix). An approved voucher is paid by cheque (the cheque number and release are recorded) or by a [bank payment file (18.9)](#bank-payment-files); on payment the journal is posted and the voucher becomes **Paid**.
+The voucher is approved by a user other than the one who prepared it, within his or her limit of the [Authority Matrix (21.10)](#authority-matrix). An approved voucher is paid by cheque (the cheque number and release are recorded) or by a [bank payment file (19.9)](#bank-payment-files); on payment the journal is posted and the voucher becomes **Paid**.
 
-![Figure 18.9: Create Disbursement](../images/screens-accounts/create-disbursement.png)
+![Figure 19.9: Create Disbursement](../images/screens-accounts/create-disbursement.png)
 ### Bank payment files {#bank-payment-files}
 **Menu:** Accounts > Bank Payment Files
 
@@ -5262,13 +5374,13 @@ The voucher is approved by a user other than the one who prepared it, within his
 Bank Payment Files pays approved payment vouchers through the bank's upload file. The list shows **Batch**, **Layout**, **Value date**, **Payments**, **Amount**, **Status** and **Created**.
 
 1. Select **New batch**.
-2. Choose the **Layout** of the bank (see [Bank file layouts and payee bank accounts (20.20)](#bank-file-layouts-and-payee-bank-accounts)), the account to **Pay from**, the **Channel** (for example **PESONet**) and the **Value date**.
+2. Choose the **Layout** of the bank (see [Bank file layouts and payee bank accounts (21.20)](#bank-file-layouts-and-payee-bank-accounts)), the account to **Pay from**, the **Channel** (for example **PESONet**) and the **Value date**.
 3. Tick the payment vouchers waiting for payment and enter **Remarks**.
 4. Select **Create batch**.
 
 The batch is approved by another user, the file is downloaded for the bank portal, and the bank's result file is loaded back: each payment it confirms is posted and its voucher becomes **Paid**; a rejected payment returns to the vouchers waiting for payment.
 
-**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments (18.10.5)](#insurer-payments) with the same batch dialog.
+**Approve** and **Return to draft** are shown only to a user who may decide the batch. The user who prepared or submitted the batch, or prepared one of its payment vouchers, reads why instead, and a user whose payment voucher limit is below the batch total sees the limit. The vouchers of insurer remittances are batched from [Insurer payments (19.10.5)](#insurer-payments) with the same batch dialog.
 
 ### Remittance to insurers {#remittance-to-insurers}
 For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its
@@ -5280,14 +5392,14 @@ The Remittance menu has eight entries. Each role sees the entries of its work; a
 
 | Entry | What it is for |
 |---|---|
-| [Remittances (18.10.1)](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
-| [Approvals (18.10.4)](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
-| [Insurer payments (18.10.5)](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
-| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation (18.17)](#insurer-statement-reconciliation) |
-| [Exceptions (18.10.6)](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
-| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes (18.11)](#direct-bill-commission-debit-notes) |
-| [Setup (18.10.7)](#remittance-schedules) | The schedules of the weekly remittance runs |
-| [Settlement (18.10.9)](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
+| [Remittances (19.10.1)](#remittances-worklist) | The remittances from draft to payment; **Import policy list** for an off-cycle remittance |
+| [Approvals (19.10.4)](#remittance-approvals) | The remittances, settlements and adjustments waiting for a decision |
+| [Insurer payments (19.10.5)](#insurer-payments) | The payment vouchers of the approved remittances, with their bank payment batch or cheque |
+| **Reconciliation** | The insurers' statements: see [Insurer statement reconciliation (19.17)](#insurer-statement-reconciliation) |
+| [Exceptions (19.10.6)](#remittance-exceptions) | Differences and problems found on remittances, to follow up |
+| **Insurer billing** | Commission debit notes of direct-bill policies: see [Direct bill: commission debit notes (19.11)](#direct-bill-commission-debit-notes) |
+| [Setup (19.10.7)](#remittance-schedules) | The schedules of the weekly remittance runs |
+| [Settlement (19.10.9)](#remittance-settlement) | The settlement of approved remittances, which raises the insurer's payment voucher |
 
 A remittance (REM-YYYY-NNNNN) covers one insurer and product line for a coverage week. Its status is **Draft** until
 submitted, **Pending approval** until an approver decides, then **Approved**, or **Returned** to its maker when
@@ -5352,7 +5464,7 @@ collections. **Import policy list** replaces the bulk upload of remittances with
 variance. The same file cannot be imported twice, and a validated file not created within 7 days is discarded.
 **Import history** (menu at the top right) lists the imports with their results.
 
-![Figure 18.10: Import policy list with Download template, Purpose, Note and File](../images/screens-accounts/import-policy-list.png)
+![Figure 19.10: Import policy list with Download template, Purpose, Note and File](../images/screens-accounts/import-policy-list.png)
 #### The remittance page {#remittance-record}
 Select a remittance number to open its page. The header shows the number, status, insurer, product line, basis,
 coverage week, due date and source, and the steps **Created**, **Submitted**, **Approved** (or **Returned**),
@@ -5365,7 +5477,7 @@ and **Reject** for an approver who may decide it, **Remind approver** for the us
 remittance schedule in XLSX and PDF and, once the voucher is raised, the remittance advice) and **Activity** (the
 decisions and the activity log, with **Download log (XLSX)**).
 
-![Figure 18.11: A remittance pending approval, seen by the user who submitted it: the steps, Remind approver and the users who can decide](../images/screens-accounts/remittance-record.png)
+![Figure 19.11: A remittance pending approval, seen by the user who submitted it: the steps, Remind approver and the users who can decide](../images/screens-accounts/remittance-record.png)
 #### Approvals {#remittance-approvals}
 **Menu:** Accounts > Remittance > Approvals
 
@@ -5378,8 +5490,8 @@ decisions and the activity log, with **Download log (XLSX)**).
 
 The chips at the top say what you may decide, for example **Remittance up to PHP 1,000,000.00**, or **View only**.
 As delivered, TIS Finance & General Accounting approves remittances up to PHP 1,000,000.00 and the TIS General
-Manager without limit (see the [Authority Matrix (20.10)](#authority-matrix)). A user without a remittance limit cannot
-approve or reject. An absent approver is covered by a [Delegation (20.11)](#delegations).
+Manager without limit (see the [Authority Matrix (21.10)](#authority-matrix)). A user without a remittance limit cannot
+approve or reject. An absent approver is covered by a [Delegation (21.11)](#delegations).
 
 The cards count **Awaiting my decision**, **Past SLA**, **Submitted by me** and **Decided by me today**. The tabs are
 **Awaiting my decision**, **Submitted by me** (with the approvers each item waits on, and **Remind approver** in the row
@@ -5397,7 +5509,7 @@ Several items can be approved together: tick them and select **Approve selected 
 its result is listed. There is no rejection of several items at once. When you may not decide an item, the panel
 says why (you submitted it, it is above your limit, or another user decided it) and shows no buttons.
 
-![Figure 18.12: Review approval of a remittance with the approver's limit, Reject and Approve](../images/screens-accounts/remittance-approval-review.png)
+![Figure 19.12: Review approval of a remittance with the approver's limit, Reject and Approve](../images/screens-accounts/remittance-approval-review.png)
 #### Insurer payments {#insurer-payments}
 **Menu:** Accounts > Remittance > Insurer payments
 
@@ -5410,7 +5522,7 @@ says why (you submitted it, it is above your limit, or another user decided it) 
 
 **Insurer payments** lists the payment vouchers of the approved remittances with their bank payment batch or cheque
 and the bank's result. It posts nothing itself: batches are approved and released on
-[Bank payment files (18.9)](#bank-payment-files), cheques on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques).
+[Bank payment files (19.9)](#bank-payment-files), cheques on [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques).
 
 The cards and tabs are **To pay**, **In payment**, **Paid** (this week on the card), **Failed** and **All**. Each row
 shows the voucher, the insurer with its bank account masked, the amount, method, batch, paid on and the **Next step**
@@ -5420,10 +5532,10 @@ shows the voucher, the insurer with its bank account masked, the amount, method,
 To pay insurers by bank file, tick the vouchers to pay (an approved voucher with the insurer's bank account on file)
 and select **Create Metrobank batch (n)**. The batch dialog of Bank Payment Files opens with those vouchers and the
 Metrobank layout; check the value date and select **Create batch with n payments**, then submit the batch on
-[Bank payment files (18.9)](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
+[Bank payment files (19.9)](#bank-payment-files). A voucher still in draft shows **Submit voucher (Disbursement)** as its next
 step and cannot be ticked.
 
-![Figure 18.13: Accounts > Remittance > Insurer payments with the vouchers to pay](../images/screens-accounts/insurer-payments.png)
+![Figure 19.13: Accounts > Remittance > Insurer payments with the vouchers to pay](../images/screens-accounts/insurer-payments.png)
 #### Exceptions {#remittance-exceptions}
 **Menu:** Accounts > Remittance > Exceptions
 
@@ -5463,9 +5575,9 @@ The row menu offers **View** (the schedule, its latest runs and its activity log
 Accounting: **Edit**, **Preview run** (what a run would create, without creating anything),
 **Run now** and **Pause** or **Resume**. **Run now** asks for the off-cycle reason and shows per insurer what will be
 created; nothing is created until you select **Create n draft remittances**. A week that has been run cannot be run
-again: a later catch-up goes through [Import policy list (18.10.2)](#remittance-import-policy-list).
+again: a later catch-up goes through [Import policy list (19.10.2)](#remittance-import-policy-list).
 
-![Figure 18.14: Accounts > Remittance > Setup with the weekly schedule and Automation Off](../images/screens-accounts/remittance-schedules.png)
+![Figure 19.14: Accounts > Remittance > Setup with the weekly schedule and Automation Off](../images/screens-accounts/remittance-schedules.png)
 #### Held policies {#remittance-held-policies}
 **Menu:** Accounts > Remittance > Held policies
 
@@ -5502,9 +5614,9 @@ An approved remittance is settled with the insurer, and the approved settlement 
    **Net Settlement**.
 4. Select **Submit for approval**, or **Save draft**.
 
-Another user approves the settlement on [Approvals (18.10.4)](#remittance-approvals). The system then raises the payment voucher
-for the net amount on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
-(voucher raised)**. The voucher is paid through [Insurer payments (18.10.5)](#insurer-payments).
+Another user approves the settlement on [Approvals (19.10.4)](#remittance-approvals). The system then raises the payment voucher
+for the net amount on [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques), and the remittance shows **Settled
+(voucher raised)**. The voucher is paid through [Insurer payments (19.10.5)](#insurer-payments).
 
 For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium
 already remitted) is netted against its next remittance.
@@ -5532,7 +5644,7 @@ For a direct-bill policy the client pays the insurer, and TISPH bills the insure
 
 A debit note or billing statement is approved by another user than the one who raised or submitted it; that user reads why instead of **Approve** and **Reject**. A billing statement is approved by TIS Finance & General Accounting or TIS General Manager, and only when the insurer's TIN is on Master > Insurance Company. A statement on commission kept from the remittance is then **Settled by retention**. **Reject** and **Cancel debit note** ask for the reason from the list; a cancelled statement's lines are billed again on the next run.
 
-![Figure 18.15: Accounts > Remittance > Insurer billing on the tab Raise debit note](../images/screens-accounts/insurer-billing.png)
+![Figure 19.15: Accounts > Remittance > Insurer billing on the tab Raise debit note](../images/screens-accounts/insurer-billing.png)
 ### Journal vouchers {#journal-vouchers}
 **Menu:** Accounts > Journal Voucher
 
@@ -5569,7 +5681,7 @@ To enter a journal, select **Voucher**:
 
 The journal is approved by TIS Finance & General Accounting other than the user who submitted it, and is posted on approval. A journal cannot be posted into a closed period.
 
-![Figure 18.16: Add Journal Voucher](../images/screens-accounts/add-journal-voucher.png)
+![Figure 19.16: Add Journal Voucher](../images/screens-accounts/add-journal-voucher.png)
 **Correction JV** corrects a posted transaction: choose the **Transaction Code** and **Transaction Number** of the original, the **Corrections JV Transaction Code** and the **Correction Description**, select **Next** and enter the corrected lines. **Reversal JV** reverses a posted transaction in full the same way, with the **Reversal JV Transaction Code** and **Reversal Description**. Both are approved like any journal voucher.
 
 ### SAP GL export {#sap-gl-export}
@@ -5700,7 +5812,7 @@ Both screens are read-only. Use them to trace a bill, receipt, remittance or com
 The **Reconciliation Workspace** reconciles one bank account for one period:
 
 1. Choose the **Bank account** and the **Period**.
-2. Select **Import statement** and load the bank statement file (in the format of the bank, see [Accounting masters (20.17)](#finance-masters-kept-by-accounting)).
+2. Select **Import statement** and load the bank statement file (in the format of the bank, see [Accounting masters (21.17)](#finance-masters-kept-by-accounting)).
 3. Select **Auto-match**: statement lines and book entries with the same amount and reference are matched.
 4. Match the remaining lines by hand: tick a bank line and the book entries it settles. A bank line with no book entry (bank charges, interest) is flagged and booked with a journal.
 5. Select **Stale cheques** to list cheques outstanding too long.
@@ -5708,10 +5820,10 @@ The **Reconciliation Workspace** reconciles one bank account for one period:
 
 The cards show the **Balance per bank**, **Balance per books**, **Unmatched bank lines**, **Unmatched book entries**, **Difference** and the status of the **Reconciliation**. The reconciliation is prepared by CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting and approved by TIS Finance & General Accounting, a user other than the preparer.
 
-![Figure 18.17: Accounts > Bank Reconciliation > Reconciliation Workspace](../images/screens-accounts/reconciliation-workspace.png)
+![Figure 19.17: Accounts > Bank Reconciliation > Reconciliation Workspace](../images/screens-accounts/reconciliation-workspace.png)
 **Reconciliations** lists the reconciliations with **Reconciliation No.**, **Bank account**, **Period**, **Status**, the adjusted bank and book balances, **Difference**, **Prepared by** and **Approved by**. **New reconciliation** starts one.
 
-The five reports (**Reconciliation Statement Report**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book**) are run like any report: choose the criteria (**Overall** or by bank account), **From Date** and **To Date**, the **Bank Account** and the **File format** (**CSV**, **Excel (XLSX)** or **PDF**), then **Preview** or **Generate**. See [Reports (chapter 22)](#reports).
+The five reports (**Reconciliation Statement Report**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book**) are run like any report: choose the criteria (**Overall** or by bank account), **From Date** and **To Date**, the **Bank Account** and the **File format** (**CSV**, **Excel (XLSX)** or **PDF**), then **Preview** or **Generate**. See [Reports (chapter 23)](#reports).
 
 ### Insurer statement reconciliation {#insurer-statement-reconciliation}
 **Menu:** Accounts > Remittance > Reconciliation
@@ -5734,7 +5846,7 @@ An insurer's statement (for example a premium remittance confirmation) is matche
 
 Each statement line is matched with the policy, premium and commission recorded; differences within the tolerance match. Open the statement to resolve the lines that differ. The statement is approved by CCD-Recon (Reconciliation and Reversals).
 
-![Figure 18.18: Import an insurer statement](../images/screens-accounts/insurer-statement-import.png)
+![Figure 19.18: Import an insurer statement](../images/screens-accounts/insurer-statement-import.png)
 ### Tax: BIR forms and returns {#tax-bir-forms-and-returns}
 **Menu:** Accounts > Tax > BIR Form 2307
 
@@ -5769,7 +5881,7 @@ The list shows **Invoice no.**, **Invoice date**, **Buyer**, **Invoice for**, **
 
 Invoices are numbered in sequence; an invoice is cancelled with a reason and keeps its number, it is never deleted.
 
-![Figure 18.19: New invoice](../images/screens-accounts/sales-invoice-new.png)
+![Figure 19.19: New invoice](../images/screens-accounts/sales-invoice-new.png)
 ### CAS books and documents {#cas-books-and-documents}
 Choose Accounts > Tax > CAS Books and Documents.
 
@@ -5784,7 +5896,7 @@ The screen holds the registration pack of the computerized accounting system (CA
 
 **Documents** holds the system description and controls and the backup and restore procedure, with their approved version; **Open** and **Print**. The books (general journal, general ledger, cash receipts and disbursements books, sales and purchase books) print per month with page numbers that run on through the year.
 
-![Figure 18.20: Accounts > Tax > CAS Books and Documents](../images/screens-accounts/cas-readiness.png)
+![Figure 19.20: Accounts > Tax > CAS Books and Documents](../images/screens-accounts/cas-readiness.png)
 ### Period end {#period-end}
 A fiscal year (FY2026) has twelve monthly periods and an adjustment period 13 used by the year-end close. The cards count the periods Open, Soft-closed, Closed and Locked.
 
@@ -5829,10 +5941,10 @@ Operations close on the 26th: a premium booking dated from the 26th of a month i
 3. Submit the run to soft-close or close the period.
 4. The run is approved by TIS Finance & General Accounting, a user other than the preparer. The period takes the new status.
 
-![Figure 18.21: New close run](../images/screens-accounts/month-end-close-new.png)
+![Figure 19.21: New close run](../images/screens-accounts/month-end-close-new.png)
 **Financial Statements** shows the **Income Statement**, **Balance Sheet** and **Trial Balance** from the posted journals, for a fiscal period or a date range, with the period, year to date and the same columns of the previous year. Select an account to see its postings. **Export** (Excel) and **Print** (PDF).
 
-![Figure 18.22: Accounts > Period End > Financial Statements](../images/screens-accounts/financial-statements.png)
+![Figure 19.22: Accounts > Period End > Financial Statements](../images/screens-accounts/financial-statements.png)
 ### Year-end close (preparer) {#year-end-close-preparer}
 Accounts > Period End > Year-End Close leads through five steps, one card per step; the stepper above the card shows the status of each step. Choose the fiscal year and select **Start year-end close**: the prerequisites are checked at once.
 
@@ -5906,7 +6018,7 @@ The incentive screens pay the account executives' incentives earned under the pr
 | **Statement** | The earnings of an account executive for a month: the programmes, totals, the trend of the last 13 months and the payments. **Print** and **Export CSV**. |
 | **Reports** | The incentive reports (monthly payout summary, agent payout details, target achievement, top performers, programme effectiveness): **Generate report**. |
 
-An approved batch is paid through [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques); its status becomes **Paid**.
+An approved batch is paid through [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques); its status becomes **Paid**.
 
 ## Screen reference: Dashboards and Commission {#screens-dashboards-and-commission}
 The dashboards and the Commission menu.
@@ -5939,7 +6051,7 @@ Dashboard > Executive Dashboard is the management view of the business of Toyota
 
 The cards show **Total Revenue** and **New Business** against their targets, **Active Policies**, **Claims Rate**, **Retention Rate**, **Premium receivable** (with the overdue amount) and **Commission receivable** (unbilled and overdue). The charts are **Premium written by month** (last 12 months), **Revenue by Product Line**, **Claims Status Distribution**, **Regional Performance** (premium, policies, growth and market share by region) and **Top Performing Products** (premium, policies and claim ratio).
 
-![Figure 19.1: Dashboard > Executive Dashboard](../images/screens-dashboards-and-commission/executive-dashboard.png)
+![Figure 20.1: Dashboard > Executive Dashboard](../images/screens-dashboards-and-commission/executive-dashboard.png)
 ### Claims Dashboard {#claims-dashboard}
 Dashboard > Claims Dashboard follows the claims handled by Operations.
 
@@ -5952,9 +6064,9 @@ Dashboard > Claims Dashboard follows the claims handled by Operations.
 | TIS Operations Unit Head | View |
 | TIS General Manager | View |
 
-The cards show **Claims reported** (and those reported today), **Total Open Claims**, **Claims Overdue** (past their due date), **Estimated amount** and **Settled amount**. The charts are **Claims Trend Analysis** (claims submitted, approved and rejected by month reported), **Claims by line of business**, **Ageing of open claims** (days since reported), **Claims by stage** and **Claims by Province**. **Recent Claims** lists the latest claims; select one to open it on [The claims list (17.13)](#the-claims-list).
+The cards show **Claims reported** (and those reported today), **Total Open Claims**, **Claims Overdue** (past their due date), **Estimated amount** and **Settled amount**. The charts are **Claims Trend Analysis** (claims submitted, approved and rejected by month reported), **Claims by line of business**, **Ageing of open claims** (days since reported), **Claims by stage** and **Claims by Province**. **Recent Claims** lists the latest claims; select one to open it on [The claims list (18.13)](#the-claims-list).
 
-![Figure 19.2: Dashboard > Claims Dashboard](../images/screens-dashboards-and-commission/claims-dashboard.png)
+![Figure 20.2: Dashboard > Claims Dashboard](../images/screens-dashboards-and-commission/claims-dashboard.png)
 ### Processing Dashboard {#processing-dashboard}
 Dashboard > Processing Dashboard (the **Processing Workbench**) shows the quotations and placements in flight with Operations.
 
@@ -6003,17 +6115,17 @@ A commission line reversed after payment (for example on a cancellation that ret
 
 **Commission > Commission Dashboard** has the views **Accounting** and **Management**. The cards show **Brokerage income**, **Comsub (gross)** (the commission due to referrers), **Net margin**, **Outstanding payable** (eligible and approved, net of withholding tax), **WHT withheld (paid)** and **Clawed back**. The charts show the monthly trend of income, payable and margin, the commission by referrer and by product, the payable by status (**Accrued**, **Eligible**, **Approved**, **Paid**) and the brokerage income by insurer.
 
-![Figure 19.3: Commission > Commission Dashboard](../images/screens-dashboards-and-commission/commission-dashboard.png)
+![Figure 20.3: Commission > Commission Dashboard](../images/screens-dashboards-and-commission/commission-dashboard.png)
 **Commission > Agents/Referrer Accounts** lists the referrers. To pay a referrer:
 
 1. Choose Commission > Agents/Referrer Accounts and select the referrer. The account shows the lines of the current cycle, the future cycles and the past lines.
 2. Mark as eligible the accrued lines whose premium is fully collected.
 3. Approve the eligible lines. The approval is made by TIS Finance & General Accounting other than the user who prepared the lines.
-4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement (18.8)](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
+4. Select the approved lines and generate the payout. The payment voucher is prepared on [Disbursement (19.8)](#disbursement-payment-vouchers-and-cheques) with the withholding tax of the referrer (5% for an individual, 10% for a company, or the referrer's own tax code), and is approved and paid there.
 
 A new referrer is added with its type, level, tax details and bank account; the withholding tax can be switched off for a referrer, which recomputes its unpaid lines.
 
-![Figure 19.4: Commission > Agents/Referrer Accounts](../images/screens-dashboards-and-commission/referrer-accounts.png)
+![Figure 20.4: Commission > Agents/Referrer Accounts](../images/screens-dashboards-and-commission/referrer-accounts.png)
 ## Screen reference: Master {#screens-master}
 The reference masters, users and access, and the system configuration of the Master menu.
 
@@ -6050,11 +6162,11 @@ Choose Master > Insurance > Distribution Channels. A channel is a dealer group o
 
 At TISPH the channels are the Toyota dealer groups and their branches (for example Toyota Alabang, Toyota Cebu, Toyota Makati) and Toyota Financial Services with its offices. The list shows **Code**, **Name**, **Channel type**, **Group** (the parent channel), **Referrer**, **Province / City**, **Prospects**, **Policies**, **Premium** and **Status**; filter by channel type and status.
 
-**Add channel** asks for the code, name and channel type, the group it belongs to (its hierarchy), the province and city, the referrer paid for its business (from [Commission to agents and referrers (19.4)](#commission-to-agents-and-referrers)) and, for a financing bank, its mortgagee clause. The pencil changes a channel; a channel with business is deactivated, not deleted.
+**Add channel** asks for the code, name and channel type, the group it belongs to (its hierarchy), the province and city, the referrer paid for its business (from [Commission to agents and referrers (20.4)](#commission-to-agents-and-referrers)) and, for a financing bank, its mortgagee clause. The pencil changes a channel; a channel with business is deactivated, not deleted.
 
-The channel is chosen on the prospect and drives the lead assignment rules, the dealer programmes and the **Dealer Production** report (Reports > Operational Reports > Dealer Production: premium and policies by channel; see [Reports (chapter 22)](#reports)).
+The channel is chosen on the prospect and drives the lead assignment rules, the dealer programmes and the **Dealer Production** report (Reports > Operational Reports > Dealer Production: premium and policies by channel; see [Reports (chapter 23)](#reports)).
 
-![Figure 20.1: Master > Insurance > Distribution Channels: dealer groups, dealer branches and TFS](../images/screens-master/distribution-channels.png)
+![Figure 21.1: Master > Insurance > Distribution Channels: dealer groups, dealer branches and TFS](../images/screens-master/distribution-channels.png)
 ### Company, branches and the letterhead {#company-branches-and-the-letterhead}
 Every printed document and report PDF (quotation, request for quotation, placement slip, policy schedule, billing statement, official receipt, payment voucher, debit note, claim letters, BIR forms) carries the letterhead of the company marked as letterhead company.
 
@@ -6085,7 +6197,7 @@ Requests for quotation, placement slips, Preliminary Loss Advices and remittance
 
 The list shows **Company Code**, **Company Name**, **E-mail**, **Phone Number**, **Modified By**, **Modified On**, **Status** and **Actions**. Only the panel insurers of TISPH are **Active**; an inactive insurer is not offered on quotations and placements. **Upload** loads insurers from a file (validated first); **Add** creates one.
 
-The insurer record holds the code, name, address, e-mail and phone of the insurer. Whether an insurer's policies are broker-billed or direct-billed is set on [Direct bill: commission debit notes (18.11)](#direct-bill-commission-debit-notes) (**Billing Mode**); its commission rates on [Commission Rate Matrix (20.16)](#commission-rate-matrix).
+The insurer record holds the code, name, address, e-mail and phone of the insurer. Whether an insurer's policies are broker-billed or direct-billed is set on [Direct bill: commission debit notes (19.11)](#direct-bill-commission-debit-notes) (**Billing Mode**); its commission rates on [Commission Rate Matrix (21.16)](#commission-rate-matrix).
 
 ### Masters that work the same way {#masters-that-work-the-same-way}
 All masters work alike: a list with search, **Add** (the form opens on its own page or as a panel on the right), **Upload** where offered, the eye to view, the pencil to edit and a status switch to deactivate. Records are not deleted; a deactivated record no longer appears in the lists of the other screens.
@@ -6159,11 +6271,11 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Master | What it holds |
 |---|---|
 | **Line of Business** | The lines TISPH writes (for example Motor, Accident, Life, Marine), with their code. Only active lines are offered. |
-| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**). The rating and covers of a product are kept in the [Product Configurator (chapter 21)](#screens-product-configurator). |
+| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**). The rating and covers of a product are kept in the [Product Configurator (chapter 22)](#screens-product-configurator). |
 | **Cover** | The covers offered on quotations (for example Own Damage, Acts of Nature, Excess Bodily Injury, Property Damage). |
 | **Signatories** | The company signatories printed on documents, with their signature image. |
 | **Vehicle** | The vehicle master used by motor quotations: **Vehicle Brand**, **Vehicle Model**, **Vehicle Variant**, code and name. **Upload** loads the Toyota model list. |
-| **Country**, **Province**, **City / Municipality** | The address lists. A city or municipality has its province, class (city or municipality) and ZIP code; the local government tax rate is kept on [Other finance masters (20.15)](#finance). |
+| **Country**, **Province**, **City / Municipality** | The address lists. A city or municipality has its province, class (city or municipality) and ZIP code; the local government tax rate is kept on [Other finance masters (21.15)](#finance). |
 | **Hierarchy**, **Designation** | The ranks of the sales hierarchy and the job titles of users, by department. |
 | **Bank** | The banks: **Bank Code**, **Bank Name**, **Bank Branch**, **SWIFT / BIC Code**, e-mail and phone, used for drawee banks, bank accounts and payee accounts. |
 
@@ -6177,9 +6289,9 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | TIS Operations Unit Head | View |
 | TIS IT AppSupport / Admin | Create and edit |
 
-The Claim Document Checklist lists the documents a claim needs, by line of business and claim type: **Code**, **Line of Business** (`*` = all), **Claim Type** (`*` = all), **Document**, **Required**, **Sort Order** and **Status**. When a claim is registered, the documents of its line and cause of loss make the list of its **Documents** step (see [Register a claim (17.13.1)](#register-a-claim)). **Add** adds a document; the switch removes it from new claims.
+The Claim Document Checklist lists the documents a claim needs, by line of business and claim type: **Code**, **Line of Business** (`*` = all), **Claim Type** (`*` = all), **Document**, **Required**, **Sort Order** and **Status**. When a claim is registered, the documents of its line and cause of loss make the list of its **Documents** step (see [Register a claim (18.13.1)](#register-a-claim)). **Add** adds a document; the switch removes it from new claims.
 
-![Figure 20.2: Master > Insurance > Claim Document Checklist](../images/screens-master/claim-document-checklist.png)
+![Figure 21.2: Master > Insurance > Claim Document Checklist](../images/screens-master/claim-document-checklist.png)
 ### Lead sources and reason codes {#lead-sources-and-reason-codes}
 **Menu:** Master > Insurance > Lead Sources
 
@@ -6197,7 +6309,7 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 **Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
 
-![Figure 20.3: Master > Insurance > Reason Codes](../images/screens-master/reason-codes.png)
+![Figure 21.3: Master > Insurance > Reason Codes](../images/screens-master/reason-codes.png)
 ### Users {#users}
 A duplicate username is refused. At the first sign-in the user must choose a new password (Getting started).
 
@@ -6212,7 +6324,7 @@ The **User List** shows **User Name**, **Assigned Role**, **E-mail** (masked), *
 
 The steps are in [Create a user account (15.7.1)](#tis-it-appsupport-admin-create-user) and [Unlock an account or reset a password (15.7.2)](#tis-it-appsupport-admin-account-actions). An administrator cannot change his or her own account or roles.
 
-![Figure 20.4: Master > Users and Access > User](../images/screens-master/users.png)
+![Figure 21.4: Master > Users and Access > User](../images/screens-master/users.png)
 ### Roles and role permissions {#roles-and-role-permissions}
 **Menu:** Master > Users and Access > Role
 
@@ -6232,7 +6344,7 @@ The steps are in [Create a user account (15.7.1)](#tis-it-appsupport-admin-creat
 
 **Role Permissions** shows what each role may do, by part of the system: **By role** (each role's access to each screen: view, create and edit, approve) and **Compare roles** (two or more roles side by side). A change of a role's permissions waits in **Waiting for approval** and applies once another administrator approves it. **Export to Excel** downloads the permissions.
 
-![Figure 20.5: Master > Users and Access > Role: the TISPH roles](../images/screens-master/roles.png)
+![Figure 21.5: Master > Users and Access > Role: the TISPH roles](../images/screens-master/roles.png)
 ### User Access Matrix {#user-access-matrix}
 **Menu:** Master > Users and Access > User Access Matrix
 
@@ -6353,7 +6465,7 @@ These four screens decide how every business event is posted to the general ledg
 | Master | What it holds |
 |---|---|
 | **Package Bundles** | Products sold together with a bundle discount, for example TFS Borrower Protect (Credit Life - Compulsory with the borrower's Personal Accident). |
-| **Insurer Rate Tables** | Each insurer's rate for a package product: **Rate basis** (percent or per mille of sum insured), **Rate**, **Minimum premium**, **Deductible**, **Key benefits**, **Commission** and the effective dates. [Quick Quote (17.2)](#quick-quote) prices from these rates. |
+| **Insurer Rate Tables** | Each insurer's rate for a package product: **Rate basis** (percent or per mille of sum insured), **Rate**, **Minimum premium**, **Deductible**, **Key benefits**, **Commission** and the effective dates. [Quick Quote (18.2)](#quick-quote) prices from these rates. |
 | **Premium Taxes & LGU Rates** | The local government tax rate of each city or municipality, the tax and charge rules (DST, VAT, LGT) and a **Calculator** to check the taxes of a premium. |
 | **Payment Gateways** | The online payment gateway for the client payment links (GCash, Maya, GrabPay, cards): enabled or not, mode, payment methods, who absorbs the fee, link validity and the bank account credited. The merchant keys are kept on the server, never on this screen. |
 | **Transaction Code** | The accounting transaction codes: **CM** Credit Memo, **DM** Debit Memo, **JV** Journal Voucher, **OR** Official Receipt, **PV** Payment Voucher, **RM** Remittance to Insurer, with their basis (debit, credit, both). |
@@ -6370,7 +6482,7 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 
 **Add rate** adds a row. **Test rate** finds the rate that would apply to a placement of an insurer, product, line of business, policy type and date.
 
-![Figure 20.6: Master > Finance > Commission Rate Matrix](../images/screens-master/commission-rate-matrix.png)
+![Figure 21.6: Master > Finance > Commission Rate Matrix](../images/screens-master/commission-rate-matrix.png)
 ### Accounting masters {#finance-masters-kept-by-accounting}
 **Menu:** Master > Finance > Taxation
 
@@ -6417,10 +6529,10 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 |---|---|
 | TIS Finance & General Accounting | Create and edit |
 
-![Figure 20.7: Master > Finance > Financial Statement Versions](../images/screens-master/fs-versions.png)
+![Figure 21.7: Master > Finance > Financial Statement Versions](../images/screens-master/fs-versions.png)
 A financial statement version lists the lines of the statements in order, each with the range of GL accounts it carries: **TIS01 Local financial statements**, **TIS02 Balance sheet and income statement** and **TIS03 Budget** (income statement lines only). A range is given by the first digits of the accounts: **GL from** 110 and **GL to** 112 take every account from 110 to 112, whatever its length. An account belongs to the first line, by line number, whose range takes it; the accounts no line takes are listed under **Accounts not in this version** and show on that line in the reports, so the statements always add up.
 
-Select a version to see its lines: **Line**, **Statement**, **Section**, **FS line**, **GL from**, **GL to**, **Shown as** (debit or credit balance) and the number of **Accounts** each line takes. TIS Finance & General Accounting edits the name, purpose and status and the lines (**Add line**, the bin of a line, **Save**); the lines are checked before they are saved. **Add version** starts a new version from the lines of another. The version of the reports when none is chosen is TIS01. See [Financial Statement by Version and Daily GL Balance (22.1.3)](#reports-by-department).
+Select a version to see its lines: **Line**, **Statement**, **Section**, **FS line**, **GL from**, **GL to**, **Shown as** (debit or credit balance) and the number of **Accounts** each line takes. TIS Finance & General Accounting edits the name, purpose and status and the lines (**Add line**, the bin of a line, **Save**); the lines are checked before they are saved. **Add version** starts a new version from the lines of another. The version of the reports when none is chosen is TIS01. See [Financial Statement by Version and Daily GL Balance (23.1.3)](#reports-by-department).
 
 ### Operational masters {#operational-masters}
 **Menu:** Master > Finance > Cost Centres
@@ -6440,9 +6552,9 @@ Master > Finance > Bank File Layouts says how each bank's upload file is written
 |---|---|
 | TIS Finance & General Accounting | View |
 
-The tab **Layouts** lists **Code**, **Name**, **Bank**, **Payment channels** (bulk credit, InstaPay, PESONet), **File format** (delimited or fixed width) and **Status**. **New layout** defines the header, detail and trailer records of a file and how the bank's status file is read. The tab **Payee bank accounts** holds the bank accounts of the payees (insurers, referrers, suppliers, claimants) used by [Bank payment files (18.9)](#bank-payment-files).
+The tab **Layouts** lists **Code**, **Name**, **Bank**, **Payment channels** (bulk credit, InstaPay, PESONet), **File format** (delimited or fixed width) and **Status**. **New layout** defines the header, detail and trailer records of a file and how the bank's status file is read. The tab **Payee bank accounts** holds the bank accounts of the payees (insurers, referrers, suppliers, claimants) used by [Bank payment files (19.9)](#bank-payment-files).
 
-![Figure 20.8: Master > Finance > Bank File Layouts](../images/screens-master/bank-file-layouts.png)
+![Figure 21.8: Master > Finance > Bank File Layouts](../images/screens-master/bank-file-layouts.png)
 ### E-mail Layout {#e-mail-layout}
 **Menu:** Master > System > E-mail Layout
 
@@ -6481,9 +6593,9 @@ For each document (for example the policy schedule), the signature slots: **Slot
 
 Configuration holds the settings of the system, grouped in cards: **Company & Branding**, **Sales, Quotations & Placement**, **Policies, Endorsements & Renewals**, **Claims**, **Billing, Collections & Credit**, **Remittance & Reconciliation**, **Commission & Incentives**, **Accounting & Tax**, **Notifications & E-mail** and the others. Each card shows the number of its settings. Open a card to see and change its settings; the search box finds a setting by its name or description (for example VAT, renewal notice, password).
 
-A setting changes the behaviour of the system for everyone (for example the quotation validity, the renewal notice days, the grace period). Change a setting only on a decision of the business owner; every change is recorded in the [Audit Trail (20.27)](#audit-trail).
+A setting changes the behaviour of the system for everyone (for example the quotation validity, the renewal notice days, the grace period). Change a setting only on a decision of the business owner; every change is recorded in the [Audit Trail (21.27)](#audit-trail).
 
-![Figure 20.9: Master > System > Configuration](../images/screens-master/configuration.png)
+![Figure 21.9: Master > System > Configuration](../images/screens-master/configuration.png)
 ### Document Numbering {#document-numbering}
 Every number the system issues comes from a series on Master > Document Numbering: prospect, request for quotation, quotation, placement slip, policy, client, bill, official receipt, payment voucher, journal voucher, claim, endorsement, debit note, close run, reconciliation, BIR Form 2307 and the others. The list shows each series with module, prefix, format, counter reset, last number and next number.
 
@@ -6507,7 +6619,7 @@ Schedules lists the jobs the system runs by itself: **Job**, **What it does**, *
 
 The actions of a job are **Run now** (the play button), the run history and the pencil to change its schedule or switch it on or off. Check the last status of the jobs every morning.
 
-![Figure 20.10: Master > System > Schedules](../images/screens-master/schedules.png)
+![Figure 21.10: Master > System > Schedules](../images/screens-master/schedules.png)
 ### Audit Trail {#audit-trail}
 The history of a single record (claim history, policy and client **History** tab, quotation **Audit Trail** tab, master records) uses the same layout as a timeline grouped by day, newest first, with a search box, a user filter, a filter by kind of event (created, status changes and approvals, other changes, cancelled or removed) and **Export**.
 
@@ -6518,10 +6630,11 @@ The history of a single record (claim history, policy and client **History** tab
 | TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | View |
+| TIS Audit (read only) | View |
 
 Master > System > Audit Trail shows every change made in the system: **Date & Time**, **User** (with the role), **Record**, **Event**, **Changes** (each field with its value before and after) and **Source** (screen, sign-in, file upload, scheduled job). Filter by user, record type and action; **Export** downloads the result.
 
-![Figure 20.11: Master > System > Audit Trail](../images/screens-master/audit-trail.png)
+![Figure 21.11: Master > System > Audit Trail](../images/screens-master/audit-trail.png)
 ### Features & Releases {#features-and-releases}
 **Menu:** Master > System > Features & Releases
 
@@ -6536,6 +6649,41 @@ The tab **Future releases** lists the functions TISPH can ask for, with their de
 
 The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
 
+### Data Migration & Go-Live {#data-migration-and-go-live}
+**Menu:** Master > System > Data Migration & Go-Live
+
+| Role | Access |
+|---|---|
+| TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | Create and edit |
+| TIS IT AppSupport / Admin | Create and edit |
+| TIS General Manager | View |
+| TIS Audit (read only) | View |
+
+Master > System > Data Migration & Go-Live is the workspace of the cut-over from the old system: the templates, the loads with their approval, the reconciliation, the mock runs, the cut-over checklist, the Go / No-Go decision, the go-live lock and the hypercare figures. TIS IT AppSupport / Admin uploads and submits the loads; TIS Finance & General Accounting, the TIS Operations Unit Head and the TIS General Manager approve another user's load, sign the reconciliation and vote; TIS Audit reads every tab and changes nothing. Personal data in every download and review is masked for users who may not see it.
+
+| Tab | What it is for |
+|---|---|
+| **Overview** | Phase of the programme, cut-over date, lock, latest loads, reconciliation, Go / No-Go and open defects, and what waits for you |
+| **Templates** | The configuration and migration templates per object, blank or with the current data; the policy sheets per product (Motor, CTPL, Personal Accident, Credit Life, Travel, Other Lines); the value maps of the old system's codes; the document file naming convention and its checker |
+| **Loads** | Upload and validate, review each row (**New**, **Changed** with the old and new values, **Unchanged**, **Duplicate**, **Error**), resolve duplicates, submit, approve or reject, load, history, undo before go-live |
+| **Reconciliation** | Control totals per object against the figures of the old system, receivables against the general ledger, the trial balance, the difference list and the sign-off, with the report |
+| **Runs** | Mock 1, Mock 2, the dress rehearsal and the production run with their timings, results and defects |
+| **Cutover** | The checklist of the run: owner, planned and actual start and end, status and evidence of each step |
+| **Go-Live** | Go / No-Go against the criteria with the named approvers, the cut-over date, the lock and the unlock by two people |
+| **Hypercare** | After the lock: business issued since go-live, migrated items worked, edits to migrated records, daily checks and defects |
+
+**Loads.** Download the template on **Templates**, fill it and upload it on **Loads > Upload** with the old system and the run. The file is validated in the background; nothing is saved. Review the rows: **Changed** shows each field as old and new value; **Duplicate** lists the matching record (same TIN, name and birth date, plate or chassis number, insurer name variant) and takes **Load as new** or **Use existing** with a reason; **Error** rows are in the errors file to correct and upload again. **Submit** the load: another user approves or rejects it with a reason; the uploader, the submitter and whoever resolved one of its duplicates cannot approve it. The approval loads the records in one go under the load number (MIG-000012); a load that fails saves nothing. Every record created or changed starts its activity log with the load it came from. Before go-live, a load is undone under the same second-person approval while nothing depends on its records.
+
+**Reconciliation and sign-off.** Enter or upload the totals of the old system for each line (counts and amounts per object, product, insurer and ageing bucket). Each line shows **Matched** or **Difference**; every difference needs an explanation and is accepted by a user who did not load the data. When the lines agree, the named signatories sign the reconciliation in the system; the signed report (PDF) is kept with the run and does not change afterwards.
+
+**Runs, cut-over and Go / No-Go.** Each mock run is recorded with its loads, timings, results and defects. The production run carries the cut-over checklist: start and close each step with its evidence. The Go / No-Go decision lists the criteria with their automatic checks; the named approvers vote **Go** or **No-Go** with their remarks.
+
+**Go-live lock.** After a Go decision, a signed reconciliation and no load waiting, one user requests the lock and another approves it on **Go-Live**. The lock closes every migration import: the migration template, the policies go-live upload, the open items import, the opening balances import, the transaction reset and the undo of loads. An unlock is requested and approved by two people, names the imports it reopens and ends by itself after its hours.
+
+**Migrated and issued business.** Every migrated client, policy, claim, open item and opening balance journal shows the chip **Migrated** with its number in the old system and its load. Policies keep their old policy number; business written after go-live takes the insurer's policy number or the next TISPH number. Endorsements and claims on a migrated policy show **Migrated policy**; the renewal of a migrated policy shows **Renewal of legacy policy** on the Renewal Queue and on the renewed policy, which is new business with its own number. The Clients, Policies, Claims, Collections, Journal Voucher and Renewal Queue lists filter by **Origin** (All, Issued, Migrated); the Executive and Sales dashboards open on **Issued since go-live** and can show **All business**; the production register, premium by product, new business against renewals and dealer production reports take the **Origin** criterion. Migrated policies are not counted in premium written, new business, commission or incentive figures unless the approvers switch this on (**Go-Live**); they count as renewal opportunities. Migrated balances are in the opening balances and never go to the SAP GL daily file. The origin, the old number and the load of a migrated record cannot be changed.
+
+![Figure 21.12: Master > System > Data Migration & Go-Live, the Loads tab](../images/screens-master/data-migration-and-go-live.png)
 ### E-mail Outbox {#e-mail-outbox}
 **Menu:** Master > System > E-mail Outbox
 
@@ -6575,7 +6723,7 @@ A product is configured as a **product template**. Only the template marked **In
 | TIS IT AppSupport / Admin | Create and edit |
 | TIS General Manager | View |
 
-The dashboard shows the **Active Products**, the **Acceptance rules in force**, the **Total Premium** and the **Avg Loss Ratio** (weighted by premium), and three tabs: **Product Templates** (the list of templates, as on [Product Templates (21.2)](#product-templates)), **Performance Analytics** and **Quick Actions** (shortcuts to the other screens). **Create New Product** starts a new template.
+The dashboard shows the **Active Products**, the **Acceptance rules in force**, the **Total Premium** and the **Avg Loss Ratio** (weighted by premium), and three tabs: **Product Templates** (the list of templates, as on [Product Templates (22.2)](#product-templates)), **Performance Analytics** and **Quick Actions** (shortcuts to the other screens). **Create New Product** starts a new template.
 
 ### Product Templates {#product-templates}
 **Menu:** Product Configurator > Product Templates
@@ -6593,7 +6741,7 @@ The dashboard shows the **Active Products**, the **Acceptance rules in force**, 
 
 The list shows **Template Code**, **Product Name**, **Product**, **Line of Business**, **Version**, **Status** (**Draft**, **Active**, **Inactive**, **Retired**) and **In use**. At TISPH the templates in use are those of the products sold: for example the motor template that prices the motor quotations (Motor Insurance Basic Plan) and the personal accident and travel templates. Templates of lines TISPH does not write stay inactive.
 
-To create a template, select **Create Template**: enter the code, the product name, the product of [Masters that work the same way (20.4)](#masters-that-work-the-same-way) it configures, the line of business and the version, then add its covers, rating factors, acceptance rules, insurers and documents on the other screens. The pencil changes a template; the **In use** mark decides which template the business screens apply to the product. A change to a template in use applies to the quotations priced afterwards.
+To create a template, select **Create Template**: enter the code, the product name, the product of [Masters that work the same way (21.4)](#masters-that-work-the-same-way) it configures, the line of business and the version, then add its covers, rating factors, acceptance rules, insurers and documents on the other screens. The pencil changes a template; the **In use** mark decides which template the business screens apply to the product. A change to a template in use applies to the quotations priced afterwards.
 
 ### Coverage Builder {#coverage-builder}
 **Menu:** Product Configurator > Coverage Builder
@@ -6602,7 +6750,7 @@ To create a template, select **Create Template**: enter the code, the product na
 |---|---|
 | TIS IT AppSupport / Admin | Create and edit |
 
-The Coverage Builder holds the covers of each template: **Code**, **Coverage Name**, **Template / product**, **Type** (**Mandatory** or optional), **Deductible**, **Priced on quotation as** and **Status**. A mandatory cover is always included in a quotation of the product; an optional cover is ticked on the quotation (see [Create a motor quotation (17.4.1)](#create-a-motor-quotation)).
+The Coverage Builder holds the covers of each template: **Code**, **Coverage Name**, **Template / product**, **Type** (**Mandatory** or optional), **Deductible**, **Priced on quotation as** and **Status**. A mandatory cover is always included in a quotation of the product; an optional cover is ticked on the quotation (see [Create a motor quotation (18.4.1)](#create-a-motor-quotation)).
 
 For the covers quoted, the deductible and main exclusions are printed as cover terms on the quotation slip and the policy schedule. The premiums of the motor covers are priced on the quotation screens with the motor tariff of the template. **Add Coverage** adds a cover: code, name, template, type, deductible, the cover it is priced as and its exclusions.
 
@@ -6635,7 +6783,7 @@ Acceptance rules are the insurers' underwriting guidelines. They are checked whe
 | Outcome | What happens |
 |---|---|
 | **Auto-accept** | The risk passes when the condition holds; otherwise it is referred (or declined) |
-| **Refer** | The quotation is held until a user of the authority role approves it within his or her limit of the [Authority Matrix (20.10)](#authority-matrix) (underwriting referral approval) |
+| **Refer** | The quotation is held until a user of the authority role approves it within his or her limit of the [Authority Matrix (21.10)](#authority-matrix) (underwriting referral approval) |
 | **Decline** | The risk is refused with the rule's message |
 | **Apply loading** | The loading (for example 15%) is added to the net premium |
 
@@ -6650,7 +6798,7 @@ The risk details the rules check are asked on the quotation (for example the fai
 
 The Document Manager holds the document templates of each product template, printed from the policy and quotation screens and attached to e-mails: **Document**, **Template / product**, **Printed as** (policy schedule, quotation slip, CTPL certificate, member enrolment form), **Stage** (quotation, policy issuance), **Layout** and **Status**.
 
-Without an upload the standard layout is printed. To use TISPH's own layout, select **Add document template** (or edit a row) and upload the layout: a text file with merge fields. **Merge fields** lists the fields that can be placed in a layout (client, policy, vehicle, covers, premium, signature slots of [Document Signatures (20.23)](#document-signatures)).
+Without an upload the standard layout is printed. To use TISPH's own layout, select **Add document template** (or edit a row) and upload the layout: a text file with merge fields. **Merge fields** lists the fields that can be placed in a layout (client, policy, vehicle, covers, premium, signature slots of [Document Signatures (21.23)](#document-signatures)).
 
 ### Market Mapping {#market-mapping}
 **Menu:** Product Configurator > Market Mapping
@@ -6659,9 +6807,9 @@ Without an upload the standard layout is printed. To use TISPH's own layout, sel
 |---|---|
 | TIS IT AppSupport / Admin | Create and edit |
 
-Market Mapping lists the insurers that offer each product: **Template / product**, **Insurer**, **Insurer Code** (the product's code at the insurer), **Agreed comm. % (ref.)**, **Target**, **YTD Performance** (premium of the policies issued this year, against the target) and **Status**. Only the insurers on a product's market can be approached on a request for quotation. The agreed commission here is a reference; the commission applied comes from the [Commission Rate Matrix (20.16)](#commission-rate-matrix). **Map Product** adds an insurer to a product.
+Market Mapping lists the insurers that offer each product: **Template / product**, **Insurer**, **Insurer Code** (the product's code at the insurer), **Agreed comm. % (ref.)**, **Target**, **YTD Performance** (premium of the policies issued this year, against the target) and **Status**. Only the insurers on a product's market can be approached on a request for quotation. The agreed commission here is a reference; the commission applied comes from the [Commission Rate Matrix (21.16)](#commission-rate-matrix). **Map Product** adds an insurer to a product.
 
-![Figure 21.1: Product Configurator > Market Mapping: the panel insurers of the motor product](../images/screens-product-configurator/market-mapping.png)
+![Figure 22.1: Product Configurator > Market Mapping: the panel insurers of the motor product](../images/screens-product-configurator/market-mapping.png)
 ### Risk Mapping {#risk-mapping}
 **Menu:** Product Configurator > Risk Mapping
 
@@ -6859,7 +7007,7 @@ the role may read.
 
 Reports > All Reports shows the reports your role may run, as cards grouped under **Operational Reports** and **Financial Reports**, each with its description. The search box finds a report by name. The same reports open from the menus **Reports > Operational Reports** and **Reports > Financial Reports**; the bank reconciliation and BIR reports also open from their Accounts menus.
 
-![Figure 22.1: Reports > All Reports, as TIS Operations Officer sees it](../images/reports/all-reports.png)
+![Figure 23.1: Reports > All Reports, as TIS Operations Officer sees it](../images/reports/all-reports.png)
 #### Run a report {#reports-run}
 1. Choose Reports > All Reports and select the report (or choose it from the report menu).
 2. In **Report Criteria**, choose how the report is grouped or which part it shows, for example **Overall**, by **Agent**, **Branch** or **Principal Insurer**; **Summary** or **Detailed**; **Open**, **Partial**, **Settled**, **Rejected**, **Cancelled**, **Aging** or by **Claim Type** for the claims reports.
@@ -6868,9 +7016,9 @@ Reports > All Reports shows the reports your role may run, as cards grouped unde
 5. Choose the **File format**: **CSV**, **Excel (XLSX)** or **PDF**.
 6. Select **Preview** to see the rows on screen, or **Generate** to download the file.
 
-The PDF and Excel files are printed in the layout of [Documents and Reports Layout (20.22)](#documents-and-reports-layout), with the letterhead of Toyota Insurance Services Philippines. Amounts are in pesos.
+The PDF and Excel files are printed in the layout of [Documents and Reports Layout (21.22)](#documents-and-reports-layout), with the letterhead of Toyota Insurance Services Philippines. Amounts are in pesos.
 
-![Figure 22.2: Reports > Operational Reports > Production Register: the criteria of a report](../images/reports/production-register.png)
+![Figure 23.2: Reports > Operational Reports > Production Register: the criteria of a report](../images/reports/production-register.png)
 #### Export and keep a report {#reports-export}
 - **Excel (XLSX)** keeps the columns as numbers and dates, for further analysis.
 - **CSV** is the format to load into another system, and the format of the BIR alphalists from which the BIR DAT files are prepared.
@@ -6919,11 +7067,11 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Collection Report** | Bills due in the period with the amount billed, collected (receipts posted up to the To Date), balance and collection rate |
 | **Receivables Ageing** | Outstanding premium receivables as of the To Date by ageing bucket |
 | **Receipts Register** | Official receipts of the period with bill, policy, payment mode, bank and reference |
-| **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (18.16)](#bank-reconciliation) |
+| **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation (19.16)](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |
 | **Payment Summary** | Payments received in the period by user or payment method: payment and posting dates, contract, reference, client, amount, bank, cheque, channel, receipt and posting status |
 | **Daily Reversals** | Receipts reversed and cheques bounced in the period, with sub-totals per bank account: reason, reversal and actual dates, contract, client, amount, cheque, method and user |
-| **PDC Encoded Summary**, **PDC Cancelled Summary**, **PDC Maturing**, **PDC Maturing by Product and Warehouse Bank**, **PDC History Log**, **Acknowledgement Receipts of Received PDCs** | The post-dated cheques encoded, cancelled (with the reason and the approver) and maturing in the period, by warehouse bank (the Insurance Partner holding them, or the TISPH account), every action on a cheque, and the sets received; see [Post-dated cheques (18.5)](#post-dated-cheques) |
+| **PDC Encoded Summary**, **PDC Cancelled Summary**, **PDC Maturing**, **PDC Maturing by Product and Warehouse Bank**, **PDC History Log**, **Acknowledgement Receipts of Received PDCs** | The post-dated cheques encoded, cancelled (with the reason and the approver) and maturing in the period, by warehouse bank (the Insurance Partner holding them, or the TISPH account), every action on a cheque, and the sets received; see [Post-dated cheques (19.5)](#post-dated-cheques) |
 | **Insufficient Payments**, **Overpayments** | Bank payments below what the policy owed (expected, paid, shortfall), and payments above it held On Account (excess, still held, allocated or refunded) |
 
 **Finance and Accounting** (TIS Finance & General Accounting):
@@ -6936,10 +7084,10 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Journal Register**, **General Ledger Detail** | Journal lines of the period; every movement of an account with its running balance |
 | **Trial Balance**, **Trial Balance (Opening / Movement / Closing)** | Per account: opening balance, period debits and credits, closing balance |
 | **Income Statement**, **Balance Sheet** | The financial statements for the period and the fiscal year to date, with the prior year |
-| **Financial Statement by Version** | The trial balance grouped by the lines of a financial statement version (TIS01 local financial statements, TIS02 balance sheet and income statement, TIS03 budget), per line or per GL account: opening, movement, closing, year to date and the prior year to date; lines with nothing to show are left out. See [Financial statement versions (20.18)](#financial-statement-versions) |
+| **Financial Statement by Version** | The trial balance grouped by the lines of a financial statement version (TIS01 local financial statements, TIS02 balance sheet and income statement, TIS03 budget), per line or per GL account: opening, movement, closing, year to date and the prior year to date; lines with nothing to show are left out. See [Financial statement versions (21.18)](#financial-statement-versions) |
 | **Daily GL Balance** | Per GL account, grouped by the lines of the version: the beginning balance and the balance at the end of each day of the month from the From Date |
 | **Month-End Close Status** | The periods of the range with their status, the latest close run, failed checks, journals generated and who prepared and approved the close |
-| **VAT Summary**, **SAWT**, **QAP**, **SLSP Sales**, **SLSP Purchases** | The BIR working papers; see [Tax: BIR forms and returns (18.18)](#tax-bir-forms-and-returns) |
+| **VAT Summary**, **SAWT**, **QAP**, **SLSP Sales**, **SLSP Purchases** | The BIR working papers; see [Tax: BIR forms and returns (19.18)](#tax-bir-forms-and-returns) |
 | Bank reconciliation reports | As for Cash Control |
 
 **Management** (TIS General Manager): every report of the departments above.
@@ -6970,7 +7118,7 @@ The Report Builder makes a report of your own from a dataset: pick the columns, 
 
 The tab **Saved reports** lists the reports you may open: your own and those shared with one of your roles, with **Name**, **Dataset**, **Description**, **Owner**, **Shared with** and **Last run**. Open one to run it again or change it.
 
-![Figure 22.3: Reports > Report Builder](../images/reports/report-builder.png)
+![Figure 23.3: Reports > Report Builder](../images/reports/report-builder.png)
 ## Glossary {#glossary}
 | Term | Meaning |
 |---|---|

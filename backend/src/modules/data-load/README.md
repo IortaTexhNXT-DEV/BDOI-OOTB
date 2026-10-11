@@ -6,7 +6,9 @@ business of the legacy system at cutover). It also compares the configuration of
 `/api/data-load` (module *Data Migration & Go-Live*; `read:data-load`, `write:data-load`; `approve:data-load` for the
 second-person approvals). The screens are the Data Migration & Go-Live workspace (front end
 `brokerverse/src/module/GoLiveWorkspace`, service `goLiveService.js`, i18n namespace `goLive`). The administrator guide
-is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`.
+is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`. In the feature catalogue (`modules/features/catalogue.js`) the workspace
+is the platform feature `go-live-workspace` (always on); the migration kit itself is the Phase 2 feature
+`legacy-migration`, enabled by the platform administrator before a migration load is uploaded (`assertKitAllowed`).
 
 ## Screens
 

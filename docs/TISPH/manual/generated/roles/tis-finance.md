@@ -86,6 +86,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Bank File Layouts | View |
 | Master > System | Schedules | View |
 | Master > System | Audit Trail | View |
+| Master > System | Data Migration & Go-Live | Create and edit |
 
 ## What you can view, change and approve {#tis-finance-and-general-accounting-access}
 
@@ -138,6 +139,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Master data and configuration | Data migration and go-live | View | Download the templates, read the loads, reconciliations, runs and decisions, compare environments | Data Migration & Go-Live |
+| Master data and configuration | Data migration and go-live | Create and edit | Upload, validate and submit loads, record checklist steps, evidence and defects |  |
+| Master data and configuration | Data migration and go-live | Approve | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock |  |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 | Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
 
@@ -147,6 +151,7 @@ This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
 - Approve premium warranty extensions and client credit limits (not the requester)
+- Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
@@ -168,6 +173,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
+| Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |
@@ -187,6 +193,7 @@ The user who enters a record never approves it: the approval is always another u
 |---|---|---|---|
 | Administration and transactions | Disbursements and petty cash (create and edit), Journal vouchers (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Claims and payment | Disbursements and petty cash (create and edit) with Claims (create and edit) held by the same person | Warning | The claims handler should not also prepare the claim payments |
+| Load and approve migration data | This role itself combines Data migration and go-live (create and edit) with Data migration and go-live (approve) | Warning | The person who uploads and submits a data load should not also approve it; named cutover administrators are recorded as exceptions until the end of hypercare |
 | Placing and paying insurers | Remittance and insurer reconciliation (create and edit), Disbursements and petty cash (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
