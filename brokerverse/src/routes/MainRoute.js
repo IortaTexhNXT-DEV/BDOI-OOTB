@@ -233,7 +233,7 @@ import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, SchemeDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, SchemeDocumentChecklist, MotorIssuanceChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -1643,6 +1643,7 @@ const Maincomponent = () => {
           <Route path="/master/insurance/endorsement-types" element={<EndorsementTypes />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
           <Route path="/master/insurance/scheme-document-checklist" element={<SchemeDocumentChecklist />} />
+          <Route path="/master/insurance/motor-issuance-checklist" element={<MotorIssuanceChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
           <Route path="/master/insurance/lead-sources" element={<LeadSources />} />
           <Route path="/master/insurance/reason-codes" element={<ReasonCodes />} />

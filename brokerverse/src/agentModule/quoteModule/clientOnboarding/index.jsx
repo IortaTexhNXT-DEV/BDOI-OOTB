@@ -17,6 +17,7 @@ import { Toast } from "primereact/toast";
 import PhAddressFields from "../../component/PhAddressFields";
 import onboardingService, { errorMessage, fieldErrors } from "./onboardingService";
 import { openConfirm } from "../../../components/ConfirmDialog";
+import { hasPermission } from "../../../utils/canOpen";
 import { AUTHORITY_DOCUMENTS, CONTROL_TYPES, KycStatusTag, PageHeader } from "./common";
 import KycDocuments from "./KycDocuments";
 import { printPdf } from "../../../components/Print";
@@ -237,6 +238,8 @@ const ClientOnboarding = () => {
   const setRow = (k, val) => setParty((p) => ({ ...p, row: { ...p.row, [k]: val } }));
   const c = profile?.client;
 
+  // a new client is onboarded with write:clients; the Operations personas (write:client-kyc) keep the KYC of existing clients
+  if (!id && !hasPermission("write:clients")) return <div className="p-3"><Message severity="info" className="w-full" text={t("onboarding.noOnboardPermission")} /></div>;
   return (
     <div className="admin__page access__page onboarding__page">
       <Toast ref={toast} />

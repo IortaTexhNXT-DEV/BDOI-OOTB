@@ -72,6 +72,12 @@ export const MASTER_TEMPLATES = [
       canWaive: 'Yes', sortOrder: '75' }],
   },
   {
+    type: 'motor-issuance-checklist', button: true, menu: 'Master > Insurance Management > Motor Issuance Checklist',
+    notes: ['A record applies to a Motor placement slip by Vehicle, Insured, Financing and Applies When (Any = every one). A KYC Document Type on the client\'s file meets the record.'],
+    samples: [{ code: 'MIC-NOTARY', documentName: 'Notarised deed of sale (second-hand vehicle)', vehicleCondition: 'Used', customerType: 'Any', financing: 'Any', condition: 'Transfer of insurance',
+      minVehicleAge: '', kycDocType: '', required: 'Yes', canWaive: 'Yes', sortOrder: '105' }],
+  },
+  {
     type: 'country', button: true, menu: 'Master > Generals > Location > Country',
     samples: [{ CountryName: 'Indonesia', ISOCode: 'ID', Description: 'Republic of Indonesia', PhoneCode: '+62' }],
   },

@@ -9142,7 +9142,10 @@
       "book": "Book (Insurer issued)",
       "printSlip": "Print slip",
       "verifyPayment": "Verify payment",
-      "paymentVerified": "Payment verified"
+      "paymentVerified": "Payment verified",
+      "submitForApproval": "Submit for approval",
+      "approveSend": "Approve",
+      "rejectSend": "Reject"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -9364,7 +9367,10 @@
       "acknowledged": "Insurer acknowledgement recorded",
       "epolicyMatch": "e-Policy recorded: it matches the slip",
       "epolicyMismatch": "e-Policy recorded: it differs from the slip",
-      "booked": "Policy {{number}} booked"
+      "booked": "Policy {{number}} booked",
+      "approvalRequested": "Placement slip submitted for approval",
+      "approvalApproved": "Placement slip approved: it can be sent to the insurer",
+      "approvalRejected": "Placement slip rejected"
     },
     "quoteJourney": {
       "title": "Send to insurance company",
@@ -9374,7 +9380,8 @@
       "direct": "Issue the policy directly",
       "directHint": "Convert the accepted quotation slip to a policy now.",
       "created": "Placement slip {{number}}",
-      "createdDetail": "Send it to the insurer(s) and record their confirmation to issue the policy."
+      "createdDetail": "Send it to the insurer(s) and record their confirmation to issue the policy.",
+      "createdDetailApproval": "Submit it for approval: a second user approves it before it is sent to the insurer(s)."
     },
     "acknowledge": {
       "title": "Insurer acknowledgement",
@@ -9501,6 +9508,60 @@
       "pdcApproved": "Approved post-dated cheque instalments",
       "verified": "Proof of payment verified",
       "notVerified": "Not verified"
+    },
+    "approval": {
+      "pending": "Waiting for approval - submitted by {{by}} on {{date}}",
+      "rejected": "Rejected by {{by}}: {{note}}",
+      "makerNote": "You raised or submitted this slip: another user approves it",
+      "submitTitle": "Submit placement slip {{number}} for approval",
+      "rejectTitle": "Reject placement slip {{number}}",
+      "approveTitle": "Approve placement slip {{number}}",
+      "remarks": "Remarks",
+      "reason": "Reason",
+      "field": "Approval to send",
+      "statusPending": "Waiting for approval",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "required": "Approval required before sending to the insurer: submit the slip for approval"
+    },
+    "checklist": {
+      "title": "Motor issuance checklist",
+      "document": "Document",
+      "mandatory": "Mandatory",
+      "statusLabel": "Status",
+      "status": {
+        "pending": "Pending",
+        "received": "Received",
+        "waiver-requested": "Waiver requested",
+        "waived": "Waived"
+      },
+      "onFile": "On the client's KYC file",
+      "missing": "{{count}} mandatory missing",
+      "complete": "Complete",
+      "mode": {
+        "warn": "Warning only",
+        "off": "Not enforced"
+      },
+      "none": "No documents apply",
+      "receive": "Receive",
+      "receiveTitle": "Receive {{document}}",
+      "file": "File (PDF or image)",
+      "remark": "Remark (paper original on file)",
+      "received": "Document received",
+      "reason": "Reason",
+      "waiverReason": "Waiver reason",
+      "requestWaiver": "Request waiver",
+      "requestWaiverTitle": "Request the waiver of {{document}}",
+      "waiverRequested": "Waiver requested",
+      "approveWaiver": "Approve waiver",
+      "approveWaiverTitle": "Approve the waiver of {{document}}",
+      "waiverApproved": "Waiver approved",
+      "rejectWaiver": "Reject waiver",
+      "rejectWaiverTitle": "Reject the waiver of {{document}}",
+      "waiverRejected": "Waiver rejected",
+      "reopen": "Reopen",
+      "reopenTitle": "Reopen {{document}}",
+      "reopened": "Document reopened"
     }
   },
   "postingRules": {
@@ -13332,7 +13393,8 @@
     "noChecklist": "No document required",
     "printKycForm": "Print KYC form",
     "duplicateTitle": "Client already on record?",
-    "createAnyway": "Create anyway"
+    "createAnyway": "Create anyway",
+    "noOnboardPermission": "Onboarding a new client needs the right to create clients; open an existing client to maintain its KYC"
   },
   "jvTools": {
     "upload": "Upload",
@@ -13525,6 +13587,12 @@
         "section": "Insurance Management",
         "item": "scheme document",
         "help": "Documents a scheme application needs, by scheme type, KYC source and condition. A KYC item cannot be waived."
+      },
+      "motorChecklist": {
+        "title": "Motor Issuance Checklist",
+        "section": "Insurance Management",
+        "item": "motor issuance document",
+        "help": "Documents to have on file before a Motor policy is booked from its placement slip, by vehicle, insured, financing and condition. A mandatory document missing blocks the booking (placement.issuance_checklist_mode); a waiver needs a second user."
       },
       "repairShops": {
         "title": "Repair Shops",

@@ -455,6 +455,23 @@ async function approvals(ctx) {
       FROM renewals ra JOIN policies p ON p.id = ra.policy_id LEFT JOIN clients c ON c.id = COALESCE(ra.client_id, p.client_id)
       WHERE ra.status = 'pending-approval' AND ${notMine(ctx, 'ra.submitted_by')} AND ${rec(ctx, 'renewal', 'ra')}`);
   }
+  // placement slips waiting for approval before they go to the insurer (GAP-POLICY-21): the roles of
+  // placement.send_approval_roles, never the user who raised or submitted the slip (placement/placements.js)
+  const placementApprovers = (await getSetting('placement.send_approval_roles', [])) || [];
+  if (ctx.can('read:quotations') && (isAdmin(ctx.user) || ctx.roles.some((r) => placementApprovers.includes(r))) && await has('placements')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Placement slip'", id: "'pls-' || ps.id", ref: 'ps.placement_number', title: "COALESCE(ic.name, ps.lob, 'Placement slip')", client_name: CLIENT('c', 'l', 'ps.insured_name'),
+      due_date: due('ps.send_approval_requested_at'), status: "'pending'", next_action: "'Approve or reject before it is sent to the insurer'", link: "'/placement/placement-slips/' || ps.id",
+      amount: 'ps.premium_total', created_at: 'ps.send_approval_requested_at' })}
+      FROM placements ps LEFT JOIN clients c ON c.id = ps.client_id LEFT JOIN leads l ON l.id = ps.lead_id LEFT JOIN insurance_companies ic ON ic.id = ps.insurance_company_id
+      WHERE ps.status = 'draft' AND ps.send_approval_status = 'pending' AND ${notMine(ctx, 'ps.send_approval_requested_by')} AND ${notMine(ctx, 'ps.created_by')} AND ${rec(ctx, 'placement', 'ps')}`);
+  }
+  // waivers of the Motor issuance checklist (GAP-QUOTE-23): approve:policies, never the user who requested them
+  if (ctx.can('approve:policies') && await has('placement_checklist_items')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Checklist waiver'", id: "'pci-' || pci.id", ref: 'pw.placement_number', title: "pci.document || ': ' || COALESCE(pci.waiver_reason, '')",
+      due_date: due('pci.waiver_requested_at'), status: 'pci.status', link: "'/placement/placement-slips/' || pw.id", created_at: 'pci.waiver_requested_at' })}
+      FROM placement_checklist_items pci JOIN placements pw ON pw.id = pci.placement_id
+      WHERE pci.status = 'waiver-requested' AND ${notMine(ctx, 'pci.waiver_requested_by')} AND ${rec(ctx, 'placement', 'pw')}`);
+  }
   // premium payments captured on a policy wait for the verification of a receipting user (write:receipts, policies/router.js)
   if (ctx.can('write:receipts') && await has('policy_payments')) {
     out.push(`SELECT ${select({ ...base, kind: "'Premium payment to verify'", id: 'pp.id', ref: "COALESCE(pp.reference_no, p.policy_number)", title: 'p.policy_number', client_name: CLIENT('c'),

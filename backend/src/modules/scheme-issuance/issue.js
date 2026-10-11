@@ -131,7 +131,7 @@ export async function sendToInsurer(id, user) {
     const attachments = (await getSetting('schemes.attach_documents_to_placement', true)) === false ? []
       : (await query('SELECT file_key, file_name FROM scheme_checklist_items WHERE application_id = $1 AND file_key IS NOT NULL ORDER BY sort_order', [a.id])).rows
         .map((f) => fileAttachment(f.file_key, f.file_name, /\.png$/i.test(f.file_name) ? 'image/png' : /\.jpe?g$/i.test(f.file_name) ? 'image/jpeg' : 'application/pdf'));
-    await sendPlacement(placementId, user, { attachments });
+    await sendPlacement(placementId, user, { attachments, approvedUnder: 'scheme-issuance' });
   } catch (e) {
     // the insurer has no e-mail address: the slip stays in Draft, sent from Placement Slips once the address is added
     warning = e.message;

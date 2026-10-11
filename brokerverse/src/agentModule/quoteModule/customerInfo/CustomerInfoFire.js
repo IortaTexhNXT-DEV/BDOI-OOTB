@@ -144,7 +144,7 @@ const CustomerInfoFire = ({ action }) => {
       if (!result.success && result.code === "PLACEMENT_JOURNEY") {
         // the line's placement journey requires a Placement Slip: place the risk with the insurer(s) first
         const placement = await placementService.placeQuotation(quotationId, { inceptionDate: inception, expiryDate: expiry, insuredName });
-        toast.current?.show({ severity: "info", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t("placement.quoteJourney.createdDetail"), life: 2500 });
+        toast.current?.show({ severity: "info", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t(placement.sendApprovalRequired ? "placement.quoteJourney.createdDetailApproval" : "placement.quoteJourney.createdDetail"), life: 2500 });
         navigate(`/placement/placement-slips/${placement.id}`);
         return;
       }

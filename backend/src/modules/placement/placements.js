@@ -12,7 +12,8 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, forbidden, notFound, HttpError } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { hasPermission } from '../../lib/auth.js';
+import { hasPermission, isAdmin } from '../../lib/auth.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { companyName } from '../../lib/letterhead.js';
 import { queueEmail, documentAttachment, fileAttachment } from '../../lib/mailer.js';
 import { today, isoDate } from '../../lib/dates.js';
@@ -29,6 +30,7 @@ import { findDocument, reserveKey, writeObject, safeKey } from '../uploads/stora
 import { premiumBreakdown } from '../quotations/premium.js';
 import { assertNotDeclined, assertReferralCleared } from '../product-configurator/underwriting.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
+import { assertIssuanceChecklist } from './issuanceChecklist.js';
 import { normaliseParticipants, writeParticipants, participantsOf, participantInputs, leadOf, legacyParticipantDetails } from './participants.js';
 import { getSlipRow, participantsFromOffers, riskFromSlip, assertParty, partyName } from './brokerSlips.js';
 
@@ -44,6 +46,8 @@ const SELECT = `SELECT p.*, row_to_json(l.*) AS lead_row, c.display_name AS clie
   (SELECT u.display_name FROM users u WHERE u.id = p.acknowledged_by) AS acknowledged_by_name, (SELECT u.display_name FROM users u WHERE u.id = p.epolicy_received_by) AS epolicy_received_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = p.checked_by) AS checked_by_name, (SELECT u.display_name FROM users u WHERE u.id = p.issued_by) AS issued_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = p.payment_verified_by) AS payment_verified_by_name,
+  (SELECT u.display_name FROM users u WHERE u.id = p.send_approval_requested_by) AS send_approval_requested_by_name,
+  (SELECT u.display_name FROM users u WHERE u.id = p.send_approved_by) AS send_approved_by_name,
   (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'placement' AND rp.entity_id = p.id) AS participants_count,
   (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'placement' AND rp.entity_id = p.id AND rp.status = 'confirmed') AS confirmed_count
   FROM placements p LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -72,8 +76,10 @@ export function toPlacement(r, participants = null) {
       receivedBy: r.epolicy_received_by_name || r.epolicy_received_by, receivedById: r.epolicy_received_by } : null,
     check: r.check_result ? { status: r.check_status, decision: r.check_decision, reason: r.check_reason, at: r.checked_at, by: r.checked_by_name || r.checked_by, byId: r.checked_by, ...r.check_result } : null,
     paymentVerification: r.payment_verified_at ? { ...(r.payment_verification || {}), at: r.payment_verified_at, by: r.payment_verified_by_name || r.payment_verified_by, byId: r.payment_verified_by } : null,
+    sendApproval: r.send_approval_status ? { status: r.send_approval_status, requestedAt: r.send_approval_requested_at, requestedBy: r.send_approval_requested_by_name || r.send_approval_requested_by,
+      requestedById: r.send_approval_requested_by, decidedAt: r.send_approved_at, decidedBy: r.send_approved_by_name || r.send_approved_by, decidedById: r.send_approved_by, note: r.send_approval_note } : null,
     participantsCount: r.participants_count ?? null, confirmedCount: r.confirmed_count ?? null, remarks: r.remarks, cancelReason: r.cancel_reason,
-    createdBy: r.created_by_name || r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    createdBy: r.created_by_name || r.created_by, createdById: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
     ...(participants ? { participants, isCoInsurance: participants.length > 1 } : {}),
   };
 }
@@ -336,6 +342,8 @@ export async function updatePlacement(id, body, user) {
     cols.insurance_company_id = leadOf(parts).insuranceCompanyId;
     cols.doc = JSON.stringify({ ...doc, participantDetails: await legacyParticipantDetails(parts, db, before.currency), isCoInsurance: parts.length > 1 });
     if (before.status === 'declined') cols.status = 'draft';
+    // an approval to send (placement.send_requires_approval) was given to the slip as it was: the edited slip is approved again
+    Object.assign(cols, { send_approval_status: null, send_approval_requested_by: null, send_approval_requested_at: null, send_approved_by: null, send_approved_at: null, send_approval_note: null });
     const keys = Object.keys(cols);
     await db.query(`UPDATE placements SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')}, updated_by = $${keys.length + 2}, updated_at = now() WHERE id = $1`, [before.id, ...Object.values(cols), user.id]);
     const after = (await db.query('SELECT * FROM placements WHERE id = $1', [before.id])).rows[0];
@@ -347,6 +355,66 @@ export async function updatePlacement(id, body, user) {
   });
   await storeSlipDocument(before.id, user.id);
   return { before: toPlacement(before), after: await placementById(before.id) };
+}
+
+// ---------------------------------------------------------------- approval to send (maker-checker, GAP-POLICY-21)
+
+/** Is the approval of a second user needed before a placement slip goes to the insurer (placement.send_requires_approval)? */
+export const sendApprovalRequired = async () => (await getSetting('placement.send_requires_approval', true)) !== false;
+/** Roles whose users approve a placement slip before it is sent (placement.send_approval_roles; the administrator always). */
+const sendApprovalRoles = async () => {
+  const v = await getSetting('placement.send_approval_roles', []);
+  return Array.isArray(v) ? v.map(String) : [];
+};
+export async function canApproveSend(user) {
+  if (isAdmin(user)) return true;
+  const roles = await sendApprovalRoles();
+  return (user?.roles || []).some((r) => roles.includes(r));
+}
+
+/** Refuse to send a raised placement slip that is not approved while placement.send_requires_approval is on. */
+export async function assertSendApproved(p) {
+  if (!(await sendApprovalRequired())) return;
+  const status = p.sendApproval?.status || p.send_approval_status || null;
+  if (status === 'approved') return;
+  const number = p.placementNumber || p.placement_number;
+  if (status === 'pending') throw conflict(`Placement slip ${number} is waiting for approval: it is sent once a second user has approved it`);
+  throw conflict(`Placement slip ${number} must be approved by a second user before it is sent to the insurer: submit it for approval`);
+}
+
+/** Submit a raised placement slip for approval to send (the maker's step); a rejected slip is submitted again. */
+export async function requestSendApproval(id, { remarks = null } = {}, user) {
+  const p = await getPlacementRow(id);
+  if (p.status !== 'draft') throw conflict(`Only a raised placement slip is submitted for approval (placement status: ${LABELS[p.status] || p.status})`);
+  if (!(await sendApprovalRequired())) throw conflict('Placement slips are sent without approval (placement.send_requires_approval is off)');
+  if (p.send_approval_status === 'pending') throw conflict(`Placement slip ${p.placement_number} is already waiting for approval`);
+  if (p.send_approval_status === 'approved') throw conflict(`Placement slip ${p.placement_number} is already approved: send it to the insurer`);
+  await query(`UPDATE placements SET send_approval_status = 'pending', send_approval_requested_by = $2, send_approval_requested_at = now(), send_approved_by = NULL, send_approved_at = NULL,
+    send_approval_note = $3, updated_by = $2, updated_at = now() WHERE id = $1`, [p.id, user.id, blank(remarks) ? null : String(remarks).trim()]);
+  const roles = await sendApprovalRoles();
+  const approvers = (await many(`SELECT DISTINCT u.id FROM users u JOIN user_roles ur ON ur.user_id = u.id JOIN roles r ON r.id = ur.role_id
+    WHERE r.code = ANY($1::text[]) AND u.status = 'active' AND NOT (u.id = ANY($2::text[]))`, [roles, [user.id, p.created_by].filter(Boolean)])).map((u) => u.id);
+  await notifyApprovers({ users: approvers, document: 'Placement slip', number: p.placement_number, by: user.username, detail: p.insured_name || null,
+    link: `/placement/placement-slips/${p.id}`, entity: 'placement', entityId: p.id });
+  return placementById(p.id);
+}
+
+/**
+ * Approve or reject (with the reason) a placement slip waiting for approval to send: a user holding a role of
+ * placement.send_approval_roles who neither raised nor submitted the slip (segregation of duties, enforced here).
+ */
+export async function decideSendApproval(id, { decision, note = null }, user) {
+  if (!['approve', 'reject'].includes(decision)) throw badRequest('Validation failed', [{ path: 'decision', message: 'decision must be approve or reject' }]);
+  const p = await getPlacementRow(id);
+  if (p.send_approval_status !== 'pending' || p.status !== 'draft') throw conflict(`Placement slip ${p.placement_number} is not waiting for approval`);
+  if (!(await canApproveSend(user))) throw forbidden(`Placement slip ${p.placement_number} is approved by a user of the roles of placement.send_approval_roles`);
+  if ([p.created_by, p.send_approval_requested_by].includes(user.id)) throw forbidden(`Maker-checker: placement slip ${p.placement_number} is approved by a user other than the one who raised or submitted it`);
+  if (decision === 'reject' && blank(note)) throw badRequest('Validation failed', [{ path: 'note', message: 'Enter the reason for rejecting the placement slip' }]);
+  await query('UPDATE placements SET send_approval_status = $2, send_approved_by = $3, send_approved_at = now(), send_approval_note = $4, updated_by = $3, updated_at = now() WHERE id = $1',
+    [p.id, decision === 'approve' ? 'approved' : 'rejected', user.id, blank(note) ? null : String(note).trim()]);
+  await notifyDecision({ userId: p.send_approval_requested_by, decidedBy: user.id, document: 'Placement slip', number: p.placement_number, approved: decision === 'approve', by: user.username,
+    reason: note || null, link: `/placement/placement-slips/${p.id}`, entity: 'placement', entityId: p.id });
+  return { before: { status: 'pending' }, placement: await placementById(p.id) };
 }
 
 /**
@@ -402,9 +470,11 @@ async function kycAttachments(p) {
   return key && /^[a-z0-9_/-]+\.[a-z0-9]+$/i.test(key) && (await findDocument(key)) ? [fileAttachment(key, key.split('/').pop())] : [];
 }
 
-export async function sendPlacement(id, user, { insurerIds = null, attachments = [] } = {}) {
+export async function sendPlacement(id, user, { insurerIds = null, attachments = [], approvedUnder = null } = {}) {
   const p = await placementById(id);
   if (!['draft', ...WITH_INSURER].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
+  // approvedUnder: the caller has its own approval of the order; a scheme application slip has its checklist and waivers (Scheme Issuance)
+  if (p.status === 'draft' && !approvedUnder && p.source !== 'scheme') await assertSendApproved(p);
   await assertPaymentVerified(p);
   const toSend = p.participants.filter((r) => r.status !== 'declined' && (!insurerIds || insurerIds.map(Number).includes(Number(r.insuranceCompanyId))));
   const t = await emailTemplate('placement_order');
@@ -727,13 +797,15 @@ export async function bookPlacement(id, body, user) {
   const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
   const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
   await assertPaymentVerified(p);
+  // the documents of the Motor issuance checklist (placement.issuance_checklist_mode: block refuses, warn names them)
+  const checklist = await assertIssuanceChecklist(p);
   await assertKyc({ lob: p.lob, sources: [quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc, p.epolicy?.vehicle, extra.customerInfo, extra], clientId: p.client_id, leadId: p.lead_id });
   const r = await withTransaction((db) => bookInTx(db, p.id, body, user));
   const policy = await getPolicyRow(r.policyId);
   const schedule = await emailSchedule(policy.id, p);
   await notify({ userId: p.owner_user_id || user.id, type: 'info', title: 'Policy booked', message: `Policy ${policy.policy_number} (insurer policy ${p.epolicy?.insurerPolicyNumber}) was booked from placement slip ${p.placement_number}`,
     link: `/agent/policydetail/${policy.id}`, entity: 'policy', entityId: policy.id });
-  return { ...r, schedule, placement: await placementById(p.id) };
+  return { ...r, schedule, checklistWarnings: checklist.warnings, placement: await placementById(p.id) };
 }
 
 function listWhere(q) {

@@ -178,7 +178,7 @@ const CoverageDetailedView = () => {
         inceptionDate: additionalPolicyData.inception || additionalPolicyData.inceptionDate || undefined,
         billingMode,
       });
-      toast.current?.show({ severity: "success", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t("placement.quoteJourney.createdDetail"), life: 2500 });
+      toast.current?.show({ severity: "success", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t(placement.sendApprovalRequired ? "placement.quoteJourney.createdDetailApproval" : "placement.quoteJourney.createdDetail"), life: 2500 });
       navigate(`/placement/placement-slips/${placement.id}`);
     } catch (error) {
       toast.current?.show({ severity: "error", summary: t("common.error"), detail: error.message, life: 5000 });

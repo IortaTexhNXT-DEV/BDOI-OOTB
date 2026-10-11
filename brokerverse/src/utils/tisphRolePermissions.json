@@ -178,9 +178,11 @@
     "write:policies",
     "write:profile",
     "write:promotion-rates",
+    "write:promotions",
     "write:quotations",
     "write:renewals",
     "write:sales-activities",
+    "write:schemes",
     "write:talkbot-calls"
   ],
   "tis-ops-associate": [
@@ -220,6 +222,7 @@
     "read:talkbot-calls",
     "view:pii",
     "write:claims",
+    "write:client-kyc",
     "write:endorsements",
     "write:fleet",
     "write:loan-status",
@@ -273,6 +276,7 @@
     "read:talkbot-calls",
     "view:pii",
     "write:claims",
+    "write:client-kyc",
     "write:discount-caps",
     "write:endorsements",
     "write:fleet",
@@ -282,11 +286,9 @@
     "write:notifications",
     "write:policies",
     "write:profile",
-    "write:promotions",
     "write:quotations",
     "write:renewals",
-    "write:scheme-issuance",
-    "write:schemes"
+    "write:scheme-issuance"
   ],
   "tis-ops-unit-head": [
     "approve:claims",
@@ -345,6 +347,7 @@
     "read:talkbot-calls",
     "view:pii",
     "write:claims",
+    "write:client-kyc",
     "write:discount-caps",
     "write:endorsements",
     "write:fleet",
@@ -354,11 +357,9 @@
     "write:notifications",
     "write:policies",
     "write:profile",
-    "write:promotions",
     "write:quotations",
     "write:renewals",
-    "write:scheme-issuance",
-    "write:schemes"
+    "write:scheme-issuance"
   ],
   "tis-ccd-pdu": [
     "read:masters",
@@ -492,6 +493,8 @@
   ],
   "tis-it-admin": [
     "approve:access-control",
+    "approve:promotions",
+    "approve:schemes",
     "read:access-control",
     "read:audit",
     "read:channels",
@@ -518,6 +521,7 @@
     "read:policies",
     "read:products",
     "read:profile",
+    "read:promotions",
     "read:quotations",
     "read:receipts",
     "read:remittance",
@@ -540,8 +544,10 @@
     "write:premium-charges",
     "write:products",
     "write:profile",
+    "write:promotions",
     "write:roles",
     "write:schedules",
+    "write:schemes",
     "write:settings",
     "write:users"
   ],
@@ -629,9 +635,11 @@
     "write:policies",
     "write:profile",
     "write:promotion-rates",
+    "write:promotions",
     "write:quotations",
     "write:renewals",
     "write:sales-activities",
+    "write:schemes",
     "write:talkbot-calls"
   ],
   "tis-auditor": [

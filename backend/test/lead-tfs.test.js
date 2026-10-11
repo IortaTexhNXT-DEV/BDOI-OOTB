@@ -81,6 +81,45 @@ describe('TFS account import', () => {
   });
 });
 
+describe('TFS column map (leads.tfs_column_map, GAP-SALES-06)', () => {
+  const MAP = 'leads.tfs_column_map';
+  it('is delivered with the current columns and is changed by IT AppSupport only, checked and audited', async () => {
+    const { TFS_COLUMNS, defaultTfsColumnMap } = await import('../src/modules/leads/tfsColumns.js');
+    const delivered = (await one('SELECT value FROM app_settings WHERE key = $1', [MAP])).value;
+    expect(delivered).toEqual(defaultTfsColumnMap());
+    expect(Object.keys(delivered).sort()).toEqual(TFS_COLUMNS.map((c) => c.key).sort());
+    await persona('tf.it', ['tis-it-admin']);
+    const map = { ...delivered, loanId: { header: 'TFS Loan Account No.', aliases: ['loan acct'] } };
+    expect((await as['tf.officer']('put', '/settings').send({ settings: { [MAP]: map } })).status).toBe(403);
+    const unknown = await as['tf.it']('put', '/settings').send({ settings: { [MAP]: { ...map, colour: { header: 'Colour' } } } });
+    expect(unknown.status).toBe(400);
+    expect(unknown.body.errors[0].message).toMatch(/^colour is not a field of the TFS account file/);
+    const twice = await as['tf.it']('put', '/settings').send({ settings: { [MAP]: { ...map, tfsReference: { header: 'Loan Acct' } } } });
+    expect(twice.status).toBe(400);
+    expect(twice.body.errors.map((e) => e.message).join()).toMatch(/Column name "(Loan Acct|loan acct)" is given to both (loanId|tfsReference) and (loanId|tfsReference)/);
+    const noHeader = await as['tf.it']('put', '/settings').send({ settings: { [MAP]: { loanId: { header: ' ' } } } });
+    expect(noHeader.body.errors[0].message).toBe('loanId: header is required (up to 80 characters)');
+    const saved = await as['tf.it']('put', '/settings').send({ settings: { [MAP]: map } });
+    expect(saved.status, JSON.stringify(saved.body)).toBe(200);
+    const trail = await one("SELECT after_data FROM audit_log WHERE entity = 'settings' AND action = 'update' ORDER BY id DESC LIMIT 1");
+    expect(trail.after_data[MAP].loanId.header).toBe('TFS Loan Account No.');
+  });
+
+  it('reads the file and builds the template by the configured headers', async () => {
+    clearSettingsCache();
+    const header = TFS.map((h) => (h === 'Loan ID' ? 'TFS Loan Account No.' : h));
+    const r = await as['tf.officer']('post', '/leads/tfs-import').attach('file', sheet(header, [tfsRow({ loan: 'LN-MAP-1', first: 'Mapped' })]), 'TFS_mapped.xlsx');
+    expect(r.body.data, JSON.stringify(r.body)).toMatchObject({ created: 1, failed: 0 });
+    // a delivered alias the map no longer lists is no longer read: the row has no loan
+    const old = await as['tf.officer']('post', '/leads/tfs-import').attach('file', sheet(TFS.map((h) => (h === 'Loan ID' ? 'Loan Number' : h)), [tfsRow({ loan: 'LN-MAP-2' })]), 'TFS_old.xlsx');
+    expect(old.body.data.errors[0].message).toMatch(/Loan ID is required/);
+    const { readXlsx } = await import('../src/modules/documents/xlsx.js');
+    const t = await as['tf.officer']('get', '/leads/tfs-import/template').buffer(true).parse((res, cb) => { const b = []; res.on('data', (c) => b.push(c)); res.on('end', () => cb(null, Buffer.concat(b))); });
+    expect(readXlsx(t.body)[0]).toContain('TFS Loan Account No.');
+    await setting(MAP, (await import('../src/modules/leads/tfsColumns.js')).defaultTfsColumnMap());
+  });
+});
+
 describe('prospect values', () => {
   it('takes the lead category, customer type and status from their lists', async () => {
     const leasing = await as['tf.assoc']('post', '/leads').send({ firstName: 'Lea', leadCategory: 'Leasing' });

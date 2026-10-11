@@ -120,7 +120,27 @@ export async function placeAndBook(api, body, { policyNumber = null, checker = n
   const raised = await api('post', '/placements').send(body);
   if (raised.status !== 201) return raised;
   const p = raised.body;
-  const sent = await api('post', `/placements/${p.id}/send`).send({});
+  // a setting switched off for one step and restored after it (the controls a suite that only needs a policy does not test)
+  const without = async (key, off, fn) => {
+    const [row] = (await query('SELECT value FROM app_settings WHERE key = $1', [key])).rows;
+    await query('UPDATE app_settings SET value = $2 WHERE key = $1', [key, JSON.stringify(off)]);
+    clearSettingsCache();
+    try { return await fn(); } finally {
+      if (row) await query('UPDATE app_settings SET value = $2 WHERE key = $1', [key, JSON.stringify(row.value)]);
+      clearSettingsCache();
+    }
+  };
+  // the approval to send (placement.send_requires_approval): given by the checker, else switched off for the send
+  if (checker) {
+    const submitted = await api('post', `/placements/${p.id}/request-approval`).send({});
+    if (![200, 409].includes(submitted.status)) return submitted;
+    if (submitted.status === 200) {
+      const approved = await checker('post', `/placements/${p.id}/approval`).send({ decision: 'approve' });
+      if (approved.status !== 200) return approved;
+    }
+  }
+  const send = () => api('post', `/placements/${p.id}/send`).send({});
+  const sent = checker ? await send() : await without('placement.send_requires_approval', false, send);
   if (sent.status !== 200) return sent;
   const file = await api('post', '/s3/upload').field('folder', 'placement-epolicies')
     .attach('file', Buffer.from('%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n'), 'e-policy.pdf');
@@ -137,7 +157,21 @@ export async function placeAndBook(api, body, { policyNumber = null, checker = n
   } finally {
     if (!checker) await setCheck(true);
   }
-  return (checker || api)('post', `/placements/${p.id}/book`).send({});
+  // the documents of the Motor issuance checklist (placement.issuance_checklist_mode) are covered by test/motor-issuance-checklist.test.js
+  return without('placement.issuance_checklist_mode', 'off', () => (checker || api)('post', `/placements/${p.id}/book`).send({}));
+}
+/**
+ * Placement slips sent without the approval of a second user (placement.send_requires_approval off, migration 0686)
+ * and Motor placements booked without the issuance checklist (placement.issuance_checklist_mode off, migration 0688),
+ * for suites that test what follows. test/placement-send-approval.test.js and test/motor-issuance-checklist.test.js
+ * cover both controls on, as delivered.
+ */
+export async function withoutPlacementControls() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query("UPDATE app_settings SET value = 'false' WHERE key = 'placement.send_requires_approval'");
+  await query('UPDATE app_settings SET value = \'"off"\' WHERE key = \'placement.issuance_checklist_mode\'');
+  clearSettingsCache();
 }
 
 /**
