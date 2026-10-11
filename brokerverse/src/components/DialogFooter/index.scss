@@ -1,0 +1,37 @@
+// Dialog footer and record title (components/DialogFooter). Theme CSS variables only.
+
+.bv-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.bv-dialog-footer__start,
+.bv-dialog-footer__end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bv-dialog-footer__danger {
+  display: flex;
+  gap: 8px;
+  padding-right: 12px;
+  margin-right: 4px;
+  border-right: 1px solid var(--color-border);
+}
+
+.bv-record-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bv-record-title__version {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}

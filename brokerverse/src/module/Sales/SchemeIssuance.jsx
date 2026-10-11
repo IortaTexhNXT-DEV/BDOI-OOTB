@@ -20,6 +20,7 @@ import RowActions from "../../components/RowActions";
 import DateField from "../../components/DateField";
 import FieldError from "../../components/FieldError";
 import { formatValue } from "../../components/KeyValueGrid/formatValue";
+import ImportDialog, { errorRows } from "../../components/ImportDialog";
 
 const STATUS_FILTERS = ["", "draft", "documents-pending", "ready", "sent", "declined", "issued", "cancelled"];
 const amount = (v) => formatValue(v, { type: "amount" });
@@ -191,9 +192,8 @@ const SchemeIssuance = () => {
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
   const [batches, setBatches] = useState([]);
-  const [file, setFile] = useState(null);
-  const [result, setResult] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [batch, setBatch] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -214,20 +214,6 @@ const SchemeIssuance = () => {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { loadBatches(); }, [loadBatches]);
 
-  const upload = async () => {
-    setUploading(true);
-    try {
-      const r = await service.uploadBookings(file);
-      setResult(r.data);
-      notifySuccess(r.message);
-      load();
-      loadBatches();
-    } catch (e) {
-      notifyError(e.message);
-    } finally {
-      setUploading(false);
-    }
-  };
   const template = async () => {
     try {
       saveBlob(await service.bookingsTemplate(), "Scheme_Loan_Bookings_Upload_Template.xlsx");
@@ -235,10 +221,15 @@ const SchemeIssuance = () => {
       notifyError(e.message);
     }
   };
+  const uploaded = () => {
+    load();
+    loadBatches();
+  };
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeIssuance.title", "Scheme Issuance")}>
+      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeIssuance.title", "Scheme Issuance")}
+        trail={[t("schemeIssuance.title", "Scheme Issuance")]}>
         {write ? <Button label={t("schemeIssuance.add", "New application")} icon="pi pi-plus" onClick={() => setCreating(true)} /> : null}
       </PageHeader>
       <div className="pe-card">
@@ -269,28 +260,40 @@ const SchemeIssuance = () => {
           <TabPanel header={t("schemeIssuance.bookings", "Loan bookings upload")}>
             {write ? (
               <div className="flex flex-wrap gap-2 align-items-center mb-3">
-                <input type="file" accept=".xlsx" aria-label={t("schemeIssuance.file", "Loan bookings file")} onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                <Button label={t("schemeIssuance.upload", "Upload")} icon="pi pi-upload" disabled={!file} loading={uploading} onClick={upload} />
+                <Button label={t("schemeIssuance.uploadBookings", "Upload loan bookings")} icon="pi pi-upload" outlined onClick={() => setImporting(true)} />
                 <Button label={t("schemeIssuance.template", "Download template")} icon="pi pi-download" text onClick={template} />
               </div>
             ) : null}
-            {result ? (
-              <div className="mb-3">
-                <strong>{t("schemeIssuance.uploaded", "{{created}} of {{total}} rows created, {{failed}} failed", result)}</strong>
-                {(result.errors || []).map((x) => <div key={x.text} className="bv-text-alert">{x.text}</div>)}
-              </div>
-            ) : null}
-            <DataTable value={batches} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("schemeIssuance.noBatches", "No uploads yet")}>
-              <Column field="batchNumber" header={t("schemeIssuance.batch", "Batch")} />
+            <DataTable value={batches} dataKey="id" size="small" stripedRows paginator rows={20}
+              emptyMessage={t("schemeIssuance.noBatches", "No uploads yet. Upload the day's loan bookings file.")}>
+              <Column field="batchNumber" header={t("schemeIssuance.batch", "Batch")}
+                body={(b) => <Button label={b.batchNumber} link className="p-0 font-bold" onClick={() => setBatch(b)} />} />
               <Column field="fileName" header={t("schemeIssuance.fileName", "File")} />
               <Column field="rowsTotal" header={t("schemeIssuance.rows", "Rows")} className="bv-num" headerClassName="bv-num" />
               <Column field="rowsCreated" header={t("schemeIssuance.created", "Created")} className="bv-num" headerClassName="bv-num" />
               <Column field="rowsFailed" header={t("schemeIssuance.failed", "Failed")} className="bv-num" headerClassName="bv-num" />
-              <Column header={t("schemeIssuance.uploadedAt", "Uploaded")} body={(b) => formatValue(b.createdAt, { type: "datetime" })} />
+              <Column header={t("schemeIssuance.status", "Status")} body={(b) => <StatusChip code={b.status} />} />
+              <Column header={t("schemeIssuance.uploadedAt", "Uploaded")} body={(b) => formatValue(b.createdAt, { type: "datetime" })} style={{ whiteSpace: "nowrap" }} />
+              <Column field="createdBy" header={t("schemeIssuance.uploadedBy", "Uploaded by")} />
             </DataTable>
           </TabPanel>
         </TabView>
       </div>
+      <ImportDialog visible={importing} onHide={() => setImporting(false)} title={t("schemeIssuance.uploadBookings", "Upload loan bookings")} accept=".xlsx"
+        fileTypes={t("schemeIssuance.fileTypes", "Excel workbook (.xlsx)")} help={t("schemeIssuance.uploadHelp", "Each row is checked and priced on its own; a failed row creates nothing.")}
+        targets={[{ label: t("schemeIssuance.bookings", "Loan bookings upload"), templatePath: "/scheme-issuance/bookings/template", uploadPath: "/scheme-issuance/bookings/upload" }]}
+        onUploaded={uploaded} />
+      <Dialog visible={!!batch} onHide={() => setBatch(null)} modal style={{ width: "48rem" }} breakpoints={{ "960px": "96vw" }}
+        header={batch ? <span className="flex align-items-center gap-2">{batch.batchNumber}<StatusChip code={batch.status} /></span> : null}
+        footer={<div className="flex justify-content-start"><Button label={t("common.close", "Close")} text onClick={() => setBatch(null)} /></div>}>
+        {batch ? (
+          <DataTable value={errorRows(batch.errors || [])} dataKey="key" size="small" stripedRows
+            emptyMessage={t("schemeIssuance.noFailedRows", "No failed rows.")}>
+            <Column field="row" header={t("schemeIssuance.row", "Row")} className="bv-num" headerClassName="bv-num" style={{ width: "5rem" }} />
+            <Column field="message" header={t("schemeIssuance.problem", "Problem")} />
+          </DataTable>
+        ) : null}
+      </Dialog>
       {creating ? <ApplicationDialog value={null} onHide={() => setCreating(false)} onSaved={(a) => { setCreating(false); navigate(`/sales/scheme-issuance/${a.id}`); }} /> : null}
     </div>
   );
