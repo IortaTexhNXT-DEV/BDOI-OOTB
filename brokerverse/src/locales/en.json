@@ -19312,5 +19312,11 @@
     "batch": "Batch",
     "created": "Issued",
     "excel": "Excel"
+  },
+  "jvEdit": {
+    "edit": "Edit",
+    "saved": "Journal voucher saved and sent for approval",
+    "notSaved": "Journal voucher not saved",
+    "notLoaded": "Journal voucher not loaded"
   }
 }

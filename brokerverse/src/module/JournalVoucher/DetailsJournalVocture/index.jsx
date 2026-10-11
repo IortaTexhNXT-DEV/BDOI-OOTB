@@ -249,6 +249,10 @@ const DetailsJournalVocture = () => {
                 />
               )}
               {canWithdraw && (
+                <Button label={t("jvEdit.edit")} icon="pi pi-pencil" outlined data-testid="edit-jv"
+                  onClick={() => navigate(`/accounts/journalvoucher/editjournalvoucture/${encodeURIComponent(voucher?.id || id)}`)} />
+              )}
+              {canWithdraw && (
                 <Button label={t("accounts.journalVoucherDetails.confirm.withdraw")} icon="pi pi-undo" severity="danger" outlined onClick={withdraw} data-testid="withdraw-jv" />
               )}
               <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
