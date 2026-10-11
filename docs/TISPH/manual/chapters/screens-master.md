@@ -75,7 +75,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Master | What it holds |
 |---|---|
 | **Line of Business** | The lines TISPH writes (for example Motor, Accident, Life, Marine), with their code. Only active lines are offered. |
-| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**). The rating and covers of a product are kept in the [Product Configurator](#screens-product-configurator). |
+| **Product** | The products of each line: **Product Code**, **Product Name**, **Line of Business**, **Business Type** (for example **Package**), **Customer Segment** (**Retail**, **Corporate**), **Quotation validity (days)** (empty: the standard 30 days). The rating and covers of a product are kept in the [Product Configurator](#screens-product-configurator). |
 | **Cover** | The covers offered on quotations (for example Own Damage, Acts of Nature, Excess Bodily Injury, Property Damage). |
 | **Signatories** | The company signatories printed on documents, with their signature image. |
 | **Vehicle** | The vehicle master used by motor quotations: **Vehicle Brand**, **Vehicle Model**, **Vehicle Variant**, code and name. **Upload** loads the Toyota model list. |
@@ -91,6 +91,12 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 ![Master > Insurance > Claim Document Checklist](images/screens-master/claim-document-checklist.png)
 
+## Endorsement types {#endorsement-types}
+
+{{screen:/master/insurance/endorsement-types}}
+
+Endorsement Types lists the kinds of mid-term change of the TISPH list: **Code**, **Endorsement Type**, **Financial**, **Premium Impact**, **Lines** (`*` = all) and **Section** (insured, vehicle, cover, period, cancellation, other). An endorsement names its types; the types of one endorsement are printed by section on the endorsement, so several changes make one grouped endorsement. A line without financial endorsements (Credit Life) is offered only the non-financial types. **Add** adds a type; the switch withdraws it.
+
 ## Lead sources and reason codes {#lead-sources-and-reason-codes}
 
 {{screen:/master/insurance/lead-sources}}
@@ -99,7 +105,7 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 **Lead Sources** lists where prospects come from (for example Walk-In, Referral, Agent, Bundling, Promo, Used-Cars - SCR, Used-Cars - UCFP), with the **Channel Type**, the **Linked Office (branch code)** and the **Sort Order**. The source is chosen on the prospect.
 
-**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
+**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, policy corrections and their rejection, endorsement rejections, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
 
 ![Master > Insurance > Reason Codes](images/screens-master/reason-codes.png)
 
@@ -210,7 +216,7 @@ These four screens decide how every business event is posted to the general ledg
 | Master | What it holds |
 |---|---|
 | **Package Bundles** | Products sold together with a bundle discount, for example TFS Borrower Protect (Credit Life - Compulsory with the borrower's Personal Accident). |
-| **Insurer Rate Tables** | Each insurer's rate for a package product: **Rate basis** (percent or per mille of sum insured), **Rate**, **Minimum premium**, **Deductible**, **Key benefits**, **Commission** and the effective dates. [Quick Quote](#quick-quote) prices from these rates. |
+| **Insurer Rate Tables** | Each insurer's rate for a package product: **Rate basis** (percent or per mille of sum insured), **Rate**, **Minimum premium**, **Deductible**, **Key benefits**, **Commission** and the effective dates. |
 | **Premium Taxes & LGU Rates** | The local government tax rate of each city or municipality, the tax and charge rules (DST, VAT, LGT) and a **Calculator** to check the taxes of a premium. |
 | **Payment Gateways** | The online payment gateway for the client payment links (GCash, Maya, GrabPay, cards): enabled or not, mode, payment methods, who absorbs the fee, link validity and the bank account credited. The merchant keys are kept on the server, never on this screen. |
 | **Transaction Code** | The accounting transaction codes: **CM** Credit Memo, **DM** Debit Memo, **JV** Journal Voucher, **OR** Official Receipt, **PV** Payment Voucher, **RM** Remittance to Insurer, with their basis (debit, credit, both). |
@@ -230,6 +236,14 @@ A rule has one of two **Rate basis** values:
 **Add rate** adds a draft; **Upload rules** loads several rules from the Excel template (**Template** downloads it); **Test rate** shows the rule and rates that apply to an insurer, product, channel, motor type, sum insured and date. A rule is submitted for approval (status **Pending**) and decided on [Configuration Approvals](#posting-configuration-configuration-approvals-posting-rules-account-determination) by {{roles:approve:commission-rules}} other than its maker; an approved rule is **In force** from its effective date. A change to an approved rule is a new version that replaces it on approval and end-dates the old one; the **History** tab lists the versions. A rule cannot overlap another rule with the same keys. A pending rule can be withdrawn; an approved rule is ended with an end date.
 
 ![Master > Finance > Commission Rate Matrix](images/screens-master/commission-rate-matrix.png)
+
+## Discount Caps {#discount-caps}
+
+{{screen:/master/finance/discount-caps}}
+
+A discount cap gives, for a product sold through a channel type (**Financing bank**, **Dealer**, **Affinity partner**, **Agent / referrer**, **Direct**), the **Min discount %** and **Max discount %** of a quotation (promotion and order summary discount together, of the premium without CTPL) and the **Lowest OD rate %**. The list shows the caps with their **Effective from**, **Effective to**, **Status** and **Proposed by**.
+
+**Add cap** ({{roles:write:discount-caps}}) proposes a cap; **Replace** proposes a new cap for the same product and channel type from a later date. The cap is live once {{roles:approve:discount-caps}} other than the proposer approves it (**Approve**, or **Return** with a reason); a replaced cap ends the day before the new one starts. Two approved caps of a product and channel type cannot cover the same day, and a cap cannot start before today. When a new cap would leave lines of an active promotion outside it, the lines are named.
 
 ## Accounting masters {#finance-masters-kept-by-accounting}
 

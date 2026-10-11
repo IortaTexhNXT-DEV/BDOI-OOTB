@@ -12,7 +12,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import ImportDialog from "../../../components/ImportDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
-import promotionService from "../../../services/promotionService";
+import environmentPromotionService from "../../../services/environmentPromotionService";
 import importService from "../../../services/importService";
 import { hasPermission } from "../../../utils/canOpen";
 import { formatInstant } from "../../../utility/dateFormat";
@@ -34,17 +34,17 @@ const SetupWorkbook = () => {
   const [open, setOpen] = useState(null);
   const canLoad = hasPermission("write:data-load");
   const loader = useCallback(async () => {
-    const [kits, batches] = await Promise.all([promotionService.getKits(), promotionService.listBatches(1, 50)]);
+    const [kits, batches] = await Promise.all([environmentPromotionService.getKits(), environmentPromotionService.listBatches(1, 50)]);
     return { kits, batches: batches.data || [] };
   }, []);
   const { data, loading, refreshing, error, reload } = useStableLoad(loader);
   const kit = useMemo(() => (data?.kits?.kits || []).find((x) => x.kit === "configuration"), [data]);
   const sheets = kit?.sheets || [];
-  const targets = useMemo(() => [{ label: k("workbook"), templatePath: promotionService.templatePath(true), uploadPath: promotionService.validatePath, validatePath: promotionService.validatePath }], []); // eslint-disable-line react-hooks/exhaustive-deps
+  const targets = useMemo(() => [{ label: k("workbook"), templatePath: environmentPromotionService.templatePath(true), uploadPath: environmentPromotionService.validatePath, validatePath: environmentPromotionService.validatePath }], []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const download = async (prefill) => {
     try {
-      await importService.downloadTemplate(promotionService.templatePath(prefill), kit?.file || "Setup_Workbook.xlsx");
+      await importService.downloadTemplate(environmentPromotionService.templatePath(prefill), kit?.file || "Setup_Workbook.xlsx");
     } catch (e) {
       toast.current?.show({ severity: "error", summary: k("workbookTitle"), detail: e.message });
     }
@@ -60,12 +60,12 @@ const SetupWorkbook = () => {
     facts: [{ label: k("columns.file"), value: p.batch?.fileName }, { label: k("columns.rows"), value: p.batch?.rowsRead }],
   });
   const commit = async (p) => {
-    const r = await promotionService.loadBatch(p.batch.id);
+    const r = await environmentPromotionService.loadBatch(p.batch.id);
     return { message: r.message, ...(r.data || {}) };
   };
   const openBatch = async (row) => {
     try {
-      setOpen(await promotionService.getBatch(row.id));
+      setOpen(await environmentPromotionService.getBatch(row.id));
     } catch (e) {
       toast.current?.show({ severity: "error", summary: k("workbookTitle"), detail: e.message });
     }
@@ -124,7 +124,7 @@ const SetupWorkbook = () => {
                 { label: k("columns.when"), value: formatInstant(open.batch.loadedAt || open.batch.createdAt) },
               ]} />
             </DetailSection>
-            <DetailSection title={k("sections.sheets")} actions={open.totalErrors ? <Button type="button" icon="pi pi-download" label={k("downloadErrors")} outlined size="small" onClick={() => importService.downloadTemplate(promotionService.errorsPath(open.batch.id), "Setup_Workbook_Errors.xlsx").catch((e) => toast.current?.show({ severity: "error", summary: k("workbookTitle"), detail: e.message }))} /> : null}>
+            <DetailSection title={k("sections.sheets")} actions={open.totalErrors ? <Button type="button" icon="pi pi-download" label={k("downloadErrors")} outlined size="small" onClick={() => importService.downloadTemplate(environmentPromotionService.errorsPath(open.batch.id), "Setup_Workbook_Errors.xlsx").catch((e) => toast.current?.show({ severity: "error", summary: k("workbookTitle"), detail: e.message }))} /> : null}>
               <DataTable value={open.batch.sheets || []} dataKey="sheet" size="small" stripedRows emptyMessage={k("noSheets")}>
                 <Column header={k("columns.sheet")} field="name" />
                 <Column header={k("columns.rows")} field="read" />

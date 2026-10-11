@@ -7,7 +7,11 @@ export const RESERVED = ['id', 'quotationId', 'quotationNumber', 'generatedQuota
   // placement journey links and co-insurance rows are served from their own tables, never stored in the document
   'participants', 'brokerSlipId', 'brokerSlipNumber', 'placementId', 'placementNumber', 'placementStatus', 'journey', 'offers',
   // underwriting referral state is set by the acceptance rules and the referral decision only
-  'underwritingReferral'];
+  'underwritingReferral',
+  // validity and versions are kept in their own columns (validity.js); changeReason goes with the version it closes
+  'version', 'issuedOn', 'validity', 'createdById', 'extensionCount', 'extendedAt', 'extendedBy', 'extensionRemarks', 'readOnly', 'changeReason',
+  // set by the server: the approval rule of the quotation (QUOT-03) and the notice of a promotion priced again (PROD-15)
+  'approveBeforeSend', 'promotionNotice'];
 
 export const stripReserved = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 
@@ -48,18 +52,19 @@ export function toQuote(r) {
     fireServiceTax: Number(r.fst), accountPremiumOthers: Number(r.others), discount: Number(r.discount), NCD: Number(r.ncd),
     taxRates: doc.premiumBreakdown?.taxRates || null, isRenewal: Boolean(doc.renewal?.policyId), renewedFromPolicyId: doc.renewal?.policyId || null,
     grossPremium: Number(r.premium_total), totalSumInsured: Number(r.sum_insured), commissionRate: r.commission_rate == null ? null : Number(r.commission_rate),
-    commissionAmount: Number(r.commission_amount), currency: r.currency, validUntil: r.valid_until,
+    commissionAmount: Number(r.commission_amount), currency: r.currency, validUntil: r.valid_until, issuedOn: r.issued_on || null, version: r.version || 1,
+    extensionCount: r.extension_count || 0, extendedAt: r.extended_at || null, extendedBy: r.extended_by_name || r.extended_by || null, extensionRemarks: r.extension_remarks || null,
     customerAccepted: r.customer_accepted_at ? 'Yes' : (doc.customerAccepted ?? null),
     approvalSentTo: r.approval_sent_to, approvalSentAt: r.approval_sent_at, customerAcceptedAt: r.customer_accepted_at,
     submittedToInsurerAt: r.submitted_to_insurer_at, approvedBy: r.approved_by, approvedAt: r.approved_at,
     lead: leadSummary(r.lead_row) || doc.lead || null,
     insured: insuredOf(r, doc.lead),
-    createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    createdBy: r.created_by_name || r.created_by, createdById: r.created_by || null, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 
 export const QUOTE_SELECT = `SELECT q.*, row_to_json(l.*) AS lead_row, ic.name AS insurer_name,
-  (SELECT u.display_name FROM users u WHERE u.id = q.created_by) AS created_by_name,
+  (SELECT u.display_name FROM users u WHERE u.id = q.created_by) AS created_by_name, (SELECT u.display_name FROM users u WHERE u.id = q.extended_by) AS extended_by_name,
   (SELECT json_build_object('id', qc.id, 'code', qc.client_code, 'name', qc.display_name, 'email', qc.email, 'phone', qc.phone)
      FROM clients qc WHERE qc.id = q.client_id) AS client_row
   FROM quotes q LEFT JOIN leads l ON l.id = q.lead_id LEFT JOIN insurance_companies ic ON ic.id = q.insurance_company_id`;

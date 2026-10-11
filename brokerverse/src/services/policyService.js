@@ -589,6 +589,28 @@ class PolicyService {
     }
   }
 
+  /** A policies API call that returns its data and throws the server's message. */
+  async policyCall(path, options = {}) {
+    const r = await this.paymentCall(path, options);
+    if (!r.success) throw new Error(r.error);
+    return r.data;
+  }
+
+  /** Corrections of the core data of a policy, newest first. */
+  getPolicyCorrections(policyId) {
+    return this.policyCall(`${encodeURIComponent(policyId)}/corrections`);
+  }
+
+  /** Request a correction: { changes, reasonCode, note, insurerReference }; applied once a second user approves it. */
+  requestPolicyCorrection(policyId, body) {
+    return this.policyCall(`${encodeURIComponent(policyId)}/corrections`, { method: "POST", body });
+  }
+
+  /** Approve (apply) or reject ({ reasonCode, note }) a pending correction; withdraw an own one. */
+  decidePolicyCorrection(policyId, correctionId, action, body = {}) {
+    return this.policyCall(`${encodeURIComponent(policyId)}/corrections/${encodeURIComponent(correctionId)}/${action}`, { method: "POST", body });
+  }
+
   /** Payment screen: open bills, captured payments, payment modes, gateway, whether the user may confirm. */
   getPolicyPayments(policyId) {
     return this.paymentCall(`${encodeURIComponent(policyId)}/payments`);

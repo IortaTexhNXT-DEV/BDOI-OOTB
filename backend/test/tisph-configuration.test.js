@@ -74,7 +74,8 @@ describe('TISPH configuration of a new database', () => {
     expect(r.status).toBe(200);
     expect(r.body.data.lossCauses.ACCIDENT).toContain('Travel Inconvenience');
     const reasons = await q("SELECT code, data->>'initiatedBy' AS by FROM master_records WHERE type_code = 'cancellation-reason' AND code LIKE 'CAN-%' ORDER BY code");
-    expect(reasons).toHaveLength(7);
+    // the 7 reasons of seed 90 and the 6 M24 reasons of seed 95_tisph_quote_policy.sql
+    expect(reasons).toHaveLength(13);
     expect(reasons.find((x) => x.code === 'CAN-INS').by).toBe('insurer');
     const modes = await q("SELECT code, data->>'channel' AS channel FROM master_records WHERE type_code = 'payment-mode' AND code IN ('EFT', 'CHCK', 'E-WALLET', 'ADA') ORDER BY code");
     expect(modes).toEqual([{ code: 'ADA', channel: 'bank-transfer' }, { code: 'CHCK', channel: 'check' }, { code: 'E-WALLET', channel: 'online' }, { code: 'EFT', channel: 'bank-transfer' }]);

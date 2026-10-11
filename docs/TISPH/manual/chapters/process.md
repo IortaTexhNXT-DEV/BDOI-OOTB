@@ -28,8 +28,8 @@ From the booking onwards both policies follow the same steps.
 | Step | Who does it | Screen | Result |
 |---|---|---|---|
 | Prospect | {{roles:write:leads}} | [Prospects](#prospects) | Prospect **New**, assigned to an account executive |
-| Dealer sales | {{roles:write:motor-programmes}} | [Dealer Programmes](#dealer-programmes) | Prospects and quotations, or booked policies |
-| Quotation | {{roles:write:quotations}} | [Quotations](#quotations), [Quick Quote](#quick-quote) | Quotation **Pending Customer**, then **Customer Accepted** |
+| Dealer sales | {{roles:write:motor-programmes}} | [Dealer & Bank Programmes](#dealer-programmes) | Prospects and quotations, or booked policies |
+| Quotation | {{roles:write:quotations}} | [Quotations](#quotations) | Quotation **Pending Customer**, then **Customer Accepted** |
 | Request for quotation | {{roles:write:quotations}} | [Requests for Quotation](#requests-for-quotation-broker-slips) | Insurers' offers compared |
 | Placement | {{roles:write:quotations}} | [Placement Slips](#placement-slips) | **Sent to insurer**, **Acknowledged**, **e-Policy received** |
 | Check of the e-policy | {{roles:approve:policies}} | [Placement Slips](#placement-slips) | **Checked against slip** |
@@ -86,7 +86,7 @@ A dealer programme holds the terms agreed with a Toyota dealer and, for financed
 insurer, the own damage and acts of nature rates, the excess liability limits, the CTPL term, whether the first year
 is free or subsidised and who pays it, and what the dealer's sales upload creates.
 
-![Operations > Sales & Marketing > Dealer Programmes, with the programmes of three Toyota dealers](images/process/dealer-programmes.png)
+![Operations > Sales & Marketing > Dealer & Bank Programmes, with the programmes of three Toyota dealers](images/process/dealer-programmes.png)
 
 As delivered, the programmes are set up, and the dealers' sales files uploaded, by {{roles:write:motor-programmes}}.
 Every sales and operations role can open the programmes and print the bank endorsement letters.
@@ -132,10 +132,10 @@ quotation; a request for quotation to several insurers is optional.
    passenger personal accident per seat, and CTPL at the tariff amount for 1 or 3 years. DST, VAT and LGT are added
    to give the gross premium.
 5. Save the quotation. It is created as **Draft**.
-6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
-   **Pending Customer**.
-
-For a package product, [Quick Quote](#quick-quote) prices the quotation from the product's rates in one screen.
+6. The quotation waits for approval by another user: {{roles:approve:quotations}} other than the raiser opens it
+   (**View Details**, the eye icon) and selects **Approve and send to client**. The status becomes **Pending Customer**
+   and the client receives the quotation slip (PDF) and its approval link by e-mail. The raiser sees **Awaiting approval
+   by another user before it is sent to the client**; a new version of the quotation is approved again.
 
 ![Quotation of a financed Fortuner waiting for the client, with Copy approval link and Record customer response](images/process/quotation-pending-customer.png)
 
@@ -218,6 +218,10 @@ The check is made by {{roles:approve:policies}}, a user other than the one who u
      discrepancy by e-mail and the placement waits for the corrected e-policy, which is uploaded again.
 
 After **Confirm check** or **Accept differences** the status is **Checked against slip**.
+
+**Confirm check** and **Accept differences** are within your approval limit for policy issue (Master > User
+Management > Authority Matrix), compared with the sum insured of the slip. Above your limit the check is refused: a
+user with a higher limit checks it. **Return to insurer** has no limit.
 
 ![Check against slip: every item of the e-policy matches the placement slip](images/process/placement-check-dialog.png)
 

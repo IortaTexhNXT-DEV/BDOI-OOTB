@@ -28,5 +28,7 @@ Performance). Access: `read:renewals`, `write:renewals`; `approve:renewals` deci
 `renewal_activities`, `policy_lock_ins` (one per policy: source `promotion`, `scheme1-ara` or `scheme2`, start, years,
 end, TFS loan account and status). `src/lib/workingCalendar.js` gives working days from the Holiday master.
 
-The capture of lock-ins at issuance and the Talkbot filter on Generate Renewal Quotes belong to the sales screens; the
-filter plugs into the batch selection and reads the same notice gate.
+A policy issued (from a quotation or a placement slip) under a promotion that has lock-in years gets its lock-in at
+issuance (`noticeGate.js` `recordLockIn`, called by `policies/service.js` `issuePolicy`). The capture of the Scheme 1 and
+Scheme 2 lock-ins and the Talkbot filter on Generate Renewal Quotes belong to the sales screens; the filter plugs into
+the batch selection and reads the same notice gate.

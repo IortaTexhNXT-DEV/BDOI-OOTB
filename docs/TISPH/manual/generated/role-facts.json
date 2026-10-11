@@ -46,11 +46,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Create and edit",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -58,15 +75,6 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -83,16 +91,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -101,11 +100,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -479,6 +478,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -653,6 +658,12 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -736,6 +747,39 @@
       "TIS Operations Unit Head"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -791,11 +835,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -804,15 +865,6 @@
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
      "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
      "modules": [
       "Quotations and placement"
      ]
@@ -828,16 +880,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -846,11 +889,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -1224,6 +1267,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -1239,6 +1294,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Sales & Marketing",
@@ -1440,6 +1501,12 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -1475,6 +1542,27 @@
     {
      "what": "Approve or return renewal terms of another user",
      "kind": "maker-checker"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "10%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 3,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 50,000.00"
     }
    ],
    "approvedBy": [
@@ -1536,6 +1624,39 @@
       "TIS Operations Unit Head"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -1591,11 +1712,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -1604,15 +1742,6 @@
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
      "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
      "modules": [
       "Quotations and placement"
      ]
@@ -1628,16 +1757,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -1646,11 +1766,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -2021,6 +2141,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -2078,6 +2207,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -2093,6 +2234,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Approve",
+     "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
     {
      "area": "Sales & Marketing",
@@ -2324,6 +2477,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Approve",
+     "meaning": "Approve or return discount caps (not the requester)"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -2349,6 +2514,10 @@
    ],
    "approves": [
     {
+     "what": "Approve or return discount caps (not the requester)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve or reject an incentive calculation batch submitted by another user",
      "kind": "maker-checker"
     },
@@ -2361,12 +2530,37 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve a quotation created by another user",
      "kind": "maker-checker"
     },
     {
      "what": "Approve or return renewal terms of another user",
      "kind": "maker-checker"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "15%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 250,000.00"
     }
    ],
    "approvedBy": [
@@ -2438,6 +2632,39 @@
       "TIS Operations Unit Head"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -2507,11 +2734,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
       "Quotations and placement"
      ]
     },
@@ -2519,15 +2763,6 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -2544,16 +2779,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -2562,11 +2788,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
      "access": "View",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -2910,6 +3136,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -2958,6 +3193,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Sales & Marketing",
@@ -3123,6 +3364,12 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -3224,6 +3471,39 @@
       "TIS Operations Unit Head"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -3299,11 +3579,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
+     "modules": [
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
       "Quotations and placement"
      ]
     },
@@ -3311,15 +3608,6 @@
      "section": "Operations > Sales & Marketing",
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
-     "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
      "access": "Create and edit",
      "modules": [
       "Quotations and placement"
@@ -3336,16 +3624,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -3354,11 +3633,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "View",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "Create and edit",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -3738,6 +4017,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "Create and edit",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -3786,6 +4074,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
     },
     {
      "area": "Sales & Marketing",
@@ -3969,6 +4269,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Create and edit",
+     "meaning": "Propose and replace discount caps"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -4004,12 +4316,30 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Discount caps",
+     "approval": "Approve or return discount caps (not the requester)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -4068,6 +4398,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -4145,11 +4508,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
-     "access": "Create and edit",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
+     "access": "View",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "View",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -4158,15 +4538,6 @@
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
      "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
      "modules": [
       "Quotations and placement"
      ]
@@ -4182,16 +4553,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -4200,11 +4562,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "View",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "Create and edit",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -4656,6 +5018,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "Create and edit",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -4701,6 +5072,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -4710,6 +5087,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
     },
     {
      "area": "Sales & Marketing",
@@ -4947,6 +5336,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Create and edit",
+     "meaning": "Propose and replace discount caps"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -5011,7 +5412,28 @@
      "kind": "authority",
      "type": "underwriting_referral",
      "step": "Operations > Sales & Marketing > Quotations > Underwriting referral",
-     "limit": "Not set"
+     "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "15%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 250,000.00"
     }
    ],
    "approvedBy": [
@@ -5025,12 +5447,30 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Discount caps",
+     "approval": "Approve or return discount caps (not the requester)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -5089,6 +5529,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -5234,6 +5707,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -5507,6 +6002,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -5841,6 +6358,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -6295,6 +6834,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -7028,6 +7589,15 @@
     },
     {
      "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
+     "section": "Master > Finance",
      "screen": "Taxation",
      "path": "/master/finance/taxation",
      "access": "View",
@@ -7126,6 +7696,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Operations",
@@ -7387,6 +7963,12 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Posting rules and account determination",
      "level": "Create and edit",
      "meaning": "Propose changes to posting rules and account determination"
@@ -7615,6 +8197,28 @@
       "TIS General Manager"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -7670,8 +8274,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Requests for Quotation",
-     "path": "/placement/broker-slips",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
      "access": "View",
      "modules": [
       "Quotations and placement"
@@ -7679,8 +8283,8 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
+     "screen": "Requests for Quotation",
+     "path": "/placement/broker-slips",
      "access": "View",
      "modules": [
       "Quotations and placement"
@@ -7697,7 +8301,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "Create and edit",
      "modules": [
@@ -8265,6 +8869,15 @@
      "section": "Master > Insurance",
      "screen": "Cancellation Reasons",
      "path": "/master/insurance/cancellation-reasons",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
+     "screen": "Endorsement Types",
+     "path": "/master/insurance/endorsement-types",
      "access": "Create and edit",
      "modules": [
       "Reference masters"
@@ -8986,6 +9599,28 @@
       "TIS General Manager"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -9043,11 +9678,28 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Quick Quote",
-     "path": "/sales/quick-quote",
+     "screen": "Lead Assignment",
+     "path": "/sales/lead-assignment",
      "access": "Create and edit",
      "modules": [
-      "Prospects and leads",
+      "Lead assignment"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Sales Activities",
+     "path": "/sales/activities",
+     "access": "Create and edit",
+     "modules": [
+      "Sales activities"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Quotations",
+     "path": "/agent/Quotation",
+     "access": "Approve",
+     "modules": [
       "Quotations and placement"
      ]
     },
@@ -9056,15 +9708,6 @@
      "screen": "Requests for Quotation",
      "path": "/placement/broker-slips",
      "access": "Create and edit",
-     "modules": [
-      "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Quotations",
-     "path": "/agent/Quotation",
-     "access": "Approve",
      "modules": [
       "Quotations and placement"
      ]
@@ -9080,16 +9723,7 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "Create and edit",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Dealer Programmes",
+     "screen": "Dealer & Bank Programmes",
      "path": "/sales/dealer-programmes",
      "access": "View",
      "modules": [
@@ -9098,11 +9732,11 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Sales Activities",
-     "path": "/sales/activities",
-     "access": "Create and edit",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
      "modules": [
-      "Sales activities"
+      "Promotions"
      ]
     },
     {
@@ -9970,6 +10604,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Master > System",
      "screen": "Audit Trail",
      "path": "/master/configuration/audit-trail",
@@ -10045,6 +10688,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -10060,6 +10715,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Approve",
+     "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
     {
      "area": "Sales & Marketing",
@@ -10357,6 +11024,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Approve",
+     "meaning": "Approve or return discount caps (not the requester)"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -10418,6 +11097,10 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return discount caps (not the requester)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve or reject an incentive calculation batch submitted by another user",
      "kind": "maker-checker"
     },
@@ -10431,6 +11114,10 @@
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
      "kind": "maker-checker"
     },
     {
@@ -10468,6 +11155,27 @@
      "kind": "authority",
      "type": "remittance_settlement",
      "step": "Accounts > Remittance > Approvals (settlement, adjustment, transfer)",
+     "limit": "No limit"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "25%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "No limit"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
      "limit": "No limit"
     }
    ],
@@ -10546,6 +11254,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -10760,12 +11501,12 @@
     }
    ]
   },
-  "/sales/quick-quote": {
-   "menu": "Operations > Sales & Marketing > Quick Quote",
+  "/sales/lead-assignment": {
+   "menu": "Operations > Sales & Marketing > Lead Assignment",
    "roles": [
     {
      "role": "TIS Sales Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Officer",
@@ -10777,15 +11518,15 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS General Manager",
@@ -10793,8 +11534,8 @@
     }
    ]
   },
-  "/placement/broker-slips": {
-   "menu": "Operations > Sales & Marketing > Requests for Quotation",
+  "/sales/activities": {
+   "menu": "Operations > Sales & Marketing > Sales Activities",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -10810,18 +11551,14 @@
     },
     {
      "role": "TIS Operations Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -10867,6 +11604,43 @@
     }
    ]
   },
+  "/placement/broker-slips": {
+   "menu": "Operations > Sales & Marketing > Requests for Quotation",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/placement/placement-slips": {
    "menu": "Operations > Sales & Marketing > Placement Slips",
    "roles": [
@@ -10908,41 +11682,8 @@
     }
    ]
   },
-  "/sales/lead-assignment": {
-   "menu": "Operations > Sales & Marketing > Lead Assignment",
-   "roles": [
-    {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "Create and edit"
-    }
-   ]
-  },
   "/sales/dealer-programmes": {
-   "menu": "Operations > Sales & Marketing > Dealer Programmes",
+   "menu": "Operations > Sales & Marketing > Dealer & Bank Programmes",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -10978,20 +11719,20 @@
     }
    ]
   },
-  "/sales/activities": {
-   "menu": "Operations > Sales & Marketing > Sales Activities",
+  "/sales/promotions": {
+   "menu": "Operations > Sales & Marketing > Promotions",
    "roles": [
     {
      "role": "TIS Sales Associate",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Officer",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Sales Unit Head",
-     "access": "Create and edit"
+     "access": "View"
     },
     {
      "role": "TIS Operations Associate",
@@ -10999,15 +11740,15 @@
     },
     {
      "role": "TIS Operations Officer",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS General Manager",
-     "access": "Create and edit"
+     "access": "View"
     }
    ]
   },
@@ -13605,6 +14346,15 @@
     }
    ]
   },
+  "/master/insurance/endorsement-types": {
+   "menu": "Master > Insurance > Endorsement Types",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/master/insurance/claim-document-checklist": {
    "menu": "Master > Insurance > Claim Document Checklist",
    "roles": [
@@ -13910,6 +14660,35 @@
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/master/finance/discount-caps": {
+   "menu": "Master > Finance > Discount Caps",
+   "roles": [
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
@@ -14301,6 +15080,10 @@
   "approve:credit-control": [
    "TIS Finance & General Accounting"
   ],
+  "approve:discount-caps": [
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
   "approve:incentive": [
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
@@ -14334,6 +15117,10 @@
   "approve:posting-rules": [
    "TIS Finance & General Accounting"
   ],
+  "approve:promotions": [
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
   "approve:quotations": [
    "TIS Sales Officer",
    "TIS Sales Unit Head",
@@ -14366,6 +15153,12 @@
   "delete:leads": [
    "TIS Sales Officer",
    "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
+  "extend:quotations": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
    "TIS General Manager"
   ],
   "manage:feature-entitlements": [],
@@ -14470,6 +15263,16 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
+  "read:discount-caps": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
    "TIS General Manager"
   ],
   "read:endorsements": [
@@ -14648,6 +15451,16 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
+  "read:promotions": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
    "TIS General Manager"
   ],
   "read:quotations": [
@@ -14830,6 +15643,10 @@
   "write:disbursements": [
    "TIS Finance & General Accounting"
   ],
+  "write:discount-caps": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
   "write:endorsements": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -14913,6 +15730,15 @@
   ],
   "write:products": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:promotion-rates": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
+  "write:promotions": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "write:quotations": [
    "TIS Sales Associate",

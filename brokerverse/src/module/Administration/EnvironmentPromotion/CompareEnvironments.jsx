@@ -13,7 +13,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import { fileSize } from "../../../components/ImportDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
-import promotionService from "../../../services/promotionService";
+import environmentPromotionService from "../../../services/environmentPromotionService";
 import importService from "../../../services/importService";
 import { formatInstant } from "../../../utility/dateFormat";
 import "../index.scss";
@@ -34,13 +34,13 @@ const CompareEnvironments = () => {
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(null);
   const [rows, setRows] = useState([]);
-  const loader = useCallback(() => promotionService.listComparisons(1, 50).then((r) => r.data || []), []);
+  const loader = useCallback(() => environmentPromotionService.listComparisons(1, 50).then((r) => r.data || []), []);
   const { data, loading, refreshing, error, reload } = useStableLoad(loader);
 
   const compare = async () => {
     setBusy(true);
     try {
-      const r = await importService.upload(promotionService.comparePath, file, { kit: "configuration", includeNumbering: includeNumbering ? "true" : "false" });
+      const r = await importService.upload(environmentPromotionService.comparePath, file, { kit: "configuration", includeNumbering: includeNumbering ? "true" : "false" });
       toast.current?.show({ severity: r.verdict === "mirrored" ? "success" : "warn", summary: k("compareTitle"), detail: r.message });
       setFile(null);
       if (input.current) input.current.value = "";
@@ -54,7 +54,7 @@ const CompareEnvironments = () => {
   };
   const openComparison = async (row) => {
     try {
-      const [c, r] = await Promise.all([promotionService.getComparison(row.id), promotionService.comparisonRows(row.id, { perPage: 200 })]);
+      const [c, r] = await Promise.all([environmentPromotionService.getComparison(row.id), environmentPromotionService.comparisonRows(row.id, { perPage: 200 })]);
       setOpen(c);
       setRows(r.data || []);
     } catch (e) {
@@ -101,7 +101,7 @@ const CompareEnvironments = () => {
       <DetailDialog visible={!!open} onHide={() => setOpen(null)} header={open?.fileName || k("comparison")} size="lg">
         {open ? (
           <>
-            <DetailSection title={k("comparison")} actions={<Button type="button" icon="pi pi-download" label={k("downloadComparison")} outlined size="small" onClick={() => importService.downloadTemplate(promotionService.comparisonWorkbookPath(open.id), "Environment_Comparison.xlsx").catch((e) => toast.current?.show({ severity: "error", summary: k("compareTitle"), detail: e.message }))} />}>
+            <DetailSection title={k("comparison")} actions={<Button type="button" icon="pi pi-download" label={k("downloadComparison")} outlined size="small" onClick={() => importService.downloadTemplate(environmentPromotionService.comparisonWorkbookPath(open.id), "Environment_Comparison.xlsx").catch((e) => toast.current?.show({ severity: "error", summary: k("compareTitle"), detail: e.message }))} />}>
               <KeyValueGrid columns={3} items={[
                 { label: k("columns.verdict"), value: verdictChip(open.verdict) },
                 { label: k("columns.identical"), value: open.totals?.identical },

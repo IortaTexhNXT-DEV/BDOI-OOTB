@@ -3,10 +3,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
-import promotionService from "../../../services/promotionService";
+import environmentPromotionService from "../../../services/environmentPromotionService";
 import PromotionPath from "./PromotionPath";
 
-jest.mock("../../../services/promotionService", () => ({
+jest.mock("../../../services/environmentPromotionService", () => ({
   __esModule: true,
   default: { getPath: jest.fn(), getHistory: jest.fn(), markEnvironment: jest.fn() },
 }));
@@ -30,9 +30,9 @@ const path = (extra = {}) => ({
 
 beforeEach(() => {
   window.localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:data-load", "write:data-load"]));
-  promotionService.getPath.mockResolvedValue(path());
-  promotionService.getHistory.mockResolvedValue([{ id: 7, fileName: "Setup_Workbook.xlsx", status: "loaded", rowsRead: 412, rowsError: 0, createdBy: "IT AppSupport", createdAt: "2026-10-10T02:05:00Z" }]);
-  promotionService.markEnvironment.mockResolvedValue({ message: "Environment marked as Pre-Production" });
+  environmentPromotionService.getPath.mockResolvedValue(path());
+  environmentPromotionService.getHistory.mockResolvedValue([{ id: 7, fileName: "Setup_Workbook.xlsx", status: "loaded", rowsRead: 412, rowsError: 0, createdBy: "IT AppSupport", createdAt: "2026-10-10T02:05:00Z" }]);
+  environmentPromotionService.markEnvironment.mockResolvedValue({ message: "Environment marked as Pre-Production" });
 });
 
 const mount = () => render(<MemoryRouter><ConfirmDialogHost /><PromotionPath /></MemoryRouter>);
@@ -62,8 +62,8 @@ test("marks the environment after confirmation", async () => {
   fireEvent.click(button);
   await screen.findByText("Mark this environment?");
   fireEvent.click(screen.getByRole("button", { name: "Mark" }));
-  await waitFor(() => expect(promotionService.markEnvironment).toHaveBeenCalledWith("preprod"));
-  await waitFor(() => expect(promotionService.getPath).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(environmentPromotionService.markEnvironment).toHaveBeenCalledWith("preprod"));
+  await waitFor(() => expect(environmentPromotionService.getPath).toHaveBeenCalledTimes(2));
 });
 
 test("without write:data-load the marker cannot be changed", async () => {

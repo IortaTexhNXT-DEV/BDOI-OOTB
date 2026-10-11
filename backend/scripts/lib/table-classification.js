@@ -19,7 +19,7 @@
 export const TRANSACTION_TABLES = [
   // sales and policy administration
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments',
-  'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses',
+  'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses', 'quote_versions', 'policy_corrections', 'promotion_units',
   // receivables, receipts, collections, disbursements, petty cash movements (the funds themselves are masters)
   'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'unapplied_collections', 'unapplied_allocations', 'bank_payment_lines', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
   'collection_items', 'collection_actions', 'disbursements', 'checkbooks', 'receipt_batches', 'nonpayment_insurer_notices',
@@ -140,7 +140,7 @@ export const MASTER_CONFIG_TABLES = [
   'override_agreements', 'override_agreement_tiers',
   // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
   // programmes, campaign segments and templates, Report Builder saved reports
-  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
+  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'promotions', 'promotion_lines', 'discount_caps', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
   // CAS registration documents (system description, backup procedure): approved versions kept as the system's documentation
   'cas_documents',
   // the releases the environment runs and their approved changes (modules/features)

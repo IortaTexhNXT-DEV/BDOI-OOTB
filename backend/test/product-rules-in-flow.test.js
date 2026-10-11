@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts, enableFeatures } from './helpers.js';
+import { setup, loginAs, withProducts, withDirectSend, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { parseCondition, bandOf, test as testCondition, adjustNet } from '../src/modules/product-configurator/underwriting.js';
@@ -38,6 +38,7 @@ const ruleId = async (code) => (await q("SELECT c.id FROM product_components c J
 
 beforeAll(async () => {
   ctx = await setup();
+  await withDirectSend();
   // requests for quotation to several insurers are a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['rfq-multi-insurer']);
   await withProducts();
@@ -114,6 +115,7 @@ describe('acceptance rules on a quotation', () => {
     expect(bySales.status).toBe(403);
     expect(bySales.body.message).toContain('Operations Unit Head');
     // an Operations Unit Head limit below the sum insured refuses the approval (authority matrix)
+    await q("DELETE FROM authority_limits WHERE transaction_type = 'underwriting_referral' AND role_code = 'tis-ops-unit-head'");
     await q("INSERT INTO authority_limits(transaction_type, role_code, max_amount, status) VALUES ('underwriting_referral', 'tis-ops-unit-head', 500000, 'active')");
     const above = await proc('post', `/quotations/${referred.quotationId}/underwriting-referral`).send({ decision: 'approve' });
     expect(above.status).toBe(403);
@@ -126,6 +128,15 @@ describe('acceptance rules on a quotation', () => {
     expect(send.status).toBe(200);
     const audit = await q("SELECT action FROM audit_log WHERE entity = 'quotation' AND entity_id = $1 AND action = 'referral-approved'", [referred.quotationId]);
     expect(audit).toHaveLength(1);
+  });
+
+  it('the Operations Unit Head who raised a referred quotation cannot decide its referral (maker-checker)', async () => {
+    const own = await proc('post', '/quotations').send(motor({}, { modelYear: String(year - 17) }));
+    expect(own.body.underwritingReferral.status).toBe('pending');
+    const self = await proc('post', `/quotations/${own.body.quotationId}/underwriting-referral`).send({ decision: 'approve', remarks: 'Own quotation' });
+    expect(self.status).toBe(403);
+    expect(self.body.message).toBe('Maker-checker: the user who raised the quotation cannot decide its underwriting referral');
+    expect((await q('SELECT doc->\'underwritingReferral\'->>\'status\' AS s FROM quotes WHERE id = $1', [own.body.quotationId]))[0].s).toBe('pending');
   });
 
   it('a declined referral rejects the quotation', async () => {

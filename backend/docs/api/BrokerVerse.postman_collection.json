@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1443 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1478 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -35844,6 +35844,432 @@
       ]
     },
     {
+      "name": "Discount caps",
+      "item": [
+        {
+          "name": "Discount caps (filter status, productId, channelType)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/discount-caps?status=approved&channelType=financing_bank",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "discount-caps"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "approved"
+                },
+                {
+                  "key": "channelType",
+                  "value": "financing_bank"
+                }
+              ]
+            },
+            "description": "Discount caps (filter status, productId, channelType)\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: read:discount-caps, write:discount-caps, approve:discount-caps"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/discount-caps?status=approved&channelType=financing_bank",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "discount-caps"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "approved"
+                    },
+                    {
+                      "key": "channelType",
+                      "value": "financing_bank"
+                    }
+                  ]
+                },
+                "description": "Discount caps (filter status, productId, channelType)\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: read:discount-caps, write:discount-caps, approve:discount-caps"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"productId\": 2,\n      \"productName\": \"Motor Vehicle Insurance\",\n      \"channelType\": \"financing_bank\",\n      \"channelTypeLabel\": \"Financing bank\",\n      \"minPct\": 0,\n      \"maxPct\": 25,\n      \"lowestOd\": 1.4,\n      \"effectiveFrom\": \"2026-10-01\",\n      \"effectiveTo\": null,\n      \"status\": \"approved\",\n      \"statusLabel\": \"Approved\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Propose a cap (or a change replacing an approved cap: replacesId); live once a second user approves it. Lists the promotion lines it would leave outside",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/discount-caps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "discount-caps"
+              ]
+            },
+            "description": "Propose a cap (or a change replacing an approved cap: replacesId); live once a second user approves it. Lists the promotion lines it would leave outside\n\nFront-end touchpoint: Master > Finance > Discount Caps > Add cap\n\nAccess: write:discount-caps",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 2,\n  \"channelType\": \"financing_bank\",\n  \"minPct\": 0,\n  \"maxPct\": 25,\n  \"lowestOd\": 1.4,\n  \"effectiveFrom\": \"2026-10-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/discount-caps",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "discount-caps"
+                  ]
+                },
+                "description": "Propose a cap (or a change replacing an approved cap: replacesId); live once a second user approves it. Lists the promotion lines it would leave outside\n\nFront-end touchpoint: Master > Finance > Discount Caps > Add cap\n\nAccess: write:discount-caps",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"productId\": 2,\n  \"channelType\": \"financing_bank\",\n  \"minPct\": 0,\n  \"maxPct\": 25,\n  \"lowestOd\": 1.4,\n  \"effectiveFrom\": \"2026-10-15\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Discount cap submitted for approval\",\n  \"data\": {\n    \"id\": 1,\n    \"productId\": 2,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"channelType\": \"financing_bank\",\n    \"channelTypeLabel\": \"Financing bank\",\n    \"minPct\": 0,\n    \"maxPct\": 25,\n    \"lowestOd\": 1.4,\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"pending\",\n    \"statusLabel\": \"Approved\"\n  },\n  \"impact\": [\n    \"PRM-VIOS26 line 1\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a pending cap (approve:discount-caps; never its maker); the cap it replaces ends the day before",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/discount-caps/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "discount-caps",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a pending cap (approve:discount-caps; never its maker); the cap it replaces ends the day before\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/discount-caps/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "discount-caps",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a pending cap (approve:discount-caps; never its maker); the cap it replaces ends the day before\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Discount cap approved\",\n  \"data\": {\n    \"id\": 1,\n    \"productId\": 2,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"channelType\": \"financing_bank\",\n    \"channelTypeLabel\": \"Financing bank\",\n    \"minPct\": 0,\n    \"maxPct\": 25,\n    \"lowestOd\": 1.4,\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"approved\",\n    \"statusLabel\": \"Approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Return a pending cap with a reason code (discount_cap_return) (approve:discount-caps; never its maker)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/discount-caps/:id/return",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "discount-caps",
+                ":id",
+                "return"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Return a pending cap with a reason code (discount_cap_return) (approve:discount-caps; never its maker)\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"DCR-VALUES\",\n  \"note\": \"Maximum not agreed with TIS Sales\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/discount-caps/:id/return",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "discount-caps",
+                    ":id",
+                    "return"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Return a pending cap with a reason code (discount_cap_return) (approve:discount-caps; never its maker)\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"DCR-VALUES\",\n  \"note\": \"Maximum not agreed with TIS Sales\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Discount cap returned\",\n  \"data\": {\n    \"id\": 1,\n    \"productId\": 2,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"channelType\": \"financing_bank\",\n    \"channelTypeLabel\": \"Financing bank\",\n    \"minPct\": 0,\n    \"maxPct\": 25,\n    \"lowestOd\": 1.4,\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"returned\",\n    \"statusLabel\": \"Approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw an own pending cap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/discount-caps/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "discount-caps",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw an own pending cap\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: write:discount-caps",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/discount-caps/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "discount-caps",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw an own pending cap\n\nFront-end touchpoint: Master > Finance > Discount Caps\n\nAccess: write:discount-caps",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Discount cap withdrawn\",\n  \"data\": {\n    \"id\": 1,\n    \"productId\": 2,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"channelType\": \"financing_bank\",\n    \"channelTypeLabel\": \"Financing bank\",\n    \"minPct\": 0,\n    \"maxPct\": 25,\n    \"lowestOd\": 1.4,\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"withdrawn\",\n    \"statusLabel\": \"Approved\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Distribution channels",
       "item": [
         {
@@ -38449,7 +38875,7 @@
       "name": "Endorsements",
       "item": [
         {
-          "name": "Get one endorsement (by id or number)",
+          "name": "Get one endorsement (by id or number) with the workflow actions open to the user",
           "request": {
             "method": "GET",
             "header": [],
@@ -38470,7 +38896,7 @@
                 }
               ]
             },
-            "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+            "description": "Get one endorsement (by id or number) with the workflow actions open to the user\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
           },
           "response": [
             {
@@ -38495,7 +38921,7 @@
                     }
                   ]
                 },
-                "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+                "description": "Get one endorsement (by id or number) with the workflow actions open to the user\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
               },
               "status": "OK",
               "code": 200,
@@ -38507,7 +38933,100 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"workflow\": {\n    \"approvalRequired\": true,\n    \"canSubmit\": false,\n    \"canApprove\": true,\n    \"canSend\": false,\n    \"canComplete\": false\n  },\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Approved\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
             }
           ]
         },
@@ -38585,6 +39104,285 @@
               ],
               "cookie": [],
               "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"ENR-DOCS\",\n  \"note\": \"OR/CR of the new owner missing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"ENR-DOCS\",\n  \"note\": \"OR/CR of the new owner missing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Rejected\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/submit-for-approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "submit-for-approval"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/submit-for-approval",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "submit-for-approval"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"PendingApproval\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "types"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/types",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "types"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ],\n  \"success\": true\n}"
             }
           ]
         },
@@ -39065,6 +39863,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"emailedTo\": \"maria.santos@example.ph\",\n  \"insurerEmailedTo\": \"uw@malayan.example\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"PendingCustomer\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/types?policyId=pol_1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                "types"
+              ],
+              "query": [
+                {
+                  "key": "policyId",
+                  "value": "pol_1"
+                }
+              ]
+            },
+            "description": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/types?policyId=pol_1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    "types"
+                  ],
+                  "query": [
+                    {
+                      "key": "policyId",
+                      "value": "pol_1"
+                    }
+                  ]
+                },
+                "description": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"CPLT\",\n      \"name\": \"Change of Plate Number\",\n      \"financial\": false,\n      \"premiumImpact\": false,\n      \"section\": \"vehicle\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -67784,7 +68643,7 @@
           ]
         },
         {
-          "name": "Cancel the placement slip",
+          "name": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)",
           "request": {
             "method": "POST",
             "header": [
@@ -67811,7 +68670,7 @@
                 }
               ]
             },
-            "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+            "description": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Client withdrew\"\n}",
@@ -67851,7 +68710,7 @@
                     }
                   ]
                 },
-                "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+                "description": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reason\": \"Client withdrew\"\n}",
@@ -69566,6 +70425,485 @@
           ]
         },
         {
+          "name": "Corrections of the core data of a policy (requested, approved, rejected), newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Corrections of the core data of a policy (requested, approved, rejected), newest first\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Corrections of the core data of a policy (requested, approved, rejected), newest first\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pcr_1\",\n      \"policyId\": \"pol_1\",\n      \"status\": \"pending\",\n      \"statusLabel\": \"Pending approval\",\n      \"changes\": [\n        {\n          \"field\": \"expiry\",\n          \"label\": \"Expiry date\",\n          \"from\": \"2027-10-01\",\n          \"to\": \"2027-10-02\",\n          \"fromText\": \"01/10/2027\",\n          \"toText\": \"02/10/2027\"\n        }\n      ],\n      \"reasonCode\": \"PCR-INSURER\",\n      \"reason\": \"Insurer issued a corrected policy\",\n      \"insurerReference\": \"MAL-END-2026-0042\",\n      \"requestedBy\": \"Maria Santos\",\n      \"requestedAt\": \"2026-10-10T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it\n\nFront-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"expiry\": \"2027-10-02\"\n  },\n  \"reasonCode\": \"PCR-INSURER\",\n  \"note\": \"Corrected policy issued by the insurer\",\n  \"insurerReference\": \"MAL-END-2026-0042\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it\n\nFront-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"changes\": {\n    \"expiry\": \"2027-10-02\"\n  },\n  \"reasonCode\": \"PCR-INSURER\",\n  \"note\": \"Corrected policy issued by the insurer\",\n  \"insurerReference\": \"MAL-END-2026-0042\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction requested\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"pending\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction approved and applied\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"approved\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PCRR-NOPROOF\",\n  \"note\": \"No corrected policy from the insurer yet\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PCRR-NOPROOF\",\n  \"note\": \"No corrected policy from the insurer yet\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction rejected\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"rejected\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw an own pending correction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw an own pending correction\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw an own pending correction\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction withdrawn\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"withdrawn\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Documents of a policy: uploaded files (policy, quotation photos, endorsements) and generated PDFs",
           "request": {
             "method": "GET",
@@ -70329,6 +71667,71 @@
               ],
               "cookie": [],
               "body": "{\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"clientId\": \"cl_1\",\n  \"insuredName\": \"Juan Dela Cruz\",\n  \"status\": \"Suspended\",\n  \"paymentStatus\": \"Pending\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"grossPremium\": 23171.25,\n  \"billNumber\": \"INV-2026-00001\",\n  \"quoteRefId\": \"qt_1\",\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"version\": 2,\n      \"endorsementNumber\": \"END-2026-00001\",\n      \"premiumDelta\": 1520.5,\n      \"before\": {\n        \"grossPremium\": 23171.25\n      },\n      \"after\": {\n        \"grossPremium\": 24691.75\n      }\n    }\n  ]\n}"
             }
           ]
         },
@@ -82721,6 +84124,1341 @@
       ]
     },
     {
+      "name": "Promotions",
+      "item": [
+        {
+          "name": "Promotions (filter status, search code or name, activeOn date); superseded versions left out",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions?status=active&search=FORTUNER&activeOn=2026-11-15",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                },
+                {
+                  "key": "search",
+                  "value": "FORTUNER"
+                },
+                {
+                  "key": "activeOn",
+                  "value": "2026-11-15"
+                }
+              ]
+            },
+            "description": "Promotions (filter status, search code or name, activeOn date); superseded versions left out\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions?status=active&search=FORTUNER&activeOn=2026-11-15",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "active"
+                    },
+                    {
+                      "key": "search",
+                      "value": "FORTUNER"
+                    },
+                    {
+                      "key": "activeOn",
+                      "value": "2026-11-15"
+                    }
+                  ]
+                },
+                "description": "Promotions (filter status, search code or name, activeOn date); superseded versions left out\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"prm_1\",\n      \"code\": \"PRM-FORTUNER26\",\n      \"version\": 1,\n      \"name\": \"Fortuner launch rate\",\n      \"periodFrom\": \"2026-10-01\",\n      \"periodTo\": \"2026-12-31\",\n      \"benefit\": \"rate\",\n      \"excess\": {\n        \"2\": 2000\n      },\n      \"unitQuota\": 500,\n      \"unitsUsed\": 12,\n      \"lockInYears\": null,\n      \"productIds\": [\n        2\n      ],\n      \"insurerIds\": [\n        2,\n        3\n      ],\n      \"channelTypes\": [\n        \"financing_bank\",\n        \"dealer\"\n      ],\n      \"combineDealer\": false,\n      \"combineDiscount\": false,\n      \"status\": \"active\",\n      \"statusLabel\": \"Active\",\n      \"lineCount\": 1\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save a new promotion as Draft, version 1 (code unique, period, benefit, excess, quota, lock-in, applicability, vehicle lines)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions"
+              ]
+            },
+            "description": "Save a new promotion as Draft, version 1 (code unique, period, benefit, excess, quota, lock-in, applicability, vehicle lines)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Add promotion\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"prm_1\",\n  \"code\": \"PRM-FORTUNER26\",\n  \"version\": 1,\n  \"name\": \"Fortuner launch rate\",\n  \"periodFrom\": \"2026-10-01\",\n  \"periodTo\": \"2026-12-31\",\n  \"benefit\": \"rate\",\n  \"excess\": {\n    \"2\": 2000\n  },\n  \"unitQuota\": 500,\n  \"unitsUsed\": 12,\n  \"lockInYears\": null,\n  \"productIds\": [\n    2\n  ],\n  \"insurerIds\": [\n    2,\n    3\n  ],\n  \"channelTypes\": [\n    \"financing_bank\",\n    \"dealer\"\n  ],\n  \"combineDealer\": false,\n  \"combineDiscount\": false,\n  \"status\": \"active\",\n  \"statusLabel\": \"Active\",\n  \"lineCount\": 1,\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"variantId\": 17,\n      \"brand\": \"Toyota\",\n      \"model\": \"Fortuner\",\n      \"variant\": \"2.4 G 4x2 AT\",\n      \"yearFrom\": 2026,\n      \"yearTo\": 2027,\n      \"insurerId\": null,\n      \"promoOd\": 1.5,\n      \"minOd\": 1.5,\n      \"promoAon\": 0.4,\n      \"remitOd\": 1.3,\n      \"remitAon\": 0.3\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions"
+                  ]
+                },
+                "description": "Save a new promotion as Draft, version 1 (code unique, period, benefit, excess, quota, lock-in, applicability, vehicle lines)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Add promotion\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": \"prm_1\",\n  \"code\": \"PRM-FORTUNER26\",\n  \"version\": 1,\n  \"name\": \"Fortuner launch rate\",\n  \"periodFrom\": \"2026-10-01\",\n  \"periodTo\": \"2026-12-31\",\n  \"benefit\": \"rate\",\n  \"excess\": {\n    \"2\": 2000\n  },\n  \"unitQuota\": 500,\n  \"unitsUsed\": 12,\n  \"lockInYears\": null,\n  \"productIds\": [\n    2\n  ],\n  \"insurerIds\": [\n    2,\n    3\n  ],\n  \"channelTypes\": [\n    \"financing_bank\",\n    \"dealer\"\n  ],\n  \"combineDealer\": false,\n  \"combineDiscount\": false,\n  \"status\": \"active\",\n  \"statusLabel\": \"Active\",\n  \"lineCount\": 1,\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"variantId\": 17,\n      \"brand\": \"Toyota\",\n      \"model\": \"Fortuner\",\n      \"variant\": \"2.4 G 4x2 AT\",\n      \"yearFrom\": 2026,\n      \"yearTo\": 2027,\n      \"insurerId\": null,\n      \"promoOd\": 1.5,\n      \"minOd\": 1.5,\n      \"promoAon\": 0.4,\n      \"remitOd\": 1.3,\n      \"remitAon\": 0.3\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion saved\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A promotion version with its lines, the cap check of each line and every version of the code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A promotion version with its lines, the cap check of each line and every version of the code\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A promotion version with its lines, the cap check of each line and every version of the code\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1,\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"variantId\": 17,\n        \"brand\": \"Toyota\",\n        \"model\": \"Fortuner\",\n        \"variant\": \"2.4 G 4x2 AT\",\n        \"yearFrom\": 2026,\n        \"yearTo\": 2027,\n        \"insurerId\": null,\n        \"promoOd\": 1.5,\n        \"minOd\": 1.5,\n        \"promoAon\": 0.4,\n        \"remitOd\": 1.3,\n        \"remitAon\": 0.3\n      }\n    ],\n    \"capCheck\": {\n      \"standardRates\": {\n        \"ownDamage\": 2,\n        \"actsOfNature\": 0.5\n      },\n      \"lines\": [\n        {\n          \"lineNo\": 1,\n          \"rateDiscount\": 24,\n          \"checks\": []\n        }\n      ]\n    },\n    \"versions\": [\n      {\n        \"id\": \"prm_1\",\n        \"code\": \"PRM-FORTUNER26\",\n        \"version\": 1,\n        \"name\": \"Fortuner launch rate\",\n        \"periodFrom\": \"2026-10-01\",\n        \"periodTo\": \"2026-12-31\",\n        \"benefit\": \"rate\",\n        \"excess\": {\n          \"2\": 2000\n        },\n        \"unitQuota\": 500,\n        \"unitsUsed\": 12,\n        \"lockInYears\": null,\n        \"productIds\": [\n          2\n        ],\n        \"insurerIds\": [\n          2,\n          3\n        ],\n        \"channelTypes\": [\n          \"financing_bank\",\n          \"dealer\"\n        ],\n        \"combineDealer\": false,\n        \"combineDiscount\": false,\n        \"status\": \"active\",\n        \"statusLabel\": \"Active\",\n        \"lineCount\": 1\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a Draft version (an approved version is amended)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a Draft version (an approved version is amended)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Edit promotion\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fortuner launch rate\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"variantId\": 17,\n      \"brand\": \"Toyota\",\n      \"model\": \"Fortuner\",\n      \"variant\": \"2.4 G 4x2 AT\",\n      \"yearFrom\": 2026,\n      \"yearTo\": 2027,\n      \"insurerId\": null,\n      \"promoOd\": 1.5,\n      \"minOd\": 1.5,\n      \"promoAon\": 0.4,\n      \"remitOd\": 1.3,\n      \"remitAon\": 0.3\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a Draft version (an approved version is amended)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Edit promotion\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fortuner launch rate\",\n  \"lines\": [\n    {\n      \"lineNo\": 1,\n      \"variantId\": 17,\n      \"brand\": \"Toyota\",\n      \"model\": \"Fortuner\",\n      \"variant\": \"2.4 G 4x2 AT\",\n      \"yearFrom\": 2026,\n      \"yearTo\": 2027,\n      \"insurerId\": null,\n      \"promoOd\": 1.5,\n      \"minOd\": 1.5,\n      \"promoAon\": 0.4,\n      \"remitOd\": 1.3,\n      \"remitAon\": 0.3\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion saved\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a Draft version 1 that was never submitted (its maker only)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Delete a Draft version 1 that was never submitted (its maker only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Delete a Draft version 1 that was never submitted (its maker only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion deleted\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Amend a promotion in force: the next version in Draft, copied from it; the current version stays in force until the new one is approved",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/amend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "amend"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Amend a promotion in force: the next version in Draft, copied from it; the current version stays in force until the new one is approved\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/amend",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "amend"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Amend a promotion in force: the next version in Draft, copied from it; the current version stays in force until the new one is approved\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Version 2 created in Draft\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 2,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"draft\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a submitted promotion (approve:promotions; never its maker): Scheduled or Active; the version in force is superseded",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a submitted promotion (approve:promotions; never its maker): Scheduled or Active; the version in force is superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Approve\n\nAccess: approve:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Rates agreed with the insurers\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a submitted promotion (approve:promotions; never its maker): Scheduled or Active; the version in force is superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Approve\n\nAccess: approve:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Rates agreed with the insurers\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion approved\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Copy a promotion into a new Draft with a new code and period",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/copy",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "copy"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Copy a promotion into a new Draft with a new code and period\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PRM-FORTUNER27\",\n  \"periodFrom\": \"2027-01-01\",\n  \"periodTo\": \"2027-03-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/copy",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "copy"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Copy a promotion into a new Draft with a new code and period\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"PRM-FORTUNER27\",\n  \"periodFrom\": \"2027-01-01\",\n  \"periodTo\": \"2027-03-31\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion saved\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER27\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Recall an own submitted promotion to Draft before it is decided",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/recall",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "recall"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Recall an own submitted promotion to Draft before it is decided\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/recall",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "recall"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Recall an own submitted promotion to Draft before it is decided\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion recalled\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"draft\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resumed a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/resume",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "resume"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Resumed a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/resume",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "resume"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Resumed a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion resumed\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  },\n  \"openQuotes\": 3\n}"
+            }
+          ]
+        },
+        {
+          "name": "Return a submitted promotion to Draft with a reason code (promotion_return) (approve:promotions; never its maker)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/return",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "return"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Return a submitted promotion to Draft with a reason code (promotion_return) (approve:promotions; never its maker)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Return\n\nAccess: approve:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PRMR-RATES\",\n  \"note\": \"Remitting rate of line 2 not agreed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/return",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "return"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Return a submitted promotion to Draft with a reason code (promotion_return) (approve:promotions; never its maker)\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions > Return\n\nAccess: approve:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PRMR-RATES\",\n  \"note\": \"Remitting rate of line 2 not agreed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion returned\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"draft\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a Draft for approval: every field, line and cap check must pass",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a Draft for approval: every field, line and cap check must pass\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a Draft for approval: every field, line and cap check must pass\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion submitted for approval\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"pending-approval\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Suspended a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/suspend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "suspend"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Suspended a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/suspend",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "suspend"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Suspended a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion suspended\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  },\n  \"openQuotes\": 3\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdrawn a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdrawn a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdrawn a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PRMS-INSURER\",\n  \"note\": \"Rate under renegotiation with the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Promotion withdrawn\",\n  \"data\": {\n    \"id\": \"prm_1\",\n    \"code\": \"PRM-FORTUNER26\",\n    \"version\": 1,\n    \"name\": \"Fortuner launch rate\",\n    \"periodFrom\": \"2026-10-01\",\n    \"periodTo\": \"2026-12-31\",\n    \"benefit\": \"rate\",\n    \"excess\": {\n      \"2\": 2000\n    },\n    \"unitQuota\": 500,\n    \"unitsUsed\": 12,\n    \"lockInYears\": null,\n    \"productIds\": [\n      2\n    ],\n    \"insurerIds\": [\n      2,\n      3\n    ],\n    \"channelTypes\": [\n      \"financing_bank\",\n      \"dealer\"\n    ],\n    \"combineDealer\": false,\n    \"combineDiscount\": false,\n    \"status\": \"active\",\n    \"statusLabel\": \"Active\",\n    \"lineCount\": 1\n  },\n  \"openQuotes\": 3\n}"
+            }
+          ]
+        },
+        {
+          "name": "Choices of the promotion form and of the promotion on a quotation: Motor products, active vehicle variants, channel types, standard rates, rate change reasons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/choices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                "choices"
+              ]
+            },
+            "description": "Choices of the promotion form and of the promotion on a quotation: Motor products, active vehicle variants, channel types, standard rates, rate change reasons\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/choices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    "choices"
+                  ]
+                },
+                "description": "Choices of the promotion form and of the promotion on a quotation: Motor products, active vehicle variants, channel types, standard rates, rate change reasons\n\nFront-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"products\": [\n      {\n        \"value\": 2,\n        \"label\": \"Motor Vehicle Insurance\"\n      }\n    ],\n    \"variants\": [\n      {\n        \"value\": 17,\n        \"label\": \"Toyota Fortuner 2.4 G 4x2 AT\"\n      }\n    ],\n    \"channelTypes\": [\n      {\n        \"value\": \"financing_bank\",\n        \"label\": \"Financing bank\"\n      }\n    ],\n    \"standardRates\": {\n      \"ownDamage\": 2,\n      \"actsOfNature\": 0.5\n    },\n    \"rateChangeReasons\": [\n      \"Fleet account\"\n    ],\n    \"maxLockInYears\": 3\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Promotions open to a motor quotation document (brand-new vehicle, product, insurer, channel type, variant, year model, FMV, quota), lowest promo Own Damage rate first",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/open",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "promotions",
+                "open"
+              ]
+            },
+            "description": "Promotions open to a motor quotation document (brand-new vehicle, product, insurer, channel type, variant, year model, FMV, quota), lowest promo Own Damage rate first\n\nFront-end touchpoint: Create Quote > Coverage Details > Promotion\n\nAccess: read:quotations, write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doc\": {\n    \"productType\": \"Motor\",\n    \"insurancePolicyType\": \"COMP\",\n    \"vehicleCondition\": \"Brand New\",\n    \"lossAndDamageCoverage\": 1200000,\n    \"channelId\": \"ch_seed_tfs\",\n    \"insuranceVehicleDetails\": [\n      {\n        \"vehicleBrand\": \"Toyota\",\n        \"vehicleModel\": \"Fortuner\",\n        \"modelVariant\": \"2.4 G 4x2 AT\",\n        \"modelYear\": 2026\n      }\n    ]\n  },\n  \"insuranceCompanyId\": 2,\n  \"leadId\": \"ld_1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promotions/open",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promotions",
+                    "open"
+                  ]
+                },
+                "description": "Promotions open to a motor quotation document (brand-new vehicle, product, insurer, channel type, variant, year model, FMV, quota), lowest promo Own Damage rate first\n\nFront-end touchpoint: Create Quote > Coverage Details > Promotion\n\nAccess: read:quotations, write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doc\": {\n    \"productType\": \"Motor\",\n    \"insurancePolicyType\": \"COMP\",\n    \"vehicleCondition\": \"Brand New\",\n    \"lossAndDamageCoverage\": 1200000,\n    \"channelId\": \"ch_seed_tfs\",\n    \"insuranceVehicleDetails\": [\n      {\n        \"vehicleBrand\": \"Toyota\",\n        \"vehicleModel\": \"Fortuner\",\n        \"modelVariant\": \"2.4 G 4x2 AT\",\n        \"modelYear\": 2026\n      }\n    ]\n  },\n  \"insuranceCompanyId\": 2,\n  \"leadId\": \"ld_1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reason\": null,\n    \"channelType\": \"financing_bank\",\n    \"promotions\": [\n      {\n        \"code\": \"PRM-FORTUNER26\",\n        \"version\": 1,\n        \"name\": \"Fortuner launch rate\",\n        \"promoOd\": 1.5,\n        \"minOd\": 1.5,\n        \"promoAon\": 0.4\n      }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Public Integrations",
       "item": [
         {
@@ -84818,6 +87556,99 @@
           ]
         },
         {
+          "name": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/extend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "extend"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Customer waiting for the loan release\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/extend",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "extend"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Customer waiting for the loan release\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Quotation valid until 09/12/2026\",\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    },\n    \"validUntil\": \"2026-12-09\",\n    \"extensionCount\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form",
           "request": {
             "method": "GET",
@@ -84883,7 +87714,7 @@
           ]
         },
         {
-          "name": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
+          "name": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)",
           "request": {
             "method": "POST",
             "header": [
@@ -84910,7 +87741,7 @@
                 }
               ]
             },
-            "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+            "description": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -84950,7 +87781,7 @@
                     }
                   ]
                 },
-                "description": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
+                "description": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Send for customer approval\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -85516,6 +88347,148 @@
               ],
               "cookie": [],
               "body": "{\n  \"quotationId\": \"qt_1\",\n  \"quotationNumber\": \"QT-2026-00001\",\n  \"quotationStatus\": \"Draft\",\n  \"leadRefId\": \"ld_1\",\n  \"productType\": \"Motor\",\n  \"netPremium\": 18500,\n  \"valueAddedTax\": 2220,\n  \"documentaryStampTax\": 2312.5,\n  \"localGovernmentTax\": 138.75,\n  \"grossPremium\": 23171.25,\n  \"totalSumInsured\": 1200000,\n  \"lead\": {\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\"\n  },\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"currentVersion\": 2,\n    \"versions\": [\n      {\n        \"version\": 2,\n        \"current\": true,\n        \"status\": \"Draft\",\n        \"grossPremium\": 23171.25\n      },\n      {\n        \"version\": 1,\n        \"current\": false,\n        \"status\": \"PendingCustomer\",\n        \"grossPremium\": 24300\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One version of a quotation (a superseded version is read-only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/versions/:version",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "versions",
+                ":version"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "version",
+                  "value": "",
+                  "description": "version (path parameter)"
+                }
+              ]
+            },
+            "description": "One version of a quotation (a superseded version is read-only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/versions/:version",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "versions",
+                    ":version"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "version",
+                      "value": "",
+                      "description": "version (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One version of a quotation (a superseded version is read-only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    },\n    \"version\": 1,\n    \"readOnly\": true\n  }\n}"
             }
           ]
         },

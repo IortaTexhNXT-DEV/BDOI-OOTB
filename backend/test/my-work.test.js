@@ -128,8 +128,8 @@ describe('open items per role and scope', () => {
     expect(refs(a2)).toContain('PV-MW-0001');
     expect(refs(a2)).not.toContain('JV-MW-0001');
     expect(a1.data.find((i) => i.ref === 'JV-MW-0001')).toMatchObject({ queue: true, link: '/accounts/journalvoucher/detailsjournalvocture/jv_mw1' });
-    // sales holds no approval permission
-    expect((await items('mw.sales1', 'category=approvals')).total).toBe(0);
+    // sales approves only policy work (approve:policies): endorsements and policy corrections of other users
+    expect((await items('mw.sales1', 'category=approvals')).data.map((i) => i.kind).filter((k) => !['Endorsement', 'Policy correction'].includes(k))).toEqual([]);
   });
 
   it('approvals above the user\'s authority limit (Authority Matrix) are left out', async () => {

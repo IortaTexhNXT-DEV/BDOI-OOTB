@@ -78,6 +78,7 @@ import CompareEnvironmentsPage from "../module/Administration/EnvironmentPromoti
 import PromotionPathPage from "../module/Administration/EnvironmentPromotion/PromotionPath";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
+import DiscountCaps from "../module/FinanceMastersModule/DiscountCaps";
 import AuditTrailPage from "../module/Administration/AuditTrail";
 import FeatureCatalogue from "../module/FeaturesReleases/FeatureCatalogue";
 import PlatformFeatures from "../module/FeaturesReleases/PlatformFeatures";
@@ -232,7 +233,7 @@ import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -363,6 +364,7 @@ import ProductRecommendation from "../agentModule/quoteModule/productRecommendat
 import LeadAssignment from "../module/Distribution/LeadAssignment";
 import DistributionChannels from "../module/Distribution/DistributionChannels";
 import DealerProgrammes from "../module/Distribution/DealerProgrammes";
+import Promotions from "../module/Distribution/Promotions";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
@@ -897,6 +899,7 @@ const Maincomponent = () => {
           <Route path="master/promotion/path" element={<PromotionPathPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
+          <Route path="master/finance/discount-caps" element={<DiscountCaps />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
           {/* features and releases: read only for the tenant; enabling by the iorta TechNXT platform administrator */}
           <Route path="master/configuration/features" element={<FeatureCatalogue />} />
@@ -1628,6 +1631,7 @@ const Maincomponent = () => {
           <Route path="/master/organization/sales-activity-outcomes" element={<SalesActivityOutcomes />} />
           <Route path="/master/insurance/short-period-rates" element={<ShortPeriodRates />} />
           <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
+          <Route path="/master/insurance/endorsement-types" element={<EndorsementTypes />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
           <Route path="/master/insurance/lead-sources" element={<LeadSources />} />
@@ -1768,6 +1772,7 @@ const Maincomponent = () => {
           {/* Distribution, motor programmes and products */}
           <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
           <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
+          <Route path="/sales/promotions" element={<Promotions />} />
           <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
           <Route path="/sales/campaigns" element={<Campaigns />} />
           <Route path="/master/insurance/channels" element={<DistributionChannels />} />

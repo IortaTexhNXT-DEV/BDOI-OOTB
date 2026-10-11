@@ -43,7 +43,8 @@ describe('product classification', () => {
 describe('journey defaults from the business type', () => {
   it('TISPH entries: the default, Motor (quotation required) and CTPL (may be placed without a quotation)', async () => {
     const [row] = await q("SELECT value FROM app_settings WHERE key = 'placement.journey'");
-    expect(Object.keys(row.value).sort()).toEqual(['CTPL', 'MOTOR', 'default']);
+    // with the Credit Life entries of seed 95_tisph_quote_policy.sql (QUOT-01)
+    expect(Object.keys(row.value).sort()).toEqual(['CL-COMP', 'CL-VOL', 'CTPL', 'MOTOR', 'default']);
     expect(await journey({ productType: 'Motor' })).toMatchObject({ businessType: 'package', source: 'entry', key: 'MOTOR', quotationSlip: 'required', placementSlip: 'required' });
     expect(await journey({ productType: 'CTPL' })).toMatchObject({ source: 'entry', key: 'CTPL', quotationSlip: 'optional', placementSlip: 'required' });
   });

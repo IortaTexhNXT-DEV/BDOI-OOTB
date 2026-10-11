@@ -40,7 +40,7 @@ the changes to the posting rules, and with the TIS General Manager, who decides 
 | Record the cover for an approver who is away | Before the leave | [Delegations](#delegations) |
 | Follow the segregation-of-duties conflicts and their exceptions | Weekly | [Segregation of Duties](#segregation-of-duties), [User Access Matrix](#user-access-matrix) |
 | Review the access of every user | At least every quarter | [Access Reviews](#access-reviews) |
-| Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer Programmes](#dealer-programmes) |
+| Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer & Bank Programmes](#dealer-programmes) |
 | Maintain the reference masters | On the request of the business | [Masters that work the same way](#masters-that-work-the-same-way) |
 | Configure products, covers, rating and acceptance rules | On the request of the business | [Product Templates](#product-templates) |
 | Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout](#documents-and-reports-layout), [Document Numbering](#document-numbering) |

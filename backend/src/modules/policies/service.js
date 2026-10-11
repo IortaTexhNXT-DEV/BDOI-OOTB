@@ -349,6 +349,12 @@ export async function issuePolicy(db, src, body, userId) {
     await writeParticipants(db, 'policy', policyId, policyParts, { sumInsured: src.sumInsured, premium: src.netPremium, taxes, premiumTotal: src.grossPremium, commissionAmount: src.commissionAmount },
       { userId, commissionRate: src.commissionRate ?? null });
   }
+  // a promotion with lock-in years puts the policy in lock-in from its inception (renewal notice gate, renewals module)
+  const promotion = policyDoc.promotion;
+  if (promotion?.code && Number(promotion.lockInYears) > 0) {
+    const { recordLockIn } = await import('../renewals/noticeGate.js');
+    await recordLockIn(db, { policyId, source: 'promotion', reference: `${promotion.code} v${promotion.version}`, years: Number(promotion.lockInYears), userId });
+  }
   // a policy brought by a distribution channel linked to a referrer earns the referrer's comsub (channels module)
   const { channelReferral } = await import('../channels/service.js');
   const details = { commissionDetails: src.doc?.commissionDetails || (await channelReferral(db, policyId)) || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };

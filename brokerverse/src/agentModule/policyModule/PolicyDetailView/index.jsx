@@ -30,6 +30,8 @@ import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
+import PromotionPanel from "../../quoteModule/promotion/PromotionPanel";
+import PolicyCorrectionsPanel from "../policyCorrections/PolicyCorrectionsPanel";
 import { hasPermission } from "../../../utils/canOpen";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import policyService from "../../../services/policyService";
@@ -1781,6 +1783,8 @@ const PolicyDetailView = () => {
               <SectionCard title={t("policyDetail.policyDetails")}>
                 <InfoGrid items={policySnapshotItems} />
               </SectionCard>
+              <PolicyCorrectionsPanel policy={rawPolicyData} onChanged={() => dispatch(policyDetailsDataMiddleWare({ policyId }))} />
+              <PromotionPanel quotation={rawPolicyData} readOnly />
 
               {showCoInsuranceSection && (
                 <SectionCard

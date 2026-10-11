@@ -12,7 +12,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
-import promotionService from "../../../services/promotionService";
+import environmentPromotionService from "../../../services/environmentPromotionService";
 import { hasPermission } from "../../../utils/canOpen";
 import { formatInstant } from "../../../utility/dateFormat";
 import "../index.scss";
@@ -31,7 +31,7 @@ const PromotionPath = () => {
   const [choice, setChoice] = useState(null);
   const canMark = hasPermission("write:data-load");
   const loader = useCallback(async () => {
-    const [path, history] = await Promise.all([promotionService.getPath(), promotionService.getHistory()]);
+    const [path, history] = await Promise.all([environmentPromotionService.getPath(), environmentPromotionService.getHistory()]);
     return { path, history };
   }, []);
   const { data, loading, refreshing, error, reload } = useStableLoad(loader);
@@ -46,7 +46,7 @@ const PromotionPath = () => {
       message: k("markMessage", { from: path.label, to: target.label }),
       facts: [{ label: k("facts.environment"), value: target.label }, { label: k("facts.release"), value: path.release?.apiVersion || "-" }],
       onConfirm: async () => {
-        const r = await promotionService.markEnvironment(choice);
+        const r = await environmentPromotionService.markEnvironment(choice);
         toast.current?.show({ severity: "success", summary: k("title"), detail: r.message });
       },
     });

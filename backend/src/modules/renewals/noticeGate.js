@@ -75,6 +75,17 @@ export function treatmentOf(row, ctx) {
   return send;
 }
 
+/**
+ * Lock-in of a policy issued under a lock-in (FR-LCK-001): from the inception of the policy for the years given,
+ * ending on the same date that many years later. Written in the issuing transaction; a policy keeps the lock-in it has.
+ */
+export async function recordLockIn(db, { policyId, source, reference = null, years, tfsLoanAccount = null, userId = null }) {
+  const r = await db.query(`INSERT INTO policy_lock_ins(policy_id, source, reference, start_date, years, end_date, tfs_loan_account, created_by)
+    SELECT p.id, $2, $3, p.inception_date, $4, (p.inception_date + make_interval(years => $4))::date, $5, (SELECT username FROM users WHERE id = $6)
+    FROM policies p WHERE p.id = $1 ON CONFLICT (policy_id) DO NOTHING RETURNING *`, [policyId, source, reference, years, tfsLoanAccount, userId]);
+  return r.rows[0] || null;
+}
+
 /** Treatment of a policy by id (for the messaging and staff reminder jobs). */
 export async function treatmentOfPolicy(policyId, ctx = null) {
   const row = await one(`SELECT p.id, p.expiry_date, p.inception_date, p.lob, p.product_type, pr.line AS product_line, pr.name AS product_name, ${LOCK_IN_COLUMNS}

@@ -1,46 +1,39 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
-/** Master > Environment Promotion: the promotion path and the Setup Workbook (data-load) API. */
-const call = async (path, options = {}) => {
+/** Promotions (/promotions) and discount caps (/discount-caps) API (PROD-15). */
+const qs = (params = {}) => {
+  const s = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+  return s ? `?${s}` : "";
+};
+const call = async (method, path, payload) => {
   const response = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...authService.getAuthHeader(),
-      ...(options.headers || {}),
-    },
+    method, headers: { "Content-Type": "application/json", ...authService.getAuthHeader() }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
   });
-  const json = await response.json().catch(() => ({}));
-  if (!response.ok || json.success === false) {
-    const error = new Error(json.message || `Request failed (${response.status})`);
-    error.status = response.status;
-    error.errors = json.errors || [];
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || body.success === false) {
+    const error = new Error(apiErrorMessage(body, response.status));
+    error.errors = Array.isArray(body.errors) ? body.errors : [];
     throw error;
   }
-  return json;
+  return body;
 };
 
 const promotionService = {
-  getPath: () => call("/environment-promotion").then((r) => r.data),
-  getHistory: () => call("/environment-promotion/history").then((r) => r.data || []),
-  markEnvironment: (environment) => call("/environment-promotion/environment", { method: "PUT", body: JSON.stringify({ environment }) }),
-  getKits: () => call("/data-load/kits").then((r) => r.data),
-  templatePath: (prefill) => `/data-load/kits/configuration/template${prefill ? "?prefill=true" : ""}`,
-  validatePath: "/data-load/batches",
-  listBatches: (page = 1, perPage = 20) => call(`/data-load/batches?kit=configuration&page=${page}&perPage=${perPage}`),
-  getBatch: (id) => call(`/data-load/batches/${encodeURIComponent(id)}`).then((r) => r.data),
-  loadBatch: (id, validRowsOnly = false) => call(`/data-load/batches/${encodeURIComponent(id)}/load`, { method: "POST", body: JSON.stringify({ validRowsOnly }) }),
-  errorsPath: (id) => `/data-load/batches/${encodeURIComponent(id)}/errors`,
-  comparePath: "/data-load/compare",
-  listComparisons: (page = 1, perPage = 20) => call(`/data-load/compare?page=${page}&perPage=${perPage}`),
-  getComparison: (id) => call(`/data-load/compare/${encodeURIComponent(id)}`).then((r) => r.data),
-  comparisonRows: (id, params = {}) => {
-    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
-    return call(`/data-load/compare/${encodeURIComponent(id)}/rows${qs ? `?${qs}` : ""}`);
-  },
-  comparisonWorkbookPath: (id) => `/data-load/compare/${encodeURIComponent(id)}/workbook`,
+  list: async (params) => (await call("GET", `/promotions${qs(params)}`)).data,
+  get: async (id) => (await call("GET", `/promotions/${encodeURIComponent(id)}`)).data,
+  create: (body) => call("POST", "/promotions", body),
+  update: (id, body) => call("PUT", `/promotions/${encodeURIComponent(id)}`, body),
+  remove: (id) => call("DELETE", `/promotions/${encodeURIComponent(id)}`),
+  /** submit | recall | approve | return | suspend | resume | withdraw | amend */
+  act: (id, action, body = {}) => call("POST", `/promotions/${encodeURIComponent(id)}/${action}`, body),
+  choices: async () => (await call("GET", "/promotions/choices")).data,
+  open: async (body) => (await call("POST", "/promotions/open", body)).data,
+  caps: async (params) => (await call("GET", `/discount-caps${qs(params)}`)).data,
+  proposeCap: (body) => call("POST", "/discount-caps", body),
+  /** approve | return | withdraw */
+  capAct: (id, action, body = {}) => call("POST", `/discount-caps/${encodeURIComponent(id)}/${action}`, body),
 };
 
 export default promotionService;

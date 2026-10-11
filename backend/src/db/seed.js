@@ -100,9 +100,16 @@ const SALES_ACTIVITY_PERMS = { sales: ['sales-activities'], operations: ['sales-
 for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[role].push(...items);
 // Approvals of the front office (permissions of migration 0348): approving a quotation, the check of a placement
 // against the slip, renewal terms and claim decisions. The approver is never the maker (maker-checker in the services).
-const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'],
-  operations: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'], claims: ['claims:approve'] };
+// Extending the validity of a quotation (migration 0480) goes with approving it.
+const APPROVAL_PERMS = { sales: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve', 'renewals:assign'],
+  processing: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve', 'renewals:assign'],
+  operations: ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve', 'renewals:assign'], claims: ['claims:approve'] };
 for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
+// Promotions and discount caps (migration 0485): the Processing Team sets them up, the Accounting Manager approves
+// them; every front-office role reads them.
+const PROMOTION_PERMS = { processing: ['promotions', 'discount-caps'], sales: ['promotions:read', 'discount-caps:read'], operations: ['promotions:read', 'discount-caps:read'],
+  accounting: ['promotions:read', 'discount-caps:read'], 'accounting-manager': ['promotions:approve', 'discount-caps:approve'], 'compliance-officer': ['promotions:read', 'discount-caps:read'] };
+for (const [role, items] of Object.entries(PROMOTION_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
 // Talkbot call lists of Motor renewals (permissions of migration 0460): Sales & Marketing and Operations maintain them,
 // the Processing Team views them and creates the renewal batch of the confirmed accounts (write:renewals).
 const TALKBOT_PERMS = { sales: ['talkbot-calls'], operations: ['talkbot-calls'], processing: ['talkbot-calls:read'] };
@@ -123,22 +130,27 @@ ROLE_PERMS['accounting-manager'].push('receipt-reversal:approve');
 // policies, endorsements and renewals; Officers and Unit Heads approve another user's (Operations: Unit Head only).
 const TIS_COMMON = ['profile', 'notifications', 'reports:read', 'masters:read'];
 const TIS_FRONT_READS = ['products:read', 'channels:read', 'motor-programmes:read', 'commission:read', 'remittance:read', 'incentive:read', 'collections:read', 'receipts:read',
-  'integrations:read', 'schedules:read'];
+  'integrations:read', 'schedules:read', 'promotions:read', 'discount-caps:read'];
 const TIS_MAKER = ['quotations', 'policies', 'endorsements', 'renewals', 'fleet', 'marine', 'pii:view'];
 // the approvers of renewal terms also reassign renewals and mark them not for renewal (assign:renewals, migration 0500)
-const TIS_FRONT_APPROVALS = ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'];
+const TIS_FRONT_APPROVALS = ['quotations:approve', 'quotations:extend', 'policies:approve', 'renewals:approve', 'renewals:assign'];
 const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'claims:read'];
 const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'claims:process', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read'];
 const TIS_CCD = [...TIS_COMMON, 'receipts'];
 const TIS_ACCOUNTING_READS = ['disbursements:read', 'journal-vouchers:read', 'payables:read', 'fixed-assets:read'];
 const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'policies:read', 'endorsements:read', 'renewals:read', 'claims:read'];
+// Promotions (migration 0485), proposed until TISPH names the users (DECISIONS D-QP-15): Operations Officers and the
+// Operations Unit Head set up promotions and discount caps; the Sales Unit Head and the General Manager approve them;
+// Sales Officers, the Sales Unit Head and the General Manager may lower a promotion rate to its minimum.
+const TIS_PROMOTION_MAKER = ['promotions', 'discount-caps'];
+const TIS_PROMOTION_APPROVER = ['promotions:approve', 'discount-caps:approve', 'promotion-rates:write'];
 Object.assign(ROLE_PERMS, {
   'tis-sales-associate': [...TIS_SALES, 'lead-assignment:read', 'campaigns:read'],
-  'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns'],
-  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'incentive', 'incentive:approve', 'disbursements:read', 'payables:read', 'payables:approve'],
+  'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'promotion-rates:write'],
+  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_APPROVER, 'lead-assignment', 'campaigns', 'incentive', 'incentive:approve', 'disbursements:read', 'payables:read', 'payables:approve'],
   'tis-ops-associate': [...TIS_OPS],
-  'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
-  'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
+  'tis-ops-officer': [...TIS_OPS, ...TIS_PROMOTION_MAKER, 'journal-vouchers:read', 'fixed-assets:read'],
+  'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_MAKER, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
   // PDC Management (RBAC v4): CCD-PDU CRU, CCD-PDC CRUD and the checker of cancellations, every other persona reads
   // Receipting (RBAC v4): CCD-BP issues the receipts, CCD-PDC and CCD-Recon read them, CCD-PDU has no access
   'tis-ccd-pdu': [...TIS_COMMON, 'pdc'],
@@ -149,14 +161,14 @@ Object.assign(ROLE_PERMS, {
   'tis-ccd-recon': [...TIS_COMMON, 'receipts:read', 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read', 'claim-funds:write', 'claim-cash:reverse'],
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
   'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
-    'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
+    'integrations:read', 'schedules:read', 'promotions:read', 'discount-caps:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
     'period-end', 'period-end:approve', 'bank-reconciliation', 'bank-reconciliation:approve', 'posting-rules:write', 'posting-rules:approve', 'credit-control:approve',
     // the proposed remittance approvers with the General Manager (migration 0400), until TISPH names them
     'remittance:approve', 'claim-cash:reverse'],
   'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
     'integrations', 'schedules', 'audit:read', 'features:read', 'data-load'],
-  'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
+  'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_APPROVER, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read', 'remittance:approve', 'features:read'],
   // the iorta TechNXT platform administrator: the catalogue and its changes, nothing of the business (lib/platform.js)

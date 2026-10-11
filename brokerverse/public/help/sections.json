@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "b6e7de037f847b93608cdf65bb426f14fc6c72b6b3e49f61c07fc939ea3146c6",
+ "sourceHash": "dab3b954f125657ff15476455ff611e283e3a959efa01e50a9d1ab0b0a5b2099",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1830,16 +1830,16 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "quick-quote",
+   "id": "lead-assignment",
    "number": "17.2",
-   "title": "Quick Quote",
+   "title": "Lead Assignment",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "requests-for-quotation-broker-slips",
+   "id": "sales-activities",
    "number": "17.3",
-   "title": "Requests for quotation (broker slips)",
+   "title": "Sales activities",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
@@ -1851,44 +1851,65 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "create-a-motor-quotation",
+   "id": "quotation-validity-and-versions",
    "number": "17.4.1",
+   "title": "Validity, extension and versions",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "credit-life-quotation",
+   "number": "17.4.2",
+   "title": "Credit Life quotation",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "quotation-promotion",
+   "number": "17.4.3",
+   "title": "Promotion of a motor quotation",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "create-a-motor-quotation",
+   "number": "17.4.4",
    "title": "Create a motor quotation",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "placement-slips",
+   "id": "requests-for-quotation-broker-slips",
    "number": "17.5",
+   "title": "Requests for quotation (broker slips)",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "placement-slips",
+   "number": "17.6",
    "title": "Placement Slips",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "record-e-policy",
-   "number": "17.5.1",
+   "number": "17.6.1",
    "title": "Record e-Policy",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "lead-assignment",
-   "number": "17.6",
-   "title": "Lead Assignment",
-   "level": 2,
-   "chapter": "Screen reference: Operations"
-  },
-  {
    "id": "dealer-programmes",
    "number": "17.7",
-   "title": "Dealer Programmes",
+   "title": "Dealer & Bank Programmes",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "sales-activities",
+   "id": "promotions",
    "number": "17.8",
-   "title": "Sales activities",
+   "title": "Promotions",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
@@ -1928,8 +1949,15 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "raise-an-endorsement-request",
+   "id": "correct-the-policy-details",
    "number": "17.10.2",
+   "title": "Correct the policy details",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "raise-an-endorsement-request",
+   "number": "17.10.3",
    "title": "Raise an endorsement request",
    "level": 3,
    "chapter": "Screen reference: Operations"
@@ -2432,218 +2460,232 @@
    "chapter": "Screen reference: Master"
   },
   {
-   "id": "lead-sources-and-reason-codes",
+   "id": "endorsement-types",
    "number": "20.6",
+   "title": "Endorsement types",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "lead-sources-and-reason-codes",
+   "number": "20.7",
    "title": "Lead sources and reason codes",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "users",
-   "number": "20.7",
+   "number": "20.8",
    "title": "Users",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "roles-and-role-permissions",
-   "number": "20.8",
+   "number": "20.9",
    "title": "Roles and role permissions",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "user-access-matrix",
-   "number": "20.9",
+   "number": "20.10",
    "title": "User Access Matrix",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "authority-matrix",
-   "number": "20.10",
+   "number": "20.11",
    "title": "Authority Matrix",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "delegations",
-   "number": "20.11",
+   "number": "20.12",
    "title": "Delegations",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "segregation-of-duties",
-   "number": "20.12",
+   "number": "20.13",
    "title": "Segregation of Duties",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "access-reviews",
-   "number": "20.13",
+   "number": "20.14",
    "title": "Access Reviews",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "posting-configuration-configuration-approvals-posting-rules-account-determination",
-   "number": "20.14",
+   "number": "20.15",
    "title": "Posting configuration",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "finance",
-   "number": "20.15",
+   "number": "20.16",
    "title": "Other finance masters",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "commission-rate-matrix",
-   "number": "20.16",
+   "number": "20.17",
    "title": "Commission Rate Matrix",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
+   "id": "discount-caps",
+   "number": "20.18",
+   "title": "Discount Caps",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
    "id": "finance-masters-kept-by-accounting",
-   "number": "20.17",
+   "number": "20.19",
    "title": "Accounting masters",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "financial-statement-versions",
-   "number": "20.18",
+   "number": "20.20",
    "title": "Financial statement versions",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "operational-masters",
-   "number": "20.19",
+   "number": "20.21",
    "title": "Operational masters",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "bank-file-layouts-and-payee-bank-accounts",
-   "number": "20.20",
+   "number": "20.22",
    "title": "Bank file layouts and payee bank accounts",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "e-mail-layout",
-   "number": "20.21",
+   "number": "20.23",
    "title": "E-mail Layout",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "documents-and-reports-layout",
-   "number": "20.22",
+   "number": "20.24",
    "title": "Documents and Reports Layout",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "document-signatures",
-   "number": "20.23",
+   "number": "20.25",
    "title": "Document Signatures",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "configuration",
-   "number": "20.24",
+   "number": "20.26",
    "title": "Configuration",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "document-numbering",
-   "number": "20.25",
+   "number": "20.27",
    "title": "Document Numbering",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "schedules",
-   "number": "20.26",
+   "number": "20.28",
    "title": "Schedules",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "audit-trail",
-   "number": "20.27",
+   "number": "20.29",
    "title": "Audit Trail",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "service-levels",
-   "number": "20.28",
+   "number": "20.30",
    "title": "Service Levels",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "security-controls",
-   "number": "20.29",
+   "number": "20.31",
    "title": "Security Controls",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "features-and-releases",
-   "number": "20.30",
+   "number": "20.32",
    "title": "Features & Releases",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "environment-promotion",
-   "number": "20.31",
+   "number": "20.33",
    "title": "Environment Promotion",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "setup-workbook",
-   "number": "20.31.1",
+   "number": "20.33.1",
    "title": "Setup Workbook",
    "level": 3,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "compare-environments",
-   "number": "20.31.2",
+   "number": "20.33.2",
    "title": "Compare Environments",
    "level": 3,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "promotion-path",
-   "number": "20.31.3",
+   "number": "20.33.3",
    "title": "Promotion Path",
    "level": 3,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "e-mail-outbox",
-   "number": "20.32",
+   "number": "20.34",
    "title": "E-mail Outbox",
    "level": 2,
    "chapter": "Screen reference: Master"
   },
   {
    "id": "integrations",
-   "number": "20.33",
+   "number": "20.35",
    "title": "Integrations",
    "level": 2,
    "chapter": "Screen reference: Master"

@@ -11,6 +11,7 @@ import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { findDocument, safeKey } from '../uploads/storage.js';
 import { notify } from '../notifications/service.js';
 import { getQuoteRow } from './service.js';
+import { assertCurrent } from './validity.js';
 
 export const OUTCOMES = ['accepted', 'declined', 'revise'];
 const DEFAULT_STATUS = { accepted: 'CustomerAccepted', declined: 'Rejected', revise: 'Draft' };
@@ -56,6 +57,7 @@ export async function recordResponse(quoteId, body, user) {
   const to = quoteStatusOut(target);
   const transitions = (await getSetting('quotations.transitions', {})) || {};
   if (!(transitions[from] || []).includes(to)) throw badRequest(`A ${from} quotation cannot be moved to ${to} by a customer response`);
+  if (target === 'accepted') await assertCurrent(q, 'recording its acceptance');
 
   const response = await withTransaction(async (db) => {
     const locked = (await db.query('SELECT status FROM quotes WHERE id = $1 FOR UPDATE', [q.id])).rows[0];

@@ -28,6 +28,7 @@ General Accounting, who owns the journals.
 |---|---|---|
 | Work through the placement slips, renewals, endorsements and claims waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Send placement slips, record acknowledgements, upload e-policies, book checked policies | Daily | [Placement Slips](#placement-slips) |
+| Set up promotions and their vehicle lines, propose discount caps | As agreed with the insurers | [Promotions](#promotions), [Discount Caps](#discount-caps) |
 | Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes](#cover-notes-binders), [CTPL Authentication](#ctpl-authentication) |
 | Register claims, collect their documents, follow motor repairs | Daily | [Claims](#the-claims-list), [Claims Awaiting Documents](#claims-awaiting-documents), [Motor Claim Repairs](#motor-claim-repairs-and-letters-of-authority) |
 | Raise endorsements and cancellations | As requested | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |

@@ -114,13 +114,26 @@ describe("Sales & Marketing menu", () => {
     (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
       .find((i) => i.name === "Sales & Marketing")?.submenu.map((i) => i.name) || [];
 
-  it("groups prospects, quick quote, requests for quotation, quotations and placement slips", () => {
-    expect(items(["system-admin"])).toEqual(["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips",
-      "Lead Assignment", "Dealer Programmes", "Comparison Reports", "Campaigns", "Sales Activities"]);
-    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(10);
+  it("follows the TISPH journey: leads, quotation, placement, dealer and bank programmes, promotions", () => {
+    expect(items(["system-admin"])).toEqual(["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports",
+      "Placement Slips", "Dealer Programmes", "Promotions", "Quick Quote", "Campaigns"]);
+    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(11);
+  });
+  it("gives no TISPH persona the entries without a TISPH requirement (Quick Quote, Campaigns)", () => {
+    const journey = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
+      "Promotions"];
+    for (const role of ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-general-manager"]) expect(items([role])).toEqual(journey);
+    for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"]) expect(items([role])).toEqual(journey);
+    // IT AppSupport has no read:lead-assignment (RBAC v4) and no sales activities or promotions
+    expect(items(["tis-it-admin"])).toEqual(journey.filter((i) => !["Lead Assignment", "Sales Activities", "Promotions"].includes(i)));
+    for (const role of ["tis-sales-officer", "tis-ops-officer", "tis-general-manager"]) {
+      expect(isPathAllowed("/sales/quick-quote", menuList, [role])).toBe(false);
+      expect(isPathAllowed("/sales/campaigns", menuList, [role])).toBe(false);
+    }
   });
   it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
-    expect(items(["processing"])).toEqual(["Prospects", "Request for Quotation", "Quotations", "Placement Slips", "Dealer Programmes", "Comparison Reports", "Sales Activities"]);
+    expect(items(["processing"])).toEqual(["Prospects", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
+      "Promotions"]);
     expect(isPathAllowed("/sales/quick-quote", menuList, ["processing"])).toBe(false);
     expect(items(["claims"])).toEqual([]);
   });

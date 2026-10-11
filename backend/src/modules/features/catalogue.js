@@ -169,6 +169,12 @@ export const FEATURES = Object.freeze([
     menus: ['Operations > Sales & Marketing > Dealer Programmes'],
   }),
   feature({
+    key: 'promotions', name: 'Promotions and discount caps', module: 'Sales & Marketing', tier: P1,
+    description: 'Promotional rates on brand-new vehicles with approval, unit quotas and lock-in years, and the discount caps per product and channel type',
+    requirements: ['TIS-BRD-PROD-15'], dependsOn: ['quotations'],
+    menus: ['Operations > Sales & Marketing > Promotions', 'Master > Finance > Discount Caps'],
+  }),
+  feature({
     key: 'comparison-reports', name: 'Comparison reports', module: 'Sales & Marketing', tier: FUT,
     description: 'Client report comparing the offers of several insurers with a recommendation',
     decision: { question: 'Placement is one insurer per client (MOM s.4) but TIS-BRD-PJRN-05 shares the PA quotation with every partner. Are comparison reports wanted, for PA only?',
@@ -230,7 +236,7 @@ export const FEATURES = Object.freeze([
     description: 'Policy register and lifecycle, policy payments, cover notes, endorsements and cancellations with return premium',
     requirements: ['TIS-BRD-ISSUE-03', 'TIS-BRD-ISSUE-04', 'TIS-BRD-KYC-03', 'TIS-BRD-ENDT-01', 'TIS-BRD-ENDT-02', 'TIS-BRD-ENDT-03', 'TIS-BRD-CANC-01', 'TIS-BRD-CANC-02',
       'TIS-BRD-CANC-03', 'TIS-BRD-BULK-02'],
-    menus: ['Operations > Policy', 'Operations > Payments', 'Operations > Cover Notes', 'Operations > Policy Cancellation'],
+    menus: ['Operations > Policy', 'Operations > Payments', 'Operations > Cover Notes', 'Operations > Policy Cancellation', 'Master > Insurance Management > Endorsement Types'],
     jobs: ['policy-expiry', 'quote-expiry', 'cover-note-expiry'],
   }),
   feature({
