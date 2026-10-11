@@ -5,7 +5,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 
 /**
- * Covers of the product template governing the quotation (Product Configurator > Coverage Builder): mandatory covers
+ * Covers of the product template governing the quotation (Coverage Builder): mandatory covers
  * are always included; optional covers are added or removed here, and each is priced on the quotation premium of its
  * "Priced on quotation as" setting. The server prices the quotation on the same choice (selectedCovers).
  */
@@ -16,7 +16,6 @@ const ProductCovers = ({ setup, isSelected, onToggle }) => {
   return (
     <div className="mb-3">
       <div className="coverage__details__card__container__sub__title mt-2 mb-1">{t("quoteRisk.coversTitle")}</div>
-      <p className="mt-0 mb-2" style={{ fontSize: 13 }}>{t("quoteRisk.coversIntro", { template: setup.templateName || setup.templateCode })}</p>
       <div className="grid m-0">
         {covers.map((c) => {
           const mandatory = c.type === "Mandatory";

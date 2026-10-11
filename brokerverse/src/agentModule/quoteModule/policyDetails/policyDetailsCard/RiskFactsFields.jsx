@@ -25,7 +25,6 @@ const RiskFactsFields = ({ setup = null, value, onChange, missing = [] }) => {
   return (
     <div className="mt-3">
       <div className="coverage__details__card__container__sub__title mt-2 mb-1">{t("quoteRisk.title")}</div>
-      <p className="mt-0 mb-2" style={{ fontSize: 13 }}>{t("quoteRisk.intro", { template: setup.templateName || setup.templateCode })}</p>
       <div className="grid m-0">
         {fields.map((f) => {
           const id = `risk-${f.field}`;

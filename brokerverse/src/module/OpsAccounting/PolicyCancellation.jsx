@@ -122,7 +122,7 @@ const PolicyCancellation = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("opsAcc.cancellation.title")} group={t("opsAcc.operations")} subtitle={t("opsAcc.cancellation.intro")} />
+      <PageHeader title={t("opsAcc.cancellation.title")} group={t("opsAcc.operations")} help={t("opsAcc.cancellation.intro")} />
       <div className="pe-card mb-3">
         <div className="grid">
           <Field label={t("opsAcc.policyNumber")} col="col-12 md:col-4" required>

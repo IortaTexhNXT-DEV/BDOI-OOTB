@@ -86,7 +86,7 @@ const ClientListingCard = () => {
               </>
             )}
             <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={start}
-              header={t("quotationPage.createQuote")} hint={t("productPicker.createQuoteHint")} />
+              header={t("quotationPage.createQuote")} />
             <CreditLifeQuoteDialog product={creditLife} onHide={() => setCreditLife(null)} />
           </div>
         </div>

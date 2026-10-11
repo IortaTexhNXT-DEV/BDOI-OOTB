@@ -232,7 +232,6 @@ const CreateProspectDialog = ({ visible, onHide, onProduct, onSkip, productRequi
           )}
           <p className="m-0 mb-2 text-color-secondary">{t("prospectChooser.productQuestion")}</p>
           <ProductPicker value={choice} onChange={setChoice} lines={lines} idPrefix="create-prospect" required={productRequired} autoFocus />
-          {!productRequired && <small className="text-color-secondary mt-2">{t("productPicker.skipHint")}</small>}
         </div>
       )}
     </Dialog>

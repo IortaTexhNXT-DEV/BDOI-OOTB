@@ -330,7 +330,6 @@ const LeadCreationCard = ({ flow, action }) => {
       <CustomToast ref={toastErrorRef} message={defaultErrorMessage} messageType="error" />
       <form className="prospect-form__card" noValidate onSubmit={(e) => { e.preventDefault(); formik.handleSubmit(); }}>
         <h2 className="prospect-form__title">{title}</h2>
-        {untagged && <Message severity="info" className="w-full justify-content-start mt-2" text={t("productPicker.skipHint")} />}
         {action === "post" && linkedClient && (
           <Message severity="success" className="w-full justify-content-start mt-2"
             text={t("prospectChooser.linkedTo", { name: linkedClient.displayName || linkedClient.fullName || [linkedClient.firstName, linkedClient.lastName].filter(Boolean).join(" "),

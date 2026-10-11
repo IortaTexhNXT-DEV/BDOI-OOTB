@@ -124,7 +124,7 @@ ProductPicker.propTypes = {
  * The product picker in a dialog: tag a prospect's product, or choose the product a new quotation or prospect is for.
  * onSelect(product, lineCode) on confirm; onSkip (optional) adds "Skip - tag product later".
  */
-export const ProductPickerDialog = ({ visible = false, onHide, onSelect, onSkip, header, hint, confirmLabel, value = null, businessType, keep, busy = false }) => {
+export const ProductPickerDialog = ({ visible = false, onHide, onSelect, onSkip, header, confirmLabel, value = null, businessType, keep, busy = false }) => {
   const { t } = useTranslation();
   const lines = useProductLines({ businessType, enabled: visible });
   const [choice, setChoice] = useState({ lob: null, productId: null });
@@ -147,9 +147,7 @@ export const ProductPickerDialog = ({ visible = false, onHide, onSelect, onSkip,
   return (
     <Dialog header={header || t("productPicker.title")} visible={visible} onHide={onHide} footer={footer} style={{ width: "40rem" }} breakpoints={{ "640px": "95vw" }}
       className="product-picker-dialog bv-centered" modal>
-      {hint && <p className="product-picker-dialog__hint">{hint}</p>}
       {visible && <ProductPicker value={choice} onChange={setChoice} lines={lines} keep={keep} idPrefix="product-picker-dialog" required autoFocus />}
-      {onSkip && <small className="product-picker-dialog__skip-hint">{t("productPicker.skipHint")}</small>}
     </Dialog>
   );
 };
@@ -160,7 +158,6 @@ ProductPickerDialog.propTypes = {
   onSelect: PropTypes.func.isRequired,
   onSkip: PropTypes.func,
   header: PropTypes.string,
-  hint: PropTypes.string,
   confirmLabel: PropTypes.string,
   value: PropTypes.shape({ lob: PropTypes.string, productId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]) }),
   businessType: PropTypes.oneOf(["package", "non_package"]),

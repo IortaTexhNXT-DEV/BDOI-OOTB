@@ -505,7 +505,6 @@ const QuoteListingCard = () => {
                 onSelect={quoteProduct}
                 busy={tagging}
                 header={t("quoteListing.addQuote")}
-                hint={isUntagged(currentLeadDetails) ? t("productPicker.quoteHint", { name: [currentLeadDetails.firstName, currentLeadDetails.lastName].filter(Boolean).join(" ") || currentLeadDetails.companyName }) : t("productPicker.addQuoteHint")}
                 value={currentLeadDetails?.lob ? { lob: currentLeadDetails.lob, productId: currentLeadDetails.productId ?? null } : null}
               />
               <CreditLifeQuoteDialog product={creditLife} lead={leadRefId || null} onHide={() => setCreditLife(null)} />

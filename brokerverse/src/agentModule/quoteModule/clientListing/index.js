@@ -47,7 +47,7 @@ const ClientListing = () => {
                 <Button icon="pi pi-plus" label={t("clients.createLead")} onClick={() => setChoosingProduct(true)} />
                 <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={createLead}
                   onSkip={productRequired ? undefined : () => skipProduct()}
-                  header={t("clients.createLead")} hint={t("productPicker.createLeadHint")} />
+                  header={t("clients.createLead")} />
               </>
             )}
           </div>
