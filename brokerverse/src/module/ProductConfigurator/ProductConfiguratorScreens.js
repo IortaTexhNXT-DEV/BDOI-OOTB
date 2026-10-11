@@ -45,6 +45,7 @@ import {
   layoutFileError, layoutPlaceholders,
 } from "./shared/ruleLogic";
 import { hasPermission } from "../../utils/canOpen";
+import { openConfirm } from "../../components/ConfirmDialog";
 
 /** Runs a save call and shows the outcome on the screen's toast; resolves to true on success. */
 const persist = async (action, toast, { success, successDetail, error, errorDetail }) => {
@@ -158,7 +159,7 @@ export const ProductTemplateManager = () => {
   // reset above, so the new template keeps its default status
   useEffect(() => {
     if (location.pathname.endsWith("/product-configurator/create")) {
-      setSelectedTemplate({ status: "Active" });
+      setSelectedTemplate({ status: "Draft" });
       setTemplateErrors({});
       setShowDialog(true);
     }
@@ -187,6 +188,45 @@ export const ProductTemplateManager = () => {
     if (!done) return;
     toast.current?.show({ severity: "success", summary: t("productTemplateManager.success"), detail: t("productTemplateManager.templateUpdated") });
     loadTemplates();
+  };
+
+  // review of a template (draft, submit, approve or return): the maker submits, another user holding approve:products decides
+  const review = async (template, action) => {
+    const record = [{ label: t("productTemplateManager.templateCode"), value: `${template.templateCode} ${template.version || ""}` }, { label: t("productTemplateManager.productName"), value: template.name }];
+    const run = {
+      submit: (note) => productConfiguratorService.submitProductTemplate(template.id, note),
+      withdraw: () => productConfiguratorService.withdrawProductTemplate(template.id),
+      approve: (note) => productConfiguratorService.decideProductTemplate(template.id, "approve", note),
+      return: (note) => productConfiguratorService.decideProductTemplate(template.id, "return", note),
+    }[action];
+    const withNote = action !== "withdraw";
+    const value = await openConfirm({
+      title: t(`productTemplateManager.review.${action}Title`),
+      message: t(`productTemplateManager.review.${action}Message`),
+      facts: record,
+      severity: action === "return" ? "warn" : "info",
+      confirmLabel: t(`productTemplateManager.review.${action}`),
+      ...(withNote ? { input: { type: "textarea", label: t("productTemplateManager.review.note"), required: action === "return" } } : {}),
+    });
+    if (withNote ? value === null : !value) return;
+    if (await persist(() => run(typeof value === "string" ? value : undefined), toast, {
+      success: t("productTemplateManager.success"), successDetail: t(`productTemplateManager.review.${action}Done`), error: t("productTemplateManager.error"), errorDetail: t("productTemplateManager.failedToSaveTemplate"),
+    })) loadTemplates();
+  };
+  const canApprove = hasPermission("approve:products");
+  const reviewActions = (row) => {
+    const canChange = hasPermission("write:products");
+    if (row.status === "Pending Approval") {
+      return (
+        <>
+          {canApprove && <IconAction icon="pi pi-check" label={t("productTemplateManager.review.approve")} onClick={() => review(row, "approve")} testId={`approve-${row.id}`} />}
+          {canApprove && <IconAction icon="pi pi-replay" label={t("productTemplateManager.review.return")} onClick={() => review(row, "return")} testId={`return-${row.id}`} />}
+          {canChange && <IconAction icon="pi pi-undo" label={t("productTemplateManager.review.withdraw")} onClick={() => review(row, "withdraw")} testId={`withdraw-${row.id}`} />}
+        </>
+      );
+    }
+    if (canChange && row.status !== "Active") return <IconAction icon="pi pi-send" label={t("productTemplateManager.review.submit")} onClick={() => review(row, "submit")} testId={`submit-${row.id}`} />;
+    return null;
   };
 
   const saveTemplate = async () => {
@@ -248,7 +288,7 @@ export const ProductTemplateManager = () => {
     <ConfiguratorPage
       screen="templates"
       usage={t("productConfigurator.usage.templates")}
-      actions={hasPermission("write:products") ? <Button label={t("productTemplateManager.createTemplate")} icon="pi pi-plus" onClick={() => { setSelectedTemplate({ status: "Active" }); setTemplateErrors({}); setShowDialog(true); }} /> : null}
+      actions={hasPermission("write:products") ? <Button label={t("productTemplateManager.createTemplate")} icon="pi pi-plus" onClick={() => { setSelectedTemplate({ status: "Draft" }); setTemplateErrors({}); setShowDialog(true); }} /> : null}
     >
       <Toast ref={toast} />
       <FilterBar value={filters} onChange={setFilters} show={["lob", "status"]} options={{ lobs: lobOptions }} />
@@ -267,8 +307,9 @@ export const ProductTemplateManager = () => {
               row={r}
               onView={setViewing}
               onEdit={(row) => navigate(`/product-configurator/template/${row.id}`)}
-              onToggle={setLifecycle}
+              onToggle={r.status === "Pending Approval" ? undefined : setLifecycle}
               onHistory={(row) => setHistory({ ...row, label: row.templateCode })}
+              extra={reviewActions(r)}
             />
           )}
         />
@@ -287,6 +328,8 @@ export const ProductTemplateManager = () => {
           [t("productTemplateManager.version"), viewing.version], [t("productTemplateManager.effectiveDate"), viewing.effectiveDate, { type: "date" }],
           [t("productTemplateManager.expiryDate"), viewing.expiryDate, { type: "date" }], [t("productTemplateManager.inUse"), Boolean(viewing.governsFlow), { type: "boolean" }],
           [t("productTemplateManager.components"), t("productTemplateManager.componentCounts", viewing._count || {})],
+          [t("productTemplateManager.review.submittedBy"), viewing.submittedBy], [t("productTemplateManager.review.decision"), viewing.decision ? `${t(`productTemplateManager.review.${viewing.decision}`)} · ${viewing.decidedBy || ""}` : null],
+          [t("productTemplateManager.review.note"), viewing.decisionNote, { span: "full" }],
           [t("productTemplateManager.insurers"), (viewing.insurers || []).join(", "), { span: "full" }], [t("productTemplateManager.description"), viewing.description, { span: "full" }],
         ] : []}
       />

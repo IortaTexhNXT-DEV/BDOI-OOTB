@@ -5130,7 +5130,30 @@
     "components": "Configuration",
     "componentCounts": "{{coverages}} coverages, {{ratingFactors}} rating factors, {{underwritingRules}} acceptance rules",
     "confirmDeactivate": "Retire template {{code}}? It is no longer applied to new business.",
-    "confirmActivate": "Activate template {{code}}?"
+    "confirmActivate": "Activate template {{code}}?",
+    "review": {
+      "submit": "Submit for approval",
+      "submitTitle": "Submit the template for approval",
+      "submitMessage": "The template goes in force only when a Unit Head or the General Manager who did not change or submit it approves it. Nothing in it can be changed while it waits.",
+      "submitDone": "Template submitted for approval",
+      "withdraw": "Withdraw from approval",
+      "withdrawTitle": "Withdraw the template from approval",
+      "withdrawMessage": "The template goes back to Draft and can be changed again.",
+      "withdrawDone": "Template withdrawn from approval",
+      "approve": "Approve",
+      "approveTitle": "Approve the template",
+      "approveMessage": "The template goes in force from its effective date and is used by quotations and policies of its product.",
+      "approveDone": "Template approved and in force",
+      "return": "Return",
+      "returnTitle": "Return the template to draft",
+      "returnMessage": "Say what must change; the maker sees your note on the template.",
+      "returnDone": "Template returned to draft",
+      "note": "Note",
+      "submittedBy": "Submitted by",
+      "decision": "Last decision",
+      "approved": "Approved",
+      "returned": "Returned"
+    }
   },
   "coverageBuilder": {
     "addCoverage": "Add Coverage",

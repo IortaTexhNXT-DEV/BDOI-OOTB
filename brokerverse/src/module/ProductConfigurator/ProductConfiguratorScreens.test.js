@@ -5,7 +5,7 @@ import "../../i18n";
 import store from "../../redux/store";
 import productConfiguratorService from "../../services/productConfiguratorService";
 import mastersService from "../../services/mastersService";
-import { UnderwritingRules, DocumentManager } from "./ProductConfiguratorScreens";
+import { UnderwritingRules, DocumentManager, ProductTemplateManager } from "./ProductConfiguratorScreens";
 
 jest.mock("../../services/productConfiguratorService", () => ({
   __esModule: true,
@@ -19,6 +19,9 @@ jest.mock("../../services/productConfiguratorService", () => ({
     saveComponent: jest.fn(),
     previewDocument: jest.fn(),
     downloadLayout: jest.fn(),
+    submitProductTemplate: jest.fn(),
+    withdrawProductTemplate: jest.fn(),
+    decideProductTemplate: jest.fn(),
   },
 }));
 jest.mock("../../services/mastersService", () => ({ __esModule: true, default: { options: jest.fn(), list: jest.fn() } }));
@@ -123,5 +126,38 @@ describe("Document Manager screen", () => {
     await waitFor(() => expect(productConfiguratorService.previewDocument).toHaveBeenCalledWith(7));
     fireEvent.click(screen.getAllByRole("button", { name: "Download" })[1]);
     await waitFor(() => expect(productConfiguratorService.downloadLayout).toHaveBeenCalledWith(8, "CTPL_CERT-layout.txt"));
+  });
+});
+
+describe("Product Templates review", () => {
+  const templates = [
+    { id: 1, templateCode: "MOT-003-2025", name: "Motor Insurance Basic Plan", status: "Active", version: "v3" },
+    { id: 2, templateCode: "FIRE-RES-2026", name: "Home Fire Protect", status: "Draft", version: "v1" },
+    { id: 3, templateCode: "PA-2026", name: "Personal Accident", status: "Pending Approval", version: "v1" },
+  ];
+  beforeEach(() => {
+    productConfiguratorService.getProductTemplates.mockResolvedValue(templates);
+    mastersService.list.mockResolvedValue([]);
+  });
+
+  it("offers Submit on a draft and Approve, Return and Withdraw on a template waiting for approval, none on one in force", async () => {
+    renderScreen(<ProductTemplateManager />);
+    await screen.findByText("FIRE-RES-2026");
+    expect(screen.getByTestId("submit-2")).toBeInTheDocument();
+    expect(screen.queryByTestId("submit-1")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("submit-3")).not.toBeInTheDocument();
+    for (const id of ["approve-3", "return-3", "withdraw-3"]) expect(screen.getByTestId(id)).toBeInTheDocument();
+    expect(screen.queryByTestId("approve-2")).not.toBeInTheDocument();
+  });
+
+  it("returns a template with the note entered", async () => {
+    productConfiguratorService.decideProductTemplate.mockResolvedValue({});
+    renderScreen(<ProductTemplateManager />);
+    await screen.findByText("PA-2026");
+    fireEvent.click(screen.getByTestId("return-3"));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.change(within(dialog).getByRole("textbox"), { target: { value: "Add the deductible" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Return" }));
+    await waitFor(() => expect(productConfiguratorService.decideProductTemplate).toHaveBeenCalledWith(3, "return", "Add the deductible"));
   });
 });
