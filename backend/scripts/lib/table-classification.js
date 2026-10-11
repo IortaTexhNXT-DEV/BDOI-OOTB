@@ -21,14 +21,14 @@ export const TRANSACTION_TABLES = [
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments',
   'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses',
   // receivables, receipts, collections, disbursements, petty cash movements (the funds themselves are masters)
-  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
-  'collection_items', 'collection_actions', 'disbursements', 'checkbooks', 'nonpayment_insurer_notices',
+  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'unapplied_collections', 'unapplied_allocations', 'bank_payment_lines', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
+  'collection_items', 'collection_actions', 'disbursements', 'checkbooks', 'receipt_batches', 'nonpayment_insurer_notices',
   // service level clocks of the open items (reopened by the sla-monitor job)
   'sla_clocks',
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
-  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs',
+  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs', 'insurer_billing_runs', 'commission_line_requests',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
   // claims and renewals
@@ -65,7 +65,7 @@ export const TRANSACTION_TABLES = [
   'client_signatories', 'client_beneficial_owners', 'client_kyc_documents',
   // operations and accounting (migrations 0290 to 0297): cover notes, post-dated cheques, claim document checklist and
   // reminders, motor claim repairs, accounts payable, fixed assets and their depreciation (masters are generic types)
-  'cover_notes', 'post_dated_cheques', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
+  'cover_notes', 'post_dated_cheques', 'pdc_sets', 'pdc_transmittals', 'remittance_holds', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
   // claim settlements (partial and final) and the claim communication log; the lock-in of a policy term (migrations 0501, 0503)
   'claim_settlements', 'claim_communications', 'policy_lock_ins',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
@@ -125,10 +125,10 @@ export const MASTER_CONFIG_TABLES = [
   'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'write_off_reasons',
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages
   'products', 'policy_types', 'coverages', 'product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections',
-  'commission_rates', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
+  'commission_rates', 'sharing_schemes', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'incentive_programs', 'payment_gateways',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
-  'gl_accounts', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
+  'gl_accounts', 'fs_versions', 'fs_version_lines', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',

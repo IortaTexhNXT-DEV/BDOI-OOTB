@@ -12,7 +12,7 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 | `router.js` | All routes of the module. |
 | `fiscal.js` | Fiscal years (`FY2026`), their twelve periods (`2026-01` ...) and the adjustment period 13 (`2026-13`). Years are created on demand. Manual status changes (`changePeriodStatus`, `transitionProblem`). |
 | `opening.js` | Go-live opening balances: `validateOpeningBalances` (Validate step, writes nothing) and `importOpeningBalances` (all or nothing). |
-| `posting.js` | `assertPostingAllowed`: which journals may post into a period (open, soft_closed, closed, locked). Called by the ledger for every journal. |
+| `posting.js` | `assertPostingAllowed`: which journals may post into a period (open, soft_closed, closed, locked), read on the journal's own period; `cutoffPeriod`: the period of a system posting after the operations cut-off day (TIS-BRD-GL-04). Called by the ledger for every journal. |
 | `close.js` | Month-end close runs (`MEC-` numbers): create, execute, sign checklist items, submit, approve, reject, cancel. |
 | `steps.js` | The valuation steps of a run: unearned commission deferral and FX revaluation. |
 | `journals.js` | Recurring and accrual journal templates, the automatic reversal on day 1 of the next period, and the undo of a run's own journals before a rerun. |
@@ -81,6 +81,9 @@ it is possible until the first period of the next year is closed. Every action i
 
 ## Key settings
 
+`accounting.operations_cutoff_day` (26: premium bookings from that day go to the next period),
+`accounting.finance_close_day` (29: the month-end reminder counts down to it), `accounting.adjustment_window_working_days`
+(6: the auto soft-close waits for that working day of the next month, Holiday master; 0 uses the job's grace days),
 `accounting.fiscal_year_start_month`, `accounting.period_close_requires_approval`, `accounting.year_end_accepts_soft_closed`,
 `finance.maker_checker_enabled`, `accounting.account.suspense`, `period_end.tieout_tolerance`,
 `accounting.fx_revaluation_account_types`, `accounting.account.current_year_pl`,

@@ -7,6 +7,7 @@ import { baseCurrency } from '../../lib/currency.js';
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { HttpError, badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { assertChecker } from '../../lib/makerChecker.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
@@ -521,6 +522,7 @@ async function applyDecision(c, a, decision, user, remarks) {
     await c.query(`UPDATE remittances SET status = $2, approved_by = CASE WHEN $2 = 'approved' THEN $3 ELSE approved_by END, approved_at = CASE WHEN $2 = 'approved' THEN now() ELSE approved_at END,
                    rejected_by = CASE WHEN $2 = 'rejected' THEN $3 ELSE rejected_by END, rejected_at = CASE WHEN $2 = 'rejected' THEN now() ELSE rejected_at END,
                    remarks = COALESCE($4, remarks), updated_by = $3, updated_at = now() WHERE id = $1`, [a.entity_id, status, user.id, remarks || null]);
+    if (decision === 'approve') await onRemittanceApproved(c, a.entity_id);
     return;
   }
   const item = (await c.query('SELECT * FROM remittance_items WHERE id = $1 FOR UPDATE', [a.entity_id])).rows[0];
@@ -545,6 +547,24 @@ async function applyDecision(c, a, decision, user, remarks) {
     const amt = toNumber(item.data.adjustmentAmount, 0);
     await c.query('UPDATE remittances SET adjustments = adjustments + $2, net_due = net_due + $2, updated_by = $3, updated_at = now() WHERE id = $1', [item.remittance_id, amt, user.id]);
   }
+}
+
+/**
+ * An approved remittance (TIS-BRD-COMM-04, FGA-PR-04, FR-RMT-014): its lines read Remitted, the client's payment
+ * records of the policies carry the remittance (receivables.remitted_at / remittance_id, policies.details.remittance)
+ * and the variance shares of the remitted policies become Eligible once fully paid (commission/service.js).
+ */
+async function onRemittanceApproved(c, remittanceId) {
+  const r = (await c.query('SELECT id, remittance_number, kind FROM remittances WHERE id = $1', [remittanceId])).rows[0];
+  if (!r || r.kind !== 'direct-bill') return;
+  await c.query("UPDATE remittance_lines SET status = 'Remitted' WHERE remittance_id = $1 AND COALESCE(status, '') NOT IN ('Settled')", [r.id]);
+  const policyIds = (await c.query('SELECT DISTINCT policy_id FROM remittance_lines WHERE remittance_id = $1 AND policy_id IS NOT NULL', [r.id])).rows.map((x) => x.policy_id);
+  if (!policyIds.length) return;
+  await c.query(`UPDATE receivables SET remitted_at = now(), remittance_id = $2 WHERE policy_id = ANY($1) AND remitted_at IS NULL AND status NOT IN ('cancelled', 'written-off')`, [policyIds, r.id]);
+  await c.query(`UPDATE policies SET details = COALESCE(details, '{}'::jsonb) || jsonb_build_object('remittance', jsonb_build_object('id', $2::text, 'number', $3::text, 'approvedAt', now())) WHERE id = ANY($1)`,
+    [policyIds, r.id, r.remittance_number]);
+  const { onPoliciesRemitted } = await import('../commission/service.js');
+  await onPoliciesRemitted(c, policyIds);
 }
 
 export const APPROVAL_SELECT = `SELECT a.*, (SELECT display_name FROM users u WHERE u.id = a.initiator_id) AS initiator_name,
@@ -614,6 +634,8 @@ async function delegateApproval(a, body, user) {
     throw conflict('Approvals are not delegated one by one. An absent approver is covered by a dated delegation of authority.');
   }
   if (a.delegated_to && a.delegated_to !== user.id && !isAdmin(user)) throw forbidden('This approval has been delegated to another user');
+  // the maker never chooses the checker (TIS-BRD-SEC-03)
+  if (a.initiator_id === user.id || a.maker_id === user.id) throw forbidden('Maker-checker: the user who submitted or prepared the remittance cannot hand its approval to another user');
   const to = await one('SELECT id FROM users WHERE (id = $1 OR lower(username) = lower($1)) AND status = \'active\'', [String(body.delegateTo || '')]);
   if (!to) throw badRequest('Validation failed', [{ path: 'delegateTo', message: 'Delegate user was not found' }]);
   if (to.id === a.initiator_id) throw badRequest('Cannot delegate to the initiator');
@@ -718,6 +740,10 @@ export async function settleRemittance(id, b, user) {
   if ((await getSetting('remittance.direct_settle_enabled')) === false) throw new HttpError(409, SETTLE_OFF, [{ path: 'remittance', code: 'SETTLE_OFF', message: SETTLE_OFF }]);
   const r = await getRemittanceRow(id);
   if (r.status !== 'approved') throw conflict('Only approved remittances can be settled');
+  // proof of the payment and a second user (TIS-BRD-SEC-03, FR-RMT-014): never the maker or the approver of the remittance
+  if (!String(b.referenceNo || '').trim() || !isoDate(b.paymentDate)) throw badRequest('Validation failed', [{ path: 'referenceNo', message: 'The payment reference and the payment date are required to mark a remittance settled' }]);
+  await assertChecker(user, r.created_by, 'remittance settlement', { configurable: false });
+  await assertChecker(user, r.approved_by, 'remittance settlement', { configurable: false });
   await query(`UPDATE remittances SET status = 'settled', settled_at = now(), remarks = COALESCE($2, remarks), data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1`,
     [r.id, b.remarks || null, JSON.stringify({ paymentReference: b.referenceNo || null, paymentMethod: b.paymentMethod || null, paymentDate: isoDate(b.paymentDate) }), user.id]);
   return getRemittance(r.id);
@@ -849,15 +875,34 @@ async function logExecution({ created, configCode, started, triggeredBy, extra =
 }
 
 /**
- * A draft direct-bill remittance of an insurer's eligible policies (inception up to `to`); null when there is none.
- * `data` is kept on the remittance (the run that created it: source, run, window, off-cycle reason).
+ * The draft direct-bill remittances of an insurer's policies ready to remit (eligibility.js: incepted up to `to`, or
+ * fully paid in the window from `from` to `to` with the catch-up), one per product line when the schedule groups by
+ * insurer and product line on the fully paid basis. `data` is kept on each remittance (the run that created it: source,
+ * run, window, off-cycle reason, product line). Returns { remittances, held, exceptions }: the policies held part-paid
+ * and those held back for a missing proof of payment (an exception is opened for each).
  */
-async function draftForInsurer({ insurerId, to, dueDate, configCode, period, data }, user) {
-  const pols = await eligiblePolicies({ insurerId, to, kind: 'direct-bill' });
-  if (!pols.length) return null;
-  const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
-  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null, data }));
-  return getRemittance(id);
+async function draftForInsurer({ insurerId, to, from = null, basis = null, groupBy = null, dueDate, configCode, period, data }, user) {
+  const { sortForRun, lineOf, raiseProofExceptions } = await import('./eligibility.js');
+  const b = basis || { fullyPaid: false };
+  const sorted = await sortForRun(await eligiblePolicies({ insurerId, to: b.fullyPaid ? null : to, kind: 'direct-bill' }), { from: from || to, to }, b);
+  if (sorted.exceptions.length) {
+    const ins = await one('SELECT id, name FROM insurance_companies WHERE id = $1', [insurerId]);
+    const { createException } = await import('./items.js');
+    await raiseProofExceptions(sorted.exceptions, ins, createException, user || { id: null });
+  }
+  const groups = new Map();
+  for (const p of sorted.ready) {
+    const key = b.fullyPaid && groupBy === 'Insurer and product line' ? lineOf(p) : '';
+    groups.set(key, [...(groups.get(key) || []), p]);
+  }
+  const remittances = [];
+  for (const [line, pols] of groups) {
+    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
+    const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null,
+      data: { ...(data || {}), ...(line ? { productLine: line } : {}), ...(b.fullyPaid ? { eligibility: b.eligibility } : {}) } }));
+    remittances.push(await getRemittance(id));
+  }
+  return { remittances, held: sorted.held, exceptions: sorted.exceptions };
 }
 
 /** Create draft remittances for every ready candidate (optionally limited to candidate ids) and log the execution. */
@@ -868,7 +913,7 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
   const created = [];
   for (const cnd of cands) {
     const r = await draftForInsurer({ insurerId: cnd.insurerId, dueDate: cnd.dueDate, configCode: cnd.scheduleCode, period: new Date().toISOString().slice(0, 7) }, user);
-    if (r) created.push(r);
+    created.push(...r.remittances);
   }
   const out = await logExecution({ created, configCode: b.configCode, started, triggeredBy }, user);
   for (const code of [...new Set(cands.map((c) => c.scheduleCode))]) {
@@ -879,23 +924,28 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
 }
 
 /**
- * Remit what a remittance schedule names: one draft remittance per insurer, of the policies incepted up to the cut-off
- * date (`to`), due after the insurer's remittance terms. Unknown or inactive insurer codes are skipped and reported.
+ * Remit what a remittance schedule names: the draft remittances of each insurer (draftForInsurer: incepted up to the
+ * cut-off date `to`, or fully paid from `from` to `to` on the schedule's basis), due after the insurer's remittance
+ * terms. Unknown or inactive insurer codes are skipped and reported; held policies and exceptions are counted.
  */
-export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDate, data }, user, triggeredBy = 'manual') {
+export async function executeForInsurers({ insurerCodes, to, from = null, basis = null, groupBy = null, scheduleCode, runDate, data }, user, triggeredBy = 'manual') {
   const started = Date.now();
   const date = runDate || (await businessToday());
   const created = [];
   const skipped = [];
+  let held = 0;
+  let exceptions = 0;
   for (const code of insurerCodes || []) {
     const ins = await one('SELECT * FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [String(code), 'active']);
     if (!ins) { skipped.push({ insurerCode: code, reason: 'Insurer not found or not active' }); continue; }
-    const r = await draftForInsurer({ insurerId: ins.id, to, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7), data }, user);
-    if (r) created.push(r);
-    else skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
+    const r = await draftForInsurer({ insurerId: ins.id, to, from, basis, groupBy, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7), data }, user);
+    created.push(...r.remittances);
+    held += r.held.length;
+    exceptions += r.exceptions.length;
+    if (!r.remittances.length) skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
   }
   const out = await logExecution({ created, configCode: scheduleCode, started, triggeredBy, extra: { cutOffDate: to || null } }, user);
-  return { ...out, skipped };
+  return { ...out, skipped, held, exceptions };
 }
 
 export async function executionHistory() {

@@ -34,6 +34,7 @@ import { hasPermission } from "../../../utils/canOpen";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import policyService from "../../../services/policyService";
 import { printPdf } from "../../../components/Print";
+import CommissionBreakdown from "../../../module/Commission/CommissionBreakdown";
 
 /**
  * Open a PDF that still has to be fetched in a new tab. The tab is opened at the click, before the fetch, so that the
@@ -2175,6 +2176,12 @@ const PolicyDetailView = () => {
                   </div>
                 )}
               </SectionCard>
+
+              {(hasPermission("read:commission-rules") || hasPermission("read:remittance") || hasPermission("read:commission")) && (
+                <SectionCard title={t("commissionBreakdown.title")} className="commission-breakdown-section">
+                  <CommissionBreakdown policyId={policyId} />
+                </SectionCard>
+              )}
 
               <SectionCard title={t("policyDetail.history", { defaultValue: "History" })} className="policy-history-section">
                 <AuditTimeline entity="policy" recordId={rawPolicyData?.id || policyId} limit={10} />

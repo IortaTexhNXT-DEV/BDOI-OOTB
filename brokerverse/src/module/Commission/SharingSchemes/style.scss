@@ -1,0 +1,32 @@
+// Commission > Sharing Schemes: the list, the scheme dialog (split lines with their limits) and the worked example
+.ss__page {
+  .ss__status-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .ss__lines {
+    .p-inputnumber,
+    .p-dropdown,
+    .p-multiselect {
+      width: 100%;
+      min-width: 6.5rem;
+    }
+  }
+
+  .ss__line-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+
+  .ss__example {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    background: var(--surface-ground);
+  }
+}

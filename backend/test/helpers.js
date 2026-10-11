@@ -52,6 +52,19 @@ export async function withoutCommissionTaxes() {
   clearSettingsCache();
 }
 /**
+ * The commission controls at their reference values (migrations 0570 and 0571: matrix rules apply at once, Motor on
+ * the net premium, line changes direct, eligible once fully paid), for suites whose commission figures assume them.
+ * The TISPH values (seed 96_tisph_commission.sql: per-peril Motor, rules and line changes under review, eligible once
+ * remitted) are covered by test/commission-rules.test.js.
+ */
+export async function withReferenceCommissionControls() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query(`UPDATE app_settings SET value = 'false' WHERE key IN ('commission.peril_based_motor', 'commission.rules_approval_required',
+    'commission.adjustment_approval_required', 'commission.eligible_requires_remittance')`);
+  clearSettingsCache();
+}
+/**
  * Fiscal year on the calendar year (accounting.fiscal_year_start_month = 1) for suites whose dates and fiscal year codes
  * assume it. TISPH's April start (seed 80_tisph_configuration.sql) is covered by test/period-end-calendar.test.js and
  * test/tisph-configuration.test.js.

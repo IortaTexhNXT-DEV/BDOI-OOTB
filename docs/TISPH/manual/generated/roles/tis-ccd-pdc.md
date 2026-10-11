@@ -6,12 +6,13 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Operations | Payments | View |
-| Accounts | Receipts | Create and edit |
+| Accounts | Receipts | View |
 | Accounts | Collections | View |
 | Accounts | Post-Dated Cheques | Create and edit |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -29,10 +30,12 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
+| Accounts | Post-dated cheques | Create and edit | Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques |  |
+| Accounts | Post-dated cheques | Approve | Approve or return the cancellation of a post-dated cheque requested by another user |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held policies |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -40,12 +43,15 @@ Where: the screens of your menus that show the module. A module without a screen
 
 ## Approvals {#ccd-pdc-ccd-ada-approvals}
 
-This role approves nothing.
+This role approves the work of other users:
+
+- Approve or return the cancellation of a post-dated cheque requested by another user
 
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
+| Post-dated cheques | Approve or return the cancellation of a post-dated cheque requested by another user | CCD-PDC / CCD-ADA |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 
@@ -53,9 +59,6 @@ The user who enters a record never approves it: the approval is always another u
 
 ## Segregation of duties {#ccd-pdc-ccd-ada-sod}
 
-| Rule | Conflict | When given together | Reason |
-|---|---|---|---|
-| Administration and transactions | Receipts (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
-| Receipting and selling | Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
+No delivered segregation-of-duties rule concerns this role.
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.

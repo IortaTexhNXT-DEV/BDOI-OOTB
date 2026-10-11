@@ -188,7 +188,7 @@ These four screens decide how every business event is posted to the general ledg
 
 - **Account Determination** gives each account role its general ledger account, by tab (**Premium**, **Customer**, **Miscellaneous**, **Claims**, **Other**, **Payee & payment mode**, **Commission taxes**, **Write-off reasons**), and shows which events use it. For example the brokerage commission income goes to 3201001 Brokerage Commission Income. VAT, DST and LGT on premium are booked in their own accounts.
 - **Posting Rules** lists the business events (policy issued, endorsement, renewal, cancellation, premium collection, remittance, direct bill commission, claims, commission) with the version of the rule in force. Open a rule to see its lines (debit or credit, account role, amount); a change creates a new version.
-- **Configuration Approvals** lists the changes waiting: what changes, before and after, who requested it and when. **Approve** or **Reject** with a reason.
+- **Configuration Approvals** lists the changes waiting: what changes, before and after, who requested it and when. **Approve** or **Reject** with a reason. Besides the posting changes it carries the commission rules of the [Commission Rate Matrix](#commission-rate-matrix) (decided by {{roles:approve:commission-rules}}) and the sharing schemes and their assignments (decided by {{roles:approve:sharing-schemes}}), each by a user other than its maker.
 - **Accounting Flow** is read only: the journal each business event posts with the rules and accounts in force today, grouped (premium billing, collections, remittance to insurers, commission, claims). It shows whether the account mapping is complete. **Export** and **Print** give it for audit.
 
 ## Other finance masters {#finance}
@@ -220,9 +220,14 @@ These four screens decide how every business event is posted to the general ledg
 
 {{screen:/master/finance/commission-rate-matrix}}
 
-The Commission Rate Matrix sets the broker's commission rate that applies to a placement. Each row gives an **Insurer**, **Product**, **Line of business**, **Policy type** (new business or renewal), **Rate (%)**, **Effective from**, **Effective to** and **Applies at**. The rate is chosen in this order: insurer and product, insurer and line of business, insurer, product, line of business; an exact policy type before **Any**; then the insurer's default rate and the system default. With no row, the insurers' default rates apply.
+The Commission Rate Matrix is the register of the commission rules. A rule names the business it covers and the rates that apply: **Insurer**, **Product**, **Line of business**, **Policy type** (new business, renewal or any), **Channel type** (financing bank, dealer, affinity partner, agent, direct or any), **Motor type** (for example PC-SEDAN, PC-OTHER) and, where the rates depend on the value insured, a **Sum insured band**; **Effective from** and **Effective to**. The most specific rule in force on the date applies: insurer, product and motor type first, then insurer and product, insurer and line of business, insurer, product, line of business; an exact policy type and channel type before **Any**; a band before an open rule. With no rule, the insurer's default rate and then the system default apply.
 
-**Add rate** adds a row. **Test rate** finds the rate that would apply to a placement of an insurer, product, line of business, policy type and date.
+A rule has one of two **Rate basis** values:
+
+- **Net premium**: one **Rate (%)** of the net premium, as before.
+- **Issuing / remitting**: the rates per peril of a Motor policy on the **Peril rates** tab. For each peril (Own Damage, Acts of Nature, Bodily Injury, Property Damage, Personal Accident, Roadside Assistance) the rule holds the **Issuing rate** charged to the client, the **Insurer net rate** and the **TIS remitting rate** that TISPH remits to the insurer; the insurer net rate is never above the TIS remitting rate, which is never above the issuing rate. The commission of a policy is the premium at the issuing rate less the premium at the TIS remitting rate per peril; CTPL is remitted in full. The difference between the TIS remitting rate and the insurer net rate is the variance shared with the referrer of the policy where its sharing scheme says so.
+
+**Add rate** adds a draft; **Upload rules** loads several rules from the Excel template (**Template** downloads it); **Test rate** shows the rule and rates that apply to an insurer, product, channel, motor type, sum insured and date. A rule is submitted for approval (status **Pending**) and decided on [Configuration Approvals](#posting-configuration-configuration-approvals-posting-rules-account-determination) by {{roles:approve:commission-rules}} other than its maker; an approved rule is **In force** from its effective date. A change to an approved rule is a new version that replaces it on approval and end-dates the old one; the **History** tab lists the versions. A rule cannot overlap another rule with the same keys. A pending rule can be withdrawn; an approved rule is ended with an end date.
 
 ![Master > Finance > Commission Rate Matrix](images/screens-master/commission-rate-matrix.png)
 
@@ -245,6 +250,16 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 | **Bank Statement Formats** | How each bank's statement file is read: columns, date format, debit and credit or signed amounts (for example the BDO and BPI exports). |
 | **Bank Transaction Types** | The bank lines with no book entry (bank charges, interest income, final tax on interest): direction, the account they post to, whether they need approval and the description pattern that recognises them on the statement. |
 | **Insurer Statement Formats** | How each insurer's statement file is read; the standard format applies to any insurer without its own. |
+
+## Financial statement versions {#financial-statement-versions}
+
+{{screen:/master/finance/fs-versions}}
+
+![Master > Finance > Financial Statement Versions](images/screens-master/fs-versions.png)
+
+A financial statement version lists the lines of the statements in order, each with the range of GL accounts it carries: **TIS01 Local financial statements**, **TIS02 Balance sheet and income statement** and **TIS03 Budget** (income statement lines only). A range is given by the first digits of the accounts: **GL from** 110 and **GL to** 112 take every account from 110 to 112, whatever its length. An account belongs to the first line, by line number, whose range takes it; the accounts no line takes are listed under **Accounts not in this version** and show on that line in the reports, so the statements always add up.
+
+Select a version to see its lines: **Line**, **Statement**, **Section**, **FS line**, **GL from**, **GL to**, **Shown as** (debit or credit balance) and the number of **Accounts** each line takes. TIS Finance & General Accounting edits the name, purpose and status and the lines (**Add line**, the bin of a line, **Save**); the lines are checked before they are saved. **Add version** starts a new version from the lines of another. The version of the reports when none is chosen is TIS01. See [Financial Statement by Version and Daily GL Balance](#reports-by-department).
 
 ## Operational masters {#operational-masters}
 

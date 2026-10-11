@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, enableFeatures } from './helpers.js';
+import { setup, loginAs, enableFeatures, withReferenceCommissionControls } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
@@ -21,6 +21,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withReferenceCommissionControls();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['quote-online-approval', 'rfq-multi-insurer']);
   const s = await persona('t.sales', ['sales']);

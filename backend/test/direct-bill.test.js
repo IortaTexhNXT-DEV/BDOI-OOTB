@@ -9,13 +9,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
+import { withReferenceCommissionControls } from './helpers.js';
 import { issuePolicy } from '../src/modules/policies/service.js';
 import { bookDirectBill } from '../src/modules/remittance/directbill.js';
 import { eligiblePolicies } from '../src/modules/remittance/service.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+beforeAll(async () => { ctx = await setupFinance(); await withReferenceCommissionControls(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -255,7 +256,7 @@ describe('billing mode change', () => {
 
   it('refuses the change once premium was collected or the commission is on a debit note', async () => {
     const b = await issue({ billingMode: 'broker', insurer: 'STANDARD', net: 1000, gross: 1252.5 });
-    const pay = await ctx.as('maker')('post', `/policies/${b.policyId}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-1', amount: 500, paymentDate: '2026-01-05' });
+    const pay = await ctx.as('maker')('post', `/policies/${b.policyId}/payments`).send({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: 'BDO-1', amount: 500, paymentDate: '2026-01-05', proofKey: 'payment-proofs/slip.jpg' });
     expect(pay.status).toBe(201);
     expect((await ctx.as('maker')('post', '/remittance/direct-bill/billing-mode').send({ policyNumber: b.policy.policy_number, billingMode: 'direct' })).status).toBe(409);
     const dnPol = (await query('SELECT policy_id FROM direct_bill_items WHERE debit_note_id IS NOT NULL LIMIT 1')).rows[0];

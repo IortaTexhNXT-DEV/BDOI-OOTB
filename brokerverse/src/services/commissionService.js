@@ -1,4 +1,4 @@
-import { getRequest, postRequest } from "../utility/commonServices";
+import { getRequest, postRequest, putRequest } from "../utility/commonServices";
 
 class CommissionService {
   static async getDashboard() {
@@ -112,6 +112,90 @@ class CommissionService {
       `commission/referrer-accounts/${referrerId}/lines/${lineId}/pay`,
       {}
     );
+    return response.data;
+  }
+
+  // rate change, reversal and withholding tax requests on a line (approved by a second user)
+  static async requestLineChange(referrerId, lineId, payload) {
+    const response = await postRequest(`commission/referrer-accounts/${referrerId}/lines/${lineId}/requests`, payload);
+    return response.data;
+  }
+
+  static async listRequests(params) {
+    const response = await getRequest("commission/requests", params);
+    return response.data;
+  }
+
+  static async decideRequest(requestId, action, payload = {}) {
+    const response = await postRequest(`commission/requests/${requestId}/${action}`, payload);
+    return response.data;
+  }
+
+  // the share of a line inside the limits of its sharing scheme
+  static async changeShare(referrerId, lineId, payload) {
+    const response = await postRequest(`commission/referrer-accounts/${referrerId}/lines/${lineId}/share`, payload);
+    return response.data;
+  }
+
+  // the commission breakdown of a policy and its recompute
+  static async policyBreakdown(policyId) {
+    const response = await getRequest(`commission/policies/${policyId}/breakdown`);
+    return response.data;
+  }
+
+  static async recomputePolicy(policyId) {
+    const response = await postRequest(`commission/policies/${policyId}/recompute`, {});
+    return response;
+  }
+
+  // sharing schemes
+  static async listSchemes(params) {
+    const response = await getRequest("commission/sharing-schemes", params);
+    return response.data;
+  }
+
+  static async schemeOptions() {
+    const response = await getRequest("commission/sharing-schemes/options");
+    return response.data;
+  }
+
+  static async getScheme(ref) {
+    const response = await getRequest(`commission/sharing-schemes/${encodeURIComponent(ref)}`);
+    return response.data;
+  }
+
+  static async schemeAssignments(ref) {
+    const response = await getRequest(`commission/sharing-schemes/${encodeURIComponent(ref)}/assignments`);
+    return response.data;
+  }
+
+  static async schemeExample(payload) {
+    const response = await postRequest("commission/sharing-schemes/example", payload);
+    return response.data;
+  }
+
+  static async createScheme(payload) {
+    const response = await postRequest("commission/sharing-schemes", payload);
+    return response.data;
+  }
+
+  static async updateScheme(ref, payload) {
+    const response = await putRequest(`commission/sharing-schemes/${encodeURIComponent(ref)}`, payload);
+    return response.data;
+  }
+
+  static async schemeAction(ref, action, payload = {}) {
+    const response = await postRequest(`commission/sharing-schemes/${encodeURIComponent(ref)}/${action}`, payload);
+    return response.data;
+  }
+
+  static async listChannels(params) {
+    const response = await getRequest("channels", params);
+    return response.data;
+  }
+
+  static async assignScheme(payload) {
+    const response = await postRequest("commission/sharing-schemes/assign", payload);
     return response.data;
   }
 }

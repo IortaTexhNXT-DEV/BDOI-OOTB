@@ -248,28 +248,31 @@ INSERT INTO master_records(type_code, code, name, data, status, created_by) SELE
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$holiday$s$ AND lower(code) = lower($s$2027-12-31-LASTDAYOFTHEYEAR$s$));
 
 -- ---------- Philippine banks (SWIFT / BIC of the head office; the bank's branch and contact details are added on the screen) ----------
-INSERT INTO banks(code, name, swift_code, attrs, created_by)
-SELECT v.code, v.name, NULLIF(v.swift, ''), jsonb_build_object('category', v.category), 'seed' FROM (VALUES
- ('BDO', 'BDO Unibank, Inc.', 'BNORPHMM', 'Universal Bank'),
- ('BPI', 'Bank of the Philippine Islands', 'BOPIPHMM', 'Universal Bank'),
- ('MBT', 'Metropolitan Bank and Trust Company', 'MBTCPHMM', 'Universal Bank'),
- ('LBP', 'Land Bank of the Philippines', 'TLBPPHMM', 'Government Bank'),
- ('PNB', 'Philippine National Bank', 'PNBMPHMM', 'Universal Bank'),
- ('SECB', 'Security Bank Corporation', 'SETCPHMM', 'Universal Bank'),
- ('UBP', 'Union Bank of the Philippines', 'UBPHPHMM', 'Universal Bank'),
- ('RCBC', 'Rizal Commercial Banking Corporation', 'RCBCPHMM', 'Universal Bank'),
- ('CBC', 'China Banking Corporation', 'CHBKPHMM', 'Universal Bank'),
- ('EWB', 'East West Banking Corporation', 'EWBCPHMM', 'Universal Bank'),
- ('DBP', 'Development Bank of the Philippines', 'DBPHPHMM', 'Government Bank'),
- ('PSB', 'Philippine Savings Bank', 'PHSBPHMM', 'Thrift Bank'),
- ('AUB', 'Asia United Bank Corporation', 'AUBKPHMM', 'Universal Bank'),
- ('MAYBANK', 'Maybank Philippines, Inc.', 'MBBEPHMM', 'Commercial Bank'),
- ('PBCOM', 'Philippine Bank of Communications', 'CPHIPHMM', 'Commercial Bank'),
- ('BOC', 'Bank of Commerce', 'PABIPHMM', 'Commercial Bank'),
- ('PVB', 'Philippine Veterans Bank', 'PHVBPHMM', 'Commercial Bank')
-) AS v(code, name, swift, category)
+INSERT INTO banks(code, name, short_name, swift_code, attrs, created_by)
+SELECT v.code, v.name, v.short_name, NULLIF(v.swift, ''), jsonb_build_object('category', v.category), 'seed' FROM (VALUES
+ ('BDO', 'BDO Unibank, Inc.', 'BDO', 'BNORPHMM', 'Universal Bank'),
+ ('BPI', 'Bank of the Philippine Islands', 'BPI', 'BOPIPHMM', 'Universal Bank'),
+ ('MBT', 'Metropolitan Bank and Trust Company', 'Metrobank', 'MBTCPHMM', 'Universal Bank'),
+ ('LBP', 'Land Bank of the Philippines', 'Landbank', 'TLBPPHMM', 'Government Bank'),
+ ('PNB', 'Philippine National Bank', 'PNB', 'PNBMPHMM', 'Universal Bank'),
+ ('SECB', 'Security Bank Corporation', 'Security Bank', 'SETCPHMM', 'Universal Bank'),
+ ('UBP', 'Union Bank of the Philippines', 'UnionBank', 'UBPHPHMM', 'Universal Bank'),
+ ('RCBC', 'Rizal Commercial Banking Corporation', 'RCBC', 'RCBCPHMM', 'Universal Bank'),
+ ('CBC', 'China Banking Corporation', 'Chinabank', 'CHBKPHMM', 'Universal Bank'),
+ ('EWB', 'East West Banking Corporation', 'EastWest', 'EWBCPHMM', 'Universal Bank'),
+ ('DBP', 'Development Bank of the Philippines', 'DBP', 'DBPHPHMM', 'Government Bank'),
+ ('PSB', 'Philippine Savings Bank', 'PSBank', 'PHSBPHMM', 'Thrift Bank'),
+ ('AUB', 'Asia United Bank Corporation', 'AUB', 'AUBKPHMM', 'Universal Bank'),
+ ('MAYBANK', 'Maybank Philippines, Inc.', 'Maybank', 'MBBEPHMM', 'Commercial Bank'),
+ ('PBCOM', 'Philippine Bank of Communications', 'PBCOM', 'CPHIPHMM', 'Commercial Bank'),
+ ('BOC', 'Bank of Commerce', 'Bank of Commerce', 'PABIPHMM', 'Commercial Bank'),
+ ('PVB', 'Philippine Veterans Bank', 'Veterans Bank', 'PHVBPHMM', 'Commercial Bank')
+) AS v(code, name, short_name, swift, category)
 WHERE NOT EXISTS (SELECT 1 FROM banks b WHERE lower(b.code) = lower(v.code) OR lower(b.name) = lower(v.name))
 ON CONFLICT (code) DO NOTHING;
+UPDATE banks b SET short_name = v.short_name FROM (VALUES
+ ('BDO', 'BDO'), ('BPI', 'BPI'), ('MBT', 'Metrobank'), ('LBP', 'Landbank'), ('SECB', 'Security Bank'), ('CBC', 'Chinabank')) AS v(code, short_name)
+WHERE b.code = v.code AND COALESCE(b.short_name, '') = '';
 UPDATE banks SET attrs = jsonb_build_object('category', 'Universal Bank') || attrs
 WHERE code IN ('BDO', 'BPI', 'MBT', 'SECB', 'CBC') AND NOT attrs ? 'category';
 UPDATE banks SET attrs = jsonb_build_object('category', 'Government Bank') || attrs WHERE code = 'LBP' AND NOT attrs ? 'category';

@@ -28,7 +28,8 @@ client credit limits. The remittance ageing also opens with `read:remittance`.
   (`receipts/receivables.js`), the bill's due date becomes the due date of its first unpaid instalment, so collections,
   reminders and the receivable ageing follow the plan.
 - Premium warranty: deadline = policy inception + the insurer's `premium_warranty_days` (else
-  `collections.default_credit_days`), moved by an approved extension. Premium due = the open premium, or on a plan the
+  `collections.corporate_credit_days` for a corporate client, 90 for TISPH, migration 0525; else
+  `collections.default_credit_days`), moved by an approved extension. The bill's due date follows the same terms. Premium due = the open premium, or on a plan the
   instalments already due. A cancellation request is a draft cancellation endorsement for Operations; the monitor never
   cancels a policy.
 - Credit limit: checked in `policies/service.js issuePolicy` after the bill is created. Going over the limit does not
@@ -40,7 +41,8 @@ client credit limits. The remittance ageing also opens with `read:remittance`.
 
 `credit.instalment_frequencies`, `credit.default_instalment_count`, `credit.max_instalment_count`,
 `credit.warranty_warning_days`, `credit.max_warranty_extension_days`, `credit.check_credit_limit`,
-`limits.receivable_ageing_buckets` (ageing columns), `collections.default_credit_days`, `remittance.default_due_days`.
+`limits.receivable_ageing_buckets` (ageing columns), `collections.default_credit_days`, `collections.corporate_credit_days`,
+`remittance.default_due_days`. TISPH offers monthly instalments only (`credit.instalment_frequencies`, migration 0525).
 
 ## Debugging
 

@@ -1,6 +1,7 @@
 /**
  * Seeds: roles, permissions, the BrokerVerse admin, configuration defaults, scheduled jobs and the reference data in
- * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on (see seeds/README.md). Idempotent.
+ * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on, the TISPH test users only when
+ * TISPH_TEST_USERS_PASSWORD is set outside the production environment (see seeds/README.md). Idempotent.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
 import { encryptSecret, isEncrypted } from '../lib/secrets.js';
 import { assertPasswordAllowed, recordHistory } from '../lib/password.js';
+import { getSetting } from '../lib/settings.js';
 import { PLATFORM_PERMISSIONS, PLATFORM_ROLE, isPlatformPermission } from '../lib/platform.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -101,6 +103,16 @@ for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[rol
 const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'],
   operations: ['quotations:approve', 'policies:approve', 'renewals:approve', 'renewals:assign'], claims: ['claims:approve'] };
 for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
+// Post-dated cheque log (permissions of migration 0520, FRS COLL-05 default grants): Accounting encodes and forwards,
+// the Accounting Manager approves cancellations, Operations reads.
+const PDC_PERMS = { accounting: ['pdc'], 'accounting-manager': ['pdc:approve'], operations: ['pdc:read'] };
+for (const [role, items] of Object.entries(PDC_PERMS)) ROLE_PERMS[role].push(...items);
+// Insurer billing statements are approved by a second user holding approve:insurer-billing (migration 0522, FRS COMM-06);
+// Accounting kept the decision it had with write:remittance, the Accounting Manager has it through Accounting
+ROLE_PERMS.accounting.push('insurer-billing:approve');
+// Receipt reversal (migration 0524): the roles that issue receipts request it, the Accounting Manager approves
+ROLE_PERMS.accounting.push('receipts:reverse');
+ROLE_PERMS['accounting-manager'].push('receipt-reversal:approve');
 
 // TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
 // R -> read, A -> approve where the module has an approval. Sales and Operations both raise quotations, placements,
@@ -123,12 +135,14 @@ Object.assign(ROLE_PERMS, {
   'tis-ops-associate': [...TIS_OPS],
   'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
   'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
-  'tis-ccd-pdu': [...TIS_CCD],
-  'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read'],
+  // PDC Management (RBAC v4): CCD-PDU CRU, CCD-PDC CRUD and the checker of cancellations, every other persona reads
+  // Receipting (RBAC v4): CCD-BP issues the receipts, CCD-PDC and CCD-Recon read them, CCD-PDU has no access
+  'tis-ccd-pdu': [...TIS_COMMON, 'pdc'],
+  'tis-ccd-pdc': [...TIS_COMMON, 'receipts:read', 'collections:read', 'remittance:read', 'bank-reconciliation:read', 'pdc', 'pdc:approve'],
   // claim settlement funds from insurers with Receipting and Reconciliation; reversals with Reconciliation (migration 0502)
   'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read', 'claim-funds:write', 'quotations:read'],
   // insurer statement reconciliation is prepared under write:remittance (see the role guide)
-  'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read', 'claim-funds:write', 'claim-cash:reverse'],
+  'tis-ccd-recon': [...TIS_COMMON, 'receipts:read', 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read', 'claim-funds:write', 'claim-cash:reverse'],
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
   'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
     'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
@@ -144,6 +158,27 @@ Object.assign(ROLE_PERMS, {
   // the iorta TechNXT platform administrator: the catalogue and its changes, nothing of the business (lib/platform.js)
   'iorta-platform-admin': ['profile:read', 'features:read', 'feature-entitlements:manage'],
 });
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-bp', 'tis-ccd-recon',
+  'tis-finance', 'tis-it-admin', 'tis-general-manager']) ROLE_PERMS[role].push('pdc:read');
+for (const role of ['tis-finance', 'tis-general-manager']) ROLE_PERMS[role].push('insurer-billing:approve');
+// RBAC v4: reversals sit with CCD-Recon, checked by a second CCD-Recon user or Finance
+ROLE_PERMS['tis-ccd-recon'].push('receipts:reverse', 'receipt-reversal:approve');
+ROLE_PERMS['tis-finance'].push('receipt-reversal:approve');
+// Commission rules register and sharing schemes (migration 0570, FRS PROD-16): Accounting keeps them, the Accounting
+// Manager approves; for TISPH Finance keeps them, the General Manager approves, the front office reads. Rate changes,
+// reversals and withholding tax changes on commission lines are approved by a second user (migration 0571, COMM-02).
+ROLE_PERMS.accounting.push('commission-rules', 'sharing-schemes', 'commission-share:write');
+ROLE_PERMS['accounting-manager'].push('commission-rules:approve', 'sharing-schemes:approve', 'commission:approve');
+ROLE_PERMS.processing.push('commission-rules:read', 'sharing-schemes:read');
+for (const role of ['sales', 'operations']) ROLE_PERMS[role].push('sharing-schemes:read');
+ROLE_PERMS['tis-finance'].push('commission-rules', 'sharing-schemes', 'commission-share:write', 'commission:approve');
+ROLE_PERMS['tis-general-manager'].push('commission-rules:read', 'commission-rules:approve', 'sharing-schemes:read', 'sharing-schemes:approve', 'commission:approve');
+ROLE_PERMS['tis-it-admin'].push('commission-rules:read', 'sharing-schemes:read');
+for (const role of ['tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('commission-rules:read');
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('sharing-schemes:read');
+ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
+// Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
+for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */
@@ -198,6 +233,56 @@ export async function seedPlatformAdmin({ log = console.log, warn = log, source 
   return id;
 }
 
+/** "carla.mendoza" -> ["Carla", "Mendoza"]: the first and last name of a test user, from its user name. */
+const nameParts = (username) => {
+  const parts = username.split('.').map((p) => p.charAt(0).toUpperCase() + p.slice(1));
+  return [parts[0], parts.slice(1).join(' ') || parts[0]];
+};
+
+/**
+ * Whether this deployment is the production environment: APP_ENVIRONMENT "production" or "prod" (any case) or, when
+ * APP_ENVIRONMENT is not set, the environment name of Help > About (setting release.environment_label) being Production.
+ * NODE_ENV says nothing about it: every deployed site (DEV, SIT, UAT, PROD) runs with NODE_ENV=production.
+ */
+export async function isProductionEnvironment(source = process.env) {
+  const label = typeof source.APP_ENVIRONMENT === 'string' && source.APP_ENVIRONMENT.trim()
+    ? source.APP_ENVIRONMENT
+    : await getSetting('release.environment_label', '');
+  const name = String(label || '').trim().toLowerCase();
+  return name === 'production' || name === 'prod';
+}
+
+/**
+ * One test user per TISPH role (seeds/tisph_test_users.json), for user acceptance testing and demonstrations, only when
+ * TISPH_TEST_USERS_PASSWORD is set and never in the production environment (isProductionEnvironment). Every user gets
+ * that password (checked against the password policy) and must change it at the first sign-in. An existing user keeps
+ * its password and its roles. Returns the user names created.
+ */
+export async function seedTisphTestUsers({ log = console.log, warn = log, source = process.env } = {}) {
+  const password = String(source.TISPH_TEST_USERS_PASSWORD || '');
+  if (!password) return [];
+  if (await isProductionEnvironment(source)) {
+    warn('WARNING: TISPH_TEST_USERS_PASSWORD is set in production; the TISPH test users are for UAT and demo sites only and were not created');
+    return [];
+  }
+  await assertPasswordAllowed(password);
+  const hash = await bcrypt.hash(password, 10);
+  const users = JSON.parse(fs.readFileSync(path.join(here, 'seeds', 'tisph_test_users.json'), 'utf8'));
+  const created = [];
+  for (const { username, role } of users) {
+    const existing = await query('SELECT id FROM users WHERE lower(username) = $1', [username.toLowerCase()]);
+    if (existing.rows[0]) continue;
+    const [first, last] = nameParts(username);
+    const id = (await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by, must_change_password)
+      VALUES ($1,$2,$3,$4,$5,$6,'active','seed',true) RETURNING id`, [username, hash, `${first} ${last}`, first, last, `${username}@tisph.example.ph`])).rows[0].id;
+    await recordHistory(id, hash);
+    await query('INSERT INTO user_roles(user_id, role_id) SELECT $1, id FROM roles WHERE code = $2 ON CONFLICT DO NOTHING', [id, role]);
+    created.push(username);
+  }
+  log(`TISPH test users: ${created.length} created, ${users.length - created.length} already present`);
+  return created;
+}
+
 /** Applies the seed. `log` receives the progress lines and `warn` the warnings (a line starting with WARNING:; default `log`). */
 export async function seed({ log = console.log, warn = log, sampleData } = {}) {
   for (const [code, name, description, isSystem] of ROLES) {
@@ -237,6 +322,7 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
       [s.key, JSON.stringify(s.value), s.group, s.label, s.type || 'string', s.editable !== false]);
   }
   await seedPlatformAdmin({ log, warn });
+  await seedTisphTestUsers({ log, warn });
   // Two-factor secrets stored before encryption at rest (DATA_ENCRYPTION_KEY) was introduced are encrypted now.
   const plain = await query(`SELECT id, totp_secret, totp_pending_secret FROM users
     WHERE (totp_secret IS NOT NULL AND totp_secret NOT LIKE 'enc:%') OR (totp_pending_secret IS NOT NULL AND totp_pending_secret NOT LIKE 'enc:%')`);

@@ -63,10 +63,10 @@ describe('Official receipts are finance-only', () => {
     expect(await balanceOf(p.bill.id)).toBeCloseTo(p.gross - 1000, 2);
   });
 
-  it('only Accounting, the TISPH Cash Control roles (and the System Administrator) hold write:receipts; migration 0084 revokes it from sales on existing databases', async () => {
+  it('only Accounting, CCD-BP of the TISPH Cash Control roles (and the System Administrator) hold write:receipts; migration 0084 revokes it from sales on existing databases', async () => {
     const holders = await q(`SELECT DISTINCT r.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
       WHERE p.code = 'write:receipts' ORDER BY r.code`);
-    expect(holders.map((r) => r.code)).toEqual(['accounting', 'system-admin', 'tis-ccd-bp', 'tis-ccd-pdc', 'tis-ccd-pdu', 'tis-ccd-recon']);
+    expect(holders.map((r) => r.code)).toEqual(['accounting', 'system-admin', 'tis-ccd-bp']);
     const sales = await q(`SELECT p.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id WHERE r.code = 'sales' AND p.module = 'receipts'`);
     expect(sales.map((r) => r.code)).toEqual([]); // the receipt register is finance-only too
     // an existing database seeded before the fix
@@ -103,7 +103,7 @@ describe('No direct-paid path for policy editors', () => {
 describe('pending payment capture, verified by finance', () => {
   it('sales, underwriting and agents record a pending payment (no receipt, no journal); finance verifies it', async () => {
     const p = await billedPolicy(12000, ctx.userIds.agent);
-    const pay = (amount, ref) => ({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: ref, amount, paymentDate: today });
+    const pay = (amount, ref) => ({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: ref, amount, paymentDate: today, proofKey: 'payment-proofs/slip.jpg' });
     const jvBefore = (await q('SELECT count(*)::int AS n FROM journal_vouchers'))[0].n;
     const ids = [];
     for (const [who, ref] of [[ctx.as('sales'), 'SLS-1'], [uw, 'UW-1'], [ctx.as('agent'), 'AGT-1']]) {
@@ -158,7 +158,7 @@ describe('endorsement premium payment follows the pending flow', () => {
 
     // pending capture against the endorsement bill
     const receiptsBefore = await receiptCount('pol_sls_02');
-    const c = await cs('post', '/policies/pol_sls_02/payments').send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-END-1', amount: delta, paymentDate: today, receivableId: rcv });
+    const c = await cs('post', '/policies/pol_sls_02/payments').send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-END-1', amount: delta, paymentDate: today, receivableId: rcv, proofKey: 'payment-proofs/slip.jpg' });
     expect(c.status).toBe(201);
     expect(c.body.data).toMatchObject({ posted: false, receipt: null, capture: { status: 'submitted', receivableId: rcv } });
     expect(await balanceOf(rcv)).toBeCloseTo(delta, 2);

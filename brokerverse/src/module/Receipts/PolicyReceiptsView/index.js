@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -6,8 +6,8 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgBack from "../../../assets/icons/SvgBack";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
 import emailService from "../../../services/emailService";
@@ -19,6 +19,9 @@ import { showErrorMessage } from "../../../utility/toastUtils";
 import DetailHeader from "../../../components/DetailHeader";
 import { statusLabel } from "../../../utils/statusSeverity";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import ReceiptProof from "./ReceiptProof";
+import ReceiptReversal from "./ReceiptReversal";
+import { getReceiptsListByIdMiddleware } from "../store/receiptsMiddleware";
 
 // the amounts of the applied policies as the header shows the receipt amount; the foreign amount has no home symbol
 const amountBody = (field, foreign = false) => (row) => {
@@ -49,6 +52,14 @@ function PolicyReceipts() {
     });
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  // a link to one receipt (My Work, a notification): ?receipt=<id>
+  const [params] = useSearchParams();
+  const linked = params.get("receipt");
+  useEffect(() => {
+    if (linked && linked !== currentReceiptId) dispatch(getReceiptsListByIdMiddleware(linked));
+  }, [linked, currentReceiptId, dispatch]);
+  const reload = () => dispatch(getReceiptsListByIdMiddleware(currentReceiptId));
   const items = [
     {
       label: t("sidebar.Receipts"),
@@ -125,6 +136,7 @@ function PolicyReceipts() {
             { label: t("accounts.receiptDialogs.customerCode"), value: header.customerCode },
             { label: t("accounts.receiptDialogs.paymentMode"), value: header.paymentMode ? t(`paymentVoucher.detail.modes.${String(header.paymentMode).toLowerCase()}`, { defaultValue: statusLabel(header.paymentMode) }) : null },
             { label: t("accounts.receiptDialogs.reference"), value: header.referenceNo },
+            { label: t("accounts.receiptDialogs.channel"), value: header.paymentChannel ? t(`accounts.receiptDialogs.channels.${header.paymentChannel}`) : null },
             { label: t("accounts.receiptDialogs.amount"), value: header.amount, type: "amount", currency: header.currencyCode || undefined },
           ]}
         />
@@ -298,6 +310,12 @@ function PolicyReceipts() {
           }}
         />
       </div>
+      {currentReceiptId && header ? (
+        <ReceiptProof receiptId={currentReceiptId} proof={header.proof} collectedBy={header.collectedBy} cancelled={receiptStatus === "Cancelled"} />
+      ) : null}
+      {currentReceiptId && header ? (
+        <ReceiptReversal receiptId={currentReceiptId} receiptNumber={receiptNumber || ""} reversal={header.reversal} cancelled={receiptStatus === "Cancelled"} onChanged={reload} />
+      ) : null}
       {currentReceiptId ? (
         <DetailSection title={t("accounts.receiptDialogs.activity")} className="mt-4">
           <RecordActivityLog entity="receipt" recordId={currentReceiptId} />
