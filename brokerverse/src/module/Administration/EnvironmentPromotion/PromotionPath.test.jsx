@@ -39,8 +39,8 @@ const mount = () => render(<MemoryRouter><ConfirmDialogHost /><PromotionPath /><
 
 test("shows the path with this environment marked, the release and the loads", async () => {
   mount();
-  await waitFor(() => expect(screen.getByTestId("promotion-path")).toBeInTheDocument());
-  const steps = screen.getByTestId("promotion-path").querySelectorAll(".ep-step");
+  await screen.findByTestId("promotion-path");
+  const steps = screen.getAllByRole("listitem").filter((li) => li.className.includes("ep-step"));
   expect(steps).toHaveLength(5);
   expect(steps[2].className).toContain("ep-step--current");
   expect(screen.getByText("This environment")).toBeInTheDocument();
@@ -52,7 +52,7 @@ test("shows the path with this environment marked, the release and the loads", a
 
 test("marks the environment after confirmation", async () => {
   mount();
-  await waitFor(() => expect(screen.getByTestId("promotion-path")).toBeInTheDocument());
+  await screen.findByTestId("promotion-path");
   const button = screen.getByRole("button", { name: "Mark environment" });
   expect(button).toBeDisabled();
   fireEvent.keyDown(screen.getByLabelText("Environment"), { key: "ArrowDown", code: "ArrowDown", keyCode: 40, which: 40, altKey: true });
@@ -69,6 +69,6 @@ test("marks the environment after confirmation", async () => {
 test("without write:data-load the marker cannot be changed", async () => {
   window.localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:data-load"]));
   mount();
-  await waitFor(() => expect(screen.getByTestId("promotion-path")).toBeInTheDocument());
+  await screen.findByTestId("promotion-path");
   expect(screen.queryByRole("button", { name: "Mark environment" })).toBeNull();
 });
