@@ -21,6 +21,7 @@ import * as ye from './yearend.js';
 import * as tax from './tax.js';
 import { AUTO_CHECKS, blockingChecks, checklistItems, closeBlockers, manualSignOffs, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
+import { closingCalendar } from './jobs.js';
 import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS, validateOpeningBalances } from './opening.js';
 import { migrationImportOpen } from '../../lib/goLiveLock.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
@@ -121,9 +122,10 @@ async function periodActions(db, p, user) {
 }
 
 define({
-  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods, the latest status change of each period and the status moves the user may make',
+  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make',
   screen: `${S} > Period Management`, middleware: read,
   response: { success: true, data: { code: 'FY2026', periods: [{ period: '2026-01', periodNo: 1, status: 'closed',
+    closing: { operationsCutoff: '2026-01-26', financeClose: '2026-01-29', adjustmentWindowEnd: '2026-02-09' },
     lastChange: { to: 'closed', at: '2026-02-05T02:00:00Z', byName: 'Ana Santos', reasonCode: 'PCL-MONTHEND', reasonName: 'Month-end close completed', remarks: 'Month-end close completed', source: 'manual' },
     actions: { reopen: { allowed: false, reason: 'permission', message: 'Reopening a period requires permission approve:period-end' } } }] } },
   handler: async (req, res) => {
@@ -136,7 +138,7 @@ define({
     for (const p of periods) {
       const run = runOf.get(p.period);
       rows.push({ ...fiscal.periodRow(p), closeRun: run ? { id: run.id, runNumber: run.run_number, status: run.status } : null,
-        lastChange: changes.get(p.period) || null, actions: await periodActions(pool, p, req.user) });
+        lastChange: changes.get(p.period) || null, closing: p.is_adjustment ? null : await closingCalendar(p), actions: await periodActions(pool, p, req.user) });
     }
     ok(res, { ...fiscal.fyRow(f), periods: rows });
   },
