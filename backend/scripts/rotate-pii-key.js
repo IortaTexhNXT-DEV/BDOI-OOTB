@@ -16,30 +16,26 @@ const ident = (s) => `"${String(s).replace(/"/g, '""')}"`;
 
 /** Count (dry run) or re-encrypt the values not encrypted with the current key. Returns [{ table, column, left, rotated }]. */
 /**
- * The audit trail is append-only (migration 0591): its re-encryption runs in a transaction of its own that lifts the
- * guard (app.audit_purge) for that transaction only. `db` is a pool or a client already in a transaction.
+ * The audit trail is append-only (migrations 0591, 0596): the re-encryption of its encrypted columns (before_data,
+ * after_data) runs in a transaction of its own under the recorded bypass, which writes an entry before (tool, reason,
+ * user) and one after with the rows rewritten; the trigger lets the bypass change only those personal-data columns.
+ * `db` is a pool, or a client outside a transaction.
  */
-async function rewriteAudit(db, sql, params) {
-  if (typeof db.connect !== 'function' || db.release) {
-    await db.query("SELECT set_config('app.audit_purge', 'on', false)");
-    try {
-      return await db.query(sql, params);
-    } finally {
-      await db.query("SELECT set_config('app.audit_purge', '', false)");
-    }
-  }
-  const client = await db.connect();
+async function rewriteAudit(db, sql, params, column) {
+  const pooled = typeof db.totalCount === 'number';
+  const client = pooled ? await db.connect() : db;
   try {
     await client.query('BEGIN');
-    await client.query("SET LOCAL app.audit_purge = 'on'");
+    await client.query('SELECT audit_bypass_begin($1, $2, $3)', ['rotate-pii-key', `re-encrypt audit_log.${column} with the current personal data key`, 'system']);
     const r = await client.query(sql, params);
+    await client.query('SELECT audit_bypass_end()');
     await client.query('COMMIT');
     return r;
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
     throw e;
   } finally {
-    client.release();
+    if (pooled) client.release();
   }
 }
 
@@ -61,7 +57,7 @@ export async function rotate(db, { execute = false, batch = 500 } = {}) {
       const set = s.json ? `${ident(s.column)} = pii_protect_jsonb(${ident(s.column)}, NULL)` : `${ident(s.column)} = pii_encrypt(pii_decrypt(${ident(s.column)}))`;
       for (;;) {
         const sql = `UPDATE ${ident(s.table)} SET ${set} WHERE ctid IN (SELECT ctid FROM ${ident(s.table)} WHERE ${stale} LIMIT ${Number(batch)})`;
-        const r = s.table === 'audit_log' ? await rewriteAudit(db, sql, params) : await db.query(sql, params);
+        const r = s.table === 'audit_log' ? await rewriteAudit(db, sql, params, s.column) : await db.query(sql, params);
         rotated += r.rowCount;
         if (r.rowCount < batch) break;
       }

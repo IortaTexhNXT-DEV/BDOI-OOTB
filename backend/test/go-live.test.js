@@ -223,7 +223,8 @@ describe('production start on a fresh database', () => {
       expect(r.users.remove).toEqual(['ops.drop']);
       const names = (await query('SELECT username FROM users ORDER BY 1')).rows.map((u) => u.username);
       expect(names).toEqual(['BrokerVerse', 'ops.keep']);
-      expect(await count('audit_log')).toBe(1); // audit emptied, then the purge recorded
+      expect(await count('audit_log', "entity <> 'audit_bypass'")).toBe(1); // audit emptied, then the purge recorded
+      expect(await count('audit_log', "entity = 'audit_bypass'")).toBe(2); // the bypass recorded itself: begin, end
       // one transaction: a failure rolls everything back
       await query("INSERT INTO sequences(name, period, value) VALUES ('purge-test', '2026', 7)");
       const bad = { query: (text, params) => (/^DELETE FROM "branches"/.test(text) ? Promise.reject(new Error('boom')) : client.query(text, params)) };

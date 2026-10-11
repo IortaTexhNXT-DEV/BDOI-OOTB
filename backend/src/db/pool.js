@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { currentRequest } from '../lib/requestContext.js';
 import pg from 'pg';
 import { config } from '../config.js';
 import { sessionOptions } from '../lib/pii.js';
@@ -24,6 +25,29 @@ export function poolConfig(url = config.databaseUrl, keys = sessionOptions(), ma
   return { connectionString, max, options: [own, keys].filter(Boolean).join(' ') };
 }
 export const pool = new Pool(poolConfig());
+
+/**
+ * The audit trail bypass (audit_bypass_begin, app.audit_purge; migration 0596) belongs to the operator tools and the
+ * housekeeping job: a statement that names it is refused while an API request is being served, on every client of
+ * the pool (pool.query, transactions and ad-hoc clients alike).
+ */
+export const AUDIT_BYPASS_RE = /audit_purge|audit_bypass_(begin|end)|audit_bypass_deleted|audit_bypass_updated/i;
+export function assertNoBypassInRequest(args) {
+  const first = args[0];
+  const text = typeof first === 'string' ? first : first?.text || '';
+  if (AUDIT_BYPASS_RE.test(text) && currentRequest()) {
+    const e = new Error('The audit trail bypass cannot be used by an application request');
+    e.status = 403;
+    throw e;
+  }
+}
+pool.on('connect', (client) => {
+  const clientQuery = client.query.bind(client);
+  client.query = (...args) => {
+    assertNoBypassInRequest(args);
+    return clientQuery(...args);
+  };
+});
 
 /**
  * Ambient transaction (runInTransaction): while one is active in the current async context, query / one / many and

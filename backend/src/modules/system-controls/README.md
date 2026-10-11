@@ -33,8 +33,15 @@ ids it answers, so the register is the evidence of the NFR items of the test pac
 - Single session (`security.single_session`): a fresh sign-in ends the earlier sessions (audit `session-superseded`).
 - MFA for every user (`security.require_2fa_all`) and the one-time code by e-mail (`security.email_otp_*`) for users
   without an authenticator app.
-- The audit trail is append-only at the database (trigger `audit_log_append_only`); only the housekeeping purge past
-  the statutory minimum and the transaction reset with `--purge-audit` delete from it (`SET LOCAL app.audit_purge`).
+- The audit trail is append-only at the database (trigger `audit_log_append_only`, migrations 0591 and 0596). It is
+  never truncated. The one way past it is `audit_bypass_begin(tool, reason, actor)` inside a transaction: it first
+  writes an `audit_bypass / begin` entry, the token it sets is bound to that transaction, and `audit_bypass_end()`
+  writes the row count; the bypass entries themselves can never be changed or deleted. Under the bypass a row may be
+  deleted, or only its personal data (before_data, after_data, ip, username) rewritten. Setting `app.audit_purge` by
+  hand does nothing, and the API refuses any statement naming the bypass while a request is served (`db/pool.js`).
+  Users: the housekeeping job (retention past the statutory minimum), `reset:transactions --purge-audit`,
+  `purge:sample --purge-audit`, `mask:data` (personal data of a copy) and `rotate-pii-key` (re-encryption of
+  before_data and after_data). Test: `test/audit-bypass.test.js`.
 - Data retention job (`data-retention`, monthly): flags closed contracts past `retention.closed_contract_years` /
   `retention.claim_contract_years`; `retention.action = anonymise` replaces the personal data of clients whose every
   contract is flagged.

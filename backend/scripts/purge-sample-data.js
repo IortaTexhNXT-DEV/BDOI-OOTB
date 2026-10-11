@@ -79,8 +79,6 @@ const ident = (t) => `"${t.replace(/"/g, '""')}"`;
  */
 export async function purgeSampleData(client, { execute = false, keepUsers = null, purgeAudit = false, log = () => {} } = {}) {
   await client.query('BEGIN');
-  // the audit trail is append-only (migration 0591): an explicit --purge-audit lifts it for this transaction only
-  if (purgeAudit) await client.query("SET LOCAL app.audit_purge = 'on'");
   try {
     const existing = new Set((await client.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")).rows.map((r) => r.tablename));
     const txTables = [...TRANSACTION_TABLES, ...(purgeAudit ? AUDIT_TABLES : [])].filter((t) => existing.has(t));
@@ -100,7 +98,14 @@ export async function purgeSampleData(client, { execute = false, keepUsers = nul
     plan.push({ table: 'users', what: keepUsers ? `all users except ${[...keep].join(', ')}` : 'sample users', rows: remove.length });
 
     if (execute) {
-      if (txTables.length) await client.query(`TRUNCATE ${txTables.map(ident).join(', ')} RESTART IDENTITY`);
+      const truncate = txTables.filter((t) => t !== 'audit_log');
+      if (truncate.length) await client.query(`TRUNCATE ${truncate.map(ident).join(', ')} RESTART IDENTITY`);
+      // the audit trail is append-only (migrations 0591, 0596): its entries are deleted under the recorded bypass
+      if (txTables.includes('audit_log')) {
+        await client.query('SELECT audit_bypass_begin($1, $2, $3)', ['purge-sample-data', 'sample data purge with --purge-audit before go-live', 'system']);
+        await client.query("DELETE FROM audit_log WHERE entity <> 'audit_bypass'");
+        await client.query('SELECT audit_bypass_end()');
+      }
       for (const p of plan.filter((x) => x.where)) await client.query(`DELETE FROM ${ident(p.table)} WHERE ${p.where}`);
       if (remove.length) {
         const ids = remove.map((u) => u.id);

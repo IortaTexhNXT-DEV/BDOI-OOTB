@@ -53,13 +53,16 @@ async function purge(table, where, cutoff) {
 /** The audit trail is append-only (trigger audit_log_append_only); only this purge, past the statutory minimum, may delete from it. */
 async function purgeAudit(cutoff) {
   return withTransaction(async (db) => {
-    await db.query("SET LOCAL app.audit_purge = 'on'");
+    // the bypass writes its own entry first (tool, reason, user) and the closing one with the rows deleted (migration 0596)
+    await db.query('SELECT audit_bypass_begin($1, $2, $3)', ['housekeeping', `audit trail retention: entries before ${new Date(cutoff).toISOString().slice(0, 10)}`, 'system']);
     let total = 0;
     for (;;) {
-      const r = await db.query(`DELETE FROM audit_log WHERE ctid IN (SELECT ctid FROM audit_log WHERE at < $1 LIMIT ${BATCH})`, [cutoff]);
+      const r = await db.query(`DELETE FROM audit_log WHERE ctid IN (SELECT ctid FROM audit_log WHERE at < $1 AND entity <> 'audit_bypass' LIMIT ${BATCH})`, [cutoff]);
       total += r.rowCount;
-      if (r.rowCount < BATCH) return total;
+      if (r.rowCount < BATCH) break;
     }
+    await db.query('SELECT audit_bypass_end()');
+    return total;
   });
 }
 

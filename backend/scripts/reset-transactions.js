@@ -172,9 +172,15 @@ export async function resetTransactions(client, {
         await client.query(`UPDATE ${ident(f.tbl)} SET ${f.cols.map((c) => `${ident(c)} = NULL`).join(', ')} WHERE ${f.cols.map((c) => `${ident(c)} IS NOT NULL`).join(' OR ')}`);
         await client.query(`ALTER TABLE ${ident(f.tbl)} DROP CONSTRAINT ${ident(f.conname)}`);
       }
-      // the audit trail is append-only at the database; the reset with --purge-audit is the one purge allowed
-      if (purgeAudit) await client.query("SET LOCAL app.audit_purge = 'on'");
-      if (removeAll.length) await client.query(`TRUNCATE ${removeAll.map((x) => ident(x.table)).join(', ')} RESTART IDENTITY`);
+      // the audit trail is append-only at the database (migrations 0591, 0596): it is never truncated; with --purge-audit
+      // its entries are deleted under the recorded bypass, whose own entries stay
+      const truncate = removeAll.filter((x) => x.table !== 'audit_log');
+      if (truncate.length) await client.query(`TRUNCATE ${truncate.map((x) => ident(x.table)).join(', ')} RESTART IDENTITY`);
+      if (purgeAudit && removeAll.some((x) => x.table === 'audit_log')) {
+        await client.query('SELECT audit_bypass_begin($1, $2, $3)', ['reset-transactions', 'transaction reset with --purge-audit before go-live', actor]);
+        await client.query("DELETE FROM audit_log WHERE entity <> 'audit_bypass'");
+        await client.query('SELECT audit_bypass_end()');
+      }
       for (const f of fks) await client.query(`ALTER TABLE ${ident(f.tbl)} ADD CONSTRAINT ${ident(f.conname)} ${f.def}`);
       for (const p of partial) await client.query(`DELETE FROM ${ident(p.table)} WHERE ${p.where}`, p.params);
       if (keepOpeningBalances && has.has('fiscal_years')) {

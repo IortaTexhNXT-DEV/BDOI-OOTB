@@ -6,8 +6,7 @@
 --   - MFA for every user (security.require_2fa_all) with a one-time code by e-mail as the second factor for users who
 --     have no authenticator app (security.email_otp_*);
 --   - reactivation restarts the dormancy clock (users.reactivated_at);
---   - the audit trail is append-only at the database (trigger; the housekeeping purge, the transaction reset with
---     --purge-audit and the masking tool of a copy set app.audit_purge for their own transaction);
+--   - the audit trail is append-only at the database (trigger; lifted only through the recorded bypass of migration 0596);
 --   - retention of closed contracts (retention.*) applied by the data-retention job, which flags the policies past
 --     their retention period;
 --   - a register of control evidence (control_evidence) behind Master > System Configuration > Security Controls.

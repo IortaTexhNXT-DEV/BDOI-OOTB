@@ -237,7 +237,9 @@ function maskValue(m, p, v, matchesWhere) {
 async function maskTable(client, table, plan, m, execute) {
   const select = ['ctid::text AS "__ctid"', ...plan.map((p, i) => `${selectExpr(p)} AS "c${i}"`),
     ...plan.map((p, i) => (p.entry?.where ? `(${p.entry.where}) AS "w${i}"` : `true AS "w${i}"`))];
-  const where = plan.map((p) => `${ident(p.name)} IS NOT NULL`).join(' OR ');
+  // the records of an audit trail bypass (migration 0596) are never rewritten: they hold tools and database users only
+  const own = table === 'audit_log' ? " AND entity <> 'audit_bypass'" : '';
+  const where = `(${plan.map((p) => `${ident(p.name)} IS NOT NULL`).join(' OR ')})${own}`;
   await forEachBatch(client, `SELECT ${select.join(', ')} FROM ${ident(table)} WHERE ${where}`, [], async (rows) => {
     const changedRows = [];
     for (const row of rows) {
@@ -441,8 +443,9 @@ export async function maskData(client, {
   const m = new Masker({ salt, maskStaff, keepLocality, referenceDate: now, fileFolders: TRANSACTION_FILE_FOLDERS });
 
   await client.query('BEGIN');
-  // the audit trail is append-only (migration 0591); masking a copy rewrites its personal values, in this transaction only
-  await client.query("SET LOCAL app.audit_purge = 'on'");
+  // the audit trail is append-only (migrations 0591, 0596): masking a copy rewrites only the personal data of its
+  // entries, under the recorded bypass (closed with the row count before the commit)
+  await client.query('SELECT audit_bypass_begin($1, $2, $3)', ['mask-data', 'masking the personal data of a copy of the database', actor]);
   try {
     let marker = await systemEnvironment(client);
     const locked = await isGoLiveLocked(client);
@@ -502,7 +505,10 @@ export async function maskData(client, {
     }
     // verified inside the transaction, before it commits (a dry run changed nothing: there is nothing to verify)
     const verification = execute ? await verifyMasked(client, { keptEmails: m.keptEmails, inTransaction: true }) : null;
-    if (execute) await client.query('COMMIT');
+    if (execute) {
+      await client.query('SELECT audit_bypass_end()');
+      await client.query('COMMIT');
+    }
     else await client.query('ROLLBACK');
     return { executed: execute, environment, previousEnvironment: remark ? remark.from : marker, remark, columns: report, tables, users, settings, verification, masker: m };
   } catch (e) {
