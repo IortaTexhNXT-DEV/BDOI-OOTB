@@ -13,6 +13,7 @@ import { detectType } from '../uploads/fileTypes.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
 import { tenantSettingErrors } from '../features/tenant.js';
 import { deploymentPackId } from '../branding/bundled.js';
+import { TFS_COLUMN_MAP_KEY, tfsColumnMapErrors } from '../leads/tfsColumns.js';
 
 /**
  * Front-end field -> app_settings key. systemName is the one application name (sign-in page, side bar, browser tab).
@@ -53,7 +54,7 @@ export function validTimeZone(value) {
  * Errors of the display currency (an active currency of the Currency master), the default language and the journal
  * statuses of the trial balance (never the opening balance journal, status opening: its balances are the opening
  * balances the trial balance already reads) and the settings of the enabling of Phase 2 by TISPH (features/tenant.js)
- * in a change ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
+ * and the column map of the TFS account file (leads.tfs_column_map) in a change ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
  */
 export async function localizationErrors(changes, paths = {}) {
   const errors = [];
@@ -70,6 +71,8 @@ export async function localizationErrors(changes, paths = {}) {
   }
   // who enables Phase 2 for TISPH (features.tenant_enable_*): never a future release, never the platform role
   errors.push(...tenantSettingErrors(changes, paths));
+  // the column map of the TFS account file (GAP-SALES-06): known fields, a header each, no column name used twice
+  for (const [key, value] of changes.filter(([k]) => k === TFS_COLUMN_MAP_KEY)) errors.push(...tfsColumnMapErrors(value, paths[key] || key));
   return errors;
 }
 

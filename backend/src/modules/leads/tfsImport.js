@@ -7,7 +7,8 @@
  * Rows are loaded one by one; a failed row does not stop the others (NFR-07.4). A row without a policy expiry date
  * gives no prospect (leads.tfs_expiry_required); an insurance provider the Insurance Company master does not know is
  * refused; a Loan ID twice in the file is refused the second time. A Loan ID already on a prospect updates that
- * prospect (TFS detail, and the status and disposition when given) instead of creating a second one.
+ * prospect (TFS detail, and the status and disposition when given) instead of creating a second one. The column
+ * headers the file is read by are configurable (leads.tfs_column_map, tfsColumns.js).
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest } from '../../lib/errors.js';
@@ -16,40 +17,9 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
 import { mapColumns } from '../documents/tabular.js';
 import { assertLeadValues, createLead, getLead, toLead, VEHICLE_KEYS } from './service.js';
+import { TFS_COLUMNS, tfsColumns } from './tfsColumns.js';
 
-/** Columns of the TFS account file; the upload template is built from this list. */
-export const TFS_COLUMNS = [
-  { key: 'tfsReference', header: 'Reference No.', aliases: ['reference number', 'ref no', 'account reference'], format: 'TFS reference number of the account', example: 'TFS-2026-104233' },
-  { key: 'loanId', header: 'Loan ID', aliases: ['loan number', 'loan no'], required: true, format: 'TFS loan identifier; one prospect per loan', example: 'LN-0094418' },
-  { key: 'firstName', header: 'First Name', aliases: ['fname'], required: 'First Name or Company Name', format: 'Text (up to 100 characters)', example: 'Andrea' },
-  { key: 'lastName', header: 'Last Name', aliases: ['surname'], format: 'Text (up to 100 characters)', example: 'Villanueva' },
-  { key: 'companyName', header: 'Company Name', aliases: ['company'], required: 'First Name or Company Name', format: 'Text; for a corporate (fleet) account', example: '' },
-  { key: 'DOB', header: 'Birthday', aliases: ['date of birth', 'birthdate', 'dob'], format: 'Date YYYY-MM-DD', example: '1987-06-21' },
-  { key: 'contactNumber', header: 'Mobile', aliases: ['mobile number', 'contact number', 'phone'], format: 'Mobile number', example: '09173047105' },
-  { key: 'emailId', header: 'Email', aliases: ['e-mail', 'email address'], format: 'E-mail address', example: 'andrea.villanueva@gmail.com' },
-  { key: 'houseNo', header: 'Address', aliases: ['house / unit no.', 'house no', 'street address'], format: 'House, unit, street', example: '12 Mabini St.' },
-  { key: 'barangay', header: 'Barangay', format: 'Text', example: 'San Antonio' },
-  { key: 'city', header: 'City / Municipality', aliases: ['city', 'municipality'], format: 'City or municipality', example: 'Pasig City' },
-  { key: 'province', header: 'Province', format: 'Province (Metro Manila for NCR)', example: 'Metro Manila' },
-  { key: 'zipCode', header: 'ZIP Code', aliases: ['zip'], format: 'Four digits', example: '1600' },
-  { key: 'make', header: 'Vehicle Make', aliases: ['make', 'brand'], format: 'Text', example: 'Toyota' },
-  { key: 'model', header: 'Vehicle Model', aliases: ['model'], format: 'Text', example: 'Raize' },
-  { key: 'variant', header: 'Vehicle Variant', aliases: ['variant'], format: 'Text', example: '1.0 Turbo CVT' },
-  { key: 'modelYear', header: 'Model Year', aliases: ['year model', 'year'], format: 'Four digits', example: '2023' },
-  { key: 'plateNumber', header: 'Plate No.', aliases: ['plate number', 'plate'], format: 'Text', example: 'NAB 1234' },
-  { key: 'chassisNumber', header: 'Chassis No.', aliases: ['chassis number', 'vin'], format: 'Text', example: 'MHKA4DE30PJ012345' },
-  { key: 'engineNumber', header: 'Engine No.', aliases: ['engine number', 'motor number'], format: 'Text', example: '1KR0123456' },
-  { key: 'insuranceProvider', header: 'Insurance Provider', aliases: ['insurer', 'insurance company'], format: 'Insurer of Master > Insurance Company (code or name)', example: 'Malayan Insurance Co., Inc.' },
-  { key: 'policyExpiryDate', header: 'Policy Expiry Date', aliases: ['expiry date', 'insurance expiry'], required: true, format: 'Date YYYY-MM-DD; an account without it gives no prospect', example: '2026-12-15' },
-  { key: 'loanStartDate', header: 'Loan Start Date', aliases: ['loan start'], format: 'Date YYYY-MM-DD', example: '2023-12-15' },
-  { key: 'loanBookingDate', header: 'Loan Booking Date', aliases: ['booking date'], format: 'Date YYYY-MM-DD', example: '2023-12-10' },
-  { key: 'loanMaturityDate', header: 'Loan Maturity Date', aliases: ['maturity date'], format: 'Date YYYY-MM-DD', example: '2028-12-15' },
-  { key: 'productGroup', header: 'Product Group', aliases: ['product'], format: 'Text (for example Motor, Credit Life)', example: 'Motor' },
-  { key: 'srp', header: 'SRP', aliases: ['suggested retail price', 'unit price'], format: 'Amount in pesos, no thousands separator', example: '1078000' },
-  { key: 'leadCategory', header: 'Lead Category', aliases: ['category'], format: 'Retail or Corporate; Retail when empty', allowed: ['Retail', 'Corporate'], example: 'Retail' },
-  { key: 'status', header: 'Status', aliases: ['call status', 'lead status'], format: 'Prospect status (leads.statuses); on an account already loaded it updates the prospect', example: '' },
-  { key: 'disposition', header: 'Disposition', aliases: ['call disposition'], format: 'Interested, Not Interested, Uncontacted, Call back or Renewed', example: '' },
-];
+export { TFS_COLUMNS, tfsColumns };
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -69,11 +39,11 @@ async function tfsSource() {
 }
 
 /** The prospect body of one row: { body, errors }. */
-async function rowBody(row, { expiryRequired, source }) {
-  const v = mapColumns(row, TFS_COLUMNS);
+async function rowBody(row, { expiryRequired, source, columns }) {
+  const v = mapColumns(row, columns);
   const errors = [];
   for (const k of ['DOB', 'policyExpiryDate', 'loanStartDate', 'loanBookingDate', 'loanMaturityDate']) {
-    if (v[k] && !DATE.test(String(v[k])) && !isoDate(v[k])) errors.push(`${TFS_COLUMNS.find((c) => c.key === k).header} must be a date YYYY-MM-DD`);
+    if (v[k] && !DATE.test(String(v[k])) && !isoDate(v[k])) errors.push(`${columns.find((c) => c.key === k).header} must be a date YYYY-MM-DD`);
   }
   if (!v.loanId) errors.push('Loan ID is required');
   if (!v.firstName && !v.companyName) errors.push('First Name or Company Name is required');
@@ -134,6 +104,8 @@ export async function importTfs(rows, { fileName, userId, onLead }) {
   if (!rows.length) throw badRequest('The file has no data rows (first row must be the column headers)');
   const expiryRequired = (await getSetting('leads.tfs_expiry_required', true)) !== false;
   const source = await tfsSource();
+  // the column headers of the file as configured (leads.tfs_column_map), else the delivered ones
+  const columns = await tfsColumns();
   const batch = await newBatch('tfs', fileName, rows.length, userId);
   const seen = new Set();
   const errors = [];
@@ -141,7 +113,7 @@ export async function importTfs(rows, { fileName, userId, onLead }) {
   let updated = 0;
   for (const [i, row] of rows.entries()) {
     const rowNo = i + 2;
-    const { body, errors: rowErrors } = await rowBody(row, { expiryRequired, source });
+    const { body, errors: rowErrors } = await rowBody(row, { expiryRequired, source, columns });
     const loan = String(body.loanId || '').toLowerCase();
     if (loan && seen.has(loan)) rowErrors.push(`Loan ID ${body.loanId} appears twice in the file`);
     if (rowErrors.length) { errors.push({ row: rowNo, message: rowErrors.join('; ') }); continue; }
