@@ -210,10 +210,10 @@ async function updateRule(db, id, v, user) {
 }
 
 /** Add a rule: in force at once, or a draft (submit: true sends it for approval) while rule changes are reviewed. */
-export async function createRate(b, user, { uploadId = null } = {}) {
+export async function createRate(b, user, { uploadId = null, direct = false } = {}) {
   return withTransaction(async (db) => {
     await db.query('LOCK TABLE commission_rates IN SHARE ROW EXCLUSIVE MODE');
-    const review = await approvalRequired();
+    const review = !direct && (await approvalRequired());
     const v = await cleanColumns(db, b);
     await assertNoOverlap(db, v, { review });
     const id = await insertRule(db, v, { status: review ? 'draft' : 'approved', user, uploadId });
@@ -227,11 +227,11 @@ export async function createRate(b, user, { uploadId = null } = {}) {
  * version (a draft that replaces it; submit: true sends it for approval); a pending rule is refused. Without review
  * the rule is changed in place, as before.
  */
-export async function updateRate(id, b, user) {
+export async function updateRate(id, b, user, { direct = false } = {}) {
   return withTransaction(async (db) => {
     await db.query('LOCK TABLE commission_rates IN SHARE ROW EXCLUSIVE MODE');
     const before = await fetchRate(db, id, true);
-    const review = await approvalRequired();
+    const review = !direct && (await approvalRequired());
     if (!review) {
       const v = await cleanColumns(db, b, before);
       await assertNoOverlap(db, v, { exceptId: before.id });

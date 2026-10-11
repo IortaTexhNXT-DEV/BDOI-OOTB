@@ -233,6 +233,8 @@ describe('commission rate matrix', () => {
   beforeAll(async () => {
     [ins, other] = await many("SELECT id, commission_rate FROM insurance_companies WHERE status = 'active' ORDER BY id LIMIT 2");
     motor = await one("SELECT id FROM products WHERE code = 'MOTOR'");
+    // the matrix mechanics on their own, without the sample rules of the TISPH panel (seeds/sample/96_commission_rules.sql)
+    await query('DELETE FROM commission_rates');
     await query('UPDATE insurance_companies SET commission_rate = 0.2 WHERE id = $1', [other.id]);
   });
   const add = (body) => ctx.api('post', '/commission-rates').send(body);

@@ -10,7 +10,9 @@
  *        pdcAcknowledgements
  * CR-14  netRemittanceFullyPaid, netRemittancePartiallyPaid, premiumPaymentStatus, invoiceTracker, soaPerPartner,
  *        reconciliationSchedule; the bank matching
- *        reports insufficientPayments and overpayments
+ *        reports insufficientPayments and overpayments; commissionSharing (OPS-07: the share of each agent or dealer
+ *        on the fully paid commission and what TISPH keeps)
+ * CR-13  agentConversion (SR-03: the policies converted per agent per month with the tier level, premium and commission)
  */
 import { FS_MAP } from '../accounting/fsVersions.js';
 import { FY_START, POSTED } from './periodEndQueries.js';
@@ -129,6 +131,27 @@ const netRemittance = (where) => `SELECT ${INSURER_DIMS}, p.policy_number AS "po
   FROM policies p JOIN (${POSITION}) pos ON pos.policy_id = p.id LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
   WHERE p.billing_mode <> 'direct' AND ${where}`;
+// Agents / dealers commission sharing (RPT-OPS-07): each commission line of a payee with the policy's commission and
+// what TISPH keeps once every share of the policy is taken; the payee as the agent dimension
+const commissionSharing = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.name AS agent, r.referrer_type AS "payeeType", r.level AS "tierLevel", p.policy_number AS "policyNumber",
+    ${CLIENT_DIMS}, ${INSURER_DIMS}, pr.name AS product, pr.id::text AS _product_id, pr.code AS _product_code, p.inception_date AS "inceptionDate", cm.net_premium AS "netPremium",
+    COALESCE((p.details->'commissionBasis'->>'grossCommission')::numeric, p.commission_amount) AS "totalCommission",
+    COALESCE(cm.scheme_code, CASE WHEN cm.share_basis IS NOT NULL THEN 'Variance' ELSE 'Level ' || COALESCE(r.level, '-') END) AS scheme,
+    CASE WHEN cm.share_basis = 'variance' THEN cm.share_note WHEN cm.share_basis IS NOT NULL THEN cm.share_value::text || CASE WHEN cm.share_basis = 'fixed' THEN '' ELSE '%' END
+      WHEN cm.comsub_fixed > 0 THEN cm.comsub_fixed::text || ' + ' || cm.comsub_pct::text || '%' ELSE cm.comsub_pct::text || '%' END AS "sharing",
+    cm.amount AS "sharedAmount", cm.withholding AS wht, cm.net_amount AS "netToPayee",
+    COALESCE((p.details->'commissionBasis'->>'grossCommission')::numeric, p.commission_amount)
+      - (SELECT COALESCE(sum(x.amount), 0) FROM commissions x WHERE x.policy_id = p.id AND x.referrer_id IS NOT NULL AND x.status <> 'Reversed') AS "retainedBalance",
+    cm.status, cm.voucher_no AS voucher, cm.paid_at::date AS "paidDate", rm.remittance_number AS "remittanceNumber"
+  FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id JOIN policies p ON p.id = cm.policy_id LEFT JOIN clients c ON c.id = p.client_id
+  LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
+  WHERE cm.cycle_date BETWEEN $1 AND $2`;
+// Agent policy conversion (RPT-SLS-03): the policies of each agent per month with the tier level, premium and
+// commission; the telesales incentive joins once COMM-08 is built (0 meanwhile)
+const agentConversion = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.name AS agent, r.referrer_type AS "payeeType", COALESCE(r.level, '-') AS "tierLevel",
+    to_char(cm.cycle_date, 'YYYY-MM') AS month, cm.policy_id AS _policy_id, cm.net_premium AS premium, cm.amount AS commission, 0::numeric AS incentives
+  FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id
+  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2`;
 const premiumPaymentStatus = `SELECT p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", ${CLIENT_DIMS}, ${INSURER_DIMS}, pr.name AS product,
     pr.id::text AS _product_id, pr.code AS _product_code, p.premium_total AS premium, COALESCE(pos.paid, 0) AS paid, COALESCE(pos.outstanding, p.premium_total) AS outstanding,
     CASE WHEN p.status IN ('cancelled', 'Cancelled') THEN 'Cancelled' WHEN pos.policy_id IS NULL OR COALESCE(pos.paid, 0) <= 0 THEN 'Pending'
@@ -262,6 +285,15 @@ export const TISPH_QUERIES = {
   reconciliationSchedule: {
     sql: reconciliationSchedule, filters: ['insurer', 'status'], criteria: { 'Principal Insurer': { groupBy: 'insurer' }, Status: { groupBy: 'status' }, Overall: {} },
     orderBy: 'f.insurer, f."statementNumber", f."lineNo"',
+  },
+  commissionSharing: {
+    sql: commissionSharing, filters: ['agent', 'insurer', 'status'],
+    criteria: { Payee: { groupBy: 'agent' }, 'Payee Type': { groupBy: 'payeeType' }, 'Principal Insurer': { groupBy: 'insurer' }, Overall: {} }, orderBy: 'f.agent, f."policyNumber"',
+  },
+  agentConversion: {
+    sql: agentConversion, filters: ['agent'], aggregate: { accounts: 'count(DISTINCT t._policy_id)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', incentives: 'sum(t.incentives)' },
+    criteria: { Agent: { dims: ['agent', 'payeeType', 'tierLevel', 'month'], groupBy: 'agent' }, Month: { dims: ['month', 'agent', 'payeeType', 'tierLevel'], groupBy: 'month' } },
+    orderBy: 'f.agent, f.month',
   },
   premiumPaymentStatus: {
     sql: premiumPaymentStatus, filters: ['insurer', 'client', 'product'],

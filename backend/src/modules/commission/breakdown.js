@@ -67,7 +67,7 @@ export async function computeBasis(db, p, { details = null } = {}) {
   const motor = (await isDualRateLine(line)) && (await getSetting('commission.peril_based_motor', false)) === true;
   const motorType = motor ? await motorTypeOf(doc) : null;
   const rule = await resolveCommissionRate({ insurerId: p.insurance_company_id, productId: p.product_id, lob: line, policyType: businessType === 'RENEW' ? 'renewal' : 'new',
-    channelType, motorType, sumInsured: num(doc.lossAndDamageCoverage) || null, date, db });
+    channelType, motorType, sumInsured: num(doc.lossAndDamageCoverage) || null, date, perPeril: motor, db });
   const warnings = [];
   const basis = { computedAt: new Date().toISOString(), date, businessType, channelType, motorType, netPremium, ruleId: rule.ruleId, ruleVersion: rule.version, ruleLevel: rule.level,
     source: rule.source, rateBasis: 'net-premium', rate: pct4(rule.rate * 100), perils: [], insurerRemitting: 0, grossCommission: 0, varianceShare: 0, shares: [], retained: 0,

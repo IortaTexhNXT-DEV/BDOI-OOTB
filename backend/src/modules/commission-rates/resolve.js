@@ -42,10 +42,11 @@ export const channelTypeOf = ({ channelType = null, referrerId = null } = {}) =>
  * The rule for a placement: { rate, source: 'matrix' | 'insurer' | 'default', ruleId, level, rateBasis, perilRates,
  * version }. insurerId / productId: ids; lob: line of business code; policyType: new | renewal (default new);
  * channelType (CHANNEL_TYPES), motorType (commission.motor_types code), sumInsured (Own Damage); date: YYYY-MM-DD
- * (default today); db: transaction client (optional).
+ * (default today); perPeril: rules rated per peril (issuing vs remitting) are considered, else only rules with one rate
+ * of the net premium (the callers that need one rate); db: transaction client (optional).
  */
 export async function resolveCommissionRate({ insurerId = null, productId = null, lob = null, policyType = 'new', channelType = null, motorType = null, sumInsured = null,
-  date = null, db = null } = {}) {
+  date = null, perPeril = false, db = null } = {}) {
   const run = db || { query };
   const insurer = toInt(insurerId);
   const product = toInt(productId);
@@ -60,11 +61,12 @@ export async function resolveCommissionRate({ insurerId = null, productId = null
       AND (r.product_id IS NULL OR r.product_id = $2)
       AND (r.line_of_business IS NULL OR lower(r.line_of_business) = lower($3))
       AND (r.policy_type = 'any' OR r.policy_type = $4)
+      AND ($9::boolean OR r.rate_basis = 'net-premium')
       AND (r.channel_type IS NULL OR r.channel_type = $6)
       AND (r.motor_type IS NULL OR upper(r.motor_type) = $7)
       AND ((r.si_from IS NULL AND r.si_to IS NULL) OR ($8::numeric IS NOT NULL AND ($8 >= COALESCE(r.si_from, 0)) AND (r.si_to IS NULL OR $8 <= r.si_to)))
     ORDER BY level DESC, (r.channel_type IS NOT NULL) DESC, (r.policy_type = $4) DESC, (r.si_from IS NOT NULL OR r.si_to IS NOT NULL) DESC, r.effective_from DESC, r.id DESC LIMIT 1`,
-  [insurer, product, lob ? String(lob) : null, type, on, channel, motor, si])).rows[0];
+  [insurer, product, lob ? String(lob) : null, type, on, channel, motor, si, perPeril === true])).rows[0];
   if (row) {
     return { rate: Number(row.rate), source: 'matrix', ruleId: row.id, level: LEVEL_LABELS[row.level], rateBasis: row.rate_basis, perilRates: row.peril_rates || [], version: row.version };
   }

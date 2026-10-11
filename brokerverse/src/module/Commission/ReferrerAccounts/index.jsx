@@ -44,7 +44,7 @@ const ReferrerAccounts = () => {
   const { data, loading, refreshing } = useStableLoad(loader);
   const requestsLoader = useCallback(() => (canDecide ? CommissionService.listRequests({ status: "pending" }).then((r) => r?.data || r || []) : Promise.resolve([])), [canDecide, version]); // eslint-disable-line react-hooks/exhaustive-deps
   const { data: requests } = useStableLoad(requestsLoader, { initialData: [] });
-  const referrers = data?.referrers || [];
+  const referrers = useMemo(() => data?.referrers || [], [data]);
   const summary = data?.summary;
 
   const types = useMemo(() => [...new Set(referrers.map((r) => r.type).filter(Boolean))].sort().map((v) => ({ label: v, value: v })), [referrers]);

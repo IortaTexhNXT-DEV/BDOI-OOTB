@@ -17,7 +17,7 @@ import * as masters from '../masters/service.js';
 import { MASTER_TEMPLATES } from '../masters/uploadSamples.js';
 import { ACCOUNT_UPLOAD_COLUMNS, FS_GROUPS, accountFromRow, upsertAccount } from '../accounting/service.js';
 import * as rates from '../commission-rates/service.js';
-import { POLICY_TYPES } from '../commission-rates/resolve.js';
+import { POLICY_TYPES, CHANNEL_TYPES } from '../commission-rates/resolve.js';
 import * as charges from '../premium-charges/service.js';
 import { RULE_KINDS, RULE_METHODS, TAX_REGIMES } from '../premium-charges/calculator.js';
 import { assertSod, proposeLimit } from '../access-control/service.js';
@@ -334,17 +334,25 @@ const commissionSheet = () => ({
     { key: 'product', header: 'Product', format: 'Product code (or name); empty = any product', list: 'Products' },
     { key: 'lineOfBusiness', header: 'Line of Business', format: 'Line of business code, e.g. motor; empty = any' },
     { key: 'policyType', header: 'Policy Type', list: 'Commission Policy Type', format: 'new, renewal or any (any when empty)' },
-    { key: 'rate', header: 'Rate', required: true, type: 'number', format: 'Decimal fraction: 0.20 for 20%' },
+    { key: 'channelType', header: 'Channel Type', format: `Channel type code, one of ${CHANNEL_TYPES.join(', ')}; empty = any channel` },
+    { key: 'motorType', header: 'Motor Type', format: 'Motor type code of the Motor Type master, e.g. PC-SEDAN; empty = any' },
+    { key: 'siFrom', header: 'SI From', type: 'number', format: 'Sum insured band start; empty = no band' },
+    { key: 'siTo', header: 'SI To', type: 'number', format: 'Sum insured band end; empty = open' },
+    { key: 'rate', header: 'Rate', required: true, type: 'number', format: 'Decimal fraction of the net premium: 0.20 for 20% (per-peril rules: Commission Rate Matrix > Upload)' },
     { key: 'effectiveFrom', header: 'Effective From', required: true, type: 'date', format: 'Date YYYY-MM-DD' },
     { key: 'effectiveTo', header: 'Effective To', type: 'date', format: 'Date YYYY-MM-DD; open ended when empty' },
     { key: 'active', header: 'Active', type: 'bool', list: 'Yes No', format: 'Yes when empty' },
     { key: 'remarks', header: 'Remarks' },
   ],
-  keyColumns: ['insurer', 'product', 'lineOfBusiness', 'policyType', 'effectiveFrom'], keyDefaults: { policyType: 'any' },
-  keyOf: (v) => keyText(v.insurer, v.product, v.lineOfBusiness, v.policyType || 'any', v.effectiveFrom),
+  keyColumns: ['insurer', 'product', 'lineOfBusiness', 'policyType', 'channelType', 'motorType', 'siFrom', 'siTo', 'effectiveFrom'], keyDefaults: { policyType: 'any' },
+  keyOf: (v) => keyText(v.insurer, v.product, v.lineOfBusiness, v.policyType || 'any', v.channelType, v.motorType, v.siFrom, v.siTo, v.effectiveFrom),
   sample: { insurer: 'MALAYAN', product: 'MOTOR', policyType: 'new', rate: '0.175', effectiveFrom: '2026-01-01', active: 'Yes', remarks: 'Agreement 2026' },
   async exportRows() {
-    return (await rates.listRates()).map((r) => ({ insurer: cell(r.insurerCode), product: cell(r.productCode), lineOfBusiness: cell(r.lineOfBusiness), policyType: r.policyType,
+    // the workbook carries the rules on the net premium; the per-peril (issuing / remitting) rules of the TISPH motor
+    // business travel through the Commission Rate Matrix upload, which carries their peril rates
+    return (await rates.listRates()).filter((r) => r.rateBasis !== 'issuing-remitting' && r.approvalStatus === 'approved').map((r) => ({
+      insurer: cell(r.insurerCode), product: cell(r.productCode), lineOfBusiness: cell(r.lineOfBusiness), policyType: r.policyType,
+      channelType: cell(r.channelType), motorType: cell(r.motorType), siFrom: r.siFrom === null ? '' : String(r.siFrom), siTo: r.siTo === null ? '' : String(r.siTo),
       rate: String(r.rate), effectiveFrom: cell(r.effectiveFrom), effectiveTo: cell(r.effectiveTo), active: yesNo(r.active), remarks: cell(r.remarks) }));
   },
   async importRow(ctx, v) {
@@ -352,6 +360,12 @@ const commissionSheet = () => ({
     if (!POLICY_TYPES.includes(policyType)) fail('policyType', `Policy Type must be one of ${POLICY_TYPES.join(', ')}`);
     const rate = numberCell(v.rate);
     if (rate === null || Number.isNaN(rate) || rate < 0 || rate > 1) fail('rate', 'Rate must be a fraction from 0 to 1 (0.20 for 20%)');
+    const channelType = v.channelType ? String(v.channelType).trim().toLowerCase() : null;
+    if (channelType && !CHANNEL_TYPES.includes(channelType)) fail('channelType', `Channel Type must be one of ${CHANNEL_TYPES.join(', ')}`);
+    const motorType = v.motorType ? String(v.motorType).trim().toUpperCase() : null;
+    const siFrom = v.siFrom === '' || v.siFrom === undefined || v.siFrom === null ? null : numberCell(v.siFrom);
+    const siTo = v.siTo === '' || v.siTo === undefined || v.siTo === null ? null : numberCell(v.siTo);
+    if ((siFrom !== null && Number.isNaN(siFrom)) || (siTo !== null && Number.isNaN(siTo))) fail('siFrom', 'SI From and SI To must be amounts');
     const effectiveFrom = dateValue('effectiveFrom', v.effectiveFrom, 'Effective From');
     const effectiveTo = dateValue('effectiveTo', v.effectiveTo, 'Effective To');
     const active = toBool(v.active);
@@ -361,15 +375,18 @@ const commissionSheet = () => ({
       fail('lineOfBusiness', `Line of Business ${v.lineOfBusiness} is not in the Line of Business master (Lines of Business sheet or Master > Line of Business)`);
     }
     const body = { insuranceCompanyId: await insurerOf('insurer', v.insurer), productId: await productOf('product', v.product), lineOfBusiness: v.lineOfBusiness || null,
-      policyType, rate, effectiveFrom, effectiveTo: effectiveTo || null, active: active ?? true, remarks: v.remarks || null };
+      policyType, channelType, motorType, siFrom, siTo, rateBasis: 'net-premium', rate, effectiveFrom, effectiveTo: effectiveTo || null, active: active ?? true, remarks: v.remarks || null };
     const hit = await one(`SELECT id FROM commission_rates WHERE insurance_company_id IS NOT DISTINCT FROM $1::int AND product_id IS NOT DISTINCT FROM $2::int
-        AND lower(line_of_business) IS NOT DISTINCT FROM lower($3::text) AND policy_type = $4 AND effective_from = $5::date ORDER BY id LIMIT 1`,
-    [body.insuranceCompanyId, body.productId, body.lineOfBusiness, policyType, effectiveFrom]);
+        AND lower(line_of_business) IS NOT DISTINCT FROM lower($3::text) AND policy_type = $4 AND effective_from = $5::date
+        AND channel_type IS NOT DISTINCT FROM $6::text AND upper(motor_type) IS NOT DISTINCT FROM $7::text
+        AND si_from IS NOT DISTINCT FROM $8::numeric AND si_to IS NOT DISTINCT FROM $9::numeric AND rate_basis = 'net-premium'
+        AND approval_status IN ('approved', 'draft', 'returned') ORDER BY (approval_status = 'approved') DESC, id DESC LIMIT 1`,
+    [body.insuranceCompanyId, body.productId, body.lineOfBusiness, policyType, effectiveFrom, channelType, motorType, siFrom, siTo]);
     if (hit) {
-      await rates.updateRate(hit.id, body, ctx.user);
+      await rates.updateRate(hit.id, body, ctx.user, { direct: true });
       return 'updated';
     }
-    await rates.createRate(body, ctx.user);
+    await rates.createRate(body, ctx.user, { direct: true });
     return 'created';
   },
 });

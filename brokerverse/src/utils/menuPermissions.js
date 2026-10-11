@@ -205,7 +205,8 @@ Object.assign(roleMenuPermissions, {
   "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
-  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
+  // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572)
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables", "Incentive"] },
   // Receipting (RBAC v4): CCD-PDU has no access to the receipts
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the

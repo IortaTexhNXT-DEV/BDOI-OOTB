@@ -15,6 +15,7 @@ import logger from "../../../utility/logger";
 import { DetailPageSkeleton } from "../../../components/Skeletons";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import StatusChip from "../../../components/StatusChip";
+import PageHeader from "../../../components/PageHeader";
 
 const ReferrerAccountDetail = () => {
   const { t } = useTranslation();
@@ -122,9 +123,22 @@ const ReferrerAccountDetail = () => {
     }
   };
 
-  // switching withholding tax recomputes the net payable of every unpaid line: confirmed, with its reason
+  // switching withholding tax recomputes the net payable of every unpaid line: confirmed, with its reason; while
+  // changes are reviewed (commission.adjustment_approval_required) it is a request on the first unpaid line
   const handleWhtToggle = async (checked) => {
     const unpaid = [...(detail?.currentCycle?.lines || []), ...(detail?.futureCycles?.lines || [])];
+    if (detail?.controls?.adjustmentApproval) {
+      const line = unpaid.find((l) => !l.pendingRequest);
+      if (!line) { showError(new Error(t("commissionLine.requests.noLineForWht")), t("commissionLine.whtFailed")); return; }
+      const ok = await openConfirm({
+        title: t(checked ? "commissionLine.confirm.whtOnTitle" : "commissionLine.confirm.whtOffTitle"), severity: "warning",
+        facts: [{ label: t("commissionLine.referrer"), value: detail?.referrer?.name }, { label: t("commissionLine.policy"), value: line.policyNo }],
+        reason: { context: "commission_wht_change" }, confirmLabel: t("commissionLine.requests.send"),
+        onConfirm: (reason) => CommissionService.requestLineChange(id, line.id, { kind: "wht", whtApplicable: checked, ...reason }),
+      });
+      if (ok) loadDetail();
+      return;
+    }
     const reason = await openConfirm({
       title: t(checked ? "commissionLine.confirm.whtOnTitle" : "commissionLine.confirm.whtOffTitle"),
       severity: "warning",
@@ -228,20 +242,16 @@ const ReferrerAccountDetail = () => {
   return (
     <div className="referrer-detail-page">
       <Toast ref={toast} />
-      <Button
-        label={t("commissionLine.backToReferrers")}
-        icon="pi pi-arrow-left"
-        outlined
-        className="back-btn"
-        onClick={() => navigate("/commission/referrer-accounts")}
-      />
+      <PageHeader title={referrer.name} home={t("commissionLine.commission")} section={{ label: t("commissionLine.backToReferrers"), to: "/commission/referrer-accounts" }}
+        trail={[referrer.name]} onBack={() => navigate("/commission/referrer-accounts")} />
 
       <div className="identity">
         <div className="badges">
           <StatusChip code={String(referrer.status || "").toLowerCase()} label={referrer.status} />
           <span className="type-badge">{typeLevel}</span>
+          {referrer.schemeCode ? <StatusChip code="active" label={t("commissionLine.schemeChip", { code: referrer.schemeCode })} severity="info" /> : null}
+          {referrer.pendingScheme ? <StatusChip code="for-approval" label={t("commissionLine.schemePending", { code: referrer.pendingScheme.schemeCode || "—" })} /> : null}
         </div>
-        <h1>{referrer.name}</h1>
         <p className="meta">
           {t("commissionLine.wht")}: {referrer.whtType || "—"} · {t("commissionLine.bank")}:{" "}
           {referrer.bankAccount || t("commissionLine.notOnFile")} ·{" "}
@@ -350,6 +360,7 @@ const ReferrerAccountDetail = () => {
         referrerId={id}
         referrerName={referrer.name}
         whtApplicable={Boolean(referrer.whtApplicable)}
+        controls={detail.controls}
         line={selectedLine}
         onUpdated={handleLineUpdated}
         onError={(err) => showError(err, t("commissionLine.actionFailed"))}

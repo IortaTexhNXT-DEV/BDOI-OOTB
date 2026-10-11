@@ -39,7 +39,7 @@ CREATE INDEX IF NOT EXISTS commission_line_requests_line_idx ON commission_line_
 CREATE INDEX IF NOT EXISTS commission_line_requests_status_idx ON commission_line_requests(status, requested_at DESC);
 
 ALTER TABLE receivables ADD COLUMN IF NOT EXISTS remitted_at timestamptz;
-ALTER TABLE receivables ADD COLUMN IF NOT EXISTS remittance_id bigint;
+ALTER TABLE receivables ADD COLUMN IF NOT EXISTS remittance_id text;
 CREATE INDEX IF NOT EXISTS receivables_remittance_idx ON receivables(remittance_id);
 
 INSERT INTO app_settings(key, value, "group", label, type) VALUES

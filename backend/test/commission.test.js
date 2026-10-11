@@ -1,9 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
-import { pool } from '../src/db/pool.js';
+import { pool, query } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
-beforeAll(async () => { ctx = await setupFinance(); });
+// the base mechanics of the lines: the TISPH review of changes and the eligibility after remittance (seed 96) are off here
+beforeAll(async () => {
+  ctx = await setupFinance();
+  await query("UPDATE app_settings SET value = 'false' WHERE key IN ('commission.adjustment_approval_required', 'commission.eligible_requires_remittance')");
+  clearSettingsCache();
+});
 afterAll(async () => { await pool.end(); });
 
 const details = (ref, sub) => ({ commissionDetails: { brokeragePct: 18, productLabel: 'Motor · All insurers', primary: { referrerId: ref, level: 'L1', comsubPct: 8, comsubFixed: 0 }, chain: sub ? [{ referrerId: sub, level: 'L2' }] : [] } });
