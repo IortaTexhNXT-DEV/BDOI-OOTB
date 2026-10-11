@@ -2483,6 +2483,12 @@
      "meaning": "See products and product templates"
     },
     {
+     "area": "Product Configurator",
+     "module": "Products",
+     "level": "Approve",
+     "meaning": "Approve or return product templates submitted for review (never one you submitted or last changed)"
+    },
+    {
      "area": "Master data and configuration",
      "module": "Reference masters",
      "level": "View",
@@ -2546,6 +2552,10 @@
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return product templates submitted for review (never one you submitted or last changed)",
      "kind": "maker-checker"
     },
     {
@@ -5414,6 +5424,12 @@
      "meaning": "See products and product templates"
     },
     {
+     "area": "Product Configurator",
+     "module": "Products",
+     "level": "Approve",
+     "meaning": "Approve or return product templates submitted for review (never one you submitted or last changed)"
+    },
+    {
      "area": "Master data and configuration",
      "module": "Reference masters",
      "level": "View",
@@ -5497,6 +5513,10 @@
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return product templates submitted for review (never one you submitted or last changed)",
      "kind": "maker-checker"
     },
     {
@@ -9924,6 +9944,16 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Products",
+     "approval": "Approve or return product templates submitted for review (never one you submitted or last changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Accounts > Remittance > Approvals",
      "approval": "Remittance approval within the approver's limit",
      "approvers": [
@@ -11376,6 +11406,12 @@
      "meaning": "See products and product templates"
     },
     {
+     "area": "Product Configurator",
+     "module": "Products",
+     "level": "Approve",
+     "meaning": "Approve or return product templates submitted for review (never one you submitted or last changed)"
+    },
+    {
      "area": "Master data and configuration",
      "module": "Reference masters",
      "level": "View",
@@ -11495,6 +11531,10 @@
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return product templates submitted for review (never one you submitted or last changed)",
      "kind": "maker-checker"
     },
     {
@@ -15850,6 +15890,11 @@
   "approve:posting-rules": [
    "TIS Finance & General Accounting"
   ],
+  "approve:products": [
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "approve:promotions": [
    "TIS Sales Unit Head",
    "TIS General Manager"
@@ -15888,6 +15933,7 @@
    "TIS Sales Unit Head",
    "TIS General Manager"
   ],
+  "enable:phase2-features": [],
   "extend:quotations": [
    "TIS Sales Officer",
    "TIS Sales Unit Head",

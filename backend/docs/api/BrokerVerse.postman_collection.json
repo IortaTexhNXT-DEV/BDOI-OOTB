@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1565 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1578 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -5200,69 +5200,6 @@
           ]
         },
         {
-          "name": "Undo matches (query matchingIds=a,b) – kept for the current front-end service",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/accounting/entries/unmatch?matchingIds=mt_1,mt_2",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "accounting",
-                "entries",
-                "unmatch"
-              ],
-              "query": [
-                {
-                  "key": "matchingIds",
-                  "value": "mt_1,mt_2"
-                }
-              ]
-            },
-            "description": "Undo matches (query matchingIds=a,b) – kept for the current front-end service\n\nFront-end touchpoint: Accounts > Open Entry Un-Matching\n\nAccess: write:journal-vouchers"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/accounting/entries/unmatch?matchingIds=mt_1,mt_2",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "accounting",
-                    "entries",
-                    "unmatch"
-                  ],
-                  "query": [
-                    {
-                      "key": "matchingIds",
-                      "value": "mt_1,mt_2"
-                    }
-                  ]
-                },
-                "description": "Undo matches (query matchingIds=a,b) – kept for the current front-end service\n\nFront-end touchpoint: Accounts > Open Entry Un-Matching\n\nAccess: write:journal-vouchers"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    \"mt_1\"\n  ]\n}"
-            }
-          ]
-        },
-        {
           "name": "Undo matches (body matchingIds[])",
           "request": {
             "method": "POST",
@@ -5884,7 +5821,7 @@
           ]
         },
         {
-          "name": "Close an accounting period (YYYY-MM); postings into a closed period are rejected",
+          "name": "Close an accounting period (YYYY-MM) as Period Management does: a reason of the period_close context (reasonCode; remarks as its note), approve:period-end, the blocking month-end checks and manual sign-offs; postings into a closed period are rejected",
           "request": {
             "method": "POST",
             "header": [
@@ -5912,10 +5849,10 @@
                 }
               ]
             },
-            "description": "Close an accounting period (YYYY-MM); postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+            "description": "Close an accounting period (YYYY-MM) as Period Management does: a reason of the period_close context (reasonCode; remarks as its note), approve:period-end, the blocking month-end checks and manual sign-offs; postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"remarks\": \"August books closed\"\n}",
+              "raw": "{\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"remarks\": \"August books closed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5953,10 +5890,10 @@
                     }
                   ]
                 },
-                "description": "Close an accounting period (YYYY-MM); postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+                "description": "Close an accounting period (YYYY-MM) as Period Management does: a reason of the period_close context (reasonCode; remarks as its note), approve:period-end, the blocking month-end checks and manual sign-offs; postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"remarks\": \"August books closed\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"remarks\": \"August books closed\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -5979,7 +5916,7 @@
           ]
         },
         {
-          "name": "Reopen an accounting period (YYYY-MM); postings into a closed period are rejected",
+          "name": "Reopen an accounting period (YYYY-MM) as Period Management does: a reason of the period_reopen context (reasonCode; remarks as its note), approve:period-end, not a closed (hard-closed) period unless accounting.reopen_closed_periods; postings into a closed period are rejected",
           "request": {
             "method": "POST",
             "header": [
@@ -6007,10 +5944,10 @@
                 }
               ]
             },
-            "description": "Reopen an accounting period (YYYY-MM); postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+            "description": "Reopen an accounting period (YYYY-MM) as Period Management does: a reason of the period_reopen context (reasonCode; remarks as its note), approve:period-end, not a closed (hard-closed) period unless accounting.reopen_closed_periods; postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"remarks\": \"August books closed\"\n}",
+              "raw": "{\n  \"reasonCode\": \"PRO-LATEDOC\",\n  \"remarks\": \"August books closed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6048,10 +5985,10 @@
                     }
                   ]
                 },
-                "description": "Reopen an accounting period (YYYY-MM); postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+                "description": "Reopen an accounting period (YYYY-MM) as Period Management does: a reason of the period_reopen context (reasonCode; remarks as its note), approve:period-end, not a closed (hard-closed) period unless accounting.reopen_closed_periods; postings into a closed period are rejected\n\nFront-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"remarks\": \"August books closed\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"PRO-LATEDOC\",\n  \"remarks\": \"August books closed\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -25911,7 +25848,7 @@
           ]
         },
         {
-          "name": "Create a referrer (agent, sub-agent or external)",
+          "name": "Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on",
           "request": {
             "method": "POST",
             "header": [
@@ -25930,7 +25867,7 @@
                 "referrer-accounts"
               ]
             },
-            "description": "Create a referrer (agent, sub-agent or external)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
+            "description": "Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Juan Dela Cruz\",\n  \"type\": \"Agent\",\n  \"level\": \"L1\",\n  \"bankName\": \"BDO\",\n  \"bankAccountNo\": \"001234564521\"\n}",
@@ -25962,7 +25899,7 @@
                     "referrer-accounts"
                   ]
                 },
-                "description": "Create a referrer (agent, sub-agent or external)\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
+                "description": "Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts\n\nAccess: write:commission",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Juan Dela Cruz\",\n  \"type\": \"Agent\",\n  \"level\": \"L1\",\n  \"bankName\": \"BDO\",\n  \"bankAccountNo\": \"001234564521\"\n}",
@@ -27435,6 +27372,101 @@
           ]
         },
         {
+          "name": "Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/commission/referrer-accounts/:id/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission",
+                "referrer-accounts",
+                ":id",
+                "verify"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Verify payee\n\nAccess: approve:commission",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Bank certificate checked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/commission/referrer-accounts/:id/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission",
+                    "referrer-accounts",
+                    ":id",
+                    "verify"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Verify payee\n\nAccess: approve:commission",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Bank certificate checked\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"referrer\": {\n      \"id\": \"ref-dcruz\",\n      \"name\": \"Juan Dela Cruz\",\n      \"type\": \"Agent\",\n      \"level\": \"L1\",\n      \"whtApplicable\": true\n    },\n    \"summary\": {\n      \"cycleLabel\": \"Sep 2026\",\n      \"dueThisCycle\": 1140,\n      \"upcoming\": 0,\n      \"paidToDate\": 0\n    },\n    \"currentCycle\": {\n      \"label\": \"Sep 2026\",\n      \"totalNet\": 1140,\n      \"lines\": [\n        {\n          \"id\": \"cm_1\",\n          \"policyNo\": \"POL-2026-00001\",\n          \"productInsurer\": \"Motor · Malayan\",\n          \"cycle\": \"Sep 2026\",\n          \"comsub\": 1200,\n          \"comsubRateLabel\": \"8%\",\n          \"wht\": 60,\n          \"net\": 1140,\n          \"status\": \"Eligible\",\n          \"lifecycle\": {\n            \"accruedAt\": \"02 Sep\",\n            \"eligibleAt\": \"10 Sep\",\n            \"approvedAt\": null,\n            \"paidAt\": null\n          }\n        }\n      ]\n    },\n    \"futureCycles\": {\n      \"totalNet\": 0,\n      \"lines\": []\n    },\n    \"past\": {\n      \"totalNet\": 0,\n      \"lines\": []\n    },\n    \"actions\": {\n      \"approveCount\": 1,\n      \"generatePayoutCount\": 0,\n      \"markEligibleCount\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Toggle withholding tax for a referrer (recomputes unpaid lines); the reason is kept in the audit trail",
           "request": {
             "method": "POST",
@@ -27526,6 +27558,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"referrer\": {\n      \"id\": \"ref-dcruz\",\n      \"name\": \"Juan Dela Cruz\",\n      \"type\": \"Agent\",\n      \"level\": \"L1\",\n      \"whtApplicable\": true\n    },\n    \"summary\": {\n      \"cycleLabel\": \"Sep 2026\",\n      \"dueThisCycle\": 1140,\n      \"upcoming\": 0,\n      \"paidToDate\": 0\n    },\n    \"currentCycle\": {\n      \"label\": \"Sep 2026\",\n      \"totalNet\": 1140,\n      \"lines\": [\n        {\n          \"id\": \"cm_1\",\n          \"policyNo\": \"POL-2026-00001\",\n          \"productInsurer\": \"Motor · Malayan\",\n          \"cycle\": \"Sep 2026\",\n          \"comsub\": 1200,\n          \"comsubRateLabel\": \"8%\",\n          \"wht\": 60,\n          \"net\": 1140,\n          \"status\": \"Eligible\",\n          \"lifecycle\": {\n            \"accruedAt\": \"02 Sep\",\n            \"eligibleAt\": \"10 Sep\",\n            \"approvedAt\": null,\n            \"paidAt\": null\n          }\n        }\n      ]\n    },\n    \"futureCycles\": {\n      \"totalNet\": 0,\n      \"lines\": []\n    },\n    \"past\": {\n      \"totalNet\": 0,\n      \"lines\": []\n    },\n    \"actions\": {\n      \"approveCount\": 1,\n      \"generatePayoutCount\": 0,\n      \"markEligibleCount\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/commission/referrer-accounts/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "commission",
+                "referrer-accounts",
+                "options"
+              ]
+            },
+            "description": "Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Add / Edit payee\n\nAccess: read:commission, read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/commission/referrer-accounts/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "commission",
+                    "referrer-accounts",
+                    "options"
+                  ]
+                },
+                "description": "Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user\n\nFront-end touchpoint: Commission > Agents/Referrer Accounts > Add / Edit payee\n\nAccess: read:commission, read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"types\": [\n      \"Agent\",\n      \"Sub-agent\",\n      \"External\",\n      \"TFS team member\",\n      \"Referral\",\n      \"Dealer\",\n      \"Affinity partner\"\n    ],\n    \"levels\": [\n      \"L1\",\n      \"L2\"\n    ],\n    \"vendorGroups\": [\n      \"Agents\",\n      \"Dealers\"\n    ],\n    \"whtCodes\": [\n      {\n        \"code\": \"WI515\",\n        \"label\": \"WI515 · 5%\"\n      }\n    ],\n    \"verificationRequired\": true\n  }\n}"
             }
           ]
         },
@@ -48218,6 +48301,396 @@
               ],
               "cookie": [],
               "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Feature change requests of the environment (of TISPH and of the platform administrator), newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/changes?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "changes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Feature change requests of the environment (of TISPH and of the platform administrator), newest first\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Changes\n\nAccess: enable:phase2-features"
+          },
+          "response": []
+        },
+        {
+          "name": "Request the enabling or disabling of Phase 2 features for TISPH (maker): reason, contract or change request reference, effective date; approved by a second enabler or a platform administrator (features.tenant_enable_approval)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/features/changes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "changes"
+              ]
+            },
+            "description": "Request the enabling or disabling of Phase 2 features for TISPH (maker): reason, contract or change request reference, effective date; approved by a second enabler or a platform administrator (features.tenant_enable_approval)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\",\n  \"reasonCode\": \"FTR-CONTRACT\",\n  \"releaseRef\": \"TISPH-FT-D01\",\n  \"effective\": \"immediate\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/features/changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "changes"
+                  ]
+                },
+                "description": "Request the enabling or disabling of Phase 2 features for TISPH (maker): reason, contract or change request reference, effective date; approved by a second enabler or a platform administrator (features.tenant_enable_approval)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\",\n  \"reasonCode\": \"FTR-CONTRACT\",\n  \"releaseRef\": \"TISPH-FT-D01\",\n  \"effective\": \"immediate\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 1,\n      \"ref\": \"FCR-00001\",\n      \"status\": \"pending\",\n      \"channel\": \"tenant\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or reject a change of TISPH (checker: another enabler, never the requester); an immediate change applies at once, a scheduled one on its date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/features/changes/:id/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "changes",
+                ":id",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or reject a change of TISPH (checker: another enabler, never the requester); an immediate change applies at once, a scheduled one on its date\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Changes > Approve / Reject\n\nAccess: enable:phase2-features",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Checked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/features/changes/:id/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "changes",
+                    ":id",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or reject a change of TISPH (checker: another enabler, never the requester); an immediate change applies at once, a scheduled one on its date\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Changes > Approve / Reject\n\nAccess: enable:phase2-features",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Checked\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 1,\n      \"status\": \"applied\"\n    },\n    \"applied\": [\n      {\n        \"key\": \"payables\",\n        \"from\": \"off\",\n        \"to\": \"on\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a change of TISPH waiting for approval (requester) or cancel a scheduled one",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/changes/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "changes",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a change of TISPH waiting for approval (requester) or cancel a scheduled one\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Changes > Withdraw\n\nAccess: enable:phase2-features"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/features/changes/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "changes",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a change of TISPH waiting for approval (requester) or cancel a scheduled one\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Changes > Withdraw\n\nAccess: enable:phase2-features"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"withdrawn\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Whether the signed-in user enables Phase 2 for TISPH, with the policy in force (roles, tiers, approval: four-eyes or single)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/enabling",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "enabling"
+              ]
+            },
+            "description": "Whether the signed-in user enables Phase 2 for TISPH, with the policy in force (roles, tiers, approval: four-eyes or single)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/features/enabling",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "enabling"
+                  ]
+                },
+                "description": "Whether the signed-in user enables Phase 2 for TISPH, with the policy in force (roles, tiers, approval: four-eyes or single)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"canEnable\": true,\n    \"permission\": \"enable:phase2-features\",\n    \"roles\": [\n      \"tis-superid\"\n    ],\n    \"tiers\": [\n      \"PHASE_2\"\n    ],\n    \"approval\": \"four-eyes\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Impact of enabling or disabling Phase 2 features (or the Phase 2 bundle) for TISPH: dependencies, menus, roles that gain access, jobs, connectors, settings, read-only features; a plan that reaches a future release is refused",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/features/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "preview"
+              ]
+            },
+            "description": "Impact of enabling or disabling Phase 2 features (or the Phase 2 bundle) for TISPH: dependencies, menus, roles that gain access, jobs, connectors, settings, read-only features; a plan that reaches a future release is refused\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/features/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "preview"
+                  ]
+                },
+                "description": "Impact of enabling or disabling Phase 2 features (or the Phase 2 bundle) for TISPH: dependencies, menus, roles that gain access, jobs, connectors, settings, read-only features; a plan that reaches a future release is refused\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"enable\",\n    \"features\": [\n      {\n        \"key\": \"payables\",\n        \"from\": \"off\",\n        \"to\": \"on\"\n      }\n    ],\n    \"menus\": [],\n    \"roles\": []\n  }\n}"
             }
           ]
         },
@@ -70528,6 +71001,132 @@
           ]
         },
         {
+          "name": "The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/finance-controls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "finance-controls"
+              ]
+            },
+            "description": "The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them\n\nFront-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/finance-controls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "finance-controls"
+                  ]
+                },
+                "description": "The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them\n\nFront-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"finance.maker_checker_enabled\",\n      \"label\": \"Finance maker-checker\",\n      \"type\": \"boolean\",\n      \"value\": true,\n      \"canChange\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/finance-controls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "finance-controls"
+              ]
+            },
+            "description": "Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited\n\nFront-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"accounting.reopen_closed_periods\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/finance-controls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "finance-controls"
+                  ]
+                },
+                "description": "Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited\n\nFront-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"settings\": {\n    \"accounting.reopen_closed_periods\": false\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"accounting.reopen_closed_periods\",\n      \"value\": false\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Fiscal years (generated from the first journal up to today) with period status counts",
           "request": {
             "method": "GET",
@@ -70654,7 +71253,7 @@
           ]
         },
         {
-          "name": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make",
+          "name": "A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make",
           "request": {
             "method": "GET",
             "header": [],
@@ -70676,7 +71275,7 @@
                 }
               ]
             },
-            "description": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+            "description": "A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
           },
           "response": [
             {
@@ -70702,7 +71301,7 @@
                     }
                   ]
                 },
-                "description": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+                "description": "A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -70714,7 +71313,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\",\n        \"lastChange\": {\n          \"to\": \"closed\",\n          \"at\": \"2026-02-05T02:00:00Z\",\n          \"byName\": \"Ana Santos\",\n          \"reasonCode\": \"PCL-MONTHEND\",\n          \"reasonName\": \"Month-end close completed\",\n          \"remarks\": \"Month-end close completed\",\n          \"source\": \"manual\"\n        },\n        \"actions\": {\n          \"reopen\": {\n            \"allowed\": false,\n            \"reason\": \"permission\",\n            \"message\": \"Reopening a period requires permission approve:period-end\"\n          }\n        }\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\",\n        \"closing\": {\n          \"operationsCutoff\": \"2026-01-26\",\n          \"financeClose\": \"2026-01-29\",\n          \"adjustmentWindowEnd\": \"2026-02-09\"\n        },\n        \"lastChange\": {\n          \"to\": \"closed\",\n          \"at\": \"2026-02-05T02:00:00Z\",\n          \"byName\": \"Ana Santos\",\n          \"reasonCode\": \"PCL-MONTHEND\",\n          \"reasonName\": \"Month-end close completed\",\n          \"remarks\": \"Month-end close completed\",\n          \"source\": \"manual\"\n        },\n        \"actions\": {\n          \"reopen\": {\n            \"allowed\": false,\n            \"reason\": \"permission\",\n            \"message\": \"Reopening a period requires permission approve:period-end\"\n          }\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -87224,6 +87823,101 @@
           ]
         },
         {
+          "name": "Approve a template waiting for approval: it goes in force (never one you created, changed or submitted)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/products/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "products",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a template waiting for approval: it goes in force (never one you created, changed or submitted)\n\nFront-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Checked against the insurer tariff\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/products/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "products",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a template waiting for approval: it goes in force (never one you created, changed or submitted)\n\nFront-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Checked against the insurer tariff\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Active\",\n    \"version\": \"v3.2\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    },\n    \"decision\": \"approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Premium illustration from the template (base rate, factors, minimum, statutory taxes, commission)",
           "request": {
             "method": "POST",
@@ -87738,6 +88432,196 @@
           ]
         },
         {
+          "name": "Return a template waiting for approval to Draft with a note (never one you created, changed or submitted)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/products/:id/return",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "products",
+                ":id",
+                "return"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Return a template waiting for approval to Draft with a note (never one you created, changed or submitted)\n\nFront-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Own Damage rate missing for SUVs\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/products/:id/return",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "products",
+                    ":id",
+                    "return"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Return a template waiting for approval to Draft with a note (never one you created, changed or submitted)\n\nFront-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Own Damage rate missing for SUVs\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Draft\",\n    \"version\": \"v3.2\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    },\n    \"decision\": \"returned\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a draft template (or an inactive or retired one to be put back in force) for approval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/products/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "products",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft template (or an inactive or retired one to be put back in force) for approval\n\nFront-end touchpoint: Product Configurator > Product Templates > Submit for approval\n\nAccess: write:products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"New 2027 rates\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/products/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "products",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a draft template (or an inactive or retired one to be put back in force) for approval\n\nFront-end touchpoint: Product Configurator > Product Templates > Submit for approval\n\nAccess: write:products",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"New 2027 rates\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Pending Approval\",\n    \"version\": \"v3.2\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    },\n    \"submittedBy\": \"it.admin\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "All versions of a template code",
           "request": {
             "method": "GET",
@@ -87896,6 +88780,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Draft\",\n    \"version\": \"v4\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a template from approval (back to Draft)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/products/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "products",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a template from approval (back to Draft)\n\nFront-end touchpoint: Product Configurator > Product Templates > Withdraw\n\nAccess: write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/products/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "products",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a template from approval (back to Draft)\n\nFront-end touchpoint: Product Configurator > Product Templates > Withdraw\n\nAccess: write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Draft\",\n    \"version\": \"v3.2\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    }\n  }\n}"
             }
           ]
         },
@@ -113268,7 +114219,7 @@
           ]
         },
         {
-          "name": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
+          "name": "Update one or more configuration values (write:settings; a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
           "request": {
             "method": "PUT",
             "header": [
@@ -113286,7 +114237,7 @@
                 "settings"
               ]
             },
-            "description": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
+            "description": "Update one or more configuration values (write:settings; a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
@@ -113317,7 +114268,7 @@
                     "settings"
                   ]
                 },
-                "description": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
+                "description": "Update one or more configuration values (write:settings; a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",

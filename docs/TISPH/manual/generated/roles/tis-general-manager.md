@@ -187,6 +187,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
+| Product Configurator | Products | Approve | Approve or return product templates submitted for review (never one you submitted or last changed) |  |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
@@ -215,6 +216,7 @@ This role approves the work of other users:
 - Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
+- Approve or return product templates submitted for review (never one you submitted or last changed)
 - Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)
 - Approve a quotation created by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)

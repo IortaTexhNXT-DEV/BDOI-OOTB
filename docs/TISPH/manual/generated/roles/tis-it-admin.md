@@ -188,6 +188,7 @@ Who approves the work of this role:
 |---|---|---|
 | Access control | Approve role access changes and authority limits of another administrator | TIS IT AppSupport / Admin |
 | Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
+| Products | Approve or return product templates submitted for review (never one you submitted or last changed) | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |

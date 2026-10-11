@@ -9591,67 +9591,6 @@
       }
     },
     "/accounting/entries/unmatch": {
-      "get": {
-        "operationId": "getAccountingEntriesUnmatch",
-        "summary": "Undo matches (query matchingIds=a,b) – kept for the current front-end service",
-        "tags": [
-          "Accounting"
-        ],
-        "description": "Front-end touchpoint: Accounts > Open Entry Un-Matching\n\nAccess: write:journal-vouchers",
-        "parameters": [
-          {
-            "name": "matchingIds",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "mt_1,mt_2"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    "mt_1"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Open Entry Un-Matching",
-        "x-permissions": [
-          "write:journal-vouchers"
-        ]
-      },
       "post": {
         "operationId": "postAccountingEntriesUnmatch",
         "summary": "Undo matches (body matchingIds[])",
@@ -10776,11 +10715,11 @@
     "/accounting/periods/{period}/close": {
       "post": {
         "operationId": "postAccountingPeriodsPeriodClose",
-        "summary": "Close an accounting period (YYYY-MM); postings into a closed period are rejected",
+        "summary": "Close an accounting period (YYYY-MM) as Period Management does: a reason of the period_close context (reasonCode; remarks as its note), approve:period-end, the blocking month-end checks and manual sign-offs; postings into a closed period are rejected",
         "tags": [
           "Accounting"
         ],
-        "description": "Front-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+        "description": "Front-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
         "parameters": [
           {
             "name": "period",
@@ -10837,6 +10776,7 @@
         },
         "x-screen": "Accounts > Journal Voucher > Periods",
         "x-permissions": [
+          "write:period-end",
           "write:journal-vouchers"
         ],
         "requestBody": {
@@ -10846,12 +10786,16 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
                   "remarks": {
                     "type": "string"
                   }
                 }
               },
               "example": {
+                "reasonCode": "PCL-MONTHEND",
                 "remarks": "August books closed"
               }
             }
@@ -10862,11 +10806,11 @@
     "/accounting/periods/{period}/reopen": {
       "post": {
         "operationId": "postAccountingPeriodsPeriodReopen",
-        "summary": "Reopen an accounting period (YYYY-MM); postings into a closed period are rejected",
+        "summary": "Reopen an accounting period (YYYY-MM) as Period Management does: a reason of the period_reopen context (reasonCode; remarks as its note), approve:period-end, not a closed (hard-closed) period unless accounting.reopen_closed_periods; postings into a closed period are rejected",
         "tags": [
           "Accounting"
         ],
-        "description": "Front-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:journal-vouchers",
+        "description": "Front-end touchpoint: Accounts > Journal Voucher > Periods\n\nAccess: write:period-end, write:journal-vouchers",
         "parameters": [
           {
             "name": "period",
@@ -10923,6 +10867,7 @@
         },
         "x-screen": "Accounts > Journal Voucher > Periods",
         "x-permissions": [
+          "write:period-end",
           "write:journal-vouchers"
         ],
         "requestBody": {
@@ -10932,12 +10877,16 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
                   "remarks": {
                     "type": "string"
                   }
                 }
               },
               "example": {
+                "reasonCode": "PRO-LATEDOC",
                 "remarks": "August books closed"
               }
             }
@@ -44202,7 +44151,7 @@
       },
       "post": {
         "operationId": "postCommissionReferrerAccounts",
-        "summary": "Create a referrer (agent, sub-agent or external)",
+        "summary": "Enrol a payee (agent, dealer, referral, vendor) with its vendor group and code, address, contact, TIN and bank details; awaits verification by a second user while commission.payee_verification_required is on",
         "tags": [
           "Commission"
         ],
@@ -48538,6 +48487,267 @@
         }
       }
     },
+    "/commission/referrer-accounts/{id}/verify": {
+      "post": {
+        "operationId": "postCommissionReferrerAccountsIdVerify",
+        "summary": "Verify the enrolment of a payee or the change of its payment details (approve:commission; never the user who enrolled or changed it); its commission can then be approved and paid",
+        "tags": [
+          "Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Agents/Referrer Accounts > Verify payee\n\nAccess: approve:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "referrer": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "string"
+                            },
+                            "whtApplicable": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "cycleLabel": {
+                              "type": "string"
+                            },
+                            "dueThisCycle": {
+                              "type": "integer"
+                            },
+                            "upcoming": {
+                              "type": "integer"
+                            },
+                            "paidToDate": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "currentCycle": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "totalNet": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "policyNo": {
+                                    "type": "string"
+                                  },
+                                  "productInsurer": {
+                                    "type": "string"
+                                  },
+                                  "cycle": {
+                                    "type": "string"
+                                  },
+                                  "comsub": {
+                                    "type": "integer"
+                                  },
+                                  "comsubRateLabel": {
+                                    "type": "string"
+                                  },
+                                  "wht": {
+                                    "type": "integer"
+                                  },
+                                  "net": {
+                                    "type": "integer"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  },
+                                  "lifecycle": {
+                                    "type": "object",
+                                    "properties": {
+                                      "accruedAt": {
+                                        "type": "string"
+                                      },
+                                      "eligibleAt": {
+                                        "type": "string"
+                                      },
+                                      "approvedAt": {},
+                                      "paidAt": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "futureCycles": {
+                          "type": "object",
+                          "properties": {
+                            "totalNet": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "past": {
+                          "type": "object",
+                          "properties": {
+                            "totalNet": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "actions": {
+                          "type": "object",
+                          "properties": {
+                            "approveCount": {
+                              "type": "integer"
+                            },
+                            "generatePayoutCount": {
+                              "type": "integer"
+                            },
+                            "markEligibleCount": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "referrer": {
+                      "id": "ref-dcruz",
+                      "name": "Juan Dela Cruz",
+                      "type": "Agent",
+                      "level": "L1",
+                      "whtApplicable": true
+                    },
+                    "summary": {
+                      "cycleLabel": "Sep 2026",
+                      "dueThisCycle": 1140,
+                      "upcoming": 0,
+                      "paidToDate": 0
+                    },
+                    "currentCycle": {
+                      "label": "Sep 2026",
+                      "totalNet": 1140,
+                      "lines": [
+                        {
+                          "id": "cm_1",
+                          "policyNo": "POL-2026-00001",
+                          "productInsurer": "Motor · Malayan",
+                          "cycle": "Sep 2026",
+                          "comsub": 1200,
+                          "comsubRateLabel": "8%",
+                          "wht": 60,
+                          "net": 1140,
+                          "status": "Eligible",
+                          "lifecycle": {
+                            "accruedAt": "02 Sep",
+                            "eligibleAt": "10 Sep",
+                            "approvedAt": null,
+                            "paidAt": null
+                          }
+                        }
+                      ]
+                    },
+                    "futureCycles": {
+                      "totalNet": 0,
+                      "lines": []
+                    },
+                    "past": {
+                      "totalNet": 0,
+                      "lines": []
+                    },
+                    "actions": {
+                      "approveCount": 1,
+                      "generatePayoutCount": 0,
+                      "markEligibleCount": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Agents/Referrer Accounts > Verify payee",
+        "x-permissions": [
+          "approve:commission"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Bank certificate checked"
+              }
+            }
+          }
+        }
+      }
+    },
     "/commission/referrer-accounts/{id}/wht": {
       "post": {
         "operationId": "postCommissionReferrerAccountsIdWht",
@@ -48801,6 +49011,114 @@
             }
           }
         }
+      }
+    },
+    "/commission/referrer-accounts/options": {
+      "get": {
+        "operationId": "getCommissionReferrerAccountsOptions",
+        "summary": "Lists of the payee enrolment form: payee types, levels, vendor groups (commission.vendor_groups), withholding tax codes, and whether a new payee or a change of its payment details is verified by a second user",
+        "tags": [
+          "Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Agents/Referrer Accounts > Add / Edit payee\n\nAccess: read:commission, read:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "types": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "levels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "vendorGroups": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "whtCodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "verificationRequired": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "types": [
+                      "Agent",
+                      "Sub-agent",
+                      "External",
+                      "TFS team member",
+                      "Referral",
+                      "Dealer",
+                      "Affinity partner"
+                    ],
+                    "levels": [
+                      "L1",
+                      "L2"
+                    ],
+                    "vendorGroups": [
+                      "Agents",
+                      "Dealers"
+                    ],
+                    "whtCodes": [
+                      {
+                        "code": "WI515",
+                        "label": "WI515 · 5%"
+                      }
+                    ],
+                    "verificationRequired": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Agents/Referrer Accounts > Add / Edit payee",
+        "x-permissions": [
+          "read:commission",
+          "read:quotations"
+        ]
       }
     },
     "/commission/requests": {
@@ -89178,6 +89496,534 @@
         ]
       }
     },
+    "/features/changes": {
+      "get": {
+        "operationId": "getFeaturesChanges",
+        "summary": "Feature change requests of the environment (of TISPH and of the platform administrator), newest first",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Changes\n\nAccess: enable:phase2-features",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Changes",
+        "x-permissions": [
+          "enable:phase2-features"
+        ]
+      },
+      "post": {
+        "operationId": "postFeaturesChanges",
+        "summary": "Request the enabling or disabling of Phase 2 features for TISPH (maker): reason, contract or change request reference, effective date; approved by a second enabler or a platform administrator (features.tenant_enable_approval)",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "channel": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 1,
+                      "ref": "FCR-00001",
+                      "status": "pending",
+                      "channel": "tenant"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Enable / Disable",
+        "x-permissions": [
+          "enable:phase2-features"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "tier": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "releaseRef": {
+                    "type": "string"
+                  },
+                  "effective": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "action": "enable",
+                "tier": "PHASE_2",
+                "reasonCode": "FTR-CONTRACT",
+                "releaseRef": "TISPH-FT-D01",
+                "effective": "immediate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/features/changes/{id}/decision": {
+      "post": {
+        "operationId": "postFeaturesChangesIdDecision",
+        "summary": "Approve or reject a change of TISPH (checker: another enabler, never the requester); an immediate change applies at once, a scheduled one on its date",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Changes > Approve / Reject\n\nAccess: enable:phase2-features",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "applied": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 1,
+                      "status": "applied"
+                    },
+                    "applied": [
+                      {
+                        "key": "payables",
+                        "from": "off",
+                        "to": "on"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Changes > Approve / Reject",
+        "x-permissions": [
+          "enable:phase2-features"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve",
+                "remarks": "Checked"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/features/changes/{id}/withdraw": {
+      "post": {
+        "operationId": "postFeaturesChangesIdWithdraw",
+        "summary": "Withdraw a change of TISPH waiting for approval (requester) or cancel a scheduled one",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Changes > Withdraw\n\nAccess: enable:phase2-features",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "status": "withdrawn"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Changes > Withdraw",
+        "x-permissions": [
+          "enable:phase2-features"
+        ]
+      }
+    },
+    "/features/enabling": {
+      "get": {
+        "operationId": "getFeaturesEnabling",
+        "summary": "Whether the signed-in user enables Phase 2 for TISPH, with the policy in force (roles, tiers, approval: four-eyes or single)",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "canEnable": {
+                          "type": "boolean"
+                        },
+                        "permission": {
+                          "type": "string"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "tiers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "approval": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "canEnable": true,
+                    "permission": "enable:phase2-features",
+                    "roles": [
+                      "tis-superid"
+                    ],
+                    "tiers": [
+                      "PHASE_2"
+                    ],
+                    "approval": "four-eyes"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases",
+        "x-permissions": [
+          "read:features"
+        ]
+      }
+    },
+    "/features/preview": {
+      "post": {
+        "operationId": "postFeaturesPreview",
+        "summary": "Impact of enabling or disabling Phase 2 features (or the Phase 2 bundle) for TISPH: dependencies, menus, roles that gain access, jobs, connectors, settings, read-only features; a plan that reaches a future release is refused",
+        "tags": [
+          "Features and Releases"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Features & Releases > Enable / Disable\n\nAccess: enable:phase2-features",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "string"
+                        },
+                        "features": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "menus": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "action": "enable",
+                    "features": [
+                      {
+                        "key": "payables",
+                        "from": "off",
+                        "to": "on"
+                      }
+                    ],
+                    "menus": [],
+                    "roles": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Features & Releases > Enable / Disable",
+        "x-permissions": [
+          "enable:phase2-features"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "tier": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "action": "enable",
+                "tier": "PHASE_2"
+              }
+            }
+          }
+        }
+      }
+    },
     "/features/state": {
       "get": {
         "operationId": "getFeaturesState",
@@ -125366,6 +126212,167 @@
         }
       }
     },
+    "/period-end/finance-controls": {
+      "get": {
+        "operationId": "getPeriodEndFinanceControls",
+        "summary": "The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "canChange": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "finance.maker_checker_enabled",
+                      "label": "Finance maker-checker",
+                      "type": "boolean",
+                      "value": true,
+                      "canChange": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management > Finance Controls",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
+      },
+      "put": {
+        "operationId": "putPeriodEndFinanceControls",
+        "summary": "Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Finance Controls\n\nAccess: approve:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "accounting.reopen_closed_periods",
+                      "value": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management > Finance Controls",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "accounting.reopen_closed_periods": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "settings": {
+                  "accounting.reopen_closed_periods": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/period-end/fiscal-years": {
       "get": {
         "operationId": "getPeriodEndFiscalYears",
@@ -125521,7 +126528,7 @@
     "/period-end/fiscal-years/{code}": {
       "get": {
         "operationId": "getPeriodEndFiscalYearsCode",
-        "summary": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make",
+        "summary": "A fiscal year with its periods, the closing calendar of each period (operations cut-off, finance close, end of the adjustment window), the latest status change of each period and the status moves the user may make",
         "tags": [
           "Period End"
         ],
@@ -125566,6 +126573,20 @@
                               },
                               "status": {
                                 "type": "string"
+                              },
+                              "closing": {
+                                "type": "object",
+                                "properties": {
+                                  "operationsCutoff": {
+                                    "type": "string"
+                                  },
+                                  "financeClose": {
+                                    "type": "string"
+                                  },
+                                  "adjustmentWindowEnd": {
+                                    "type": "string"
+                                  }
+                                }
                               },
                               "lastChange": {
                                 "type": "object",
@@ -125628,6 +126649,11 @@
                         "period": "2026-01",
                         "periodNo": 1,
                         "status": "closed",
+                        "closing": {
+                          "operationsCutoff": "2026-01-26",
+                          "financeClose": "2026-01-29",
+                          "adjustmentWindowEnd": "2026-02-09"
+                        },
                         "lastChange": {
                           "to": "closed",
                           "at": "2026-02-05T02:00:00Z",
@@ -153295,6 +154321,184 @@
         }
       }
     },
+    "/product-configurator/products/{id}/approve": {
+      "post": {
+        "operationId": "postProductConfiguratorProductsIdApprove",
+        "summary": "Approve a template waiting for approval: it goes in force (never one you created, changed or submitted)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        },
+                        "effectiveDate": {
+                          "type": "string"
+                        },
+                        "baseRate": {
+                          "type": "number"
+                        },
+                        "minPremium": {
+                          "type": "integer"
+                        },
+                        "commissionRate": {
+                          "type": "integer"
+                        },
+                        "configuration": {
+                          "type": "object",
+                          "properties": {
+                            "premiumRates": {
+                              "type": "object",
+                              "properties": {
+                                "private_cars": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "features": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "_count": {
+                          "type": "object",
+                          "properties": {
+                            "coverages": {
+                              "type": "integer"
+                            },
+                            "ratingFactors": {
+                              "type": "integer"
+                            },
+                            "underwritingRules": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "decision": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "templateCode": "MOT-003-2025",
+                    "name": "Motor Insurance Basic Plan",
+                    "category": "Motor",
+                    "lineOfBusiness": "Motor Vehicle",
+                    "status": "Active",
+                    "version": "v3.2",
+                    "effectiveDate": "2025-01-01",
+                    "baseRate": 2.5,
+                    "minPremium": 10000,
+                    "commissionRate": 12,
+                    "configuration": {
+                      "premiumRates": {
+                        "private_cars": "2"
+                      }
+                    },
+                    "features": {},
+                    "insurers": [],
+                    "tags": [],
+                    "_count": {
+                      "coverages": 7,
+                      "ratingFactors": 8,
+                      "underwritingRules": 7
+                    },
+                    "decision": "approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Product Templates; My Work > Approvals",
+        "x-permissions": [
+          "approve:products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Checked against the insurer tariff"
+              }
+            }
+          }
+        }
+      }
+    },
     "/product-configurator/products/{id}/calculate-premium": {
       "post": {
         "operationId": "postProductConfiguratorProductsIdCalculatePremium",
@@ -154149,6 +155353,362 @@
         }
       }
     },
+    "/product-configurator/products/{id}/return": {
+      "post": {
+        "operationId": "postProductConfiguratorProductsIdReturn",
+        "summary": "Return a template waiting for approval to Draft with a note (never one you created, changed or submitted)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Product Templates; My Work > Approvals\n\nAccess: approve:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        },
+                        "effectiveDate": {
+                          "type": "string"
+                        },
+                        "baseRate": {
+                          "type": "number"
+                        },
+                        "minPremium": {
+                          "type": "integer"
+                        },
+                        "commissionRate": {
+                          "type": "integer"
+                        },
+                        "configuration": {
+                          "type": "object",
+                          "properties": {
+                            "premiumRates": {
+                              "type": "object",
+                              "properties": {
+                                "private_cars": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "features": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "_count": {
+                          "type": "object",
+                          "properties": {
+                            "coverages": {
+                              "type": "integer"
+                            },
+                            "ratingFactors": {
+                              "type": "integer"
+                            },
+                            "underwritingRules": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "decision": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "templateCode": "MOT-003-2025",
+                    "name": "Motor Insurance Basic Plan",
+                    "category": "Motor",
+                    "lineOfBusiness": "Motor Vehicle",
+                    "status": "Draft",
+                    "version": "v3.2",
+                    "effectiveDate": "2025-01-01",
+                    "baseRate": 2.5,
+                    "minPremium": 10000,
+                    "commissionRate": 12,
+                    "configuration": {
+                      "premiumRates": {
+                        "private_cars": "2"
+                      }
+                    },
+                    "features": {},
+                    "insurers": [],
+                    "tags": [],
+                    "_count": {
+                      "coverages": 7,
+                      "ratingFactors": 8,
+                      "underwritingRules": 7
+                    },
+                    "decision": "returned"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Product Templates; My Work > Approvals",
+        "x-permissions": [
+          "approve:products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Own Damage rate missing for SUVs"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product-configurator/products/{id}/submit": {
+      "post": {
+        "operationId": "postProductConfiguratorProductsIdSubmit",
+        "summary": "Submit a draft template (or an inactive or retired one to be put back in force) for approval",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Product Templates > Submit for approval\n\nAccess: write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        },
+                        "effectiveDate": {
+                          "type": "string"
+                        },
+                        "baseRate": {
+                          "type": "number"
+                        },
+                        "minPremium": {
+                          "type": "integer"
+                        },
+                        "commissionRate": {
+                          "type": "integer"
+                        },
+                        "configuration": {
+                          "type": "object",
+                          "properties": {
+                            "premiumRates": {
+                              "type": "object",
+                              "properties": {
+                                "private_cars": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "features": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "_count": {
+                          "type": "object",
+                          "properties": {
+                            "coverages": {
+                              "type": "integer"
+                            },
+                            "ratingFactors": {
+                              "type": "integer"
+                            },
+                            "underwritingRules": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "templateCode": "MOT-003-2025",
+                    "name": "Motor Insurance Basic Plan",
+                    "category": "Motor",
+                    "lineOfBusiness": "Motor Vehicle",
+                    "status": "Pending Approval",
+                    "version": "v3.2",
+                    "effectiveDate": "2025-01-01",
+                    "baseRate": 2.5,
+                    "minPremium": 10000,
+                    "commissionRate": 12,
+                    "configuration": {
+                      "premiumRates": {
+                        "private_cars": "2"
+                      }
+                    },
+                    "features": {},
+                    "insurers": [],
+                    "tags": [],
+                    "_count": {
+                      "coverages": 7,
+                      "ratingFactors": 8,
+                      "underwritingRules": 7
+                    },
+                    "submittedBy": "it.admin"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Product Templates > Submit for approval",
+        "x-permissions": [
+          "write:products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "New 2027 rates"
+              }
+            }
+          }
+        }
+      }
+    },
     "/product-configurator/products/{id}/versions": {
       "get": {
         "operationId": "getProductConfiguratorProductsIdVersions",
@@ -154489,6 +156049,162 @@
             }
           }
         }
+      }
+    },
+    "/product-configurator/products/{id}/withdraw": {
+      "post": {
+        "operationId": "postProductConfiguratorProductsIdWithdraw",
+        "summary": "Withdraw a template from approval (back to Draft)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Product Templates > Withdraw\n\nAccess: write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "lineOfBusiness": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        },
+                        "effectiveDate": {
+                          "type": "string"
+                        },
+                        "baseRate": {
+                          "type": "number"
+                        },
+                        "minPremium": {
+                          "type": "integer"
+                        },
+                        "commissionRate": {
+                          "type": "integer"
+                        },
+                        "configuration": {
+                          "type": "object",
+                          "properties": {
+                            "premiumRates": {
+                              "type": "object",
+                              "properties": {
+                                "private_cars": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "features": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "_count": {
+                          "type": "object",
+                          "properties": {
+                            "coverages": {
+                              "type": "integer"
+                            },
+                            "ratingFactors": {
+                              "type": "integer"
+                            },
+                            "underwritingRules": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "templateCode": "MOT-003-2025",
+                    "name": "Motor Insurance Basic Plan",
+                    "category": "Motor",
+                    "lineOfBusiness": "Motor Vehicle",
+                    "status": "Draft",
+                    "version": "v3.2",
+                    "effectiveDate": "2025-01-01",
+                    "baseRate": 2.5,
+                    "minPremium": 10000,
+                    "commissionRate": 12,
+                    "configuration": {
+                      "premiumRates": {
+                        "private_cars": "2"
+                      }
+                    },
+                    "features": {},
+                    "insurers": [],
+                    "tags": [],
+                    "_count": {
+                      "coverages": 7,
+                      "ratingFactors": 8,
+                      "underwritingRules": 7
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Product Templates > Withdraw",
+        "x-permissions": [
+          "write:products"
+        ]
       }
     },
     "/product-configurator/products/configurator": {
@@ -199970,11 +201686,11 @@
       },
       "put": {
         "operationId": "putSettings",
-        "summary": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
+        "summary": "Update one or more configuration values (write:settings; a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
+        "description": "Front-end touchpoint: Master > Configuration\n\nAccess: write:settings",
         "parameters": [],
         "responses": {
           "200": {
@@ -200006,6 +201722,9 @@
           }
         },
         "x-screen": "Master > Configuration",
+        "x-permissions": [
+          "write:settings"
+        ],
         "requestBody": {
           "required": true,
           "content": {

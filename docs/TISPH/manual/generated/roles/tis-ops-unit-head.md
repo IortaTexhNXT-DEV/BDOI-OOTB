@@ -124,6 +124,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
+| Product Configurator | Products | Approve | Approve or return product templates submitted for review (never one you submitted or last changed) |  |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
@@ -145,6 +146,7 @@ This role approves the work of other users:
 - Approve or reject an incentive calculation batch submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
+- Approve or return product templates submitted for review (never one you submitted or last changed)
 - Approve a quotation created by another user
 - Approve or return renewal terms of another user
 
