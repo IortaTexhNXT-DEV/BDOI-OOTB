@@ -17,9 +17,14 @@ describe("actions shown only when the role may use them (N1)", () => {
   });
 
   it("sales users are offered both", () => {
-    signIn(["sales"], ["read:leads", "write:leads", "read:policies", "write:policies"]);
+    signIn(["sales"], ["read:leads", "write:leads", "read:policies", "write:policies", "read:masters", "read:quotations"]);
     expect(canOpen("/agent/leadlisting")).toBe(true);
     expect(hasPermission("write:policies")).toBe(true);
+  });
+
+  it("a screen is not offered to a role whose permissions cannot load it", () => {
+    signIn(["sales"], ["read:leads", "write:leads"]);
+    expect(canOpen("/agent/leadlisting")).toBe(false);
   });
 
   it("administrators hold every permission; nothing stored leaves the decision to the server", () => {

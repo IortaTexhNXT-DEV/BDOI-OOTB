@@ -51,7 +51,7 @@ describe("ConfigStatus", () => {
 
   it("checks the given permission instead of the administrator role", () => {
     signIn(["accounting"]);
-    window.localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["write:period-end"]));
+    window.localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:period-end", "write:period-end"]));
     inApp(<ConfigStatus state="incomplete" missing={["Loose-leaf book permit"]} to="/accounts/tax/cas" permission="write:period-end" />);
     fireEvent.click(screen.getByRole("button", { name: "Incomplete" }));
     expect(configureLink()).toHaveAttribute("href", "/accounts/tax/cas");

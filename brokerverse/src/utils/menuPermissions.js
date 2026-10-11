@@ -8,11 +8,14 @@
  * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as My Work).
  *
  * The server enforces the same personas through permissions on every endpoint; this file only
- * decides what the user sees and which screens the router lets them open. Entries of features this environment does
- * not run (features/entitlements.js) are left out for every role, and entries marked `platform: true` are shown to the
- * iorta TechNXT platform administrator only.
+ * decides what the user sees and which screens the router lets them open. A screen is shown only when the user also
+ * holds what it needs to load: the permissions of the endpoints it calls when it opens (components/SideBar/requires.js,
+ * or `requires` on the entry; one permission of each group), so no entry leads to a refusal. Entries of features this
+ * environment does not run (features/entitlements.js) are left out for every role, and entries marked `platform: true`
+ * are shown to the iorta TechNXT platform administrator only.
  */
 import { withoutFeatures } from "../features/entitlements.js";
+import { requiresOf } from "../components/SideBar/requires.js";
 
 const OPERATIONS_ALL = [
   "Sales & Marketing",
@@ -178,7 +181,8 @@ const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receiv
 // TISPH menu (its statements open under Remittance > Reconciliation).
 const REMITTANCE = (...items) => items.map((item) => `Remittance > ${item}`);
 const withoutInsurerRec = (items) => items.filter((item) => item !== "Insurer Reconciliation");
-const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
+// Operations > Payments (the payments collected for policies) is read with the receipts: not by CCD-PDU (RBAC v4 Receipting)
+const TIS_CCD = (accounts, operations = ["Payments"]) => ({ "my work": true, ...(operations.length ? { operations } : {}), accounts, reports: TIS_CASH_REPORTS });
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
 // Sales & Marketing item by item, in the order of the TISPH journey (components/SideBar/list.js)
@@ -192,27 +196,36 @@ const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !lef
 const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
 // the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
 // Sales and Operations read the sharing schemes behind the share of a quotation (read:sharing-schemes, migration 0570)
+// RBAC v4 Interface Monitor: Sales, Operations, Finance and the General Manager read the scheduled jobs and their runs
+const INTERFACE_MONITOR = "System Configuration > Schedules";
 const TIS_SALES = { ...roleMenuPermissions.sales, operations: [...operationsWithout(), ...salesMarketingWithout()],
-  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE], commission: [...(roleMenuPermissions.sales.commission || []), "Sharing Schemes"] };
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE], commission: [...(roleMenuPermissions.sales.commission || []), "Sharing Schemes"],
+  master: [...roleMenuPermissions.sales.master, INTERFACE_MONITOR] };
+// Payables of an approver of supplier invoices (approve:payables): not the withholding certificates (BIR 2307)
+const TIS_PAYABLES_APPROVER = ["Supplier Invoices", "Supplier Payments", "AP Ageing", "Suppliers"].map((item) => `Payables > ${item}`);
+// RBAC v4 Telesales Incentives: Operations and IT AppSupport read the calculations and the incentive reports
+const INCENTIVE_READER = ["Incentive > Calculations", "Incentive > Reports"];
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
   operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
-  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances"), ...INCENTIVE_READER],
   commission: ["Commission Dashboard", "Sharing Schemes"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
     // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
-    "Finance > Discount Caps"],
+    "Finance > Discount Caps", INTERFACE_MONITOR],
 };
 // Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
 const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Held policies", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
-  // the Sales Unit Head approves promotions and discount caps (approve:promotions, approve:discount-caps)
-  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"], master: [...TIS_SALES.master, "Finance > Discount Caps"] },
+  // the Sales Unit Head approves promotions and discount caps (approve:promotions, approve:discount-caps) and supplier
+  // invoices (approve:payables); the supplier withholding certificates (BIR 2307) stay with Finance
+  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", ...TIS_PAYABLES_APPROVER, "Incentive"],
+    master: [...TIS_SALES.master, "Finance > Discount Caps"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572) and, as the
@@ -220,7 +233,7 @@ Object.assign(roleMenuPermissions, {
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables", "Incentive"],
     master: [...TIS_OPERATIONS.master, "System Configuration > Data Migration & Go-Live"] },
   // Receipting (RBAC v4): CCD-PDU has no access to the receipts
-  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
+  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"], []),
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
   // instalment plans and the follow-ups of Credit Control (write:collections); Recon also decides
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
@@ -245,7 +258,7 @@ Object.assign(roleMenuPermissions, {
     // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, promotions, fleet
     // schedules and open covers (read:campaigns, read:sales-activities, read:promotions, read:fleet, read:marine)
     operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities", "Promotions")],
-    accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
+    accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance", ...INCENTIVE_READER],
     commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["Organization", "Insurance Management", "Location", "Employee Management", "User Management", "System Configuration", "Environment Promotion", "Finance > Currency",
@@ -270,7 +283,7 @@ Object.assign(roleMenuPermissions, {
       "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
       "Insurance Management > Distribution Channels",
       // approves promotions and discount caps
-      "Finance > Discount Caps", "System Configuration > Data Migration & Go-Live"],
+      "Finance > Discount Caps", "System Configuration > Data Migration & Go-Live", INTERFACE_MONITOR],
   },
   // TIS Audit: the migration workspace and the audit trail, read only (read:data-load, read:audit)
   "tis-auditor": { master: ["System Configuration > Data Migration & Go-Live", "System Configuration > Audit Trail"] },
@@ -285,10 +298,41 @@ roleMenuPermissions["tis-it-admin"].operations = [...roleMenuPermissions["tis-it
 // read:lead-assignment, so Lead Assignment is not in its menu.
 roleMenuPermissions["tis-it-admin"].operations = roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Sales & Marketing > Lead Assignment");
 roleMenuPermissions["tis-finance"].operations = [...(roleMenuPermissions["tis-finance"].operations || []), "Sales & Marketing > Prospects"];
+// RBAC v4 Finance & GenAcctg reads the front office from the quotation to the renewal and the claim, the dashboards and
+// the product configurator with the dealer programmes and promotions (not the talkbot call lists: read:talkbot-calls)
+Object.assign(roleMenuPermissions["tis-finance"], {
+  dashboard: ["Executive Dashboard"],
+  "product configurator": ["Dashboard", "Product Templates"],
+  operations: [...roleMenuPermissions["tis-finance"].operations, "Clients", "Policy", "Claims", "Payments", "Cover Notes", "Policy Cancellation", ...RENEWALS_WITHOUT_TALKBOT,
+    ...["Quotations", "Request for Quotation", "Placement Slips", "Dealer Programmes", "Promotions"].map((item) => `Sales & Marketing > ${item}`)],
+});
 // Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
 // Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).
 const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
 ["accounting", "tis-finance"].forEach((role) => { roleMenuPermissions[role].reports = [...roleMenuPermissions[role].reports, ...SALES_REPORTS]; });
+// the report catalogue gives TIS Finance the dealer production report as well (report_definitions roles)
+roleMenuPermissions["tis-finance"].reports.push("Operational Reports > Dealer Production");
+
+/** API permissions of the signed-in user, stored at sign-in; null when unknown (the role grants alone then apply). */
+export const getUserPermissions = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem("USER_PERMISSIONS") || "null");
+    return Array.isArray(stored) ? stored : null;
+  } catch {
+    return null;
+  }
+};
+
+/** True when the permissions meet `requires` of a menu entry: one permission of every group (unknown permissions pass). */
+export const meetsRequires = (requires, permissions) =>
+  !permissions || !requires || requires.every((group) => group.some((code) => permissions.includes(code)));
+
+/** The menu tree without the entries the permissions cannot load; a group left without entries goes too. */
+const withoutUnusable = (items, permissions) =>
+  (items || [])
+    .filter((item) => item.submenu || meetsRequires(requiresOf(item), permissions))
+    .map((item) => (item.submenu ? { ...item, submenu: withoutUnusable(item.submenu, permissions) } : item))
+    .filter((item) => !item.submenu || item.submenu.length);
 
 /** Roles of the signed-in user, from the login response stored by authService. */
 export const getUserRoles = () => {
@@ -343,19 +387,23 @@ export const hasMenuAccess = (role, menuName, submenuName = null) => {
   return perms[norm(menuName)] !== undefined;
 };
 
-/** The menu tree reduced to what any of the given roles may see. */
 const withoutPlatformEntries = (items) =>
   (items || [])
     .filter((item) => !item.platform)
     .map((item) => (item.submenu ? { ...item, submenu: withoutPlatformEntries(item.submenu) } : item))
     .filter((item) => !item.submenu || item.submenu.length);
 
-export const filterMenuForRoles = (fullMenu, roles) => {
+/**
+ * The menu tree reduced to what any of the given roles may see and the permissions can load (`permissions`: the API
+ * permissions of the user, by default those stored at sign-in; the administrator holds every permission).
+ */
+export const filterMenuForRoles = (fullMenu, roles, permissions = getUserPermissions()) => {
   const list = (roles || []).map(norm).filter(Boolean);
   if (!list.length) return [];
   const edition = withoutFeatures(fullMenu);
-  const menuList = list.includes(PLATFORM_ROLE) ? edition : withoutPlatformEntries(edition);
-  if (list.some((r) => roleMenuPermissions[r]?.all)) return menuList;
+  const offered = list.includes(PLATFORM_ROLE) ? edition : withoutPlatformEntries(edition);
+  if (list.some((r) => roleMenuPermissions[r]?.all)) return offered;
+  const menuList = withoutUnusable(offered, permissions);
   return menuList
     .map((menu) => {
       if (!menu.submenu) {
@@ -375,7 +423,7 @@ export const filterMenuForRoles = (fullMenu, roles) => {
 };
 
 /** First screen the roles may open after sign-in (My Work, the first entry, for every delivered role); an entry marked `landing: false` only when nothing else is open. */
-export const firstAllowedPath = (menuList, roles) => {
+export const firstAllowedPath = (menuList, roles, permissions = getUserPermissions()) => {
   const walk = (items, skip) => {
     for (const item of items || []) {
       if (skip && item.landing === false) continue;
@@ -385,7 +433,7 @@ export const firstAllowedPath = (menuList, roles) => {
     }
     return null;
   };
-  const allowed = filterMenuForRoles(menuList, roles);
+  const allowed = filterMenuForRoles(menuList, roles, permissions);
   return walk(allowed, true) || walk(allowed, false);
 };
 
@@ -408,14 +456,18 @@ const matches = (pathname, p) => {
   return pathname === base || pathname.startsWith(`${base}/`);
 };
 
+const specificity = (p) => p.replace(/\/+$/, "").length;
+
 /**
  * Route guard: a path that belongs to a menu screen is allowed only when that screen is in the
- * user's filtered menu. Paths outside the menu (profile, notifications, detail pages reached from
- * an allowed screen) are allowed.
+ * user's filtered menu. When several entries cover the path, the most specific decides (a report
+ * of its own menu entry is not opened through the report catalogue's /reports/run/). Paths outside
+ * the menu (profile, notifications, detail pages reached from an allowed screen) are allowed.
  */
-export const isPathAllowed = (pathname, menuList, roles) => {
+export const isPathAllowed = (pathname, menuList, roles, permissions = getUserPermissions()) => {
   const all = collectPaths(menuList).filter((p) => matches(pathname, p));
   if (!all.length) return true;
-  const allowed = collectPaths(filterMenuForRoles(menuList, roles));
-  return allowed.some((p) => matches(pathname, p));
+  const closest = Math.max(...all.map(specificity));
+  const allowed = collectPaths(filterMenuForRoles(menuList, roles, permissions));
+  return allowed.some((p) => matches(pathname, p) && specificity(p) === closest);
 };

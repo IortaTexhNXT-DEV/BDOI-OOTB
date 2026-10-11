@@ -12,6 +12,7 @@ forms and i18next for text. It talks only to the BrokerVerse API (`backend/`, se
 | `routes/MainRoute.js` | Every signed-in route, wrapped by `routes/ProtectedRoute` |
 | `components/SideBar/list.js` | The side menu: one tree of `{ name, path, includes, submenu }` |
 | `utils/menuPermissions.js`, `utils/canOpen.js` | Which role sees which menu entry, route guard, `hasPermission` |
+| `components/SideBar/requires.js` | Per menu route, the API permissions the screen needs to load |
 | `agentModule/` | Operations screens (leads, clients, quotations, policies, endorsements, claims, renewals, payments, open items); routes under `/agent/...` |
 | `module/` | Everything else: masters, accounts and finance, placement, remittance, commission, incentive, product configurator, reports, system settings |
 | `services/` | One file per API area; every HTTP call of a screen goes through a service |
@@ -36,22 +37,33 @@ Three layers decide what a user can do. They must agree.
 
 1. **Menu** (`components/SideBar/list.js`). Each entry has a `path` and an `includes` list of path
    prefixes that belong to the same screen (detail and edit pages). The `permissions` field on an
-   entry records the API permission the screen needs; it is documentation and is not checked in the
-   browser.
+   entry records the module of the screen for the user manual's access level; it is not checked in the
+   browser (what is checked is `requires.js`, below).
 2. **Role grants** (`utils/menuPermissions.js`, `roleMenuPermissions`). Deny by default. The
    administrator role (`system-admin`) gets `all: true`. Other roles list, per top-level menu, the
    second-level entries they may open (`"Operational Reports > Remittance"` grants one child).
+   An entry is also shown only when the user holds what the screen needs to load:
+   `components/SideBar/requires.js` lists per route the permissions of the endpoints the screen calls
+   when it opens, as groups of alternatives (one permission of each group, the alternatives the
+   endpoint accepts, `backend/docs/api/openapi.json` "Access"). A role is therefore never shown an
+   entry that ends on a refusal; a group heading whose entries are all hidden goes too.
    `ProtectedRoute` calls `isPathAllowed`: a path that belongs to a menu entry opens only when that
-   entry is in the user's filtered menu; paths outside the menu (profile, notifications) are open to
-   every signed-in user. `canOpen(path)` applies the same rule to buttons and links, and
-   `hasPermission("write:policies")` hides actions the API would refuse (permissions come from the
-   sign-in response).
+   entry is in the user's filtered menu (the most specific entry decides when several cover the path);
+   paths outside the menu (profile, notifications) are open to every signed-in user; "Not authorised"
+   is only what a typed address shows. `canOpen(path)` and `canOpenLink(link)` apply the same rule to
+   buttons, tiles, My Work items and record links, and `hasPermission("write:policies")` hides
+   actions the API would refuse (permissions come from the sign-in response): an action the user may
+   not take is hidden, not disabled.
 3. **API** (backend). Every endpoint checks the user's permissions. The front end only hides what a
    role cannot use; the server is the authority. `utils/menuPermissions.test.js` walks each persona
-   through the menu and checks the grants against the API permissions.
+   through the menu and checks the grants against the API permissions; `utils/tisphMenus.test.js`
+   walks every entry for each TISPH role with the role's permissions (`utils/tisphRolePermissions.json`,
+   kept equal to `db/seed.js` by the backend test `tisph-menu-permissions`) and fails when a role is
+   shown, or granted, an entry its permissions cannot load.
 
-When a role must see a new screen: add the menu entry, add it to the role in `roleMenuPermissions`,
-and make sure the backend role has the permission the screen's API calls need. Master is organised in
+When a role must see a new screen: add the menu entry and its route in `requires.js` (the permissions
+of the calls the screen makes when it opens), add it to the role in `roleMenuPermissions`, and make
+sure the backend role has those permissions. Master is organised in
 sections (Organization, Insurance Management, Location, Employee Management, User Management, Finance,
 System Configuration); a grant such as `"Finance > Bank File Layouts"`
 opens one item of a section.

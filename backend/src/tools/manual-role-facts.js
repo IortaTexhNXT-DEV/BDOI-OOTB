@@ -153,7 +153,8 @@ export async function roleFacts(db, menu) {
 
   const facts = roles.map((role) => {
     const held = perms.get(role.code) || new Set();
-    const own = menu.filterMenuForRoles(menu.menuList, [role.code]);
+    // the menu the role is shown: its grants, without the entries its permissions cannot load
+    const own = menu.filterMenuForRoles(menu.menuList, [role.code], [...held]);
     const menus = menu.flattenLeaves(own).filter((l) => l.item.path).map((l) => {
       const modules = modulesOf.get(leafKey(l)) || [];
       const level = accessLevel(l, modules, held, cat);

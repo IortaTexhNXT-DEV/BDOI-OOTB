@@ -11,6 +11,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
+import { hasPermission } from "../../utils/canOpen";
 import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import DetailHeader from "../../components/DetailHeader";
@@ -59,7 +60,8 @@ const SupplierInvoices = () => {
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     service.masterRecords("supplier", { status: "Active" }).then((r) => setSuppliers(r.rows)).catch(() => {});
-    service.assetClasses().then(setClasses).catch(() => {});
+    // the asset class of a capitalised line: only for a user who reads the fixed asset register (approvers need not)
+    if (hasPermission("read:fixed-assets")) service.assetClasses().then(setClasses).catch(() => {});
   }, []);
 
   const supplier = suppliers.find((s) => s.code === form?.supplierId);

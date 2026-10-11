@@ -124,6 +124,8 @@ describe("asset disposal register", () => {
 });
 
 describe("menus and help", () => {
+  // the role grants alone (the permissions of a signed-in user narrow them further)
+  beforeEach(() => localStorage.removeItem("USER_PERMISSIONS"));
   it("Sales, Operations and the Processing Team reach Sales Activities; Claims does not", () => {
     for (const role of ["sales", "operations", "processing"]) expect(isPathAllowed("/sales/activities", menuList, [role])).toBe(true);
     expect(isPathAllowed("/sales/activities", menuList, ["claims"])).toBe(false);

@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { filterMenuForRoles, isPathAllowed, roleMenuPermissions } from "./menuPermissions";
+import { filterMenuForRoles, isPathAllowed, meetsRequires, roleMenuPermissions } from "./menuPermissions";
 import { menuList } from "../components/SideBar/list";
 import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
 import { flattenLeaves } from "../components/SideBar/menuTree";
+import { requiresOf } from "../components/SideBar/requires";
+import rolePermissions from "./tisphRolePermissions.json";
 
 const TIS_ROLES = ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-ccd-pdu",
   "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager", "tis-auditor"];
@@ -177,5 +179,35 @@ describe("TISPH roles (RBAC v4): menus", () => {
     const uncovered = TIS_ROLES.flatMap((role) => flattenLeaves(filterMenuForRoles(menuList, [role])).map((l) => l.item.path))
       .filter((p) => !ids.has(helpSectionFor(p, ids).id));
     expect([...new Set(uncovered)]).toEqual([]);
+  });
+});
+
+// A role never sees an entry it cannot use: each entry it is shown loads with the permissions it holds (no refusal on
+// opening), and its menu grants name no entry its permissions cannot load. The permissions are those of db/seed.js
+// (tisphRolePermissions.json, kept equal by the back end's tisph-menu-permissions test).
+describe("TISPH roles: every menu entry opens without a refusal", () => {
+  const paths = (menu) => flattenLeaves(menu).map((l) => l.item.path).filter(Boolean);
+
+  it("every screen of the menu states the permissions it needs to load", () => {
+    expect(flattenLeaves(menuList).filter((l) => l.item.path && !requiresOf(l.item)).map((l) => l.item.path)).toEqual([]);
+  });
+
+  it("every entry a TIS role is shown loads with the role's permissions", () => {
+    const refused = TIS_ROLES.flatMap((role) => flattenLeaves(filterMenuForRoles(menuList, [role], rolePermissions[role]))
+      .filter((l) => l.item.path && !meetsRequires(requiresOf(l.item), rolePermissions[role])).map((l) => `${role} ${l.item.path}`));
+    expect(refused).toEqual([]);
+  });
+
+  it("the menu grants of a TIS role give no entry its permissions cannot load", () => {
+    const unusable = TIS_ROLES.flatMap((role) => {
+      const usable = new Set(paths(filterMenuForRoles(menuList, [role], rolePermissions[role])));
+      return paths(filterMenuForRoles(menuList, [role], null)).filter((p) => !usable.has(p)).map((p) => `${role} ${p}`);
+    });
+    expect(unusable).toEqual([]);
+  });
+
+  it("an address of an entry the permissions cannot load is refused", () => {
+    expect(isPathAllowed("/agent/payments", menuList, ["tis-ccd-pdc"], rolePermissions["tis-ccd-pdc"])).toBe(true);
+    expect(isPathAllowed("/agent/payments", menuList, ["tis-ccd-pdc"], ["read:pdc"])).toBe(false);
   });
 });
