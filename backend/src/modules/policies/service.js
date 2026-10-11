@@ -373,7 +373,7 @@ export async function issuePolicy(db, src, body, userId) {
   // at booking; a Motor policy rated per peril is booked at its gross commission (net premium less insurer remitting)
   const { computeBasis, policyForBasis } = await import('../commission/breakdown.js');
   details.commissionBasis = await computeBasis(db, await policyForBasis(db, policyId), { details });
-  if (details.commissionBasis.rateBasis === 'issuing-remitting' && details.commissionBasis.status === 'ok') {
+  if (['issuing-remitting', 'scheme'].includes(details.commissionBasis.rateBasis) && details.commissionBasis.status === 'ok') {
     src.commissionAmount = details.commissionBasis.grossCommission;
     if (num(src.netPremium) > 0) src.commissionRate = Math.round((details.commissionBasis.grossCommission / num(src.netPremium)) * 1e6) / 1e6;
     await db.query('UPDATE policies SET commission_amount = $2 WHERE id = $1', [policyId, src.commissionAmount]);

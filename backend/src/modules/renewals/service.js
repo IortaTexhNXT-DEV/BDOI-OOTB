@@ -431,6 +431,13 @@ export async function captureRenewal(id, input) {
   if (input.remarks !== undefined) set('remarks', input.remarks);
   if (input.priority) set('priority', input.priority);
   const gross = Number(input.orderSummary?.grossPremium ?? input.premiumBreakdown?.grossPremium ?? input.coverageDetails?.grossPremium);
+  // a scheme renewal changed from the scheme premium (claims, change of use) needs the reason (FR-SCM-023, MSG-SCM-060)
+  const scheme = before.premium_breakdown?.scheme;
+  if (gross > 0 && scheme && Math.abs(round2(gross) - Number(scheme.grossPremium)) >= 0.01 && !String(input.remarks ?? before.remarks ?? '').trim()) {
+    throw badRequest(`The renewal premium differs from the scheme premium of ${await formatMoney(scheme.grossPremium)} for year ${scheme.year}; enter the reason`,
+      [{ path: 'remarks', message: `The renewal premium differs from the scheme premium of ${await formatMoney(scheme.grossPremium)} for year ${scheme.year}; enter the reason` }]);
+  }
+  if (gross > 0 && scheme && input.premiumBreakdown === undefined) set('premium_breakdown', JSON.stringify({ ...before.premium_breakdown, grossPremium: round2(gross) }));
   if (gross > 0) set('premium_new', round2(gross));
   if (gross > 0 && ['pipeline', ...NOTICE_STATUS, 'approved'].includes(before.status)) set('status', 'quoted');
   if (gross > 0 && before.status === 'approved') { sets.push('approved_by = NULL', 'approved_at = NULL'); }
@@ -452,6 +459,23 @@ export const quoteApi = (q) => ({
  * charge engine (the same as a quotation); returns premium variance.
  */
 export async function rate(r) {
+  // a scheme policy within its term is priced by the scheme rating on the version kept on the policy (FR-SCM-023)
+  const { renewalYear } = await import('../schemes/rating.js');
+  const scheme = r.policy_id ? await renewalYear(r.policy_id) : null;
+  if (scheme) {
+    const previous = Number(r.premium_old ?? r.premium_total ?? 0);
+    const taxes = { vat: scheme.vat, dst: scheme.dst, lgt: scheme.lgt, ...(scheme.fst ? { fst: scheme.fst } : {}), ...(scheme.ctpl ? { ctpl: scheme.ctpl } : {}) };
+    const variance = round2(scheme.grossPremium - previous);
+    return {
+      base: scheme.netPremium, claimsLoading: 0, loyaltyDiscount: 0, net: scheme.netPremium, taxes, total: scheme.grossPremium, previous, variance,
+      variancePct: previous ? round2((variance / previous) * 100) : 0,
+      scheme: { schemeId: scheme.scheme.id, schemeNo: scheme.scheme.scheme_no, version: scheme.scheme.version, lineNo: scheme.line?.line_no ?? null, year: scheme.year,
+        termYears: scheme.policyScheme.term_years, sumInsured: scheme.sumInsured, commission: scheme.commission, commissionPct: scheme.commissionPct, dealerShare: scheme.dealerShare,
+        dealerCommissionPct: scheme.dealerCommissionPct, grossPremium: scheme.grossPremium, rates: scheme.rates, perils: scheme.perils,
+        vehicleClass: scheme.vehicleClass, ctplYears: scheme.ctplYears },
+      rating: { line: 'scheme', scheme: `${scheme.scheme.scheme_no} v${scheme.scheme.version}`, year: scheme.year, sumInsured: scheme.sumInsured, rates: scheme.rates, ratedAt: new Date().toISOString() },
+    };
+  }
   const line = r.product_line || 'default';
   const rates = (await getSetting('renewals.rating_rates', {})) || {};
   const rateUsed = Number(rates[line] ?? rates.default ?? 0);
@@ -486,7 +510,8 @@ export async function generateQuote(id, user) {
       net_premium, taxes, total_premium, variance, variance_pct, rating, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
     [number, r.id, validUntil, q.previous, q.base, q.claimsLoading, q.loyaltyDiscount, q.net, JSON.stringify(q.taxes), q.total, q.variance, q.variancePct, JSON.stringify(q.rating), user?.username ?? null]);
     await db.query(`UPDATE renewals SET premium_new = $2, premium_old = COALESCE(premium_old, $3), status = 'quoted', approved_by = NULL, approved_at = NULL,
-      premium_breakdown = $4, updated_at = now() WHERE id = $1`, [r.id, q.total, q.previous, JSON.stringify({ netPremium: q.net, ...q.taxes, grossPremium: q.total })]);
+      premium_breakdown = $4, updated_at = now() WHERE id = $1`, [r.id, q.total, q.previous, JSON.stringify({ netPremium: q.net, ...q.taxes, grossPremium: q.total,
+      ...(q.scheme ? { scheme: q.scheme, commissionAmount: q.scheme.commission, sumInsured: q.scheme.sumInsured } : {}) })]);
     await activity(db, r.id, user, { type: 'Quote Generated', description: `Renewal quote ${number}: ${q.total} (${q.variancePct >= 0 ? '+' : ''}${q.variancePct}%)` });
     return ins.rows[0];
   });
@@ -643,7 +668,11 @@ export async function completeRenewal(id, user, input = {}) {
   const expiry = (await businessDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
   if (input.inceptionDate) await assertTermDates(r, inception, expiry);
-  const commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;
+  let commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;
+  // a scheme renewal year within the term: the scheme commission % of the year (FR-SCM-030); a premium adjusted for
+  // claims or a change of use keeps the scheme and shows both premiums on the Scheme panel (FR-SCM-023)
+  const schemeYear = r.premium_breakdown?.scheme || null;
+  const schemeAdjusted = schemeYear && Math.abs(Number(schemeYear.grossPremium ?? r.premium_breakdown.grossPremium) - premium) >= 0.01;
   const issuedOn = (await businessDate(input.issuedDate)) || (await today());
   const result = await withTransaction(async (db) => {
     const lock = await db.query('SELECT status FROM renewals WHERE id = $1 FOR UPDATE', [r.id]);
@@ -654,12 +683,17 @@ export async function completeRenewal(id, user, input = {}) {
     const takesQuote = Number(quoted.grossPremium) > 0 && Math.abs(Number(quoted.grossPremium) - premium) < 0.01 && Number(quoted.netPremium) > 0;
     const net = takesQuote ? round2(quoted.netPremium)
       : Number(old.premium_total) > 0 && Number(old.net_premium) > 0 ? round2((Number(old.net_premium) / Number(old.premium_total)) * premium) : premium;
+    if (schemeYear) commission = schemeAdjusted ? round2((net * Number(schemeYear.commissionPct || 0)) / 100) : round2(Number(schemeYear.commission));
     const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' },
       ...(await numberingContext({ db, userId: user?.id ?? null, productId: old.product_id, lob: old.lob, policyTypeId: old.policy_type_id, renewal: true })) });
     // how the expiring term came in (go-live migration, bulk upload) is not carried: the renewal term is new business
     const doc = { ...(old.doc || {}) };
     delete doc.source;
     delete doc.loadBatchId;
+    if (schemeYear && doc.scheme) {
+      doc.scheme = { ...doc.scheme, policyYear: schemeYear.year, sumInsured: schemeYear.sumInsured };
+      doc.lossAndDamageCoverage = schemeYear.sumInsured;
+    }
     // the renewal term keeps the expiring policy's billing mode (broker billed or direct bill), product, line, insured and
     // risk details, and is issued today (or on the issue date given)
     const np = await db.query(`INSERT INTO policies(policy_number, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id, status,
@@ -667,7 +701,7 @@ export async function completeRenewal(id, user, input = {}) {
         renewed_from, created_by, billing_mode)
       VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
         COALESCE((SELECT billing_mode FROM policies WHERE id = $21), 'broker')) RETURNING id, policy_number`, [
-      policyNumber, r.policy_client_id, old.lead_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, issuedOn, r.sum_insured, net, premium,
+      policyNumber, r.policy_client_id, old.lead_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, issuedOn, schemeYear ? schemeYear.sumInsured : r.sum_insured, net, premium,
       commission, r.currency, old.product_type, old.lob, old.insured_name, JSON.stringify(doc),
       JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
       r.policy_id, user?.username ?? null]);
@@ -682,6 +716,23 @@ export async function completeRenewal(id, user, input = {}) {
     await db.query(`INSERT INTO policy_lock_ins(policy_id, source, reference, start_date, years, end_date, tfs_loan_account, loan_status, loan_status_at, loan_status_by, loan_status_note, status, created_by)
       SELECT $2, source, reference, start_date, years, end_date, tfs_loan_account, loan_status, loan_status_at, loan_status_by, loan_status_note, status, $3
         FROM policy_lock_ins WHERE policy_id = $1 ON CONFLICT (policy_id) DO NOTHING`, [r.policy_id, newPolicy.id, user?.username ?? null]);
+    // the scheme of the expiring term continues on the renewal term with the next policy year (FR-SCM-023)
+    let schemeDetails = null;
+    if (schemeYear) {
+      await db.query(`INSERT INTO policy_schemes(policy_id, scheme_id, scheme_no, version, scheme_type, line_no, line_label, policy_year, term_years, year1_sum_insured, sum_insured, rates,
+          commission_pct, dealer_commission_pct, dealer_channel_id, net_premium, commission_amount, dealer_share, tisph_share, scheme_premium, application_id, created_by)
+        SELECT $2, scheme_id, scheme_no, version, scheme_type, line_no, line_label, $3, term_years, year1_sum_insured, $4, rates, commission_pct, dealer_commission_pct, dealer_channel_id,
+          $5, $6, $7, $6 - $7, $8, application_id, $9 FROM policy_schemes WHERE policy_id = $1 ON CONFLICT (policy_id) DO NOTHING`,
+      [r.policy_id, newPolicy.id, schemeYear.year, schemeYear.sumInsured, net, commission, round2((commission * Number(schemeYear.dealerCommissionPct || 0)) / 100),
+        round2(Number(schemeYear.grossPremium ?? premium)), user?.username ?? null]);
+      if (schemeAdjusted) await db.query('UPDATE policy_schemes SET adjusted_premium = $2, adjust_reason = $3 WHERE policy_id = $1', [newPolicy.id, premium, r.remarks || null]);
+      await db.query('UPDATE policies SET channel_id = (SELECT channel_id FROM policies WHERE id = $1) WHERE id = $2', [r.policy_id, newPolicy.id]);
+      const { computeBasis, policyForBasis, storeBasis } = await import('../commission/breakdown.js');
+      const basis = await computeBasis(db, await policyForBasis(db, newPolicy.id));
+      await storeBasis(db, newPolicy.id, basis);
+      const ref = basis.shares?.find((x) => x.referrerId)?.referrerId;
+      if (ref) schemeDetails = { primary: { referrerId: ref }, chain: [], source: 'scheme' };
+    }
     await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now() WHERE id = $1`, [r.id, newPolicy.id, premium]);
     await db.query('UPDATE renewal_quotes SET status = \'accepted\' WHERE renewal_id = $1 AND status = \'generated\'', [r.id]);
     await activity(db, r.id, user, { type: 'Renewed', description: `Renewed as policy ${newPolicy.policy_number} (${inception} to ${expiry})` });
@@ -693,7 +744,8 @@ export async function completeRenewal(id, user, input = {}) {
       bill = await createReceivable(db, { policyId: newPolicy.id, amount: premium, source: 'renewal', reference: r.renewal_number || null, date: issuedOn, user,
         breakdown: { netPremium: net, vat: quoted.vat, dst: quoted.dst, lgt: quoted.lgt, commissionAmount: commission } });
       await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [newPolicy.id, bill.bill_number]);
-      await accrueCommission(db, { policyId: newPolicy.id, agentUserId: r.policy_owner, basis: net, rate: net > 0 ? commission / net : 0, period: inception.slice(0, 7), user });
+      await accrueCommission(db, { policyId: newPolicy.id, agentUserId: r.policy_owner, basis: net, rate: net > 0 ? commission / net : 0, period: inception.slice(0, 7), user,
+        details: schemeDetails });
     }
     return { ...newPolicy, receivableId: bill?.id ?? null };
   });

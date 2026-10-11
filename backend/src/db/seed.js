@@ -212,6 +212,23 @@ for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-
 ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 // Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
 for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
+// Dealer schemes (migrations 0600 to 0602, FRS SCHM-01 to 03 default grants): the Processing Team keeps the Scheme Master
+// and the scheme applications, the Accounting Manager approves schemes, checklist waivers and lock-in decisions; Sales
+// and the Processing Team review the lock-in accounts, Operations and Compliance set the TFS loan status; everyone reads.
+// TISPH personas (proposal until TISPH names the users): Operations makes, the Sales Unit Head, the Operations Unit
+// Head (waivers) and the General Manager approve.
+const SCHEME_PERMS = {
+  processing: ['schemes', 'scheme-issuance', 'lock-in'], sales: ['schemes:read', 'scheme-issuance:read', 'lock-in'],
+  operations: ['schemes:read', 'scheme-issuance:read', 'lock-in:read', 'loan-status:write'], accounting: ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
+  'accounting-manager': ['schemes:approve', 'scheme-issuance:approve', 'lock-in:approve'],
+  'tis-sales-associate': ['schemes:read', 'scheme-issuance:read', 'lock-in'], 'tis-sales-officer': ['schemes:read', 'scheme-issuance:read', 'lock-in'],
+  'tis-sales-unit-head': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'lock-in', 'lock-in:approve'],
+  'tis-ops-associate': ['schemes:read', 'scheme-issuance', 'lock-in:read', 'loan-status:write'], 'tis-ops-officer': ['schemes', 'scheme-issuance', 'lock-in', 'loan-status:write'],
+  'tis-ops-unit-head': ['schemes', 'scheme-issuance', 'scheme-issuance:approve', 'lock-in', 'loan-status:write'],
+  'tis-finance': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'], 'tis-it-admin': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
+  'tis-general-manager': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
+};
+for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

@@ -216,6 +216,22 @@ export function assertDateOrder(t, rec) {
 }
 
 /**
+ * Field rules declared on a type: a field with notWhen { field, value, message } cannot be set while the other field has
+ * that value (Scheme Document Checklist: a KYC item cannot be waived).
+ */
+export function assertFieldRules(t, rec) {
+  const on = (v) => v === true || ['true', 'yes', '1'].includes(String(v ?? '').toLowerCase());
+  const errors = [];
+  for (const f of t.fields) {
+    const r = f.notWhen;
+    if (!r || !on(rec[f.name])) continue;
+    const other = rec[r.field];
+    if (r.value === true ? on(other) : other === r.value) errors.push({ path: f.name, message: r.message || `${f.label || f.name} is not allowed` });
+  }
+  if (errors.length) throw badRequest(errors[0].message, errors);
+}
+
+/**
  * Codes issued by the system: a field declared with numbering (a Document Numbering series) gets the next number of
  * that series when the record is created without one.
  */
@@ -478,6 +494,7 @@ export async function createRecord(t, body, user) {
   assertNotRetired(t);
   const valid = validateRecord(t, body);
   assertDateOrder(t, valid.values);
+  assertFieldRules(t, valid.values);
   const values = await withIssuedCodes(t, valid.values);
   const { status } = valid;
   await assertUnique(t, values);
@@ -509,6 +526,7 @@ export async function updateRecord(t, id, body, user) {
   const before = await getRecord(t, id);
   const { values, status } = validateRecord(t, body, { partial: true });
   assertDateOrder(t, { ...before, ...values });
+  assertFieldRules(t, { ...before, ...values });
   // an unchanged reference keeps the record it points to (its id), not its label, which other records may share
   const refIds = Object.fromEntries(t.fields.filter((f) => f.ref && before[`${f.name}Id`]).map((f) => [f.name, before[`${f.name}Id`]]));
   await assertUnique(t, { ...before, ...refIds, ...values }, id);

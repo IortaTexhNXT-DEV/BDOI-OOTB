@@ -153,7 +153,8 @@ export async function storeSlipDocument(id, userId) {
   return { key, fileName };
 }
 
-async function insertPlacement(db, data, parts, userId, participantStatus) {
+/** Insert a placement slip with its participants (also used by Scheme Issuance for the placements of source scheme). */
+export async function insertPlacement(db, data, parts, userId, participantStatus) {
   const number = await nextDocumentNumber('placement', { db, unique: { table: 'placements', column: 'placement_number' },
     ...(await numberingContext({ db, userId, productId: data.product_id || null, lob: data.lob || null, policyTypeId: data.policy_type_id || null })) });
   const row = { placement_number: number, owner_user_id: userId, created_by: userId, ...data };
@@ -360,6 +361,8 @@ export async function updatePlacement(id, body, user) {
  */
 export async function assertPaymentVerified(p) {
   if (!(await getSetting('placement.payment_verification_required', false))) return;
+  // a scheme application's slip: the customer pays nothing, the dealer or TFSPH is billed at issuance (SCHM-01 FR-SIS-022)
+  if (p.source === 'scheme' && (await getSetting('schemes.skip_payment_verification', true)) !== false) return;
   const v = p.paymentVerification || (p.payment_verified_at ? { ...(p.payment_verification || {}), at: p.payment_verified_at } : null);
   if (!v) throw conflict(`The proof of payment of placement slip ${p.placementNumber || p.placement_number} must be verified by Cash Control before it is sent or booked`);
   if (v.pdcApproved && !(await getSetting('placement.pdc_cover_before_cash', true))) throw conflict('A post-dated cheque instalment plan does not give cover before cash is received');
@@ -399,7 +402,7 @@ async function kycAttachments(p) {
   return key && /^[a-z0-9_/-]+\.[a-z0-9]+$/i.test(key) && (await findDocument(key)) ? [fileAttachment(key, key.split('/').pop())] : [];
 }
 
-export async function sendPlacement(id, user, { insurerIds = null } = {}) {
+export async function sendPlacement(id, user, { insurerIds = null, attachments = [] } = {}) {
   const p = await placementById(id);
   if (!['draft', ...WITH_INSURER].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
   await assertPaymentVerified(p);
@@ -417,7 +420,7 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
       role: x.isLead ? 'lead insurer' : 'co-insurer', shareSumInsured: amountText(x.sumInsured), sharePremium: amountText(x.premium), sharePremiumTotal: amountText(x.premiumTotal) };
     const slip = documentAttachment('placement-slip', { placementId: p.id, insurerId: x.insuranceCompanyId }, `placement-slip-${p.placementNumber}-${x.insurerCode || x.insuranceCompanyId}.pdf`);
     const emailId = await queueEmail({ to: x.insurerEmail, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'placement_order', entity: 'placement', entityId: p.id,
-      attachments: [slip, ...lto, ...kycDocs] });
+      attachments: [slip, ...lto, ...kycDocs, ...attachments] });
     sent.push({ insurer: x.insuranceCompanyName, email: x.insurerEmail, emailId });
   }
   if (!sent.length && failed.length) throw badRequest(`No insurer could be e-mailed: ${failed.map((f) => `${f.insurer} (${f.reason})`).join('; ')}`);
@@ -460,12 +463,13 @@ export async function declineParticipant(id, { insuranceCompanyId, reason }, use
  * only a user holding approve:policies who did not raise it may cancel, and each insurer holding it is e-mailed the
  * cancellation (email.template.placement_cancelled).
  */
-export async function cancelPlacement(id, reason, user) {
+export async function cancelPlacement(id, reason, user, { approvedUnder = null } = {}) {
   const p = await getPlacementRow(id);
   if (['issued', 'cancelled'].includes(p.status)) throw conflict(`A ${LABELS[p.status]} placement slip cannot be cancelled`);
   if (await remarksRequired() && blank(reason)) throw badRequest('Validation failed', [{ path: 'reason', message: 'Enter the reason for cancelling the placement slip' }]);
   const withInsurer = !['draft', 'declined'].includes(p.status) && Boolean(p.sent_at);
-  if (withInsurer && (await getSetting('placement.cancel_approval', true)) !== false) {
+  // approvedUnder: the caller checked its own approval (Scheme Issuance: approve:scheme-issuance cancels a sent application)
+  if (withInsurer && !approvedUnder && (await getSetting('placement.cancel_approval', true)) !== false) {
     if (!hasPermission(user, 'approve:policies')) throw forbidden(`Placement slip ${p.placement_number} is with the insurer: an approver (approve:policies) cancels it`);
     if (p.created_by === user.id) throw forbidden(`Maker-checker: placement slip ${p.placement_number} is cancelled by a user other than the one who raised it`);
   }
@@ -718,6 +722,8 @@ async function emailSchedule(policyId, placement) {
  */
 export async function bookPlacement(id, body, user) {
   const p = await getPlacementRow(id);
+  // a scheme application's slip is issued by Scheme Issuance: bill to the dealer or TFSPH, scheme and lock-in on the policy
+  if (p.source === 'scheme') return (await import('../scheme-issuance/issue.js')).issueFromPlacement(p.id, user);
   const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
   const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
   await assertPaymentVerified(p);
