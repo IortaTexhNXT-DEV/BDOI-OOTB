@@ -5,6 +5,10 @@ UAT and PROD, are built from the same Terraform code with different sizes (NFR-0
 images are promoted from one to the next (NFR-19). This page is the runbook: first set-up, releases, rollback,
 backups and disaster recovery, and the Microsoft 365 pieces (sign-in, e-mail).
 
+Status on 11 October 2026: the Azure environments are not provisioned yet. The repository variable `ACR_NAME` is
+unset, so `azure-deploy.yml` skips its build; TISPH DEV runs on Railway meanwhile ([RAILWAY.md](RAILWAY.md)). UAT is
+set up (here or in another environment TISPH approves) only after TISPH confirms.
+
 Do the sections in order the first time. Secrets go only into each environment's Key Vault, never into the
 repository, the tfvars or GitHub.
 
@@ -117,8 +121,9 @@ Repeat for `dev`, `sit`, `uat` and `prod`, in that order.
    enablement by `system`.
 6. **GitHub environment** (section 9): copy the output `github_variables` into the environment's variables and set
    `DEPLOY_ENABLED=true`.
-7. Continue with the smoke tests and go-live data of [README.md](README.md), sections 4 to 6, and the security
-   settings of section 13 below.
+7. Continue with the smoke test (`deploy/smoke-test.sh`), the business set-up of
+   [docs/onboarding/GO_LIVE_DATA_SETUP.md](../docs/onboarding/GO_LIVE_DATA_SETUP.md) and the security settings of
+   section 13 below.
 
 Terraform does not change the running images after creation, so a later `terraform apply` (a size change, a new
 alert address) never rolls an environment back.

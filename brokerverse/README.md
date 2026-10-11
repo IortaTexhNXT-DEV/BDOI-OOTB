@@ -17,7 +17,7 @@ npm run check:i18n                                         # translation keys mi
 The build holds no environment settings. `/env-config.js`, written by the web server when it starts
 (`scripts/env-config.sh`), gives the API address (empty: same origin `/api`, proxied to the backend) and the
 environment name shown next to the logo outside production. The app reads them only through
-`src/config/runtimeConfig.js`. Deployment: [deploy/RELEASE_PIPELINE.md](../deploy/RELEASE_PIPELINE.md).
+`src/config/runtimeConfig.js`. Deployment for TISPH: [deploy/README.md](../deploy/README.md).
 
 How the code is organised, how to trace a defect and how to add a screen:
 [docs/developer-guide/frontend.md](../docs/developer-guide/frontend.md).
