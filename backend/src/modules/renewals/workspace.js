@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { notFound } from '../../lib/errors.js';
@@ -41,12 +41,12 @@ const command = (action, fn, message) => async (req, res) => {
 };
 
 define({
-  method: 'GET', path: '/queue', summary: 'Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)', screen: 'Operations > Renewals > Renewal Queue',
+  method: 'GET', path: '/queue', summary: 'Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize; talkbotOutcome and each renewal\'s Talkbot outcome with read:talkbot-calls)', screen: 'Operations > Renewals > Renewal Queue',
   middleware: read, query: { search: 'Santos', status: 'Pending', risk: 'High', from: '2026-10-01', to: '2026-12-31', page: 1, pageSize: 20 },
   response: { success: true, data: [queueItem], dashboard: { totalPolicies: 14, dueSoon: 5, atRisk: 3, inGracePeriod: 1 }, total: 14, page: 1, perPage: 20, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
-    const r = await an.renewalQueue(await withScope(req), pg);
+    const r = await an.renewalQueue(await withScope(req), pg, { talkbot: hasPermission(req.user, 'read:talkbot-calls') });
     res.json({ success: true, message: 'OK', data: r.items, dashboard: r.dashboard, ...pageMeta(r.total, pg) });
   },
 });

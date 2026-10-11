@@ -18,7 +18,7 @@ export async function setup() {
  */
 export const OWN_BOOK_ROLE = 'own-book';
 export const OWN_BOOK_PERMISSIONS = ['profile', 'leads', 'quotations', 'policies', 'endorsements', 'claims', 'notifications']
-  .flatMap((m) => [`read:${m}`, `write:${m}`]).concat('read:clients');
+  .flatMap((m) => [`read:${m}`, `write:${m}`]).concat('read:clients', 'delete:leads');
 export async function createOwnBookRole(api) {
   const r = await api('post', '/roles').send({ code: OWN_BOOK_ROLE, name: 'Own book (test)', permissions: OWN_BOOK_PERMISSIONS });
   if (r.status !== 201) throw new Error(`own-book role: ${r.status} ${JSON.stringify(r.body)}`);

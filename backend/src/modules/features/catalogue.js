@@ -269,6 +269,13 @@ export const FEATURES = Object.freeze([
     jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue'],
   }),
   feature({
+    key: 'talkbot-calls', name: 'Talkbot renewal calls', module: 'Operations', tier: P1,
+    description: 'Talkbot call lists of the Motor renewals, the call results upload, the Talkbot outcome and the Talkbot filter on renewal quotes',
+    requirements: ['TIS-BRD-LEAD-09', 'CR-02'], dependsOn: ['renewals'],
+    menus: ['Operations > Renewals > Talkbot Calls'],
+    jobs: ['talkbot-call-list', 'talkbot-call-list-close'],
+  }),
+  feature({
     key: 'renewal-analytics', name: 'Retention analytics and renewal performance', module: 'Operations', tier: FUT,
     description: 'Retention KPIs by product, agent and month; renewal rate, premium retention and cycle time',
     menus: ['Operations > Renewals > Retention Analytics', 'Operations > Renewals > Performance'], api: ['/renewals/performance'],
@@ -515,10 +522,12 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'reports', name: 'Operational and financial reports', module: 'Reports', tier: P1,
     description: 'Report catalogue, production, claims, renewal, remittance and commission reports, receivables, ledger and financial statement reports',
-    requirements: ['TIS-BRD-RPT-SLS-01', 'TIS-BRD-RPT-SLS-02', 'TIS-BRD-RPT-OPS-02', 'TIS-BRD-RPT-OPS-03', 'TIS-BRD-RPT-OPS-04', 'TIS-BRD-RPT-CCD-01', 'TIS-BRD-RPT-FGA-01',
+    requirements: ['TIS-BRD-RPT-SLS-01', 'TIS-BRD-RPT-SLS-02', 'TIS-BRD-RPT-SLS-03', 'TIS-BRD-RPT-SLS-04', 'TIS-BRD-RPT-02', 'CR-13', 'TIS-BRD-RPT-OPS-02', 'TIS-BRD-RPT-OPS-03', 'TIS-BRD-RPT-OPS-04', 'TIS-BRD-RPT-CCD-01', 'TIS-BRD-RPT-FGA-01',
       'TIS-BRD-RPT-FGA-02', 'TIS-BRD-RPT-FGA-05', 'TIS-BRD-RPT-FGA-06'],
     menus: ['Reports > All Reports', 'Reports > Operational Reports > Production', 'Reports > Operational Reports > Claims', 'Reports > Operational Reports > Renewal',
       'Reports > Operational Reports > Remittance', 'Reports > Operational Reports > Broker Commission', 'Reports > Operational Reports > Dealer Production',
+      'Reports > Operational Reports > APR Operation Report', 'Reports > Operational Reports > Production per Line',
+      'Reports > Operational Reports > Agent Pipeline', 'Reports > Operational Reports > Renewal Notice Listing',
       'Reports > Financial Reports > SOA/Premium Receivable', 'Reports > Financial Reports > Collection Report', 'Reports > Financial Reports > Payables',
       'Reports > Financial Reports > Journal', 'Reports > Financial Reports > Trial Balance', 'Reports > Financial Reports > Income Statement',
       'Reports > Financial Reports > Balance Sheet', 'Reports > Financial Reports > Trial Balance Movement', 'Reports > Financial Reports > General Ledger Detail',

@@ -173,6 +173,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -359,6 +368,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -497,6 +542,18 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -861,6 +918,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -1047,6 +1113,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -1095,6 +1197,12 @@
      "module": "Prospects and leads",
      "level": "Create and edit",
      "meaning": "Create and edit prospects and leads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
     },
     {
      "area": "Sales & Marketing",
@@ -1221,6 +1329,18 @@
      "module": "Renewals",
      "level": "Special",
      "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -1598,6 +1718,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -1838,6 +1967,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -1886,6 +2051,12 @@
      "module": "Prospects and leads",
      "level": "Create and edit",
      "meaning": "Create and edit prospects and leads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
     },
     {
      "area": "Sales & Marketing",
@@ -2012,6 +2183,18 @@
      "module": "Renewals",
      "level": "Special",
      "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -2451,6 +2634,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -2646,6 +2838,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -2778,6 +3006,12 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -3192,6 +3426,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -3423,6 +3666,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -3555,6 +3834,12 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -3987,6 +4272,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -4290,6 +4584,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -4446,6 +4776,12 @@
      "module": "Renewals",
      "level": "Special",
      "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -6007,6 +6343,15 @@
      "modules": []
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Prospects",
+     "path": "/agent/leadlisting",
+     "access": "View",
+     "modules": [
+      "Prospects and leads"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
@@ -6478,6 +6823,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Broker Commission",
      "path": "/reports/operationalreports/brokercommision",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -7316,15 +7697,6 @@
     },
     {
      "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
      "screen": "Dealer Programmes",
      "path": "/sales/dealer-programmes",
      "access": "Create and edit",
@@ -7381,15 +7753,6 @@
      "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
-     "access": "View",
-     "modules": [
-      "Renewals"
-     ]
-    },
-    {
-     "section": "Operations > Renewals",
-     "screen": "Lock-in Accounts",
-     "path": "/renewal/lock-in-accounts",
      "access": "View",
      "modules": [
       "Renewals"
@@ -7659,6 +8022,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -8771,6 +9170,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -9346,6 +9754,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Pipeline",
+     "path": "/reports/run/agent-pipeline",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports > Financial Reports",
      "screen": "SOA/Premium Receivable",
      "path": "/reports/financialreports/soapremiumreceivable",
@@ -9577,6 +10021,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "View",
      "meaning": "See quotations, requests for quotation, placement slips and comparison reports"
@@ -9700,6 +10150,18 @@
      "module": "Renewals",
      "level": "Special",
      "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -10285,6 +10747,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -10467,10 +10933,6 @@
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -10800,6 +11262,39 @@
     }
    ]
   },
+  "/renewal/talkbot": {
+   "menu": "Operations > Renewals > Talkbot Calls",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/renewal/queue": {
    "menu": "Operations > Renewals > Renewal Queue",
    "roles": [
@@ -10863,10 +11358,6 @@
     {
      "role": "TIS Operations Unit Head",
      "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
     },
     {
      "role": "TIS General Manager",
@@ -12590,6 +13081,170 @@
     }
    ]
   },
+  "/reports/run/apr-operation": {
+   "menu": "Reports > Operational Reports > APR Operation Report",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/production-by-line": {
+   "menu": "Reports > Operational Reports > Production per Line",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/agent-pipeline": {
+   "menu": "Reports > Operational Reports > Agent Pipeline",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/renewal-notice-listing": {
+   "menu": "Reports > Operational Reports > Renewal Notice Listing",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
   "/reports/financialreports/soapremiumreceivable": {
    "menu": "Reports > Financial Reports > SOA/Premium Receivable",
    "roles": [
@@ -13708,6 +14363,11 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
+  "delete:leads": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
   "manage:feature-entitlements": [],
   "process:claims": [
    "TIS Operations Associate",
@@ -14090,6 +14750,15 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
+  "read:talkbot-calls": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "read:users": [
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
@@ -14288,6 +14957,12 @@
   ],
   "write:sharing-schemes": [
    "TIS Finance & General Accounting"
+  ],
+  "write:talkbot-calls": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS General Manager"
   ],
   "write:users": [
    "TIS IT AppSupport / Admin"

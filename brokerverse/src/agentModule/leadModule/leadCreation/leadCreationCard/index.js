@@ -49,6 +49,8 @@ const initialValue = {
   Source: "",
   Quotes: "01",
   LeadID: "877",
+  CustomerType: "",
+  LoanId: "",
 };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -120,7 +122,7 @@ const duplicateQuery = (values) => (values.clientId
   ? { clientId: values.clientId }
   : {
     firstName: values.FirstName, lastName: values.LastName, companyName: values.category === "Corporate" ? values.CompanyName : undefined,
-    DOB: values.DateofBirth ? toIsoDate(values.DateofBirth) : undefined, emailId: values.EmailID, contactNumber: values.ContactNumber,
+    DOB: values.DateofBirth ? toIsoDate(values.DateofBirth) : undefined, emailId: values.EmailID, contactNumber: values.ContactNumber, loanId: values.LoanId || undefined,
   });
 
 /**
@@ -134,6 +136,11 @@ const LeadCreationCard = ({ flow, action }) => {
   const ageLimits = useAgeLimits();
   // where the prospect came from: Master > Insurance Management > Lead Sources (stored by name)
   const leadSources = useMasterOptions("lead-source", { value: (r) => r.name });
+  // TISPH customer types (leads.customer_types)
+  const [customerTypes, setCustomerTypes] = useState([]);
+  useEffect(() => {
+    leadService.options().then((o) => setCustomerTypes((o.customerTypes || []).map((c) => ({ label: c, value: c })))).catch(() => setCustomerTypes([]));
+  }, []);
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
     ({ leadReducers }) => {
@@ -260,6 +267,8 @@ const LeadCreationCard = ({ flow, action }) => {
         category: currentLeadDetails.leadCategory || "Retail",
         gender: currentLeadDetails.gender || "Male",
         Source: currentLeadDetails.source || "",
+        CustomerType: currentLeadDetails.customerType || "",
+        LoanId: currentLeadDetails.loanId || "",
         Quotes: "01",
         LeadID: currentLeadDetails.generatedLeadId || currentLeadDetails.leadId || "",
       };
@@ -364,6 +373,11 @@ const LeadCreationCard = ({ flow, action }) => {
 
         {flow !== "client" && (
           <FormSection title={t("leadCreation.form.sourceProduct")}>
+            <FormField label={t("leadCreation.form.customerType")} htmlFor="lead-customer-type">
+              <Dropdown inputId="lead-customer-type" value={v.CustomerType || null} options={customerTypes} onChange={(e) => formik.setFieldValue("CustomerType", e.value || "")} showClear
+                placeholder={t("leadCreation.form.chooseCustomerType")} className="w-full" />
+            </FormField>
+            {text("LoanId", t("leadCreation.form.loanId"), { required: false, maxLength: 60 })}
             <FormField label={t("leadCreation.source")} htmlFor="lead-source">
               <Dropdown inputId="lead-source" value={v.Source || null} options={sourceOptions} onChange={(e) => formik.setFieldValue("Source", e.value || "")} filter showClear
                 placeholder={t("leadCreation.form.chooseSource")} className="w-full" />

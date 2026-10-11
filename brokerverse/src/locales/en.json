@@ -274,7 +274,8 @@
     "Environment Promotion": "Environment Promotion",
     "Setup Workbook": "Setup Workbook",
     "Compare Environments": "Compare Environments",
-    "Promotion Path": "Promotion Path"
+    "Promotion Path": "Promotion Path",
+    "Talkbot Calls": "Talkbot Calls"
   },
   "sidebarFull": {
     "Request for Quotation": "Requests for Quotation (Broker Slips)",
@@ -4378,7 +4379,10 @@
     "deleteTitle": "Delete prospect",
     "deleteMessage": "The prospect is removed from the prospect list.",
     "deleteNote": "A prospect with an issued policy cannot be deleted.",
-    "deleteAction": "Delete prospect"
+    "deleteAction": "Delete prospect",
+    "uploadProspects": "Prospects",
+    "uploadTfs": "TFS accounts",
+    "bulkUploadTitle": "Bulk upload prospects"
   },
   "quotes": {
     "title": "Quotations",
@@ -5524,6 +5528,20 @@
       "allSkipped": "No notices queued",
       "skippedDetail_one": "{{count}} policy skipped: its notices are held or suppressed.",
       "skippedDetail_other": "{{count}} policies skipped: their notices are held or suppressed."
+    },
+    "talkbotOutcome": "Talkbot outcome",
+    "talkbotCallList": "Talkbot call list",
+    "confirmedOn": "Confirmed on",
+    "generateQuotes": "Generate Renewal Quotes",
+    "quoteStatus": "Quote status",
+    "noPoliciesToQuote": "Select at least one policy without a renewal quote",
+    "quoteFailed": "The renewal quotes could not be queued",
+    "quote": {
+      "NotQuoted": "Not quoted",
+      "Queued": "Queued",
+      "Quoted": "Quoted",
+      "Failed": "Failed",
+      "Skipped": "Skipped"
     }
   },
   "shareOption": {
@@ -6501,7 +6519,24 @@
     "createdDate": "Created Date:",
     "lastUpdated": "Last Updated:",
     "numberOfQuotes": "Number of Quotes:",
-    "history": "History"
+    "history": "History",
+    "account": "Account",
+    "customerType": "Customer Type",
+    "source": "Source",
+    "disposition": "Disposition",
+    "tfsReference": "TFS reference no.",
+    "loanId": "Loan ID",
+    "insuranceProvider": "Insurance provider",
+    "policyExpiry": "Policy expiry",
+    "vehicle": "Vehicle",
+    "plateNumber": "Plate no.",
+    "chassisNumber": "Chassis no.",
+    "productGroup": "Product group",
+    "srp": "SRP",
+    "loanStart": "Loan start",
+    "loanBooking": "Loan booking",
+    "loanMaturity": "Loan maturity",
+    "importBatch": "Upload batch"
   },
   "leadCreation": {
     "source": "Source",
@@ -6565,7 +6600,10 @@
       "chooseSource": "Choose the source",
       "product": "Product",
       "motor": "Motor",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "customerType": "Customer Type",
+      "chooseCustomerType": "Choose the customer type",
+      "loanId": "Loan ID"
     },
     "errors": {
       "required": "Enter this field",
@@ -11641,7 +11679,8 @@
       "risk": "Risk",
       "agent": "Account executive",
       "contacts": "Contacts",
-      "actions": "Actions"
+      "actions": "Actions",
+      "talkbot": "Talkbot"
     },
     "emptyTitle": "No open renewals",
     "emptyText": "Policies enter the queue as they approach expiry. Use Refresh pipeline to add policies due now.",
@@ -11676,7 +11715,8 @@
     "noEmail": "No e-mail on file",
     "noMobile": "No mobile number on file",
     "mailingAddress": "Mailing address on file",
-    "note": "Note"
+    "note": "Note",
+    "allTalkbot": "All Talkbot outcomes"
   },
   "perf": {
     "title": "Performance",
@@ -14343,7 +14383,9 @@
         "branchCode": "Branch",
         "source": "Source",
         "leadCategory": "Category",
-        "productId": "Product"
+        "productId": "Product",
+        "insuranceProviderId": "Insurance provider",
+        "customerType": "Customer type"
       },
       "reassignTitle": "Reassign {{count}} prospect(s)",
       "to": "To account executive",
@@ -14414,7 +14456,9 @@
       "reassignTitle_one": "Reassign {{count}} prospect",
       "reassignTitle_other": "Reassign {{count}} prospects",
       "queueTitle_one": "Send {{count}} prospect to the queue",
-      "queueTitle_other": "Send {{count}} prospects to the queue"
+      "queueTitle_other": "Send {{count}} prospects to the queue",
+      "maxOpen": "Bandwidth",
+      "maxOpenHelp": "Open prospects one account executive may hold under this rule; empty: no limit"
     },
     "oc": {
       "title": "Marine Open Covers",
@@ -15387,7 +15431,9 @@
       "feature_change": "Feature change (platform)",
       "feature_reject": "Feature change rejected (platform)",
       "policy_suspend": "Policy suspension",
-      "policy_reinstate": "Policy reinstatement"
+      "policy_reinstate": "Policy reinstatement",
+      "talkbot_line_remove": "Talkbot call list: account removed",
+      "talkbot_list_cancel": "Talkbot call list cancelled"
     }
   },
   "financialStatements": {
@@ -17049,6 +17095,157 @@
       "different": "Different",
       "only-in-file": "Only in file",
       "only-here": "Only here"
+    }
+  },
+  "talkbot": {
+    "title": "Talkbot Calls",
+    "newList": "New call list",
+    "uploadResults": "Upload results",
+    "searchHint": "Call list or task name",
+    "allStatuses": "All statuses",
+    "loadError": "The call lists could not be loaded",
+    "emptyTitle": "No call lists",
+    "noAccess": "You do not have access to Talkbot call lists",
+    "error": "Action not completed",
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent to Talkbot",
+      "results-loaded": "Results loaded",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
+    "outcomes": {
+      "not-called": "Not called",
+      "willing": "Willing to renew",
+      "not-willing": "Not willing to renew",
+      "already-renewed": "Already renewed",
+      "call-back": "Call back",
+      "wrong-contact": "Wrong contact",
+      "uncontacted": "Uncontacted",
+      "missed-call": "Missed call"
+    },
+    "col": {
+      "list": "Call list",
+      "taskName": "Talkbot task name",
+      "expiry": "Expiry date",
+      "accounts": "Accounts",
+      "willing": "Willing to renew",
+      "notCalled": "Not called",
+      "batch": "Renewal batch",
+      "status": "Status",
+      "outcome": "Talkbot outcome",
+      "contactId": "Contact ID / client",
+      "mobile": "Mobile",
+      "vehicle": "Vehicle",
+      "expiryDate": "Expiry",
+      "premium": "Renewal premium",
+      "calls": "Calls",
+      "batchQuote": "Batch / quote",
+      "actions": "Actions",
+      "upload": "Upload",
+      "file": "File",
+      "uploadedBy": "Uploaded by",
+      "rows": "Rows",
+      "loaded": "Loaded",
+      "failed": "Failed",
+      "callTime": "Call time",
+      "callId": "Call ID",
+      "result": "Result",
+      "callStatus": "Call status",
+      "callResult": "Call result",
+      "callback": "Date of callback"
+    },
+    "downloaded": "Call list downloaded: {{count}} accounts",
+    "dropped": "{{count}} accounts are no longer eligible and are left out of the file: {{policies}}",
+    "markSent": "Mark as sent",
+    "markSentMessage": "Record that call list {{list}} was loaded on the Talkbot platform.",
+    "taskName": "Talkbot task name",
+    "cancelList": "Cancel list",
+    "cancelMessage": "Cancel call list {{list}}.",
+    "closeList": "Close list",
+    "closeMessage": "Close call list {{list}}.",
+    "createBatch": "Create renewal batch",
+    "createBatchMessage": "Create the renewal batch of the Talkbot-confirmed accounts of {{list}}.",
+    "removeLine": "Remove",
+    "removeMessage": "Remove {{policy}} ({{client}}) from the call list.",
+    "restoreLine": "Put back",
+    "callRecords": "Call records",
+    "download": "Download call list",
+    "downloadFirst": "Download the call list before you mark it as sent",
+    "manual": "Manual",
+    "removed": "Removed",
+    "inBatch": "In batch {{batch}}",
+    "quoted": "Quoted {{quote}}",
+    "skipped": "Skipped",
+    "viewCalls": "Calls",
+    "recordOutcome": "Record outcome",
+    "openPolicy": "Open policy",
+    "back": "Back to Talkbot Calls",
+    "details": "Call list",
+    "createdBy": "Created",
+    "sentOn": "Sent to Talkbot",
+    "lastDownload": "Last download",
+    "lastDownloadValue": "{{at}} · {{count}} accounts",
+    "lastUpload": "Last upload",
+    "leftOut": "Left out",
+    "removedCount": "Accounts removed",
+    "cancelReason": "Cancellation reason",
+    "accounts": "Accounts",
+    "lineSearchHint": "Policy or client",
+    "allOutcomes": "All outcomes",
+    "lineStatus": "Line",
+    "allLines": "All accounts",
+    "onList": "On the list",
+    "noAccounts": "No accounts",
+    "uploads": "Uploads",
+    "history": "History",
+    "callsOf": "Calls of {{policy}}",
+    "cancel": "Cancel",
+    "all": "All",
+    "callBackOn": "Call back {{date}}",
+    "callsCount_one": "{{count}} call",
+    "callsCount_other": "{{count}} calls",
+    "new": {
+      "title": "New call list",
+      "create": "Create call list",
+      "created": "Call list created",
+      "required": "Required",
+      "datesWrong": "Expiry Date To cannot be before Expiry Date From",
+      "expiryFrom": "Expiry Date From",
+      "expiryTo": "Expiry Date To",
+      "insurer": "Insurance Company",
+      "productType": "Product Type",
+      "motor": "Motor Vehicle Insurance",
+      "salesPerson": "Sales person",
+      "source": "Source of business",
+      "recallOf": "Re-call accounts not reached on",
+      "none": "None",
+      "includeExpired": "Include expired policies still renewable",
+      "includeCallBack": "Include Call back",
+      "canBeCalled": "Accounts to call",
+      "accounts_one": "{{count}} account",
+      "accounts_other": "{{count}} accounts",
+      "leftOut": "Left out",
+      "noneLeftOut": "None"
+    },
+    "outcome": {
+      "title": "Record outcome",
+      "message": "Talkbot outcome of {{policy}} ({{client}}).",
+      "outcome": "Outcome",
+      "save": "Record outcome",
+      "date": "Date",
+      "remark": "Remark",
+      "remarkRequired": "Enter a remark for the outcome you record"
+    },
+    "upload": {
+      "title": "Upload Talkbot results",
+      "callList": "Call list",
+      "chooseList": "Choose the call list",
+      "noList": "No call list sent to Talkbot",
+      "help": "The Call Records export of the Talkbot platform, as it is.",
+      "upload": "Upload",
+      "otherTask": "Other Talkbot task",
+      "loadAnyway": "Load anyway"
     }
   }
 }

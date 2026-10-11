@@ -13,6 +13,7 @@ import { localizationErrors } from '../system-settings/service.js';
 import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
 import { sendSheet } from '../claims/docs.js';
 import * as auditSvc from '../audit/service.js';
+import { rederiveOpenLists } from '../talkbot/results.js';
 import { assertSettingsAllowed } from '../features/service.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
@@ -51,6 +52,8 @@ define({
       await setSetting(k, v, req.user.id);
     }
     await audit(req, { entity: 'settings', action: 'update', before, after: req.body.settings });
+    // new Talkbot outcome rules: the outcomes of the call lists still worked are derived again
+    if (changes.some(([k, v, b]) => k === 'talkbot.outcome_rules' && JSON.stringify(v) !== JSON.stringify(b))) await rederiveOpenLists(req.user);
     ok(res, withOwners(await getSettings()), 'Settings updated');
   },
 });

@@ -258,6 +258,20 @@ Object.assign(roleMenuPermissions, {
   },
 });
 
+// Talkbot Calls (Operations > Renewals, TIS-BRD-LEAD-09): opened with read:talkbot-calls (Sales and Operations personas,
+// the General Manager); IT AppSupport reads the renewal screens without it.
+const RENEWALS_WITHOUT_TALKBOT = ["Renewal Policy", "Renewal Batch", "Renewal Queue", "Retention Analytics", "At-Risk Policies", "Negotiations",
+  "Lapse Management", "Performance"].map((item) => `Renewals > ${item}`);
+roleMenuPermissions["tis-it-admin"].operations = [...roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Renewals"), ...RENEWALS_WITHOUT_TALKBOT];
+// Prospects and Lead Assignment by permission (RBAC v4): Finance reads prospects (read:leads); IT AppSupport has no
+// read:lead-assignment, so Lead Assignment is not in its menu.
+roleMenuPermissions["tis-it-admin"].operations = roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Sales & Marketing > Lead Assignment");
+roleMenuPermissions["tis-finance"].operations = [...(roleMenuPermissions["tis-finance"].operations || []), "Sales & Marketing > Prospects"];
+// Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
+// Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).
+const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
+["accounting", "tis-finance"].forEach((role) => { roleMenuPermissions[role].reports = [...roleMenuPermissions[role].reports, ...SALES_REPORTS]; });
+
 /** Roles of the signed-in user, from the login response stored by authService. */
 export const getUserRoles = () => {
   try {

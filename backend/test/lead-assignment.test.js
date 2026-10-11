@@ -152,6 +152,9 @@ describe('reassignment queue, bulk reassignment and team view', () => {
   });
 
   it('the daily job queues prospects still New after leads.assignment_sla_hours', async () => {
+    // the delivered values (TISPH: 72 hours on working time, seed 93_tisph_sales.sql and test/lead-tfs.test.js)
+    await setting('leads.assignment_sla_hours', 48);
+    await setting('leads.sla_working_time', false);
     await pool.query("UPDATE leads SET assigned_at = now() - interval '3 days' WHERE first_name = 'Robin3'");
     const out = await leadAssignmentSla();
     expect(out.queued).toBeGreaterThanOrEqual(1);

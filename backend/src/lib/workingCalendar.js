@@ -2,11 +2,12 @@
  * Working calendar of the business: the working days of the week (calendar.working_weekdays, 1 = Monday ... 7 = Sunday;
  * Monday to Friday by default) less the national public holidays of the Holiday master (Master > Configuration, type
  * holiday: Regular Holidays and Special Non-working Days; a Special Working Day stays a working day). Dates are ISO
- * yyyy-mm-dd business dates (lib/dates.js). Used by the renewal notice schedule, the renewal and claim service levels.
+ * yyyy-mm-dd business dates (lib/dates.js). Used by the renewal notice schedule, the renewal and claim service levels,
+ * the Talkbot call list of the day and the prospect assignment SLA (working hours).
  */
 import { many } from '../db/pool.js';
 import { getSetting } from './settings.js';
-import { addDays } from './dates.js';
+import { addDays, businessTimeZone, isoInZone } from './dates.js';
 
 const NON_WORKING = ['Regular Holiday', 'Special Non-working Day'];
 /** Longest run of non-working days searched for the next working day (a guard against an empty working week). */
@@ -73,4 +74,22 @@ export async function addWorkingDays(iso, n) {
 
 export async function workingDaysBetween(a, b) {
   return (await workingCalendar(a, b)).between(a, b);
+}
+
+/**
+ * Hours of working days between two instants: every hour that falls on a working day of the business time zone counts,
+ * the hours of days off do not (a prospect assigned on Friday morning reaches 72 hours on Wednesday morning).
+ */
+export async function workingHoursBetween(start, end) {
+  const from = new Date(start);
+  const to = new Date(end);
+  if (!(to > from)) return 0;
+  const tz = await businessTimeZone();
+  const cal = await workingCalendar(isoInZone(from, tz), isoInZone(to, tz));
+  let hours = 0;
+  for (let t = from.getTime(); t < to.getTime(); t += 3600000) {
+    const step = Math.min(3600000, to.getTime() - t);
+    if (cal.isWorking(isoInZone(new Date(t), tz))) hours += step / 3600000;
+  }
+  return hours;
 }
