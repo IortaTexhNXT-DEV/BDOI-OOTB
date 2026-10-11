@@ -90,7 +90,7 @@ export const roleMenuPermissions = {
     operations: OPERATIONS_PROCESSING,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     // distribution channels; the discount caps the promotions are checked against (write:discount-caps)
-    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps", "Insurance Management > Scheme Document Checklist"],
+    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps", "Insurance Management > Scheme Document Checklist", "Insurance Management > Motor Issuance Checklist"],
   },
   // Operations (Client Servicing): client servicing, endorsement requests, renewals, My Work, documents
   operations: {
@@ -217,8 +217,8 @@ const TIS_OPERATIONS = {
   commission: ["Commission Dashboard", "Sharing Schemes"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
-    // the document checklist of the scheme applications (Scheme Issuance)
-    "Insurance Management > Scheme Document Checklist",
+    // the document checklist of the scheme applications (Scheme Issuance) and of a Motor booking (placement slips)
+    "Insurance Management > Scheme Document Checklist", "Insurance Management > Motor Issuance Checklist",
     // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
     "Finance > Discount Caps", INTERFACE_MONITOR],
 };

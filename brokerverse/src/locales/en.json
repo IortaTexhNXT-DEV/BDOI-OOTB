@@ -9315,6 +9315,45 @@
       "statusPending": "Waiting for approval",
       "statusApproved": "Approved",
       "statusRejected": "Rejected"
+    },
+    "checklist": {
+      "title": "Motor issuance checklist",
+      "document": "Document",
+      "mandatory": "Mandatory",
+      "statusLabel": "Status",
+      "status": {
+        "pending": "Pending",
+        "received": "Received",
+        "waiver-requested": "Waiver requested",
+        "waived": "Waived"
+      },
+      "onFile": "On the client's KYC file",
+      "missing": "{{count}} mandatory missing",
+      "complete": "Complete",
+      "mode": {
+        "warn": "Warning only",
+        "off": "Not enforced"
+      },
+      "none": "No documents apply",
+      "receive": "Receive",
+      "receiveTitle": "Receive {{document}}",
+      "file": "File (PDF or image)",
+      "remark": "Remark (paper original on file)",
+      "received": "Document received",
+      "reason": "Reason",
+      "waiverReason": "Waiver reason",
+      "requestWaiver": "Request waiver",
+      "requestWaiverTitle": "Request the waiver of {{document}}",
+      "waiverRequested": "Waiver requested",
+      "approveWaiver": "Approve waiver",
+      "approveWaiverTitle": "Approve the waiver of {{document}}",
+      "waiverApproved": "Waiver approved",
+      "rejectWaiver": "Reject waiver",
+      "rejectWaiverTitle": "Reject the waiver of {{document}}",
+      "waiverRejected": "Waiver rejected",
+      "reopen": "Reopen",
+      "reopenTitle": "Reopen {{document}}",
+      "reopened": "Document reopened"
     }
   },
   "postingRules": {
@@ -13339,6 +13378,12 @@
         "section": "Insurance Management",
         "item": "scheme document",
         "help": "Documents a scheme application needs, by scheme type, KYC source and condition. A KYC item cannot be waived."
+      },
+      "motorChecklist": {
+        "title": "Motor Issuance Checklist",
+        "section": "Insurance Management",
+        "item": "motor issuance document",
+        "help": "Documents to have on file before a Motor policy is booked from its placement slip, by vehicle, insured, financing and condition. A mandatory document missing blocks the booking (placement.issuance_checklist_mode); a waiver needs a second user."
       },
       "repairShops": {
         "title": "Repair Shops",

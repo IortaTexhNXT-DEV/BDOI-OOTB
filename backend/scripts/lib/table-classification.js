@@ -69,6 +69,8 @@ export const TRANSACTION_TABLES = [
   // claim settlements (partial and final) and the claim communication log; the lock-in of a policy term (migrations 0501, 0503)
   'claim_settlements', 'claim_communications', 'policy_lock_ins',
   // dealer schemes (0600-0602): the scheme of a policy, scheme applications with their checklist and bookings uploads, TFS loan status, lock-in reviews and changes
+  // the Motor issuance checklist of a placement slip (0688)
+  'placement_checklist_items',
   'policy_schemes', 'scheme_applications', 'scheme_checklist_items', 'scheme_booking_batches', 'loan_status_batches', 'loan_status_history', 'lock_in_reviews', 'lock_in_changes',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
   // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open

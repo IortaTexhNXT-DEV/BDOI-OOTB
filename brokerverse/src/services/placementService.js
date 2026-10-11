@@ -80,6 +80,9 @@ const placementService = {
   // approval by a second user before the slip goes to the insurer (placement.send_requires_approval)
   requestApproval: async (id, remarks) => (await request("POST", `/placements/${enc(id)}/request-approval`, { remarks: remarks || undefined })).data,
   decideApproval: async (id, decision, note) => (await request("POST", `/placements/${enc(id)}/approval`, { decision, note: note || undefined })).data,
+  // Motor issuance checklist (placement.issuance_checklist_mode): documents before the booking, waivers by a second user
+  issuanceChecklist: async (id) => (await request("GET", `/placements/${enc(id)}/issuance-checklist`)).data,
+  checklistAction: async (id, itemId, action, body) => (await request("POST", `/placements/${enc(id)}/issuance-checklist/${enc(itemId)}/${action}`, body)).data,
   sendPlacement: (id, insurerIds) => request("POST", `/placements/${enc(id)}/send`, insurerIds ? { insurerIds } : {}),
   verifyPayment: (id, body) => request("POST", `/placements/${enc(id)}/verify-payment`, body),
   acknowledgePlacement: async (id, body) => (await request("POST", `/placements/${enc(id)}/acknowledge`, body)).data,

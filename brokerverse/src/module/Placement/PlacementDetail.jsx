@@ -25,6 +25,7 @@ import { RecordActivityLog } from "../../components/ActivityLog";
 import { printPdf } from "../../components/Print";
 import { Field, JourneyTimeline, PageHeader, ParticipantEditor, ParticipantsTable, StatusTag, formatDate, formatDateTime, participantProblem, riskLabel, usePlacementOptions } from "./shared";
 import { EpolicyDialog, SlipComparison } from "./EpolicyForm";
+import IssuanceChecklist from "./IssuanceChecklist";
 import "./index.scss";
 
 const WITH_INSURER = ["sent", "acknowledged"];
@@ -280,6 +281,8 @@ const PlacementDetail = () => {
           {p.check?.items && <><h4 className="mb-2">{t("placement.check.title")}</h4><SlipComparison check={p.check} /></>}
         </div>
       )}
+
+      {p.lob === "MOTOR" && p.source !== "scheme" && <IssuanceChecklist placement={p} userId={userId} notify={notify} />}
 
       <div className="placement-card">
         <h3 className="section-title">{t("placement.sections.security")} {p.isCoInsurance && <span className="co-chip">{t("placement.participants.coInsurance")}</span>}</h3>

@@ -162,7 +162,7 @@ export async function placeAndBook(api, body, { policyNumber = null, checker = n
 }
 /**
  * Placement slips sent without the approval of a second user (placement.send_requires_approval off, migration 0686)
- * and Motor placements booked without the issuance checklist (placement.issuance_checklist_mode off, migration 0687),
+ * and Motor placements booked without the issuance checklist (placement.issuance_checklist_mode off, migration 0688),
  * for suites that test what follows. test/placement-send-approval.test.js and test/motor-issuance-checklist.test.js
  * cover both controls on, as delivered.
  */

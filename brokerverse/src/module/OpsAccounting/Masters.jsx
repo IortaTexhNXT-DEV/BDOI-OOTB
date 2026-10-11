@@ -24,6 +24,8 @@ export const EndorsementTypes = page("endorsement-type", "endorsementTypes", "op
 export const ClaimDocumentChecklist = page("claim-document-requirement", "claimChecklist", "opsAcc.master", ["code", "lineOfBusiness", "claimType", "documentName", "required", "sortOrder"]);
 // the documents of a scheme application by scheme type, KYC source and condition (Scheme Issuance, TIS-BRD-SCHM-01)
 export const SchemeDocumentChecklist = page("scheme-document-checklist", "schemeChecklist", "opsAcc.master", ["code", "schemeType", "kycSource", "condition", "documentName", "kycItem", "required", "canWaive"]);
+// the documents before a Motor policy is booked from its placement slip, by vehicle, insured, financing and condition (GAP-QUOTE-23)
+export const MotorIssuanceChecklist = page("motor-issuance-checklist", "motorChecklist", "opsAcc.master", ["code", "documentName", "vehicleCondition", "customerType", "financing", "condition", "required", "canWaive"]);
 export const RepairShops = page("repair-shop", "repairShops", "opsAcc.master", ["code", "name", "city", "contactPerson", "phone", "accredited"]);
 export const Suppliers = page("supplier", "suppliers", "opsAcc.accounts", ["code", "name", "tin", "vatRegistered", "ewtCode", "paymentTermsDays", "expenseAccount"]);
 // sales activities (Master > Organization): the activity types and outcomes account executives choose when they log

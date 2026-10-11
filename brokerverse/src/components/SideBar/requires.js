@@ -170,6 +170,7 @@ export const screenRequires = {
   "/master/insurance/endorsement-types": [],
   "/master/insurance/claim-document-checklist": [],
   "/master/insurance/scheme-document-checklist": [],
+  "/master/insurance/motor-issuance-checklist": [],
   "/master/insurance/repair-shops": [],
   "/master/insurance/lead-sources": [],
   "/master/insurance/reason-codes": [],

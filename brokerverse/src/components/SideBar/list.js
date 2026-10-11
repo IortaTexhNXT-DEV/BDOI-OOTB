@@ -1092,6 +1092,8 @@ export const menuList = [
           { id: 36, name: "Endorsement Types", path: "/master/insurance/endorsement-types", includes: ["/master/insurance/endorsement-types"] },
           { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
           { id: 37, name: "Scheme Document Checklist", path: "/master/insurance/scheme-document-checklist", includes: ["/master/insurance/scheme-document-checklist"] },
+          // the documents before a Motor policy is booked from its placement slip (GAP-QUOTE-23)
+          { id: 38, name: "Motor Issuance Checklist", path: "/master/insurance/motor-issuance-checklist", includes: ["/master/insurance/motor-issuance-checklist"] },
           { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
           // the Source of a prospect and the coded reasons of decisions without a master of their own
           { id: 34, name: "Lead Sources", path: "/master/insurance/lead-sources", includes: ["/master/insurance/lead-sources"] },

@@ -30,6 +30,7 @@ import { findDocument, reserveKey, writeObject, safeKey } from '../uploads/stora
 import { premiumBreakdown } from '../quotations/premium.js';
 import { assertNotDeclined, assertReferralCleared } from '../product-configurator/underwriting.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
+import { assertIssuanceChecklist } from './issuanceChecklist.js';
 import { normaliseParticipants, writeParticipants, participantsOf, participantInputs, leadOf, legacyParticipantDetails } from './participants.js';
 import { getSlipRow, participantsFromOffers, riskFromSlip, assertParty, partyName } from './brokerSlips.js';
 
@@ -796,13 +797,15 @@ export async function bookPlacement(id, body, user) {
   const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
   const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
   await assertPaymentVerified(p);
+  // the documents of the Motor issuance checklist (placement.issuance_checklist_mode: block refuses, warn names them)
+  const checklist = await assertIssuanceChecklist(p);
   await assertKyc({ lob: p.lob, sources: [quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc, p.epolicy?.vehicle, extra.customerInfo, extra], clientId: p.client_id, leadId: p.lead_id });
   const r = await withTransaction((db) => bookInTx(db, p.id, body, user));
   const policy = await getPolicyRow(r.policyId);
   const schedule = await emailSchedule(policy.id, p);
   await notify({ userId: p.owner_user_id || user.id, type: 'info', title: 'Policy booked', message: `Policy ${policy.policy_number} (insurer policy ${p.epolicy?.insurerPolicyNumber}) was booked from placement slip ${p.placement_number}`,
     link: `/agent/policydetail/${policy.id}`, entity: 'policy', entityId: policy.id });
-  return { ...r, schedule, placement: await placementById(p.id) };
+  return { ...r, schedule, checklistWarnings: checklist.warnings, placement: await placementById(p.id) };
 }
 
 function listWhere(q) {

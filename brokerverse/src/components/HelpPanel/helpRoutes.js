@@ -121,6 +121,7 @@ export const HELP_ROUTES = [
   ["/master/finance/accounting-flow", "posting-configuration-configuration-approvals-posting-rules-account-determination"],
   ["/master/insurance/claim-document-checklist", "claim-documents"],
   ["/master/insurance/scheme-document-checklist", "dealer-programmes"],
+  ["/master/insurance/motor-issuance-checklist", "placement-slips"],
   ["/master/insurance/repair-shops", "motor-claim-repairs-and-letters-of-authority"],
   ["/master/insurance/short-period-rates", "cancel-a-policy-computed-return-premium"],
   ["/master/insurance/cancellation-reasons", "cancel-a-policy-computed-return-premium"],

@@ -17,6 +17,7 @@ differs from the slip, also need `write:policies`.
 | `placements.js` | Placement slips (`PS-`): raised (automatically on acceptance), slip PDF stored, sent with the slip attached, acknowledged, e-policy recorded, compared with the slip, checked (maker-checker), booked; decline and cancel. |
 | `participants.js` | Co-insurance participants shared by broker slips, quotations, placements and policies: one lead, shares total 100%, amounts split by share with the rounding remainder on the lead. |
 | `productLines.js` | The active products grouped by line of business (`GET /placements/product-lines`, read by the product picker of every screen where a product is chosen for a prospect, a quotation or a placement: line of business first, then its products), and the check that a product chosen for a line belongs to it (prospects, quotations, broker slips). |
+| `issuanceChecklist.js` | The Motor issuance checklist of a placement slip (GAP-QUOTE-23): the records of the Motor Issuance Checklist master that apply (brand new or used, individual or corporate, financed, transfer, CTPL), receipt by file or remark, waivers decided by a second user, and the gate at booking (`placement.issuance_checklist_mode`). |
 | `journey.js` | Which steps a product or line of business requires: the default of its business type (package / non-package, Product master; setting `placement.journey_by_business_type`), overridden by `placement.journey` (an entry for the product type, product code or name, or the line). |
 
 Statuses: broker slip `draft`, `submitted`, `responses-in`, `closed`, `cancelled`; placement:
@@ -37,7 +38,8 @@ to placements recorded before the chain; Record Issued Policy no longer exists.
 ## Main tables
 
 `broker_slips`, `insurer_offers`, `placements` (with the acknowledgement, the `epolicy` figures and file, the
-`check_result` of the comparison and the check decision), `risk_participants` (participants of any entity), and on
+`check_result` of the comparison and the check decision, the `send_approval_*` of the approval to send),
+`placement_checklist_items` (the Motor issuance checklist), `risk_participants` (participants of any entity), and on
 booking the policy tables (`policies`, `receivables` through the policies and receipts modules). The placement file and
 the e-policy are `documents` rows (entity `placement`).
 
@@ -68,7 +70,16 @@ the e-policy are `documents` rows (entity `placement`).
    the tolerance.
 6. Another user confirms the check, an approver accepts the differences with a reason, or the e-policy goes back to the
    lead insurer (`email.template.placement_discrepancy`) and the placement waits for a corrected one.
-7. `book` issues the policy through `policies/service.js#issuePolicy` (participants, bill or direct-bill commission,
+7. A Motor slip (not a scheme slip) carries the Motor issuance checklist (`GET /:id/issuance-checklist`), built from the
+   Motor Issuance Checklist master (Master > Insurance Management): sales invoice and delivery receipt of a brand-new
+   vehicle, OR/CR of a used one and its photos or inspection report from the minimum age, the government ID of an
+   individual, SEC / DTI registration and the authorised signatory of a corporate insured, the signed proposal form,
+   the loan and mortgagee details of a financed vehicle, the previous policy of a transfer, the documents of the CTPL
+   COC. A document is received with a file or a remark; a KYC document on the client's file counts; a waiver is
+   requested with the reason and decided by another user holding `approve:policies` (My Work > Approvals). At booking,
+   `placement.issuance_checklist_mode` block (delivered) refuses while a mandatory document is missing (code
+   `ISSUANCE_CHECKLIST`), warn books and returns the missing documents in `warnings` and the audit trail, off skips it.
+8. `book` issues the policy through `policies/service.js#issuePolicy` (participants, bill or direct-bill commission,
    journal, commission accrual, renewal link for a renewal quotation), ends the cover notes and queues the policy
    schedule with the e-policy to the client's e-mail (`email.template.policy_schedule`).
 
@@ -80,7 +91,7 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
 `placement.check_tolerance_pct`, `placement.check_maker_checker`, `placement.schedule_email_on_booking`,
 `placement.direct_document_products`, `placement.lob_keywords`, `placement.offer_validity_days`,
 `placement.payment_verification_required`, `placement.pdc_cover_before_cash`, `placement.send_requires_approval`,
-`placement.send_approval_roles`,
+`placement.send_approval_roles`, `placement.issuance_checklist_mode`,
 `placement.editable_statuses`, `placement.quote_statuses`, and the e-mail templates `email.template.broker_slip_request`,
 `email.template.placement_order`, `email.template.placement_discrepancy` and `email.template.policy_schedule`.
 
@@ -96,6 +107,8 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
 - A raised slip cannot be sent: it waits for the approval of a second user (`sendApproval.status` pending, or none yet:
   submit it), or it was rejected (`sendApproval.note`). The maker cannot approve it, nor a user without a role of
   `placement.send_approval_roles`.
+- A Motor booking is refused with code `ISSUANCE_CHECKLIST`: a mandatory document of the issuance checklist is neither
+  received, waived nor on the client's KYC file (a requested waiver still counts as missing until it is approved).
 - The check cannot be confirmed: the same user recorded the e-policy (maker-checker), or `GET /placements/:id/check`
   lists a difference beyond the tolerance.
 - The policy cannot be booked: the placement is not `checked`, the KYC items of `policy.kyc_required_fields` are
