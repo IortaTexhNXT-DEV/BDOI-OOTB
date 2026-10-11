@@ -77,6 +77,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
+| Sales & Marketing | Quotations and placement | Special | Change the fair market value of a Motor quotation away from the value less depreciation, with a reason |  |
+| Sales & Marketing | Quotations and placement | Special | Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |

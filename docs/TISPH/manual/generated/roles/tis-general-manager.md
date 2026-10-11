@@ -136,6 +136,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
+| Sales & Marketing | Quotations and placement | Special | Change the fair market value of a Motor quotation away from the value less depreciation, with a reason |  |
+| Sales & Marketing | Quotations and placement | Special | Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate |  |
 | Sales & Marketing | Quotations and placement | Special | Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Lead assignment | Create and edit | Maintain assignment rules and reassign prospects |  |

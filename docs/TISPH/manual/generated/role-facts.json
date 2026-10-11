@@ -1363,6 +1363,18 @@
      "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "Special",
+     "meaning": "Change the fair market value of a Motor quotation away from the value less depreciation, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
      "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
     },
     {
@@ -1376,6 +1388,12 @@
      "module": "Lead assignment",
      "level": "Create and edit",
      "meaning": "Maintain assignment rules and reassign prospects"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Lead assignment",
+     "level": "Special",
+     "meaning": "Endorse prospects as call-out leads of the telesales callers and keep call-out assignment rules (Team Leaders)"
     },
     {
      "area": "Sales & Marketing",
@@ -2354,6 +2372,18 @@
      "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "Special",
+     "meaning": "Change the fair market value of a Motor quotation away from the value less depreciation, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
      "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
     },
     {
@@ -2367,6 +2397,12 @@
      "module": "Lead assignment",
      "level": "Create and edit",
      "meaning": "Maintain assignment rules and reassign prospects"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Lead assignment",
+     "level": "Special",
+     "meaning": "Endorse prospects as call-out leads of the telesales callers and keep call-out assignment rules (Team Leaders)"
     },
     {
      "area": "Sales & Marketing",
@@ -4414,6 +4450,18 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the fair market value of a Motor quotation away from the value less depreciation, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -5538,6 +5586,18 @@
      "module": "Quotations and placement",
      "level": "Special",
      "meaning": "Extend the validity of a quotation once, within the longest validity"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the fair market value of a Motor quotation away from the value less depreciation, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate"
     },
     {
      "area": "Sales & Marketing",
@@ -11649,6 +11709,18 @@
      "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "Special",
+     "meaning": "Change the fair market value of a Motor quotation away from the value less depreciation, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
      "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
     },
     {
@@ -16670,6 +16742,20 @@
    "TIS General Manager"
   ],
   "manage:feature-entitlements": [],
+  "override:motor-fmv": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "override:quotation-rates": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "process:claims": [
    "TIS Operations Associate",
    "TIS Operations Officer",
@@ -17165,6 +17251,10 @@
   "write:bank-reconciliation": [
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting"
+  ],
+  "write:callout-endorsement": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head"
   ],
   "write:campaigns": [
    "TIS Sales Officer",

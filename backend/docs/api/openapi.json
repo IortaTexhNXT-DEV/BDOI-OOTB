@@ -95115,6 +95115,60 @@
         }
       }
     },
+    "/incentive/calculations/{batchId}/export": {
+      "get": {
+        "operationId": "getIncentiveCalculationsBatchIdExport",
+        "summary": "Export a batch to Excel: one sheet of caller lines (policies, NB, renewal, ANC, level, base, additional, recovery / adjustment, tax, total, remarks) and one of policies",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details > Export to Excel\n\nAccess: read:incentive, write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details > Export to Excel",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive"
+        ]
+      }
+    },
     "/incentive/calculations/{batchId}/pay": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdPay",
@@ -95276,6 +95330,457 @@
             }
           }
         }
+      }
+    },
+    "/incentive/calculations/{batchId}/policies": {
+      "get": {
+        "operationId": "getIncentiveCalculationsBatchIdPolicies",
+        "summary": "Policies tab of a telesales batch: every policy considered with NB / renewal, fully paid, commission settled, eligible date, net commission and status (filters callerId, status)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details > Policies\n\nAccess: read:incentive, write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "callerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "usr_5"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Counted"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "caller": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "fullyPaidOn": {
+                            "type": "string"
+                          },
+                          "commissionSettledOn": {
+                            "type": "string"
+                          },
+                          "eligibleOn": {
+                            "type": "string"
+                          },
+                          "netCommission": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "policyNumber": "POL-2026-004655",
+                      "caller": "Geralyn Ramos",
+                      "kind": "NB",
+                      "fullyPaidOn": "2026-09-30",
+                      "commissionSettledOn": "2026-10-05",
+                      "eligibleOn": "2026-10-05",
+                      "netCommission": 5318.79,
+                      "status": "Counted"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details > Policies",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive"
+        ]
+      }
+    },
+    "/incentive/calculations/{batchId}/policies/{policyId}/exclude": {
+      "post": {
+        "operationId": "postIncentiveCalculationsBatchIdPoliciesPolicyIdExclude",
+        "summary": "Exclude a counted policy with a reason (context incentive_exclude) and a remark while the batch is Calculated or Rejected; the caller is recalculated (MSG-TSI-036 to 038)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details > Policies\n\nAccess: write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "caller": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyNumber": "POL-2026-004655",
+                    "caller": "Geralyn Ramos",
+                    "message": "Policy POL-2026-004655 excluded; Geralyn Ramos recalculated"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details > Policies",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "TEX-GRAB",
+                "note": "Prospect of another caller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/calculations/{batchId}/policies/{policyId}/include": {
+      "post": {
+        "operationId": "postIncentiveCalculationsBatchIdPoliciesPolicyIdInclude",
+        "summary": "Include an excluded policy again while the batch is Calculated or Rejected; the caller is recalculated",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details > Policies\n\nAccess: write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "caller": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "policyNumber": "POL-2026-004655",
+                    "caller": "Geralyn Ramos",
+                    "message": "Policy POL-2026-004655 excluded; Geralyn Ramos recalculated"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details > Policies",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/incentive/calculations/{batchId}/recalculate": {
+      "post": {
+        "operationId": "postIncentiveCalculationsBatchIdRecalculate",
+        "summary": "Recalculate a Calculated or Rejected telesales batch: reads the policies again, keeps exclusions and adjustments",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details\n\nAccess: write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batchId": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "calculationDate": {
+                          "type": "string"
+                        },
+                        "programsIncluded": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "totalAmount": {
+                          "type": "integer"
+                        },
+                        "agentCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "agentName": {
+                                "type": "string"
+                              },
+                              "program": {
+                                "type": "string"
+                              },
+                              "target": {
+                                "type": "integer"
+                              },
+                              "achieved": {
+                                "type": "integer"
+                              },
+                              "achievementPercent": {
+                                "type": "integer"
+                              },
+                              "baseIncentive": {
+                                "type": "integer"
+                              },
+                              "adjustments": {
+                                "type": "integer"
+                              },
+                              "finalAmount": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "batchId": "CALC-2026-00001",
+                    "period": "August 2026",
+                    "calculationDate": "2026-09-01",
+                    "programsIncluded": [
+                      "INC-2026-002"
+                    ],
+                    "totalAmount": 61500,
+                    "agentCount": 3,
+                    "status": "Calculated",
+                    "details": [
+                      {
+                        "agentName": "Juan Dela Cruz",
+                        "program": "New Business Champion",
+                        "target": 20,
+                        "achieved": 18,
+                        "achievementPercent": 90,
+                        "baseIncentive": 13500,
+                        "adjustments": 0,
+                        "finalAmount": 13500,
+                        "status": "Calculated"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details",
+        "x-permissions": [
+          "write:incentive"
+        ]
       }
     },
     "/incentive/calculations/{batchId}/reject": {
@@ -96851,6 +97356,2221 @@
           "write:incentive",
           "read:profile"
         ]
+      }
+    },
+    "/incentive/telesales/callers/{callerId}": {
+      "put": {
+        "operationId": "putIncentiveTelesalesCallersCallerId",
+        "summary": "Change a caller row: To date (end of participation) or Team Leader",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Callers\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "callerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programId": {
+                          "type": "integer"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "teamLeaderId": {
+                          "type": "string"
+                        },
+                        "teamLeader": {
+                          "type": "string"
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "programId": 7,
+                    "userId": "usr_5",
+                    "name": "Geralyn Ramos",
+                    "code": "TS-014",
+                    "insuranceCompanyId": 4,
+                    "insurer": "Apex Assurance",
+                    "teamLeaderId": "usr_9",
+                    "teamLeader": "Marco Villanueva",
+                    "dateFrom": "2026-04-01",
+                    "dateTo": "2026-12-31",
+                    "status": "Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Callers",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dateTo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "dateTo": "2026-12-31"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/callers/{callerId}/disqualify": {
+      "post": {
+        "operationId": "postIncentiveTelesalesCallersCallerIdDisqualify",
+        "summary": "Disqualify a caller from a date with a reason (context incentive_disqualify) and a remark (approve:incentive; MSG-TSI-023, 024)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Callers\n\nAccess: approve:incentive",
+        "parameters": [
+          {
+            "name": "callerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programId": {
+                          "type": "integer"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "teamLeaderId": {
+                          "type": "string"
+                        },
+                        "teamLeader": {
+                          "type": "string"
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "disqualifiedFrom": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "programId": 7,
+                    "userId": "usr_5",
+                    "name": "Geralyn Ramos",
+                    "code": "TS-014",
+                    "insuranceCompanyId": 4,
+                    "insurer": "Apex Assurance",
+                    "teamLeaderId": "usr_9",
+                    "teamLeader": "Marco Villanueva",
+                    "dateFrom": "2026-04-01",
+                    "dateTo": null,
+                    "status": "Disqualified",
+                    "disqualifiedFrom": "2026-08-01"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Callers",
+        "x-permissions": [
+          "approve:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "date": "2026-08-01",
+                "reasonCode": "TDQ-GRAB",
+                "note": "Took over accounts of another caller"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/callers/{callerId}/reinstate": {
+      "post": {
+        "operationId": "postIncentiveTelesalesCallersCallerIdReinstate",
+        "summary": "Reinstate a disqualified caller with a remark (approve:incentive; never the user who disqualified the row)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Callers\n\nAccess: approve:incentive",
+        "parameters": [
+          {
+            "name": "callerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programId": {
+                          "type": "integer"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "teamLeaderId": {
+                          "type": "string"
+                        },
+                        "teamLeader": {
+                          "type": "string"
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {},
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "programId": 7,
+                    "userId": "usr_5",
+                    "name": "Geralyn Ramos",
+                    "code": "TS-014",
+                    "insuranceCompanyId": 4,
+                    "insurer": "Apex Assurance",
+                    "teamLeaderId": "usr_9",
+                    "teamLeader": "Marco Villanueva",
+                    "dateFrom": "2026-04-01",
+                    "dateTo": null,
+                    "status": "Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Callers",
+        "x-permissions": [
+          "approve:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "date": "2026-10-01",
+                "note": "Cleared after review"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/defaults": {
+      "get": {
+        "operationId": "getIncentiveTelesalesDefaults",
+        "summary": "Defaults of a new Telesales program (settings incentive.telesales.*): minimum policies, withholding tax %, ANC tier and production-excess tables, Motor products, next month",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs\n\nAccess: write:masters, read:incentive, approve:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "minPolicies": {
+                          "type": "integer"
+                        },
+                        "whtPct": {
+                          "type": "integer"
+                        },
+                        "excessMethod": {
+                          "type": "string"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "minPolicies": 15,
+                    "whtPct": 5,
+                    "excessMethod": "banded",
+                    "effectiveFrom": "2026-11-01",
+                    "products": [
+                      {
+                        "id": 2,
+                        "code": "MOTOR",
+                        "name": "Motor Vehicle Insurance"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs",
+        "x-permissions": [
+          "write:masters",
+          "read:incentive",
+          "approve:incentive"
+        ]
+      }
+    },
+    "/incentive/telesales/options": {
+      "get": {
+        "operationId": "getIncentiveTelesalesOptions",
+        "summary": "Users who may be callers (incentive.eligible_roles), Team Leaders (write:callout-endorsement) and insurance partners",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Callers\n\nAccess: write:masters, read:incentive, approve:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "teamLeaders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "callers": [
+                      {
+                        "id": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "code": "TS-014"
+                      }
+                    ],
+                    "teamLeaders": [
+                      {
+                        "id": "usr_9",
+                        "name": "Marco Villanueva"
+                      }
+                    ],
+                    "insurers": [
+                      {
+                        "id": 4,
+                        "name": "Apex Assurance"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Callers",
+        "x-permissions": [
+          "write:masters",
+          "read:incentive",
+          "approve:incentive"
+        ]
+      }
+    },
+    "/incentive/telesales/policies/{policyId}": {
+      "get": {
+        "operationId": "getIncentiveTelesalesPoliciesPolicyId",
+        "summary": "The telesales link of a policy: caller, call-out endorsement, NB / renewal, payment, commission settlement, eligible date, batch",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Related Records\n\nAccess: read:policies, read:incentive",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "telesales": {
+                          "type": "boolean"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "caller": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "endorsedOn": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "telesales": true,
+                    "policyNumber": "POL-2026-004655",
+                    "caller": "Geralyn Ramos",
+                    "kind": "NB",
+                    "endorsedOn": "2026-09-22",
+                    "label": "Telesales: Geralyn Ramos, call-out endorsed 22/09/2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Related Records",
+        "x-permissions": [
+          "read:policies",
+          "read:incentive"
+        ]
+      }
+    },
+    "/incentive/telesales/programs": {
+      "post": {
+        "operationId": "postIncentiveTelesalesPrograms",
+        "summary": "Create a Telesales program: version 1 in Draft (Motor products, minimum 1-999, withholding tax 0-100, effective from the first day of a month, tier and excess tables; MSG-TSI-001 to 019)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Add Program\n\nAccess: write:masters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programCode": {
+                          "type": "string"
+                        },
+                        "programName": {
+                          "type": "string"
+                        },
+                        "programType": {
+                          "type": "string"
+                        },
+                        "targetMetric": {
+                          "type": "string"
+                        },
+                        "calculationFrequency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "integer"
+                            },
+                            "effectiveFrom": {
+                              "type": "string"
+                            },
+                            "minPolicies": {
+                              "type": "integer"
+                            },
+                            "whtPct": {
+                              "type": "integer"
+                            },
+                            "products": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "displayStatus": {
+                              "type": "string"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "level": {
+                                    "type": "integer"
+                                  },
+                                  "ancFrom": {
+                                    "type": "integer"
+                                  },
+                                  "ancTo": {
+                                    "type": "number"
+                                  },
+                                  "nbAmount": {
+                                    "type": "integer"
+                                  },
+                                  "renewalAmount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "bands": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "band": {
+                                    "type": "integer"
+                                  },
+                                  "over": {
+                                    "type": "integer"
+                                  },
+                                  "upTo": {
+                                    "type": "integer"
+                                  },
+                                  "every": {
+                                    "type": "integer"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "open": {},
+                        "versions": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "teamLeader": {
+                                "type": "string"
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "versionLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "programCode": "TSI-2026-001",
+                    "programName": "Telesales Incentive Program",
+                    "programType": "Telesales",
+                    "targetMetric": "Average Net Commission (ANC)",
+                    "calculationFrequency": "Monthly",
+                    "status": "Active",
+                    "current": {
+                      "version": 1,
+                      "effectiveFrom": "2026-04-01",
+                      "minPolicies": 15,
+                      "whtPct": 5,
+                      "products": [
+                        2,
+                        3
+                      ],
+                      "displayStatus": "In force",
+                      "tiers": [
+                        {
+                          "level": 1,
+                          "ancFrom": 2500,
+                          "ancTo": 3999.99,
+                          "nbAmount": 300,
+                          "renewalAmount": 150
+                        }
+                      ],
+                      "bands": [
+                        {
+                          "band": 1,
+                          "over": 30,
+                          "upTo": 50,
+                          "every": 5,
+                          "amount": 2000
+                        }
+                      ]
+                    },
+                    "open": null,
+                    "versions": [],
+                    "callers": [
+                      {
+                        "id": 3,
+                        "userId": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "insurer": "Apex Assurance",
+                        "teamLeader": "Marco Villanueva",
+                        "dateFrom": "2026-04-01",
+                        "status": "Active"
+                      }
+                    ],
+                    "versionLabel": "v1 in force"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Add Program",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "programName": {
+                    "type": "string"
+                  },
+                  "products": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "minPolicies": {
+                    "type": "integer"
+                  },
+                  "whtPct": {
+                    "type": "integer"
+                  },
+                  "effectiveFrom": {
+                    "type": "string"
+                  },
+                  "changeReason": {},
+                  "tiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ancFrom": {
+                          "type": "integer"
+                        },
+                        "nbAmount": {
+                          "type": "integer"
+                        },
+                        "renewalAmount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "bands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "over": {
+                          "type": "integer"
+                        },
+                        "every": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "programName": "Telesales Incentive Program",
+                "products": [
+                  2,
+                  3
+                ],
+                "minPolicies": 18,
+                "whtPct": 5,
+                "effectiveFrom": "2026-04-01",
+                "tiers": [
+                  {
+                    "ancFrom": 2500,
+                    "nbAmount": 300,
+                    "renewalAmount": 150
+                  },
+                  {
+                    "ancFrom": 4000,
+                    "nbAmount": 500,
+                    "renewalAmount": 250
+                  }
+                ],
+                "bands": [
+                  {
+                    "over": 30,
+                    "every": 5,
+                    "amount": 2000
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/programs/{id}": {
+      "get": {
+        "operationId": "getIncentiveTelesalesProgramsId",
+        "summary": "A Telesales program with the version in force, the open version (Draft or Pending approval), every version (History) and its callers",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Edit\n\nAccess: write:masters, read:incentive, approve:incentive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programCode": {
+                          "type": "string"
+                        },
+                        "programName": {
+                          "type": "string"
+                        },
+                        "programType": {
+                          "type": "string"
+                        },
+                        "targetMetric": {
+                          "type": "string"
+                        },
+                        "calculationFrequency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "integer"
+                            },
+                            "effectiveFrom": {
+                              "type": "string"
+                            },
+                            "minPolicies": {
+                              "type": "integer"
+                            },
+                            "whtPct": {
+                              "type": "integer"
+                            },
+                            "products": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "displayStatus": {
+                              "type": "string"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "level": {
+                                    "type": "integer"
+                                  },
+                                  "ancFrom": {
+                                    "type": "integer"
+                                  },
+                                  "ancTo": {
+                                    "type": "number"
+                                  },
+                                  "nbAmount": {
+                                    "type": "integer"
+                                  },
+                                  "renewalAmount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "bands": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "band": {
+                                    "type": "integer"
+                                  },
+                                  "over": {
+                                    "type": "integer"
+                                  },
+                                  "upTo": {
+                                    "type": "integer"
+                                  },
+                                  "every": {
+                                    "type": "integer"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "open": {},
+                        "versions": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "teamLeader": {
+                                "type": "string"
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "versionLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "programCode": "TSI-2026-001",
+                    "programName": "Telesales Incentive Program",
+                    "programType": "Telesales",
+                    "targetMetric": "Average Net Commission (ANC)",
+                    "calculationFrequency": "Monthly",
+                    "status": "Active",
+                    "current": {
+                      "version": 1,
+                      "effectiveFrom": "2026-04-01",
+                      "minPolicies": 15,
+                      "whtPct": 5,
+                      "products": [
+                        2,
+                        3
+                      ],
+                      "displayStatus": "In force",
+                      "tiers": [
+                        {
+                          "level": 1,
+                          "ancFrom": 2500,
+                          "ancTo": 3999.99,
+                          "nbAmount": 300,
+                          "renewalAmount": 150
+                        }
+                      ],
+                      "bands": [
+                        {
+                          "band": 1,
+                          "over": 30,
+                          "upTo": 50,
+                          "every": 5,
+                          "amount": 2000
+                        }
+                      ]
+                    },
+                    "open": null,
+                    "versions": [],
+                    "callers": [
+                      {
+                        "id": 3,
+                        "userId": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "insurer": "Apex Assurance",
+                        "teamLeader": "Marco Villanueva",
+                        "dateFrom": "2026-04-01",
+                        "status": "Active"
+                      }
+                    ],
+                    "versionLabel": "v1 in force"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Edit",
+        "x-permissions": [
+          "write:masters",
+          "read:incentive",
+          "approve:incentive"
+        ]
+      },
+      "put": {
+        "operationId": "putIncentiveTelesalesProgramsId",
+        "summary": "Save draft: update the Draft version, or open the next version as a copy of the one in force with the changes (refused while a version is pending approval, MSG-TSI-026)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Edit\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programCode": {
+                          "type": "string"
+                        },
+                        "programName": {
+                          "type": "string"
+                        },
+                        "programType": {
+                          "type": "string"
+                        },
+                        "targetMetric": {
+                          "type": "string"
+                        },
+                        "calculationFrequency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "integer"
+                            },
+                            "effectiveFrom": {
+                              "type": "string"
+                            },
+                            "minPolicies": {
+                              "type": "integer"
+                            },
+                            "whtPct": {
+                              "type": "integer"
+                            },
+                            "products": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "displayStatus": {
+                              "type": "string"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "level": {
+                                    "type": "integer"
+                                  },
+                                  "ancFrom": {
+                                    "type": "integer"
+                                  },
+                                  "ancTo": {
+                                    "type": "number"
+                                  },
+                                  "nbAmount": {
+                                    "type": "integer"
+                                  },
+                                  "renewalAmount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "bands": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "band": {
+                                    "type": "integer"
+                                  },
+                                  "over": {
+                                    "type": "integer"
+                                  },
+                                  "upTo": {
+                                    "type": "integer"
+                                  },
+                                  "every": {
+                                    "type": "integer"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "open": {},
+                        "versions": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "teamLeader": {
+                                "type": "string"
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "versionLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "programCode": "TSI-2026-001",
+                    "programName": "Telesales Incentive Program",
+                    "programType": "Telesales",
+                    "targetMetric": "Average Net Commission (ANC)",
+                    "calculationFrequency": "Monthly",
+                    "status": "Active",
+                    "current": {
+                      "version": 1,
+                      "effectiveFrom": "2026-04-01",
+                      "minPolicies": 15,
+                      "whtPct": 5,
+                      "products": [
+                        2,
+                        3
+                      ],
+                      "displayStatus": "In force",
+                      "tiers": [
+                        {
+                          "level": 1,
+                          "ancFrom": 2500,
+                          "ancTo": 3999.99,
+                          "nbAmount": 300,
+                          "renewalAmount": 150
+                        }
+                      ],
+                      "bands": [
+                        {
+                          "band": 1,
+                          "over": 30,
+                          "upTo": 50,
+                          "every": 5,
+                          "amount": 2000
+                        }
+                      ]
+                    },
+                    "open": null,
+                    "versions": [],
+                    "callers": [
+                      {
+                        "id": 3,
+                        "userId": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "insurer": "Apex Assurance",
+                        "teamLeader": "Marco Villanueva",
+                        "dateFrom": "2026-04-01",
+                        "status": "Active"
+                      }
+                    ],
+                    "versionLabel": "v1 in force"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Edit",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "programName": {
+                    "type": "string"
+                  },
+                  "products": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "minPolicies": {
+                    "type": "integer"
+                  },
+                  "whtPct": {
+                    "type": "integer"
+                  },
+                  "effectiveFrom": {
+                    "type": "string"
+                  },
+                  "changeReason": {
+                    "type": "string"
+                  },
+                  "tiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ancFrom": {
+                          "type": "integer"
+                        },
+                        "nbAmount": {
+                          "type": "integer"
+                        },
+                        "renewalAmount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "bands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "over": {
+                          "type": "integer"
+                        },
+                        "every": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "programName": "Telesales Incentive Program",
+                "products": [
+                  2,
+                  3
+                ],
+                "minPolicies": 18,
+                "whtPct": 5,
+                "effectiveFrom": "2026-11-01",
+                "changeReason": "Agreed with management on 30/09/2026",
+                "tiers": [
+                  {
+                    "ancFrom": 2500,
+                    "nbAmount": 300,
+                    "renewalAmount": 150
+                  },
+                  {
+                    "ancFrom": 4000,
+                    "nbAmount": 500,
+                    "renewalAmount": 250
+                  }
+                ],
+                "bands": [
+                  {
+                    "over": 30,
+                    "every": 5,
+                    "amount": 2000
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/programs/{id}/callers": {
+      "post": {
+        "operationId": "postIncentiveTelesalesProgramsIdCallers",
+        "summary": "Add a caller: an active user of an incentive role, the insurance partner, a Team Leader with write:callout-endorsement, From / To (MSG-TSI-020 to 022)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Callers\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programId": {
+                          "type": "integer"
+                        },
+                        "userId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "insuranceCompanyId": {
+                          "type": "integer"
+                        },
+                        "insurer": {
+                          "type": "string"
+                        },
+                        "teamLeaderId": {
+                          "type": "string"
+                        },
+                        "teamLeader": {
+                          "type": "string"
+                        },
+                        "dateFrom": {
+                          "type": "string"
+                        },
+                        "dateTo": {},
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "programId": 7,
+                    "userId": "usr_5",
+                    "name": "Geralyn Ramos",
+                    "code": "TS-014",
+                    "insuranceCompanyId": 4,
+                    "insurer": "Apex Assurance",
+                    "teamLeaderId": "usr_9",
+                    "teamLeader": "Marco Villanueva",
+                    "dateFrom": "2026-04-01",
+                    "dateTo": null,
+                    "status": "Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Callers",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "insuranceCompanyId": {
+                    "type": "integer"
+                  },
+                  "teamLeaderId": {
+                    "type": "string"
+                  },
+                  "dateFrom": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "userId": "usr_5",
+                "insuranceCompanyId": 4,
+                "teamLeaderId": "usr_9",
+                "dateFrom": "2026-04-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/telesales/programs/{id}/recall": {
+      "post": {
+        "operationId": "postIncentiveTelesalesProgramsIdRecall",
+        "summary": "Recall the version pending approval (back to Draft)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Edit\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programCode": {
+                          "type": "string"
+                        },
+                        "programName": {
+                          "type": "string"
+                        },
+                        "programType": {
+                          "type": "string"
+                        },
+                        "targetMetric": {
+                          "type": "string"
+                        },
+                        "calculationFrequency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "integer"
+                            },
+                            "effectiveFrom": {
+                              "type": "string"
+                            },
+                            "minPolicies": {
+                              "type": "integer"
+                            },
+                            "whtPct": {
+                              "type": "integer"
+                            },
+                            "products": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "displayStatus": {
+                              "type": "string"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "level": {
+                                    "type": "integer"
+                                  },
+                                  "ancFrom": {
+                                    "type": "integer"
+                                  },
+                                  "ancTo": {
+                                    "type": "number"
+                                  },
+                                  "nbAmount": {
+                                    "type": "integer"
+                                  },
+                                  "renewalAmount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "bands": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "band": {
+                                    "type": "integer"
+                                  },
+                                  "over": {
+                                    "type": "integer"
+                                  },
+                                  "upTo": {
+                                    "type": "integer"
+                                  },
+                                  "every": {
+                                    "type": "integer"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "open": {},
+                        "versions": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "teamLeader": {
+                                "type": "string"
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "versionLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "programCode": "TSI-2026-001",
+                    "programName": "Telesales Incentive Program",
+                    "programType": "Telesales",
+                    "targetMetric": "Average Net Commission (ANC)",
+                    "calculationFrequency": "Monthly",
+                    "status": "Active",
+                    "current": {
+                      "version": 1,
+                      "effectiveFrom": "2026-04-01",
+                      "minPolicies": 15,
+                      "whtPct": 5,
+                      "products": [
+                        2,
+                        3
+                      ],
+                      "displayStatus": "In force",
+                      "tiers": [
+                        {
+                          "level": 1,
+                          "ancFrom": 2500,
+                          "ancTo": 3999.99,
+                          "nbAmount": 300,
+                          "renewalAmount": 150
+                        }
+                      ],
+                      "bands": [
+                        {
+                          "band": 1,
+                          "over": 30,
+                          "upTo": 50,
+                          "every": 5,
+                          "amount": 2000
+                        }
+                      ]
+                    },
+                    "open": null,
+                    "versions": [],
+                    "callers": [
+                      {
+                        "id": 3,
+                        "userId": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "insurer": "Apex Assurance",
+                        "teamLeader": "Marco Villanueva",
+                        "dateFrom": "2026-04-01",
+                        "status": "Active"
+                      }
+                    ],
+                    "versionLabel": "v1 in force"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Edit",
+        "x-permissions": [
+          "write:masters"
+        ]
+      }
+    },
+    "/incentive/telesales/programs/{id}/submit": {
+      "post": {
+        "operationId": "postIncentiveTelesalesProgramsIdSubmit",
+        "summary": "Submit the Draft version for approval on Configuration Approvals (change reason from version 2; decided with approve:incentive, never by its maker)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Incentive Programs > Edit\n\nAccess: write:masters",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "programCode": {
+                          "type": "string"
+                        },
+                        "programName": {
+                          "type": "string"
+                        },
+                        "programType": {
+                          "type": "string"
+                        },
+                        "targetMetric": {
+                          "type": "string"
+                        },
+                        "calculationFrequency": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "current": {
+                          "type": "object",
+                          "properties": {
+                            "version": {
+                              "type": "integer"
+                            },
+                            "effectiveFrom": {
+                              "type": "string"
+                            },
+                            "minPolicies": {
+                              "type": "integer"
+                            },
+                            "whtPct": {
+                              "type": "integer"
+                            },
+                            "products": {
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              }
+                            },
+                            "displayStatus": {
+                              "type": "string"
+                            },
+                            "tiers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "level": {
+                                    "type": "integer"
+                                  },
+                                  "ancFrom": {
+                                    "type": "integer"
+                                  },
+                                  "ancTo": {
+                                    "type": "number"
+                                  },
+                                  "nbAmount": {
+                                    "type": "integer"
+                                  },
+                                  "renewalAmount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "bands": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "band": {
+                                    "type": "integer"
+                                  },
+                                  "over": {
+                                    "type": "integer"
+                                  },
+                                  "upTo": {
+                                    "type": "integer"
+                                  },
+                                  "every": {
+                                    "type": "integer"
+                                  },
+                                  "amount": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "open": {},
+                        "versions": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "callers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "teamLeader": {
+                                "type": "string"
+                              },
+                              "dateFrom": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "versionLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "programCode": "TSI-2026-001",
+                    "programName": "Telesales Incentive Program",
+                    "programType": "Telesales",
+                    "targetMetric": "Average Net Commission (ANC)",
+                    "calculationFrequency": "Monthly",
+                    "status": "Active",
+                    "current": {
+                      "version": 1,
+                      "effectiveFrom": "2026-04-01",
+                      "minPolicies": 15,
+                      "whtPct": 5,
+                      "products": [
+                        2,
+                        3
+                      ],
+                      "displayStatus": "In force",
+                      "tiers": [
+                        {
+                          "level": 1,
+                          "ancFrom": 2500,
+                          "ancTo": 3999.99,
+                          "nbAmount": 300,
+                          "renewalAmount": 150
+                        }
+                      ],
+                      "bands": [
+                        {
+                          "band": 1,
+                          "over": 30,
+                          "upTo": 50,
+                          "every": 5,
+                          "amount": 2000
+                        }
+                      ]
+                    },
+                    "open": null,
+                    "versions": [],
+                    "callers": [
+                      {
+                        "id": 3,
+                        "userId": "usr_5",
+                        "name": "Geralyn Ramos",
+                        "insurer": "Apex Assurance",
+                        "teamLeader": "Marco Villanueva",
+                        "dateFrom": "2026-04-01",
+                        "status": "Active"
+                      }
+                    ],
+                    "versionLabel": "v1 in force"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Incentive Programs > Edit",
+        "x-permissions": [
+          "write:masters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "changeReason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "changeReason": "Agreed with management on 30/09/2026"
+              }
+            }
+          }
+        }
       }
     },
     "/insurer-integration/claim-status/import": {
@@ -103547,6 +106267,204 @@
           "read:leads",
           "read:lead-assignment"
         ]
+      }
+    },
+    "/lead-assignment/callout/endorse": {
+      "post": {
+        "operationId": "postLeadAssignmentCalloutEndorse",
+        "summary": "Endorse prospects as call-out leads of their callers (the caller's Team Leader or a holder of approve:incentive); prospects of another team are skipped with the reason (MSG-TSI-029, 031)",
+        "tags": [
+          "Lead assignment"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Endorse as call-out lead\n\nAccess: write:callout-endorsement",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "endorsed": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "leadNumber": {
+                                "type": "string"
+                              },
+                              "caller": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "endorsed": [
+                      {
+                        "leadNumber": "LD-2026-95102",
+                        "caller": "Geralyn Ramos"
+                      }
+                    ],
+                    "skipped": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Lead Assignment > Endorse as call-out lead",
+        "x-permissions": [
+          "write:callout-endorsement"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "leadIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "leadIds": [
+                  "ld_1"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lead-assignment/callout/withdraw": {
+      "post": {
+        "operationId": "postLeadAssignmentCalloutWithdraw",
+        "summary": "Withdraw the call-out endorsement of prospects without a quotation, with a reason (MSG-TSI-030)",
+        "tags": [
+          "Lead assignment"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Withdraw endorsement\n\nAccess: write:callout-endorsement",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "withdrawn": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "leadNumber": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "skipped": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "withdrawn": [
+                      {
+                        "leadNumber": "LD-2026-95102"
+                      }
+                    ],
+                    "skipped": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Lead Assignment > Withdraw endorsement",
+        "x-permissions": [
+          "write:callout-endorsement"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "leadIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "leadIds": [
+                  "ld_1"
+                ],
+                "reason": "Handed to the wrong caller"
+              }
+            }
+          }
+        }
       }
     },
     "/lead-assignment/history/{leadId}": {
@@ -149028,7 +151946,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings, read:commission-rules, read:sharing-schemes, approve:commission-rules, approve:sharing-schemes",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings, read:commission-rules, read:sharing-schemes, approve:commission-rules, approve:sharing-schemes, approve:incentive",
         "parameters": [
           {
             "name": "status",
@@ -149139,7 +152057,8 @@
           "read:commission-rules",
           "read:sharing-schemes",
           "approve:commission-rules",
-          "approve:sharing-schemes"
+          "approve:sharing-schemes",
+          "approve:incentive"
         ]
       }
     },
@@ -149150,7 +152069,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings, read:commission-rules, read:sharing-schemes, approve:commission-rules, approve:sharing-schemes",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: read:journal-vouchers, read:masters, read:settings, read:commission-rules, read:sharing-schemes, approve:commission-rules, approve:sharing-schemes, approve:incentive",
         "parameters": [
           {
             "name": "changeId",
@@ -149255,7 +152174,8 @@
           "read:commission-rules",
           "read:sharing-schemes",
           "approve:commission-rules",
-          "approve:sharing-schemes"
+          "approve:sharing-schemes",
+          "approve:incentive"
         ]
       }
     },
@@ -149266,7 +152186,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules, approve:commission-rules, approve:sharing-schemes",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules, approve:commission-rules, approve:sharing-schemes, approve:incentive",
         "parameters": [
           {
             "name": "changeId",
@@ -149367,7 +152287,8 @@
         "x-permissions": [
           "approve:posting-rules",
           "approve:commission-rules",
-          "approve:sharing-schemes"
+          "approve:sharing-schemes",
+          "approve:incentive"
         ],
         "requestBody": {
           "required": true,
@@ -149396,7 +152317,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules, approve:commission-rules, approve:sharing-schemes",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: approve:posting-rules, approve:commission-rules, approve:sharing-schemes, approve:incentive",
         "parameters": [
           {
             "name": "changeId",
@@ -149497,7 +152418,8 @@
         "x-permissions": [
           "approve:posting-rules",
           "approve:commission-rules",
-          "approve:sharing-schemes"
+          "approve:sharing-schemes",
+          "approve:incentive"
         ],
         "requestBody": {
           "required": true,
@@ -149526,7 +152448,7 @@
         "tags": [
           "Posting Rules"
         ],
-        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: write:settings, write:masters, write:posting-rules, write:commission-rules, write:sharing-schemes, approve:commission-rules, approve:sharing-schemes",
+        "description": "Front-end touchpoint: Master > Finance > Posting Rules > Approvals\n\nAccess: write:settings, write:masters, write:posting-rules, write:commission-rules, write:sharing-schemes, approve:commission-rules, approve:sharing-schemes, approve:incentive",
         "parameters": [
           {
             "name": "changeId",
@@ -149631,7 +152553,8 @@
           "write:commission-rules",
           "write:sharing-schemes",
           "approve:commission-rules",
-          "approve:sharing-schemes"
+          "approve:sharing-schemes",
+          "approve:incentive"
         ]
       }
     },
@@ -170205,6 +173128,187 @@
         "x-permissions": [
           "read:quotations"
         ]
+      }
+    },
+    "/quotations/motor-rating": {
+      "post": {
+        "operationId": "postQuotationsMotorRating",
+        "summary": "Motor rating of a draft quotation (PROD-12): default issuing rates (commission rule, motor tariff, standard), the reference value and the FMV less depreciation, the depreciation options, the excess, and whether the user may change rates or the FMV",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Coverage details\n\nAccess: write:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "fmv": {
+                          "type": "object",
+                          "properties": {
+                            "referenceValue": {
+                              "type": "integer"
+                            },
+                            "referenceBasis": {
+                              "type": "string"
+                            },
+                            "depreciationPct": {
+                              "type": "integer"
+                            },
+                            "computedFmv": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "depreciationOptions": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "rates": {
+                          "type": "object",
+                          "properties": {
+                            "OD": {
+                              "type": "integer"
+                            },
+                            "AON": {
+                              "type": "number"
+                            },
+                            "source": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "pct": {
+                              "type": "integer"
+                            },
+                            "basis": {
+                              "type": "string"
+                            },
+                            "minimum": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "canChangeRates": {
+                          "type": "boolean"
+                        },
+                        "canEditFmv": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "fmv": {
+                      "referenceValue": 1000000,
+                      "referenceBasis": "reference",
+                      "depreciationPct": 10,
+                      "computedFmv": 900000
+                    },
+                    "depreciationOptions": [
+                      8,
+                      10,
+                      15,
+                      20
+                    ],
+                    "rates": {
+                      "OD": 2,
+                      "AON": 0.5,
+                      "source": "rule"
+                    },
+                    "excess": {
+                      "pct": 5,
+                      "basis": "sum-insured",
+                      "minimum": 0,
+                      "amount": 45000
+                    },
+                    "canChangeRates": false,
+                    "canEditFmv": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Coverage details",
+        "x-permissions": [
+          "write:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "leadRefId": {
+                    "type": "string"
+                  },
+                  "productId": {
+                    "type": "integer"
+                  },
+                  "insuranceCompanyId": {
+                    "type": "integer"
+                  },
+                  "vehicleType": {
+                    "type": "string"
+                  },
+                  "fmvRating": {
+                    "type": "object",
+                    "properties": {
+                      "referenceValue": {
+                        "type": "integer"
+                      },
+                      "depreciationPct": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "leadRefId": "ld_1",
+                "productId": 1,
+                "insuranceCompanyId": 1,
+                "vehicleType": "private_cars",
+                "fmvRating": {
+                  "referenceValue": 1000000,
+                  "depreciationPct": 10
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/quotations/motor-tariff": {
