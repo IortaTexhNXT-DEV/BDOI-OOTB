@@ -32,6 +32,8 @@ const OPERATIONS_ALL = [
   // fleet schedules and marine open covers (read:fleet / read:marine; processing and operations also write)
   "Fleet Schedules",
   "Marine Open Covers",
+  // monthly Credit Life batches of the financing bank (read:credit-life; Operations and the Processing Team also write)
+  "Credit Life",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -263,7 +265,7 @@ Object.assign(roleMenuPermissions, {
     // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
     // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine); maintains and approves the Scheme
     // Master and the promotions (TISPH decision of 11 Oct 2026, GAP-SALES-17)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities")],
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers", "Credit Life"), ...salesMarketingWithout("Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance", ...INCENTIVE_READER],
     commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
@@ -314,7 +316,7 @@ Object.assign(roleMenuPermissions["tis-finance"], {
 });
 // Sales reports (Reports > Operational Reports, TIS-BRD-RPT-SLS-01..04): every role with Operational Reports sees them;
 // Finance, which has only some operational reports, gets them too (report catalogue roles, backend migration 0462).
-const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing"].map((item) => `Operational Reports > ${item}`);
+const SALES_REPORTS = ["APR Operation Report", "Production per Line", "Agent Pipeline", "Renewal Notice Listing", "CLI Generated Report"].map((item) => `Operational Reports > ${item}`);
 ["accounting", "tis-finance"].forEach((role) => { roleMenuPermissions[role].reports = [...roleMenuPermissions[role].reports, ...SALES_REPORTS]; });
 // the report catalogue gives TIS Finance the dealer production report as well (report_definitions roles)
 roleMenuPermissions["tis-finance"].reports.push("Operational Reports > Dealer Production");

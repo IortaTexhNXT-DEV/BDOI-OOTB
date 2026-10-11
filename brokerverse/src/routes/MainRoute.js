@@ -371,6 +371,7 @@ import SchemeIssuance from "../module/Sales/SchemeIssuance";
 import SchemeApplication from "../module/Sales/SchemeApplication";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
+import CreditLife from "../module/Distribution/CreditLife";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
 import Campaigns from "../module/Distribution/Campaigns";
 import ReportBuilder from "../module/Distribution/ReportBuilder";
@@ -1794,6 +1795,8 @@ const Maincomponent = () => {
           <Route path="/operations/fleet-schedules/:id" element={<FleetSchedules />} />
           <Route path="/operations/open-covers" element={<OpenCovers />} />
           <Route path="/operations/open-covers/:id" element={<OpenCovers />} />
+          <Route path="/operations/credit-life" element={<CreditLife />} />
+          <Route path="/operations/credit-life/:id" element={<CreditLife />} />
           <Route path="/reports/builder" element={<ReportBuilder />} />
 
           {/* Any other address inside the application */}

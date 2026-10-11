@@ -237,6 +237,23 @@ for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) 
 // Operations maintains the client KYC (TISPH decision of 11 Oct 2026, migration 0687, GAP-POLICY-09): identification,
 // signatories, beneficial owners and KYC documents of a client, without the other client edits of write:clients
 for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('client-kyc:write');
+// Parcel / Courier open covers (migration 0675, FRS PJRN-09 3.3 default grants): Sales uploads, adds, cancels and prints
+// parcel certificates (write:parcel-certificates) and no longer sets up, endorses or bills open covers; Operations and
+// the Processing Team do everything but approve; the Accounting Manager approves endorsements and reversals. TISPH
+// personas (proposal until TISPH names the users): TIS Finance and the General Manager approve.
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head']) ROLE_PERMS[role] = [...ROLE_PERMS[role].filter((p) => p !== 'marine'), 'marine:read'];
+const PARCEL_PERMS = { sales: ['parcel-certificates:write'], processing: ['parcel-certificates:write'], operations: ['parcel-certificates:write'],
+  'accounting-manager': ['marine:read', 'marine:approve'], 'tis-sales-associate': ['parcel-certificates:write'], 'tis-sales-officer': ['parcel-certificates:write'],
+  'tis-sales-unit-head': ['parcel-certificates:write'], 'tis-ops-associate': ['parcel-certificates:write'], 'tis-ops-officer': ['parcel-certificates:write'],
+  'tis-ops-unit-head': ['parcel-certificates:write'], 'tis-finance': ['marine:read', 'marine:approve'], 'tis-general-manager': ['parcel-certificates:write', 'marine:approve'] };
+for (const [role, items] of Object.entries(PARCEL_PERMS)) ROLE_PERMS[role].push(...items);
+// Credit Life batches (migration 0680, PJRN-01, PJRN-02): Operations and the Processing Team run the monthly batches,
+// Sales reads them; TISPH personas (proposal until TISPH names the users): the Operations personas run them, the Sales
+// personas and the General Manager read them.
+const CREDIT_LIFE_PERMS = { processing: ['credit-life'], operations: ['credit-life'], sales: ['credit-life:read'], 'tis-ops-associate': ['credit-life'], 'tis-ops-officer': ['credit-life'],
+  'tis-ops-unit-head': ['credit-life'], 'tis-sales-associate': ['credit-life:read'], 'tis-sales-officer': ['credit-life:read'], 'tis-sales-unit-head': ['credit-life:read'],
+  'tis-general-manager': ['credit-life:read'] };
+for (const [role, items] of Object.entries(CREDIT_LIFE_PERMS)) ROLE_PERMS[role].push(...items);
 // Motor rating (migration 0615, PROD-12): changing a peril rate away from the issuing rate and the FMV away from the
 // value less depreciation is for the internal users who rate (Officers and Unit Heads of Sales and Operations, the
 // General Manager), never the associates; the broker roles keep what they could do.

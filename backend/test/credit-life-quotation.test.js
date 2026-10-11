@@ -50,12 +50,12 @@ describe('Credit Life applicability (QUOT-01)', () => {
 });
 
 describe('Credit Life eligibility (QUOT-06, CR-03)', () => {
-  it('age: 64 accepted, 65 and 66 refused', async () => {
-    expect((await associate('post', '/quotations').send(cl({ borrowerBirthDate: bornYearsAgo(64) }))).status).toBe(201);
-    for (const years of [65, 66]) {
+  it('age: 64 and 65 accepted (65 inclusive, BRD QUOT-06 / PJRN-01), 66 refused', async () => {
+    for (const years of [64, 65]) expect((await associate('post', '/quotations').send(cl({ borrowerBirthDate: bornYearsAgo(years) }))).status, String(years)).toBe(201);
+    for (const years of [66, 70]) {
       const r = await associate('post', '/quotations').send(cl({ borrowerBirthDate: bornYearsAgo(years) }));
       expect(r.status).toBe(400);
-      expect(r.body.errors[0].message).toContain('excludes borrowers aged 65 and over');
+      expect(r.body.errors[0].message).toContain('Credit Life covers borrowers aged up to 65');
     }
     expect(ageOn('1961-10-11', '2026-10-10')).toBe(64);
     expect(ageOn('1961-10-10', '2026-10-10')).toBe(65);

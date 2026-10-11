@@ -276,6 +276,13 @@ export const menuList = [
         includes: ["/operations/open-covers"],
         permissions: ["read:marine"],
       },
+      // monthly Credit Life batches of the financing bank, master policies and certificates of cover (PJRN-01, PJRN-02)
+      {
+        name: "Credit Life",
+        path: "/operations/credit-life",
+        includes: ["/operations/credit-life"],
+        permissions: ["read:credit-life"],
+      },
 
       {
         name: "Claims",
@@ -896,6 +903,14 @@ export const menuList = [
             name: "Renewal Notice Listing",
             path: "/reports/run/renewal-notice-listing",
             includes: ["/reports/run/renewal-notice-listing"],
+            permissions: ["read:reports"],
+          },
+          {
+            // Credit Life certificates generated from the financing bank's batches (TIS-BRD-RPT-OPS-01, CR-14)
+            id: 11,
+            name: "CLI Generated Report",
+            path: "/reports/run/cli-generated",
+            includes: ["/reports/run/cli-generated"],
             permissions: ["read:reports"],
           },
         ],

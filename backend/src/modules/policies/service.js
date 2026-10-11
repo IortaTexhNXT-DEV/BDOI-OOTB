@@ -227,7 +227,8 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
  * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
  * is returned.
  */
-export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null, split = null, payerClientId = null }) {
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null, split = null, payerClientId = null,
+  basis = null, serviceFee = 0 }) {
   const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
   if (policy?.billing_mode === 'direct') {
@@ -237,7 +238,7 @@ export async function createReceivable(db, { policyId, amount, source = 'policy'
   }
   const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
   // payerClientId: the bill is addressed to another party than the insured (a dealer paying the premium)
-  return financeReceivable(db, { policy: payerClientId ? { ...policy, client_id: payerClientId } : policy, amount: round2(amount), breakdown, source, reference, date, user, split });
+  return financeReceivable(db, { policy: payerClientId ? { ...policy, client_id: payerClientId } : policy, amount: round2(amount), breakdown, source, reference, date, user, split, basis, serviceFee });
 }
 
 /**
