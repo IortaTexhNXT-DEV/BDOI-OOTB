@@ -527,7 +527,9 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'incentives', name: 'Incentives', module: 'Accounts', tier: P1,
     description: 'Telesales incentive programmes, calculation with approval, statements and reports',
-    requirements: ['TIS-BRD-COMM-08'],
+    requirements: ['TIS-BRD-COMM-08', 'FR-TSI-001', 'FR-TSI-002', 'FR-TSI-003', 'FR-TSI-004', 'FR-TSI-005', 'FR-TSI-010', 'FR-TSI-011', 'FR-TSI-020', 'FR-TSI-021', 'FR-TSI-022',
+      'FR-TSI-030', 'FR-TSI-031', 'FR-TSI-032', 'FR-TSI-033', 'FR-TSI-034', 'FR-TSI-035', 'FR-TSI-036', 'FR-TSI-037', 'FR-TSI-040', 'FR-TSI-041', 'FR-TSI-042', 'FR-TSI-043'],
+    jobs: ['telesales-incentive-calc'],
     menus: ['Accounts > Incentive > My Programs', 'Accounts > Incentive > Calculations', 'Accounts > Incentive > Approvals', 'Accounts > Incentive > Statement',
       'Accounts > Incentive > Reports', 'Master > Finance > Incentive Programs'],
   }),

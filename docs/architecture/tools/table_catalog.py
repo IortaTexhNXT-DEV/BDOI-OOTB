@@ -200,6 +200,11 @@ TABLES = {
     'incentive_programs': ('incentive', 'incentive', 'Incentive programmes (metric, targets, tiers, eligibility)', 'REF'),
     'incentive_calculations': ('incentive', 'incentive', 'Incentive calculation batches with maker-checker and payment', 'FIN'),
     'incentive_results': ('incentive', 'incentive', 'Incentive results and payouts per participant', 'FIN'),
+    'incentive_program_versions': ('incentive', 'incentive', 'Telesales program values by month (minimum, WHT, products, ANC tiers, excess bands) with approval', 'REF'),
+    'incentive_callers': ('incentive', 'incentive', 'Callers of a Telesales program (insurance partner, Team Leader, dates, disqualification)', 'REF'),
+    'callout_endorsements': ('incentive', 'leads', 'Prospects endorsed as call-out leads for a telesales caller', 'TXN'),
+    'telesales_policies': ('incentive', 'incentive', 'Policies attributed to a telesales caller with eligible date, net commission, counting, exclusion, recovery', 'FIN'),
+    'incentive_batch_policies': ('incentive', 'incentive', 'Telesales policies considered by a calculation batch and their status', 'FIN'),
     # Reporting
     'report_definitions': ('reporting', 'reports', 'Report catalogue (parameters, query, columns, roles, permission)', 'REF'),
     'report_schedules': ('reporting', 'reports', 'E-mailed report schedules (cron, format, recipients)', 'REF'),

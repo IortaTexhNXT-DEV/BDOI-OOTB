@@ -56,6 +56,14 @@ define({
   handler: async (_req, res) => res.json({ success: true, data: await motorTariff() }),
 });
 define({
+  method: 'POST', path: '/motor-rating', summary: 'Motor rating of a draft quotation (PROD-12): default issuing rates (commission rule, motor tariff, standard), the reference value and the FMV less depreciation, the depreciation options, the excess, and whether the user may change rates or the FMV',
+  screen: `${SCREEN} > Coverage details`, middleware: [...canWrite, validate(quoteBody.partial())],
+  request: { leadRefId: 'ld_1', productId: 1, insuranceCompanyId: 1, vehicleType: 'private_cars', fmvRating: { referenceValue: 1000000, depreciationPct: 10 } },
+  response: { success: true, data: { fmv: { referenceValue: 1000000, referenceBasis: 'reference', depreciationPct: 10, computedFmv: 900000 }, depreciationOptions: [8, 10, 15, 20],
+    rates: { OD: 2, AON: 0.5, source: 'rule' }, excess: { pct: 5, basis: 'sum-insured', minimum: 0, amount: 45000 }, canChangeRates: false, canEditFmv: false } },
+  handler: async (req, res) => res.json({ success: true, data: await svc.motorRatingFor(req.body, actor(req)) }),
+});
+define({
   method: 'GET', path: '/stats', summary: 'Quotation KPIs (optionally for one lead)', screen: `${SCREEN} (stats cards)`, middleware: canRead, query: { leadRefId: 'ld_1' },
   response: { totalQuotations: 14, convertedToPolicyCount: 8, activeQuotationsCount: 5, conversionRate: 57.1, quotationsByStatus: [{ status: 'Draft', count: 2 }] },
   handler: async (req, res) => { const s = await svc.quoteStats(await withScope(req)); res.json({ success: true, ...s, data: s }); },
