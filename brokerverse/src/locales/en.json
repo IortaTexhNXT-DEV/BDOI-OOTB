@@ -1059,7 +1059,9 @@
     "bulkUploadTitle": "Bulk upload disbursements",
     "printVouchers": "Print vouchers",
     "customerCodeFromRequired": "Customer code from is required",
-    "refundReason": "Refund reason"
+    "refundReason": "Refund reason",
+    "refundReasonRequired": "Choose the refund reason",
+    "refundNoteRequired": "Enter the note the refund reason asks for"
   },
   "renewal": {
     "renewals": "Renewals",
