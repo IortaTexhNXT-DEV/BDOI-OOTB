@@ -119,7 +119,7 @@ describe("Period Management", () => {
     periodEndService.createFiscalYear.mockResolvedValue({ code: "FY2029" });
     fireEvent.click(await screen.findByRole("button", { name: "Next fiscal year" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Create fiscal year FY2029")).toBeInTheDocument();
+    expect(within(dialog).getByText("Create Fiscal Year FY2029")).toBeInTheDocument();
     expect(periodEndService.createFiscalYear).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Create fiscal year" }));
     await waitFor(() => expect(periodEndService.createFiscalYear).toHaveBeenCalled());

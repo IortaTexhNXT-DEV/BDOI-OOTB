@@ -95,7 +95,7 @@ describe("User access matrix", () => {
     renderAt(`${BASE}/access-matrix`, <UserAccessMatrix />, `${BASE}/access-matrix`);
     fireEvent.click(await screen.findByRole("button", { name: "Actions for Gene Jaen" }));
     expect(await screen.findByText("View access")).toBeInTheDocument();
-    expect(screen.queryByText("Sign out everywhere")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sign Out Everywhere")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "More options" })).not.toBeInTheDocument();
   });
 });

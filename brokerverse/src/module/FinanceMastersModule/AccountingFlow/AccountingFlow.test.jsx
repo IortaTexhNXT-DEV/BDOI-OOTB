@@ -115,7 +115,7 @@ describe("Accounting flow", () => {
   it("lists the events under their modules in cycle order with contents, facts and entries in business words", async () => {
     renderAt();
     await loaded();
-    expect(screen.getByRole("heading", { level: 1, name: "Accounting flow" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Accounting Flow" })).toBeInTheDocument();
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
     expect(headings).toEqual(["Premium billing1", "Collections1", "Incentives1", "Other system journals1"]);
     const contents = screen.getByRole("navigation", { name: "Contents" });

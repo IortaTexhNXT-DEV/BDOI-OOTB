@@ -43,13 +43,13 @@ describe("Insurer billing", () => {
   it("shows neutral KPI cards and no setting key or rule sentence", async () => {
     show();
     expect(await screen.findByText("Unbilled commission")).toBeInTheDocument();
-    expect(await screen.findByText("1 debit note awaiting approval")).toBeInTheDocument();
+    expect(await screen.findByText("1 Debit Note awaiting approval")).toBeInTheDocument();
     expect(screen.queryByText(/direct_bill\.|System Settings/)).not.toBeInTheDocument();
   });
 
   it("the maker of a note pending approval reads why instead of Approve and Reject", async () => {
     show();
-    fireEvent.click(screen.getByText("Debit notes"));
+    fireEvent.click(screen.getByText("Debit Notes"));
     expect(await screen.findByText(MAKER.blockedReason)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Actions for DN-2026-00004" }));
     const items = within(screen.getByRole("menu")).getAllByRole("menuitem").map((m) => m.textContent);
@@ -82,7 +82,7 @@ describe("Insurer billing", () => {
 
   it("the billing run tab lists the runs and the next billing dates; Run billing needs write:remittance", async () => {
     show();
-    fireEvent.click(screen.getByText("Billing run"));
+    fireEvent.click(screen.getByText("Billing Run"));
     expect(await screen.findByText("Billing run done: 2 billing statement(s) drafted.")).toBeInTheDocument();
     expect(screen.getByText("Scheduled job")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Run billing" })).not.toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("Insurer billing", () => {
   it("a remittance user runs the billing for a billing date", async () => {
     mockPerms = ["write:remittance"];
     show();
-    fireEvent.click(screen.getByText("Billing run"));
+    fireEvent.click(screen.getByText("Billing Run"));
     fireEvent.click(await screen.findByRole("button", { name: "Run billing" }));
     expect(await screen.findByText("Billing run done: 1 billing statement(s) drafted.")).toBeInTheDocument();
     expect(remittanceService.runBilling).toHaveBeenCalledWith(expect.objectContaining({ billingDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) }));

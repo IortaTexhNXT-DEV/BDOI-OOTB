@@ -39,7 +39,7 @@ describe("Policy Cancellation", () => {
   it("shows only the result of the policy, not the short-period scale", async () => {
     render(<MemoryRouter initialEntries={["/operations/policy-cancellation?policy=pol_1"]}><PolicyCancellation /></MemoryRouter>);
     fireEvent.click(await screen.findByText("Compute return premium"));
-    expect(await screen.findByText("Return premium of POL-2026-00001")).toBeInTheDocument();
+    expect(await screen.findByText("Return Premium of POL-2026-00001")).toBeInTheDocument();
     expect(service.cancellationQuote).toHaveBeenCalledWith(expect.objectContaining({ policyId: "pol_1", method: "auto", cancellationType: "FULL" }));
     expect(screen.getByText("Not exceeding 4 months")).toBeInTheDocument();
     expect(screen.getByText("Refund to the client")).toBeInTheDocument();

@@ -5,7 +5,7 @@
  */
 import fs from "fs";
 import path from "path";
-import { bundleProblems, copyProblems, isTitleCaseLabel, sourceProblems, titleCaseLabels } from "./uiStandard";
+import { bundleProblems, capitaliseTerms, caseProblems, copyProblems, isTitleCaseLabel, isTitleLevelKey, sourceProblems, titleKeysOf, toTitleCase } from "./uiStandard";
 import allow from "./uiStandard.allow.json";
 
 const SRC = path.join(__dirname, "..");
@@ -83,10 +83,19 @@ describe("visual rules", () => {
   });
 });
 
-describe("sentence case", () => {
-  it("finds no Title Case label in en.json outside the allow-list", () => {
+describe("two case levels", () => {
+  it("has Title Case for menu items, page, dialog and tab titles and report names, sentence case elsewhere", () => {
     const en = JSON.parse(fs.readFileSync(path.join(SRC, "locales", "en.json"), "utf8"));
-    expect(titleCaseLabels(en, (allow.titleCaseKeys || []).map((c) => c.key))).toEqual([]);
+    const titleKeys = new Set(listFiles(SRC).flatMap((f) => titleKeysOf(fs.readFileSync(f, "utf8"))));
+    expect(caseProblems(en, titleKeys, (allow.titleCaseKeys || []).map((c) => c.key))).toEqual([]);
+  });
+
+  it("writes the named business documents in Title Case inside a sentence", () => {
+    expect(capitaliseTerms("Print the placement slips and the request for quotation")).toBe("Print the Placement Slips and the Request for Quotation");
+    expect(toTitleCase("loan bookings upload")).toBe("Loan Bookings Upload");
+    expect(isTitleLevelKey("sidebar.Petty Cash")).toBe(true);
+    expect(isTitleLevelKey("schemeIssuance.save")).toBe(false);
+    expect(titleKeysOf('<TabPanel header={t("a.tab")}><Column header={t("a.col")} />')).toEqual(["a.tab"]);
   });
 
   it("tells Title Case from sentence case, keeping proper nouns and acronyms", () => {

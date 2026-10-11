@@ -31,7 +31,7 @@ describe("Commission breakdown", () => {
     localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["write:remittance"]));
     render(<CommissionBreakdown policyId="pol_1" />);
     expect(await screen.findByText("Own Damage / Theft")).toBeInTheDocument();
-    expect(screen.getByText("Rated on the register")).toBeInTheDocument();
+    expect(screen.getByText("Rated on the Register")).toBeInTheDocument();
     expect(screen.getByText("Remittance REM-2026-00021")).toBeInTheDocument();
     expect(screen.getByText("Ramon Bautista")).toBeInTheDocument();
     expect(screen.getByText(/cannot be recomputed/)).toBeInTheDocument();

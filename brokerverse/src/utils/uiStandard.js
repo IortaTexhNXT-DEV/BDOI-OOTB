@@ -72,8 +72,79 @@ export const isTitleCaseLabel = (text) => {
   return caps.length >= 1 && caps.length > small.length;
 };
 
-/** Keys of a bundle whose label is in Title Case, skipping the allowed keys (exact or prefixes ending in "."). */
-export const titleCaseLabels = (bundle, allow = []) => flatten(bundle)
+/**
+ * Named business documents and terms: always in Title Case, also inside a sentence-case label or message
+ * ("Print the Placement Slip"). Plurals follow ("Official Receipts").
+ */
+export const NAMED_TERMS = [
+  "Request for Quotation", "Placement Slip", "Quotation Slip", "Broker Slip", "Official Receipt", "Acknowledgement Receipt", "Provisional Receipt",
+  "Collection Receipt", "Statement of Account", "Certificate of Cover", "Cover Note", "Policy Schedule", "Endorsement Slip", "Debit Note", "Credit Note",
+  "Scheme Master", "Product Configurator", "Journal Voucher", "Payment Voucher", "Auto Renewal Agreement", "Placement Report", "Comparison Report",
+  "Chart of Accounts", "Trial Balance", "General Ledger",
+];
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const TERM_RE = new RegExp(`\\b(${NAMED_TERMS.map((n) => escapeRe(n).replace(/ /g, "\\s+")).join("|")})(s?)\\b`, "gi");
+
+/** The text with every named term in its Title Case form. */
+export const capitaliseTerms = (text) => String(text).replace(TERM_RE, (m, term, plural) => {
+  const canonical = NAMED_TERMS.find((n) => n.toLowerCase() === term.toLowerCase().replace(/\s+/g, " "));
+  return `${canonical}${plural}`;
+});
+
+const maskTerms = (text) => String(text).replace(TERM_RE, (m) => m.replace(/[A-Za-z]/g, "x"));
+
+/**
+ * Keys that name a place or a thing and so take Title Case (the client's two levels): menu items (sidebar.*,
+ * sidebarFull.*), page and dialog titles, tab names and report names. Everything else is sentence case.
+ */
+export const TITLE_KEY_PREFIXES = ["sidebar.", "sidebarFull."];
+const TITLE_SEGMENT = /^(title|heading|pageTitle|dialogTitle|screenTitle|[a-zA-Z]+Title)$/;
+export const isTitleLevelKey = (key, titleKeys = new Set()) => titleKeys.has(key) || TITLE_KEY_PREFIXES.some((p) => key.startsWith(p))
+  || TITLE_SEGMENT.test(key.split(".").pop()) || /\.tabs\.[^.]+$/.test(key);
+
+const TITLE_TAGS = "TabPanel|AccordionTab|Dialog|DetailDialog|ImportDialog|PageHeader|ConfiguratorPage|LayoutPage|RecordPage|BankBatchDialog";
+const TITLE_ATTR = new RegExp(`<(?:${TITLE_TAGS})\\b[^<>]*?\\b(?:title|header)=\\{\\s*t\\(\\s*["']([\\w.\\- &/]+)["']`, "g");
+
+/** Translation keys a source file uses as a tab name, a page title or a dialog title. */
+export const titleKeysOf = (source) => Array.from(String(source).matchAll(TITLE_ATTR), (m) => m[1]);
+
+/** The title-level texts that are not Title Case ("Loan bookings upload" as a tab name). */
+export const isTitleCase = (text) => {
+  const plain = String(text).replace(/\{\{[^}]*\}\}|<[^>]+>|\$t\([^)]*\)/g, " ");
+  const words = plain.match(LABEL_WORD) || [];
+  if (words.length < 2 || words.length > 8 || /[.?!]\s*$/.test(String(text).trim())) return true;
+  return words.slice(1).every((w) => /^[A-Z]/.test(w) || SMALL_WORDS.has(w) || keepsCapital(w));
+};
+
+/** Title Case for a title-level label: each word capitalised except the small words inside it. */
+export const toTitleCase = (text) => {
+  let first = true;
+  return String(text).replace(/\{\{[^}]*\}\}|<[^>]+>|[A-Za-z][A-Za-z'’]*|[.:!?]\s|\s-\s|>/g, (tok) => {
+    if (/^([.:!?]\s|\s-\s|>)$/.test(tok)) { first = true; return tok; }
+    if (!/^[A-Za-z]/.test(tok)) return tok;
+    const out = first || !SMALL_WORDS.has(tok.toLowerCase()) ? tok.charAt(0).toUpperCase() + tok.slice(1) : tok.toLowerCase();
+    first = false;
+    return out;
+  });
+};
+
+/**
+ * Case problems of a bundle: a title-level key (isTitleLevelKey) must be Title Case; any other label must be sentence
+ * case, apart from proper nouns, acronyms and the named terms. `allow`: keys (or prefixes ending in ".") left out.
+ */
+/** A report name ("Premium Production Report", "Claims Register"): Title Case like a page title. */
+export const isReportName = (key, text) => /^[A-Za-z][\w &/'’-]{2,60}\b(report|register|ledger|listing)s?$/i.test(String(text).trim())
+  && !/(generat|fail|error|select|loading|no[A-Z]|empty)/.test(key.split(".").pop());
+
+export const caseProblems = (bundle, titleKeys = new Set(), allow = []) => flatten(bundle)
   .filter(([key]) => !allow.some((a) => key === a || (a.endsWith(".") && key.startsWith(a))))
-  .filter(([, text]) => isTitleCaseLabel(text))
-  .map(([key, text]) => `${key}: ${text}`);
+  .flatMap(([key, text]) => {
+    if (isTitleLevelKey(key, titleKeys) || isReportName(key, text)) return isTitleCase(text) ? [] : [`${key}: not Title Case: ${text}`];
+    if (isTitleCaseLabel(maskTerms(text))) return [`${key}: not sentence case: ${text}`];
+    if (capitaliseTerms(text) !== text) return [`${key}: named term not in Title Case: ${text}`];
+    return [];
+  });
+
+/** Kept for callers of the first version of the guard: the sentence-case problems only. */
+export const titleCaseLabels = (bundle, allow = []) => caseProblems(bundle, new Set(), allow).filter((p) => p.includes("not sentence case"));

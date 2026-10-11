@@ -34,7 +34,12 @@ Back-office screens look like an enterprise insurance system (Guidewire, Sapiens
 - Don't: a table wider than its card at 1366px; merge related columns (gross with net + taxes as a muted second line).
 
 ## Copy
-- Do: sentence case labels, buttons and headings ("Sum insured", not "Sum Insured"); proper nouns, acronyms and form names keep their capitals (Toyota, BIR 2307, OR/CR). Guarded: a Title Case label in en.json fails unless its key is in `titleCaseKeys` of the allow-list, or the word is in `PROPER_NOUNS` (`src/utils/uiStandard.js`).
+- Do: two case levels (client decision).
+  - Title Case: menu items (`sidebar.*`, `sidebarFull.*`), page titles (PageHeader), tab names, dialog titles, report names ("Premium Production Report").
+  - Sentence case: buttons, field labels, column headings, section headings, messages, help and placeholders ("Sum insured", not "Sum Insured").
+- Do: named business documents and terms in Title Case everywhere, also inside a sentence ("Print the Placement Slip"): Request for Quotation, Placement Slip, Quotation Slip, Official Receipt, Acknowledgement Receipt, Statement of Account, Certificate of Cover, Scheme Master, Product Configurator, Journal Voucher, Payment Voucher and the rest of `NAMED_TERMS` in `src/utils/uiStandard.js` (maintain the list there).
+- Do: proper nouns, acronyms and form names keep their capitals in either level (Toyota, BIR 2307, OR/CR; `PROPER_NOUNS`).
+- Guarded (`caseProblems`): a title-level key (by prefix, by a `title`/`*Title`/`heading`/`tabs.*` key name, by its use as `title`/`header` of PageHeader, Dialog, DetailDialog, ImportDialog or TabPanel in the source, or a report name) must be Title Case; every other label must be sentence case with the named terms capitalised. Exceptions: `titleCaseKeys` in `uiStandard.allow.json`, with a reason.
 - Do: consistent terms: Policy, Quotation, Request for Quotation, Placement Slip, Insurer, Client.
 - Don't: emojis, exclamation marks, marketing adjectives (seamless, powerful, easily, simply, effortlessly, smart), chatty phrases (Let's, Oops, Great!, Here you can), em-dash flourishes (guarded in en.json).
 

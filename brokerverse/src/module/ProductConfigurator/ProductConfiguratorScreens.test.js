@@ -51,7 +51,7 @@ describe("Acceptance Rules screen", () => {
     renderScreen(<UnderwritingRules />);
     expect(screen.getByRole("heading", { level: 1, name: "Acceptance rules" })).toBeInTheDocument();
     const crumbs = screen.getByLabelText("Breadcrumb");
-    expect(within(crumbs).getByText("Product configurator")).toBeInTheDocument();
+    expect(within(crumbs).getByText("Product Configurator")).toBeInTheDocument();
     expect(within(crumbs).getByText("Acceptance rules")).toBeInTheDocument();
     await screen.findByText("R1");
     expect(screen.queryByText(/Insurer Acceptance Rules/)).not.toBeInTheDocument();
@@ -119,7 +119,7 @@ describe("Document Manager screen", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Document manager" })).toBeInTheDocument();
     await screen.findByText("MOTOR_SCHED");
     expect(screen.queryByText("Document Template Manager")).not.toBeInTheDocument();
-    expect(screen.getByText("Policy schedule")).toBeInTheDocument();
+    expect(screen.getByText("Policy Schedule")).toBeInTheDocument();
     expect(screen.getByText("Uploaded schedule.txt")).toBeInTheDocument();
     expect(screen.getByText("Standard layout")).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("button", { name: "View" })[0]);

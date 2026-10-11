@@ -73,7 +73,7 @@ describe("activities of a prospect, quotation or client", () => {
         positive: 1, nextSteps: 1, followUpsDone: 0, followUpsOpen: 1, followUpsOverdue: 0 }], byType: [{ activityType: "CALL", activityTypeName: "Phone call", total: 1 }], byOutcome: [] });
     render(<MemoryRouter><SalesActivities /></MemoryRouter>);
     expect(await screen.findByText("Introductory call")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Activity report"));
+    fireEvent.click(screen.getByText("Activity Report"));
     expect(await screen.findAllByText("Maria Rivera")).not.toHaveLength(0);
     expect(screen.getByText("By activity type")).toBeInTheDocument();
   });

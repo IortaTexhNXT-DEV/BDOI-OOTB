@@ -39,8 +39,8 @@ describe("Lock-in Review", () => {
     expect(await screen.findByText("POL-2026-00120")).toBeInTheDocument();
     expect(screen.getByText("2 of 5")).toBeInTheDocument();
     expect(screen.getByText("Held: TFS loan Past due")).toBeInTheDocument();
-    expect(screen.getByText("Review due (1)")).toBeInTheDocument();
-    expect(screen.getByText("In lock-in (4)")).toBeInTheDocument();
+    expect(screen.getByText("Review Due (1)")).toBeInTheDocument();
+    expect(screen.getByText("In Lock-in (4)")).toBeInTheDocument();
   });
 
   it("records the decision with a reason and a remark; the server message is shown when refused", async () => {
@@ -58,7 +58,7 @@ describe("Lock-in Review", () => {
   it("the uploads tab lists the TFS account status uploads with their failed rows", async () => {
     localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:lock-in", "write:loan-status"]));
     render(<MemoryRouter><LockInReview /></MemoryRouter>);
-    fireEvent.click(await screen.findByText("Loan status uploads"));
+    fireEvent.click(await screen.findByText("Loan Status Uploads"));
     expect(await screen.findByText("LS-2026-90001")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Failed rows" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Upload loan status" })).toBeEnabled();

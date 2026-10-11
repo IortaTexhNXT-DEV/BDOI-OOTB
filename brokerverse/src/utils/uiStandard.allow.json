@@ -87,5 +87,11 @@
       "key": "security.rules.symbol",
       "why": "Lists the symbols a password may contain, including the exclamation mark."
     }
+  ],
+  "titleCaseKeys": [
+    {
+      "key": "technicalDetails.title",
+      "why": "The label of the Technical details disclosure button, sentence case like every button."
+    }
   ]
 }

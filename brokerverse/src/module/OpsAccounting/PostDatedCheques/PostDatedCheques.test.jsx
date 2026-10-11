@@ -79,7 +79,7 @@ describe("post-dated cheque log", () => {
     expect(screen.getAllByText("–")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button", { name: "₱25,575.00" }));
     expect(screen.getByRole("button", { name: "₱25,575.00" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("tab", { name: "All open (2)" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "All Open (2)" })).toBeInTheDocument();
     const forward = screen.getByRole("button", { name: "Forward to Insurance partner" });
     expect(forward).toBeDisabled();
     const boxes = screen.getAllByRole("checkbox");

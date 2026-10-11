@@ -70,7 +70,7 @@ describe("Agents / Referrer Accounts: payee enrolment", () => {
     const buttons = screen.getAllByRole("button", { name: "Verify" });
     expect(buttons).toHaveLength(1);
     fireEvent.click(buttons[0]);
-    expect(await screen.findByText("Verify payee Liza Verify")).toBeInTheDocument();
+    expect(await screen.findByText("Verify Payee Liza Verify")).toBeInTheDocument();
     const confirm = screen.getAllByRole("button", { name: "Verify" }).pop();
     fireEvent.click(confirm);
     await waitFor(() => expect(CommissionService.verifyReferrer).toHaveBeenCalledWith("ref-new", {}));

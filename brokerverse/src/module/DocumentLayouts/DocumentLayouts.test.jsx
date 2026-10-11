@@ -81,6 +81,6 @@ describe("Document signatures", () => {
     });
     render(<DocumentSignaturesPage />);
     expect(await screen.findByDisplayValue("Authorised signatory")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Document signatures" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Document Signatures" })).toBeInTheDocument();
   });
 });
