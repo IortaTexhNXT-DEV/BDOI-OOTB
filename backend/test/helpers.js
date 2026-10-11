@@ -301,6 +301,31 @@ export async function delegateAuthority(ctx, body) {
   const { rows: [delegation] } = await query('SELECT id FROM user_delegations WHERE change_id = $1', [d.body.data.change.id]);
   return { id: Number(delegation.id), dateTo: addDays(day, 30) };
 }
+/**
+ * The endorsement shortcuts of a broker build (migration 0482 switched off): no approval before sending, booking without
+ * the insurer's confirmation or a second user, annual (not pro-rata) premium changes, no endorsement types or
+ * cancellation note required. For suites whose subject is the pricing and booking of an endorsement; the TISPH flow is
+ * covered by test/endorsement-workflow.test.js.
+ */
+export async function withDirectEndorsements() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query(`UPDATE app_settings SET value = 'false' WHERE key IN ('endorsements.approval_before_send', 'endorsements.complete_needs_insurer',
+    'endorsements.complete_maker_checker', 'endorsements.prorata', 'endorsements.types_required', 'endorsements.cancellation_note_required')`);
+  clearSettingsCache();
+}
+
+/**
+ * The raiser sends a quotation to the client (the platform default), for suites that test the client's side of the
+ * quotation; TISPH's approval by a second user before the client (quotations.approve_before_send, QUOT-03) is covered
+ * by test/quotation-release.test.js.
+ */
+export async function withDirectSend() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query("UPDATE app_settings SET value = 'false' WHERE key = 'quotations.approve_before_send'");
+  clearSettingsCache();
+}
 
 /**
  * Two iorta TechNXT platform administrators signed in with their second factor (maker and checker of the feature

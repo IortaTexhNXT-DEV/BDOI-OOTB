@@ -7,6 +7,7 @@ import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
@@ -88,6 +89,9 @@ const ProductMatserDetailsAction = ({ action }) => {
     if (!values.customerSegment) {
       errors.customerSegment = t("validation.fieldRequired");
     }
+    if (values.quoteValidityDays !== null && values.quoteValidityDays !== "" && !(values.quoteValidityDays >= 1 && values.quoteValidityDays <= 366)) {
+      errors.quoteValidityDays = t("generalMasters.quoteValidityDaysRange");
+    }
 
     return errors;
   };
@@ -116,6 +120,7 @@ const ProductMatserDetailsAction = ({ action }) => {
     const lineofBusiness = data[0]?.lineofBusiness;
     const businessType = data[0]?.businessType;
     const customerSegment = data[0]?.customerSegment;
+    const quoteValidityDays = data[0]?.quoteValidityDays;
 
     const updatedValues = {
       productCode: productCode ?? "",
@@ -126,6 +131,7 @@ const ProductMatserDetailsAction = ({ action }) => {
       lineofBusiness: lineofBusiness ?? "",
       businessType: businessType ?? "",
       customerSegment: customerSegment ?? "both",
+      quoteValidityDays: quoteValidityDays ?? null,
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -138,6 +144,7 @@ const ProductMatserDetailsAction = ({ action }) => {
       lineofBusiness: "",
       businessType: "",
       customerSegment: "both",
+      quoteValidityDays: null,
       modifiedBy: "",
       modifiedOn: "",
     },
@@ -284,6 +291,27 @@ const ProductMatserDetailsAction = ({ action }) => {
               </>)}
             </div>
           ))}
+          {/* days a quotation of the product stays valid; empty: the standard quotation validity of System Settings */}
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            {readOnly ? (
+              <RecordValue label={t("generalMasters.quoteValidityDays")} value={formik.values.quoteValidityDays} />
+            ) : (<>
+            <label className="input__label__corrections block mb-1" htmlFor="quoteValidityDays">{t("generalMasters.quoteValidityDays")}</label>
+            <InputNumber
+              inputId="quoteValidityDays"
+              disabled={action === "view"}
+              className="w-full"
+              value={formik.values.quoteValidityDays}
+              min={1}
+              max={366}
+              useGrouping={false}
+              onValueChange={(e) => formik.setFieldValue("quoteValidityDays", e.value ?? null)}
+            />
+            {formik.touched.quoteValidityDays && formik.errors.quoteValidityDays && (
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.quoteValidityDays}</div>
+            )}
+            </>)}
+          </div>
           {action !== "add" && (<>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField

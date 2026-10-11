@@ -14,6 +14,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setupFinance, makePolicy } from './accounting.fixtures.js';
+import { withDirectEndorsements, withDirectSend } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { issuePolicy, importPolicy } from '../src/modules/policies/service.js';
@@ -38,6 +39,8 @@ const idOf = async (table, code) => (await one(`SELECT id FROM ${table} WHERE co
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withDirectSend();
+  await withDirectEndorsements();
   now = await today();
   processing = await persona('uat.proc2', ['processing']);
   claims2 = await persona('uat.claims2', ['claims']);

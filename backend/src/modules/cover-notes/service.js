@@ -3,7 +3,8 @@
  *
  * Issued from a quotation the customer accepted (cover_note.quote_statuses) or from a placement slip with the insurer
  * and not yet booked (cover_note.placement_statuses), for cover_note.validity_days from the cover start date (at most
- * cover_note.max_validity_days). One active cover note per quotation or placement slip.
+ * cover_note.max_validity_days). One active cover note per quotation or placement slip. With no quotation status
+ * (TISPH: the insurer must hold the order) a cover note comes only from an acknowledged placement slip.
  *
  * Status: active -> superseded when the policy of the quotation / placement is issued (the policy is linked), expired
  * after its end date, or cancelled by a user. syncStatuses() applies the policy link and the expiry; it runs before
@@ -99,6 +100,7 @@ async function sourceOf(db, { quoteId, placementId }) {
     WHERE q.id = $1 OR q.quote_number = $1`, [String(quoteId)])).rows[0];
   if (!q) throw notFound(`Quotation ${quoteId} not found`);
   const allowed = (await getSetting('cover_note.quote_statuses', ['accepted', 'approved', 'submitted'])) || [];
+  if (!allowed.length) throw conflict(`A cover note is issued once the insurer holds the order: issue it from the placement slip of quotation ${q.quote_number}`);
   if (!allowed.includes(q.status)) throw conflict(`A cover note is issued from a quotation the customer accepted (quotation ${q.quote_number} is ${q.status})`);
   const issued = (await db.query('SELECT policy_number FROM policies WHERE quote_id = $1 AND status <> \'cancelled\' LIMIT 1', [q.id])).rows[0];
   if (issued) throw conflict(`Policy ${issued.policy_number} is already issued from quotation ${q.quote_number}; no cover note is needed`);

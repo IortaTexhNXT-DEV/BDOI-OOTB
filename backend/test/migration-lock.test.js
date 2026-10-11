@@ -175,12 +175,17 @@ describe('the lock', () => {
   });
 
   it('refuses a file of the ordinary policy upload with rows issued before the cutover date; business issued after it still loads', async () => {
+    // where the ordinary upload issues policies (policies.bulk_upload_issue; TISPH issues through the placement slip)
+    await query('UPDATE app_settings SET value = \'true\' WHERE key = \'policies.bulk_upload_issue\'');
+    clearSettingsCache();
     const legacy = await bulk([policyRow('LK-NEW-1', addDays(s.cutover, 1)), policyRow('LK-OLD-1', addDays(s.cutover, -20))]);
     expect(legacy.status).toBe(409);
     expect(legacy.body.errors).toEqual([{ path: 'row 3', message: 'Row 3: Issue date before go-live: legacy business is loaded by the migration workbook' }]);
     const issued = await bulk([policyRow('LK-NEW-2', addDays(s.cutover, 1))]);
     expect(issued.status).toBe(200);
     expect(issued.body.data.created).toBe(1);
+    await query('UPDATE app_settings SET value = \'false\' WHERE key = \'policies.bulk_upload_issue\'');
+    clearSettingsCache();
   });
 });
 

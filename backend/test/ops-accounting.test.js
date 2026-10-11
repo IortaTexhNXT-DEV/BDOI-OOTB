@@ -7,6 +7,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { ledgerIntegrity, makePolicy, setupFinance } from './accounting.fixtures.js';
+import { enableFeatures, withDirectEndorsements } from './helpers.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { one, pool, query, withTransaction } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { createReceivable, findPolicy } from '../src/modules/receipts/receivables.js';
@@ -16,9 +18,7 @@ import { straightLine, depreciationStep } from '../src/modules/fixed-assets/serv
 import { ensureCalendar, getPeriod } from '../src/modules/period-end/fiscal.js';
 import { coverNoteExpiry } from '../src/modules/cover-notes/jobs.js';
 import { pdcDepositDue } from '../src/modules/pdc/jobs.js';
-import { clearSettingsCache } from '../src/lib/settings.js';
 import { claimDocumentReminders } from '../src/modules/claim-documents/jobs.js';
-import { enableFeatures } from './helpers.js';
 
 let ctx; let admin; let manager; let asOf;
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -29,6 +29,14 @@ const bill = async (m, amount = m.gross) => withTransaction(async (db) => create
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withDirectEndorsements();
+  // the broker cancellation rules (short-period scale for the insured, commission taken back); TISPH's pro-rata without
+  // commission reversal (CANC-03) is covered by test/endorsement-workflow.test.js
+  await query("UPDATE app_settings SET value = 'true' WHERE key IN ('endorsements.short_period_for_insured', 'endorsements.cancellation_reverses_commission')");
+  // the broker cover notes from an accepted quotation; TISPH's cover notes only once the insurer holds the order
+  // (ISSUE-01) are covered by test/placement-moves.test.js
+  await query(`UPDATE app_settings SET value = '["accepted","approved","submitted"]' WHERE key = 'cover_note.quote_statuses'`);
+  clearSettingsCache();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['claims-settlements', 'payables', 'fixed-assets']);
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");

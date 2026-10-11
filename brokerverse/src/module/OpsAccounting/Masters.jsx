@@ -19,6 +19,8 @@ const page = (type, key, group, columns, extra) => {
 
 export const ShortPeriodRates = page("short-period-rate", "shortPeriod", "opsAcc.master", ["code", "maxDays", "retainedPercent", "description"]);
 export const CancellationReasons = page("cancellation-reason", "cancellationReasons", "opsAcc.master", ["code", "name", "initiatedBy", "method"]);
+// endorsement types (M12): financial flag, premium impact, the lines and the section of the endorsement they belong to
+export const EndorsementTypes = page("endorsement-type", "endorsementTypes", "opsAcc.master", ["code", "name", "financial", "premiumImpact", "lines", "section"]);
 export const ClaimDocumentChecklist = page("claim-document-requirement", "claimChecklist", "opsAcc.master", ["code", "lineOfBusiness", "claimType", "documentName", "required", "sortOrder"]);
 export const RepairShops = page("repair-shop", "repairShops", "opsAcc.master", ["code", "name", "city", "contactPerson", "phone", "accredited"]);
 export const Suppliers = page("supplier", "suppliers", "opsAcc.accounts", ["code", "name", "tin", "vatRegistered", "ewtCode", "paymentTermsDays", "expenseAccount"]);

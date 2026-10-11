@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -30,7 +30,9 @@ const DirectPlacementForm = () => {
   const toast = useRef(null);
   const options = usePlacementOptions();
   const [customer, setCustomer] = useState({ kind: "client" });
-  const [productId, setProductId] = useState(null);
+  // a product chosen before (Credit Life new business, placed without a quotation)
+  const { state } = useLocation();
+  const [productId, setProductId] = useState(state?.productId ?? null);
   const [insuredName, setInsuredName] = useState("");
   const [riskDetails, setRiskDetails] = useState({});
   const [sumInsured, setSumInsured] = useState(null);

@@ -39,8 +39,9 @@ const OPERATIONS_PROCESSING = [
   "Sales & Marketing > Request for Quotation",
   "Sales & Marketing > Quotations",
   "Sales & Marketing > Placement Slips",
-  // brand-new vehicle programmes (write:motor-programmes) and client comparison reports from the insurers' offers
+  // brand-new vehicle programmes (write:motor-programmes), promotions (write:promotions) and client comparison reports
   "Sales & Marketing > Dealer Programmes",
+  "Sales & Marketing > Promotions",
   "Sales & Marketing > Comparison Reports",
   // the sales activity timelines and report (read:sales-activities)
   "Sales & Marketing > Sales Activities",
@@ -83,7 +84,8 @@ export const roleMenuPermissions = {
     "my work": true,
     operations: OPERATIONS_PROCESSING,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
-    master: ["Insurance Management > Distribution Channels"],
+    // distribution channels; the discount caps the promotions are checked against (write:discount-caps)
+    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps"],
   },
   // Operations (Client Servicing): client servicing, endorsement requests, renewals, My Work, documents
   operations: {
@@ -153,6 +155,8 @@ export const roleMenuPermissions = {
       "Finance > Financial Statement Versions",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
+      // discount caps of the promotions (read:discount-caps; the Accounting Manager approves them)
+      "Finance > Discount Caps",
       // bank payment file layouts and payee bank accounts (write:disbursements)
       "Finance > Bank File Layouts",
       // asset classes of the fixed asset register (write:fixed-assets)
@@ -178,31 +182,38 @@ const withoutInsurerRec = (items) => items.filter((item) => item !== "Insurer Re
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 // Incentive self-service of a producer (read:incentive, own data only): not the calculation, approval and report screens
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
+// Sales & Marketing item by item, in the order of the TISPH journey (components/SideBar/list.js)
+const SALES_MARKETING = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips",
+  "Dealer Programmes", "Promotions", "Quick Quote", "Campaigns"];
+// entries that map to no TISPH requirement (BRD, FRS, MOM): no TISPH persona is given them. Quick Quote: the BRD raises a
+// quotation per product from the Quotations screen; Campaigns: no requirement. Removing an entry here gives it back.
+const TIS_HIDDEN_SALES = ["Quick Quote", "Campaigns"];
+const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item) && !TIS_HIDDEN_SALES.includes(item))
+  .map((item) => `Sales & Marketing > ${item}`);
+const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
 // the post-dated cheque log is read by every persona (RBAC v4 PDC Management: others R)
 // Sales and Operations read the sharing schemes behind the share of a quotation (read:sharing-schemes, migration 0570)
-const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE], commission: [...(roleMenuPermissions.sales.commission || []), "Sharing Schemes"] };
-// Sales & Marketing item by item, for the personas that lack the permission of some of its screens
-const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
-  "Comparison Reports", "Campaigns", "Sales Activities"];
-const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item)).map((item) => `Sales & Marketing > ${item}`);
-const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
+const TIS_SALES = { ...roleMenuPermissions.sales, operations: [...operationsWithout(), ...salesMarketingWithout()],
+  accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...INCENTIVE_SELF_SERVICE], commission: [...(roleMenuPermissions.sales.commission || []), "Sharing Schemes"] };
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
-  // campaigns are Sales' (read:campaigns)
-  operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
+  operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections", "Post-Dated Cheques", ...REMITTANCE("Remittances")],
   commission: ["Commission Dashboard", "Sharing Schemes"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
-  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
+  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
+    // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
+    "Finance > Discount Caps"],
 };
 // Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
 const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Held policies", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
-  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
+  // the Sales Unit Head approves promotions and discount caps (approve:promotions, approve:discount-caps)
+  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"], master: [...TIS_SALES.master, "Finance > Discount Caps"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   // the Operations Unit Head also approves telesales incentive batches (approve:incentive, migration 0572) and, as the
@@ -231,9 +242,9 @@ Object.assign(roleMenuPermissions, {
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,
-    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
-    // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Quick Quote", "Campaigns", "Sales Activities")],
+    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, promotions, fleet
+    // schedules and open covers (read:campaigns, read:sales-activities, read:promotions, read:fleet, read:marine)
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities", "Promotions")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
     commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
@@ -248,7 +259,7 @@ Object.assign(roleMenuPermissions, {
     dashboard: ["Executive Dashboard", "Sales Dashboard", "Processing Dashboard", "Claims Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
     "my work": true,
-    operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+    operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
     // Remittance without Setup; Approvals to decide what approve:remittance gives it
     accounts: [...withoutInsurerRec(roleMenuPermissions.accounting.accounts).filter((item) => item !== "Remittance"),
       ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Settlement")],
@@ -257,7 +268,9 @@ Object.assign(roleMenuPermissions, {
     // decides the commission rules and sharing schemes of Finance on Configuration Approvals (approve:commission-rules, approve:sharing-schemes)
     master: ["Finance > Commission Rate Matrix", "Finance > Configuration Approvals", "User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
       "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "System Configuration > Features & Releases",
-      "Insurance Management > Distribution Channels", "System Configuration > Data Migration & Go-Live"],
+      "Insurance Management > Distribution Channels",
+      // approves promotions and discount caps
+      "Finance > Discount Caps", "System Configuration > Data Migration & Go-Live"],
   },
   // TIS Audit: the migration workspace and the audit trail, read only (read:data-load, read:audit)
   "tis-auditor": { master: ["System Configuration > Data Migration & Go-Live", "System Configuration > Audit Trail"] },

@@ -11,7 +11,7 @@ Screens to refresh (redesign in another stream, described as on this build): tis
 {{role-summary:tis-sales-unit-head}}
 
 The TIS Sales Unit Head heads the sales unit. You have every right of the TIS Sales Officer (the sales work, lead
-assignment, campaigns and the checker's decisions of the sales chain) and, in addition, you run and approve the
+assignment and the checker's decisions of the sales chain) and, in addition, you run and approve the
 telesales incentives of the sales force and approve the supplier invoices of the unit before they are posted.
 
 You work with the TIS Sales Officers and TIS Sales Associates of the unit, with the TIS Operations Unit Head on the
@@ -26,7 +26,9 @@ and pays them. You never decide a record you entered yourself.
 |---|---|---|
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations](#negotiations) |
+| Approve the quotations raised by your team, which sends them to the client | Daily | [Quotation and request for quotation](#process-quotation) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
+| Approve or return promotions and discount caps; suspend, resume or withdraw a promotion | As submitted | [Promotions](#promotions), [Discount Caps](#discount-caps) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies](#renewal-queue-and-at-risk-policies) |
 | Approve or reject the supplier invoices recorded by Finance | As notified | [Payables](#accounts-payable) |
 | Review the unit's pipeline, conversion and premium | Weekly | [Sales Dashboard](#sales-dashboard) |
@@ -36,7 +38,7 @@ and pays them. You never decide a record you entered yourself.
 | Mark the approved incentives as paid | When paid | [Incentive](#incentives) |
 | Run the incentive and production reports | Month-end | [Incentive](#incentives), [All Reports](#reports-catalogue) |
 
-The sales work, lead assignment, campaigns, the check of the e-policies and the approval of renewal terms follow the
+The sales work, lead assignment, the check of the e-policies and the approval of renewal terms follow the
 procedures of the [TIS Sales Associate](#tis-sales-associate-procedures) and the
 [TIS Sales Officer](#tis-sales-officer-procedures).
 

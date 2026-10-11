@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs, enableFeatures } from './helpers.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -52,10 +53,15 @@ describe('policies', () => {
     expect((await sales('get', '/policies/pol_missing')).status).toBe(404);
   });
   it('updates policy details and payment status', async () => {
-    const u = await sales('put', '/policies/pol_sls_05').send({ policyNumber: 'FPG-MC-2026-0005', plateNumber: 'NEF 5511', inception: '2026-06-01', expiry: '2027-06-01', paymentStatus: 'Pending' });
+    // the inception sent is the policy's own (seeded relative to the day): a changed date is core data (below)
+    const { inception_date: inception } = (await pool.query('SELECT inception_date FROM policies WHERE id = $1', ['pol_sls_05'])).rows[0];
+    const u = await sales('put', '/policies/pol_sls_05').send({ plateNumber: 'NEF 5511', inception, paymentStatus: 'Pending' });
     expect(u.status).toBe(200);
-    expect(u.body).toMatchObject({ policyNumber: 'FPG-MC-2026-0005', plateNumber: 'NEF 5511', inception: '2026-06-01', expiry: '2027-06-01' });
-    expect((await sales('put', '/policies/pol_sls_07').send({ policyNumber: 'FPG-MC-2026-0005' })).status).toBe(409);
+    expect(u.body).toMatchObject({ plateNumber: 'NEF 5511', inception });
+    // the core data of an issued policy changes by an approved correction (test/policy-corrections.test.js)
+    const core = await sales('put', '/policies/pol_sls_05').send({ policyNumber: 'FPG-MC-2026-0005' });
+    expect(core.status).toBe(400);
+    expect(core.body.message).toContain('Policy number of policy');
     // a policy editor cannot mark the premium paid: only finance sets the payment status
     expect((await sales('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Completed', paymentMethod: 'GCash' })).status).toBe(403);
     expect((await sales('put', '/policies/pol_sls_05').send({ paymentStatus: 'Completed' })).status).toBe(403);
@@ -78,6 +84,9 @@ describe('policies', () => {
     }
   });
   it('bulk uploads policies with client, receivable and commission', async () => {
+    // the broker's bulk issuance; TISPH's go-live-only upload (BULK-02) is covered by test/policy-corrections.test.js
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'policies.bulk_upload_issue'");
+    clearSettingsCache();
     const csv = 'Policy Number,Insured Name,Email,Product,Insurance Company,Inception Date,Expiry Date,Sum Insured,Net Premium,Gross Premium\n'
       + 'UPL-0001,Rosa Villanueva,rosa@example.ph,Motor,MAPFRE,2026-09-01,2027-09-01,800000,12000,15030\nUPL-0002,No Premium,,Motor,MAPFRE,2026-09-01,2027-09-01,1,,\n';
     const r = await sales('post', '/policies/bulk-upload').attach('file', Buffer.from(csv), 'policies.csv');

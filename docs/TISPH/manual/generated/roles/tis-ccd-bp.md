@@ -58,6 +58,8 @@ Who approves the work of this role:
 | Receipts | Approve or return the reversal of a receipt requested by another user | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

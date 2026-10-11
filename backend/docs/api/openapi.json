@@ -105,6 +105,9 @@
       "name": "Disbursements"
     },
     {
+      "name": "Discount caps"
+    },
+    {
       "name": "Distribution channels"
     },
     {
@@ -229,6 +232,9 @@
     },
     {
       "name": "Product Configurator"
+    },
+    {
+      "name": "Promotions"
     },
     {
       "name": "Public Integrations"
@@ -82650,6 +82656,651 @@
         ]
       }
     },
+    "/discount-caps": {
+      "get": {
+        "operationId": "getDiscountCaps",
+        "summary": "Discount caps (filter status, productId, channelType)",
+        "tags": [
+          "Discount caps"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Discount Caps\n\nAccess: read:discount-caps, write:discount-caps, approve:discount-caps",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "approved"
+          },
+          {
+            "name": "channelType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "financing_bank"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "channelType": {
+                            "type": "string"
+                          },
+                          "channelTypeLabel": {
+                            "type": "string"
+                          },
+                          "minPct": {
+                            "type": "integer"
+                          },
+                          "maxPct": {
+                            "type": "integer"
+                          },
+                          "lowestOd": {
+                            "type": "number"
+                          },
+                          "effectiveFrom": {
+                            "type": "string"
+                          },
+                          "effectiveTo": {},
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "productId": 2,
+                      "productName": "Motor Vehicle Insurance",
+                      "channelType": "financing_bank",
+                      "channelTypeLabel": "Financing bank",
+                      "minPct": 0,
+                      "maxPct": 25,
+                      "lowestOd": 1.4,
+                      "effectiveFrom": "2026-10-01",
+                      "effectiveTo": null,
+                      "status": "approved",
+                      "statusLabel": "Approved"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Discount Caps",
+        "x-permissions": [
+          "read:discount-caps",
+          "write:discount-caps",
+          "approve:discount-caps"
+        ]
+      },
+      "post": {
+        "operationId": "postDiscountCaps",
+        "summary": "Propose a cap (or a change replacing an approved cap: replacesId); live once a second user approves it. Lists the promotion lines it would leave outside",
+        "tags": [
+          "Discount caps"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Discount Caps > Add cap\n\nAccess: write:discount-caps",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "channelType": {
+                          "type": "string"
+                        },
+                        "channelTypeLabel": {
+                          "type": "string"
+                        },
+                        "minPct": {
+                          "type": "integer"
+                        },
+                        "maxPct": {
+                          "type": "integer"
+                        },
+                        "lowestOd": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "impact": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Discount cap submitted for approval",
+                  "data": {
+                    "id": 1,
+                    "productId": 2,
+                    "productName": "Motor Vehicle Insurance",
+                    "channelType": "financing_bank",
+                    "channelTypeLabel": "Financing bank",
+                    "minPct": 0,
+                    "maxPct": 25,
+                    "lowestOd": 1.4,
+                    "effectiveFrom": "2026-10-01",
+                    "effectiveTo": null,
+                    "status": "pending",
+                    "statusLabel": "Approved"
+                  },
+                  "impact": [
+                    "PRM-VIOS26 line 1"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Discount Caps > Add cap",
+        "x-permissions": [
+          "write:discount-caps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "type": "integer"
+                  },
+                  "channelType": {
+                    "type": "string"
+                  },
+                  "minPct": {
+                    "type": "integer"
+                  },
+                  "maxPct": {
+                    "type": "integer"
+                  },
+                  "lowestOd": {
+                    "type": "number"
+                  },
+                  "effectiveFrom": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "productId": 2,
+                "channelType": "financing_bank",
+                "minPct": 0,
+                "maxPct": 25,
+                "lowestOd": 1.4,
+                "effectiveFrom": "2026-10-15"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discount-caps/{id}/approve": {
+      "post": {
+        "operationId": "postDiscountCapsIdApprove",
+        "summary": "Approve a pending cap (approve:discount-caps; never its maker); the cap it replaces ends the day before",
+        "tags": [
+          "Discount caps"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "channelType": {
+                          "type": "string"
+                        },
+                        "channelTypeLabel": {
+                          "type": "string"
+                        },
+                        "minPct": {
+                          "type": "integer"
+                        },
+                        "maxPct": {
+                          "type": "integer"
+                        },
+                        "lowestOd": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Discount cap approved",
+                  "data": {
+                    "id": 1,
+                    "productId": 2,
+                    "productName": "Motor Vehicle Insurance",
+                    "channelType": "financing_bank",
+                    "channelTypeLabel": "Financing bank",
+                    "minPct": 0,
+                    "maxPct": 25,
+                    "lowestOd": 1.4,
+                    "effectiveFrom": "2026-10-01",
+                    "effectiveTo": null,
+                    "status": "approved",
+                    "statusLabel": "Approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Discount Caps",
+        "x-permissions": [
+          "approve:discount-caps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/discount-caps/{id}/return": {
+      "post": {
+        "operationId": "postDiscountCapsIdReturn",
+        "summary": "Return a pending cap with a reason code (discount_cap_return) (approve:discount-caps; never its maker)",
+        "tags": [
+          "Discount caps"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Discount Caps\n\nAccess: approve:discount-caps",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "channelType": {
+                          "type": "string"
+                        },
+                        "channelTypeLabel": {
+                          "type": "string"
+                        },
+                        "minPct": {
+                          "type": "integer"
+                        },
+                        "maxPct": {
+                          "type": "integer"
+                        },
+                        "lowestOd": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Discount cap returned",
+                  "data": {
+                    "id": 1,
+                    "productId": 2,
+                    "productName": "Motor Vehicle Insurance",
+                    "channelType": "financing_bank",
+                    "channelTypeLabel": "Financing bank",
+                    "minPct": 0,
+                    "maxPct": 25,
+                    "lowestOd": 1.4,
+                    "effectiveFrom": "2026-10-01",
+                    "effectiveTo": null,
+                    "status": "returned",
+                    "statusLabel": "Approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Discount Caps",
+        "x-permissions": [
+          "approve:discount-caps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "DCR-VALUES",
+                "note": "Maximum not agreed with TIS Sales"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discount-caps/{id}/withdraw": {
+      "post": {
+        "operationId": "postDiscountCapsIdWithdraw",
+        "summary": "Withdraw an own pending cap",
+        "tags": [
+          "Discount caps"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Discount Caps\n\nAccess: write:discount-caps",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "channelType": {
+                          "type": "string"
+                        },
+                        "channelTypeLabel": {
+                          "type": "string"
+                        },
+                        "minPct": {
+                          "type": "integer"
+                        },
+                        "maxPct": {
+                          "type": "integer"
+                        },
+                        "lowestOd": {
+                          "type": "number"
+                        },
+                        "effectiveFrom": {
+                          "type": "string"
+                        },
+                        "effectiveTo": {},
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Discount cap withdrawn",
+                  "data": {
+                    "id": 1,
+                    "productId": 2,
+                    "productName": "Motor Vehicle Insurance",
+                    "channelType": "financing_bank",
+                    "channelTypeLabel": "Financing bank",
+                    "minPct": 0,
+                    "maxPct": 25,
+                    "lowestOd": 1.4,
+                    "effectiveFrom": "2026-10-01",
+                    "effectiveTo": null,
+                    "status": "withdrawn",
+                    "statusLabel": "Approved"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Discount Caps",
+        "x-permissions": [
+          "write:discount-caps"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
     "/channels": {
       "get": {
         "operationId": "getChannels",
@@ -86004,11 +86655,124 @@
     "/endorsements/{id}": {
       "get": {
         "operationId": "getEndorsementsId",
-        "summary": "Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live",
+        "summary": "Get one endorsement (by id or number) with the workflow actions open to the user; policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live",
         "tags": [
           "Endorsements"
         ],
         "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "workflow": {
+                      "type": "object",
+                      "properties": {
+                        "approvalRequired": {
+                          "type": "boolean"
+                        },
+                        "canSubmit": {
+                          "type": "boolean"
+                        },
+                        "canApprove": {
+                          "type": "boolean"
+                        },
+                        "canSend": {
+                          "type": "boolean"
+                        },
+                        "canComplete": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Draft",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "workflow": {
+                    "approvalRequired": true,
+                    "canSubmit": false,
+                    "canApprove": true,
+                    "canSend": false,
+                    "canComplete": false
+                  },
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Detailed view",
+        "x-permissions": [
+          "read:endorsements"
+        ]
+      }
+    },
+    "/endorsements/{id}/approve": {
+      "post": {
+        "operationId": "postEndorsementsIdApprove",
+        "summary": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
         "parameters": [
           {
             "name": "id",
@@ -86061,7 +86825,7 @@
                   "endorsementNumber": "END-2026-00001",
                   "policyId": "pol_1",
                   "policyNumber": "POL-2026-00001",
-                  "status": "Draft",
+                  "status": "Approved",
                   "endorsementTypeIds": [
                     1
                   ],
@@ -86081,10 +86845,22 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Policy > Endorsement > Detailed view",
+        "x-screen": "Operations > Policy > Endorsement > Detailed view > Approval",
         "x-permissions": [
-          "read:endorsements"
-        ]
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
       }
     },
     "/endorsements/{id}/pdf": {
@@ -86140,6 +86916,332 @@
         "x-permissions": [
           "read:endorsements"
         ]
+      }
+    },
+    "/endorsements/{id}/reject": {
+      "post": {
+        "operationId": "postEndorsementsIdReject",
+        "summary": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Rejected",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Detailed view > Approval",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "ENR-DOCS",
+                "note": "OR/CR of the new owner missing"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endorsements/{id}/submit-for-approval": {
+      "post": {
+        "operationId": "postEndorsementsIdSubmitForApproval",
+        "summary": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "PendingApproval",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Submit for approval",
+        "x-permissions": [
+          "write:endorsements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/endorsements/{id}/types": {
+      "put": {
+        "operationId": "putEndorsementsIdTypes",
+        "summary": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "endorsementTypeCodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Draft",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "endorsementTypeCodes": [
+                    "CPLT",
+                    "CADR"
+                  ],
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Endorsement types",
+        "x-permissions": [
+          "write:endorsements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endorsementTypeCodes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "endorsementTypeCodes": [
+                  "CPLT",
+                  "CADR"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/endorsements/complete-endorsement": {
@@ -86897,6 +87999,92 @@
             }
           }
         }
+      }
+    },
+    "/endorsements/types": {
+      "get": {
+        "operationId": "getEndorsementsTypes",
+        "summary": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pol_1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "financial": {
+                            "type": "boolean"
+                          },
+                          "premiumImpact": {
+                            "type": "boolean"
+                          },
+                          "section": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "CPLT",
+                      "name": "Change of Plate Number",
+                      "financial": false,
+                      "premiumImpact": false,
+                      "section": "vehicle"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Endorsement types",
+        "x-permissions": [
+          "read:endorsements"
+        ]
       }
     },
     "/endorsements/upload-document": {
@@ -131228,7 +132416,7 @@
     "/placements/{id}/cancel": {
       "post": {
         "operationId": "postPlacementsIdCancel",
-        "summary": "Cancel the placement slip",
+        "summary": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)",
         "tags": [
           "Placement Slips"
         ],
@@ -134282,6 +135470,792 @@
         }
       }
     },
+    "/policies/{id}/corrections": {
+      "get": {
+        "operationId": "getPoliciesIdCorrections",
+        "summary": "Corrections of the core data of a policy (requested, approved, rejected), newest first",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                },
+                                "fromText": {
+                                  "type": "string"
+                                },
+                                "toText": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "reasonCode": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "insurerReference": {
+                            "type": "string"
+                          },
+                          "requestedBy": {
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "pcr_1",
+                      "policyId": "pol_1",
+                      "status": "pending",
+                      "statusLabel": "Pending approval",
+                      "changes": [
+                        {
+                          "field": "expiry",
+                          "label": "Expiry date",
+                          "from": "2027-10-01",
+                          "to": "2027-10-02",
+                          "fromText": "01/10/2027",
+                          "toText": "02/10/2027"
+                        }
+                      ],
+                      "reasonCode": "PCR-INSURER",
+                      "reason": "Insurer issued a corrected policy",
+                      "insurerReference": "MAL-END-2026-0042",
+                      "requestedBy": "Maria Santos",
+                      "requestedAt": "2026-10-10T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "read:policies"
+        ]
+      },
+      "post": {
+        "operationId": "postPoliciesIdCorrections",
+        "summary": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction requested",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "pending",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Request correction",
+        "x-permissions": [
+          "write:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "changes": {
+                    "type": "object",
+                    "properties": {
+                      "expiry": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "insurerReference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "changes": {
+                  "expiry": "2027-10-02"
+                },
+                "reasonCode": "PCR-INSURER",
+                "note": "Corrected policy issued by the insurer",
+                "insurerReference": "MAL-END-2026-0042"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/approve": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdApprove",
+        "summary": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction approved and applied",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "approved",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/reject": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdReject",
+        "summary": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction rejected",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "rejected",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PCRR-NOPROOF",
+                "note": "No corrected policy from the insurer yet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdWithdraw",
+        "summary": "Withdraw an own pending correction",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction withdrawn",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "withdrawn",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "write:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
     "/policies/{id}/documents": {
       "get": {
         "operationId": "getPoliciesIdDocuments",
@@ -135169,10 +137143,109 @@
         }
       }
     },
+    "/policies/{id}/versions": {
+      "get": {
+        "operationId": "getPoliciesIdVersions",
+        "summary": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "version": {
+                            "type": "integer"
+                          },
+                          "endorsementNumber": {
+                            "type": "string"
+                          },
+                          "premiumDelta": {
+                            "type": "number"
+                          },
+                          "before": {
+                            "type": "object",
+                            "properties": {
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "after": {
+                            "type": "object",
+                            "properties": {
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "version": 2,
+                      "endorsementNumber": "END-2026-00001",
+                      "premiumDelta": 1520.5,
+                      "before": {
+                        "grossPremium": 23171.25
+                      },
+                      "after": {
+                        "grossPremium": 24691.75
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Endorsements",
+        "x-permissions": [
+          "read:policies"
+        ]
+      }
+    },
     "/policies/bulk-upload": {
       "post": {
         "operationId": "postPoliciesBulkUpload",
-        "summary": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook",
+        "summary": "Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums) where policies.bulk_upload_issue is on (TISPH: off, policies are issued through the placement slip); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook",
         "tags": [
           "Policies"
         ],
@@ -155568,6 +157641,3136 @@
         ]
       }
     },
+    "/promotions": {
+      "get": {
+        "operationId": "getPromotions",
+        "summary": "Promotions (filter status, search code or name, activeOn date); superseded versions left out",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "active"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "FORTUNER"
+          },
+          {
+            "name": "activeOn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-11-15"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "periodFrom": {
+                            "type": "string"
+                          },
+                          "periodTo": {
+                            "type": "string"
+                          },
+                          "benefit": {
+                            "type": "string"
+                          },
+                          "excess": {
+                            "type": "object",
+                            "properties": {
+                              "2": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "unitQuota": {
+                            "type": "integer"
+                          },
+                          "unitsUsed": {
+                            "type": "integer"
+                          },
+                          "lockInYears": {},
+                          "productIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer"
+                            }
+                          },
+                          "insurerIds": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer"
+                            }
+                          },
+                          "channelTypes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "combineDealer": {
+                            "type": "boolean"
+                          },
+                          "combineDiscount": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "lineCount": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "prm_1",
+                      "code": "PRM-FORTUNER26",
+                      "version": 1,
+                      "name": "Fortuner launch rate",
+                      "periodFrom": "2026-10-01",
+                      "periodTo": "2026-12-31",
+                      "benefit": "rate",
+                      "excess": {
+                        "2": 2000
+                      },
+                      "unitQuota": 500,
+                      "unitsUsed": 12,
+                      "lockInYears": null,
+                      "productIds": [
+                        2
+                      ],
+                      "insurerIds": [
+                        2,
+                        3
+                      ],
+                      "channelTypes": [
+                        "financing_bank",
+                        "dealer"
+                      ],
+                      "combineDealer": false,
+                      "combineDiscount": false,
+                      "status": "active",
+                      "statusLabel": "Active",
+                      "lineCount": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "read:promotions",
+          "write:promotions",
+          "approve:promotions"
+        ]
+      },
+      "post": {
+        "operationId": "postPromotions",
+        "summary": "Save a new promotion as Draft, version 1 (code unique, period, benefit, excess, quota, lock-in, applicability, vehicle lines)",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions > Add promotion\n\nAccess: write:promotions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion saved",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions > Add promotion",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "periodFrom": {
+                    "type": "string"
+                  },
+                  "periodTo": {
+                    "type": "string"
+                  },
+                  "benefit": {
+                    "type": "string"
+                  },
+                  "excess": {
+                    "type": "object",
+                    "properties": {
+                      "2": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "unitQuota": {
+                    "type": "integer"
+                  },
+                  "unitsUsed": {
+                    "type": "integer"
+                  },
+                  "lockInYears": {},
+                  "productIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "insurerIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "channelTypes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "combineDealer": {
+                    "type": "boolean"
+                  },
+                  "combineDiscount": {
+                    "type": "boolean"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "statusLabel": {
+                    "type": "string"
+                  },
+                  "lineCount": {
+                    "type": "integer"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lineNo": {
+                          "type": "integer"
+                        },
+                        "variantId": {
+                          "type": "integer"
+                        },
+                        "brand": {
+                          "type": "string"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "variant": {
+                          "type": "string"
+                        },
+                        "yearFrom": {
+                          "type": "integer"
+                        },
+                        "yearTo": {
+                          "type": "integer"
+                        },
+                        "insurerId": {},
+                        "promoOd": {
+                          "type": "number"
+                        },
+                        "minOd": {
+                          "type": "number"
+                        },
+                        "promoAon": {
+                          "type": "number"
+                        },
+                        "remitOd": {
+                          "type": "number"
+                        },
+                        "remitAon": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "id": "prm_1",
+                "code": "PRM-FORTUNER26",
+                "version": 1,
+                "name": "Fortuner launch rate",
+                "periodFrom": "2026-10-01",
+                "periodTo": "2026-12-31",
+                "benefit": "rate",
+                "excess": {
+                  "2": 2000
+                },
+                "unitQuota": 500,
+                "unitsUsed": 12,
+                "lockInYears": null,
+                "productIds": [
+                  2
+                ],
+                "insurerIds": [
+                  2,
+                  3
+                ],
+                "channelTypes": [
+                  "financing_bank",
+                  "dealer"
+                ],
+                "combineDealer": false,
+                "combineDiscount": false,
+                "status": "active",
+                "statusLabel": "Active",
+                "lineCount": 1,
+                "lines": [
+                  {
+                    "lineNo": 1,
+                    "variantId": 17,
+                    "brand": "Toyota",
+                    "model": "Fortuner",
+                    "variant": "2.4 G 4x2 AT",
+                    "yearFrom": 2026,
+                    "yearTo": 2027,
+                    "insurerId": null,
+                    "promoOd": 1.5,
+                    "minOd": 1.5,
+                    "promoAon": 0.4,
+                    "remitOd": 1.3,
+                    "remitAon": 0.3
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}": {
+      "get": {
+        "operationId": "getPromotionsId",
+        "summary": "A promotion version with its lines, the cap check of each line and every version of the code",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer"
+                              },
+                              "variantId": {
+                                "type": "integer"
+                              },
+                              "brand": {
+                                "type": "string"
+                              },
+                              "model": {
+                                "type": "string"
+                              },
+                              "variant": {
+                                "type": "string"
+                              },
+                              "yearFrom": {
+                                "type": "integer"
+                              },
+                              "yearTo": {
+                                "type": "integer"
+                              },
+                              "insurerId": {},
+                              "promoOd": {
+                                "type": "number"
+                              },
+                              "minOd": {
+                                "type": "number"
+                              },
+                              "promoAon": {
+                                "type": "number"
+                              },
+                              "remitOd": {
+                                "type": "number"
+                              },
+                              "remitAon": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "capCheck": {
+                          "type": "object",
+                          "properties": {
+                            "standardRates": {
+                              "type": "object",
+                              "properties": {
+                                "ownDamage": {
+                                  "type": "integer"
+                                },
+                                "actsOfNature": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "lineNo": {
+                                    "type": "integer"
+                                  },
+                                  "rateDiscount": {
+                                    "type": "integer"
+                                  },
+                                  "checks": {
+                                    "type": "array",
+                                    "items": {}
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "periodFrom": {
+                                "type": "string"
+                              },
+                              "periodTo": {
+                                "type": "string"
+                              },
+                              "benefit": {
+                                "type": "string"
+                              },
+                              "excess": {
+                                "type": "object",
+                                "properties": {
+                                  "2": {
+                                    "type": "integer"
+                                  }
+                                }
+                              },
+                              "unitQuota": {
+                                "type": "integer"
+                              },
+                              "unitsUsed": {
+                                "type": "integer"
+                              },
+                              "lockInYears": {},
+                              "productIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer"
+                                }
+                              },
+                              "insurerIds": {
+                                "type": "array",
+                                "items": {
+                                  "type": "integer"
+                                }
+                              },
+                              "channelTypes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "combineDealer": {
+                                "type": "boolean"
+                              },
+                              "combineDiscount": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "statusLabel": {
+                                "type": "string"
+                              },
+                              "lineCount": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1,
+                    "lines": [
+                      {
+                        "lineNo": 1,
+                        "variantId": 17,
+                        "brand": "Toyota",
+                        "model": "Fortuner",
+                        "variant": "2.4 G 4x2 AT",
+                        "yearFrom": 2026,
+                        "yearTo": 2027,
+                        "insurerId": null,
+                        "promoOd": 1.5,
+                        "minOd": 1.5,
+                        "promoAon": 0.4,
+                        "remitOd": 1.3,
+                        "remitAon": 0.3
+                      }
+                    ],
+                    "capCheck": {
+                      "standardRates": {
+                        "ownDamage": 2,
+                        "actsOfNature": 0.5
+                      },
+                      "lines": [
+                        {
+                          "lineNo": 1,
+                          "rateDiscount": 24,
+                          "checks": []
+                        }
+                      ]
+                    },
+                    "versions": [
+                      {
+                        "id": "prm_1",
+                        "code": "PRM-FORTUNER26",
+                        "version": 1,
+                        "name": "Fortuner launch rate",
+                        "periodFrom": "2026-10-01",
+                        "periodTo": "2026-12-31",
+                        "benefit": "rate",
+                        "excess": {
+                          "2": 2000
+                        },
+                        "unitQuota": 500,
+                        "unitsUsed": 12,
+                        "lockInYears": null,
+                        "productIds": [
+                          2
+                        ],
+                        "insurerIds": [
+                          2,
+                          3
+                        ],
+                        "channelTypes": [
+                          "financing_bank",
+                          "dealer"
+                        ],
+                        "combineDealer": false,
+                        "combineDiscount": false,
+                        "status": "active",
+                        "statusLabel": "Active",
+                        "lineCount": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "read:promotions",
+          "write:promotions",
+          "approve:promotions"
+        ]
+      },
+      "put": {
+        "operationId": "putPromotionsId",
+        "summary": "Change a Draft version (an approved version is amended)",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions > Edit promotion\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion saved",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions > Edit promotion",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "lineNo": {
+                          "type": "integer"
+                        },
+                        "variantId": {
+                          "type": "integer"
+                        },
+                        "brand": {
+                          "type": "string"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "variant": {
+                          "type": "string"
+                        },
+                        "yearFrom": {
+                          "type": "integer"
+                        },
+                        "yearTo": {
+                          "type": "integer"
+                        },
+                        "insurerId": {},
+                        "promoOd": {
+                          "type": "number"
+                        },
+                        "minOd": {
+                          "type": "number"
+                        },
+                        "promoAon": {
+                          "type": "number"
+                        },
+                        "remitOd": {
+                          "type": "number"
+                        },
+                        "remitAon": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "name": "Fortuner launch rate",
+                "lines": [
+                  {
+                    "lineNo": 1,
+                    "variantId": 17,
+                    "brand": "Toyota",
+                    "model": "Fortuner",
+                    "variant": "2.4 G 4x2 AT",
+                    "yearFrom": 2026,
+                    "yearTo": 2027,
+                    "insurerId": null,
+                    "promoOd": 1.5,
+                    "minOd": 1.5,
+                    "promoAon": 0.4,
+                    "remitOd": 1.3,
+                    "remitAon": 0.3
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePromotionsId",
+        "summary": "Delete a Draft version 1 that was never submitted (its maker only)",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion deleted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "write:promotions"
+        ]
+      }
+    },
+    "/promotions/{id}/amend": {
+      "post": {
+        "operationId": "postPromotionsIdAmend",
+        "summary": "Amend a promotion in force: the next version in Draft, copied from it; the current version stays in force until the new one is approved",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Version 2 created in Draft",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 2,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "draft",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/approve": {
+      "post": {
+        "operationId": "postPromotionsIdApprove",
+        "summary": "Approve a submitted promotion (approve:promotions; never its maker): Scheduled or Active; the version in force is superseded",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions > Approve\n\nAccess: approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion approved",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions > Approve",
+        "x-permissions": [
+          "approve:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Rates agreed with the insurers"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/copy": {
+      "post": {
+        "operationId": "postPromotionsIdCopy",
+        "summary": "Copy a promotion into a new Draft with a new code and period",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion saved",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER27",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "periodFrom": {
+                    "type": "string"
+                  },
+                  "periodTo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "PRM-FORTUNER27",
+                "periodFrom": "2027-01-01",
+                "periodTo": "2027-03-31"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/recall": {
+      "post": {
+        "operationId": "postPromotionsIdRecall",
+        "summary": "Recall an own submitted promotion to Draft before it is decided",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion recalled",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "draft",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/resume": {
+      "post": {
+        "operationId": "postPromotionsIdResume",
+        "summary": "Resumed a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "openQuotes": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion resumed",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  },
+                  "openQuotes": 3
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "approve:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PRMS-INSURER",
+                "note": "Rate under renegotiation with the insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/return": {
+      "post": {
+        "operationId": "postPromotionsIdReturn",
+        "summary": "Return a submitted promotion to Draft with a reason code (promotion_return) (approve:promotions; never its maker)",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions > Return\n\nAccess: approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion returned",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "draft",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions > Return",
+        "x-permissions": [
+          "approve:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PRMR-RATES",
+                "note": "Remitting rate of line 2 not agreed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/submit": {
+      "post": {
+        "operationId": "postPromotionsIdSubmit",
+        "summary": "Submit a Draft for approval: every field, line and cap check must pass",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: write:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion submitted for approval",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "pending-approval",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "write:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/suspend": {
+      "post": {
+        "operationId": "postPromotionsIdSuspend",
+        "summary": "Suspended a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "openQuotes": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion suspended",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  },
+                  "openQuotes": 3
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "approve:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PRMS-INSURER",
+                "note": "Rate under renegotiation with the insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/{id}/withdraw": {
+      "post": {
+        "operationId": "postPromotionsIdWithdraw",
+        "summary": "Withdrawn a promotion with a reason code (promotion_status) (approve:promotions); open quotations keep it until their validity ends",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: approve:promotions",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "periodFrom": {
+                          "type": "string"
+                        },
+                        "periodTo": {
+                          "type": "string"
+                        },
+                        "benefit": {
+                          "type": "string"
+                        },
+                        "excess": {
+                          "type": "object",
+                          "properties": {
+                            "2": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "unitQuota": {
+                          "type": "integer"
+                        },
+                        "unitsUsed": {
+                          "type": "integer"
+                        },
+                        "lockInYears": {},
+                        "productIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "combineDealer": {
+                          "type": "boolean"
+                        },
+                        "combineDiscount": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "openQuotes": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Promotion withdrawn",
+                  "data": {
+                    "id": "prm_1",
+                    "code": "PRM-FORTUNER26",
+                    "version": 1,
+                    "name": "Fortuner launch rate",
+                    "periodFrom": "2026-10-01",
+                    "periodTo": "2026-12-31",
+                    "benefit": "rate",
+                    "excess": {
+                      "2": 2000
+                    },
+                    "unitQuota": 500,
+                    "unitsUsed": 12,
+                    "lockInYears": null,
+                    "productIds": [
+                      2
+                    ],
+                    "insurerIds": [
+                      2,
+                      3
+                    ],
+                    "channelTypes": [
+                      "financing_bank",
+                      "dealer"
+                    ],
+                    "combineDealer": false,
+                    "combineDiscount": false,
+                    "status": "active",
+                    "statusLabel": "Active",
+                    "lineCount": 1
+                  },
+                  "openQuotes": 3
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "approve:promotions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PRMS-INSURER",
+                "note": "Rate under renegotiation with the insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/promotions/choices": {
+      "get": {
+        "operationId": "getPromotionsChoices",
+        "summary": "Choices of the promotion form and of the promotion on a quotation: Motor products, active vehicle variants, channel types, standard rates, rate change reasons",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Promotions\n\nAccess: read:promotions, write:promotions, write:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "integer"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "variants": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "integer"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "channelTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "standardRates": {
+                          "type": "object",
+                          "properties": {
+                            "ownDamage": {
+                              "type": "integer"
+                            },
+                            "actsOfNature": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "rateChangeReasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "maxLockInYears": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "products": [
+                      {
+                        "value": 2,
+                        "label": "Motor Vehicle Insurance"
+                      }
+                    ],
+                    "variants": [
+                      {
+                        "value": 17,
+                        "label": "Toyota Fortuner 2.4 G 4x2 AT"
+                      }
+                    ],
+                    "channelTypes": [
+                      {
+                        "value": "financing_bank",
+                        "label": "Financing bank"
+                      }
+                    ],
+                    "standardRates": {
+                      "ownDamage": 2,
+                      "actsOfNature": 0.5
+                    },
+                    "rateChangeReasons": [
+                      "Fleet account"
+                    ],
+                    "maxLockInYears": 3
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Promotions",
+        "x-permissions": [
+          "read:promotions",
+          "write:promotions",
+          "write:quotations"
+        ]
+      }
+    },
+    "/promotions/open": {
+      "post": {
+        "operationId": "postPromotionsOpen",
+        "summary": "Promotions open to a motor quotation document (brand-new vehicle, product, insurer, channel type, variant, year model, FMV, quota), lowest promo Own Damage rate first",
+        "tags": [
+          "Promotions"
+        ],
+        "description": "Front-end touchpoint: Create Quote > Coverage Details > Promotion\n\nAccess: read:quotations, write:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reason": {},
+                        "channelType": {
+                          "type": "string"
+                        },
+                        "promotions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "promoOd": {
+                                "type": "number"
+                              },
+                              "minOd": {
+                                "type": "number"
+                              },
+                              "promoAon": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "reason": null,
+                    "channelType": "financing_bank",
+                    "promotions": [
+                      {
+                        "code": "PRM-FORTUNER26",
+                        "version": 1,
+                        "name": "Fortuner launch rate",
+                        "promoOd": 1.5,
+                        "minOd": 1.5,
+                        "promoAon": 0.4
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Create Quote > Coverage Details > Promotion",
+        "x-permissions": [
+          "read:quotations",
+          "write:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "doc": {
+                    "type": "object",
+                    "properties": {
+                      "productType": {
+                        "type": "string"
+                      },
+                      "insurancePolicyType": {
+                        "type": "string"
+                      },
+                      "vehicleCondition": {
+                        "type": "string"
+                      },
+                      "lossAndDamageCoverage": {
+                        "type": "integer"
+                      },
+                      "channelId": {
+                        "type": "string"
+                      },
+                      "insuranceVehicleDetails": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "vehicleBrand": {
+                              "type": "string"
+                            },
+                            "vehicleModel": {
+                              "type": "string"
+                            },
+                            "modelVariant": {
+                              "type": "string"
+                            },
+                            "modelYear": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "insuranceCompanyId": {
+                    "type": "integer"
+                  },
+                  "leadId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "doc": {
+                  "productType": "Motor",
+                  "insurancePolicyType": "COMP",
+                  "vehicleCondition": "Brand New",
+                  "lossAndDamageCoverage": 1200000,
+                  "channelId": "ch_seed_tfs",
+                  "insuranceVehicleDetails": [
+                    {
+                      "vehicleBrand": "Toyota",
+                      "vehicleModel": "Fortuner",
+                      "modelVariant": "2.4 G 4x2 AT",
+                      "modelYear": 2026
+                    }
+                  ]
+                },
+                "insuranceCompanyId": 2,
+                "leadId": "ld_1"
+              }
+            }
+          }
+        }
+      }
+    },
     "/public/integrations/inbound/{connector}": {
       "post": {
         "operationId": "postPublicIntegrationsInboundConnector",
@@ -158274,6 +163477,155 @@
         ]
       }
     },
+    "/quotations/{id}/extend": {
+      "post": {
+        "operationId": "postQuotationsIdExtend",
+        "summary": "Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity\n\nAccess: extend:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotationStatus": {
+                          "type": "string"
+                        },
+                        "leadRefId": {
+                          "type": "string"
+                        },
+                        "productType": {
+                          "type": "string"
+                        },
+                        "netPremium": {
+                          "type": "integer"
+                        },
+                        "valueAddedTax": {
+                          "type": "integer"
+                        },
+                        "documentaryStampTax": {
+                          "type": "number"
+                        },
+                        "localGovernmentTax": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "totalSumInsured": {
+                          "type": "integer"
+                        },
+                        "lead": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "validUntil": {
+                          "type": "string"
+                        },
+                        "extensionCount": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Quotation valid until 09/12/2026",
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00001",
+                    "quotationStatus": "Draft",
+                    "leadRefId": "ld_1",
+                    "productType": "Motor",
+                    "netPremium": 18500,
+                    "valueAddedTax": 2220,
+                    "documentaryStampTax": 2312.5,
+                    "localGovernmentTax": 138.75,
+                    "grossPremium": 23171.25,
+                    "totalSumInsured": 1200000,
+                    "lead": {
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz"
+                    },
+                    "validUntil": "2026-12-09",
+                    "extensionCount": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Validity > Extend validity",
+        "x-permissions": [
+          "extend:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Customer waiting for the loan release"
+              }
+            }
+          }
+        }
+      }
+    },
     "/quotations/{id}/kyc-prefill": {
       "get": {
         "operationId": "getQuotationsIdKycPrefill",
@@ -158357,7 +163709,7 @@
     "/quotations/{id}/send-for-approval": {
       "post": {
         "operationId": "postQuotationsIdSendForApproval",
-        "summary": "Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team",
+        "summary": "Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)",
         "tags": [
           "Quotations"
         ],
@@ -159234,6 +164586,243 @@
             }
           }
         }
+      }
+    },
+    "/quotations/{id}/versions": {
+      "get": {
+        "operationId": "getQuotationsIdVersions",
+        "summary": "Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "currentVersion": {
+                          "type": "integer"
+                        },
+                        "versions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "version": {
+                                "type": "integer"
+                              },
+                              "current": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "quotationNumber": "QT-2026-00001",
+                    "currentVersion": 2,
+                    "versions": [
+                      {
+                        "version": 2,
+                        "current": true,
+                        "status": "Draft",
+                        "grossPremium": 23171.25
+                      },
+                      {
+                        "version": 1,
+                        "current": false,
+                        "status": "PendingCustomer",
+                        "grossPremium": 24300
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Versions",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
+    "/quotations/{id}/versions/{version}": {
+      "get": {
+        "operationId": "getQuotationsIdVersionsVersion",
+        "summary": "One version of a quotation (a superseded version is read-only)",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Versions\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotationStatus": {
+                          "type": "string"
+                        },
+                        "leadRefId": {
+                          "type": "string"
+                        },
+                        "productType": {
+                          "type": "string"
+                        },
+                        "netPremium": {
+                          "type": "integer"
+                        },
+                        "valueAddedTax": {
+                          "type": "integer"
+                        },
+                        "documentaryStampTax": {
+                          "type": "number"
+                        },
+                        "localGovernmentTax": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "totalSumInsured": {
+                          "type": "integer"
+                        },
+                        "lead": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "readOnly": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00001",
+                    "quotationStatus": "Draft",
+                    "leadRefId": "ld_1",
+                    "productType": "Motor",
+                    "netPremium": 18500,
+                    "valueAddedTax": 2220,
+                    "documentaryStampTax": 2312.5,
+                    "localGovernmentTax": 138.75,
+                    "grossPremium": 23171.25,
+                    "totalSumInsured": 1200000,
+                    "lead": {
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz"
+                    },
+                    "version": 1,
+                    "readOnly": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Versions",
+        "x-permissions": [
+          "read:quotations"
+        ]
       }
     },
     "/quotations/approve-by-customer": {

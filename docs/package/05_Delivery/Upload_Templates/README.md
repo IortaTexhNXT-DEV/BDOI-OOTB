@@ -77,6 +77,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Cost Centre master upload | No Upload button: Master > Finance > Cost Centres | `POST /api/masters/cost-centre/upload` | `Cost_Centre_Upload_Template.xlsx` |
 | Short-Period Rate master upload | No Upload button: Master > Insurance Management > Short-Period Rates | `POST /api/masters/short-period-rate/upload` | `Short_Period_Rate_Upload_Template.xlsx` |
 | Cancellation Reason master upload | No Upload button: Master > Insurance Management > Cancellation Reasons | `POST /api/masters/cancellation-reason/upload` | `Cancellation_Reason_Upload_Template.xlsx` |
+| Endorsement Type master upload | No Upload button: Master > Insurance Management > Endorsement Types | `POST /api/masters/endorsement-type/upload` | `Endorsement_Type_Upload_Template.xlsx` |
 | Claim Document Checklist master upload | No Upload button: Master > Insurance Management > Claim Document Checklist | `POST /api/masters/claim-document-requirement/upload` | `Claim_Document_Checklist_Upload_Template.xlsx` |
 | Repair Shop master upload | No Upload button: Master > Insurance Management > Repair Shops | `POST /api/masters/repair-shop/upload` | `Repair_Shop_Upload_Template.xlsx` |
 | Sales Activity Type master upload | No Upload button: Master > Organization > Sales Activity Types | `POST /api/masters/sales-activity-type/upload` | `Sales_Activity_Type_Upload_Template.xlsx` |

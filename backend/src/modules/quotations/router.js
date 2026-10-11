@@ -18,6 +18,8 @@ import { motorTariff, vehicleClass, vehicleOf } from './motorTariff.js';
 import { ownRecord, withScope, assertVisible } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as responses from './customerResponses.js';
+import * as validity from './validity.js';
+import { formatDate } from '../../lib/pdf/format.js';
 import mastersRouter from './masters.js';
 import emailRouter from './email.js';
 
@@ -144,10 +146,32 @@ define({
   method: 'PUT', path: '/:id', summary: 'Update a quotation (not once converted); premiums recalculated', screen: `${SCREEN} > Edit quote`, middleware: [...canWrite, ownRecord('quote'), validate(quoteBody)],
   request: { discount: '500', remarks: 'Loyalty discount' }, response: { ...example, success: true },
   handler: async (req, res) => {
-    const { before, after } = await svc.updateQuote(req.params.id, req.body, actor(req));
-    await audit(req, { entity: 'quotation', entityId: after.id, action: 'update', before: out(before), after: out(after) });
-    sendEntity(res, out(after), { message: 'Quotation updated' });
+    const { before, after, newVersion } = await svc.updateQuote(req.params.id, req.body, actor(req));
+    await audit(req, { entity: 'quotation', entityId: after.id, action: newVersion ? 'new-version' : 'update', before: out(before), after: out(after) });
+    sendEntity(res, out(after), { message: newVersion ? `Quotation updated as version ${after.version}` : 'Quotation updated' });
   },
+});
+define({
+  method: 'POST', path: '/:id/extend', summary: 'Extend the validity of a current quotation by quotations.extension_days, at most quotations.max_extensions times and never beyond issued date + quotations.max_validity_days (extend:quotations)',
+  screen: `${SCREEN} > Quote detail > Validity > Extend validity`, middleware: [requireAuth, requirePermission('extend:quotations'), ownRecord('quote'), validate(z.object({ remarks: z.string().trim().max(500).optional().nullable() }))],
+  request: { remarks: 'Customer waiting for the loan release' }, response: { success: true, message: 'Quotation valid until 09/12/2026', data: { ...example, validUntil: '2026-12-09', extensionCount: 1 } },
+  handler: async (req, res) => {
+    const r = await validity.extendQuote(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'extend', before: { validUntil: r.before.valid_until, extensionCount: r.before.extension_count },
+      after: { validUntil: r.after.valid_until, extensionCount: r.after.extension_count, remarks: r.after.extension_remarks } });
+    sendEntity(res, await svc.quoteById(r.after.id), { message: `Quotation valid until ${formatDate(r.validUntil)}` });
+  },
+});
+define({
+  method: 'GET', path: '/:id/versions', summary: 'Versions of a quotation (v1, v2, v3 under one quotation number): the current version and the read-only versions it superseded', screen: `${SCREEN} > Quote detail > Versions`,
+  middleware: [...canRead, ownRecord('quote')],
+  response: { success: true, data: { quotationNumber: 'QT-2026-00001', currentVersion: 2, versions: [{ version: 2, current: true, status: 'Draft', grossPremium: 23171.25 }, { version: 1, current: false, status: 'PendingCustomer', grossPremium: 24300 }] } },
+  handler: async (req, res) => res.json({ success: true, data: await validity.listVersions(req.params.id) }),
+});
+define({
+  method: 'GET', path: '/:id/versions/:version', summary: 'One version of a quotation (a superseded version is read-only)', screen: `${SCREEN} > Quote detail > Versions`,
+  middleware: [...canRead, ownRecord('quote')], response: { success: true, data: { ...example, version: 1, readOnly: true } },
+  handler: async (req, res) => sendEntity(res, await validity.versionOf(req.params.id, req.params.version)),
 });
 define({
   method: 'DELETE', path: '/:id', summary: 'Delete a Draft / Rejected / Dropped quotation', screen: `${SCREEN} > Delete`, middleware: [...canWrite, ownRecord('quote')],
@@ -173,12 +197,12 @@ for (const method of ['PUT', 'PATCH']) {
   });
 }
 define({
-  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail) and notify the Processing Team', screen: `${SCREEN} > Quote detail > Send for customer approval`,
+  method: 'POST', path: '/:id/send-for-approval', summary: 'Send the quotation to the customer for approval (signed link e-mail with the quotation slip PDF) and notify the Processing Team; with quotations.approve_before_send, a second user holding approve:quotations approves and sends a Draft (never its raiser)', screen: `${SCREEN} > Quote detail > Send for customer approval`,
   middleware: [...canWrite, ownRecord('quote')], request: { sentBy: 'agent' }, response: { success: true, message: 'Quotation sent for approval', sentTo: 'juan@example.com', approvalUrl: 'http://localhost:3000/approve-quote?token=...' },
   handler: async (req, res) => {
     const r = await svc.sendForApproval(req.params.id, req.user);
     await audit(req, { entity: 'quotation', entityId: r.after.id, action: 'send-for-approval', before: { quotationStatus: out(r.before).quotationStatus }, after: { quotationStatus: out(r.after).quotationStatus, sentTo: r.sentTo, emailSending: r.emailSending } });
-    let message = `Quotation sent to ${r.sentTo} for approval`;
+    let message = r.approved ? `Quotation approved and sent to ${r.sentTo}` : `Quotation sent to ${r.sentTo} for approval`;
     if (!r.emailSending) {
       message = `${r.sentTo ? `The e-mail to ${r.sentTo} is queued, but e-mail` : 'E-mail'} sending is not configured, so the customer has not been e-mailed. `
         + 'Share the approval link (Copy approval link) or record the customer\'s response when it comes in.';

@@ -132,7 +132,7 @@ const PlacementDetail = () => {
       { label: t("placement.decline.share"), value: x.sharePercent, type: "percent" },
       ...slipFacts().slice(0, 2),
     ],
-    input: { type: "textarea", label: t("placement.fields.reason") },
+    input: { type: "textarea", label: t("placement.fields.reason"), required: true },
     confirmLabel: t("placement.actions.recordDecline"),
     cancelLabel: t("placement.actions.back"),
   }, (reason) => placementService.declineParticipant(p.id, x.insuranceCompanyId, reason || ""), t("placement.messages.declined"));
@@ -183,7 +183,8 @@ const PlacementDetail = () => {
         {write && WITH_INSURER.includes(p.status) && <Button label={t("placement.actions.uploadEpolicy")} icon="pi pi-upload" className="ml-2" severity={p.status === "acknowledged" ? undefined : "secondary"} onClick={() => setRecording(true)} />}
         {p.status === "epolicy_received" && <Button label={t("placement.actions.checkAgainstSlip")} icon="pi pi-list-check" className="ml-2" onClick={openCheck} />}
         {canBook && <Button label={t("placement.actions.book")} icon="pi pi-verified" className="ml-2" onClick={() => setBooking({ kyc: { ...(p.kycPrefill || {}) } })} />}
-        {write && !["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={cancelSlip} />}
+        {write && !["issued", "cancelled"].includes(p.status) && (!p.sentAt || ["draft", "declined"].includes(p.status) || hasPermission("approve:policies"))
+          && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={cancelSlip} />}
       </PageHeader>
 
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
@@ -271,6 +272,7 @@ const PlacementDetail = () => {
 
       <DetailDialog header={t("placement.acknowledge.title")} visible={Boolean(acknowledging)} onHide={() => setAcknowledging(null)} size="md" className="placement-dialog"
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAcknowledging(null)} /><Button label={t("placement.actions.acknowledge")} icon="pi pi-check" loading={busy}
+          disabled={!String(acknowledging?.reference || "").trim() && !String(acknowledging?.remarks || "").trim()}
           onClick={async () => { const ok = await act(() => placementService.acknowledgePlacement(p.id, { reference: acknowledging.reference.trim() || undefined, remarks: acknowledging.remarks || undefined }),
             t("placement.messages.acknowledged")); if (ok) setAcknowledging(null); }} /></>}>
         {acknowledging && (

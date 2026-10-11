@@ -10,6 +10,7 @@ import { uploadFile } from '../documents/tabular.js';
 import { storeFile } from '../uploads/storage.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
+import * as flow from './workflow.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { endorsementDoc } from '../documents/templates.js';
 
@@ -110,8 +111,59 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
-  response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, out(await svc.getEndorsementRow(req.params.id))),
+  method: 'GET', path: '/types', summary: 'Endorsement types (Endorsement Types master, M12) that apply to the line of a policy', screen: `${SCREEN} > Summary > Endorsement types`,
+  middleware: [...canRead, ownRecord('policy', (req) => req.query.policyId)], query: { policyId: 'pol_1' },
+  response: { success: true, data: [{ code: 'CPLT', name: 'Change of Plate Number', financial: false, premiumImpact: false, section: 'vehicle' }] },
+  handler: async (req, res) => {
+    if (!req.query.policyId) throw badRequest('policyId is required');
+    res.json({ success: true, data: await flow.typesOfPolicy(await getPolicyRow(req.query.policyId)) });
+  },
+});
+define({
+  method: 'PUT', path: '/:id/types', summary: 'Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)', screen: `${SCREEN} > Summary > Endorsement types`,
+  middleware: [...canWrite, ownRecord('endorsement'), validate(z.object({ endorsementTypeCodes: z.array(z.string().min(1)).min(1) }))],
+  request: { endorsementTypeCodes: ['CPLT', 'CADR'] }, response: { ...example, endorsementTypeCodes: ['CPLT', 'CADR'], success: true },
+  handler: async (req, res) => {
+    const { before, after } = await svc.setTypes(req.params.id, req.body.endorsementTypeCodes, actor(req));
+    await audit(req, { entity: 'endorsement', entityId: after.id, action: 'types', before: { types: before.endorsement_type_codes }, after: { types: after.endorsement_type_codes } });
+    sendEntity(res, out(after), { message: 'Endorsement types saved' });
+  },
+});
+define({
+  method: 'POST', path: '/:id/submit-for-approval', summary: 'Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)', screen: `${SCREEN} > Summary > Submit for approval`,
+  middleware: [...canWrite, ownRecord('endorsement')], request: {}, response: { ...example, status: 'PendingApproval', success: true },
+  handler: async (req, res) => {
+    const e = await svc.getEndorsementRow(req.params.id);
+    await flow.submitForApproval(e, req.user);
+    const after = await svc.getEndorsementRow(e.id);
+    await audit(req, { entity: 'endorsement', entityId: e.id, action: 'submit-for-approval', before: { status: out(e).status }, after: { status: out(after).status } });
+    sendEntity(res, { ...out(after), workflow: await flow.workflowOf(after, req.user) }, { message: 'Endorsement submitted for approval' });
+  },
+});
+for (const decision of ['approve', 'reject']) {
+  define({
+    method: 'POST', path: `/:id/${decision}`, summary: decision === 'approve'
+      ? 'Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)'
+      : 'Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)',
+    screen: `${SCREEN} > Detailed view > Approval`,
+    middleware: [requireAuth, requirePermission('approve:policies'), ownRecord('endorsement'), validate(z.object({ reasonCode: z.string().max(40).optional().nullable(), note: z.string().max(2000).optional().nullable() }))],
+    request: decision === 'approve' ? {} : { reasonCode: 'ENR-DOCS', note: 'OR/CR of the new owner missing' }, response: { ...example, status: decision === 'approve' ? 'Approved' : 'Rejected', success: true },
+    handler: async (req, res) => {
+      const e = await svc.getEndorsementRow(req.params.id);
+      const reason = await flow.decide(e, { decision, reasonCode: req.body?.reasonCode, note: req.body?.note }, req.user);
+      const after = await svc.getEndorsementRow(e.id);
+      await audit(req, { entity: 'endorsement', entityId: e.id, action: decision, before: { status: out(e).status }, after: { status: out(after).status, reasonCode: reason?.code, reason: reason?.text } });
+      sendEntity(res, { ...out(after), workflow: await flow.workflowOf(after, req.user) }, { message: decision === 'approve' ? 'Endorsement approved' : 'Endorsement rejected' });
+    },
+  });
+}
+define({
+  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number) with the workflow actions open to the user; policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
+  response: { ...example, workflow: { approvalRequired: true, canSubmit: false, canApprove: true, canSend: false, canComplete: false }, success: true },
+  handler: async (req, res) => {
+    const row = await svc.getEndorsementRow(req.params.id);
+    sendEntity(res, { ...out(row), workflow: await flow.workflowOf(row, req.user) });
+  },
 });
 
 export default router;

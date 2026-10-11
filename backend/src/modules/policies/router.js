@@ -20,6 +20,8 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { placingSlipDoc, printablePolicy } from '../documents/templates.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
+import * as corrections from './corrections.js';
+import { policyVersions } from '../endorsements/workflow.js';
 
 const { router, define } = moduleRouter('Policies', '/policies');
 const SCREEN = 'Operations > Policy';
@@ -44,7 +46,7 @@ define({
   middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'policies'),
 });
 define({
-  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook',
+  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums) where policies.bulk_upload_issue is on (TISPH: off, policies are issued through the placement slip); mode=go-live loads in-force policies of the old system without bill, journal or commission (also write:data-load; refused once go-live is locked). Once go-live is locked a file with rows issued before the cutover date is refused (409): legacy business is loaded by the migration workbook',
   screen: `${SCREEN} > Bulk Upload`,
   middleware: [...canWrite, uploadFile], request: 'multipart/form-data file', response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
@@ -52,6 +54,11 @@ define({
     const mode = String(req.body?.mode || req.query.mode || '');
     if (mode && mode !== 'go-live') throw badRequest('mode must be go-live or empty');
     const migration = mode === 'go-live';
+    // TISPH (policies.bulk_upload_issue off): a policy is issued through its placement slip; the upload only loads the
+    // in-force book at go-live, by the go-live data owner (write:data-load), while the go-live lock allows it
+    if (!migration && !(await getSetting('policies.bulk_upload_issue', false))) {
+      throw badRequest('Policies are issued through the placement slip once the insurer confirms; the bulk upload only loads the in-force policies at go-live');
+    }
     const parsed = rows.map((row) => { try { return { p: svc.policyFromRow(row) }; } catch (e) { return { e }; } });
     if (migration) {
       if (!hasPermission(req.user, 'write:data-load')) throw forbidden('Loading the policies of the old system needs the permission to load migration data (write:data-load)');
@@ -173,9 +180,62 @@ define({
         throw forbidden('Only finance can change the payment status; record the payment on the Payment screen for finance to verify');
       }
     }
+    await corrections.assertEditable(pool, await svc.getPolicyRow(req.params.id), req.body);
     const { before, after } = await svc.updatePolicy(req.params.id, req.body, actor(req));
     await audit(req, { entity: 'policy', entityId: after.id, action: 'update', before: out(before), after: out(after) });
     sendEntity(res, out(after), { message: 'Policy updated' });
+  },
+});
+define({
+  method: 'GET', path: '/:id/versions', summary: 'Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)', screen: `${SCREEN} > Policy detail > Endorsements`,
+  middleware: [...canRead, ownRecord('policy')],
+  response: { success: true, data: [{ version: 2, endorsementNumber: 'END-2026-00001', premiumDelta: 1520.5, before: { grossPremium: 23171.25 }, after: { grossPremium: 24691.75 } }] },
+  handler: async (req, res) => res.json({ success: true, data: await policyVersions(await svc.getPolicyRow(req.params.id)) }),
+});
+const correctionExample = { id: 'pcr_1', policyId: 'pol_1', status: 'pending', statusLabel: 'Pending approval', changes: [{ field: 'expiry', label: 'Expiry date', from: '2027-10-01', to: '2027-10-02', fromText: '01/10/2027', toText: '02/10/2027' }],
+  reasonCode: 'PCR-INSURER', reason: 'Insurer issued a corrected policy', insurerReference: 'MAL-END-2026-0042', requestedBy: 'Maria Santos', requestedAt: '2026-10-10T02:00:00Z' };
+define({
+  method: 'GET', path: '/:id/corrections', summary: 'Corrections of the core data of a policy (requested, approved, rejected), newest first', screen: `${SCREEN} > Policy detail > Corrections`,
+  middleware: [...canRead, ownRecord('policy')], response: { success: true, data: [correctionExample] },
+  handler: async (req, res) => res.json({ success: true, data: await corrections.listCorrections(req.params.id) }),
+});
+define({
+  method: 'POST', path: '/:id/corrections', summary: 'Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer\'s reference (policies.correction_insurer_fields); applied once a second user approves it',
+  screen: `${SCREEN} > Policy detail > Request correction`,
+  middleware: [...canWrite, ownRecord('policy'), validate(z.object({ changes: z.record(z.any()), reasonCode: z.string().min(1).max(40), note: z.string().max(2000).optional().nullable(),
+    insurerReference: z.string().max(120).optional().nullable() }))],
+  request: { changes: { expiry: '2027-10-02' }, reasonCode: 'PCR-INSURER', note: 'Corrected policy issued by the insurer', insurerReference: 'MAL-END-2026-0042' },
+  response: { success: true, message: 'Correction requested', data: correctionExample },
+  handler: async (req, res) => {
+    const r = await corrections.requestCorrection(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'policy', entityId: r.policy.id, action: 'correction-request', after: r.correction });
+    res.status(201).json({ success: true, message: 'Correction requested: a second user approves it', data: r.correction });
+  },
+});
+const decide = (decision) => async (req, res) => {
+  const r = await corrections.decideCorrection(req.params.id, req.params.correctionId, { decision, reasonCode: req.body?.reasonCode, note: req.body?.note }, req.user);
+  await audit(req, { entity: 'policy', entityId: r.policy.id, action: decision === 'approve' ? 'correction-approve' : 'correction-reject',
+    before: decision === 'approve' ? out(r.before) : null, after: decision === 'approve' ? { ...out(r.after), correctionId: r.correction.id } : { correctionId: r.correction.id, reason: r.correction.decisionReason } });
+  res.json({ success: true, message: decision === 'approve' ? 'Correction approved and applied' : 'Correction rejected', data: r.correction });
+};
+define({
+  method: 'POST', path: '/:id/corrections/:correctionId/approve', summary: 'Approve a pending correction and apply it to the policy (approve:policies; never the requester)', screen: `${SCREEN} > Policy detail > Corrections`,
+  middleware: [requireAuth, requirePermission('approve:policies'), ownRecord('policy')], request: {}, response: { success: true, message: 'Correction approved and applied', data: { ...correctionExample, status: 'approved' } },
+  handler: decide('approve'),
+});
+define({
+  method: 'POST', path: '/:id/corrections/:correctionId/reject', summary: 'Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)', screen: `${SCREEN} > Policy detail > Corrections`,
+  middleware: [requireAuth, requirePermission('approve:policies'), ownRecord('policy'), validate(z.object({ reasonCode: z.string().min(1).max(40), note: z.string().max(2000).optional().nullable() }))],
+  request: { reasonCode: 'PCRR-NOPROOF', note: 'No corrected policy from the insurer yet' }, response: { success: true, message: 'Correction rejected', data: { ...correctionExample, status: 'rejected' } },
+  handler: decide('reject'),
+});
+define({
+  method: 'POST', path: '/:id/corrections/:correctionId/withdraw', summary: 'Withdraw an own pending correction', screen: `${SCREEN} > Policy detail > Corrections`,
+  middleware: [...canWrite, ownRecord('policy')], request: {}, response: { success: true, message: 'Correction withdrawn', data: { ...correctionExample, status: 'withdrawn' } },
+  handler: async (req, res) => {
+    const r = await corrections.withdrawCorrection(req.params.id, req.params.correctionId, req.user);
+    await audit(req, { entity: 'policy', entityId: r.policy.id, action: 'correction-withdraw', after: { correctionId: r.correction.id } });
+    res.json({ success: true, message: 'Correction withdrawn', data: r.correction });
   },
 });
 define({

@@ -41,6 +41,12 @@ export const AUTHORITY_STEPS = {
   remittance: { step: 'Accounts > Remittance > Approvals', permissions: ['approve:remittance'] },
   remittance_settlement: { step: 'Accounts > Remittance > Approvals (settlement, adjustment, transfer)', permissions: ['approve:remittance'] },
   underwriting_referral: { step: 'Operations > Sales & Marketing > Quotations > Underwriting referral', permissions: ['write:quotations'], ruleRoles: true },
+  // the discount of a promotion above the maker's limit, decided on the underwriting referral (PROD-15)
+  quotation_discount: { step: 'Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)', permissions: ['approve:quotations'] },
+  // the check of the e-policy against the placement slip, by sum insured (ISSUE-04)
+  policy_issue: { step: 'Operations > Sales & Marketing > Placement Slips > Check against slip', permissions: ['approve:policies'] },
+  // the approval or booking of an endorsement or cancellation that returns premium (ENDT-02, CANC-03)
+  return_premium: { step: 'Operations > Policy > Endorsement approval and booking', permissions: ['write:endorsements', 'approve:policies'] },
 };
 
 const money = (v) => (v === null || v === undefined || v === '' ? null : Math.round(Number(v) * 100) / 100);

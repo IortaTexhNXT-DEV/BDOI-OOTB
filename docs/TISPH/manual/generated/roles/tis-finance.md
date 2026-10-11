@@ -83,6 +83,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Accounting Flow | View |
 | Master > Finance | Financial Statement Versions | Create and edit |
 | Master > Finance | Premium Taxes & LGU Rates | View |
+| Master > Finance | Discount Caps | View |
 | Master > Finance | Taxation | View |
 | Master > Finance | Close Checklist | View |
 | Master > Finance | Cost Centres | View |
@@ -103,6 +104,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Payments |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
@@ -146,6 +148,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Taxation, Close Checklist, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
+| Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Posting rules and account determination | Create and edit | Propose changes to posting rules and account determination | Account Determination, Posting Rules and Configuration Approvals |
 | Master data and configuration | Posting rules and account determination | Approve | Approve changes to posting rules and account determination (not the requester) |  |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
@@ -200,6 +203,8 @@ Who approves the work of this role:
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

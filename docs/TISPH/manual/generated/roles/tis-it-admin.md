@@ -7,10 +7,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
 | Operations > Sales & Marketing | Prospects | View |
-| Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Quotations | View |
+| Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Placement Slips | View |
-| Operations > Sales & Marketing | Dealer Programmes | Create and edit |
+| Operations > Sales & Marketing | Dealer & Bank Programmes | Create and edit |
 | Operations | Clients | View |
 | Operations | Policy | View |
 | Operations | Claims | View |
@@ -74,6 +74,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Vehicle | Create and edit |
 | Master > Insurance | Short-Period Rates | Create and edit |
 | Master > Insurance | Cancellation Reasons | Create and edit |
+| Master > Insurance | Endorsement Types | Create and edit |
 | Master > Insurance | Claim Document Checklist | Create and edit |
 | Master > Insurance | Repair Shops | Create and edit |
 | Master > Insurance | Lead Sources | Create and edit |
@@ -124,8 +125,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Requests for Quotation, Quotations and Placement Slips |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |  |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
@@ -147,7 +148,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping and Risk Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
@@ -184,6 +185,8 @@ Who approves the work of this role:
 | Data migration and go-live | Approve another user's data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock | TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
+| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

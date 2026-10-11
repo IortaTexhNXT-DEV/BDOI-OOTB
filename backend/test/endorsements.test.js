@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutCommissionTaxes, withOwnDamageOnly } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes, withOwnDamageOnly, withDirectEndorsements } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -45,6 +45,7 @@ async function persona(username, roles) {
 beforeAll(async () => {
   ctx = await setup();
   await withoutCommissionTaxes();
+  await withDirectEndorsements();
   // the sample motor policies the figures below start from, reduced to own damage only
   await withOwnDamageOnly('pol_sls_01', 1200000, 2);
   await withOwnDamageOnly('pol_sls_02', 980000, 1.75);

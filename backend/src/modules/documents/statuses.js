@@ -9,7 +9,7 @@ const QUOTE = {
 };
 const POLICY = { active: 'Active', issued: 'Active', expired: 'Expired', cancelled: 'Cancelled', renewed: 'Renewed', suspended: 'Suspended', draft: 'Draft' };
 const ENDORSEMENT = {
-  draft: 'Draft', submitted: 'PendingCustomer', 'cancel-initiated': 'InitiateCancel', approved: 'Approved', completed: 'Completed',
+  draft: 'Draft', 'for-approval': 'PendingApproval', submitted: 'PendingCustomer', 'cancel-initiated': 'InitiateCancel', approved: 'Approved', completed: 'Completed',
   cancelled: 'Cancelled', rejected: 'Rejected',
 };
 

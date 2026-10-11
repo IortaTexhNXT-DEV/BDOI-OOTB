@@ -50,7 +50,7 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **Category** | Yes | **Retail** (a person) or **Corporate** (a company) | A corporate prospect asks for the company name instead of the personal details |
 | **First name**, **Last name**, **Preferred name** | Yes | As on the client's ID | |
 | **Date of birth**, **Gender** | Yes | | |
-| **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
+| **E-mail** | Yes | The e-mail address | Used for the quotation approval link |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
 | **Customer Type** | No | **TFS**, **Non-TFS** or **Direct Customer** | |
@@ -72,20 +72,112 @@ The **Account** section shows the customer type, the source, the disposition of 
 
 Only the roles allowed to delete prospects see **Delete**, and a prospect with a policy is never deleted: set it to **Lost** instead. A **Converted** prospect keeps its status. A prospect not converted and not changed for 90 days is closed as **Lost** by the daily job. Every change is kept in the history of the prospect.
 
-## Quick Quote {#quick-quote}
+## Lead Assignment {#lead-assignment}
 
-Quick Quote prices a package product on the spot from the product's rates, without the steps of a full quotation: for example Compulsory Credit Life, Personal Accident or Parcel / Courier Insurance.
+Lead Assignment decides who works each prospect.
 
-{{screen:/sales/quick-quote}}
+{{screen:/sales/lead-assignment}}
 
-1. Choose {{menu:/sales/quick-quote}}.
-2. In **Line of Business**, choose the line; in **Product**, choose the package product. Only package products are offered.
-3. Choose the plan or package and enter the details the product asks for (insured, sum insured or plan, period).
-4. Check the premium shown with its taxes and create the quotation.
+The screen has three tabs:
 
-The quotation is created in **Draft** on [Quotations](#quotations) and follows the same steps as any quotation. When a product has no quick quote on this build (for example **Credit Life - Compulsory**), the screen says so and offers **Request quotation**, which opens a request for quotation to the insurers. For a product that is not a package, use **Request for Quotation (non-package)** at the top of the screen, which opens [Requests for quotation](#requests-for-quotation-broker-slips).
+- **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
+- **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
+- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. The conditions include the **Insurance provider** and the **Customer type** of the prospect, so the TFS accounts of each insurer go to that insurer's group of account executives. **Method** is **Round robin** between the rule's **Account executives**, **Load** (the one with the fewest open prospects) or a fixed account executive. **Bandwidth** caps the open prospects one account executive may hold under the rule; when all are full the prospect waits in the queue. **Add rule** creates a rule; the switch in **Active** turns it off.
 
-![Operations > Sales & Marketing > Quick Quote](images/screens-operations/quick-quote.png)
+A prospect with an insurance provider is reassigned only to an account executive of that insurer's rules. A prospect still **New** three working days (72 hours, weekends and holidays not counted) after it was assigned goes to the **Reassignment Queue** and the lead assignment team is told.
+
+At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
+
+![Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](images/screens-operations/assignment-rules.png)
+
+## Sales activities {#sales-activities}
+
+Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
+
+{{screen:/sales/activities}}
+
+{{screen:/master/organization/sales-activity-types}}
+
+{{screen:/master/organization/sales-activity-outcomes}}
+
+The cards count **Activities**, **Account executives**, **Positive outcomes**, **Follow-ups open** and **Follow-ups overdue**. The **Activities** tab lists **Date and time**, **Activity type**, **Subject**, **Record**, **Account executive**, **Outcome**, **Next step** and **Follow-up**, filtered by account executive, activity type and outcome. The **Activity Report** tab totals the activities per account executive (calls, meetings, e-mails, visits; on prospects, clients and quotations; positive outcomes; next steps done, open and overdue), by activity type and by outcome. **Export to Excel** downloads the list.
+
+To log an activity, open the prospect, client or quotation, select the activity log and enter the **Activity type**, **Subject**, date and time, **Outcome** and, if there is one, the **Next step** with its follow-up date. The next step appears in [My Work](#my-work) on its date.
+
+The activity types (phone call, meeting, e-mail, visit, proposal presentation) and outcomes are kept on {{menu:/master/organization/sales-activity-types}} and {{menu:/master/organization/sales-activity-outcomes}}, by {{roles:write:masters}}.
+
+![Operations > Sales & Marketing > Sales Activities](images/screens-operations/sales-activities.png)
+
+## Quotations {#quotations}
+
+The quotation (quotation slip) is the offer given to the client: the insurer, the covers and the premium with its taxes.
+
+{{screen:/agent/Quotation}}
+
+The cards count **Total Quotations**, **Active Quotations**, **Pending Review**, **Approved Quotations** (with the approval rate), **Converted to Policy** and the **Average Premium**. The list shows **Quote ID** (QT-YYYY-NNNNN), **Prospect Name**, **Policy Type**, **Gross premium**, **Date**, **Status** and **Actions** (**View Details**; **Edit Quotation** while the quotation can still be changed).
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Saved, not yet sent to the client |
+| **Pending Customer** | Sent to the client for approval |
+| **Customer Accepted** | The client accepted; the placement slip is raised |
+| **Submitted to Insurer** | The placement slip has gone to the insurer |
+| **Approved** | Approved by {{roles:approve:quotations}}, a user other than the one who created it |
+| **Rejected** | Turned down, with a reason |
+| **Expired** | Not accepted or converted within its validity; it cannot be reopened |
+| **Converted to Policy** | The insurer's policy has been booked |
+
+![Operations > Sales & Marketing > Quotations](images/screens-operations/quotations-list.png)
+
+The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Approve and send to client** on a draft (a user other than the raiser), **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation](#process-quotation).
+
+![A motor quotation waiting for the client, with Copy approval link and Record customer response](images/screens-operations/quotation-pending-customer.png)
+
+### Validity, extension and versions {#quotation-validity-and-versions}
+
+A quotation is valid for the days set on its product (**Quotation validity (days)** on the Product Master), else for 30 days, counted from the day it is issued; it stays valid through its last day. The section **Validity and versions** of the quotation page shows the **Version**, **Issued on**, **Valid until**, the days left (or **Expired**) and the **Longest validity**.
+
+- Five days before the end of the validity the owner of the quotation is reminded under **My Work**; a client who has the quotation for approval is reminded by e-mail.
+- **Extend validity** (for {{roles:extend:quotations}}) adds 30 days once, never beyond 60 days from the day the quotation was issued. Enter the remarks and select **Extend validity**; **Extended on** and **Extended by** are then shown.
+- The day after the last valid day the quotation becomes **Expired**. A quotation whose placement slip is already with the insurer is followed on the placement slip instead.
+- Changing a quotation the client has already received keeps the terms the client saw as a read-only version and makes the change the next version (version 2, version 3) of the same quotation number, back in **Draft**: send it to the client again. The earlier link sent to the client stops working. The versions are listed with their status and gross premium; **View** shows a superseded version as it was. A quotation with an open placement slip cannot be changed: cancel the placement slip first.
+
+### Credit Life quotation {#credit-life-quotation}
+
+Credit Life new business (the complimentary cover of a TFS motor loan) takes no quotation: choosing it under **Create Quote** opens the direct placement. A Credit Life quotation is raised at renewal, on the voluntary product.
+
+1. Choose {{menu:/agent/Quotation}}, select **Create Quote** and choose Credit Life, then the voluntary product (or **Add Quote** on the prospect).
+2. Choose the borrower (client or prospect) and the **Insurer**, and enter the **TFS loan account no.**, the **Borrower's date of birth**, the **TFS accounts**, the **Pending balance**, the **Term (years)** of the loan (1 to 5) and the **Sum insured** (empty: PHP 1,000,000.00).
+3. Select **Create quotation**. The premium is 3.68 per 1,000 of sum insured; the rate cannot be changed.
+
+The quotation is refused for a corporate account, a borrower aged 65 or over, more than 6 TFS accounts, a pending balance, an agent or referrer, or a loan account that already has an open quotation. A sum insured below PHP 1,000,000.00 is referred: it is sent to the client only once {{roles:approve:quotations}} other than the raiser approves it in **Underwriting referral**. The quotation page shows the Credit Life terms in **Credit Life**.
+
+### Promotion of a motor quotation {#quotation-promotion}
+
+A promotion gives a brand-new vehicle the reduced rates agreed with the insurers (see [Promotions](#promotions)). The quotation must be **Comprehensive**, the **Vehicle condition** **Brand New**, the model year not older than the year before the policy year, and the vehicle, insurer and channel (dealer, financing bank, affinity partner, agent or referrer, direct) must be those of the promotion.
+
+1. Open the motor quotation and select **Find promotion** in **Promotion**. The promotions open to the vehicle are listed with their rates; when none is open the reason is shown.
+2. Select **Apply**. The quotation is priced again at the promotion rates. **Promotion** shows the **Gross premium at the standard rates**, the **Promotion discount** in PHP and percent, the **Total discount**, the **Discount cap** and the **Promo excess**.
+3. To use the standard rates again select **Remove promotion**.
+
+The discount (promotion and order summary discount together) must stay within the [discount cap](#discount-caps) of the product and channel; an order summary discount is refused when the promotion is not combinable with one. A discount above the maker's **Quotation discount** limit (Authority Matrix) is referred: a user whose limit covers it approves it in **Underwriting referral**. {{roles:write:promotion-rates}} may lower the **Own Damage rate** to the minimum of the promotion with **Change promo rate** and a reason.
+
+A quotation keeps its promotion until its validity ends, even when the promotion is suspended or ends; when the promotion has a new version the quotation is priced at the new rates the next time it is changed. On conversion to a policy one unit of the promotion's quota is counted; a chassis number already on an earlier policy is refused. The policy shows the promotion it was issued with; a cancellation from inception gives the unit back.
+
+### Create a motor quotation {#create-a-motor-quotation}
+
+A motor quotation is made for a prospect and has four steps: **Policy details**, **Coverage**, **Accessories** and **Summary**. Nothing is saved until the last step, so you can move with **Back** and **Next**.
+
+1. Choose {{menu:/agent/leadlisting}} and open the prospect (or select **Create Quote** on {{menu:/agent/Quotation}}, choose the motor product and then the prospect).
+2. Select **Add Quote**. In **Line of Business**, choose **Motor**; in **Product**, choose the motor product. Select **Continue**.
+3. **Policy details**: choose the insurer (**Select Insurance Company**, or **Co-Insurance** for several insurers), the **Insurance Policy Type**, the **Referrer (agent / account code)** if any, and the **Payment Type** (required). Under **Insurance Vehicle Details**, choose **Vehicle Type** (the tariff class), **Vehicle Brand**, **Vehicle use**, **Model Year**, **Vehicle Model**, **Model Variant**, **Vehicle Color** and **Seating Capacity** from the vehicle master. Under **Risk details for the product rules**, enter the **Fair market value of the vehicle**, the **Claims in the last 3 years** and the **Driver's date of birth** (required: the acceptance rules of the product check them), and if they apply **The vehicle has modifications**, **Claim-free years (NCB)** and **Vehicles in the fleet**. Select **Next**.
+4. **Coverage**: the mandatory covers of the product are always included; tick the optional covers to quote. Enter the own damage sum insured (the invoice price for a new car) and rates, acts of nature, the bodily injury and property damage limits, auto passenger personal accident per seat, and CTPL for 1 or 3 years at the Insurance Commission tariff. Select **Calculate**; **Override** lets an authorised user change a computed premium.
+5. **Accessories**: add the accessories with their value, if any.
+6. **Summary**: check the premium (net premium, DST, VAT, LGT, gross premium) and complete the quotation.
+
+The quotation is created in **Draft**. Another user holding the quotation approval opens it and selects **Approve and send to client**.
+
+![Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](images/screens-operations/motor-quotation-policy-details.png)
 
 ## Requests for quotation (broker slips) {#requests-for-quotation-broker-slips}
 
@@ -119,44 +211,21 @@ On the request, the tabs are **Market responses**, **Compare offers**, **Risk an
 
 The buttons of the request are **Print slip**, **Client comparison report** (see [Comparison Reports](#comparison-reports)), **Add insurer**, **Close (not taken up)** and **Cancel slip**. The stepper at the top shows the journey: **Request for Quotation**, **Quotation Slip**, **Placement raised**, **Insurer issued (Booked)**.
 
-## Quotations {#quotations}
+## Comparison Reports {#comparison-reports}
 
-The quotation (quotation slip) is the offer given to the client: the insurer, the covers and the premium with its taxes.
+Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
 
-{{screen:/agent/Quotation}}
+{{screen:/sales/comparison-reports}}
 
-The cards count **Total Quotations**, **Active Quotations**, **Pending Review**, **Approved Quotations** (with the approval rate), **Converted to Policy** and the **Average Premium**. The list shows **Quote ID** (QT-YYYY-NNNNN), **Prospect Name**, **Policy Type**, **Gross premium**, **Date**, **Status** and **Actions** (**View Details**; **Edit Quotation** while the quotation can still be changed).
+The list shows **Report**, **Prepared for**, **Compared**, **Options**, **Recommended**, **Sent** and **Status**.
 
-| Status | Meaning |
-|---|---|
-| **Draft** | Saved, not yet sent to the client |
-| **Pending Customer** | Sent to the client for approval |
-| **Customer Accepted** | The client accepted; the placement slip is raised |
-| **Submitted to Insurer** | The placement slip has gone to the insurer |
-| **Approved** | Approved by {{roles:approve:quotations}}, a user other than the one who created it |
-| **Rejected** | Turned down, with a reason |
-| **Converted to Policy** | The insurer's policy has been booked |
+1. Select **New report**.
+2. In **Compared**, choose **Request for quotation** (its insurers' offers become the options) or **Quotations** (quotations of the same client).
+3. Choose the request for quotation. A request with fewer than two offers cannot be compared yet.
+4. Select **Prepare**. Mark the recommended option and write the reasons.
+5. Print the report on the letterhead or e-mail it to the client. The report is marked sent.
 
-![Operations > Sales & Marketing > Quotations](images/screens-operations/quotations-list.png)
-
-The quotation page has the tabs **Details**, **Activities** and **Audit Trail**. **Details** shows the placement journey, the policy details (insurer, co-insurance, policy type, referrer), the assured, the vehicle (for motor), the coverage details and the payment details: **NET Premium**, **DST (12.5%)**, **VAT (12%)**, **LGT (0.75%)**, **Others**, **Discount** and **Gross premium**. The actions depend on the status: **Send for Customer Approval** on a draft, **Copy approval link** and **Record customer response** while it waits for the client, **Proceed to Policy** once accepted. See [Quotation and request for quotation](#process-quotation).
-
-![A motor quotation waiting for the client, with Copy approval link and Record customer response](images/screens-operations/quotation-pending-customer.png)
-
-### Create a motor quotation {#create-a-motor-quotation}
-
-A motor quotation is made for a prospect and has four steps: **Policy details**, **Coverage**, **Accessories** and **Summary**. Nothing is saved until the last step, so you can move with **Back** and **Next**.
-
-1. Choose {{menu:/agent/leadlisting}} and open the prospect (or select **Create Quote** on {{menu:/agent/Quotation}}, choose the motor product and then the prospect).
-2. Select **Add Quote**. In **Line of Business**, choose **Motor**; in **Product**, choose the motor product. Select **Continue**.
-3. **Policy details**: choose the insurer (**Select Insurance Company**, or **Co-Insurance** for several insurers), the **Insurance Policy Type**, the **Referrer (agent / account code)** if any, and the **Payment Type** (required). Under **Insurance Vehicle Details**, choose **Vehicle Type** (the tariff class), **Vehicle Brand**, **Vehicle use**, **Model Year**, **Vehicle Model**, **Model Variant**, **Vehicle Color** and **Seating Capacity** from the vehicle master. Under **Risk details for the product rules**, enter the **Fair market value of the vehicle**, the **Claims in the last 3 years** and the **Driver's date of birth** (required: the acceptance rules of the product check them), and if they apply **The vehicle has modifications**, **Claim-free years (NCB)** and **Vehicles in the fleet**. Select **Next**.
-4. **Coverage**: the mandatory covers of the product are always included; tick the optional covers to quote. Enter the own damage sum insured (the invoice price for a new car) and rates, acts of nature, the bodily injury and property damage limits, auto passenger personal accident per seat, and CTPL for 1 or 3 years at the Insurance Commission tariff. Select **Calculate**; **Override** lets an authorised user change a computed premium.
-5. **Accessories**: add the accessories with their value, if any.
-6. **Summary**: check the premium (net premium, DST, VAT, LGT, gross premium) and complete the quotation.
-
-The quotation is created in **Draft**. Open it and select **Send for Customer Approval** to send it to the client.
-
-![Create Quote, step 1 Policy details: insurer, vehicle and the risk details of the product rules](images/screens-operations/motor-quotation-policy-details.png)
+![New report: the request for quotation whose offers are compared](images/screens-operations/comparison-report-new.png)
 
 ## Placement Slips {#placement-slips}
 
@@ -185,7 +254,7 @@ A placement slip is raised by the client's acceptance of a quotation, or directl
 
 Select **Create Placement Slip**. The status is **Placement raised**.
 
-On the placement slip the buttons follow the status: **Edit participants** and **Send to insurer(s)** (placement raised), **Record acknowledgement**, **Upload e-policy** or **Record decline** (sent), **Check against slip** (e-policy received), **Book (Insurer issued)** (checked), and at every step **Print slip** and **Cancel slip**. The page shows the stepper, the **e-Policy** panel with the result of the comparison, the **Security (participating insurers)** with each insurer's share, premium, taxes, commission and policy number, the **Premium** breakdown, the **Summary**, the **Risk** and the **History**.
+On the placement slip the buttons follow the status: **Edit participants** and **Send to insurer(s)** (placement raised), **Record acknowledgement**, **Upload e-policy** or **Record decline** (sent), **Check against slip** (e-policy received), **Book (Insurer issued)** (checked), and at every step **Print slip** and **Cancel slip**. **Record acknowledgement** takes the insurer's reference or a remark, **Record decline** and **Cancel slip** a reason. Once sent to the insurer, a placement slip is cancelled only by {{roles:approve:policies}}, never by the user who raised it, and each insurer holding it is e-mailed the cancellation. The page shows the stepper, the **e-Policy** panel with the result of the comparison, the **Security (participating insurers)** with each insurer's share, premium, taxes, commission and policy number, the **Premium** breakdown, the **Summary**, the **Risk** and the **History**.
 
 The check against the slip compares the net and gross premium, the sum insured, the commission, the effective and expiry dates, the insured and, for motor, the chassis, engine and plate numbers. Amounts within PHP 1.00 of the slip match. The check is decided by {{roles:approve:policies}}, never by the user who recorded the e-policy: **Confirm check**, **Accept differences** (with a reason) or **Return to insurer** (with a reason). See [Placement with the insurer](#process-placement) and [Book the policy](#process-booking).
 
@@ -206,27 +275,9 @@ The placement slip becomes **e-Policy received** and opens afterwards for the ch
 
 ![Record e-Policy: the placement slips waiting for the insurer's e-policy](images/screens-operations/record-epolicy.png)
 
-## Lead Assignment {#lead-assignment}
+## Dealer & Bank Programmes {#dealer-programmes}
 
-Lead Assignment decides who works each prospect.
-
-{{screen:/sales/lead-assignment}}
-
-The screen has three tabs:
-
-- **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
-- **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
-- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. The conditions include the **Insurance provider** and the **Customer type** of the prospect, so the TFS accounts of each insurer go to that insurer's group of account executives. **Method** is **Round robin** between the rule's **Account executives**, **Load** (the one with the fewest open prospects) or a fixed account executive. **Bandwidth** caps the open prospects one account executive may hold under the rule; when all are full the prospect waits in the queue. **Add rule** creates a rule; the switch in **Active** turns it off.
-
-A prospect with an insurance provider is reassigned only to an account executive of that insurer's rules. A prospect still **New** three working days (72 hours, weekends and holidays not counted) after it was assigned goes to the **Reassignment Queue** and the lead assignment team is told.
-
-At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
-
-![Lead Assignment, Assignment Rules: TFS referrals by office, shared round robin](images/screens-operations/assignment-rules.png)
-
-## Dealer Programmes {#dealer-programmes}
-
-Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
+Choose Operations > Sales & Marketing > Dealer & Bank Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
 
 {{screen:/sales/dealer-programmes}}
 
@@ -253,51 +304,34 @@ The **Dealer Sales Upload** tab takes the dealer's sales file: choose the progra
 
 ![Add programme: the terms of a dealer programme](images/screens-operations/dealer-programme-add.png)
 
-## Comparison Reports {#comparison-reports}
+## Promotions {#promotions}
 
-Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
+Choose Operations > Sales & Marketing > Promotions. A promotion offers reduced rates, or a gross premium discount, on brand-new vehicles of selected variants for a period.
 
-{{screen:/sales/comparison-reports}}
+{{screen:/sales/promotions}}
 
-The list shows **Report**, **Prepared for**, **Compared**, **Options**, **Recommended**, **Sent** and **Status**.
+The list shows **Code**, **Name**, **Products**, **Insurers**, **Channel types**, **Period**, **Variants**, **Version**, **Units / quota** and **Status** (**Draft**, **Pending approval**, **Scheduled**, **Active**, **Suspended**, **Expired**, **Withdrawn**). Filter it by status, or search by code or name; **View** opens a promotion.
 
-1. Select **New report**.
-2. In **Compared**, choose **Request for quotation** (its insurers' offers become the options) or **Quotations** (quotations of the same client).
-3. Choose the request for quotation. A request with fewer than two offers cannot be compared yet.
-4. Select **Prepare**. Mark the recommended option and write the reasons.
-5. Print the report on the letterhead or e-mail it to the client. The report is marked sent.
+**Add promotion** ({{roles:write:promotions}}) opens the form:
 
-![New report: the request for quotation whose offers are compared](images/screens-operations/comparison-report-new.png)
+| Tab | Field | What to enter | Rule |
+|---|---|---|---|
+| General | **Code**, **Name** | For example PRM-FORTUNER26 | Capital letters, digits and hyphens, 3 to 20 characters, unique; the code cannot change after the first save |
+| General | **Period from**, **Period to** | The days the promotion is offered | At most 12 months; it cannot start before today when submitted |
+| General | **Promo benefit** | **Promo rate** (reduced Own Damage and Acts of Nature rates) or **Gross premium discount %** | Cannot change on a new version |
+| General | **Unit quota**, **Lock-in (years)** | The vehicles that may be insured with it; the years its rate is kept on renewal | Quota a whole number of 1 or more; lock-in 1 to 3 years |
+| General | **Promo excess** | The Own Damage and Theft deductible per product while the promotion applies | |
+| Applicability | **Products**, **Insurers**, **Channel types** | Where the promotion is offered | Motor products only; each product and channel type needs an approved [discount cap](#discount-caps) |
+| Applicability | **Can be combined with a Dealer Programme**, **with an Order Summary discount** | | Both off by default |
+| Vehicle variants & rates | **Vehicle**, **Year model from / to**, **Insurer** (empty: every insurer of the promotion), **Promo OD %**, **Min OD %**, **Promo AON %**, **Remit OD %**, **Remit AON %** (or **Discount %**) | One line per variant | Rates above 0 and at most 100 with up to 4 decimals; a remitting rate not above the promo rate; Min OD % not above Promo OD %; no two lines for the same variant, year models and insurer |
 
-## Campaigns {#campaigns}
+**Save draft** keeps the promotion as **Draft**, version 1. The promotion page shows each line with its **Rate discount** (against the standard rates of 2% Own Damage and 0.5% Acts of Nature) and its **Cap check** for each product and channel type: **Within cap**, **Above max**, **Below min**, **Below lowest OD rate** or **No cap**.
 
-Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force and who have an e-mail address. Everyone else is left out and recorded with the reason.
-
-{{screen:/sales/campaigns}}
-
-The screen has four tabs: **Campaigns**, **Segments** (who receives a campaign, for example "Motor clients renewing in 60 days"), **Templates** (the e-mail texts) and **Marketing consents** (the consent of each client and prospect: **Recorded** with how it was given, or **Not Recorded**).
-
-To create a campaign, select **New campaign** and enter **Name**, **Segment**, **Template** and **Notes**, then **Save**. The campaign is **Draft**; schedule it for a date and time (**Scheduled**) or send it. The list shows **Recipients** and **Excluded** for each campaign. Every e-mail carries an opt-out link; an opt-out ends the consent.
-
-![Operations > Sales & Marketing > Campaigns](images/screens-operations/campaigns.png)
-
-## Sales activities {#sales-activities}
-
-Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
-
-{{screen:/sales/activities}}
-
-{{screen:/master/organization/sales-activity-types}}
-
-{{screen:/master/organization/sales-activity-outcomes}}
-
-The cards count **Activities**, **Account executives**, **Positive outcomes**, **Follow-ups open** and **Follow-ups overdue**. The **Activities** tab lists **Date and time**, **Activity type**, **Subject**, **Record**, **Account executive**, **Outcome**, **Next step** and **Follow-up**, filtered by account executive, activity type and outcome. The **Activity Report** tab totals the activities per account executive (calls, meetings, e-mails, visits; on prospects, clients and quotations; positive outcomes; next steps done, open and overdue), by activity type and by outcome. **Export to Excel** downloads the list.
-
-To log an activity, open the prospect, client or quotation, select the activity log and enter the **Activity type**, **Subject**, date and time, **Outcome** and, if there is one, the **Next step** with its follow-up date. The next step appears in [My Work](#my-work) on its date.
-
-The activity types (phone call, meeting, e-mail, visit, proposal presentation) and outcomes are kept on {{menu:/master/organization/sales-activity-types}} and {{menu:/master/organization/sales-activity-outcomes}}, by {{roles:write:masters}}.
-
-![Operations > Sales & Marketing > Sales Activities](images/screens-operations/sales-activities.png)
+- **Submit for approval** checks every field, line and cap; a line outside its cap blocks it. **Recall** brings a submitted promotion back to draft.
+- {{roles:approve:promotions}} other than the maker selects **Approve** (the promotion becomes **Scheduled**, or **Active** from its first day) or **Return** with a reason. The approvals are listed in **My Work**.
+- **Suspend**, **Resume** and **Withdraw** (with a reason) stop or restart the offer; quotations already priced keep the promotion until their validity ends.
+- **Amend** creates the next version in draft; the version in force stays offered until the new one is approved, then it is **Superseded**.
+- Every night the job **Promotion status** activates the promotions whose period starts and expires those whose period has ended; a promotion whose quota is used up expires.
 
 ## Clients {#clients}
 
@@ -335,7 +369,7 @@ Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **C
 
 {{screen:/agent/policy}}
 
-Policies are booked from the placement slip (see [Placement Slips](#placement-slips)); **Bulk Upload** loads policies from a file, validated first. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
+Policies are booked from the placement slip (see [Placement Slips](#placement-slips)); **Bulk Upload** loads the policies in force at go-live from a file, validated first, without bill, journal or commission. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
 
 In **Actions**, the eye (**View policy**) opens the policy and **More actions** offers **Claim** (register a claim on the policy, see [Register a claim](#register-a-claim)) and **Endorsement**.
 
@@ -345,15 +379,30 @@ The policy page shows the cards **Gross Premium**, **Expiry Date** and **Client 
 
 ![The policy page, with Documents & Billing](images/screens-operations/policy-details.png)
 
+### Correct the policy details {#correct-the-policy-details}
+
+The policy number, insured name, inception and expiry dates and insurer of a policy are not edited: they are corrected with the approval of a second user, and the status of a policy only follows its endorsements, cancellation, renewal and expiry.
+
+1. On the policy page, in **Corrections**, select **Request correction**.
+2. Change the values to correct. For the policy number, the period or the insurer, enter the **Insurer reference** of the corrected policy.
+3. Choose the **Reason** and select **Request correction**. The correction is listed as **Pending approval** and {{roles:approve:policies}} are notified.
+4. A user other than the requester selects **Approve correction** (the policy is updated) or **Reject correction** with a reason. The requester may **Withdraw** it before.
+
+One correction at a time waits for approval on a policy.
+
 ### Raise an endorsement request {#raise-an-endorsement-request}
+
+An endorsement goes through the broker: it is raised, approved by a second user, sent to the insurer and booked once the insurer confirms it with its own endorsement number.
 
 1. Choose {{menu:/agent/policy}}.
 2. In the row of the policy, select **More actions**, then **Endorsement** (or **Endorsement** on the policy page).
-3. Choose the kind of change (insured details, vehicle, cover, extension), enter the new values and the effective date.
-4. Upload the endorsement document of the insurer.
-5. Complete the endorsement.
+3. Choose the kind of change (insured details, vehicle, cover, extension, cancellation), enter the new values and the effective date, and check the summary. A change of cover is priced from the effective date to the expiry: the **Unexpired days** and the **Annual net premium change** are shown with the premium change.
+4. Select **Continue to approval**. In **Approval and insurer**, choose the **Endorsement types** (the types that apply to the line of the policy; a Credit Life policy takes no financial type) and select **Submit for approval**. {{roles:approve:policies}} are notified.
+5. A user other than the one who raised it selects **Approve endorsement**, or **Reject endorsement** with a reason.
+6. Select **Send to insurer**: the client and the insurer receive the endorsement.
+7. When the insurer confirms, select **Book endorsement**, upload the insurer's endorsement, enter the **Endorsement Number** of the insurer and complete it. A user other than the one who raised it books it; the client is e-mailed the endorsement.
 
-The endorsement is not available while the payment is **Pending** or **Reviewing**, or once the policy has expired, lapsed, was cancelled or renewed. An additional premium is billed to the client. An endorsement that returns premium is completed by {{roles:approve:policies}}, a user other than the one who entered it. See [Endorsements and cancellations](#process-endorsement).
+The endorsement is not available while the payment is **Pending** or **Reviewing**, or once the policy has expired, lapsed, was cancelled or renewed. An additional premium is billed to the client. A cancellation needs a note; the premium is returned pro-rata on the days left and no commission is taken back. See [Endorsements and cancellations](#process-endorsement).
 
 ## Fleet Schedules {#fleet-schedules}
 
@@ -620,12 +669,12 @@ The authentication is requested from the provider (**Requested**). The provider'
 
 {{screen:/operations/cover-notes}}
 
-A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from an accepted quotation or from a placement slip sent to the insurer or later. It is superseded when the policy is booked and expires after its end date.
+A cover note gives the client temporary cover while the insurer's policy is pending. It is issued from a placement slip once the insurer has acknowledged it (acknowledged, e-policy received or checked), never from a quotation: the insurer then holds the order. It is superseded when the policy is booked and expires after its end date.
 
 The cards count the cover notes **Active** and **Expiring within 7 days**, and show those where you must **Follow up the insurer's policy**. The list shows **Cover note / insured**, **Insurer**, **Quotation / placement**, **Cover period**, **Premium**, **Status** and **Policy**.
 
 1. Select **Issue cover note**.
-2. Search and select the quotation or placement slip.
+2. Search and select the placement slip.
 3. Enter **Cover from**, **Cover period (days)** (the default applies if left empty), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. Print it or e-mail it to the client.
 
