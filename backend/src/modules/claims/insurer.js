@@ -139,8 +139,9 @@ const alert = (userId, title, message, claimId) => notify({ userId, type: 'alert
  *     working day after the submission (claims.insurer_ack_alert; M15 CLM-INS-ACK)
  *   - a communication whose follow-up date has passed
  */
-export async function serviceLevels() {
-  const now = await today();
+export async function serviceLevels({ on = null } = {}) {
+  // on: the run date (YYYY-MM-DD), the business date by default
+  const now = on || await today();
   const cal = await workingCalendar(addDays(now, -30), now);
   if (!cal.isWorking(now)) return { skipped: `${now} is not a working day` };
   const open = await openStatuses();
