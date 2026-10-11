@@ -76,6 +76,8 @@ const ident = (t) => `"${t.replace(/"/g, '""')}"`;
  */
 export async function purgeSampleData(client, { execute = false, keepUsers = null, purgeAudit = false, log = () => {} } = {}) {
   await client.query('BEGIN');
+  // the audit trail is append-only (migration 0591): an explicit --purge-audit lifts it for this transaction only
+  if (purgeAudit) await client.query("SET LOCAL app.audit_purge = 'on'");
   try {
     const existing = new Set((await client.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")).rows.map((r) => r.tablename));
     const txTables = [...TRANSACTION_TABLES, ...(purgeAudit ? AUDIT_TABLES : [])].filter((t) => existing.has(t));

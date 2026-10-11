@@ -155,9 +155,9 @@ define({
   method: 'GET', path: '/:id/kyc-form.pdf', summary: 'The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines', screen: `${SCREEN} > Onboard client > Print KYC form`,
   middleware: [...canRead, ownRecord('client')], response: '<pdf>',
   handler: async (req, res) => {
-    const doc = await kyc.kycFormDoc(req.params.id);
+    const spec = await kyc.kycFormDoc(req.params.id);
     await audit(req, { entity: 'client', entityId: req.params.id, action: 'print', after: { document: 'kyc-form' } });
-    sendPdf(res, buildPdf(doc), `kyc-form-${doc.number}.pdf`);
+    sendPdf(res, buildPdf(spec), `kyc-form-${spec.number}.pdf`);
   },
 });
 define({
