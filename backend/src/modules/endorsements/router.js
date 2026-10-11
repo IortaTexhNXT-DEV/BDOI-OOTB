@@ -32,6 +32,29 @@ const completeBody = z.object({
 }).passthrough();
 
 define({
+  method: 'POST', path: '/insurer-commission/upload', summary: 'Bulk file of the commission / service fee the insurer calculated on endorsements (TIS-BRD-COMM-07): CSV or XLSX with the columns Endorsement No and Commission; a result per row, the valid rows recorded on endorsements not yet booked',
+  screen: `${SCREEN} > Insurer commission upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, data: { message: 'Processed 2 rows: 1 created, 1 failed', total: 2, created: 1, failed: 1, errors: [{ row: 3, message: 'Endorsement END-X not found' }] } },
+  handler: async (req, res) => {
+    const { parseUploadedRows, uploadResult } = await import('../documents/tabular.js');
+    const source = `upload:${req.file?.originalname || 'file'}`;
+    const r = await svc.uploadInsurerCommissions(parseUploadedRows(req.file), req.user, source);
+    for (const x of r.applied) await audit(req, { entity: 'endorsement', entityId: x.id, action: 'insurer-commission', before: { insurerCommission: x.before }, after: { insurerCommission: x.insurerCommission, source } });
+    res.json({ success: true, data: uploadResult(r.total, r.applied.length, r.errors, { applied: r.applied }) });
+  },
+});
+define({
+  method: 'PUT', path: '/:id/insurer-commission', summary: 'Record the commission / service fee the insurer calculated on one endorsement (TIS-BRD-COMM-07); booked on the premium change instead of the policy commission ratio; refused once booked',
+  screen: `${SCREEN} > Insurer commission`, middleware: [...canWrite, ownRecord('endorsement', (req) => req.params.id), validate(z.object({ amount: z.coerce.number().min(0) }).passthrough())],
+  request: { amount: 1250 }, response: { success: true, data: example },
+  handler: async (req, res) => {
+    const { withTransaction } = await import('../../db/pool.js');
+    const r = await withTransaction((db) => svc.setInsurerCommission(db, req.params.id, req.body.amount, req.user));
+    await audit(req, { entity: 'endorsement', entityId: r.id, action: 'insurer-commission', before: { insurerCommission: r.before }, after: { insurerCommission: r.insurerCommission, source: 'single' } });
+    res.json({ success: true, message: 'Insurer commission recorded', data: out(await svc.getEndorsementRow(r.id)) });
+  },
+});
+define({
   method: 'GET', path: '/get-All-Endorsements', summary: 'List endorsements (clientId, policyId, status, search; pageNo / perPage)', screen: 'Operations > Clients > Client view > Endorsements',
   middleware: canRead, query: { pageNo: 1, perPage: 50, clientId: 'cl_1' },
   response: { success: true, data: { items: [example], pagination: { page: 1, perPage: 50, total: 1, totalPages: 1 } } },

@@ -32,6 +32,7 @@ export function toEndorsement(r) {
     endorsementTypes: r.endorsement_type_codes || [], endorsementTypeCodes: (r.endorsement_type_codes || []).map((t) => t.code),
     submittedAt: r.submitted_at || null, approvedAt: r.approved_at || null, approvedBy: r.approved_by_name || r.approved_by || null, rejectedAt: r.rejected_at || null,
     rejectionReason: r.rejection_reason || null, createdById: r.created_by || null,
+    insurerCommission: r.insurer_commission === null || r.insurer_commission === undefined ? null : Number(r.insurer_commission), insurerCommissionSource: r.insurer_commission_source || null,
     premiumDelta: Number(r.premium_delta), effectiveDate: r.effective_date, remarks: r.remarks, documentKey: r.document_key,
     documentUrl: r.document_key ? (/^https?:/.test(r.document_key) ? r.document_key : publicUrl(r.document_key)) : null, completionDetails: r.completion || {},
     policyExpiry: r.policy_expiry, lob: r.lob, receivableId: r.receivable_id, sentAt: r.sent_at, completedAt: r.completed_at,
@@ -380,6 +381,12 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
     const breakdown = dp && num(dp.netPremium) ? { netPremium: Math.abs(num(dp.netPremium)), vat: dp.valueAddedTax, dst: dp.documentaryStampTax, lgt: dp.localGovernmentTax,
       // a computed cancellation carries the commission taken back on its return premium
       ...(dp.commission !== undefined && dp.commission !== null ? { commissionAmount: Math.abs(num(dp.commission)) } : {}) } : {};
+    // the commission the insurer calculated on the endorsement (TIS-BRD-COMM-07) replaces the policy's ratio
+    if (delta !== 0 && e.insurer_commission !== null && e.insurer_commission !== undefined) {
+      Object.assign(breakdown, { commissionAmount: Math.abs(num(e.insurer_commission)) });
+    } else if (delta !== 0 && !e.is_cancel && (await getSetting('endorsements.insurer_commission_required', false))) {
+      throw badRequest(`Record the commission the insurer calculated on ${e.endorsement_number} before booking it`);
+    }
     // the premium change is booked on the endorsement's issue date (today when none is given or it is in the future)
     const bookedOn = await postingDate(completion.issuedDate);
     if (billingMode === 'direct' && delta !== 0) {
@@ -430,6 +437,47 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
       link: `/agent/endorsementdetailedview/${after.id}`, entity: 'endorsement', entityId: after.id });
   }
   return { before: e0, after };
+}
+
+// ---------------------------------------------------------------- insurer commission (TIS-BRD-COMM-07, migration 0649)
+const INSURER_COMMISSION_OPEN = ['draft', 'for-approval', 'approved', 'submitted', 'cancel-initiated', 'confirmed'];
+
+/**
+ * Record the commission / service fee the insurer calculated on an endorsement (TIS-BRD-COMM-07): booked on the premium
+ * change instead of the policy's commission ratio. Refused once the endorsement is booked or closed. source: single
+ * (the endorsement screen) or the reference of a bulk file.
+ */
+export async function setInsurerCommission(db, ref, amount, user, { source = 'single' } = {}) {
+  const e = (await db.query('SELECT id, endorsement_number, status, insurer_commission FROM endorsements WHERE id = $1 OR endorsement_number = $1 FOR UPDATE', [String(ref)])).rows[0];
+  if (!e) throw notFound(`Endorsement ${ref} not found`);
+  if (!INSURER_COMMISSION_OPEN.includes(e.status)) {
+    throw badRequest(`Endorsement ${e.endorsement_number} is ${endorsementStatusOut(e.status)}: the insurer commission is recorded before it is booked`);
+  }
+  const value = Number(amount);
+  if (!Number.isFinite(value) || value < 0) throw badRequest('Validation failed', [{ path: 'amount', message: 'Enter the commission the insurer calculated (0 or more)' }]);
+  await db.query(`UPDATE endorsements SET insurer_commission = $2, insurer_commission_source = $3, insurer_commission_at = now(), insurer_commission_by = $4, updated_at = now()
+    WHERE id = $1`, [e.id, round2(value), source, user?.id ?? null]);
+  return { id: e.id, endorsementNumber: e.endorsement_number, before: e.insurer_commission === null ? null : Number(e.insurer_commission), insurerCommission: round2(value) };
+}
+
+/** A bulk file of insurer commissions (columns Endorsement No and Commission): a result per row; the valid rows are kept. */
+export async function uploadInsurerCommissions(rows, user, source) {
+  const { pick } = await import('../documents/tabular.js');
+  const errors = [];
+  const applied = [];
+  for (const [i, r] of rows.entries()) {
+    const ref = pick(r, 'Endorsement No', 'Endorsement Number', 'endorsementNumber');
+    const raw = pick(r, 'Commission', 'Service Fee', 'Insurer Commission', 'insurerCommission');
+    const amount = raw === undefined ? NaN : Number(String(raw).replace(/,/g, ''));
+    try {
+      if (!ref) throw badRequest('Endorsement No is required');
+      if (!Number.isFinite(amount)) throw badRequest('Commission must be a number');
+      applied.push(await withTransaction((db) => setInsurerCommission(db, ref, amount, user, { source })));
+    } catch (e) {
+      errors.push({ row: i + 2, message: e.message });
+    }
+  }
+  return { total: rows.length, applied, errors };
 }
 
 /** The booked endorsement to the client (endorsements.notify_client_on_booking), its PDF attached. */
