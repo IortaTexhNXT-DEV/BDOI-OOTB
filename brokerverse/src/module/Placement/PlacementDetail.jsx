@@ -21,6 +21,8 @@ import { InputSwitch } from "primereact/inputswitch";
 import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import FileField from "../../components/FileField";
+import FieldError from "../../components/FieldError";
 import { RecordActivityLog } from "../../components/ActivityLog";
 import { printPdf } from "../../components/Print";
 import { Field, JourneyTimeline, PageHeader, ParticipantEditor, ParticipantsTable, StatusTag, formatDate, formatDateTime, participantProblem, riskLabel, usePlacementOptions } from "./shared";
@@ -87,6 +89,35 @@ const PlacementDetail = () => {
     }
   };
   const setKyc = (patch) => setBooking((b) => ({ ...b, kyc: { ...b.kyc, ...patch } }));
+  // the refusal is shown in the dialog, next to what is missing, so that the booking is never refused without a word
+  const book = async () => {
+    const needsImage = p.lob === "MOTOR" && requiredKycFor(kycConfig, p.lob).includes("idImage");
+    if (needsImage && !booking.idFile && !booking.kyc.idCardImage) {
+      setBooking((b) => ({ ...b, idError: t("placement.kyc.idCardImageRequired"), error: null }));
+      return;
+    }
+    setBusy(true);
+    setBooking((b) => ({ ...b, idError: null, error: null }));
+    try {
+      const kyc = { ...booking.kyc };
+      if (booking.idFile) {
+        const up = await s3Service.uploadFile(booking.idFile, "id-cards");
+        if (!up?.url) throw new Error(up?.error || t("placement.epolicy.errors.upload"));
+        kyc.idCardImage = up.url;
+      }
+      const r = await placementService.bookPolicy(p.id, { additionalPolicyData: kyc });
+      notify("success", withQueuedNotice(t("placement.messages.booked", { number: r.data?.policy?.policyNumber }), emailSending));
+      if (r?.policyId) navigate(`/agent/policydetail/${r.policyId}`);
+      else {
+        setBooking(null);
+        await load();
+      }
+    } catch (e) {
+      setBooking((b) => ({ ...b, error: e.message }));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (!p) return <div className="placement-page"><Toast ref={toast} /><div className="placement-card">{t("placement.messages.loading")}</div></div>;
   const write = hasPermission("write:quotations");
@@ -394,19 +425,7 @@ const PlacementDetail = () => {
 
       <DetailDialog header={t("placement.book.title")} visible={Boolean(booking)} onHide={() => setBooking(null)} size="md"
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" loading={busy}
-          onClick={async () => {
-            const res = await act(async () => {
-              const kyc = { ...booking.kyc };
-              if (booking.idFile) {
-                const up = await s3Service.uploadFile(booking.idFile, "id-cards");
-                if (!up?.url) throw new Error(up?.error || t("placement.epolicy.errors.upload"));
-                kyc.idCardImage = up.url;
-              }
-              return placementService.bookPolicy(p.id, { additionalPolicyData: kyc });
-            },
-              (r) => withQueuedNotice(t("placement.messages.booked", { number: r.data?.policy?.policyNumber }), emailSending));
-            if (res?.policyId) navigate(`/agent/policydetail/${res.policyId}`);
-          }} /></>}>
+          onClick={book} /></>}>
         {booking && (
           <>
             <KeyValueGrid columns={2} items={[
@@ -433,11 +452,14 @@ const PlacementDetail = () => {
                   <div className="col-12">
                     <label htmlFor="bk-idImage">{t("placement.kyc.idCardImage")}</label>
                     {booking.kyc.idCardImage && !booking.idFile && <div className="muted">{t("placement.kyc.idCardImageAttached")}</div>}
-                    <input id="bk-idImage" type="file" accept="image/*,application/pdf" onChange={(e) => setBooking({ ...booking, idFile: e.target.files?.[0] || null })} />
+                    <FileField id="bk-idImage" accept="image/*,application/pdf" hint={t("placement.kyc.idCardImageTypes")} value={booking.idFile || null} invalid={Boolean(booking.idError)}
+                      onChange={(f) => setBooking((b) => ({ ...b, idFile: f, idError: null }))} />
+                    <FieldError error={booking.idError} />
                   </div>
                 )}
               </div>
             )}
+            <FieldError error={booking.error} />
           </>
         )}
       </DetailDialog>

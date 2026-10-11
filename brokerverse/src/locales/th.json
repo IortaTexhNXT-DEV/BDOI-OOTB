@@ -660,7 +660,8 @@
       "print": "Print {{number}}",
       "difference": "ผลต่าง"
     },
-    "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้"
+    "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้",
+    "viewVoucher": "ดูใบสำคัญ {{number}}"
   },
   "renewalWaiting": {
     "clients": "ลูกค้า",
@@ -7608,6 +7609,10 @@
     },
     "addInsurer": {
       "invited": "บริษัทประกันที่เชิญแล้ว"
+    },
+    "kyc": {
+      "idCardImageRequired": "แนบรูปบัตรประจำตัว",
+      "idCardImageTypes": "รูปภาพหรือ PDF"
     }
   },
   "salesMarketing": {
