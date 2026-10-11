@@ -3,12 +3,17 @@ import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { addDays } from '../src/lib/dates.js';
 
 let ctx;
 let associate;
 let officer;
 let head;
 let officerId;
+// the sample policy expires a year after its seeded inception (a date relative to the seed day): the correction moves it a day
+let expiry;
+let newExpiry;
+const shown = (iso) => iso.split('-').reverse().join('/');
 const q = (sql, params) => pool.query(sql, params).then((r) => r.rows);
 
 async function persona(username, roles) {
@@ -19,6 +24,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  expiry = (await q('SELECT expiry_date FROM policies WHERE id = $1', ['pol_sls_02']))[0].expiry_date;
+  newExpiry = addDays(expiry, 1);
   associate = (await persona('c.associate', ['tis-ops-associate'])).api;
   const o = await persona('c.officer', ['tis-sales-officer']);
   officer = o.api; officerId = o.id;
@@ -54,7 +61,7 @@ describe('policy corrections: request and approval by a second user', () => {
     const badCode = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine M. Soriano' }, reasonCode: 'PCRR-WRONG' });
     expect(badCode.status).toBe(400);
     expect(badCode.body.errors[0].message).toContain('is not a reason for this action');
-    const noRef = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { expiry: '2027-05-14' }, reasonCode: 'PCR-PERIOD' });
+    const noRef = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { expiry: newExpiry }, reasonCode: 'PCR-PERIOD' });
     expect(noRef.status).toBe(400);
     expect(noRef.body.errors[0].message).toContain("insurer's reference");
     const same = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine Soriano' }, reasonCode: 'PCR-NAME' });
@@ -64,13 +71,13 @@ describe('policy corrections: request and approval by a second user', () => {
   });
 
   it('records the request, one pending at a time, and tells the approvers', async () => {
-    const r = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine M. Soriano', expiry: '2027-05-14', insuranceCompanyName: 'MAPFRE' },
+    const r = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine M. Soriano', expiry: newExpiry, insuranceCompanyName: 'MAPFRE' },
       reasonCode: 'PCR-INSURER', insurerReference: 'MAP-END-2026-0042' });
     expect(r.status).toBe(201);
     id = r.body.data.id;
     expect(r.body.data).toMatchObject({ status: 'pending', reasonCode: 'PCR-INSURER', reason: 'Corrected policy issued by the insurer', insurerReference: 'MAP-END-2026-0042' });
     expect(r.body.data.changes.map((c) => c.field).sort()).toEqual(['expiry', 'insuranceCompanyId', 'insuredName']);
-    expect(r.body.data.changes.find((c) => c.field === 'expiry')).toMatchObject({ fromText: '13/05/2027', toText: '14/05/2027' });
+    expect(r.body.data.changes.find((c) => c.field === 'expiry')).toMatchObject({ fromText: shown(expiry), toText: shown(newExpiry) });
     expect(r.body.data.changes.find((c) => c.field === 'insuranceCompanyId').toText).toContain('MAPFRE');
     const again = await associate('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'K. Soriano' }, reasonCode: 'PCR-NAME' });
     expect(again.status).toBe(409);
@@ -81,7 +88,7 @@ describe('policy corrections: request and approval by a second user', () => {
   it('the maker cannot decide it; a user without approve:policies cannot either', async () => {
     expect((await associate('post', `/policies/pol_sls_02/corrections/${id}/approve`).send({})).status).toBe(403);
     expect((await associate('post', `/policies/pol_sls_02/corrections/${id}/withdraw`).send({})).status).toBe(200);
-    const r = await head('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine M. Soriano', expiry: '2027-05-14' }, reasonCode: 'PCR-INSURER', insurerReference: 'MAP-END-2026-0042' });
+    const r = await head('post', '/policies/pol_sls_02/corrections').send({ changes: { insuredName: 'Kristine M. Soriano', expiry: newExpiry }, reasonCode: 'PCR-INSURER', insurerReference: 'MAP-END-2026-0042' });
     id = r.body.data.id;
     const self = await head('post', `/policies/pol_sls_02/corrections/${id}/approve`).send({});
     expect(self.status).toBe(403);
@@ -93,7 +100,7 @@ describe('policy corrections: request and approval by a second user', () => {
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ status: 'approved', decidedBy: 'c.officer' });
     const p = (await q('SELECT insured_name, expiry_date, updated_by FROM policies WHERE id = $1', ['pol_sls_02']))[0];
-    expect(p).toMatchObject({ insured_name: 'Kristine M. Soriano', expiry_date: '2027-05-14', updated_by: officerId });
+    expect(p).toMatchObject({ insured_name: 'Kristine M. Soriano', expiry_date: newExpiry, updated_by: officerId });
     const [a] = await q("SELECT before_data, after_data FROM audit_log WHERE entity = 'policy' AND entity_id = 'pol_sls_02' AND action = 'correction-approve'");
     expect(a.before_data.insuredName).toBe('Kristine Soriano');
     expect(a.after_data.insuredName).toBe('Kristine M. Soriano');

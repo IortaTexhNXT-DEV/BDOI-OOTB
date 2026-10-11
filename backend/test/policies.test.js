@@ -53,9 +53,11 @@ describe('policies', () => {
     expect((await sales('get', '/policies/pol_missing')).status).toBe(404);
   });
   it('updates policy details and payment status', async () => {
-    const u = await sales('put', '/policies/pol_sls_05').send({ plateNumber: 'NEF 5511', inception: '2026-07-17', paymentStatus: 'Pending' });
+    // the inception sent is the policy's own (seeded relative to the day): a changed date is core data (below)
+    const { inception_date: inception } = (await pool.query('SELECT inception_date FROM policies WHERE id = $1', ['pol_sls_05'])).rows[0];
+    const u = await sales('put', '/policies/pol_sls_05').send({ plateNumber: 'NEF 5511', inception, paymentStatus: 'Pending' });
     expect(u.status).toBe(200);
-    expect(u.body).toMatchObject({ plateNumber: 'NEF 5511', inception: '2026-07-17' });
+    expect(u.body).toMatchObject({ plateNumber: 'NEF 5511', inception });
     // the core data of an issued policy changes by an approved correction (test/policy-corrections.test.js)
     const core = await sales('put', '/policies/pol_sls_05').send({ policyNumber: 'FPG-MC-2026-0005' });
     expect(core.status).toBe(400);
