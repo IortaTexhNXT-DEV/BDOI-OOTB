@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import PageHeader from "../../../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { MasterLookup, confirmDeleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
@@ -119,18 +118,9 @@ const SettlementParameterMaster = () => {
   return (
     <div className="container__settlement__parameter__master">
         <Toast ref={toast} />
-        <div className="top__container">
-          <div className="header-actions">
-            <Button
-              icon={<SvgBackArrow />}
-              className="back-button"
-              onClick={handleClose}
-              text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
-            <h1 className="page__title">Settlement Parameter Master</h1>
-            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
-          </div>
-          <BreadCrumb model={items} home={home} />
-        </div>
+        <PageHeader title="Settlement Parameter Master" onBack={handleClose} home={home.label}
+          trail={items.map((i) => (i.url && i.url !== "#" ? { label: i.label, to: i.url } : i.label))}
+          meta={<span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>} />
 
         <div className="content-container">
           <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>

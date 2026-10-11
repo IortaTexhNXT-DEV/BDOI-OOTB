@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import PageHeader from "../../../components/PageHeader";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useNavigate } from "react-router-dom";
@@ -340,19 +341,9 @@ const AllClientsAccountingView = () => {
       <Toast ref={toast} />
 
       {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <div>
-            <h1>{t("accounting.allClientsTitle")}</h1>
-          </div>
-          <Button
-            label={t("accounting.exportCsv")}
-            icon="pi pi-download"
-            onClick={handleExport}
-            className="export-button"
-          />
-        </div>
-      </div>
+      <PageHeader title={t("accounting.allClientsTitle")} home={t("sidebar.Accounts", "Accounts")} trail={[t("accounting.allClientsTitle")]}>
+        <Button label={t("accounting.exportCsv")} icon="pi pi-download" outlined onClick={handleExport} />
+      </PageHeader>
 
       {/* Summary Cards */}
       {totals.totalClients > 0 && (

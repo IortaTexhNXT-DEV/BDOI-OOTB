@@ -15179,7 +15179,8 @@
     "sinceGoLive": {
       "title": "Issued since go-live",
       "note": "{{count}} policies since {{date}}"
-    }
+    },
+    "home": "Dashboards"
   },
   "confirmDialog": {
     "cancel": "Cancel",
