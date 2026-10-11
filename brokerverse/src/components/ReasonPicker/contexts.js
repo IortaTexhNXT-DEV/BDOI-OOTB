@@ -11,6 +11,7 @@ export const REASON_CONTEXTS = [
   "payment_duplicate_override", "billing_reject", "billing_cancel", "pdc_cancel", "pdc_bounce", "receipt_reversal", "receipt_reversal_reject", "unapplied_refund",
   "feature_change", "feature_reject",
   "commission_share_change", "commission_rate_change", "commission_reversal", "commission_wht_change", "scheme_end",
+  "talkbot_line_remove", "talkbot_list_cancel",
   "policy_correction", "policy_correction_reject", "endorsement_reject", "promotion_return", "promotion_status", "discount_cap_return",
 ];
 

@@ -89,6 +89,10 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Premium by Product / Month / Insurer** | Policy count, sum insured, premium and commission by month, product or insurer |
 | **SOA / Premium Receivable**, **Receivables Ageing** | The premium bills with their balance and ageing |
 | **Incentive Results** | The incentive programme results: target, achieved, achievement and payout per agent |
+| **APR Operation Report** | Policies written month to date or year to date per business category: Existing UIO, New Car, ROPA, OEM, Cancelled and Unclassified; see [Sales reports](#reports-sales) |
+| **Production per Line** | Policy count, sum insured, premium and commission per product line, by month, product or business type |
+| **Agent Pipeline** | Prospects, quotations, policies and accounts of each agent per month, with premium, commission, incentive tier and incentive payout (the **Agent Policy Conversion** report of All Reports gives the converted policies per agent with the tier level of the agent master) |
+| **Renewal Notice Listing** | Policies expiring within 90 days of the as-of date, in 30, 60 and 90 day buckets, with the renewal calling details |
 
 **Operations** (TIS Operations Associate, TIS Operations Officer, TIS Operations Unit Head): the operational reports above, and
 
@@ -120,7 +124,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **PDC Encoded Summary**, **PDC Cancelled Summary**, **PDC Maturing**, **PDC Maturing by Product and Warehouse Bank**, **PDC History Log**, **Acknowledgement Receipts of Received PDCs** | The post-dated cheques encoded, cancelled (with the reason and the approver) and maturing in the period, by warehouse bank (the Insurance Partner holding them, or the TISPH account), every action on a cheque, and the sets received; see [Post-dated cheques](#post-dated-cheques) |
 | **Insufficient Payments**, **Overpayments** | Bank payments below what the policy owed (expected, paid, shortfall), and payments above it held On Account (excess, still held, allocated or refunded) |
 
-**Finance and Accounting** (TIS Finance & General Accounting):
+**Finance and Accounting** (TIS Finance & General Accounting): the four [sales reports](#reports-sales), and
 
 | Report | Contents |
 |---|---|
@@ -139,6 +143,36 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 **Management** (TIS General Manager): every report of the departments above.
 
 The roles that open each report menu, with their access, are listed at the top of this section and in each role chapter.
+
+### Sales reports {#reports-sales}
+
+The four sales reports are under Reports > Operational Reports. The Sales and Operations roles, Finance & General Accounting, the General Manager and IT AppSupport can run them.
+
+**APR Operation Report**. Choose the **To Date** (the as-of date) and the **Report Criteria**:
+
+| Report Criteria | Rows |
+|---|---|
+| Month to Date | One row per business category, for the policies incepted from the first day of the month of the To Date |
+| Year to Date | The same from 1 January of the year of the To Date |
+| Month to Date by Product Line, Year to Date by Product Line | One row per business category and product line |
+| Period by Month | One row per month and business category, from the From Date to the To Date |
+
+The business category of a policy is:
+
+| Category | When |
+|---|---|
+| Cancelled | The policy is cancelled |
+| The category written on the policy | For example ROPA for a repossessed unit |
+| OEM | The vehicle brand is not Toyota or Lexus |
+| Existing UIO | A renewal, or a vehicle that is not brand new |
+| New Car | A brand-new Toyota or Lexus vehicle |
+| Unclassified | No category and no vehicle brand, for example a Personal Accident policy |
+
+**Production per Line**. Choose the From Date, the To Date and the Report Criteria: Product Line, Product Line by Month, Product or Business Type. Cancelled policies are left out.
+
+**Agent Pipeline**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
+
+**Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Suppressed or Held. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. The notice treatment is the one of the renewal notices: **Send**, **Suppressed: lock-in** or **Suppressed: Scheme 2** for an account under a lock-in, or **Held: loan status** when the TFS loan status holds the notices (see [Lock-in Accounts](#lock-in-accounts)).
 
 ## Report Builder {#report-builder}
 

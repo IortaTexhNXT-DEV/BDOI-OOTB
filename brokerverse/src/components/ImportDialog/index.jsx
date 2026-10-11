@@ -65,10 +65,13 @@ const ErrorTable = ({ errors }) => {
  * `rowColumns`; `onErrorReport(preview)` downloads the error report; `onCommit(preview)` loads what was validated
  * (instead of sending the file again) once `preview.canCommit` is not false. `loadLabel` may be a function of the
  * preview ("Create 3 draft remittances").
+ *
+ * A refusal the user may override (a file of another Talkbot task): `confirmRetry(error)` returns { dialog: the
+ * ConfirmDialog props of the question, fields: the form fields that load the file anyway }; null keeps the refusal.
  */
 const ImportDialog = ({
   visible, onHide, title, targets, note, help, goLiveDate = false, onDone, previewFacts, confirmLoad, loadLabel,
-  steps, fields: extraFields, fieldsReady = true, previewRows, rowColumns, resultFilters, onErrorReport, onCommit,
+  steps, fields: extraFields, fieldsReady = true, previewRows, rowColumns, resultFilters, onErrorReport, onCommit, confirmRetry,
 }) => {
   const { t } = useTranslation();
   const [target, setTarget] = useState(targets?.[0] || null);
@@ -79,6 +82,7 @@ const ImportDialog = ({
   const [result, setResult] = useState(null);
   const [preview, setPreview] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [retry, setRetry] = useState(null);
   const input = useRef(null);
 
   useEffect(() => {
@@ -115,17 +119,23 @@ const ImportDialog = ({
     }
   };
 
-  // throws again after showing the error, so a confirmation dialog stays open with it
-  const load = async () => {
+  // throws again after showing the error, so a confirmation dialog stays open with it; extra: fields of a confirmed retry
+  const load = async (extra) => {
     setBusy("upload");
     setError(null);
     setResult(null);
     try {
-      const r = onCommit ? await onCommit(preview) : await importService.upload(target.uploadPath, file, fields());
+      const more = extra && typeof extra === "object" ? extra : {};
+      const r = onCommit ? await onCommit(preview) : await importService.upload(target.uploadPath, file, { ...fields(), ...more });
       setResult(r);
       setPreview(null);
-      if (onDone && (onCommit || r.created || r.updated || r.accounts)) onDone(r);
+      if (onDone && (onCommit || r.created || r.updated || r.accounts || r.loaded)) onDone(r);
     } catch (e) {
+      const again = !extra && confirmRetry ? confirmRetry(e) : null;
+      if (again) {
+        setRetry(again);
+        return;
+      }
       setError(failure(e));
       throw e;
     } finally {
@@ -254,6 +264,9 @@ const ImportDialog = ({
       {confirmLoad && (
         <ConfirmDialog visible={!!confirm} onHide={() => setConfirm(null)} confirmIcon="pi pi-upload" {...(confirm || {})} onConfirm={load} />
       )}
+      {confirmRetry && (
+        <ConfirmDialog visible={!!retry} onHide={() => setRetry(null)} confirmIcon="pi pi-upload" {...(retry?.dialog || {})} onConfirm={() => load(retry?.fields || {})} />
+      )}
     </>
   );
 };
@@ -282,6 +295,8 @@ ImportDialog.propTypes = {
   onErrorReport: PropTypes.func,
   /** loads the validated preview on the server: (preview) => Promise<result> */
   onCommit: PropTypes.func,
+  /** a refusal the user may override: (error) => { dialog: ConfirmDialog props, fields: sent again }, or null */
+  confirmRetry: PropTypes.func,
 };
 
 export { UploadPreview };

@@ -26,6 +26,8 @@ import { COLUMN_KEYS as INSURER_COLUMN_KEYS } from '../insurer-reconciliation/st
 import { DEALER_SALE_COLUMNS } from '../motor-programmes/service.js';
 import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
 import { IMPORT_COLUMNS as REMITTANCE_IMPORT_COLUMNS, PRODUCT_LINES } from '../remittance/imports.js';
+import { CALL_RECORD_COLUMNS } from '../talkbot/columns.js';
+import { TFS_COLUMNS } from '../leads/tfsImport.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -94,6 +96,30 @@ export function staticUploads() {
           city: 'San Fernando', province: 'Pampanga', country: 'Philippines', zipCode: '2000', leadCategory: 'Corporate', taxInformationNumber: '009-876-543-000', lob: 'MOTOR', product: 'Motor Vehicle Insurance', source: 'Walk-in' },
       ],
       notes: ['A lead needs a First Name (individual) or a Company Name (corporate).'],
+    },
+    {
+      id: 'tfs-accounts', file: 'TFS_Accounts_Upload_Template.xlsx', title: 'TFS accounts upload', menu: 'Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts',
+      route: 'POST /api/leads/tfs-import (multipart field "file")', columns: TFS_COLUMNS, maxRows: IMPORT_ROWS,
+      samples: [
+        { tfsReference: 'TFS-2026-104233', loanId: 'LN-0094418', firstName: 'Andrea', lastName: 'Villanueva', DOB: '1987-06-21', contactNumber: '09173047105', emailId: 'andrea.villanueva@gmail.com',
+          houseNo: '12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', zipCode: '1600', make: 'Toyota', model: 'Raize', variant: '1.0 Turbo CVT',
+          modelYear: '2023', plateNumber: 'NAB 1234', chassisNumber: 'MHKA4DE30PJ012345', engineNumber: '1KR0123456', insuranceProvider: 'Malayan Insurance Co., Inc.',
+          policyExpiryDate: '2026-12-15', loanStartDate: '2023-12-15', loanBookingDate: '2023-12-10', loanMaturityDate: '2028-12-15', productGroup: 'Motor', srp: '1078000', leadCategory: 'Retail' },
+      ],
+      notes: ['One prospect per Loan ID: a Loan ID already loaded updates that prospect (TFS details, status and disposition).', 'An account without a Policy Expiry Date gives no prospect.'],
+    },
+    {
+      id: 'talkbot-results', file: 'Talkbot_Call_Results_Template.xlsx', title: 'Talkbot call results', menu: 'Operations > Renewals > Talkbot Calls > Upload results',
+      route: 'POST /api/talkbot/lists/:id/results (multipart field "file")', columns: CALL_RECORD_COLUMNS, fileTypes: 'Excel (.xlsx) only. The first sheet is read; the first row must be the column headers.',
+      maxRows: 'Up to 20,000 data rows per file (talkbot.max_upload_rows).',
+      samples: [
+        { taskName: 'TIS_MV - OCT 07, 2026', contactId: 'POL-2025-41187', callId: '3422766876', contactName: 'ANDREA M. VILLANUEVA', contactNumber: '09173047105', result: 'Connected(200)',
+          callTime: '07/10/2026 14:52:10', duration: '96', tags: 'Call Drop-off Point:Closing;Call Result:Will Renew', dropOffPoint: 'Closing', callResult: 'Will Renew' },
+        { taskName: 'TIS_MV - OCT 07, 2026', contactId: 'POL-2025-41188', callId: '3422766901', contactName: 'DENNIS P. NAVARRO', contactNumber: '09182223344', result: 'Missed Call(19)',
+          callTime: '07/10/2026 15:03:44', duration: '0' },
+      ],
+      notes: ['Upload the Call Records export of the Talkbot platform as it is: its other columns are ignored.', 'A row whose Call ID was already loaded is not loaded again.',
+        'Each row is matched to the call list by Contact ID (the policy number), else by Contact Number when one account only has it.'],
     },
     {
       id: 'quotations', file: 'Quotations_Upload_Template.xlsx', title: 'Quotations upload', menu: 'Operations > Sales & Marketing > Quotations > Bulk Upload', route: 'POST /api/quotations/bulk-upload (multipart field "file")',

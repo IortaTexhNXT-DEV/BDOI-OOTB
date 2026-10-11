@@ -29,6 +29,7 @@ import StatusChip from "../../../components/StatusChip";
 import { calendarDateFormat, formatDate as formatAppDate, formatInstant, toIsoDate } from "../../../utility/dateFormat";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import logger from "../../../utility/logger";
+import { hasPermission } from "../../../utils/canOpen";
 
 export default function BatchTable() {
   const { t } = useTranslation();
@@ -55,7 +56,13 @@ export default function BatchTable() {
     premiumMax: null,
     clientName: "",
     paymentStatus: "All",
+    talkbotOutcome: "",
+    talkbotCallList: "",
   };
+  // Talkbot outcome of the policies (read:talkbot-calls): criteria, columns and the Skipped quote status
+  const talkbotOn = hasPermission("read:talkbot-calls");
+  const canQuote = hasPermission("write:renewals");
+  const [quoting, setQuoting] = useState(false);
   const [batchCriteria, setBatchCriteria] = useState(initialBatchCriteria);
   // defaults (expiry window from today, from settings) and insurer / product choices from the masters
   const [renewalOptions, setRenewalOptions] = useState({ insurers: [], products: [], paymentStatuses: ["All", "Paid", "Unpaid"] });
@@ -106,10 +113,13 @@ export default function BatchTable() {
     }
   };
 
+  const isMotorProduct = (productId) => (renewalOptions.products || []).some((p) => String(p.id) === String(productId) && String(p.line).toLowerCase() === "motor");
   const handleCriteriaChange = (field, value) => {
     setBatchCriteria((prev) => ({
       ...prev,
       [field]: value,
+      // Motor: the confirmed accounts first while Generate Renewal Quotes quotes only Talkbot-confirmed policies
+      ...(field === "productId" && renewalOptions.talkbot ? { talkbotOutcome: isMotorProduct(value) ? renewalOptions.talkbot.defaultOutcome || "" : "" } : {}),
     }));
   };
 
@@ -271,7 +281,48 @@ export default function BatchTable() {
     { label: t("batchRenewal.maximumPremium"), value: c.premiumMax, type: "amount" },
     { label: t("batchRenewal.clientName"), value: c.clientName },
     { label: t("batchRenewal.paymentStatus"), value: c.paymentStatus ? t(`batchRenewal.payment${c.paymentStatus}`, c.paymentStatus) : null },
+    { label: t("batchRenewal.talkbotOutcome"), value: c.talkbotOutcome ? t(`talkbot.outcomes.${c.talkbotOutcome}`, c.talkbotOutcome) : null, hidden: !talkbotOn || !c.talkbotOutcome },
+    { label: t("batchRenewal.talkbotCallList"), value: c.talkbotCallList, hidden: !talkbotOn || !c.talkbotCallList },
   ];
+  const talkbotOutcomeOptions = [{ label: t("batchRenewal.all"), value: "" }, ...(renewalOptions.talkbot?.outcomes || []).map((o) => ({ label: t(`talkbot.outcomes.${o.code}`, o.label), value: o.code }))];
+  const talkbotListOptions = [{ label: t("batchRenewal.all"), value: "" }, ...(renewalOptions.talkbot?.callLists || []).map((l) => ({ label: l.taskName ? `${l.listNumber} · ${l.taskName}` : l.listNumber, value: l.listNumber }))];
+  const quoteLabel = (p) => {
+    if (!p.quoteStatus || p.quoteStatus === "NotQuoted") return t("batchRenewal.quote.NotQuoted");
+    return p.quoteStatus === "Quoted" && p.quoteNumber ? `${t("batchRenewal.quote.Quoted")} ${p.quoteNumber}` : t(`batchRenewal.quote.${p.quoteStatus}`, p.quoteStatus);
+  };
+  const QUOTE_SEVERITY = { Quoted: "success", Queued: "warning", Failed: "danger", Skipped: "warning", NotQuoted: "secondary" };
+
+  // Generate Renewal Quotes: the selected policies not yet quoted; Motor policies not confirmed by Talkbot are skipped
+  const generateQuotes = async () => {
+    const ids = (selectedBatch?.policies || []).filter((p) => p.isSelected && ["NotQuoted", "Failed", "Skipped", undefined, null].includes(p.quoteStatus)).map((p) => p.policyId);
+    if (!ids.length) {
+      notifyWarn(t("batchRenewal.noPoliciesToQuote"));
+      return;
+    }
+    setQuoting(true);
+    try {
+      const response = await BatchRenewalService.generateRenewalQuotes(selectedBatch.batchId, ids);
+      notifySuccess(response.message);
+      const jobId = response.data?.jobId;
+      if (!jobId) {
+        setQuoting(false);
+        await fetchBatchDetails(selectedBatch.batchId);
+        return;
+      }
+      const poll = setInterval(async () => {
+        const job = await BatchRenewalService.getQueueJobStatus(jobId).catch(() => null);
+        if (!job?.data || ["completed", "failed"].includes(job.data.status)) {
+          clearInterval(poll);
+          setQuoting(false);
+          await fetchBatchDetails(selectedBatch.batchId);
+          fetchBatches();
+        }
+      }, 1000);
+    } catch (error) {
+      setQuoting(false);
+      notifyError(error?.message || t("batchRenewal.quoteFailed"));
+    }
+  };
   const noticeLabel = (status) => t(`batchRenewal.notice.${status}`, status);
   const noticeCount = (status) => (selectedBatch?.policies || []).filter((p) => p.noticeStatus === status).length;
 
@@ -812,6 +863,21 @@ export default function BatchTable() {
                   style={{ width: "100%" }}
                 />
               </div>
+
+              {talkbotOn && renewalOptions.talkbot ? (
+                <>
+                  <div className="col-12 md:col-6 lg:col-3">
+                    <label htmlFor="rb-talkbot-outcome" className="block mb-2 font-medium">{t("batchRenewal.talkbotOutcome")}</label>
+                    <Dropdown inputId="rb-talkbot-outcome" value={batchCriteria.talkbotOutcome} onChange={(e) => handleCriteriaChange("talkbotOutcome", e.value)}
+                      options={talkbotOutcomeOptions} style={{ width: "100%" }} />
+                  </div>
+                  <div className="col-12 md:col-6 lg:col-3">
+                    <label htmlFor="rb-talkbot-list" className="block mb-2 font-medium">{t("batchRenewal.talkbotCallList")}</label>
+                    <Dropdown inputId="rb-talkbot-list" value={batchCriteria.talkbotCallList} onChange={(e) => handleCriteriaChange("talkbotCallList", e.value)} filter
+                      options={talkbotListOptions} style={{ width: "100%" }} />
+                  </div>
+                </>
+              ) : null}
             </div>
 
             {/* Action Buttons */}
@@ -934,6 +1000,12 @@ export default function BatchTable() {
                     header={t("batchRenewal.renewalState")}
                     body={(rowData) => <Tag value={rowData.renewalStateLabel} severity={rowData.renewalState === "due" ? "info" : "warning"} />}
                   />
+                  {talkbotOn ? (
+                    <Column header={t("batchRenewal.talkbotOutcome")} body={(rowData) => (rowData.talkbotOutcome ? t(`talkbot.outcomes.${rowData.talkbotOutcome}`, rowData.talkbotOutcomeLabel) : "-")} />
+                  ) : null}
+                  {talkbotOn ? (
+                    <Column header={t("batchRenewal.confirmedOn")} body={(rowData) => (rowData.talkbotConfirmedOn ? formatDate(rowData.talkbotConfirmedOn) : "-")} />
+                  ) : null}
                 </DataTable>
               </div>
               <div className="flex justify-content-end gap-2 mt-3">
@@ -968,6 +1040,10 @@ export default function BatchTable() {
                 loading={sendingNotices}
               />
             )}
+            {canQuote ? (
+              <Button label={t("batchRenewal.generateQuotes")} icon="pi pi-calculator" outlined onClick={generateQuotes} loading={quoting}
+                disabled={quoting || sendingNotices || !(selectedBatch.policies || []).some((p) => p.isSelected && p.quoteStatus !== "Quoted" && p.quoteStatus !== "Queued")} />
+            ) : null}
             <Button
               label={t("batchRenewal.sendNotices")}
               icon="pi pi-envelope"
@@ -1161,6 +1237,19 @@ export default function BatchTable() {
                   sortable
                   body={(rowData) => formatInstant(rowData.noticeSentAt)}
                 />
+                <Column
+                  field="quoteStatus"
+                  header={t("batchRenewal.quoteStatus")}
+                  body={(rowData) => (
+                    <span className="flex flex-column gap-1">
+                      <StatusChip code={rowData.quoteStatus || "NotQuoted"} label={quoteLabel(rowData)} severity={QUOTE_SEVERITY[rowData.quoteStatus] || "secondary"} />
+                      {rowData.skipReason ? <small className="text-color-secondary">{rowData.skipReason}</small> : null}
+                    </span>
+                  )}
+                />
+                {talkbotOn ? (
+                  <Column header={t("batchRenewal.talkbotOutcome")} body={(rowData) => (rowData.talkbotOutcome ? t(`talkbot.outcomes.${rowData.talkbotOutcome}`, rowData.talkbotOutcomeLabel) : "-")} />
+                ) : null}
                 <Column
                   field="createdAt"
                   header={t("batchRenewal.addedDate")}

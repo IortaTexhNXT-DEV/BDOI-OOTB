@@ -110,6 +110,10 @@ for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].pus
 const PROMOTION_PERMS = { processing: ['promotions', 'discount-caps'], sales: ['promotions:read', 'discount-caps:read'], operations: ['promotions:read', 'discount-caps:read'],
   accounting: ['promotions:read', 'discount-caps:read'], 'accounting-manager': ['promotions:approve', 'discount-caps:approve'], 'compliance-officer': ['promotions:read', 'discount-caps:read'] };
 for (const [role, items] of Object.entries(PROMOTION_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
+// Talkbot call lists of Motor renewals (permissions of migration 0460): Sales & Marketing and Operations maintain them,
+// the Processing Team views them and creates the renewal batch of the confirmed accounts (write:renewals).
+const TALKBOT_PERMS = { sales: ['talkbot-calls'], operations: ['talkbot-calls'], processing: ['talkbot-calls:read'] };
+for (const [role, items] of Object.entries(TALKBOT_PERMS)) ROLE_PERMS[role].push(...items);
 // Post-dated cheque log (permissions of migration 0520, FRS COLL-05 default grants): Accounting encodes and forwards,
 // the Accounting Manager approves cancellations, Operations reads.
 const PDC_PERMS = { accounting: ['pdc'], 'accounting-manager': ['pdc:approve'], operations: ['pdc:read'] };
@@ -170,6 +174,11 @@ Object.assign(ROLE_PERMS, {
   // the iorta TechNXT platform administrator: the catalogue and its changes, nothing of the business (lib/platform.js)
   'iorta-platform-admin': ['profile:read', 'features:read', 'feature-entitlements:manage'],
 });
+// Talkbot call lists (migration 0460): the Sales personas and the General Manager maintain them, Operations view them.
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('talkbot-calls');
+for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('talkbot-calls:read');
+// Deleting a prospect (delete:leads, migration 0461): not the TIS Sales Associate (RBAC v4 CRUDA: CRU).
+for (const role of ['sales', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('leads:delete');
 for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-bp', 'tis-ccd-recon',
   'tis-finance', 'tis-it-admin', 'tis-general-manager']) ROLE_PERMS[role].push('pdc:read');
 for (const role of ['tis-finance', 'tis-general-manager']) ROLE_PERMS[role].push('insurer-billing:approve');

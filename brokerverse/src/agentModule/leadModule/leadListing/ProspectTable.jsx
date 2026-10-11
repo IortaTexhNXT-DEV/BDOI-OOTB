@@ -21,6 +21,7 @@ import logger from "../../../utility/logger";
 import { useSalesProducts } from "../../../module/Sales/salesProducts";
 import TagProductDialog from "./TagProductDialog";
 import confirmDeleteProspect from "../confirmDeleteProspect";
+import { hasPermission } from "../../../utils/canOpen";
 
 /** lob filter (and tab) of the prospects whose product is not yet tagged. */
 const UNTAGGED = "none";
@@ -123,7 +124,9 @@ const ProspectTable = () => {
       <Button icon="pi pi-tag" text rounded size="small" aria-label={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")}
         tooltip={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); setTagging(r); }} />
       <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("leads.edit")} tooltip={t("leads.edit")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, true); }} />
-      <Button icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("leads.delete")} tooltip={t("leads.delete")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); removeLead(r); }} />
+      {hasPermission("delete:leads") ? (
+        <Button icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("leads.delete")} tooltip={t("leads.delete")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); removeLead(r); }} />
+      ) : null}
     </div>
   );
   const lobLabel = (r) => (r.lob ? r.productType || lobName(r.lob) : <Tag value={t("productPicker.untagged")} severity="warning" />);

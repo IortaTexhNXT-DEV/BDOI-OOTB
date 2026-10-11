@@ -222,6 +222,17 @@ class LeadService {
   }
 
   /**
+   * Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers
+   * @returns {Promise<Object>} { categories, customerTypes, statuses, dispositions, insurers: [{ id, name }] }
+   */
+  async options() {
+    const response = await fetch(`${this.baseURL}/leads/options`, { headers: { "Content-Type": "application/json", ...authService.getAuthHeader() } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "Failed to load the prospect lists");
+    return data.data || {};
+  }
+
+  /**
    * Get lead by ID
    * @param {string} leadId - Lead ID
    * @returns {Promise<Object>} API response

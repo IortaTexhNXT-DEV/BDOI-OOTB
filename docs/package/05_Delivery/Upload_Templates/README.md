@@ -85,6 +85,8 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Lead Source master upload | No Upload button: Master > Insurance Management > Lead Sources | `POST /api/masters/lead-source/upload` | `Lead_Source_Upload_Template.xlsx` |
 | Reason Code master upload | No Upload button: Master > Insurance Management > Reason Codes | `POST /api/masters/reason-code/upload` | `Reason_Code_Upload_Template.xlsx` |
 | Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
+| TFS accounts upload | Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts | `POST /api/leads/tfs-import` | `TFS_Accounts_Upload_Template.xlsx` |
+| Talkbot call results | Operations > Renewals > Talkbot Calls > Upload results | `POST /api/talkbot/lists/:id/results` | `Talkbot_Call_Results_Template.xlsx` |
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
 | Official receipts upload | Accounts > Receipts > Bulk upload | `POST /api/receipts/bulk-upload` | `Receipts_Upload_Template.xlsx` |

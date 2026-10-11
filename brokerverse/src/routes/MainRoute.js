@@ -269,6 +269,8 @@ import IncentiveStatement from "../module/Incentive/Statement";
 
 // Renewal Module
 import RenewalQueue from "../module/Renewal/RenewalQueue";
+import TalkbotCalls from "../module/Renewal/TalkbotCalls";
+import TalkbotCallList from "../module/Renewal/TalkbotCalls/CallList";
 import QuoteGeneration from "../module/Renewal/QuoteGeneration";
 import RetentionAnalytics from "../module/Renewal/RetentionAnalytics";
 import AtRiskAnalysis from "../module/Renewal/AtRiskAnalysis";
@@ -1110,6 +1112,8 @@ const Maincomponent = () => {
 
           {/* Renewal Module Routes */}
           <Route path="renewal/queue" element={<RenewalQueue />} />
+          <Route path="renewal/talkbot" element={<TalkbotCalls />} />
+          <Route path="renewal/talkbot/:id" element={<TalkbotCallList />} />
           <Route
             path="renewal/generate-quote/:policyId"
             element={<QuoteGeneration />}

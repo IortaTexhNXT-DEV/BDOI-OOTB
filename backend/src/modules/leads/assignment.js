@@ -20,9 +20,10 @@ import { hasPermission } from '../../lib/auth.js';
 import { lobOf } from '../documents/common.js';
 import { notify } from '../notifications/service.js';
 import { decisionReason } from '../ops-masters/records.js';
+import { workingHoursBetween } from '../../lib/workingCalendar.js';
 
 export const METHODS = ['round_robin', 'load', 'fixed'];
-export const CONDITION_KEYS = ['branchCode', 'lob', 'productId', 'source', 'leadCategory', 'channelId', 'province', 'city'];
+export const CONDITION_KEYS = ['branchCode', 'lob', 'productId', 'source', 'leadCategory', 'channelId', 'province', 'city', 'insuranceProviderId', 'customerType'];
 /** Line condition of a rule for the prospects whose product is not yet tagged. */
 export const UNTAGGED_LOB = 'NONE';
 /** Reason codes of a reassignment or of a prospect sent to the queue (master reason-code). */
@@ -37,11 +38,13 @@ const norm = (v) => String(v ?? '').trim().toLowerCase();
 
 export const ruleOut = (r) => ({
   id: r.id, name: r.name, priority: r.priority, method: r.method, conditions: r.conditions || {}, assignees: r.assignees || [],
-  assigneeNames: r.assignee_names || [], lastAssignedUserId: r.last_assigned_user_id, status: r.status, description: r.description,
+  assigneeNames: r.assignee_names || [], lastAssignedUserId: r.last_assigned_user_id, status: r.status, description: r.description, maxOpen: r.max_open ?? null,
+  insuranceProviderName: r.insurance_provider_name ?? null,
   createdBy: r.created_by, createdAt: r.created_at, updatedBy: r.updated_by, updatedAt: r.updated_at,
 });
 
-const RULE_SELECT = `SELECT r.*, (SELECT array_agg(u.display_name ORDER BY array_position(r.assignees, u.id)) FROM users u WHERE u.id = ANY(r.assignees)) AS assignee_names
+const RULE_SELECT = `SELECT r.*, (SELECT array_agg(u.display_name ORDER BY array_position(r.assignees, u.id)) FROM users u WHERE u.id = ANY(r.assignees)) AS assignee_names,
+  (SELECT ic.name FROM insurance_companies ic WHERE ic.id::text = r.conditions->>'insuranceProviderId') AS insurance_provider_name
   FROM lead_assignment_rules r`;
 
 export async function listRules({ status } = {}) {
@@ -78,9 +81,9 @@ async function checkAssignees(ids) {
 
 export async function createRule(b, userId) {
   const assignees = await checkAssignees(b.assignees);
-  const r = await one(`INSERT INTO lead_assignment_rules(name, priority, method, conditions, assignees, status, description, created_by, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8) RETURNING id`, [b.name.trim(), Number(b.priority ?? 100), b.method || 'round_robin', JSON.stringify(cleanConditions(b.conditions)),
-    assignees, b.status || 'active', b.description || null, userId]);
+  const r = await one(`INSERT INTO lead_assignment_rules(name, priority, method, conditions, assignees, status, description, max_open, created_by, updated_by)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9) RETURNING id`, [b.name.trim(), Number(b.priority ?? 100), b.method || 'round_robin', JSON.stringify(cleanConditions(b.conditions)),
+    assignees, b.status || 'active', b.description || null, b.maxOpen || null, userId]);
   return ruleOut(await getRule(r.id));
 }
 
@@ -88,10 +91,10 @@ export async function updateRule(id, b, userId) {
   const before = await getRule(id);
   const assignees = b.assignees !== undefined ? await checkAssignees(b.assignees) : before.assignees;
   await query(`UPDATE lead_assignment_rules SET name = $2, priority = $3, method = $4, conditions = $5, assignees = $6, status = $7, description = $8,
-      last_assigned_user_id = CASE WHEN last_assigned_user_id = ANY($6) THEN last_assigned_user_id END, updated_by = $9, updated_at = now() WHERE id = $1`,
+      last_assigned_user_id = CASE WHEN last_assigned_user_id = ANY($6) THEN last_assigned_user_id END, updated_by = $9, updated_at = now(), max_open = $10 WHERE id = $1`,
   [before.id, (b.name ?? before.name).trim(), Number(b.priority ?? before.priority), b.method || before.method,
     JSON.stringify(b.conditions !== undefined ? cleanConditions(b.conditions) : before.conditions), assignees, b.status || before.status,
-    b.description !== undefined ? b.description : before.description, userId]);
+    b.description !== undefined ? b.description : before.description, userId, b.maxOpen !== undefined ? b.maxOpen || null : before.max_open]);
   return { before: ruleOut(before), after: ruleOut(await getRule(before.id)) };
 }
 
@@ -120,6 +123,7 @@ export async function deleteRule(id, userId) {
 /** The lead's values the conditions are compared with. */
 const leadFacts = (l) => ({
   branchCode: l.branch_code, lob: l.lob, productId: l.product_id, source: l.source, leadCategory: l.lead_category, channelId: l.channel_id, province: l.state, city: l.city,
+  insuranceProviderId: l.insurance_provider_id, customerType: l.customer_type,
 });
 
 /** Whether every condition of the rule holds for the lead (text compared without case; line NONE: no product yet). */
@@ -134,19 +138,37 @@ async function activeAssignees(db, rule) {
   return (rule.assignees || []).filter((id) => rows.includes(id));
 }
 
-/** The assignee the rule's method picks (null when none of its assignees is active). */
+/** Open prospects of each user (Converted and Lost not counted). */
+async function openLoad(db, users) {
+  const counts = (await db.query(`SELECT owner_user_id AS id, count(*)::int AS n FROM leads WHERE owner_user_id = ANY($1) AND deleted_at IS NULL
+    AND NOT (status = ANY($2)) GROUP BY 1`, [users, CLOSED])).rows;
+  return (id) => counts.find((c) => c.id === id)?.n || 0;
+}
+
+/**
+ * The assignee the rule's method picks (null when none of its assignees is active, or all are at the rule's bandwidth:
+ * max_open open prospects, TIS-BRD-LEAD-06).
+ */
 export async function pickAssignee(db, rule) {
-  const users = await activeAssignees(db, rule);
+  let users = await activeAssignees(db, rule);
+  if (users.length && rule.max_open > 0) {
+    const load = await openLoad(db, users);
+    users = users.filter((id) => load(id) < rule.max_open);
+  }
   if (!users.length) return null;
   if (rule.method === 'fixed') return users[0];
   if (rule.method === 'load') {
-    const counts = (await db.query(`SELECT owner_user_id AS id, count(*)::int AS n FROM leads WHERE owner_user_id = ANY($1) AND deleted_at IS NULL
-      AND NOT (status = ANY($2)) GROUP BY 1`, [users, CLOSED])).rows;
-    const load = (id) => counts.find((c) => c.id === id)?.n || 0;
+    const load = await openLoad(db, users);
     return [...users].sort((a, b) => load(a) - load(b) || users.indexOf(a) - users.indexOf(b))[0];
   }
-  const last = users.indexOf(rule.last_assigned_user_id);
-  return users[(last + 1) % users.length];
+  // round robin: the next active assignee after the last one assigned, among those under the bandwidth
+  const all = rule.assignees || [];
+  const start = all.indexOf(rule.last_assigned_user_id);
+  for (let i = 1; i <= all.length; i += 1) {
+    const next = all[(start + i) % all.length];
+    if (users.includes(next)) return next;
+  }
+  return users[0];
 }
 
 async function history(db, { leadId, from, to, ruleId = null, action, reason = null, reasonCode = null, by = null }) {
@@ -195,7 +217,7 @@ export async function assignNewLead(db, leadId, creatorId) {
     if (!ruleMatches(rule, lead)) continue;
     const userId = await applyRule(db, lead, rule, creatorId);
     if (!userId) {
-      await queueLead(db, lead, `No active account executive in rule "${rule.name}"`, creatorId);
+      await queueLead(db, lead, rule.max_open > 0 ? `Every account executive of rule "${rule.name}" holds ${rule.max_open} open prospects` : `No active account executive in rule "${rule.name}"`, creatorId);
       return { userId: null, ruleId: rule.id, queued: true };
     }
     return { userId, ruleId: rule.id, queued: false };
@@ -246,6 +268,7 @@ export async function reassign(leadIds, toUserId, { reasonCode = null, reason = 
   const why = await reassignmentReason({ reasonCode, reason }, required);
   return withTransaction(async (db) => {
     const leads = await lockedLeads(db, leadIds);
+    await assertInsurerGroup(db, leads, to);
     if (action === 'taken') {
       const notQueued = leads.filter((l) => l.assignment_status !== 'queued');
       if (notQueued.length) throw badRequest('Validation failed', [{ path: 'leadIds', message: `Not in the reassignment queue: ${notQueued.map((l) => l.lead_number).join(', ')}` }]);
@@ -259,6 +282,22 @@ export async function reassign(leadIds, toUserId, { reasonCode = null, reason = 
     return { reassigned: leads.length, toUserId: to.id, toName: to.display_name, reason: why.text, reasonCode: why.code,
       leads: leads.map((l) => ({ id: l.id, leadNumber: l.lead_number, fromUserId: l.owner_user_id })) };
   });
+}
+
+/**
+ * With leads.reassign_within_insurer (TIS-BRD-LEAD-06), a prospect with an insurance provider goes only to an
+ * account executive of an active rule for that insurer (the insurer group); prospects without one go to anyone.
+ */
+async function assertInsurerGroup(db, leads, to) {
+  if ((await getSetting('leads.reassign_within_insurer')) !== true) return;
+  for (const insurerId of [...new Set(leads.map((l) => l.insurance_provider_id).filter(Boolean))]) {
+    const group = (await db.query(`SELECT r.assignees, ic.name FROM lead_assignment_rules r JOIN insurance_companies ic ON ic.id::text = r.conditions->>'insuranceProviderId'
+      WHERE r.status = 'active' AND r.conditions->>'insuranceProviderId' = $1`, [String(insurerId)])).rows;
+    if (!group.length) continue;
+    if (!group.some((g) => (g.assignees || []).includes(to.id))) {
+      throw badRequest('Validation failed', [{ path: 'toUserId', message: `${to.display_name} is not in the ${group[0].name} group: choose an account executive of the ${group[0].name} rules` }]);
+    }
+  }
 }
 
 /** Send prospects to the reassignment queue by hand (an account executive leaving, a complaint ...); a reason is required. */
@@ -381,12 +420,22 @@ export async function teamView(user, { managerId = null, memberId = null, status
   return { managerId: head, members: out, totals, leads };
 }
 
-/** Daily job: prospects still New after leads.assignment_sla_hours go to the queue; the lead assignment team is told. */
-export async function leadAssignmentSla() {
-  const hours = Number(await getSetting('leads.assignment_sla_hours', 48));
+/**
+ * Daily job: prospects still New after leads.assignment_sla_hours go to the queue; the lead assignment team is told.
+ * With leads.sla_working_time the hours of weekends and holidays (Holiday master) do not count (TIS-BRD-LEAD-07: three
+ * days on working time). now: the time of the run (job runs pass their parameters).
+ */
+export async function leadAssignmentSla({ now = new Date() } = {}) {
+  const hours = Number(await getSetting('leads.assignment_sla_hours'));
   if (!(hours > 0)) return { skipped: 'leads.assignment_sla_hours is 0' };
-  const stale = await many(`SELECT * FROM leads WHERE deleted_at IS NULL AND assignment_status = 'assigned' AND status IN ('New', 'new')
-    AND COALESCE(assigned_at, created_at) < now() - make_interval(hours => $1)`, [hours]);
+  const workingTime = (await getSetting('leads.sla_working_time')) === true;
+  let stale = await many(`SELECT * FROM leads WHERE deleted_at IS NULL AND assignment_status = 'assigned' AND status IN ('New', 'new')
+    AND COALESCE(assigned_at, created_at) < $2::timestamptz - make_interval(hours => $1)`, [hours, now]);
+  if (workingTime) {
+    const late = [];
+    for (const l of stale) if ((await workingHoursBetween(l.assigned_at || l.created_at, now)) >= hours) late.push(l);
+    stale = late;
+  }
   for (const l of stale) await queueLead(db0, l, `Not worked within ${hours} hours`, null);
   if (stale.length) {
     await notify({ type: 'reminder', title: `${stale.length} prospect(s) queued for reassignment`, message: `Prospects still New after ${hours} hours were moved to the reassignment queue`,
@@ -417,4 +466,20 @@ export async function assigneeOptions({ leadIds = [] } = {}) {
     }
   }
   return users.map((u) => ({ ...u, suggested: byUser.has(u.id), rules: byUser.get(u.id) || [] }));
+}
+
+/**
+ * Daily job "Prospects not converted" (TIS-BRD-LEAD-08): a prospect not converted and not changed for
+ * leads.retention_days is closed as Lost (its history stays); 0 = never. Returns { closed }.
+ */
+export async function leadRetention() {
+  const days = Number(await getSetting('leads.retention_days')) || 0;
+  if (!(days > 0)) return { skipped: 'leads.retention_days is 0' };
+  const rows = await many(`UPDATE leads SET status = 'Lost', disposition = COALESCE(disposition, 'Not Interested'), updated_at = now()
+    WHERE deleted_at IS NULL AND NOT (status = ANY($2)) AND COALESCE(updated_at, created_at) < now() - make_interval(days => $1) RETURNING id, lead_number`, [days, CLOSED]);
+  for (const r of rows) {
+    await query(`INSERT INTO audit_log(entity, entity_id, action, after_data, source) VALUES ('lead', $1, 'update', $2, '{"channel": "job", "name": "lead-retention"}')`,
+      [r.id, JSON.stringify({ status: 'Lost', reason: `Not converted within ${days} days` })]);
+  }
+  return { closed: rows.length };
 }

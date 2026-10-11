@@ -23,6 +23,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
@@ -88,6 +89,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
+| Reports > Operational Reports | APR Operation Report | View |
+| Reports > Operational Reports | Production per Line | View |
+| Reports > Operational Reports | Agent Pipeline | View |
+| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
 | Reports > Financial Reports | Payables | View |
@@ -122,6 +127,7 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
+| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -147,6 +153,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
@@ -175,7 +183,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Commission | Commission rules register | Approve | Approve or return a commission rule submitted by another user |  |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
 | Commission | Sharing schemes | Approve | Approve or return sharing schemes and assignments; suspend, resume and end schemes |  |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |

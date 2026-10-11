@@ -23,6 +23,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Lock-in Accounts | Create and edit |
 | Operations > Renewals | Negotiations | Create and edit |
@@ -45,6 +46,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
+| Reports > Operational Reports | APR Operation Report | View |
+| Reports > Operational Reports | Production per Line | View |
+| Reports > Operational Reports | Agent Pipeline | View |
+| Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
@@ -73,6 +78,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Lock-in Accounts, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
@@ -87,7 +93,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
 | Commission | Sharing schemes | View | See the sharing schemes and the share of a policy | Sharing Schemes |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |

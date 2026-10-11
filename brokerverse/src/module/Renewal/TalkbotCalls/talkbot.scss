@@ -1,0 +1,64 @@
+// Operations > Renewals > Talkbot Calls: the call lists, a call list and its dialogs.
+@import "../../../theme/bdoi/tokens";
+@import "../../../theme/bdoi/fields";
+
+.talkbot-label {
+  @include bv-field-label;
+  display: block;
+}
+
+.talkbot-error {
+  color: $color-danger;
+  margin: 12px 0 0;
+}
+
+.talkbot-dialog {
+  &__fixed {
+    margin: 8px 0 0;
+    color: $color-heading;
+  }
+
+  &__checks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  &__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.talkbot-page {
+  .talkbot-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .talkbot-outcome {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .talkbot-muted {
+    color: $color-text-muted;
+    font-size: 12px;
+  }
+}
+
+.talkbot-action-hint {
+  display: inline-flex;
+}
+
+// the outcome names are long: let the label of a figure wrap instead of cutting it
+.bv-stat-cards.talkbot-figures {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+
+  .bv-stat-label {
+    white-space: normal;
+  }
+}

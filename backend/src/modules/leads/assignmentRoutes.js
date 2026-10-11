@@ -21,11 +21,13 @@ const conditions = z.object({
   source: z.string().max(80).optional().nullable(),
   leadCategory: z.string().max(40).optional().nullable(), channelId: z.string().max(40).optional().nullable(),
   province: z.string().max(120).optional().nullable(), city: z.string().max(120).optional().nullable(),
+  insuranceProviderId: z.union([z.number().int(), z.string().max(20)]).optional().nullable(), customerType: z.string().max(40).optional().nullable(),
 }).partial();
 const ruleBody = z.object({
   name: z.string().trim().min(1).max(120), priority: z.coerce.number().int().min(0).max(100000).optional(),
   method: z.enum(asg.METHODS).optional(), conditions: conditions.optional(), assignees: z.array(z.string().min(1)).min(1),
   status: z.enum(['active', 'inactive']).optional(), description: z.string().max(500).optional().nullable(),
+  maxOpen: z.coerce.number().int().min(0).max(100000).optional().nullable(),
 });
 const ruleUpdate = ruleBody.partial();
 const leadIds = z.array(z.string().min(1)).min(1).max(1000);
@@ -45,7 +47,7 @@ define({
   handler: async (req, res) => res.json({ success: true, data: await asg.listRules(req.query) }),
 });
 define({
-  method: 'POST', path: '/rules', summary: 'Add an assignment rule (conditions on branch, line, source, category, channel, province, city; round robin, load or fixed)', screen: `${SCREEN} > Rules > Add`,
+  method: 'POST', path: '/rules', summary: 'Add an assignment rule (conditions on branch, line, source, category, channel, province, city, insurance provider, customer type; round robin, load or fixed; maxOpen: open prospects an account executive may hold under the rule)', screen: `${SCREEN} > Rules > Add`,
   middleware: [...canWrite, validate(ruleBody)], request: { name: 'Metro Manila motor', priority: 10, method: 'round_robin', conditions: { lob: 'MOTOR', province: 'Metro Manila' }, assignees: ['usr_1', 'usr_2'] },
   response: { success: true, data: rule },
   handler: async (req, res) => {

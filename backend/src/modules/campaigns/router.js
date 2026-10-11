@@ -12,6 +12,10 @@ const { router, define } = moduleRouter('Campaigns', '/campaigns');
 const SCREEN = 'Operations > Sales & Marketing > Campaigns';
 const canRead = [requireAuth, requirePermission('read:campaigns', 'write:campaigns')];
 const canWrite = [requireAuth, requirePermission('write:campaigns')];
+// Marketing consent (Data Privacy Act; TIS-BRD-NFR-17.1): recorded by whoever keeps the client relationship, the account
+// executives of the prospects and clients, as well as by the campaign team.
+const consentRead = [requireAuth, requirePermission('read:campaigns', 'write:campaigns', 'read:leads', 'read:clients')];
+const consentWrite = [requireAuth, requirePermission('write:campaigns', 'write:leads', 'write:clients')];
 
 const text = (n) => z.string().max(n).optional().nullable();
 const criteria = z.object({
@@ -80,13 +84,13 @@ const consent = { partyType: 'client', partyId: 'cl_1', name: 'Maria Santos', co
   evidence: 'Signed application form', recordedAt: '2026-10-09T02:00:00Z' };
 define({
   method: 'GET', path: '/consents', summary: 'Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)',
-  screen: `${SCREEN} > Marketing consents`, middleware: canRead, query: { search: 'Santos', status: 'not-recorded' }, response: { success: true, data: [consent] },
+  screen: `${SCREEN} > Marketing consents`, middleware: consentRead, query: { search: 'Santos', status: 'not-recorded' }, response: { success: true, data: [consent] },
   handler: async (req, res) => res.json({ success: true, data: await svc.marketingConsents(req.query) }),
 });
 define({
   method: 'POST', path: '/consents', summary: 'Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force',
   screen: `${SCREEN} > Marketing consents > Record`,
-  middleware: [...canWrite, validate(z.object({ partyType: z.enum(['client', 'lead']), partyId: z.string().trim().min(1).max(60), granted: z.boolean(), channel: z.enum(svc.CONSENT_CHANNELS),
+  middleware: [...consentWrite, validate(z.object({ partyType: z.enum(['client', 'lead']), partyId: z.string().trim().min(1).max(60), granted: z.boolean(), channel: z.enum(svc.CONSENT_CHANNELS),
     evidence: text(500) }))],
   request: { partyType: 'client', partyId: 'cl_1', granted: true, channel: 'Form', evidence: 'Signed application form' }, response: { success: true, data: { id: 41, ...consent } },
   handler: async (req, res) => {

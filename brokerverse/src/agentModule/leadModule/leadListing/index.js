@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -15,8 +15,15 @@ import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
 import useProspectStart from "./useProspectStart";
 
-/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
-const UPLOAD_TARGETS = [{ label: "Prospects", templatePath: "/leads/bulk-upload/template", uploadPath: "/leads/bulk-upload" }];
+/**
+ * Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). Prospects
+ * from calls, e-mail, walk-ins and the other manual channels (a Lead Number or Loan ID already loaded updates its status),
+ * or the TFS account file (TIS-BRD-LEAD-01: one prospect per loan with the TFS detail set).
+ */
+export const uploadTargets = (t) => [
+  { label: t("leads.uploadProspects"), templatePath: "/leads/bulk-upload/template", uploadPath: "/leads/bulk-upload" },
+  { label: t("leads.uploadTfs"), templatePath: "/leads/tfs-import/template", uploadPath: "/leads/tfs-import" },
+];
 
 const LeadListing = () => {
   const { t } = useTranslation();
@@ -29,6 +36,7 @@ const LeadListing = () => {
   const toast = useRef(null);
   const navigate = useNavigate();
   const { openProduct, skipProduct, productRequired } = useProspectStart();
+  const targets = useMemo(() => uploadTargets(t), [t]);
 
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
@@ -158,8 +166,8 @@ const LeadListing = () => {
       <ImportDialog
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}
-        title={"Bulk upload prospects"}
-        targets={UPLOAD_TARGETS}
+        title={t("leads.bulkUploadTitle")}
+        targets={targets}
         onDone={handleBulkUploadSuccess}
       />
       <Dialog

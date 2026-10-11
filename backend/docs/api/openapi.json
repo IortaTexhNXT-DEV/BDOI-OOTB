@@ -282,6 +282,9 @@
       "name": "System Settings"
     },
     {
+      "name": "Talkbot calls"
+    },
+    {
       "name": "User Management"
     }
   ],
@@ -33525,7 +33528,7 @@
         "tags": [
           "Campaigns"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns, read:leads, read:clients",
         "parameters": [
           {
             "name": "search",
@@ -33626,7 +33629,9 @@
         "x-screen": "Operations > Sales & Marketing > Campaigns > Marketing consents",
         "x-permissions": [
           "read:campaigns",
-          "write:campaigns"
+          "write:campaigns",
+          "read:leads",
+          "read:clients"
         ]
       },
       "post": {
@@ -33635,7 +33640,7 @@
         "tags": [
           "Campaigns"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns, write:leads, write:clients",
         "parameters": [],
         "responses": {
           "200": {
@@ -33715,7 +33720,9 @@
         },
         "x-screen": "Operations > Sales & Marketing > Campaigns > Marketing consents > Record",
         "x-permissions": [
-          "write:campaigns"
+          "write:campaigns",
+          "write:leads",
+          "write:clients"
         ],
         "requestBody": {
           "required": true,
@@ -85240,7 +85247,7 @@
       },
       "post": {
         "operationId": "postLeadAssignmentRules",
-        "summary": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city; round robin, load or fixed)",
+        "summary": "Add an assignment rule (conditions on branch, line, source, category, channel, province, city, insurance provider, customer type; round robin, load or fixed; maxOpen: open prospects an account executive may hold under the rule)",
         "tags": [
           "Lead assignment"
         ],
@@ -87094,11 +87101,11 @@
       },
       "delete": {
         "operationId": "deleteLeadsId",
-        "summary": "Delete a lead (soft delete; blocked once a policy exists)",
+        "summary": "Delete a lead (soft delete; blocked once a policy exists; delete:leads)",
         "tags": [
           "Leads"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: write:leads",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Delete\n\nAccess: delete:leads",
         "parameters": [
           {
             "name": "id",
@@ -87155,7 +87162,7 @@
         },
         "x-screen": "Operations > Sales & Marketing > Prospects > Delete",
         "x-permissions": [
-          "write:leads"
+          "delete:leads"
         ]
       }
     },
@@ -87493,7 +87500,7 @@
     "/leads/duplicates": {
       "get": {
         "operationId": "getLeadsDuplicates",
-        "summary": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check",
+        "summary": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth; with leads.duplicate_rule four-key the same first name, last name, mobile and date of birth together, or the same Loan ID (clientId: the open prospects of that client); off with leads.duplicate_check",
         "tags": [
           "Leads"
         ],
@@ -87618,6 +87625,104 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Prospects > Create Prospect",
+        "x-permissions": [
+          "read:leads"
+        ]
+      }
+    },
+    "/leads/options": {
+      "get": {
+        "operationId": "getLeadsOptions",
+        "summary": "Lists of the prospect form: lead categories, customer types, statuses, dispositions and the insurers (insurance provider)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Create / Edit\n\nAccess: read:leads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "customerTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "dispositions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "categories": [
+                      "Retail",
+                      "Corporate"
+                    ],
+                    "customerTypes": [
+                      "TFS",
+                      "Non-TFS",
+                      "Direct Customer"
+                    ],
+                    "dispositions": [
+                      "Interested"
+                    ],
+                    "insurers": [
+                      {
+                        "id": 2,
+                        "name": "Malayan Insurance Co., Inc."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Create / Edit",
         "x-permissions": [
           "read:leads"
         ]
@@ -87910,6 +88015,142 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Prospects (stats cards)",
+        "x-permissions": [
+          "read:leads"
+        ]
+      }
+    },
+    "/leads/tfs-import": {
+      "post": {
+        "operationId": "postLeadsTfsImport",
+        "summary": "Load the TFS account file (multipart field \"file\", XLSX or CSV): one prospect per Loan ID with the TFS detail set, source TFS, Customer Type TFS; a Loan ID already loaded updates its prospect; an account without a policy expiry date or with an unknown insurer is refused; the upload is stamped LIB-yyyy-nnnnn",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts\n\nAccess: write:leads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "created": {
+                          "type": "integer"
+                        },
+                        "updated": {
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "type": "integer"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "message": "Processed 250 rows: 246 created, 2 updated, 2 failed (batch LIB-2026-00004)",
+                    "total": 250,
+                    "created": 246,
+                    "updated": 2,
+                    "failed": 2,
+                    "errors": [
+                      {
+                        "row": 17,
+                        "message": "Row 17: No policy expiry date: no prospect is created for this account"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts",
+        "x-permissions": [
+          "write:leads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/leads/tfs-import/template": {
+      "get": {
+        "operationId": "getLeadsTfsImportTemplate",
+        "summary": "TFS account file template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts > Download template\n\nAccess: read:leads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Bulk Upload > TFS accounts > Download template",
         "x-permissions": [
           "read:leads"
         ]
@@ -120944,7 +121185,7 @@
     "/policy-renewals/batches/{id}/generate-quotes": {
       "post": {
         "operationId": "postPolicyRenewalsBatchesIdGenerateQuotes",
-        "summary": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)",
+        "summary": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId); with talkbot.bulk_quote_filter a Motor policy not confirmed by Talkbot is Skipped with the reason",
         "tags": [
           "Policy renewals"
         ],
@@ -120982,6 +121223,9 @@
                         "queued": {
                           "type": "integer"
                         },
+                        "skipped": {
+                          "type": "integer"
+                        },
                         "batchId": {
                           "type": "string"
                         }
@@ -120991,10 +121235,11 @@
                 },
                 "example": {
                   "success": true,
-                  "message": "Renewal quotes queued",
+                  "message": "Renewal quotes queued: 2 policies, 1 skipped as not confirmed by Talkbot",
                   "data": {
                     "jobId": "17",
                     "queued": 2,
+                    "skipped": 1,
                     "batchId": "RB-2026-00001"
                   }
                 }
@@ -174594,7 +174839,7 @@
     "/renewals/queue": {
       "get": {
         "operationId": "getRenewalsQueue",
-        "summary": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",
+        "summary": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize; talkbotOutcome and each renewal's Talkbot outcome with read:talkbot-calls)",
         "tags": [
           "Renewals workspace"
         ],
@@ -182059,6 +182304,1931 @@
             }
           }
         }
+      }
+    },
+    "/talkbot/lists": {
+      "get": {
+        "operationId": "getTalkbotLists",
+        "summary": "Call lists, newest first (status, search by list number or task name, page, pageSize)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls\n\nAccess: read:talkbot-calls",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "sent"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "listNumber": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "taskName": {
+                            "type": "string"
+                          },
+                          "expiryFrom": {
+                            "type": "string"
+                          },
+                          "expiryTo": {
+                            "type": "string"
+                          },
+                          "accounts": {
+                            "type": "integer"
+                          },
+                          "willing": {
+                            "type": "integer"
+                          },
+                          "notCalled": {
+                            "type": "integer"
+                          },
+                          "batchNumbers": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "leftOut": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "tcl_1",
+                      "listNumber": "TCL-2026-00014",
+                      "status": "sent",
+                      "statusLabel": "Sent to Talkbot",
+                      "taskName": "TIS_MV - OCT 07, 2026",
+                      "expiryFrom": "2026-10-10",
+                      "expiryTo": "2026-10-10",
+                      "accounts": 500,
+                      "willing": 37,
+                      "notCalled": 0,
+                      "batchNumbers": [
+                        "RB-2026-90014"
+                      ],
+                      "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
+      },
+      "post": {
+        "operationId": "postTalkbotLists",
+        "summary": "Create a call list in Draft from the Motor policies due for renewal of the criteria (eligibility rules applied; refused when no account or more than talkbot.max_accounts)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > New call list > Create call list\n\nAccess: write:talkbot-calls",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "willing": {
+                          "type": "integer"
+                        },
+                        "notCalled": {
+                          "type": "integer"
+                        },
+                        "batchNumbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Call list TCL-2026-00016 created with 41 accounts",
+                  "data": {
+                    "id": "tcl_1",
+                    "listNumber": "TCL-2026-00014",
+                    "status": "sent",
+                    "statusLabel": "Sent to Talkbot",
+                    "taskName": "TIS_MV - OCT 07, 2026",
+                    "expiryFrom": "2026-10-10",
+                    "expiryTo": "2026-10-10",
+                    "accounts": 500,
+                    "willing": 37,
+                    "notCalled": 0,
+                    "batchNumbers": [
+                      "RB-2026-90014"
+                    ],
+                    "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > New call list > Create call list",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expiryFrom": {
+                    "type": "string"
+                  },
+                  "expiryTo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "expiryFrom": "2026-10-10",
+                "expiryTo": "2026-10-10"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}": {
+      "get": {
+        "operationId": "getTalkbotListsId",
+        "summary": "One call list with its accounts (outcome, lineStatus active | removed, search); mobile numbers masked",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list\n\nAccess: read:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "call-back"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "willing": {
+                          "type": "integer"
+                        },
+                        "notCalled": {
+                          "type": "integer"
+                        },
+                        "batchNumbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "clientName": {
+                                "type": "string"
+                              },
+                              "mobile": {
+                                "type": "string"
+                              },
+                              "vehicle": {
+                                "type": "string"
+                              },
+                              "expiryDate": {
+                                "type": "string"
+                              },
+                              "outcome": {
+                                "type": "string"
+                              },
+                              "outcomeLabel": {
+                                "type": "string"
+                              },
+                              "outcomeDetail": {
+                                "type": "string"
+                              },
+                              "calls": {
+                                "type": "integer"
+                              },
+                              "manual": {
+                                "type": "boolean"
+                              },
+                              "batchNumber": {
+                                "type": "string"
+                              },
+                              "quoteStatus": {
+                                "type": "string"
+                              },
+                              "quoteNumber": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "tcl_1",
+                    "listNumber": "TCL-2026-00014",
+                    "status": "sent",
+                    "statusLabel": "Sent to Talkbot",
+                    "taskName": "TIS_MV - OCT 07, 2026",
+                    "expiryFrom": "2026-10-10",
+                    "expiryTo": "2026-10-10",
+                    "accounts": 500,
+                    "willing": 37,
+                    "notCalled": 0,
+                    "batchNumbers": [
+                      "RB-2026-90014"
+                    ],
+                    "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2",
+                    "lines": [
+                      {
+                        "id": 41,
+                        "policyNumber": "POL-2025-41187",
+                        "clientName": "ANDREA M. VILLANUEVA",
+                        "mobile": "0917 *** 7105",
+                        "vehicle": "2023 TOYOTA Raize 1.0 Turbo CVT",
+                        "expiryDate": "2026-10-10",
+                        "outcome": "willing",
+                        "outcomeLabel": "Willing to renew",
+                        "outcomeDetail": "Will Renew (Closing)",
+                        "calls": 3,
+                        "manual": false,
+                        "batchNumber": "RB-2026-90014",
+                        "quoteStatus": "Quoted",
+                        "quoteNumber": "RQ-2026-90031"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/cancel": {
+      "post": {
+        "operationId": "postTalkbotListsIdCancel",
+        "summary": "Cancel a Draft or Sent call list with a reason code (context talkbot_list_cancel)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Cancel list\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "willing": {
+                          "type": "integer"
+                        },
+                        "notCalled": {
+                          "type": "integer"
+                        },
+                        "batchNumbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "tcl_1",
+                    "listNumber": "TCL-2026-00014",
+                    "status": "sent",
+                    "statusLabel": "Sent to Talkbot",
+                    "taskName": "TIS_MV - OCT 07, 2026",
+                    "expiryFrom": "2026-10-10",
+                    "expiryTo": "2026-10-10",
+                    "accounts": 500,
+                    "willing": 37,
+                    "notCalled": 0,
+                    "batchNumbers": [
+                      "RB-2026-90014"
+                    ],
+                    "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Cancel list",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "TBC-NOT-RUN"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}/close": {
+      "post": {
+        "operationId": "postTalkbotListsIdClose",
+        "summary": "Close a call list whose results were loaded",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Close list\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "willing": {
+                          "type": "integer"
+                        },
+                        "notCalled": {
+                          "type": "integer"
+                        },
+                        "batchNumbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "tcl_1",
+                    "listNumber": "TCL-2026-00014",
+                    "status": "sent",
+                    "statusLabel": "Sent to Talkbot",
+                    "taskName": "TIS_MV - OCT 07, 2026",
+                    "expiryFrom": "2026-10-10",
+                    "expiryTo": "2026-10-10",
+                    "accounts": 500,
+                    "willing": 37,
+                    "notCalled": 0,
+                    "batchNumbers": [
+                      "RB-2026-90014"
+                    ],
+                    "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Close list",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/download": {
+      "post": {
+        "operationId": "postTalkbotListsIdDownload",
+        "summary": "Download call list: the Contact Import file (.xlsx, sheet Contact Import); accounts no longer eligible are taken off the list first",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Download call list\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Download call list",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/lines/{lineId}/attempts": {
+      "get": {
+        "operationId": "getTalkbotListsIdLinesLineIdAttempts",
+        "summary": "The call attempts of an account with the Call ID and the upload they came from",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Calls\n\nAccess: read:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "callId": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "callTime": {
+                            "type": "string"
+                          },
+                          "callResult": {
+                            "type": "string"
+                          },
+                          "outcome": {
+                            "type": "string"
+                          },
+                          "uploadNumber": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "callId": "3422766876",
+                      "result": "Connected(200)",
+                      "callTime": "2026-10-07T06:52:10Z",
+                      "callResult": "Will Renew",
+                      "outcome": "willing",
+                      "uploadNumber": 1
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Calls",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/lines/{lineId}/outcome": {
+      "post": {
+        "operationId": "postTalkbotListsIdLinesLineIdOutcome",
+        "summary": "Record or correct the Talkbot outcome of an account by hand (remark required; any outcome but Not called)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Record outcome\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "after": {
+                          "type": "object",
+                          "properties": {
+                            "outcome": {
+                              "type": "string"
+                            },
+                            "source": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Outcome recorded for policy POL-2025-41187",
+                  "data": {
+                    "policyNumber": "POL-2025-41187",
+                    "after": {
+                      "outcome": "willing",
+                      "source": "manual"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Record outcome",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "date": {
+                    "type": "string"
+                  },
+                  "remark": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "outcome": "willing",
+                "date": "2026-10-08",
+                "remark": "Client called the hotline 08/10/2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}/lines/{lineId}/remove": {
+      "post": {
+        "operationId": "postTalkbotListsIdLinesLineIdRemove",
+        "summary": "Take an account off a Draft call list with a reason code (context talkbot_line_remove)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Remove\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "clientName": {
+                          "type": "string"
+                        },
+                        "mobile": {
+                          "type": "string"
+                        },
+                        "vehicle": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeLabel": {
+                          "type": "string"
+                        },
+                        "outcomeDetail": {
+                          "type": "string"
+                        },
+                        "calls": {
+                          "type": "integer"
+                        },
+                        "manual": {
+                          "type": "boolean"
+                        },
+                        "batchNumber": {
+                          "type": "string"
+                        },
+                        "quoteStatus": {
+                          "type": "string"
+                        },
+                        "quoteNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 41,
+                    "policyNumber": "POL-2025-41187",
+                    "clientName": "ANDREA M. VILLANUEVA",
+                    "mobile": "0917 *** 7105",
+                    "vehicle": "2023 TOYOTA Raize 1.0 Turbo CVT",
+                    "expiryDate": "2026-10-10",
+                    "outcome": "willing",
+                    "outcomeLabel": "Willing to renew",
+                    "outcomeDetail": "Will Renew (Closing)",
+                    "calls": 3,
+                    "manual": false,
+                    "batchNumber": "RB-2026-90014",
+                    "quoteStatus": "Quoted",
+                    "quoteNumber": "RQ-2026-90031"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Remove",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "TBR-COMPLAINT"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}/lines/{lineId}/restore": {
+      "post": {
+        "operationId": "postTalkbotListsIdLinesLineIdRestore",
+        "summary": "Put a removed account back on a Draft call list",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Put back\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "policyNumber": {
+                          "type": "string"
+                        },
+                        "clientName": {
+                          "type": "string"
+                        },
+                        "mobile": {
+                          "type": "string"
+                        },
+                        "vehicle": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeLabel": {
+                          "type": "string"
+                        },
+                        "outcomeDetail": {
+                          "type": "string"
+                        },
+                        "calls": {
+                          "type": "integer"
+                        },
+                        "manual": {
+                          "type": "boolean"
+                        },
+                        "batchNumber": {
+                          "type": "string"
+                        },
+                        "quoteStatus": {
+                          "type": "string"
+                        },
+                        "quoteNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 41,
+                    "policyNumber": "POL-2025-41187",
+                    "clientName": "ANDREA M. VILLANUEVA",
+                    "mobile": "0917 *** 7105",
+                    "vehicle": "2023 TOYOTA Raize 1.0 Turbo CVT",
+                    "expiryDate": "2026-10-10",
+                    "outcome": "willing",
+                    "outcomeLabel": "Willing to renew",
+                    "outcomeDetail": "Will Renew (Closing)",
+                    "calls": 3,
+                    "manual": false,
+                    "batchNumber": "RB-2026-90014",
+                    "quoteStatus": "Quoted",
+                    "quoteNumber": "RQ-2026-90031"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Put back",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/renewal-batches": {
+      "post": {
+        "operationId": "postTalkbotListsIdRenewalBatches",
+        "summary": "Create renewal batch: a Draft renewal batch (at most renewals.batch_max_policies policies each) with the Talkbot-confirmed accounts not yet in a batch",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Create renewal batch\n\nAccess: read:talkbot-calls, write:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "batches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "batchNumber": {
+                                "type": "string"
+                              },
+                              "policies": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Renewal batch RB-2026-90014 created with 37 policies",
+                  "data": {
+                    "listNumber": "TCL-2026-00014",
+                    "batches": [
+                      {
+                        "batchNumber": "RB-2026-90014",
+                        "policies": 37
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Create renewal batch",
+        "x-permissions": [
+          "read:talkbot-calls",
+          "write:renewals"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/results": {
+      "post": {
+        "operationId": "postTalkbotListsIdResults",
+        "summary": "Upload the Talkbot Call Records file of a call list (multipart field \"file\", .xlsx; confirmTaskName=true loads a file of another Talkbot task)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "loaded": {
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "type": "integer"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "outcomeCounts": {
+                          "type": "object",
+                          "properties": {
+                            "willing": {
+                              "type": "integer"
+                            },
+                            "missed-call": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Processed 1,529 rows: 1,529 loaded, 0 failed",
+                  "data": {
+                    "total": 1529,
+                    "loaded": 1529,
+                    "failed": 0,
+                    "errors": [],
+                    "outcomeCounts": {
+                      "willing": 37,
+                      "missed-call": 261
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Upload results",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file, confirmTaskName"
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}/send": {
+      "post": {
+        "operationId": "postTalkbotListsIdSend",
+        "summary": "Mark a downloaded Draft list as sent to Talkbot with the Talkbot task name",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Mark as sent\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "listNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "willing": {
+                          "type": "integer"
+                        },
+                        "notCalled": {
+                          "type": "integer"
+                        },
+                        "batchNumbers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "tcl_1",
+                    "listNumber": "TCL-2026-00014",
+                    "status": "sent",
+                    "statusLabel": "Sent to Talkbot",
+                    "taskName": "TIS_MV - OCT 07, 2026",
+                    "expiryFrom": "2026-10-10",
+                    "expiryTo": "2026-10-10",
+                    "accounts": 500,
+                    "willing": 37,
+                    "notCalled": 0,
+                    "batchNumbers": [
+                      "RB-2026-90014"
+                    ],
+                    "leftOut": "11 accounts left out: 6 No mobile number, 3 Already on call list TCL-2026-00013, 2 Lock-in or Scheme 2"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Mark as sent",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "taskName": "TIS_MV - OCT 07, 2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/lists/{id}/uploads": {
+      "get": {
+        "operationId": "getTalkbotListsIdUploads",
+        "summary": "Uploads of a call list with their counts and failed rows",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: read:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "uploadNumber": {
+                            "type": "integer"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "total": {
+                            "type": "integer"
+                          },
+                          "loaded": {
+                            "type": "integer"
+                          },
+                          "failed": {
+                            "type": "integer"
+                          },
+                          "fileAvailable": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "uploadNumber": 1,
+                      "fileName": "CallRecords_07-10-2026.xlsx",
+                      "total": 1529,
+                      "loaded": 1529,
+                      "failed": 0,
+                      "fileAvailable": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Uploads",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/lists/{id}/uploads/{uploadId}/file": {
+      "get": {
+        "operationId": "getTalkbotListsIdUploadsUploadIdFile",
+        "summary": "The call records file of an upload as it was uploaded (kept talkbot.file_retention_days)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Call list > Uploads\n\nAccess: write:talkbot-calls",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "uploadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Call list > Uploads",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/options": {
+      "get": {
+        "operationId": "getTalkbotOptions",
+        "summary": "New call list defaults: expiry dates (today + talkbot.days_before_expiry, extended over the coming non-working days), proposed task name, insurers, sales persons, lists to call again, outcomes",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: read:talkbot-calls",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "taskName": {
+                          "type": "string"
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "expiryFrom": "2026-10-12",
+                    "expiryTo": "2026-10-14",
+                    "taskName": "TIS_MV - OCT 09, 2026",
+                    "insurers": [
+                      {
+                        "id": 2,
+                        "name": "Malayan Insurance Co., Inc."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > New call list",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
+      }
+    },
+    "/talkbot/preview": {
+      "post": {
+        "operationId": "postTalkbotPreview",
+        "summary": "Accounts the criteria give: how many can be called and how many are left out, by reason (nothing is saved)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > New call list\n\nAccess: write:talkbot-calls",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "eligible": {
+                          "type": "integer"
+                        },
+                        "maxAccounts": {
+                          "type": "integer"
+                        },
+                        "excluded": {
+                          "type": "object",
+                          "properties": {
+                            "No mobile number": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "leftOut": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "eligible": 500,
+                    "maxAccounts": 2000,
+                    "excluded": {
+                      "No mobile number": 6
+                    },
+                    "leftOut": "6 accounts left out: 6 No mobile number"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > New call list",
+        "x-permissions": [
+          "write:talkbot-calls"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "expiryFrom": {
+                    "type": "string"
+                  },
+                  "expiryTo": {
+                    "type": "string"
+                  },
+                  "includeExpired": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "expiryFrom": "2026-10-10",
+                "expiryTo": "2026-10-10",
+                "includeExpired": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/talkbot/results/template": {
+      "get": {
+        "operationId": "getTalkbotResultsTemplate",
+        "summary": "Talkbot call results template (Data, Columns and Instructions sheets with the 13 columns BrokerVerse reads)",
+        "tags": [
+          "Talkbot calls"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Talkbot Calls > Upload results > Download template\n\nAccess: read:talkbot-calls",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Talkbot Calls > Upload results > Download template",
+        "x-permissions": [
+          "read:talkbot-calls"
+        ]
       }
     },
     "/roles": {

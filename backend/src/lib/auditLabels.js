@@ -55,7 +55,7 @@ export const ENTITY_LABELS = {
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
-  cas_document: 'CAS document', cas_book_print: 'Book print',
+  cas_document: 'CAS document', cas_book_print: 'Book print', talkbot_call_list: 'Talkbot call list', talkbot_call_line: 'Talkbot call list account',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -92,6 +92,14 @@ const ACTION_VERBS = {
  * send-bill, settle). A rejected remittance goes back to its maker, so reject reads as returned.
  */
 const ACTION_TITLES = {
+  talkbot_call_list: {
+    create: 'Call list created', download: 'Call list downloaded', 'mark-sent': 'Call list marked as sent to Talkbot', 'upload-results': 'Talkbot results uploaded',
+    cancel: 'Call list cancelled', close: 'Call list closed', 'create-renewal-batch': 'Renewal batch created from the confirmed accounts',
+  },
+  // prospects loaded from the TFS account file or updated by a bulk upload (TIS-BRD-LEAD-01, LEAD-07)
+  lead: { 'tfs-import': 'Prospect created from the TFS account file', 'tfs-update': 'Prospect updated from the TFS account file',
+    'bulk-update': 'Prospect updated by bulk upload' },
+  talkbot_call_line: { remove: 'Account removed from the call list', restore: 'Account put back on the call list', 'record-outcome': 'Talkbot outcome recorded by hand' },
   session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' },
   remittance: {
     create: 'Remittance created', submit: 'Remittance submitted', withdraw: 'Remittance withdrawn from approval', return: 'Remittance returned to the maker',

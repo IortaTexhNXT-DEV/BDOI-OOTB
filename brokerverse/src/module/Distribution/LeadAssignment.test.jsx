@@ -10,6 +10,7 @@ import systemSettingsService from "../../services/systemSettingsService";
 import mastersService from "../../services/mastersService";
 import addressService from "../../services/addressService";
 import placementService from "../../services/placementService";
+import leadService from "../../services/leadService";
 
 jest.mock("../../services/distributionService", () => ({
   __esModule: true,
@@ -18,6 +19,7 @@ jest.mock("../../services/distributionService", () => ({
     channelOptions: jest.fn(), takeFromQueue: jest.fn(), runRules: jest.fn(),
   },
 }));
+jest.mock("../../services/leadService", () => ({ __esModule: true, default: { options: jest.fn() } }));
 jest.mock("../../services/mastersService", () => ({ __esModule: true, default: { options: jest.fn() } }));
 jest.mock("../../services/addressService", () => ({ __esModule: true, default: { getProvincesByCountry: jest.fn(), getCitiesByProvince: jest.fn() } }));
 jest.mock("../../services/placementService", () => ({ __esModule: true, default: { productLines: jest.fn() } }));
@@ -119,6 +121,7 @@ describe("Lead Assignment screen", () => {
     service.assignmentQueue.mockResolvedValue([QUEUED]);
     service.assignmentRules.mockResolvedValue([]);
     service.channelOptions.mockResolvedValue([]);
+    leadService.options.mockResolvedValue({ insurers: [{ id: 2, name: "Malayan Insurance Co., Inc." }], customerTypes: ["TFS", "Non-TFS", "Direct Customer"] });
     service.takeFromQueue.mockResolvedValue({ message: "1 prospect(s) taken from the queue" });
     service.runRules.mockResolvedValue({ data: { dryRun: true, assigned: [{ leadId: "ld_9", leadNumber: "LD-2026-00009", name: "Jose Reyes", ruleName: "Untagged", toName: "Ana Garcia" }], unmatched: 0 } });
   });
@@ -133,6 +136,19 @@ describe("Lead Assignment screen", () => {
     fireEvent.click(screen.getByRole("button", { name: "Assign by rules" }));
     expect(await screen.findByText("Assign 1 prospect(s)")).toBeInTheDocument();
     expect(service.runRules).toHaveBeenCalledWith(true);
+  }, 20000);
+
+  it("shows a rule by insurance provider and customer type with its bandwidth, and offers them on the rule form", async () => {
+    service.assignmentRules.mockResolvedValue([{ id: 7, name: "Malayan TFS accounts", priority: 10, method: "round_robin", status: "active", assignees: ["usr_ana"],
+      assigneeNames: ["Ana Garcia"], conditions: { insuranceProviderId: "2", customerType: "TFS" }, maxOpen: 40 }]);
+    render(<LeadAssignment />);
+    fireEvent.click(await screen.findByText("Assignment Rules"));
+    expect(await screen.findByText("Insurance provider: Malayan Insurance Co., Inc.; Customer type: TFS")).toBeInTheDocument();
+    expect(screen.getByText("40")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add rule" }));
+    expect(await screen.findByText("Insurance provider")).toBeInTheDocument();
+    expect(screen.getByText("Customer type")).toBeInTheDocument();
+    expect(screen.getAllByText("Bandwidth").length).toBeGreaterThan(1);
   }, 20000);
 
   it("opens the Assignment Rules tab", async () => {
