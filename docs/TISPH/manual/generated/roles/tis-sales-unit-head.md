@@ -14,6 +14,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
 | Operations > Sales & Marketing | Promotions | View |
+| Operations > Sales & Marketing | Scheme Master | View |
+| Operations > Sales & Marketing | Scheme Issuance | View |
 | Operations | Clients | Create and edit |
 | Operations | Policy | Approve |
 | Operations | Fleet Schedules | Create and edit |
@@ -23,7 +25,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Renewals | Renewal Batch | Create and edit |
 | Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
-| Operations > Renewals | Lock-in Accounts | Create and edit |
+| Operations > Renewals | Lock-in Review | Create and edit |
 | Operations > Renewals | Negotiations | Approve |
 | Operations > Renewals | Lapse Management | Create and edit |
 | Operations | Payments | Create and edit |
@@ -72,12 +74,18 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
+| Sales & Marketing | Quotations and placement | Special | Change the fair market value of a Motor quotation away from the value less depreciation, with a reason |  |
+| Sales & Marketing | Quotations and placement | Special | Change the Own Damage or Acts of Nature rate of a Motor quotation away from the issuing rate |  |
 | Sales & Marketing | Quotations and placement | Special | Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Lead assignment | Create and edit | Maintain assignment rules and reassign prospects |  |
+| Sales & Marketing | Lead assignment | Special | Endorse prospects as call-out leads of the telesales callers and keep call-out assignment rules (Team Leaders) |  |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
 | Sales & Marketing | Promotions | Approve | Approve or return promotions; suspend, resume and withdraw them (never one you made or changed) |  |
+| Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
+| Sales & Marketing | Scheme Master | Approve | Approve or return schemes; suspend, resume and withdraw them (never one you made or changed) |  |
+| Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | No screen of its own |
 | Sales & Marketing | Marketing campaigns | Create and edit | Prepare and send campaigns; maintain segments and templates |  |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
@@ -89,12 +97,15 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Policies | Approve | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user |  |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
-| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Lock-in Accounts, Negotiations and Lapse Management |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
 | Operations | Renewals | Special | Reassign a renewal to another user or mark it not for renewal |  |
 | Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
+| Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
+| Operations | Lock-in review and TFS loan status | Create and edit | Record lock-in review decisions and request lock-in changes |  |
+| Operations | Lock-in review and TFS loan status | Approve | Approve or return Release, Not for renewal and lock-in changes (never one you requested) |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -130,12 +141,14 @@ This role approves the work of other users:
 
 - Approve or return discount caps (not the requester)
 - Approve or reject an incentive calculation batch submitted by another user
+- Approve or return Release, Not for renewal and lock-in changes (never one you requested)
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve or return product templates submitted for review (never one you submitted or last changed)
 - Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)
 - Approve a quotation created by another user
 - Approve or return renewal terms of another user
+- Approve or return schemes; suspend, resume and withdraw them (never one you made or changed)
 
 Approval limits of this role on the Authority Matrix:
 
@@ -150,6 +163,7 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Incentives | Approve or reject an incentive calculation batch submitted by another user | TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Lock-in review and TFS loan status | Approve or return Release, Not for renewal and lock-in changes (never one you requested) | TIS Sales Unit Head or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |

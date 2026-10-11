@@ -58,7 +58,8 @@ AREA_TABLES = {
                       'client_credit_exceptions',
     'Reinsurance': 'reinsurers reinsurance_treaties cessions reinsurance_recoveries reinsurance_bordereaux reinsurance_reconciliations reinsurance_exceptions '
                    'fac_placements fac_placement_shares fac_settlements',
-    'Incentives': 'incentive_programs incentive_calculations incentive_results',
+    'Incentives': 'incentive_programs incentive_calculations incentive_results incentive_program_versions incentive_callers callout_endorsements telesales_policies '
+                  'incentive_batch_policies',
     'Security and audit': 'users roles permissions role_permissions user_roles refresh_tokens password_resets password_history login_history audit_log '
                           'authority_transaction_types authority_limits sod_rules user_delegations access_reviews access_review_items',
     'Configuration and schedules': 'app_settings master_types master_records currencies document_numbering sequences scheduled_jobs job_runs job_queue '

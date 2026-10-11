@@ -11,12 +11,15 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Placement Slips | View |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | Create and edit |
+| Operations > Sales & Marketing | Scheme Master | View |
+| Operations > Sales & Marketing | Scheme Issuance | View |
 | Operations | Clients | View |
 | Operations | Policy | View |
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | View |
 | Operations > Renewals | Renewal Batch | View |
 | Operations > Renewals | Renewal Queue | View |
+| Operations > Renewals | Lock-in Review | View |
 | Operations > Renewals | Negotiations | View |
 | Operations > Renewals | Lapse Management | View |
 | Operations | Payments | View |
@@ -78,6 +81,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Cancellation Reasons | Create and edit |
 | Master > Insurance | Endorsement Types | Create and edit |
 | Master > Insurance | Claim Document Checklist | Create and edit |
+| Master > Insurance | Scheme Document Checklist | Create and edit |
 | Master > Insurance | Repair Shops | Create and edit |
 | Master > Insurance | Lead Sources | Create and edit |
 | Master > Insurance | Reason Codes | Create and edit |
@@ -133,10 +137,13 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quotations, Requests for Quotation and Placement Slips |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
 | Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |  |
+| Sales & Marketing | Scheme Master | View | See the Scheme Master: schemes, perils, vehicle lines, versions; premium preview and export | Scheme Master |
+| Sales & Marketing | Scheme issuance | View | See scheme applications, their checklists and the loan bookings uploads | Scheme Issuance |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments and Cover Notes |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Negotiations and Lapse Management |
+| Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Claims | View | See claims | Claims |
 | Accounts | Receipts | View | See receipts | Receipts |
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
@@ -153,7 +160,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Pipeline, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers and Month-End Close Status |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager and Market Mapping |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
-| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-mail Outbox |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Endorsement Types, Claim Document Checklist, Scheme Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Transaction Code, Currency, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering, Service Levels, Security Controls and E-mail Outbox |
 | Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
 | Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |

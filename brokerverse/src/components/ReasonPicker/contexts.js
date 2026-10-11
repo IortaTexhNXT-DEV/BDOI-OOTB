@@ -14,6 +14,7 @@ export const REASON_CONTEXTS = [
   "talkbot_line_remove", "talkbot_list_cancel",
   "policy_correction", "policy_correction_reject", "endorsement_reject", "promotion_return", "promotion_status", "discount_cap_return",
   "dealer_scheme_return", "dealer_scheme_status", "scheme_application_cancel", "lockin_renew", "lockin_hold", "lockin_release", "lockin_not_renewed", "lockin_end",
+  "incentive_disqualify", "incentive_exclude",
 ];
 
 const words = (code) => {

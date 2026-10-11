@@ -31,6 +31,7 @@ import { assertAuthority } from '../access-control/service.js';
 import { decisionReason } from '../ops-masters/records.js';
 import { creditLifeTerms, withReduction } from './creditLife.js';
 import { applyPromotion, countPromotionUnit, DISCOUNT_RULE, withDiscountReferral } from '../promotions/quote.js';
+import { prepareMotorRating, checkMotorRates, discountControl, withRateReferral, motorRatingPreview } from './motorRating.js';
 import { validityDays, assertCurrent, validityOf, endOfBusinessDay, isIssued, openPlacement, keepVersion, nextVersionCols } from './validity.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -124,12 +125,16 @@ export async function createQuote(body, userId, db = null) {
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const cl = await applyCreditLife(c, { productId, productType: body.productType }, doc, await partyOf(c, leadId, body.clientId), null);
+    // PROD-12: the FMV from its reference value less depreciation, the default issuing rates and the rights to change them
+    const motor = await prepareMotorRating(c, { doc, userId, productId, productType: body.productType, icId, leadId });
     const promo = await applyPromotion(c, { request: raw.promotion, doc, productId, productType: body.productType, icId, leadId, userId, orderDiscount: num(doc.discount) },
       (d) => premiumBreakdown(d, { insurerId: icId }));
+    const rating = await checkMotorRates(c, motor, { doc });
     const b = promo ? promo.b : await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
-    const referral = withDiscountReferral(withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names), promo?.authority, null);
+    const discount = promo ? promo.authority : await discountControl(c, { doc, b, productId, productType: body.productType, leadId, userId });
+    const referral = withRateReferral(withDiscountReferral(withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names), discount, null), rating?.minRate, null);
     if (referral) doc.underwritingReferral = referral;
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     // valid through valid_until: the product's quotation validity (Product Master), else limits.quote_validity_days
@@ -149,6 +154,19 @@ export async function createQuote(body, userId, db = null) {
   const q = await getQuoteRow(id, db);
   await notifyReferral(q);
   return q;
+}
+
+/**
+ * The motor rating Create Quote offers for a draft (PROD-12): default issuing rates, reference value and computed FMV,
+ * depreciation options, excess and the user's rights to change rates or the FMV. `body` is the quotation as far as it
+ * is known (prospect, product, insurer, vehicle, renewal, fmvRating).
+ */
+export async function motorRatingFor(body, userId) {
+  const c = { query };
+  const doc = stripReserved(body);
+  const icId = await insurerId(c, insurerRef(doc));
+  const productId = body.productId ? (await one('SELECT id FROM products WHERE id::text = $1::text', [String(body.productId)]))?.id ?? null : null;
+  return motorRatingPreview(c, { doc, productId, productType: body.productType, icId, leadId: body.leadRefId || body.leadId || null, userId });
 }
 
 /**
@@ -194,17 +212,22 @@ export async function updateQuote(id, body, userId) {
     const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
     const cl = await applyCreditLife(c, { productId: before.product_id, productType: body.productType || before.product_type }, doc,
       await partyOf(c, body.leadRefId || before.lead_id, before.client_id), before.id);
+    const productType = body.productType || before.product_type;
+    const leadRef = body.leadRefId || before.lead_id;
+    const motor = await prepareMotorRating(c, { doc, previous: before.doc?.motorRating || null, userId, productId: before.product_id, productType, icId, leadId: leadRef });
     const previous = before.doc?.promotion?.promotionId ? before.doc.promotion : null;
     const orderDiscount = body.discount !== undefined ? num(body.discount) : previous ? num(previous.orderDiscount) : num(doc.discount);
     // a screen sending the whole quotation echoes the priced terms (with their promotionId): not a new choice
     const asked = Object.prototype.hasOwnProperty.call(body, 'promotion') && !body.promotion?.promotionId;
     const promo = await applyPromotion(c, { request: asked ? body.promotion : previous, requested: asked, previous, doc, productId: before.product_id,
       productType: body.productType || before.product_type, icId, leadId: body.leadRefId || before.lead_id, userId, orderDiscount }, (d) => premiumBreakdown(d, { insurerId: icId }));
+    const rating = await checkMotorRates(c, motor, { doc, hadPromotion: Boolean(previous) });
     const b = promo ? promo.b : await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
     const prior = before.doc?.underwritingReferral || null;
-    const referral = withDiscountReferral(withReduction(referralFor(b.underwriting, prior), cl?.reduction, prior, cl?.names), promo?.authority, prior);
+    const discount = promo ? promo.authority : await discountControl(c, { doc, b, productId: before.product_id, productType, leadId: leadRef, userId });
+    const referral = withRateReferral(withDiscountReferral(withReduction(referralFor(b.underwriting, prior), cl?.reduction, prior, cl?.names), discount, prior), rating?.minRate, prior);
     if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;
     const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date(), ...(newVersion ? nextVersionCols(before) : {}) };

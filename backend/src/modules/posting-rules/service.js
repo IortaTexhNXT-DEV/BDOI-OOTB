@@ -321,11 +321,14 @@ export const configurationReview = async () => (await getSetting('accounting.con
 
 export const CHANGE_LABELS = { 'posting-rule-version': 'New posting rule version', 'posting-rule-status': 'Posting rule version (de)activated',
   'account-role': 'Account role', 'account-map': 'Account map', 'commission-taxes': 'Commission taxes',
-  'commission-rule': 'Commission rule', 'sharing-scheme': 'Sharing scheme', 'scheme-assignment': 'Sharing scheme assignment' };
+  'commission-rule': 'Commission rule', 'sharing-scheme': 'Sharing scheme', 'scheme-assignment': 'Sharing scheme assignment',
+  'incentive-program': 'Incentive program version' };
 // the same table holds the changes of access (access-control/changes.js): they are listed and decided there
 const KINDS = Object.keys(CHANGE_LABELS);
 // commission rules and sharing schemes (commission-rates/changes.js, commission/schemes.js) are decided by their own approvers
-const KIND_PERMISSION = { 'commission-rule': 'approve:commission-rules', 'sharing-scheme': 'approve:sharing-schemes', 'scheme-assignment': 'approve:sharing-schemes' };
+// and Telesales incentive program versions by the incentive approvers (incentive/telesales.js, FR-TSI-005)
+const KIND_PERMISSION = { 'commission-rule': 'approve:commission-rules', 'sharing-scheme': 'approve:sharing-schemes', 'scheme-assignment': 'approve:sharing-schemes',
+  'incentive-program': 'approve:incentive' };
 export const changePermission = (kind) => KIND_PERMISSION[kind] || 'approve:posting-rules';
 const assertKindPermission = (user, kind) => {
   if (!hasPermission(user, changePermission(kind))) throw forbidden(`Requires permission: ${changePermission(kind)}`);
@@ -383,6 +386,9 @@ export async function decideChange(db, id, action, remarks, user) {
     await (await import('../commission-rates/service.js')).applyRuleDecision(db, c, action, user);
   } else if (c.kind === 'sharing-scheme' || c.kind === 'scheme-assignment') {
     await (await import('../commission/schemes.js')).applySchemeDecision(db, c, action, user);
+  } else if (c.kind === 'incentive-program') {
+    // Return sends the version back to Draft with the remark
+    await (await import('../incentive/telesales.js')).applyVersionDecision(db, c, action, user, remarks);
   } else if (action === 'reject') {
     if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
   } else if (c.kind === 'posting-rule-version') {
@@ -413,6 +419,7 @@ export async function withdrawChange(db, id, user) {
   if (c.kind === 'posting-rule-version') await db.query('UPDATE posting_rules SET approval_status = \'rejected\', updated_by = $2, updated_at = now() WHERE id = $1', [c.rule_id, user?.id ?? null]);
   if (c.kind === 'commission-rule') await db.query("UPDATE commission_rates SET approval_status = 'withdrawn', updated_at = now() WHERE id = $1 AND approval_status = 'pending'", [Number(c.payload?.ruleId) || 0]);
   if (c.kind === 'sharing-scheme' || c.kind === 'scheme-assignment') await (await import('../commission/schemes.js')).applySchemeDecision(db, c, 'withdraw', user);
+  if (c.kind === 'incentive-program') await (await import('../incentive/telesales.js')).applyVersionDecision(db, c, 'withdraw', user);
   await db.query('UPDATE accounting_config_changes SET status = \'withdrawn\', decided_by = $2, decided_at = now() WHERE id = $1', [c.id, user?.id ?? null]);
   return getChange(db, c.id);
 }

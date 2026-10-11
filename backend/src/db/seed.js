@@ -237,6 +237,15 @@ for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) 
 // Operations maintains the client KYC (TISPH decision of 11 Oct 2026, migration 0687, GAP-POLICY-09): identification,
 // signatories, beneficial owners and KYC documents of a client, without the other client edits of write:clients
 for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('client-kyc:write');
+// Motor rating (migration 0615, PROD-12): changing a peril rate away from the issuing rate and the FMV away from the
+// value less depreciation is for the internal users who rate (Officers and Unit Heads of Sales and Operations, the
+// General Manager), never the associates; the broker roles keep what they could do.
+for (const role of ['sales', 'processing', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-general-manager']) {
+  ROLE_PERMS[role].push('quotation-rates:override', 'motor-fmv:override');
+}
+// Team Leaders (the Sales Officers) and the Sales Head endorse prospects as call-out leads of the telesales callers
+// (FRS COMM-08 3.3, migration 0610); the System Administrator holds every permission
+for (const role of ['tis-sales-officer', 'tis-sales-unit-head']) ROLE_PERMS[role].push('callout-endorsement:write');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**

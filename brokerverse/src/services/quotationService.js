@@ -957,6 +957,11 @@ class QuotationService {
     return this.request("/master/account-codes");
   }
 
+  /** Motor rating of a draft (PROD-12): default issuing rates, reference value and FMV less depreciation, the user's rights. */
+  motorRating(draft) {
+    return this.request("/quotations/motor-rating", { method: "POST", body: JSON.stringify(draft) });
+  }
+
   /** Motor tariff: vehicle classes (fixed CTPL premium, own damage rate, default seats) and Auto Passenger PA limits/rate. */
   async getMotorTariff() {
     return this.request("/quotations/motor-tariff");
