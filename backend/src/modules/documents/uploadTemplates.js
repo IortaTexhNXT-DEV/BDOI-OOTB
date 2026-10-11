@@ -31,6 +31,7 @@ import { TFS_COLUMNS } from '../leads/tfsImport.js';
 import { SCHEME_LINE_COLUMNS } from '../schemes/service.js';
 import { LOAN_BOOKING_COLUMNS } from '../scheme-issuance/upload.js';
 import { LOAN_STATUS_COLUMNS } from '../lock-in/upload.js';
+import { PARCEL_COLUMNS, SHIPMENT_COLUMNS } from '../marine/parcel.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -316,6 +317,30 @@ export function staticUploads() {
       ],
       notes: ['The TFS status codes are mapped to the BrokerVerse loan statuses by the Configuration setting lockin.tfs_status_map (MISSED PAYMENT is Past due).',
         'A blocking status (lockin.blocking_loan_statuses) holds the renewal notices of every policy of the loan account; a return to CURRENT lifts the hold.'],
+    },
+    {
+      id: 'parcel-list', file: 'Parcel_List_Upload_Template.xlsx', title: 'TFS daily parcel list (Parcel / Courier certificates)',
+      menu: 'Operations > Marine Open Covers > Open Cover > Certificates > Upload Parcels', route: 'POST /api/marine/open-covers/:id/parcels/upload (multipart field "file", field parcelDate)',
+      columns: PARCEL_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting parcel.max_upload_rows) and 10 MB.',
+      onError: 'Each row is checked and becomes one certificate on its own. A row with an error creates nothing and is listed with its row number and the reason; a warning (possible duplicate, late item) is listed and the certificate is issued. Uploading the same file again creates nothing: every waybill is already used.',
+      samples: [
+        { parcelDate: '09/10/2026', customerName: 'Maria Clara Reyes', loanAccount: '0701-2026-118842', addressLine: '18 Sampaguita St.', barangay: 'Bel-Air', city: 'Makati City', province: 'Metro Manila',
+          zipCode: '1209', mobile: '09175550123', email: 'maria.reyes@example.ph', documentsSent: 'Certificate of registration; Deed of sale', courier: 'LBC Express', waybillNo: '143298765012', deliveryType: 'Rush' },
+      ],
+      notes: ['The covers, the premium and the charge come from the open cover in force on the parcel date; they are not in the file.',
+        'A certificate is e-mailed to EMAIL as a password-protected PDF (parcel.certificate_password); the others are printed with Print certificates of the day.'],
+    },
+    {
+      id: 'cargo-shipments', file: 'Cargo_Shipments_Upload_Template.xlsx', title: 'Cargo shipment list (Marine Cargo inland declarations)',
+      menu: 'Operations > Marine Open Covers > Open Cover > Certificates > Upload Shipments', route: 'POST /api/marine/open-covers/:id/shipments/upload (multipart field "file")',
+      columns: SHIPMENT_COLUMNS, fileTypes: 'XLSX only (the first sheet, Data, is read). The first row must be the column headers.',
+      maxRows: 'Up to 2,000 rows per file (Configuration setting parcel.max_upload_rows) and 10 MB.',
+      onError: 'Each row is priced like Issue certificate on its own: insured value = invoice value plus the mark-up, premium = insured value x the rate of the conveyance, at least the minimum premium. A row above the limit of its conveyance, or on a conveyance the cover does not rate, is listed as failed; the others join the daily declaration of their date.',
+      samples: [
+        { shipmentDate: '05/10/2026', conveyance: 'Land', voyageFrom: 'Manila', voyageTo: 'Batangas City', billOfLading: 'DR-0051234', vesselName: 'NBC 1234', goodsDescription: 'Auto parts', packing: '12 pallets',
+          consignee: 'Batangas Auto Supply', invoiceValue: '850000', markupPercent: '0', certificate: 'N' },
+      ],
     },
     {
       id: 'fleet-vehicles', file: 'Fleet_Vehicles_Upload_Template.xlsx', title: 'Fleet vehicles (schedule of a fleet policy)', menu: 'Operations > Fleet Schedules > Schedule > Upload Vehicles',

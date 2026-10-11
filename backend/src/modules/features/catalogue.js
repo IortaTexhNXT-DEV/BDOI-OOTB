@@ -260,9 +260,12 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'open-covers', name: 'Parcel and courier open covers', module: 'Operations', tier: P1,
-    description: 'Open policy for parcel and courier shipments with certificates per customer and monthly declarations',
-    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-001'],
-    menus: ['Operations > Marine Open Covers'],
+    description: 'Open policy for parcel and courier shipments: covers and charge per certificate, parcel upload and certificates per customer (password-protected e-mail), daily and monthly declarations, the declaration file to the insurer, endorsements of the open policy, reversals, billing with the service fee and gross remittance; inland cargo shipments on the same declarations',
+    requirements: ['TIS-BRD-PJRN-09', 'FR-PCL-001', 'FR-PCL-002', 'FR-PCL-003', 'FR-PCL-004', 'FR-PCL-005', 'FR-PCL-010', 'FR-PCL-011', 'FR-PCL-012', 'FR-PCL-013', 'FR-PCL-014',
+      'FR-PCL-020', 'FR-PCL-021', 'FR-PCL-022', 'FR-PCL-023', 'FR-PCL-024', 'FR-PCL-030', 'FR-PCL-031', 'FR-PCL-040', 'FR-PCL-041', 'FR-PCL-042', 'FR-PCL-050', 'FR-PCL-051',
+      'FR-PCL-060', 'FR-PCL-061'],
+    menus: ['Operations > Marine Open Covers'], jobs: ['marine-daily-declaration-close', 'marine-monthly-declaration-open'],
+    permissions: ['read:marine', 'write:marine', 'write:parcel-certificates', 'approve:marine'],
   }),
   feature({
     key: 'marine-cargo', name: 'Marine cargo open covers', module: 'Operations', tier: FUT,

@@ -19,6 +19,15 @@ export { quoteExpiry, quoteExpiryReminders } from '../modules/quotations/validit
 export { promotionStatus } from '../modules/promotions/service.js';
 export { schemeStatus } from '../modules/schemes/service.js';
 export { lockInReview } from '../modules/lock-in/review.js';
+/** Open covers (FR-PCL-020, 022): close the daily declarations of the days ended; open the monthly declaration of the month ended. */
+export async function marineDailyDeclarationClose() {
+  if (!(await tableExists('open_cover_daily_declarations'))) return { skipped: 'open_cover_daily_declarations table missing' };
+  return (await import('../modules/marine/daily.js')).closeDailyDeclarations();
+}
+export async function marineMonthlyDeclarationOpen() {
+  if (!(await tableExists('open_cover_daily_declarations'))) return { skipped: 'open_cover_daily_declarations table missing' };
+  return (await import('../modules/marine/daily.js')).openMonthlyDeclarations();
+}
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];

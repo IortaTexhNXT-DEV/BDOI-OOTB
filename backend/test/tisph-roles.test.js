@@ -20,6 +20,8 @@ const MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0348_tisph_roles
 const REMITTANCE_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0400_remittance_approval_authority.sql', import.meta.url), 'utf8');
 // 0531 narrows the receipting rights 0348 gave the Cash Control personas: it follows 0348 whenever 0348 runs
 const RECEIPTING_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0531_tisph_receipting_grants.sql', import.meta.url), 'utf8');
+// 0675 takes write:marine from the TIS Sales personas that 0348 gave it (they keep write:parcel-certificates): it follows 0348 whenever 0348 runs
+const PARCEL_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0675_parcel_open_covers.sql', import.meta.url), 'utf8');
 
 let ctx;
 const as = {};
@@ -194,12 +196,12 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     // or to the TISPH roles (0460-0461: Talkbot call lists and TFS accounts, 0480: extend:quotations, 0485: promotions, 0502: claim
     // settlement cash, 0504: claim processing, 0520: the post-dated cheque log, 0522: the insurer billing approval, 0524: the receipt
     // reversal, 0531: the receipting grants, 0570-0572: the commission rules, schemes, line approvals and incentive approvers, 0597: the
-    // enabling of Phase 2 by SUPERID, 0600-0602: the dealer schemes, scheme issuance and lock-in, 0660: the product template approvers) run again after it
+    // enabling of Phase 2 by SUPERID, 0600-0602: the dealer schemes, scheme issuance and lock-in, 0660: the product template approvers, 0675: the parcel certificates and open cover approvals) run again after it
     await q(`DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0460_talkbot_calls.sql', '0461_lead_tfs_accounts.sql',
       '0480_quotation_validity_versions.sql', '0485_promotions.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql',
       '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql',
       '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql',
-      '0597_tenant_phase2_enabling.sql', '0600_scheme_master.sql', '0601_scheme_issuance.sql', '0602_lock_in_review.sql', '0660_product_template_approval.sql')`);
+      '0597_tenant_phase2_enabling.sql', '0600_scheme_master.sql', '0601_scheme_issuance.sql', '0602_lock_in_review.sql', '0660_product_template_approval.sql', '0675_parcel_open_covers.sql')`);
     // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
     await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });
@@ -209,6 +211,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await pool.query(MIGRATION);
     await pool.query(REMITTANCE_MIGRATION);
     await pool.query(RECEIPTING_MIGRATION);
+    await pool.query(PARCEL_MIGRATION);
     expect(await grants()).toEqual(migrated);
   });
 });

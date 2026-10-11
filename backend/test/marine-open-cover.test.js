@@ -25,7 +25,9 @@ describe('marine cargo open cover', () => {
   let policyId;
   const contract = { clientId: 'cl_sls_06', insuranceCompanyId: 4, periodFrom: '2026-01-01', periodTo: '2026-12-31', goodsDescription: 'Frozen seafood in reefer containers',
     voyageScope: 'Imports from Asia to Philippine ports', clauses: 'Institute Cargo Clauses (A); Institute Frozen Food Clauses',
-    rates: [{ conveyance: 'Sea', ratePercent: 0.15, limit: 20000000 }, { conveyance: 'Air', ratePercent: 0.1, limit: 5000000 }], markupPercent: 10, minimumPremium: 500 };
+    rates: [{ conveyance: 'Sea', ratePercent: 0.15, limit: 20000000 }, { conveyance: 'Air', ratePercent: 0.1, limit: 5000000 }], markupPercent: 10, minimumPremium: 500,
+    // declarations by shipment date, without the daily declaration of FR-PCL-020 (test/parcel-open-cover.test.js covers it)
+    coverType: 'cargo', dailyDeclaration: false };
 
   it('sets up the contract: rates and limits per conveyance are checked', async () => {
     expect((await claims('post', '/marine/open-covers').send(contract)).status).toBe(403);

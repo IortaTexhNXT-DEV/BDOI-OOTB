@@ -232,6 +232,16 @@ const SCHEME_PERMS = {
   'tis-general-manager': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
 };
 for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
+// Parcel / Courier open covers (migration 0675, FRS PJRN-09 3.3 default grants): Sales uploads, adds, cancels and prints
+// parcel certificates (write:parcel-certificates) and no longer sets up, endorses or bills open covers; Operations and
+// the Processing Team do everything but approve; the Accounting Manager approves endorsements and reversals. TISPH
+// personas (proposal until TISPH names the users): TIS Finance and the General Manager approve.
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head']) ROLE_PERMS[role] = [...ROLE_PERMS[role].filter((p) => p !== 'marine'), 'marine:read'];
+const PARCEL_PERMS = { sales: ['parcel-certificates:write'], processing: ['parcel-certificates:write'], operations: ['parcel-certificates:write'],
+  'accounting-manager': ['marine:read', 'marine:approve'], 'tis-sales-associate': ['parcel-certificates:write'], 'tis-sales-officer': ['parcel-certificates:write'],
+  'tis-sales-unit-head': ['parcel-certificates:write'], 'tis-ops-associate': ['parcel-certificates:write'], 'tis-ops-officer': ['parcel-certificates:write'],
+  'tis-ops-unit-head': ['parcel-certificates:write'], 'tis-finance': ['marine:read', 'marine:approve'], 'tis-general-manager': ['parcel-certificates:write', 'marine:approve'] };
+for (const [role, items] of Object.entries(PARCEL_PERMS)) ROLE_PERMS[role].push(...items);
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**

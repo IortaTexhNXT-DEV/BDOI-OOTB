@@ -57,7 +57,7 @@ describe('accounting flow: wording and grouping', () => {
   it('lists the events by module in the order of the accounting cycle, with the lines in force and their accounts', async () => {
     const f = await flow();
     expect(f.areas.map((a) => a.code)).toEqual(AREAS.map((a) => a.code));
-    expect(f.areas[0]).toEqual({ code: 'premium', name: 'Premium billing', count: 5 });
+    expect(f.areas[0]).toEqual({ code: 'premium', name: 'Premium billing', count: 6 });
     expect(f.events.map((e) => e.eventCode).sort()).toEqual(Object.keys(EVENTS).sort());
     expect(f.events.slice(0, 2).map((e) => e.eventCode)).toEqual(['policy.issue.broker_billed', 'policy.renewal.broker_billed']);
     const issue = eventOf(f, 'policy.issue.broker_billed');

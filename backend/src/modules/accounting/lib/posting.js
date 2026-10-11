@@ -26,6 +26,8 @@ export const EVENTS = {
   'policy.issue.broker_billed': { label: 'Policy issued – broker billed', module: 'policies', participants: true,
     amounts: ['gross', 'due_to_insurer', 'vat', 'dst', 'lgt', 'commission', 'net_premium', 'commission_vat', 'commission_ewt'], vars: ['policyNumber', 'billNumber', 'insurer', 'participantSuffix'],
     sample: { amounts: { gross: 11200, net_premium: 10000, vat: 0, dst: 0, lgt: 0, commission: 1500, commission_vat: 180, commission_ewt: 150, due_to_insurer: 9670 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE', insurer: 'Sample Insurer', participantSuffix: '' } } },
+  'parcel.service_fee': { label: 'Parcel service fee billed', module: 'marine', amounts: ['amount', 'fee', 'vat'], vars: ['policyNumber', 'billNumber'],
+    sample: { amounts: { amount: 438, fee: 391.07, vat: 46.93 }, vars: { policyNumber: 'POL-SAMPLE', billNumber: 'INV-SAMPLE' } } },
   'endorsement.additional_premium': { label: 'Endorsement – additional premium', module: 'endorsements', participants: true, sameAs: 'policy.issue.broker_billed' },
   'policy.renewal.broker_billed': { label: 'Renewal – broker billed', module: 'policies', participants: true, sameAs: 'policy.issue.broker_billed' },
   'endorsement.return_premium': { label: 'Endorsement – return premium', module: 'endorsements', participants: true,

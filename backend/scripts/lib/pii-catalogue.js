@@ -416,6 +416,20 @@ export const CATALOGUE = {
   'fleet_vehicles.engine_number': 'engine',
   'open_cover_declarations.notes': 'freeText',
   'open_cover_certificates.consignee': 'partyName',
+  // parcel certificates: the TFS customer of each parcel (migration 0675)
+  'open_cover_certificates.customer_name': 'personName',
+  'open_cover_certificates.loan_account': 'idNumber',
+  'open_cover_certificates.address_line': 'street',
+  'open_cover_certificates.barangay': 'barangay',
+  'open_cover_certificates.city': 'locality',
+  'open_cover_certificates.province': 'province',
+  'open_cover_certificates.zip_code': 'postal',
+  'open_cover_certificates.mobile': 'phone',
+  'open_cover_certificates.email': 'email',
+  'open_cover_certificates.reversal_reason': 'freeText',
+  'open_cover_certificates.reversal_remark': 'freeText',
+  'open_cover_uploads.file_name': 'fileName',
+  'open_cover_uploads.messages': 'json',
   'comparison_reports.prepared_for': 'partyName',
   'comparison_reports.sent_to': 'email',
   'campaigns.notes': 'freeText',
@@ -466,6 +480,9 @@ export const TABLE_ACTIONS = {
  * "table.*" keeps every column of a table (configuration and master tables without personal data).
  */
 export const ALLOW_LIST = {
+  'open_covers.declaration_email': "the insurer's declaration mailbox of an open cover, not a person's",
+  'open_cover_declarations.file_sent_to': "the insurer's declaration mailbox the file was sent to, not a person's",
+  'open_cover_declaration_files.file_name': 'declaration file name built from the insurer code, policy number, period and declaration number',
   'sharing_schemes.change_note': 'maker note of a scheme version, business text',
   'schemes.notes': 'notes of a dealer scheme, business text',
   'schemes.decision_note': 'approval or return note of a dealer scheme version, business text',

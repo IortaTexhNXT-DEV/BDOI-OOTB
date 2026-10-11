@@ -147,8 +147,13 @@ async function bookGrossCommission(db, { policy, rcv, commission, netPremium, da
  * commissionAmount }. date: the date of the billing event (policy issue date, endorsement issue date); the booking journal
  * is dated with it (never later than today) and the credit days run from it, or from the inception when that is later.
  * `split` (optional): the split per insurer in the shape of premiumSplit(), used as given.
+ * `basis` (optional): the remittance basis of the bill when its source decides it (an open cover's), else the rules.
+ * `serviceFee` (optional): a part of the amount that is the broker's own fee, not premium (the charge per parcel
+ * certificate less its premium, marine/parcel): the premium split and booking cover the rest, and the fee is booked
+ * by the posting rule parcel.service_fee (fee income, output VAT inside it per parcel.service_fee_vat).
  */
-export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, date = null, user = null, split: given = null }) {
+export async function createReceivable(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, dueDate = null, date = null, user = null, split: given = null,
+  basis: givenBasis = null, serviceFee = 0 }) {
   // Direct bill: the client pays the insurer, so the broker has no premium receivable (commission is billed to the insurer)
   if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
@@ -156,8 +161,10 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db, clientId: policy.client_id })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   // a package gives its own split (each insurer carries its own sections); otherwise the premium is split by share
-  const computed = given || await premiumSplit(db, policy, gross, breakdown, source);
-  const basis = await remittanceBasis(db, policy);
+  const fee = round2(Math.max(num(serviceFee), 0));
+  if (fee >= gross) throw badRequest('The service fee must be less than the amount billed');
+  const computed = given || await premiumSplit(db, policy, round2(gross - fee), breakdown, source);
+  const basis = givenBasis === 'gross' || givenBasis === 'net' ? givenBasis : await remittanceBasis(db, policy);
   const split = basis === 'gross' ? grossBasisSplit(computed) : computed;
   const { commission } = split;
   const bookedOn = await postingDate(date);
@@ -168,14 +175,26 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await baseCurrency()), round2(breakdown.netPremium || gross),
     round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null,
     split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt, basis])).rows[0];
-  const jv = await postBooking(db, r, policy, split, user, bookedOn);
+  const jv = await postBooking(db, fee ? { ...r, amount: round2(gross - fee) } : r, policy, split, user, bookedOn);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
-  if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: r, commission: computed.commission, netPremium: breakdown.netPremium, date: bookedOn, user });
+  if (fee) await postServiceFee(db, r, policy, fee, user, bookedOn);
+  if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: fee ? { ...r, amount: round2(gross - fee) } : r, commission: computed.commission, netPremium: breakdown.netPremium, date: bookedOn, user });
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
   // an additional premium leaves a paid policy with something to pay again
   if (source === 'endorsement') await syncPolicyPaymentStatus(db, policy.id, user?.id ?? null);
   await autoEmailBill(db, r);
   return { ...r, booking_jv_id: jv.id };
+}
+
+/** The broker's service fee inside a bill (parcel.service_fee): receivable, fee income and the output VAT inside the fee. */
+async function postServiceFee(db, r, policy, fee, user, date) {
+  const vatRate = (await getSetting('parcel.service_fee_vat', 'inclusive')) === 'exempt' ? 0 : num(await getSetting('tax.vat_rate', 0.12));
+  const net = round2(fee / (1 + vatRate));
+  return postEvent('parcel.service_fee', {
+    source: 'booking', entryType: 'NEW_BUSINESS', transactionCode: r.bill_number, referenceType: 'Policy', referenceId: policy.id, clientId: r.client_id || policy.client_id,
+    policyId: policy.id, policyNumber: policy.policy_number, dueDate: r.due_date, date: date || undefined, description: `Parcel service fee – ${policy.policy_number} (${r.bill_number})`,
+    amounts: { amount: fee, fee: net, vat: round2(fee - net) }, vars: { policyNumber: policy.policy_number, billNumber: r.bill_number },
+  }, { db, user });
 }
 
 /** Booking journal of a bill from the posting rule of its source (issue, endorsement, renewal); participants kept on co-insured bills. */

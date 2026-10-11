@@ -382,6 +382,19 @@ async function approvals(ctx) {
       due_date: due('ci.waiver_requested_at'), status: 'ci.status', link: "'/sales/scheme-issuance/' || sa.id", created_at: 'ci.waiver_requested_at' })}
       FROM scheme_checklist_items ci JOIN scheme_applications sa ON sa.id = ci.application_id WHERE ci.status = 'waiver-requested' AND ${notMine(ctx, 'ci.waiver_requested_by')}`);
   }
+  // endorsements of an open policy and reversals of declared parcel certificates (FR-PCL-005, 014): approve:marine, never the maker
+  if (ctx.can('approve:marine') && await has('open_cover_endorsements')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Open policy endorsement'", id: 'oe.id', ref: 'oc.cover_number', title: "'Effective ' || to_char(oe.effective_from, 'DD Mon YYYY') || ': ' || oe.reason",
+      client_name: 'occ.display_name', due_date: due('oe.requested_at'), status: 'oe.status', link: "'/operations/open-covers/' || oc.id || '?endorsement=' || oe.id",
+      next_action: "'Approve or return the endorsement'", created_at: 'oe.requested_at' })}
+      FROM open_cover_endorsements oe JOIN open_covers oc ON oc.id = oe.open_cover_id JOIN clients occ ON occ.id = oc.client_id
+      WHERE oe.status = 'pending' AND ${notMine(ctx, 'oe.requested_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Certificate reversal'", id: 'rx.id', ref: 'rx.certificate_number', title: "COALESCE(rx.customer_name, rx.certificate_number) || ': ' || rx.reversal_reason",
+      client_name: 'rcl.display_name', due_date: due('rx.reversal_requested_at'), status: 'rx.reversal_status', link: "'/operations/open-covers/' || roc.id || '?reversal=' || rx.id",
+      amount: 'rx.premium', next_action: "'Approve or return the reversal'", created_at: 'rx.reversal_requested_at' })}
+      FROM open_cover_certificates rx JOIN open_covers roc ON roc.id = rx.open_cover_id JOIN clients rcl ON rcl.id = roc.client_id
+      WHERE rx.reversal_status = 'pending' AND ${notMine(ctx, 'rx.reversal_requested_by')}`);
+  }
   if (ctx.can('approve:lock-in') && await has('lock_in_reviews')) {
     out.push(`SELECT ${select({ ...base, kind: "'Lock-in review'", id: 'lr.id', ref: 'lp.policy_number',
       title: "CASE lr.decision WHEN 'release' THEN 'Release to standard renewal' ELSE 'Not for renewal' END || COALESCE(': ' || lr.reason, '')", due_date: due('lr.decided_at'),
