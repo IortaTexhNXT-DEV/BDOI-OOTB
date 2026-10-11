@@ -967,6 +967,9 @@ function renewalQuoteBody(pre, policy, r, input) {
     clientId: pre.clientId, businessType: 'Renewal', isRenewal: true, renewedFromPolicyId: policy.id, renewedFromPolicyNumber: policy.policy_number,
     renewal: { renewalId: r?.id, renewalNumber: r?.renewal_number, policyId: policy.id, policyNumber: policy.policy_number, previousExpiryDate: policy.expiry_date },
     remarks: input.remarks || `Renewal of policy ${policy.policy_number}`,
+    // the reference value, depreciation and reason of a changed FMV, and the reason of a changed rate (quotations/motorRating.js)
+    ...((input.fmvRating || input.coverageDetails?.fmvRating) ? { fmvRating: input.fmvRating || input.coverageDetails.fmvRating } : {}),
+    ...((input.rateOverride || input.coverageDetails?.rateOverride) ? { rateOverride: input.rateOverride || input.coverageDetails.rateOverride } : {}),
   };
   // Lines other than motor are not priced from cover rates: the renewal is quoted on the net premium entered on the
   // wizard, else the expiring term's (a quotation without premium could be accepted but never issued).

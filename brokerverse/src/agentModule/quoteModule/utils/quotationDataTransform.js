@@ -67,6 +67,9 @@ export const transformToBackendFormat = (
     APPAtotalCoverage: coverageDetails?.APPAtotalCoverage || null,
     APPAcoveragePremium: coverageDetails?.APPAcoveragePremium || null,
     totalSumInsured: coverageDetails?.totalSumInsured || null,
+    // market value and rate terms of Coverage Details (MotorRatingPanel, PROD-12)
+    ...(coverageDetails?.fmvRating ? { fmvRating: coverageDetails.fmvRating } : {}),
+    ...(coverageDetails?.rateOverride ? { rateOverride: coverageDetails.rateOverride } : {}),
     // covers of the product template chosen on Coverage Details (mandatory ones always included)
     ...(Array.isArray(coverageDetails?.selectedCovers) ? { selectedCovers: coverageDetails.selectedCovers } : {}),
     // vehicle use and the risk details the product's acceptance rules and rating factors test

@@ -232,6 +232,12 @@ const SCHEME_PERMS = {
   'tis-general-manager': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
 };
 for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
+// Motor rating (migration 0615, PROD-12): changing a peril rate away from the issuing rate and the FMV away from the
+// value less depreciation is for the internal users who rate (Officers and Unit Heads of Sales and Operations, the
+// General Manager), never the associates; the broker roles keep what they could do.
+for (const role of ['sales', 'processing', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-general-manager']) {
+  ROLE_PERMS[role].push('quotation-rates:override', 'motor-fmv:override');
+}
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**

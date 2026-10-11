@@ -19097,5 +19097,32 @@
     "yearTo": "Year to",
     "siFrom": "Sum insured from",
     "siTo": "Sum insured to"
+  },
+  "motorRating": {
+    "title": "Market value and rates",
+    "help": "The FMV is the reference value less the depreciation; the rates default to the issuing rates. Changing them needs the right to do so and a reason.",
+    "source": {
+      "rule": "Commission rule",
+      "tariff": "Motor tariff",
+      "standard": "Standard rates"
+    },
+    "referenceValue": "Reference value",
+    "basis": "Basis",
+    "basisLabel": {
+      "previous-fmv": "FMV of the expiring term",
+      "srp": "Suggested retail price",
+      "reference": "Reference value"
+    },
+    "computedFmv": "Computed FMV",
+    "defaultOd": "Own Damage issuing rate",
+    "defaultAon": "Acts of Nature issuing rate",
+    "excess": "Excess",
+    "depreciation": "Depreciation",
+    "fmv": "Fair market value",
+    "odRate": "Own Damage rate",
+    "aonRate": "Acts of Nature rate",
+    "fmvReason": "Reason for the FMV change",
+    "rateReason": "Reason for the rate change",
+    "belowMinimum": "Below the minimum issuing rate of {{rate}}%: the quotation is referred for approval"
   }
 }
