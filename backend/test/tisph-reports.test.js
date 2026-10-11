@@ -132,3 +132,18 @@ describe('CR-14 premium and net remittance', () => {
     expect(premium.groups.map((g) => g.group)).toEqual(expect.arrayContaining(['Fully paid']));
   });
 });
+
+describe('CR-11 BIR books of accounts (TIS-BRD-TAX-02)', () => {
+  it('lists the posted GL in the General Journal and the cash books, balanced, in Excel and CSV; not for Sales', async () => {
+    const from = addDays(day, -60);
+    const gj = await run(finance, 'bir-book-general-journal', { FromDate: from, ToDate: day });
+    expect(gj.rows.length).toBeGreaterThan(0);
+    expect(r2(gj.rows.reduce((a, r) => a + Number(r.debit), 0))).toBe(r2(gj.rows.reduce((a, r) => a + Number(r.credit), 0)));
+    const crb = await run(finance, 'bir-book-cash-receipts', { FromDate: from, ToDate: day, ReportCriteria: 'Month' });
+    expect(crb.rows.every((r) => Number(r.amount) > 0 && r.cashAccount)).toBe(true);
+    for (const code of ['bir-book-cash-disbursements', 'bir-book-sales-journal', 'bir-book-purchase-journal', 'bir-book-general-ledger']) await run(finance, code, { FromDate: from, ToDate: day });
+    const csv = await finance('post', '/reports/bir-book-general-journal/generate').send({ FromDate: from, ToDate: day, format: 'csv' });
+    expect(csv.status).toBeLessThan(300);
+    expect((await sales('post', '/reports/bir-book-general-journal/run').send({})).status).toBe(403);
+  });
+});

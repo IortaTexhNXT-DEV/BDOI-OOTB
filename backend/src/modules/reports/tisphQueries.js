@@ -210,7 +210,45 @@ const reconciliationSchedule = `SELECT ${INSURER_DIMS}, s.statement_number AS "s
   FROM insurer_statement_lines l JOIN insurer_statements s ON s.id = l.statement_id LEFT JOIN insurance_companies ic ON ic.id = s.insurance_company_id
   WHERE COALESCE(s.period_to, s.created_at::date) BETWEEN $1 AND $2`;
 
+
+// ------------------------------------------------------------------ CR-11 BIR books of accounts (TIS-BRD-TAX-02)
+// The same entries as the CAS loose-leaf books (bir/cas.js), as catalogue reports for any date range in Excel / CSV / PDF
+const BOOK_POSTED = "j.status IN ('posted', 'reversed')";
+const BOOK_CASH = "(SELECT code FROM gl_accounts WHERE category = 'Cash and Cash Equivalents')";
+const generalJournal = `SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(j.transaction_code, '') AS reference,
+    COALESCE(NULLIF(l.memo, ''), j.description, '') AS particulars, l.account_code AS "accountCode", a.name AS "accountName", l.debit, l.credit, l.line_no AS _line
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2`;
+const cashBook = (cash, other) => `SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(j.transaction_code, j.reference_id, '') AS reference,
+    COALESCE(j.description, '') AS particulars, string_agg(DISTINCT c.account_code, ', ') AS "cashAccount", sum(c.${cash} - c.${other}) AS amount,
+    (SELECT string_agg(o.account_code || ' ' || o.account_name || ' ' || to_char(o.${other}, 'FM999,999,999,990.00'), '; ' ORDER BY o.line_no) FROM journal_lines o
+      WHERE o.jv_id = j.id AND o.${other} > 0 AND o.account_code NOT IN ${BOOK_CASH}) AS accounts
+  FROM journal_vouchers j JOIN journal_lines c ON c.jv_id = j.id AND c.account_code IN ${BOOK_CASH}
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2 GROUP BY j.id HAVING sum(c.${cash} - c.${other}) > 0`;
+const salesJournal = `SELECT s.invoice_date AS date, s.invoice_number AS "invoiceNumber", s.buyer_name AS buyer, COALESCE(s.buyer_tin, '') AS tin,
+    CASE WHEN s.status = 'issued' THEN s.vatable_sales ELSE 0 END AS "vatableSales", CASE WHEN s.status = 'issued' THEN s.vat_exempt_sales ELSE 0 END AS "exemptSales",
+    CASE WHEN s.status = 'issued' THEN s.zero_rated_sales ELSE 0 END AS "zeroRatedSales", CASE WHEN s.status = 'issued' THEN s.vat_amount ELSE 0 END AS vat,
+    CASE WHEN s.status = 'issued' THEN s.total_amount ELSE 0 END AS total, CASE WHEN s.status = 'issued' THEN 'Issued' ELSE 'Cancelled: ' || COALESCE(s.cancel_reason, '') END AS status
+  FROM sales_invoices s WHERE s.invoice_date BETWEEN $1 AND $2`;
+const purchaseJournal = `SELECT x.*, x.total - x."inputVat" AS "netPurchase" FROM (SELECT j.jv_date AS date, j.jv_number AS "journalNumber", COALESCE(d.voucher_number, j.transaction_code, '') AS reference,
+    COALESCE(d.payee_name, j.description, '') AS supplier, COALESCE(cr.tin, ic.tin, '') AS tin,
+    COALESCE((SELECT sum(v.debit - v.credit) FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $3), 0) AS "inputVat",
+    COALESCE((SELECT sum(v.credit - v.debit) FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $4), 0) AS withholding,
+    COALESCE(NULLIF(d.gross_amount, 0), d.amount + d.wht_amount, (SELECT sum(v.debit) FROM journal_lines v WHERE v.jv_id = j.id)) AS total
+  FROM journal_vouchers j LEFT JOIN disbursements d ON d.journal_id = j.id LEFT JOIN commission_referrers cr ON cr.id = d.referrer_id LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id
+  WHERE ${BOOK_POSTED} AND j.jv_date BETWEEN $1 AND $2 AND (d.payee_type = 'Supplier' OR EXISTS (SELECT 1 FROM journal_lines v WHERE v.jv_id = j.id AND v.account_code = $3 AND v.debit > 0))) x`;
+const BOOK_CRITERIA = { Overall: {}, Month: { groupBy: '_month' } };
+const withMonth = (sql) => `SELECT b.*, to_char(b.date, 'YYYY-MM') AS _month FROM (${sql}) b`;
+
 export const TISPH_QUERIES = {
+  birGeneralJournal: { sql: withMonth(generalJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber", f._line' },
+  birCashReceiptsBook: { sql: withMonth(cashBook('debit', 'credit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
+  birCashDisbursementsBook: { sql: withMonth(cashBook('credit', 'debit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
+  birSalesJournal: { sql: withMonth(salesJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."invoiceNumber"' },
+  birPurchaseJournal: {
+    sql: withMonth(purchaseJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"',
+    extras: [setting('accounting.account.input_vat', '135000', 'text'), setting('accounting.account.wht_payable', '2204001', 'text')],
+  },
   fsByVersion: {
     sql: fsRows(`(LEAST($1::date, ${YS}) - interval '1 year')::date`), filters: ['account', 'fsVersion'], defaults: FS_VERSION,
     criteria: { 'FS Line': { dims: FS_DIMS, groupBy: 'section' }, 'GL Account': { dims: FS_ACCOUNT_DIMS, groupBy: 'caption' } },
