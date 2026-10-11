@@ -37,7 +37,7 @@ afterAll(async () => { await pool.end(); });
 describe('catalogue', () => {
   it('runs every TISPH layout over the sample business', async () => {
     const codes = (await q("SELECT code FROM report_definitions WHERE code LIKE 'tisph-%' ORDER BY sort_order")).map((r) => r.code);
-    expect(codes).toHaveLength(20);
+    expect(codes).toHaveLength(23);
     for (const code of codes) await run(ctx.api, code, { FromDate: addDays(day, -20), ToDate: day });
   });
 
@@ -145,5 +145,36 @@ describe('CR-11 BIR books of accounts (TIS-BRD-TAX-02)', () => {
     const csv = await finance('post', '/reports/bir-book-general-journal/generate').send({ FromDate: from, ToDate: day, format: 'csv' });
     expect(csv.status).toBeLessThan(300);
     expect((await sales('post', '/reports/bir-book-general-journal/run').send({})).status).toBe(403);
+  });
+});
+
+describe('CR-16 GL schedule, journal entries and chart of accounts (RPT-FGA-05 to 07)', () => {
+  it('splits the open-item lines into open and cleared, with the clearing document of a cleared one', async () => {
+    const from = addDays(day, -60);
+    const all = await run(finance, 'tisph-gl-schedule', { FromDate: from, ToDate: day, ReportCriteria: 'Overall' });
+    expect(all.rows.length).toBeGreaterThan(0);
+    for (const r of all.rows) {
+      expect(['40', '50']).toContain(r.postingKey);
+      expect(r2(Math.abs(Number(r.amount)))).toBe(r2(Number(r.clearedAmount) + Number(r.openAmount)));
+      if (r.status === 'Cleared') expect(r.clearingDate).toBeTruthy();
+      else expect(r.clearingDate).toBeNull();
+    }
+    const open = await run(finance, 'tisph-gl-schedule', { FromDate: from, ToDate: day, Status: 'Open' });
+    expect(open.rows.every((r) => r.status === 'Open')).toBe(true);
+  });
+
+  it('lists the journal entries by document type with company code, preparer and approver, balanced', async () => {
+    const je = await run(finance, 'tisph-journal-entries', { FromDate: addDays(day, -60), ToDate: day });
+    expect(je.rows.length).toBeGreaterThan(0);
+    expect(je.rows[0].companyCode).toBe('4F29');
+    expect(je.groups.length).toBeGreaterThan(0);
+    expect(r2(je.totals.debit)).toBe(r2(je.totals.credit));
+  });
+
+  it('lists the chart of accounts, filtered by account prefix; not for Sales', async () => {
+    const coa = await run(finance, 'tisph-chart-of-accounts', { Account: '1' });
+    expect(coa.rows.length).toBeGreaterThan(0);
+    expect(coa.rows.every((r) => r.accountCode.startsWith('1'))).toBe(true);
+    expect((await sales('post', '/reports/tisph-chart-of-accounts/run').send({})).status).toBe(403);
   });
 });

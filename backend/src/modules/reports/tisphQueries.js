@@ -240,7 +240,45 @@ const purchaseJournal = `SELECT x.*, x.total - x."inputVat" AS "netPurchase" FRO
 const BOOK_CRITERIA = { Overall: {}, Month: { groupBy: '_month' } };
 const withMonth = (sql) => `SELECT b.*, to_char(b.date, 'YYYY-MM') AS _month FROM (${sql}) b`;
 
+
+// ------------------------------------------------------------------ CR-16 GL schedules, journal entries, chart (RPT-FGA-05..07)
+// SAP-style: posting key 40 (debit) / 50 (credit) as in the SAP GL file (sap_gl.layout), profit centre = cost centre,
+// company code = BUKRS of the SAP GL file header
+const SAP_KEY = "CASE WHEN l.debit > 0 THEN COALESCE((SELECT value->>'debitKey' FROM app_settings WHERE key = 'sap_gl.layout'), '40') ELSE COALESCE((SELECT value->>'creditKey' FROM app_settings WHERE key = 'sap_gl.layout'), '50') END";
+const COMPANY_CODE = "COALESCE((SELECT f->>'value' FROM app_settings s, jsonb_array_elements(s.value->'header'->'fields') f WHERE s.key = 'sap_gl.layout' AND f->>'name' = 'BUKRS'), '')";
+const LIVE_MATCH = "m.unmatched_at IS NULL AND COALESCE(m.status, 'active') <> 'unmatched'";
+const glSchedule = `SELECT x.*, CASE WHEN x."openAmount" = 0 THEN 'Cleared' ELSE 'Open' END AS status,
+    CASE WHEN x."openAmount" = 0 THEN x._last_cleared END AS "clearingDate", CASE WHEN x."openAmount" = 0 THEN x._last_doc END AS "clearingDocument"
+  FROM (SELECT l.account_code AS "accountCode", a.name AS "accountName", l.account_code AS _account, j.jv_number AS "documentNumber", j.jv_date AS "postingDate",
+    ${SAP_KEY} AS "postingKey", COALESCE(c.display_name, ic.name, '') AS partner, COALESCE(j.policy_number, j.transaction_code, '') AS assignment, COALESCE(l.cost_centre, '') AS "profitCentre",
+    CASE WHEN l.debit > 0 THEN l.debit ELSE -l.credit END AS amount,
+    COALESCE((SELECT sum(m.matched_amount) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}), 0) AS "clearedAmount",
+    (CASE WHEN l.debit > 0 THEN l.debit ELSE l.credit END) - COALESCE((SELECT sum(m.matched_amount) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}), 0) AS "openAmount",
+    (SELECT max(m.matched_at)::date FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH}) AS _last_cleared,
+    (SELECT COALESCE(m.document_ref, m.id::text) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH} ORDER BY m.matched_at DESC LIMIT 1) AS _last_doc
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code
+  LEFT JOIN clients c ON c.id = COALESCE(l.client_id, j.client_id) LEFT JOIN insurance_companies ic ON ic.id = l.insurance_company_id
+  WHERE j.status IN ('posted', 'reversed') AND a.is_open_item AND j.jv_date BETWEEN $1 AND $2) x`;
+const journalEntries = `SELECT ${COMPANY_CODE} AS "companyCode", COALESCE(p.fiscal_year, '') AS "fiscalYear", COALESCE(j.period, to_char(j.jv_date, 'YYYY-MM')) AS period,
+    j.jv_number AS "documentNumber", COALESCE(NULLIF(j.entry_type, ''), j.source, 'JOURNAL') AS "documentType", j.jv_date AS "postingDate", l.line_no AS "lineNo",
+    ${SAP_KEY} AS "postingKey", l.account_code AS "accountCode", a.name AS "accountName", l.account_code AS _account, l.debit, l.credit, COALESCE(l.cost_centre, '') AS "profitCentre",
+    COALESCE(NULLIF(l.memo, ''), j.description, '') AS text, COALESCE(j.policy_number, j.transaction_code, '') AS assignment,
+    (SELECT COALESCE(m.document_ref, m.id::text) FROM entry_matches m WHERE (m.debit_line_id = l.id OR m.credit_line_id = l.id) AND ${LIVE_MATCH} ORDER BY m.matched_at DESC LIMIT 1) AS "clearingReference",
+    COALESCE(j.created_by, '') AS "preparerId", COALESCE(j.approved_by, j.posted_by, '') AS "approverId"
+  FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id JOIN gl_accounts a ON a.code = l.account_code LEFT JOIN accounting_periods p ON p.period = j.period
+  WHERE j.status IN ('posted', 'reversed') AND j.jv_date BETWEEN $1 AND $2`;
+const chartOfAccounts = `SELECT a.code AS "accountCode", a.name AS "accountName", a.code AS _account, initcap(a.account_type) AS "accountType", COALESCE(a.fs_group, '') AS "fsGroup",
+    COALESCE(a.category, '') AS category, COALESCE(a.parent_code, '') AS "mainAccount", initcap(COALESCE(a.normal_balance, '')) AS "normalBalance",
+    CASE WHEN a.is_open_item THEN 'Yes' ELSE 'No' END AS "openItem", CASE WHEN a.allow_manual THEN 'Yes' ELSE 'No' END AS "manualPosting", initcap(a.status) AS status
+  FROM gl_accounts a WHERE $1::date IS NOT NULL`;
+
 export const TISPH_QUERIES = {
+  glSchedule: { sql: glSchedule, filters: ['account', 'status'], criteria: { 'GL Account': { groupBy: 'accountCode' }, Status: { groupBy: 'status' }, Overall: {} },
+    orderBy: 'f."accountCode", f."postingDate", f."documentNumber"' },
+  journalEntries: { sql: journalEntries, filters: ['account'], criteria: { 'Document Type': { groupBy: 'documentType' }, Period: { groupBy: 'period' }, Overall: {} },
+    orderBy: 'f."postingDate", f."documentNumber", f."lineNo"' },
+  chartOfAccounts: { sql: chartOfAccounts, filters: ['account', 'status'], criteria: { Overall: {}, 'Account Type': { groupBy: 'accountType' }, 'FS Group': { groupBy: 'fsGroup' } },
+    orderBy: 'f."accountCode"' },
   birGeneralJournal: { sql: withMonth(generalJournal), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber", f._line' },
   birCashReceiptsBook: { sql: withMonth(cashBook('debit', 'credit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
   birCashDisbursementsBook: { sql: withMonth(cashBook('credit', 'debit')), criteria: BOOK_CRITERIA, orderBy: 'f.date, f."journalNumber"' },
