@@ -56,7 +56,7 @@ const RECEIPT_STATE = "CASE r.receipt_status WHEN 'Cancelled' THEN 'Reversed' WH
 const paymentSummary = `SELECT r.received_date AS "paymentDate", r.created_at::date AS "postingDate", r.receipt_number AS "receiptNumber",
     COALESCE(p.policy_number, r.policy_number) AS "policyNumber", r.reference_no AS "referenceNo", ${CLIENT_DIMS}, r.amount,
     COALESCE(bk.name, r.bank_account_code) AS bank, CASE WHEN r.payment_mode IN ('check', 'cheque', 'pdc') THEN r.reference_no END AS "chequeNumber",
-    r.payment_mode AS "paymentMethod", COALESCE(r.source, 'manual') AS channel, r.receipt_status AS status, cu.display_name AS "user", ${RECEIPT_STATE} AS "postingStatus"
+    bk.name AS "draweeBank", r.payment_mode AS "paymentMethod", COALESCE(r.source, 'manual') AS channel, r.receipt_status AS status, cu.display_name AS "user", ${RECEIPT_STATE} AS "postingStatus"
   FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   LEFT JOIN banks bk ON bk.id = r.bank_id ${USER('r.created_by', 'cu')}
   WHERE r.received_date BETWEEN $1 AND $2`;
@@ -65,15 +65,15 @@ const reasonName = (code) => `(SELECT m.name FROM master_records m WHERE m.type_
 const dailyReversals = `SELECT 'Receipt reversal' AS kind, r.cancelled_at::date AS "reversalDate", r.received_date AS "actualDate", r.receipt_number AS reference,
     COALESCE(r.reversal_reason, r.cancel_reason) AS reason, COALESCE(p.policy_number, r.policy_number) AS "policyNumber", ${CLIENT_DIMS}, r.amount,
     COALESCE(r.bank_account_code, bk.name, 'Not recorded') AS "bankAccount", CASE WHEN r.payment_mode IN ('check', 'cheque', 'pdc') THEN r.reference_no END AS "chequeNumber",
-    r.payment_mode AS "paymentMethod", cu.display_name AS "user"
+    bk.name AS "draweeBank", r.payment_mode AS "paymentMethod", cu.display_name AS "user"
   FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   LEFT JOIN banks bk ON bk.id = r.bank_id ${USER('r.cancelled_by', 'cu')}
   WHERE r.receipt_status = 'Cancelled' AND r.cancelled_at::date BETWEEN $1 AND $2
   UNION ALL
   SELECT 'Bounced cheque', d.bounced_on, d.cheque_date, d.pdc_number, COALESCE(${reasonName('d.bounce_reason_code')}, d.bounce_reason), p.policy_number, ${CLIENT_DIMS}, d.amount,
-    COALESCE(d.deposit_account, CASE WHEN d.payee = 'insurance-partner' THEN ic.name END, 'Not recorded'), d.cheque_number, 'check', du.display_name
+    COALESCE(d.deposit_account, CASE WHEN d.payee = 'insurance-partner' THEN ic.name END, 'Not recorded'), d.cheque_number, COALESCE(db.name, d.drawee_bank), 'check', du.display_name
   FROM post_dated_cheques d LEFT JOIN policies p ON p.id = d.policy_id LEFT JOIN clients c ON c.id = d.client_id
-  LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id ${USER('d.updated_by', 'du')}
+  LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id LEFT JOIN banks db ON db.id = d.bank_id ${USER('d.updated_by', 'du')}
   WHERE d.bounced_on BETWEEN $1 AND $2`;
 
 const PDC_STATUS = `CASE d.status WHEN 'on-hand' THEN 'Received at TIS' WHEN 'forwarded' THEN 'Forwarded' WHEN 'warehoused' THEN 'Warehoused' WHEN 'deposited' THEN 'Deposited'

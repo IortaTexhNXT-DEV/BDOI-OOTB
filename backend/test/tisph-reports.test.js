@@ -98,12 +98,12 @@ describe('CR-15 cash control', () => {
     await q(`INSERT INTO post_dated_cheques(id, pdc_number, client_id, cheque_number, cheque_date, amount, received_date, status, payee, cancel_reason_code, cancel_remarks, cancelled_on, created_by)
       VALUES ('pdc_rpt_1', 'PDC-RPT-0001', $1, '000123', $2, 12500, $2, 'cancelled', 'tisph', 'PDC-CXL-CASH', 'Cash replacement', $2, 'test'),
              ('pdc_rpt_2', 'PDC-RPT-0002', $1, '000124', $2, 7300, $2, 'bounced', 'tisph', NULL, NULL, NULL, 'test')`, [c.id, day]);
-    await q("UPDATE post_dated_cheques SET bounced_on = $1, bounce_reason_code = 'PDC-BNC-DAIF', deposit_account = 'ACC-MBT-001' WHERE id = 'pdc_rpt_2'", [day]);
+    await q("UPDATE post_dated_cheques SET bounced_on = $1, bounce_reason_code = 'PDC-BNC-DAIF', deposit_account = 'ACC-MBT-001', drawee_bank = 'BDO Unibank' WHERE id = 'pdc_rpt_2'", [day]);
     await q(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, after_data) VALUES ('usr_admin', 'admin', 'post_dated_cheque', 'pdc_rpt_2', 'bounce', '{"statusText":"Bounced"}')`);
     const cancelled = await run(bp, 'tisph-pdc-cancelled', { FromDate: day, ToDate: day });
     expect(cancelled.rows.find((r) => r.pdcNumber === 'PDC-RPT-0001')).toMatchObject({ reason: 'Cash replacement', amount: 12500 });
     const reversals = await run(bp, 'tisph-daily-reversals', { FromDate: day, ToDate: day });
-    expect(reversals.rows.find((r) => r.reference === 'PDC-RPT-0002')).toMatchObject({ kind: 'Bounced cheque', reason: 'DAIF - drawn against insufficient funds', bankAccount: 'ACC-MBT-001' });
+    expect(reversals.rows.find((r) => r.reference === 'PDC-RPT-0002')).toMatchObject({ kind: 'Bounced cheque', reason: 'DAIF - drawn against insufficient funds', bankAccount: 'ACC-MBT-001', draweeBank: 'BDO Unibank' });
     expect(reversals.groups.find((g) => g.group === 'ACC-MBT-001')).toBeTruthy();
     const history = await run(bp, 'tisph-pdc-history', { FromDate: day, ToDate: day });
     expect(history.rows.find((r) => r.pdcNumber === 'PDC-RPT-0002')).toMatchObject({ event: 'Bounce', statusAfter: 'Bounced' });
