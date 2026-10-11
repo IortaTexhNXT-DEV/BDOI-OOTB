@@ -10,6 +10,7 @@ import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import StatCards from "../../components/StatCards";
+import { NameChipCell } from "../../components/TableCells";
 import { PageHeader, StatusTag, formatDate } from "./shared";
 import { hasPermission } from "../../utils/canOpen";
 import "./index.scss";
@@ -80,7 +81,7 @@ const BrokerSlipList = () => {
           onRowClick={(e) => navigate(`/placement/broker-slips/${e.data.id}`)} rowClassName={() => "clickable"}>
           <Column field="slipNumber" header={t("placement.fields.slipNumber")} body={(r) => <span className="doc-number">{r.slipNumber}</span>} />
           <Column field="insuredName" header={t("placement.fields.insured")} body={(r) => r.insuredName || r.customerName} />
-          <Column field="productType" header={t("placement.fields.product")} body={(r) => <>{r.productType}<span className="lob-chip">{r.lob}</span></>} />
+          <Column field="productType" header={t("placement.fields.product")} body={(r) => <NameChipCell name={r.productType} chip={r.lob} />} />
           <Column field="sumInsured" header={t("placement.fields.sumInsured")} body={(r) => formatCurrency(r.sumInsured)} className="num" headerClassName="num" />
           <Column header={t("placement.fields.responses")} body={(r) => `${r.offersReceived || 0} / ${r.offersTotal || 0}${r.offersDeclined ? ` (${t("placement.list.declinedCount", { count: r.offersDeclined })})` : ""}`} />
           <Column field="bestPremium" header={t("placement.fields.bestPremium")} body={(r) => (r.bestPremium == null ? "-" : formatCurrency(r.bestPremium))} className="num" headerClassName="num" />

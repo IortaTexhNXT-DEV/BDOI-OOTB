@@ -5,6 +5,7 @@ import { businessTimeZone } from '../lib/dates.js';
 import { logger } from '../lib/logger.js';
 import { notify } from '../modules/notifications/service.js';
 import { jobAllowed } from '../modules/features/service.js';
+import { nonWorkingDayHold } from '../lib/workingCalendar.js';
 
 const tasks = new Map();
 /** State of the schedules loaded on this instance: time zone, signature of the jobs table, change-watch timer. */
@@ -54,12 +55,18 @@ const UNLOCK_SQL = "SELECT pg_advisory_unlock(hashtext('brokerverse.scheduled_jo
  * (pg_try_advisory_lock on a dedicated connection, held until the run ends), so a job never runs twice at the same time
  * across instances. A scheduled run additionally skips when another instance already started a scheduled run of the
  * same job in the same minute (the cron slot), so an instance whose clock fires a little later does not repeat it.
- * A job of a feature that is not enabled (modules/features) is skipped as well.
+ * A job of a feature that is not enabled (modules/features) is skipped as well, and so is a scheduled run of a job of
+ * calendar.working_days_only_jobs on a day that is not a working day (lib/workingCalendar.js).
  * A skipped run returns { status: 'skipped' } and records nothing.
  */
 export async function runJob(job, triggeredBy = 'schedule', { firedAt = new Date() } = {}) {
   // a job of a feature this environment does not run (modules/features) never runs, whatever its enabled flag
   if (!(await jobAllowed(job.code))) return { status: 'skipped', reason: `job ${job.code} belongs to a feature that is not enabled in this edition` };
+  // a reminder job waits for a working day (weekends off and the Holiday master); "Run now" still runs it
+  if (triggeredBy === 'schedule') {
+    const hold = await nonWorkingDayHold(job.code, firedAt);
+    if (hold) return { status: 'skipped', reason: hold };
+  }
   const lock = await pool.connect();
   let locked = false;
   try {

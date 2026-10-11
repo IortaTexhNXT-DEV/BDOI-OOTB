@@ -31,6 +31,8 @@ export const TRANSACTION_TABLES = [
   'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_imports', 'remittance_import_rows', 'remittance_runs', 'insurer_billing_runs', 'commission_line_requests',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
+  // telesales incentive: call-out endorsements of prospects, telesales policies, the policies of a batch
+  'callout_endorsements', 'telesales_policies', 'incentive_batch_policies',
   // claims and renewals
   'claims', 'claim_history', 'claim_field_changes',
   'renewals', 'renewal_quotes', 'renewal_notices', 'renewal_activities', 'renewal_batches', 'renewal_batch_policies', 'winback_campaigns',
@@ -68,6 +70,8 @@ export const TRANSACTION_TABLES = [
   'cover_notes', 'post_dated_cheques', 'pdc_sets', 'pdc_transmittals', 'remittance_holds', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
   // claim settlements (partial and final) and the claim communication log; the lock-in of a policy term (migrations 0501, 0503)
   'claim_settlements', 'claim_communications', 'policy_lock_ins',
+  // dealer schemes (0600-0602): the scheme of a policy, scheme applications with their checklist and bookings uploads, TFS loan status, lock-in reviews and changes
+  'policy_schemes', 'scheme_applications', 'scheme_checklist_items', 'scheme_booking_batches', 'loan_status_batches', 'loan_status_history', 'lock_in_reviews', 'lock_in_changes',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
   // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open
   // covers, comparison reports, marketing campaigns (assignment rules, channels, programmes, segments, templates and
@@ -146,7 +150,7 @@ export const MASTER_CONFIG_TABLES = [
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages
   'products', 'policy_types', 'coverages', 'product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections',
   'commission_rates', 'sharing_schemes', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
-  'incentive_programs', 'payment_gateways',
+  'incentive_programs', 'incentive_program_versions', 'incentive_callers', 'payment_gateways',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
   'gl_accounts', 'fs_versions', 'fs_version_lines', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
@@ -158,7 +162,7 @@ export const MASTER_CONFIG_TABLES = [
   'override_agreements', 'override_agreement_tiers',
   // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
   // programmes, campaign segments and templates, Report Builder saved reports
-  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'promotions', 'promotion_lines', 'discount_caps', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
+  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'promotions', 'promotion_lines', 'schemes', 'scheme_vehicle_lines', 'discount_caps', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
   // CAS registration documents (system description, backup procedure): approved versions kept as the system's documentation
   'cas_documents',
   // legacy code tables of the go-live migration (Data Migration & Go-Live > Templates > Value Maps)
@@ -193,6 +197,8 @@ export const TRANSACTION_FILE_FOLDERS = [
   // KYC documents of the clients (onboarding)
   'kyc',
   'bi-extract',
+  // scheme application documents (Scheme Issuance checklist)
+  'scheme-applications',
 ];
 /** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents, e-signatures. */
 export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents', 'e-signatures'];

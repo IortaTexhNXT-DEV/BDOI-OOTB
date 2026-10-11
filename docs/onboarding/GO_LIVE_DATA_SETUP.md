@@ -1,13 +1,13 @@
 # Go-live data set-up
 
-For the System Administrator and Accounting. It gives the order in which to set up the company in BrokerVerse before
+For TISPH IT AppSupport (role TIS IT AppSupport / Admin) and Finance. It gives the order in which to set up the company in BrokerVerse before
 users start working, and for each step the screen, what to enter, the template to use and how to check the result.
-The technical installation (servers, database, secrets, SMTP account) is in `deploy/README.md` and must be
-finished first.
+The technical installation (environment, database, secrets, SMTP account) is in `deploy/README.md` (TISPH DEV on
+Railway, the Azure environments) and must be finished first.
 
 The templates are in `docs/package/05_Delivery/Upload_Templates`. Each has a Data sheet with the exact headers and a sample row to delete, a
 Columns sheet and an Instructions sheet. On screens with an **Upload** button the same template is under
-**Download template**. Screens without an Upload button are marked below; for those a System Administrator loads the
+**Download template**. Screens without an Upload button are marked below; for those TISPH IT AppSupport loads the
 file through the API route written on the template's Instructions sheet, or enters the records on the screen.
 
 Most of the steps below can also be done with two workbooks on **Master > System Configuration > Data Migration &
@@ -16,7 +16,7 @@ numbering, settings) and the migration workbook (step 11: clients, in-force poli
 claims, post-dated cheques on hand, opening balances), each validated as a whole before anything is saved, approved by
 a second person and loaded as a numbered load (MIG-000012). See `GO_LIVE_DATA_WORKBENCH.md`.
 
-Agree a **go-live date** with Accounting before you start: the first day on which transactions are entered in
+Agree a **go-live date** with Finance before you start: the first day on which transactions are entered in
 BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
 
 ## Philippine settings delivered with BrokerVerse
@@ -117,17 +117,20 @@ warranties, renewals and reminders).
 
 ## Step 3. Users and roles
 
-- **Screen:** Master > Generals > User Management > User. Roles are fixed: System Administrator (Super Admin),
-  Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager.
+- **Screen:** Master > Generals > User Management > User. Assign the TISPH roles (listed with what each does in
+  `GETTING_STARTED.md`, section 2): the Sales and Operations Associates, Officers and Unit Heads, the four Cash Control
+  roles (CCD-PDU, CCD-PDC / CCD-ADA, CCD-BP / QRPh, CCD-Recon), TIS Finance & General Accounting, TIS IT AppSupport /
+  Admin, TIS General Manager and TIS Audit (read only). SUPERID is for user acceptance testing only and is never
+  assigned in production.
 - **Enter:** one user per person with a single role, e-mail address and branch. BrokerVerse shows a temporary password
-  once; hand it to the user privately. Give the System Administrator role to as few people as possible.
-- **Template:** `Users_Provisioning_Template.xlsx` / `.csv` for many users at once. It is run on the server by the
-  System Administrator with `backend/scripts/provision-users.js` (dry run first, then `CONFIRM_PROVISION=yes`). The
+  once; hand it to the user privately. Give TIS IT AppSupport / Admin to as few people as possible.
+- **Template:** `Users_Provisioning_Template.xlsx` / `.csv` for many users at once. It is run on the server by
+  TISPH IT AppSupport with `backend/scripts/provision-users.js` (dry run first, then `CONFIRM_PROVISION=yes`). The
   file holds initial passwords: keep it outside the repository and delete it after use. The credentials sheet you hand
   out is kept outside the repository too.
 - **Security settings:** Master > Configuration > Security. Check the password rules (8 characters, upper and lower
   case, digit, symbol, history 5, expiry 90 days), lockout after 5 wrong passwords, and list the roles that must use
-  two-step verification (`security.require_2fa_roles`, recommended: system-admin, accounting, accounting-manager).
+  two-step verification (`security.require_2fa_roles`, recommended: tis-it-admin, tis-finance, tis-ccd-recon).
 - **Check:** each user signs in, changes the password and sees only the menus of the role (`GETTING_STARTED.md`,
   section 2).
 
@@ -257,16 +260,16 @@ Points to know:
 
 ## Step 12. First month-end
 
-At the end of the first month, Accounting prepares and the Accounting Manager approves:
+At the end of the first month, a Finance user prepares and a second Finance user approves:
 
 1. Accounts > Bank Reconciliation: import the month's statements, match, prepare and approve each reconciliation.
 2. Accounts > Remittance: remit collected premium to insurers; Accounts > Disbursement for payments due.
 3. Accounts > Period End > Month-End Close: start the run for the month, work through the checklist (unposted journals,
    unreconciled banks, open receipts), execute the steps (accruals, recurring journals, commission deferral, FX
    revaluation) and send it for approval.
-4. Accounting Manager approves the run; the period closes.
+4. The second Finance user approves the run; the period closes.
 5. Accounts > Tax: VAT summary, SAWT, QAP and Form 2307 for the month.
 6. Compare the trial balance with the go-live opening balances plus the month's activity, and keep the reports.
 
-Plan a review meeting after the first close with Accounting, the Accounting Manager and support to note what to
+Plan a review meeting after the first close with Finance, Cash Control and support to note what to
 change in the settings.

@@ -14,6 +14,7 @@ import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
+import StatusChip from "../../../components/StatusChip";
 import { Timeline } from "primereact/timeline";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import remittanceService from "../../../services/remittanceService";
@@ -624,11 +625,7 @@ const SettlementProcessing = () => {
                   <div className="status-info">
                     <div className="status-item">
                       <label>Status:</label>
-                      <Tag value={settlementData.status} severity={
-                        settlementData.status === 'Approved' ? 'success' :
-                        settlementData.status === 'Pending Approval' ? 'warning' :
-                        settlementData.status === 'Draft' ? 'info' : 'secondary'
-                      } />
+                      <StatusChip label={settlementData.status} />
                     </div>
                     {approvalResult && (
                       <>

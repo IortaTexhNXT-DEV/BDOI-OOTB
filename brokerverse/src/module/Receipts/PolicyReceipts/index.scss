@@ -305,9 +305,8 @@
   .p-card .p-card-content {
     padding: 0;
   }
+  // list cells take the size and font of every other list (theme/bdoi/enterprise.scss)
   .fieldvalue_container {
-    font-size: 16px;
-    font-family: "Nunito", Arial, sans-serif;
     font-weight: 400;
   }
   // the action cell stays a table cell (a flex cell left the row one column short, so the last columns slid under it)

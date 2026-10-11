@@ -104,7 +104,7 @@ const pdcHistory = `SELECT a.at AS "eventAt", d.pdc_number AS "pdcNumber", d.che
     COALESCE(a.after_data->>'remark', a.after_data->>'reason', a.after_data->>'receivedBy') AS detail, COALESCE(au.display_name, a.username) AS "user", d.amount
   FROM audit_log a JOIN post_dated_cheques d ON d.id = a.entity_id LEFT JOIN policies p ON p.id = d.policy_id LEFT JOIN clients c ON c.id = d.client_id
   LEFT JOIN insurance_companies ic ON ic.id = COALESCE(d.insurance_company_id, p.insurance_company_id) LEFT JOIN banks bk ON bk.id = d.bank_id ${USER('a.user_id', 'au')}
-  WHERE a.entity = 'post_dated_cheque' AND a.at::date BETWEEN $1 AND $2`;
+  WHERE a.entity = 'post_dated_cheque' AND (a.at AT TIME ZONE $3)::date BETWEEN $1 AND $2`;
 const pdcAcknowledgements = `SELECT s.set_number AS "setNumber", s.received_date AS "receivedDate", p.policy_number AS "policyNumber", ${CLIENT_DIMS}, ${INSURER_DIMS},
     CASE s.payee WHEN 'insurance-partner' THEN 'Insurance Partner' ELSE 'TISPH' END AS "payableTo",
     (SELECT count(*) FROM post_dated_cheques x WHERE x.set_id = s.id AND x.status NOT IN ('cancelled', 'replaced', 'returned')) AS cheques,
@@ -248,7 +248,7 @@ export const TISPH_QUERIES = {
     aggregate: { cheques: 'count(*)', amount: 'sum(t.amount)', heldForCancellation: "count(*) FILTER (WHERE t.suspension <> '')" },
   },
   pdcHistory: {
-    sql: pdcHistory, filters: ['client', 'insurer'], criteria: { Overall: {}, Cheque: { groupBy: 'pdcNumber' }, Contract: { groupBy: 'policyNumber' } },
+    sql: pdcHistory, extras: [{ timeZone: true, type: 'text' }], filters: ['client', 'insurer'], criteria: { Overall: {}, Cheque: { groupBy: 'pdcNumber' }, Contract: { groupBy: 'policyNumber' } },
     orderBy: 'f."pdcNumber", f."eventAt"',
   },
   pdcAcknowledgements: {

@@ -4,11 +4,15 @@
  *
  * Tiers:
  *   PHASE_1   core TISPH scope (BRD v2.2, FRS); always on, never switched off from the tenant
- *   PHASE_2   built and delivered off; switched on by the iorta TechNXT platform administrator ("Enable Phase 2")
+ *   PHASE_2   built and delivered off; switched on by the iorta TechNXT platform administrator ("Enable Phase 2") or by
+ *             the enablers of the tenant (SUPERID by default; tenant.js, features.tenant_enable_roles)
  *   FUTURE    available in the platform but outside the BRD and FRS; off until enabled for a later release
  *   PLATFORM  supporting functions (users, configuration, audit, jobs); always on
  *
  * A feature: { key, name, description, module, tier, requirements, dependsOn, decision?, controls }.
+ * decision: { id, question, options, decided? } - a classification TISPH has to confirm (FT-Dnn of the feature
+ * catalogue document); `decided` = { answer (one of the options), by, on (YYYY-MM-DD), note } once TISPH answered.
+ * A decision without `decided` is shown "Decision pending" on Features & Releases.
  * controls:
  *   menus        side-menu entries, as the names of the menu from the top-level group down ("Accounts > Payables > AP Ageing")
  *   routes       other front-end addresses of the feature (wizard steps, public pages), matched as prefixes
@@ -130,8 +134,9 @@ export const FEATURES = Object.freeze([
     key: 'sales-dashboard', name: 'Sales dashboard', module: 'Dashboard', tier: P2,
     description: 'Conversion, figures by sales person, premium and policies by product and the monthly trend; agent performance on the executive dashboard',
     requirements: ['TIS-BRD-RPT-DSH-05', 'TIS-BRD-RPT-DSH-06', 'TIS-BRD-RPT-DSH-07', 'CR-17', 'FGA-SD-01', 'FGA-SD-02'],
-    decision: { question: 'TIS-BRD-RPT-02 (Phase 1) names the same measures as the Phase 2 dashboards DSH-05 to DSH-07. Is the Sales Dashboard the Phase 1 delivery of RPT-02 (always on) or a Phase 2 dashboard?',
-      options: ['Phase 1 (RPT-02 delivery, always on)', 'Phase 2 (enable with Phase 2)'] },
+    decision: { id: 'FT-D02', question: 'TIS-BRD-RPT-02 (Phase 1) names the same measures as the Phase 2 dashboards DSH-05 to DSH-07. Is the Sales Dashboard the Phase 1 delivery of RPT-02 (always on) or a Phase 2 dashboard?',
+      options: ['Phase 1 (RPT-02 delivery, always on)', 'Phase 2 (enable with Phase 2)'],
+      decided: { answer: 'Phase 2 (enable with Phase 2)', by: 'TISPH', on: '2026-10-11', note: 'Phase 2, enabled by the SUPERID role of TISPH or the platform administrator' } },
     menus: ['Dashboard > Sales Dashboard'], api: ['/dashboard/sales'],
     sections: ['Executive Dashboard: agent performance'], documents: ['sales-dashboard', 'tis-sales-unit-head-dashboard'],
     permissions: ['read:leads', 'read:quotations'],
@@ -170,9 +175,11 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'dealer-programmes', name: 'Dealer programmes', module: 'Sales & Marketing', tier: P1,
-    description: 'Scheme 1 and 2 programmes of brand-new vehicles, dealer sales uploads and bank endorsement letters',
-    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15'],
-    menus: ['Operations > Sales & Marketing > Dealer Programmes'],
+    description: 'Brand-new vehicle programmes with dealer sales uploads and bank endorsement letters; the Scheme Master of the Scheme 1 and 2 bundling schemes with its scheme rating; Scheme Issuance on TFS loan documents with the document checklist, waivers and the direct placement; the lock-in of scheme policies',
+    requirements: ['TIS-BRD-SCHM-01', 'TIS-BRD-SCHM-02', 'TIS-BRD-SCHM-03', 'TIS-BRD-MAS-05', 'TIS-BRD-PROD-15', 'CR-05'],
+    menus: ['Operations > Sales & Marketing > Dealer Programmes', 'Operations > Sales & Marketing > Scheme Master', 'Operations > Sales & Marketing > Scheme Issuance',
+      'Master > Insurance Management > Scheme Document Checklist'],
+    jobs: ['scheme-status'],
   }),
   feature({
     key: 'promotions', name: 'Promotions and discount caps', module: 'Sales & Marketing', tier: P1,
@@ -274,11 +281,11 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'renewals', name: 'Renewals', module: 'Operations', tier: P1,
-    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management and lock-in accounts',
-    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
+    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management, and the 60-day Lock-in Review of lock-in and Scheme 2 accounts with the TFS loan status upload and the Lock-in / Scheme 2 expiry report',
+    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'TIS-BRD-RPT-SLS-05', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
     menus: ['Operations > Renewals > Renewal Policy', 'Operations > Renewals > Renewal Batch', 'Operations > Renewals > Renewal Queue', 'Operations > Renewals > Negotiations',
-      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Accounts'],
-    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue'],
+      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Review'],
+    jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue', 'lock-in-review'],
   }),
   feature({
     key: 'talkbot-calls', name: 'Talkbot renewal calls', module: 'Operations', tier: P1,
@@ -390,9 +397,11 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'fixed-assets', name: 'Fixed assets', module: 'Accounts', tier: P2,
     description: 'Asset register by asset class, monthly straight-line depreciation and disposals',
-    requirements: ['TIS-BRD-NIA-07', 'FGA-FA-01', 'FGA-FA-02', 'FGA-FA-04', 'FGA-DS-08', 'TIS-BRD-RPT-FGA-10', 'PBSM-M17v4-PAFA'],
-    decision: { question: 'MOM-S5-AP-ASSET-MASTER (Phase 1) asks for an asset master at requisition while fixed assets (TIS-BRD-NIA-07) are Phase 2. Does the asset master go live in Phase 1?',
-      options: ['Phase 2 (enable with Phase 2)', 'Asset master in Phase 1'] },
+    // MOM-S5-AP-ASSET-MASTER (asset master at requisition) goes with fixed assets in Phase 2 (FT-D01)
+    requirements: ['TIS-BRD-NIA-07', 'FGA-FA-01', 'FGA-FA-02', 'FGA-FA-04', 'FGA-DS-08', 'TIS-BRD-RPT-FGA-10', 'PBSM-M17v4-PAFA', 'MOM-S5-AP-ASSET-MASTER'],
+    decision: { id: 'FT-D01', question: 'MOM-S5-AP-ASSET-MASTER (Phase 1) asks for an asset master at requisition while fixed assets (TIS-BRD-NIA-07) are Phase 2. Does the asset master go live in Phase 1?',
+      options: ['Phase 2 (enable with Phase 2)', 'Asset master in Phase 1'],
+      decided: { answer: 'Phase 2 (enable with Phase 2)', by: 'TISPH', on: '2026-10-11', note: 'Phase 2 with the asset master at requisition (MOM-S5-AP-ASSET-MASTER), enabled by the SUPERID role of TISPH or the platform administrator' } },
     menus: ['Accounts > Fixed Assets > Asset Register', 'Accounts > Fixed Assets > Depreciation Run', 'Accounts > Fixed Assets > Disposals', 'Master > Finance > Asset Classes'],
     api: ['/fixed-assets'], data: ['fixed_assets'], documents: ['fixed-assets-and-depreciation', 'asset-disposal', 'tis-finance-and-general-accounting-depreciation', 'tis-operations-officer-fixed-assets'],
     permissions: ['read:fixed-assets', 'write:fixed-assets'],
@@ -508,7 +517,9 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'incentives', name: 'Incentives', module: 'Accounts', tier: P1,
     description: 'Telesales incentive programmes, calculation with approval, statements and reports',
-    requirements: ['TIS-BRD-COMM-08'],
+    requirements: ['TIS-BRD-COMM-08', 'FR-TSI-001', 'FR-TSI-002', 'FR-TSI-003', 'FR-TSI-004', 'FR-TSI-005', 'FR-TSI-010', 'FR-TSI-011', 'FR-TSI-020', 'FR-TSI-021', 'FR-TSI-022',
+      'FR-TSI-030', 'FR-TSI-031', 'FR-TSI-032', 'FR-TSI-033', 'FR-TSI-034', 'FR-TSI-035', 'FR-TSI-036', 'FR-TSI-037', 'FR-TSI-040', 'FR-TSI-041', 'FR-TSI-042', 'FR-TSI-043'],
+    jobs: ['telesales-incentive-calc'],
     menus: ['Accounts > Incentive > My Programs', 'Accounts > Incentive > Calculations', 'Accounts > Incentive > Approvals', 'Accounts > Incentive > Statement',
       'Accounts > Incentive > Reports', 'Master > Finance > Incentive Programs'],
   }),
@@ -674,6 +685,8 @@ const byKey = new Map(FEATURES.map((f) => [f.key, f]));
 export const featureOf = (key) => byKey.get(key);
 /** Is the tier always on (Phase 1 and platform functions)? */
 export const alwaysOn = (f) => !!TIERS[f?.tier]?.alwaysOn;
+/** Is a decision of TISPH still open on the feature (a decision without its answer)? */
+export const decisionPending = (f) => !!f?.decision && !f.decision.decided;
 /** Features that can be switched on and off (Phase 2 and future releases). */
 export const switchable = () => FEATURES.filter((f) => !alwaysOn(f));
 
@@ -693,6 +706,10 @@ export function catalogueProblems() {
     seen.add(f.key);
     if (!TIERS[f.tier]) problems.push(`${f.key}: unknown tier ${f.tier}`);
     for (const d of f.dependsOn) if (!byKey.has(d)) problems.push(`${f.key}: depends on unknown feature ${d}`);
+    const decided = f.decision?.decided;
+    if (decided && !(f.decision.options || []).includes(decided.answer)) problems.push(`${f.key}: decision answer "${decided.answer}" is not one of its options`);
+    if (decided && /^Phase 2/.test(decided.answer) && f.tier !== 'PHASE_2') problems.push(`${f.key}: decided Phase 2 but in tier ${f.tier}`);
+    if (decided && /^Phase 1/.test(decided.answer) && f.tier !== 'PHASE_1') problems.push(`${f.key}: decided Phase 1 but in tier ${f.tier}`);
     for (const m of f.controls.menus) {
       if (menus.has(m)) problems.push(`menu entry "${m}" is registered by ${menus.get(m)} and ${f.key}`);
       menus.set(m, f.key);

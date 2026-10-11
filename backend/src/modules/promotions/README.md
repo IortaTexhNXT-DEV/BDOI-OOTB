@@ -43,3 +43,8 @@ Damage rate on a quotation). Migration 0485.
   through `recordLockIn` of the renewals module). A cancellation from inception returns the unit.
 - **Caps.** One approved cap per product and channel type on a day; not backdated; a replacement ends the replaced cap
   the day before it starts.
+
+## Lock-in end date
+
+`recordLockIn` ends a promotion lock-in at start + years (the day the next term starts). The scheme lock-ins written by
+Scheme Issuance end at start + years - 1 day (FRS SCHM-03 FR-LCK-001); aligning the promotion rule is left to TISPH.

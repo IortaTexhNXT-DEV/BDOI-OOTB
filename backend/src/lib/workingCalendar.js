@@ -7,7 +7,7 @@
  */
 import { many } from '../db/pool.js';
 import { getSetting } from './settings.js';
-import { addDays, businessTimeZone, isoInZone } from './dates.js';
+import { addDays, businessTimeZone, isoInZone, today } from './dates.js';
 
 const NON_WORKING = ['Regular Holiday', 'Special Non-working Day'];
 /** Longest run of non-working days searched for the next working day (a guard against an empty working week). */
@@ -92,4 +92,21 @@ export async function workingHoursBetween(start, end) {
     if (cal.isWorking(isoInZone(new Date(t), tz))) hours += step / 3600000;
   }
   return hours;
+}
+
+/** Jobs whose scheduled runs wait for a working day (calendar.working_days_only_jobs): the reminders to clients and staff. */
+export const WORKING_DAY_JOBS = ['collection-reminders', 'sms-payment-reminders', 'sms-renewal-notices', 'quote-expiry-reminder', 'claim-document-reminders',
+  'pdc-deposit-due', 'pdc-follow-up', 'month-end-reminder'];
+
+/**
+ * Why a scheduled run of a job waits for the next working day, or null when it runs: the job is listed in
+ * calendar.working_days_only_jobs and the business date is a weekend day off or a national holiday (TIS-BRD-MAS-08,
+ * NOTIF-02). The reminders look ahead over a window and remember what they sent, so the next working day catches up.
+ */
+export async function nonWorkingDayHold(code, now = new Date()) {
+  const jobs = await getSetting('calendar.working_days_only_jobs', WORKING_DAY_JOBS);
+  if (!Array.isArray(jobs) || !jobs.includes(code)) return null;
+  const day = await today(now);
+  if (await isWorkingDay(day)) return null;
+  return `${day} is not a working day (calendar.working_weekdays and the Holiday master); job ${code} waits for the next working day (calendar.working_days_only_jobs)`;
 }

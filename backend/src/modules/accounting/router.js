@@ -103,7 +103,7 @@ const unmatchHandler = async (req, res) => {
   ok(res, r, 'Entries unmatched successfully');
 };
 define({ method: 'POST', path: '/entries/unmatch', summary: 'Undo matches (body matchingIds[])', screen: 'Accounts > Open Entry Un-Matching', middleware: write, request: { matchingIds: ['mt_1'] }, response: { success: true, data: ['mt_1'] }, handler: unmatchHandler });
-define({ method: 'GET', path: '/entries/unmatch', summary: 'Undo matches (query matchingIds=a,b) – kept for the current front-end service', screen: 'Accounts > Open Entry Un-Matching', middleware: write, query: { matchingIds: 'mt_1,mt_2' }, response: { success: true, data: ['mt_1'] }, handler: unmatchHandler });
+// no GET variant: a change of the ledger's matching never rides on a GET (link previews, prefetch; TIS-BRD-NFR-5.1)
 
 define({
   method: 'PUT', path: '/transactions/bulk-post', summary: 'Post several pending journals (ids may be entry ids, journal ids or numbers)', screen: Q,
@@ -181,13 +181,26 @@ define({
   method: 'GET', path: '/periods', summary: 'Accounting periods (last 12 months plus any stored) with open / closed status', screen: 'Accounts > Journal Voucher > Periods', middleware: read,
   response: { success: true, data: [{ period: '2026-09', status: 'open' }] }, handler: async (_req, res) => ok(res, await svc.listPeriods(pool)),
 });
+// The older Accounts > Journal Voucher > Periods routes go through Period Management (TIS-BRD-GL-04, NFR-5.2): the same
+// reason, permission (approve:period-end to close or reopen), blocking checks, history and hard-close rule
 for (const [action, status] of [['close', 'closed'], ['reopen', 'open']]) {
   define({
-    method: 'POST', path: `/periods/:period/${action}`, summary: `${action === 'close' ? 'Close' : 'Reopen'} an accounting period (YYYY-MM); postings into a closed period are rejected`, screen: 'Accounts > Journal Voucher > Periods',
-    middleware: [...write, validate(z.object({ remarks: z.string().optional() }))], request: { remarks: 'August books closed' }, response: { success: true, data: { period: '2026-08', status } },
+    method: 'POST', path: `/periods/:period/${action}`, summary: `${action === 'close' ? 'Close' : 'Reopen'} an accounting period (YYYY-MM) as Period Management does: a reason of the ${action === 'close' ? 'period_close' : 'period_reopen'} context (reasonCode; remarks as its note), approve:period-end, ${action === 'close' ? 'the blocking month-end checks and manual sign-offs' : 'not a closed (hard-closed) period unless accounting.reopen_closed_periods'}; postings into a closed period are rejected`,
+    screen: 'Accounts > Journal Voucher > Periods',
+    middleware: [requireAuth, requirePermission('write:period-end', 'write:journal-vouchers'), validate(z.object({ reasonCode: z.string().trim().max(60).optional(), note: z.string().trim().max(1000).optional(), remarks: z.string().optional() }))],
+    request: { reasonCode: action === 'close' ? 'PCL-MONTHEND' : 'PRO-LATEDOC', remarks: 'August books closed' }, response: { success: true, data: { period: '2026-08', status } },
     handler: async (req, res) => {
-      const r = await withTransaction((db) => svc.setPeriodStatus(db, req.params.period, status, req.body.remarks, req.user));
-      await audit(req, { entity: 'accounting_period', entityId: req.params.period, action, after: r });
+      if (!/^\d{4}-\d{2}$/.test(req.params.period)) throw badRequest('period must be YYYY-MM');
+      const [fiscal, { closeBlockers }] = await Promise.all([import('../period-end/fiscal.js'), import('../period-end/checks.js')]);
+      const before = (await pool.query('SELECT * FROM accounting_periods WHERE period = $1', [req.params.period])).rows[0];
+      const { reason } = await withTransaction(async (db) => {
+        await fiscal.ensureCalendar(db);
+        return fiscal.changePeriodStatus(db, req.params.period, status,
+          { reasonCode: req.body.reasonCode, note: req.body.note ?? req.body.remarks, user: req.user, runBlockingChecks: closeBlockers });
+      });
+      const r = (await svc.listPeriods(pool)).find((p) => p.period === req.params.period);
+      await audit(req, { entity: 'accounting_period', entityId: req.params.period, action: `status:${status}`, before: before && fiscal.periodRow(before),
+        after: { ...r, reasonCode: reason.code, note: reason.note } });
       ok(res, r, `Period ${req.params.period} ${status}`);
     },
   });

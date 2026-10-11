@@ -3,6 +3,7 @@
  * and /system-settings always agree.
  */
 import crypto from 'node:crypto';
+import { assertFinanceControlsAllowed } from '../../lib/financeControls.js';
 import { many, one } from '../../db/pool.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { baseCurrency, currencyChoices } from '../../lib/currency.js';
@@ -10,6 +11,7 @@ import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
 import { detectType } from '../uploads/fileTypes.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
+import { tenantSettingErrors } from '../features/tenant.js';
 import { deploymentPackId } from '../branding/bundled.js';
 
 /**
@@ -50,8 +52,8 @@ export function validTimeZone(value) {
 /**
  * Errors of the display currency (an active currency of the Currency master), the default language and the journal
  * statuses of the trial balance (never the opening balance journal, status opening: its balances are the opening
- * balances the trial balance already reads) in a change ([key, value] pairs, the currency code normalised in place);
- * `paths` names the field of each key in the errors.
+ * balances the trial balance already reads) and the settings of the enabling of Phase 2 by TISPH (features/tenant.js)
+ * in a change ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
  */
 export async function localizationErrors(changes, paths = {}) {
   const errors = [];
@@ -66,6 +68,8 @@ export async function localizationErrors(changes, paths = {}) {
       errors.push({ path: paths[change[0]] || change[0], message: 'must list journal statuses; the opening balance journal (opening) is never part of the trial balance' });
     }
   }
+  // who enables Phase 2 for TISPH (features.tenant_enable_*): never a future release, never the platform role
+  errors.push(...tenantSettingErrors(changes, paths));
   return errors;
 }
 
@@ -239,7 +243,7 @@ function coerceSetting(row, value) {
  * Apply { key: value } changes; every key must exist and be editable, values are coerced by type. A setting owned by
  * another screen (the brand pack, Company master, Premium Taxes) is refused with the name of that screen.
  */
-export async function updateConfiguration(changes, userId) {
+export async function updateConfiguration(changes, userId, user = null) {
   const keys = Object.keys(changes);
   if (!keys.length) throw badRequest('No settings to update');
   const rows = await many('SELECT key, type, editable, value FROM app_settings WHERE key = ANY($1)', [keys]);
@@ -260,6 +264,7 @@ export async function updateConfiguration(changes, userId) {
   const { assertNotControlled, assertParkedEvents } = await import('../posting-rules/service.js');
   await assertNotControlled(apply);
   assertParkedEvents(apply);
+  if (user) assertFinanceControlsAllowed(apply, user);
   for (const [k, v] of apply) await setSetting(k, v, userId);
   return { before: Object.fromEntries(apply.map(([k, , b]) => [k, b])), after: Object.fromEntries(apply.map(([k, v]) => [k, v])) };
 }

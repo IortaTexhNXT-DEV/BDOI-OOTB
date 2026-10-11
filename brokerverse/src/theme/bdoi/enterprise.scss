@@ -264,6 +264,38 @@ $text-strong: #1f2937;
     font-variant-numeric: tabular-nums;
   }
 
+  // Status tags and short values ("4 days", "Buyer") stay on one line; names and descriptions keep a minimum width
+  // so that they wrap to two lines rather than five (columns marked by utility/tableNumericAlign.js).
+  :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td):is(.bv-status, .bv-short) {
+    white-space: nowrap;
+  }
+
+  :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).bv-text {
+    min-width: 9.5rem;
+  }
+
+  :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).bv-text-wide {
+    min-width: 13rem;
+  }
+
+  // the record number in the first column reads as the key of the row: semibold, and in the link colour when the row
+  // opens the record
+  .p-datatable-tbody > tr > td.bv-code:first-child {
+    font-weight: 600;
+    color: $color-heading !important;
+  }
+
+  .p-datatable-tbody > tr:is(.p-selectable-row, .clickable) > td.bv-code:first-child {
+    color: var(--bv-link, #0072d8) !important;
+  }
+
+  // a name and the small chip that qualifies it (MOTOR, FIRE) read as one value, the chip under the name
+  .p-datatable-tbody > tr > td .bv-cell-chip {
+    display: block;
+    width: fit-content;
+    margin-top: 4px;
+  }
+
   // Paginator: compact 32px controls on the 8px grid, the current page filled in the primary colour.
   .p-paginator {
     border: 0;
@@ -1054,14 +1086,15 @@ small.p-error {
   font-weight: 600;
   line-height: 1.5;
   white-space: nowrap;
-  @include bv-tag($brand-navy, $brand-blue-050);
+  @include bv-tag($color-info, $color-info-050);
 
   &.p-tag-success {
     @include bv-tag($color-success, $color-success-050);
   }
 
+  // semantic, not the brand colour: under a black or grey brand an open status would read as a closed one
   &.p-tag-info {
-    @include bv-tag($brand-navy, $brand-blue-050);
+    @include bv-tag($color-info, $color-info-050);
   }
 
   &.p-tag-warning {
@@ -1207,9 +1240,9 @@ small.p-error {
 
 // ---------------------------------------------------------------- stable layout while data loads
 
-// A paginated list keeps the height of a few rows while it is empty or loading, so the rows arriving do not push the
-// paginator and everything under it down the page.
-.main__content .p-datatable:has(> .p-paginator-bottom) > .p-datatable-wrapper {
+// A paginated list keeps the height of a few rows while its first rows load, so the rows arriving do not push the
+// paginator and everything under it down the page; once loaded it is as tall as its rows, with no empty block under them.
+.main__content .p-datatable.bv-table-is-loading:has(> .p-paginator-bottom) > .p-datatable-wrapper {
   min-height: 24rem;
 }
 
@@ -1339,7 +1372,8 @@ small.p-error {
     background: inherit;
   }
 
-  .p-datatable :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).p-frozen-column[style*="right"] {
+  // only while the rows actually scroll under it: a table that fits its card needs no rule before its actions
+  .p-datatable .p-datatable-wrapper.bv-scrolls :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).p-frozen-column[style*="right"] {
     box-shadow: inset 1px 0 0 $color-border;
   }
 
@@ -1491,7 +1525,7 @@ small.p-error {
     background: inherit;
   }
 
-  :is(td, th).p-frozen-column.bv-actions {
+  .p-datatable-wrapper.bv-scrolls :is(td, th).p-frozen-column.bv-actions {
     box-shadow: inset 1px 0 0 $color-border;
   }
 }
@@ -1598,11 +1632,18 @@ small.p-error {
     position: sticky;
     right: 0;
     z-index: 1;
-    box-shadow: inset 1px 0 0 $color-border;
+    box-shadow: none;
   }
 
   > tbody > tr > td.bv-actions {
     background: inherit;
+  }
+}
+
+#{$shell} .p-datatable > .p-datatable-wrapper.bv-scrolls > table {
+  > thead > tr > th.bv-actions,
+  > tbody > tr > td.bv-actions {
+    box-shadow: inset 1px 0 0 $color-border;
   }
 }
 

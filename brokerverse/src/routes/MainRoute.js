@@ -233,7 +233,7 @@ import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, EndorsementTypes, ClaimDocumentChecklist, SchemeDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -283,6 +283,7 @@ import NegotiationWorkspace from "../module/Renewal/NegotiationWorkspace";
 import LapseManagement from "../module/Renewal/LapseManagement";
 import PerformanceTracking from "../module/Renewal/PerformanceTracking";
 import LockInAccounts from "../module/Renewal/LockInAccounts";
+import LockInReview from "../module/Renewal/LockInReview";
 
 // Accounts > Remittance
 import { remittanceRoutes } from "../module/Remittance/routes";
@@ -365,6 +366,9 @@ import LeadAssignment from "../module/Distribution/LeadAssignment";
 import DistributionChannels from "../module/Distribution/DistributionChannels";
 import DealerProgrammes from "../module/Distribution/DealerProgrammes";
 import Promotions from "../module/Distribution/Promotions";
+import SchemeMaster from "../module/Sales/SchemeMaster";
+import SchemeIssuance from "../module/Sales/SchemeIssuance";
+import SchemeApplication from "../module/Sales/SchemeApplication";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
@@ -1127,6 +1131,7 @@ const Maincomponent = () => {
           <Route path="renewal/analytics" element={<RetentionAnalytics />} />
           <Route path="renewal/at-risk" element={<AtRiskAnalysis />} />
           <Route path="renewal/lock-in-accounts" element={<LockInAccounts />} />
+          <Route path="renewal/lock-in-review" element={<LockInReview />} />
           <Route
             path="renewal/negotiations"
             element={<NegotiationWorkspace />}
@@ -1633,6 +1638,7 @@ const Maincomponent = () => {
           <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
           <Route path="/master/insurance/endorsement-types" element={<EndorsementTypes />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
+          <Route path="/master/insurance/scheme-document-checklist" element={<SchemeDocumentChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
           <Route path="/master/insurance/lead-sources" element={<LeadSources />} />
           <Route path="/master/insurance/reason-codes" element={<ReasonCodes />} />
@@ -1773,6 +1779,9 @@ const Maincomponent = () => {
           <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
           <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
           <Route path="/sales/promotions" element={<Promotions />} />
+          <Route path="/sales/scheme-master" element={<SchemeMaster />} />
+          <Route path="/sales/scheme-issuance" element={<SchemeIssuance />} />
+          <Route path="/sales/scheme-issuance/:id" element={<SchemeApplication />} />
           <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
           <Route path="/sales/campaigns" element={<Campaigns />} />
           <Route path="/master/insurance/channels" element={<DistributionChannels />} />

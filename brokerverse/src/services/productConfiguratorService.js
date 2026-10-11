@@ -319,6 +319,10 @@ const downloadLayout = async (id, fileName) => {
 const retireProductTemplate = (id, reason) => call("POST", `products/${id}/retire`, { reason });
 const reactivateProductTemplate = (id) => call("POST", `products/${id}/reactivate`, {});
 const createProductVersion = (id, payload = {}) => call("POST", `products/${id}/versions`, payload);
+// review of a template (product.approval_required): submit, withdraw, approve or return with a note
+const submitProductTemplate = (id, note) => call("POST", `products/${id}/submit`, { note });
+const withdrawProductTemplate = (id) => call("POST", `products/${id}/withdraw`, {});
+const decideProductTemplate = (id, decision, note) => call("POST", `products/${id}/${decision === "approve" ? "approve" : "return"}`, { note });
 const getProductAnalytics = () => call("GET", "analytics");
 const getDashboard = () => call("GET", "dashboard");
 
@@ -340,6 +344,9 @@ const productConfiguratorService = {
   retireProductTemplate,
   reactivateProductTemplate,
   createProductVersion,
+  submitProductTemplate,
+  withdrawProductTemplate,
+  decideProductTemplate,
   getProductAnalytics,
   getDashboard,
   getProductTemplates,

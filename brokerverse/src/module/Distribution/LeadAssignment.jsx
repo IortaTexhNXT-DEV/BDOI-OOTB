@@ -57,6 +57,9 @@ const LeadAssignment = () => {
   const toast = useRef(null);
   const manage = hasPermission("read:lead-assignment");
   const write = hasPermission("write:lead-assignment");
+  // Team Leaders of the telesales callers endorse call-out leads (FRS COMM-08 FR-TSI-010)
+  const endorser = hasPermission("write:callout-endorsement");
+  const selectable = write || endorser;
   const [assignees, setAssignees] = useState([]);
   const [channels, setChannels] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -157,6 +160,27 @@ const LeadAssignment = () => {
       showError(toast, e);
     }
   };
+  const endorse = async (leads) => {
+    try {
+      const r = await service.endorseCallout(leads.map((l) => l.id));
+      showSuccess(toast, r.message);
+      for (const s of r.data?.skipped || []) showError(toast, { message: s.reason });
+      refresh();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+  const withdraw = (leads) => openConfirm({
+    title: t("distribution.la.withdrawTitle"),
+    message: t("distribution.la.withdrawMessage"),
+    input: { type: "text", label: t("distribution.la.withdrawReason"), required: true, maxLength: 500 },
+    confirmLabel: t("distribution.la.withdraw"),
+    onConfirm: async (reason) => {
+      const r = await service.withdrawCallout(leads.map((l) => l.id), reason);
+      showSuccess(toast, r.message);
+      return r;
+    },
+  }).then((v) => v !== null && refresh());
   const previewRun = async () => {
     try {
       setRun((await service.runRules(true)).data);
@@ -177,7 +201,7 @@ const LeadAssignment = () => {
   const saveRule = async () => {
     const conditions = Object.fromEntries(Object.entries(rule.conditions).filter(([, v]) => v));
     const body = { name: rule.name, priority: rule.priority, method: rule.method, assignees: rule.assignees, status: rule.status, description: rule.description || null, conditions,
-      maxOpen: rule.maxOpen || null };
+      maxOpen: rule.maxOpen || null, ...(endorser ? { callout: rule.callout === true } : {}) };
     try {
       const r = rule.id ? await service.updateRule(rule.id, body) : await service.createRule(body);
       showSuccess(toast, r.message);
@@ -266,6 +290,8 @@ const LeadAssignment = () => {
     <Column key="where" header={t("distribution.la.territory", "Territory")} body={(r) => [r.city, r.province].filter(Boolean).join(", ")} />,
     <Column key="ch" field="channelName" header={t("distribution.la.channel", "Channel")} />,
     <Column key="owner" field="ownerName" header={t("distribution.la.owner", "Account executive")} />,
+    <Column key="callout" header={t("distribution.la.calloutLead")} body={(r) => (r.callout
+      ? t("distribution.la.endorsedBy", { date: dateTime(r.callout.endorsedAt), name: r.callout.endorsedBy || t("distribution.la.calloutRuleName") }) : "-")} />,
     <Column key="asg" header={t("distribution.la.assignment", "Assignment")} body={(r) => (<span><StatusTag status={r.assignmentStatus} />{r.queueReason ? <><br /><span className="pe-muted text-sm">{r.queueReason}</span></> : null}</span>)} />,
     ...(list === "queue" ? [<Column key="queued" header={t("distribution.la.queuedAt", "Queued")} body={(r) => dateTime(r.queuedAt)} />] : []),
     <Column key="act" style={{ width: "8.5rem" }} body={(r) => (
@@ -277,13 +303,16 @@ const LeadAssignment = () => {
     )} />,
   ];
 
-  const bulkBar = (list) => (write && selected.length ? (
+  const bulkBar = (list) => (selectable && selected.length ? (
     <div className="dist-toolbar">
       <span>{t("distribution.la.selected", "{{count}} selected", { count: selected.length })}</span>
-      <Button label={t("distribution.la.reassign", "Reassign")} icon="pi pi-user-edit" size="small" onClick={() => setReassign({ leads: selected, mode: "reassign" })} />
-      {list === "queue"
-        ? <Button label={t("distribution.la.take", "Take")} icon="pi pi-download" size="small" outlined onClick={() => take(selected)} />
-        : <Button label={t("distribution.la.toQueue", "Send to queue")} icon="pi pi-inbox" size="small" outlined onClick={() => setReassign({ leads: selected, mode: "queue" })} />}
+      {write ? <Button label={t("distribution.la.reassign", "Reassign")} icon="pi pi-user-edit" size="small" onClick={() => setReassign({ leads: selected, mode: "reassign" })} /> : null}
+      {write && list === "queue"
+        ? <Button label={t("distribution.la.take", "Take")} icon="pi pi-download" size="small" outlined onClick={() => take(selected)} /> : null}
+      {write && list !== "queue"
+        ? <Button label={t("distribution.la.toQueue", "Send to queue")} icon="pi pi-inbox" size="small" outlined onClick={() => setReassign({ leads: selected, mode: "queue" })} /> : null}
+      {endorser ? <Button label={t("distribution.la.endorse")} icon="pi pi-phone" size="small" outlined onClick={() => endorse(selected)} /> : null}
+      {endorser ? <Button label={t("distribution.la.withdraw")} icon="pi pi-times" size="small" text onClick={() => withdraw(selected)} /> : null}
     </div>
   ) : null);
 
@@ -312,12 +341,13 @@ const LeadAssignment = () => {
               <Column field="converted" header={t("distribution.la.converted", "Converted")} className="bv-num" headerClassName="bv-num" />
               <Column field="lost" header={t("distribution.la.lost", "Lost")} className="bv-num" headerClassName="bv-num" />
               <Column field="queued" header={t("distribution.la.queued", "In queue")} className="bv-num" headerClassName="bv-num" />
+              <Column field="callout" header={t("distribution.la.calloutCount")} className="bv-num" headerClassName="bv-num" />
               <Column field="last30" header={t("distribution.la.last30", "Last 30 days")} className="bv-num" headerClassName="bv-num" />
             </DataTable>
             <h3 className="mt-4">{t("distribution.la.teamLeads", "Prospects of the team")}</h3>
             {bulkBar("team")}
             <DataTable value={team?.leads || []} dataKey="id" size="small" stripedRows paginator rows={20} selection={selected} onSelectionChange={(e) => setSelected(e.value)}
-              selectionMode={write ? "checkbox" : null} emptyMessage={t("distribution.common.none", "Nothing to show")}>
+              selectionMode={selectable ? "checkbox" : null} emptyMessage={t("distribution.common.none", "Nothing to show")}>
               {leadColumns("team")}
             </DataTable>
           </TabPanel>
@@ -336,7 +366,7 @@ const LeadAssignment = () => {
               </div>
               {bulkBar("queue")}
               <DataTable value={queue} dataKey="id" size="small" stripedRows paginator rows={20} selection={selected} onSelectionChange={(e) => setSelected(e.value)}
-                selectionMode={write ? "checkbox" : null} emptyMessage={t("distribution.la.queueEmpty", "The queue is empty")}>
+                selectionMode={selectable ? "checkbox" : null} emptyMessage={t("distribution.la.queueEmpty", "The queue is empty")}>
                 {leadColumns("queue")}
               </DataTable>
             </TabPanel>
@@ -425,6 +455,11 @@ const LeadAssignment = () => {
             <Field label={t("distribution.la.maxOpen")} help={t("distribution.la.maxOpenHelp")}>
               <InputNumber value={rule.maxOpen ?? null} min={0} max={100000} onValueChange={(e) => setRule({ ...rule, maxOpen: e.value ?? null })} />
             </Field>
+            {endorser ? (
+              <Field label={t("distribution.la.calloutRule")} help={t("distribution.la.calloutRuleHelp")}>
+                <InputSwitch checked={rule.callout === true} onChange={(e) => setRule({ ...rule, callout: e.value })} />
+              </Field>
+            ) : null}
             <Field label={t("distribution.common.description", "Description")} full>
               <InputText value={rule.description || ""} onChange={(e) => setRule({ ...rule, description: e.target.value })} />
             </Field>

@@ -212,8 +212,42 @@ for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-
 ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 // Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
 for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
+// Product register maker-checker (migration 0660, PROD-03, RBAC v4 "A" on the Product Configurator): IT AppSupport drafts
+// and submits product templates, the Unit Heads and the General Manager approve them
+for (const role of ['tis-sales-unit-head', 'tis-ops-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('products:approve');
+// Dealer schemes (migrations 0600 to 0602, FRS SCHM-01 to 03 default grants): the Processing Team keeps the Scheme Master
+// and the scheme applications, the Accounting Manager approves schemes, checklist waivers and lock-in decisions; Sales
+// and the Processing Team review the lock-in accounts, Operations and Compliance set the TFS loan status; everyone reads.
+// TISPH personas (proposal until TISPH names the users): Operations makes, the Sales Unit Head, the Operations Unit
+// Head (waivers) and the General Manager approve.
+const SCHEME_PERMS = {
+  processing: ['schemes', 'scheme-issuance', 'lock-in'], sales: ['schemes:read', 'scheme-issuance:read', 'lock-in'],
+  operations: ['schemes:read', 'scheme-issuance:read', 'lock-in:read', 'loan-status:write'], accounting: ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
+  'accounting-manager': ['schemes:approve', 'scheme-issuance:approve', 'lock-in:approve'],
+  'tis-sales-associate': ['schemes:read', 'scheme-issuance:read', 'lock-in'], 'tis-sales-officer': ['schemes:read', 'scheme-issuance:read', 'lock-in'],
+  'tis-sales-unit-head': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'lock-in', 'lock-in:approve'],
+  'tis-ops-associate': ['schemes:read', 'scheme-issuance', 'lock-in:read', 'loan-status:write'], 'tis-ops-officer': ['schemes', 'scheme-issuance', 'lock-in', 'loan-status:write'],
+  'tis-ops-unit-head': ['schemes', 'scheme-issuance', 'scheme-issuance:approve', 'lock-in', 'loan-status:write'],
+  'tis-finance': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'], 'tis-it-admin': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
+  'tis-general-manager': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
+};
+for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
+// Motor rating (migration 0615, PROD-12): changing a peril rate away from the issuing rate and the FMV away from the
+// value less depreciation is for the internal users who rate (Officers and Unit Heads of Sales and Operations, the
+// General Manager), never the associates; the broker roles keep what they could do.
+for (const role of ['sales', 'processing', 'operations', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-general-manager']) {
+  ROLE_PERMS[role].push('quotation-rates:override', 'motor-fmv:override');
+}
+// Team Leaders (the Sales Officers) and the Sales Head endorse prospects as call-out leads of the telesales callers
+// (FRS COMM-08 3.3, migration 0610); the System Administrator holds every permission
+for (const role of ['tis-sales-officer', 'tis-sales-unit-head']) ROLE_PERMS[role].push('callout-endorsement:write');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
+/**
+ * Enabling of Phase 2 by TISPH (migration 0597, modules/features/tenant.js): SUPERID holds the permission in its own
+ * right (not only through the System Administrator it includes); it counts with a role of features.tenant_enable_roles.
+ */
+export const TENANT_ENABLE_GRANTS = { 'tis-superid': ['enable:phase2-features', 'read:features'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */
 export const permissionCodes = (items) => [...new Set(items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`])))];
 export const ROLE_PERMISSIONS = Object.fromEntries(Object.entries(ROLE_PERMS).map(([role, items]) => [role, permissionCodes(items)]));
@@ -338,6 +372,7 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
     AND p.code = ANY($1) AND r.code <> $2`, [PLATFORM_PERMISSIONS, PLATFORM_ROLE]);
   for (const [role, codes] of Object.entries(ROLE_PERMISSIONS)) await grant(role, codes);
   for (const [role, inherits] of Object.entries(ROLE_INHERITS)) await query('UPDATE roles SET inherits = $2 WHERE code = $1', [role, inherits]);
+  for (const [role, codes] of Object.entries(TENANT_ENABLE_GRANTS)) if (roleIds[role]) await grant(role, codes);
   // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
   // An existing administrator keeps the password it has.
   const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url');

@@ -1,7 +1,8 @@
 # BrokerVerse runtime reference
 
 Reference for the people who run BrokerVerse: environment variables, seed data, scheduled jobs, health checks and the
-production start-up rules. The step-by-step deployment on the existing BrokerVerse URL is in [README.md](README.md).
+production start-up rules. Deployment of the TISPH environments: [RAILWAY.md](RAILWAY.md) (DEV today) and
+[AZURE.md](AZURE.md) (Azure); the folder index is [README.md](README.md).
 The front end is in `brokerverse/`, the Node.js + PostgreSQL backend in `backend/`.
 
 ## Docker Compose (a single server, a test system or a trial)

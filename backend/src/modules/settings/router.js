@@ -1,5 +1,6 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { ADMIN_ROLE, requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
+import { assertFinanceControlsAllowed } from '../../lib/financeControls.js';
+import { ADMIN_ROLE, requireAuth, requirePermission } from '../../lib/auth.js';
 import { getSettings, setSetting } from '../../lib/settings.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -34,8 +35,9 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/', summary: 'Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen\'s name)', screen: 'Master > Configuration', roles: [ADMIN_ROLE],
-  middleware: [requireAuth, requireRole(ADMIN_ROLE), validate(z.object({ settings: z.record(z.any()) }))],
+  method: 'PUT', path: '/', summary: 'Update one or more configuration values (write:settings; a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen\'s name)', screen: 'Master > Configuration',
+  // write:settings, not the administrator role: IT AppSupport (tis-it-admin) saves Master > Configuration (GAP-PLAT-21)
+  middleware: [requireAuth, requirePermission('write:settings'), validate(z.object({ settings: z.record(z.any()) }))],
   request: { settings: { 'limits.bulk_upload_max_rows': 1000, 'notification.email_enabled': true } }, response: { success: true },
   handler: async (req, res) => {
     const before = Object.fromEntries((await getSettings()).map((s) => [s.key, s.value]));
@@ -44,6 +46,7 @@ define({
     const invalid = await localizationErrors(changes);
     if (invalid.length) throw badRequest('Validation failed', invalid);
     await assertNotControlled(changes);
+    assertFinanceControlsAllowed(changes, req.user);
     assertParkedEvents(changes);
     await assertSettingsAllowed(changes.filter(([, v, was]) => JSON.stringify(v) !== JSON.stringify(was)).map(([k]) => k));
     for (const [k, v] of changes) {
