@@ -81,6 +81,7 @@ export const NAMED_TERMS = [
   "Collection Receipt", "Statement of Account", "Certificate of Cover", "Cover Note", "Policy Schedule", "Endorsement Slip", "Debit Note", "Credit Note",
   "Scheme Master", "Product Configurator", "Journal Voucher", "Payment Voucher", "Auto Renewal Agreement", "Placement Report", "Comparison Report",
   "Chart of Accounts", "Trial Balance", "General Ledger", "Bureau of Internal Revenue", "Insurance Commission",
+  "Personal Accident", "Marine Cargo", "Parcel / Courier",
 ];
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

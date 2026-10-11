@@ -124,7 +124,7 @@ const CoverList = () => {
           <Column header={t("common.actions", "Actions")} body={(r) => <RowActions onView={() => navigate(`${BASE}/${r.id}`)} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={t("distribution.oc.new", "New open cover")} visible={!!form} style={{ width: "min(1040px, 96vw)" }} onHide={() => setForm(null)}
+      <Dialog className="pe-dialog" header={t("distribution.oc.newTitle", "New Open Cover")} visible={!!form} style={{ width: "min(1040px, 96vw)" }} onHide={() => setForm(null)}
         footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setForm(null)} /><Button label={t("distribution.common.save", "Save")} icon="pi pi-save" onClick={create}
           disabled={!form?.client?.id || !form?.insuranceCompanyId || !form?.goodsDescription} /></div>}>
         {form && (
@@ -534,7 +534,7 @@ const CoverDetail = ({ id }) => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={t("distribution.oc.endorse", "Endorse open policy")} visible={!!endorseForm} style={{ width: "min(1040px, 96vw)" }} onHide={() => setEndorseForm(null)}
+      <Dialog className="pe-dialog" header={t("distribution.oc.endorseTitle", "Endorse Open Policy")} visible={!!endorseForm} style={{ width: "min(1040px, 96vw)" }} onHide={() => setEndorseForm(null)}
         footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setEndorseForm(null)} /><Button label={t("distribution.oc.submitApproval", "Submit for approval")} icon="pi pi-send" onClick={submitEndorsement} /></div>}>
         {endorseForm && (
           <div className="dist-grid">

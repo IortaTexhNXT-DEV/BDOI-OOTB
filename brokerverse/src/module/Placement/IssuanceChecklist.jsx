@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import FileField from "../../components/FileField";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -119,7 +120,7 @@ const IssuanceChecklist = ({ placement, userId, notify, onChange }) => {
           <div className="p-fluid">
             <div className="field">
               <label htmlFor="chk-file">{t("placement.checklist.file")}</label>
-              <input id="chk-file" type="file" accept="image/*,application/pdf" onChange={(e) => setReceiving({ ...receiving, file: e.target.files?.[0] || null })} />
+              <FileField id="chk-file" accept="image/*,application/pdf" value={receiving.file || null} onChange={(f) => setReceiving({ ...receiving, file: f })} />
             </div>
             <div className="field mb-0">
               <label htmlFor="chk-remark">{t("placement.checklist.remark")}</label>

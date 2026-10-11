@@ -705,7 +705,7 @@
         "lines": "Entries",
         "activity": "Activity",
         "withdraw": "Withdraw",
-        "withdrawTitle": "Withdraw journal voucher {{number}}?"
+        "withdrawTitle": "Withdraw Journal Voucher {{number}}?"
       },
       "withdrawReason": "Reason (optional)"
     },
@@ -1406,8 +1406,8 @@
     "proceedToPayment": "Proceed to payment",
     "anyOneOccurrenceLimitCoverage": "Any one occurrence limit coverage",
     "anyOneOccurrenceLimitCoveragePremium": "Any one occurrence limit coverage premium",
-    "paCoverage": "PA(personal accident) coverage",
-    "paCoveragePremium": "PA(personal accident) coverage premium",
+    "paCoverage": "PA(Personal Accident) coverage",
+    "paCoveragePremium": "PA(Personal Accident) coverage premium",
     "dependentsCoverage": "Dependents coverage",
     "dependentsCoveragePremium": "Dependents coverage premium",
     "totalEmployeeBenefitsSumInsured": "Total employee benefits sum insured",
@@ -1509,7 +1509,7 @@
       },
       "productLines": {
         "Motor": "Motor",
-        "Personal Accident": "Personal accident",
+        "Personal Accident": "Personal Accident",
         "Credit Life": "Credit life",
         "Marine": "Marine"
       },
@@ -1548,9 +1548,9 @@
       "dueOn": "Due {{date}}",
       "lifecycle": {
         "withdraw": {
-          "title": "Withdraw {{reference}} from approval",
+          "title": "Withdraw {{reference}} from Approval",
           "message": "The remittance goes back to Draft and its approval is closed. Correct it and submit it again.",
-          "done": "Withdrawn to Draft"
+          "done": "Withdrawn to draft"
         },
         "cancel": {
           "title": "Cancel {{reference}}",
@@ -1558,13 +1558,13 @@
           "done": "Remittance cancelled"
         },
         "revoke": {
-          "title": "Revoke the approval of {{reference}}",
+          "title": "Revoke the Approval of {{reference}}",
           "message": "The remittance returns to its preparer as Returned and its policies no longer read remitted. Only a remittance not yet on a settlement, billed or paid can be revoked.",
           "done": "Approval revoked; the remittance is returned to its preparer"
         }
       },
       "send": {
-        "title": "Send {{reference}} to the insurer",
+        "title": "Send {{reference}} to the Insurer",
         "email": "E-mail (blank: the insurer's contact e-mail)",
         "done": "E-mailed to the insurer"
       }
@@ -4816,8 +4816,8 @@
       "reasonBasicAge": "Your {{vehicleAge}}-year-old {{vehicleDescription}} is in the optimal age range for Basic coverage. This plan provides enhanced protection including own damage and theft coverage, offering the ideal balance between coverage and affordability.",
       "reasonBasicDefault": "Basic coverage provides enhanced protection with additional coverage options for your {{vehicleDescription}}. Ideal balance between coverage and affordability, including essential protections for common risks.",
       "reasonComprehensiveNew": "Your newer {{vehicleDescription}} ({{vehicleAge}} years old) qualifies for Comprehensive coverage, providing maximum protection for your investment. This plan covers all major risks including natural disasters and provides additional benefits.",
-      "reasonComprehensiveSeating": "With {{seatingCapacity}} seating capacity, Comprehensive coverage is recommended for your {{vehicleDescription}} to ensure adequate protection for all passengers and the vehicle. This plan provides maximum coverage including personal accident benefits.",
-      "reasonComprehensiveDefault": "Comprehensive coverage provides complete protection with maximum coverage for your {{vehicleDescription}}. Perfect for ensuring peace of mind with protection against all major risks including natural disasters and personal accident benefits.",
+      "reasonComprehensiveSeating": "With {{seatingCapacity}} seating capacity, comprehensive coverage is recommended for your {{vehicleDescription}} to ensure adequate protection for all passengers and the vehicle. This plan provides maximum coverage including Personal Accident benefits.",
+      "reasonComprehensiveDefault": "Comprehensive coverage provides complete protection with maximum coverage for your {{vehicleDescription}}. Perfect for ensuring peace of mind with protection against all major risks including natural disasters and Personal Accident benefits.",
       "reasonFallback": "This plan is recommended based on your {{vehicleDescription}} profile and insurance requirements.",
       "planNameCtpl": "CTPL",
       "planNameBasic": "Basic",
@@ -4836,7 +4836,7 @@
       "planFeatureComprehensive0": "All Basic benefits",
       "planFeatureComprehensive1": "Full comprehensive coverage",
       "planFeatureComprehensive2": "Acts of nature protection",
-      "planFeatureComprehensive3": "Personal accident benefits",
+      "planFeatureComprehensive3": "Personal Accident benefits",
       "planFeatureComprehensive4": "24/7 roadside assistance",
       "defaultReasonCtpl": "Based on your vehicle profile and driving history, CTPL provides essential legal protection while keeping costs minimal. Perfect for low-risk drivers seeking basic coverage.",
       "defaultReasonBasic": "Ideal balance between coverage and affordability. Includes essential protections for common risks while maintaining reasonable premiums.",
@@ -5349,10 +5349,10 @@
       "lossAndDamageCoveragePremium": "Own damage / theft",
       "actsOfNaturePremium": "Acts of nature",
       "roadsideAssistancePremium": "Roadside assistance",
-      "personalAccidentCoverPremium": "Personal accident",
+      "personalAccidentCoverPremium": "Personal Accident",
       "bodilyInjuryCoveragePremium": "Bodily injury",
       "propertyDamageCoveragePremium": "Property damage",
-      "APPAcoveragePremium": "Auto passenger personal accident",
+      "APPAcoveragePremium": "Auto passenger Personal Accident",
       "ctplCoveragePremium": "CTPL"
     }
   },
@@ -6139,7 +6139,7 @@
     "actsOfNatureRate": "Acts of nature rate",
     "appaTotalCoverage": "Appa total coverage",
     "authenCode": "Authen code",
-    "autoPassengerPersonalAccident": "Auto passenger personal accident",
+    "autoPassengerPersonalAccident": "Auto passenger Personal Accident",
     "barangaySubd": "Barangay subd",
     "bodilyInjury": "Bodily injury",
     "bodilyInjuryCoveragePremium": "Bodily injury coverage premium",
@@ -6224,11 +6224,11 @@
     "insurerCommission": {
       "label": "Insurer commission",
       "action": "Insurer commission",
-      "title": "Insurer commission on {{reference}}",
+      "title": "Insurer Commission on {{reference}}",
       "amount": "Commission calculated by the insurer",
       "save": "Save",
       "upload": "Upload insurer commission",
-      "uploadTitle": "Upload insurer commission",
+      "uploadTitle": "Upload Insurer Commission",
       "file": "Insurer commission"
     }
   },
@@ -6373,7 +6373,7 @@
     "frontSide": "Front side",
     "rearSide": "Rear side",
     "interiorDashboard": "Interior dashboard",
-    "autoPassengerPersonalAccident": "Auto passenger personal accident (APPA)",
+    "autoPassengerPersonalAccident": "Auto passenger Personal Accident (APPA)",
     "aircon": "Aircon",
     "stereo": "Stereo",
     "magWheels": "Mag wheels",
@@ -6401,9 +6401,9 @@
     "includeRoadsideAssistance": "Include roadside assistance",
     "roadsideAssistanceRate": "Roadside assistance rate",
     "roadsideAssistancePremium": "Roadside Assistance premium",
-    "includePersonalAccidentCover": "Include personal accident cover",
-    "personalAccidentCoverRate": "Personal accident cover rate",
-    "personalAccidentCoverPremium": "Personal accident cover premium",
+    "includePersonalAccidentCover": "Include Personal Accident cover",
+    "personalAccidentCoverRate": "Personal Accident cover rate",
+    "personalAccidentCoverPremium": "Personal Accident cover premium",
     "bodilyInjury": "Bodily injury",
     "bodilyInjuryCoveragePremium": "Bodily injury coverage premium",
     "propertyDamage": "Property damage",
@@ -6425,7 +6425,7 @@
     "ctplThreeYear": "Brand-new vehicle: 3-year CTPL (LTO 3-year registration)",
     "actsOfNature": "Acts of nature",
     "roadsideAssistance": "Roadside assistance",
-    "personalAccidentCover": "Personal accident cover"
+    "personalAccidentCover": "Personal Accident cover"
   },
   "finance": {
     "monthly": "Monthly",
@@ -9370,9 +9370,9 @@
       "epolicyMatch": "e-Policy recorded: it matches the slip",
       "epolicyMismatch": "e-Policy recorded: it differs from the slip",
       "booked": "Policy {{number}} booked",
-      "approvalRequested": "Placement slip submitted for approval",
-      "approvalApproved": "Placement slip approved: it can be sent to the insurer",
-      "approvalRejected": "Placement slip rejected"
+      "approvalRequested": "Placement Slip submitted for approval",
+      "approvalApproved": "Placement Slip approved: it can be sent to the insurer",
+      "approvalRejected": "Placement Slip rejected"
     },
     "quoteJourney": {
       "title": "Send to Insurance Company",
@@ -9515,9 +9515,9 @@
       "pending": "Waiting for approval - submitted by {{by}} on {{date}}",
       "rejected": "Rejected by {{by}}: {{note}}",
       "makerNote": "You raised or submitted this slip: another user approves it",
-      "submitTitle": "Submit placement slip {{number}} for approval",
-      "rejectTitle": "Reject placement slip {{number}}",
-      "approveTitle": "Approve placement slip {{number}}",
+      "submitTitle": "Submit Placement Slip {{number}} for Approval",
+      "rejectTitle": "Reject Placement Slip {{number}}",
+      "approveTitle": "Approve Placement Slip {{number}}",
       "remarks": "Remarks",
       "reason": "Reason",
       "field": "Approval to send",
@@ -9527,7 +9527,7 @@
       "required": "Approval required before sending to the insurer: submit the slip for approval"
     },
     "checklist": {
-      "title": "Motor issuance checklist",
+      "title": "Motor Issuance Checklist",
       "document": "Document",
       "mandatory": "Mandatory",
       "statusLabel": "Status",
@@ -9553,13 +9553,13 @@
       "reason": "Reason",
       "waiverReason": "Waiver reason",
       "requestWaiver": "Request waiver",
-      "requestWaiverTitle": "Request the waiver of {{document}}",
+      "requestWaiverTitle": "Request the Waiver of {{document}}",
       "waiverRequested": "Waiver requested",
       "approveWaiver": "Approve waiver",
-      "approveWaiverTitle": "Approve the waiver of {{document}}",
+      "approveWaiverTitle": "Approve the Waiver of {{document}}",
       "waiverApproved": "Waiver approved",
       "rejectWaiver": "Reject waiver",
-      "rejectWaiverTitle": "Reject the waiver of {{document}}",
+      "rejectWaiverTitle": "Reject the Waiver of {{document}}",
       "waiverRejected": "Waiver rejected",
       "reopen": "Reopen",
       "reopenTitle": "Reopen {{document}}",
@@ -11622,7 +11622,7 @@
       "FIRE": "Fire",
       "IAR": "Industrial all risks",
       "MARINE": "Marine",
-      "ACCIDENT": "Personal accident",
+      "ACCIDENT": "Personal Accident",
       "LIFE": "Credit life",
       "CASUALTY": "Casualty",
       "ENGINEERING": "Engineering",
@@ -13661,9 +13661,9 @@
       },
       "motorChecklist": {
         "title": "Motor Issuance Checklist",
-        "section": "Insurance Management",
+        "section": "Insurance management",
         "item": "motor issuance document",
-        "help": "Documents to have on file before a Motor policy is booked from its placement slip, by vehicle, insured, financing and condition. A mandatory document missing blocks the booking (placement.issuance_checklist_mode); a waiver needs a second user."
+        "help": "Documents to have on file before a motor policy is booked from its Placement Slip, by vehicle, insured, financing and condition. A mandatory document missing blocks the booking (placement.issuance_checklist_mode); a waiver needs a second user."
       }
     },
     "instalments": {
@@ -14801,7 +14801,7 @@
     "oc": {
       "title": "Marine Open Covers",
       "subtitle": "Cargo open covers: limits and rates per conveyance, certificates for each shipment and the monthly declarations billed on the open policy.",
-      "new": "New Open Cover",
+      "new": "New open cover",
       "number": "Open cover",
       "conveyances": "Conveyances",
       "certificates": "Certificates",
@@ -14929,7 +14929,7 @@
       "uploadParcels": "Upload parcels",
       "uploadShipments": "Upload shipments",
       "file": "Excel file (.xlsx)",
-      "recordAcceptance": "Record insurer acceptance",
+      "recordAcceptance": "Record Insurer Acceptance",
       "acceptedOn": "Date",
       "insurerRef": "Insurer's reference",
       "result": "Result",
@@ -14959,13 +14959,13 @@
       "waybillDelivery": "Waybill / delivery",
       "dailyDecl": "Daily declaration",
       "late": "(late)",
-      "dailyTab": "Daily declarations",
+      "dailyTab": "Daily Declarations",
       "closeDays": "Close ended days",
       "day": "Day",
       "lateItems": "Late items",
       "closed": "Closed",
       "monthlyDecl": "Monthly declaration",
-      "monthlyTab": "Monthly declarations",
+      "monthlyTab": "Monthly Declarations",
       "chargeBilled": "Charge billed",
       "fileStatus": "File",
       "endorsementsTab": "Endorsements",
@@ -14978,7 +14978,7 @@
       "sendInsurer": "Send to insurer",
       "summary": "Declaration summary",
       "declarationFile": "Declaration file",
-      "register": "Certificate register",
+      "register": "Certificate Register",
       "reversals": "Reversals",
       "premiumInclTaxes": "Premium (taxes inside)",
       "commission": "Commission due from the insurer",
@@ -15022,7 +15022,10 @@
         "fileFrequency": "Declaration file",
         "fileLayout": "File layout",
         "declarationEmail": "Declaration file e-mail"
-      }
+      },
+      "addParcelTitle": "Add Parcel",
+      "newTitle": "New Open Cover",
+      "endorseTitle": "Endorse Open Policy"
     },
     "rb": {
       "deleteConfirm": "Delete the saved report {{name}}?",
@@ -19588,9 +19591,9 @@
   },
   "jvEdit": {
     "edit": "Edit",
-    "saved": "Journal voucher saved and sent for approval",
-    "notSaved": "Journal voucher not saved",
-    "notLoaded": "Journal voucher not loaded"
+    "saved": "Journal Voucher saved and sent for approval",
+    "notSaved": "Journal Voucher not saved",
+    "notLoaded": "Journal Voucher not loaded"
   },
   "creditLife": {
     "title": "Credit Life",
@@ -19604,7 +19607,7 @@
     "failed": "Failed",
     "issued": "Issued",
     "premium": "Premium",
-    "masterPolicies": "Master policies",
+    "masterPolicies": "Master Policies",
     "searchMasters": "Master policy, name or customer number",
     "masterPolicy": "Master policy",
     "borrower": "Borrower",
@@ -19616,17 +19619,17 @@
     "certificate": "Certificate",
     "loanAccount": "Loan account",
     "cover": "Period of cover",
-    "issueTitle": "Issue the batch",
-    "issueMessage": "A certificate of cover is issued for every valid member and e-mailed to the borrowers with an e-mail address.",
+    "issueTitle": "Issue the Batch",
+    "issueMessage": "A Certificate of Cover is issued for every valid member and e-mailed to the borrowers with an e-mail address.",
     "valid": "Valid members",
     "issue": "Issue certificates",
-    "sendTitle": "Send to insurer",
+    "sendTitle": "Send to Insurer",
     "insurerEmail": "Insurer e-mail (empty: the insurer's contact e-mail)",
     "send": "Send",
     "sendSoa": "Send SOA to bank",
     "bankEmail": "Bank e-mail (empty: the bank's e-mail)",
-    "cancelTitle": "Cancel certificate",
-    "soa": "Statement of account",
+    "cancelTitle": "Cancel Certificate",
+    "soa": "Statement of Account",
     "accountsList": "Accounts list",
     "file": "Members file (.xlsx)",
     "addMember": "Add member",
@@ -19649,6 +19652,8 @@
       "error": "Failed",
       "issued": "Issued",
       "cancelled": "Cancelled"
-    }
+    },
+    "newBatchTitle": "New Batch",
+    "addMemberTitle": "Add Member"
   }
 }

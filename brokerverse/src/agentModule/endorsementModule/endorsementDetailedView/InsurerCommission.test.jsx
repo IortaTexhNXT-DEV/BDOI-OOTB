@@ -44,7 +44,7 @@ describe("Insurer commission on an endorsement (TIS-BRD-COMM-07)", () => {
     await waitFor(() => expect(endorsementService.setInsurerCommission).toHaveBeenCalledWith("end_1", 1200.5));
     expect(await screen.findByText("Insurer commission", { selector: "dt, span, div, th, label" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Upload insurer commission" }));
-    expect(await screen.findByText("Upload insurer commission", { selector: "[role=dialog]" })).toBeInTheDocument();
+    expect(await screen.findByText("Upload Insurer Commission", { selector: "[role=dialog]" })).toBeInTheDocument();
   });
 
   it("offers no insurer commission action on a booked endorsement or to a reader", async () => {

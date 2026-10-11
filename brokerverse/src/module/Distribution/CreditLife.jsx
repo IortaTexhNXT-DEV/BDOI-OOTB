@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import FileField from "../../components/FileField";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
@@ -131,7 +132,7 @@ const BatchList = () => {
           </TabPanel>
         </TabView>
       </div>
-      <Dialog className="pe-dialog" header={t("creditLife.newBatch", "New batch")} visible={!!form} style={{ width: "min(720px, 96vw)" }} onHide={() => setForm(null)}
+      <Dialog className="pe-dialog" header={t("creditLife.newBatchTitle", "New Batch")} visible={!!form} style={{ width: "min(720px, 96vw)" }} onHide={() => setForm(null)}
         footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setForm(null)} /><Button label={t("distribution.common.save", "Save")} icon="pi pi-save" onClick={create}
           disabled={!form?.client?.id || !form?.insuranceCompanyId} /></div>}>
         {form && (
@@ -287,8 +288,8 @@ const BatchDetail = ({ id }) => {
           <TabPanel header={t("creditLife.members", "Members")}>
             {write && draft ? (
               <div className="dist-toolbar">
-                <input type="file" accept=".xlsx" aria-label={t("creditLife.file", "Members file (.xlsx)")} onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                <Button label={t("distribution.oc.upload", "Upload")} icon="pi pi-upload" size="small" disabled={!file || busy} onClick={upload} />
+                <FileField accept=".xlsx" value={file} chooseLabel={t("creditLife.file", "Members file (.xlsx)")} onChange={setFile} />
+                <Button label={t("distribution.oc.upload", "Upload")} icon="pi pi-upload" size="small" outlined disabled={!file || busy} onClick={upload} />
                 <Button label={t("distribution.oc.template", "Download template")} icon="pi pi-download" size="small" text onClick={() => service.creditLifeTemplate().catch((e) => showError(toast, e))} />
                 <Button label={t("creditLife.addMember", "Add member")} icon="pi pi-plus" size="small" outlined onClick={() => { setErrors({}); setMember({ ...EMPTY_MEMBER }); }} />
               </div>
@@ -344,7 +345,7 @@ const BatchDetail = ({ id }) => {
           </TabPanel>
         </TabView>
       </div>
-      <Dialog className="pe-dialog" visible={!!member} header={t("creditLife.addMember", "Add member")} style={{ width: "min(860px, 96vw)" }} onHide={() => setMember(null)}
+      <Dialog className="pe-dialog" visible={!!member} header={t("creditLife.addMemberTitle", "Add Member")} style={{ width: "min(860px, 96vw)" }} onHide={() => setMember(null)}
         footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setMember(null)} /><Button label={t("distribution.common.save", "Save")} icon="pi pi-save" onClick={saveMember} /></div>}>
         {member && (
           <div className="dist-grid">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import FileField from "../../components/FileField";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -174,7 +175,7 @@ export const ParcelDialog = ({ cover, choices, onHide, onSaved }) => {
     </Field>
   );
   return (
-    <Dialog className="pe-dialog" visible header={t("distribution.oc.addParcel", "Add parcel")} style={{ width: "min(860px, 96vw)" }} onHide={onHide}
+    <Dialog className="pe-dialog" visible header={t("distribution.oc.addParcelTitle", "Add Parcel")} style={{ width: "min(860px, 96vw)" }} onHide={onHide}
       footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={onHide} /><Button label={t("distribution.common.save", "Save")} icon="pi pi-save" loading={saving} onClick={save} /></div>}>
       <div className="dist-grid">
         <Field label={t("distribution.oc.parcelDate", "Parcel date")} htmlFor="pc-date" required error={errors.parcelDate}>
@@ -248,7 +249,7 @@ export const UploadDialog = ({ cover, kind, onHide, onDone }) => {
           </Field>
         ) : null}
         <Field label={t("distribution.oc.file", "Excel file (.xlsx)")} htmlFor="up-file">
-          <input id="up-file" type="file" accept=".xlsx" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          <FileField id="up-file" accept=".xlsx" value={file} onChange={setFile} />
         </Field>
         <div className="dist-field dist-field--full"><Button label={t("distribution.oc.template", "Download template")} icon="pi pi-download" text onClick={template} /></div>
       </div>
