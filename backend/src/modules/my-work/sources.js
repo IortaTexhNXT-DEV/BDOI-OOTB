@@ -22,10 +22,14 @@ import { CHANGE_LABELS } from '../posting-rules/service.js';
 import { APPROVER as ACCESS_APPROVER } from '../access-control/changes.js';
 import { isFeatureOn } from '../features/service.js';
 
-/** Categories in screen order: code, label, icon, permission needed to see it. */
+/**
+ * Categories in screen order: code, label, icon, permission needed to see it. The quotations and requests for quotation
+ * waiting on their maker (complete, send, submit, follow up) are the work of those who raise them (write:quotations); a
+ * reader of quotations, such as Cash Control verifying a placement, has none of them.
+ */
 export const CATEGORIES = [
-  { code: 'quotes', label: 'Quotations', icon: 'pi pi-file-edit', permission: 'read:quotations' },
-  { code: 'rfq', label: 'Requests for quotation', icon: 'pi pi-send', permission: 'read:quotations' },
+  { code: 'quotes', label: 'Quotations', icon: 'pi pi-file-edit', permission: 'write:quotations' },
+  { code: 'rfq', label: 'Requests for quotation', icon: 'pi pi-send', permission: 'write:quotations' },
   { code: 'placements', label: 'Placement slips', icon: 'pi pi-briefcase', permission: 'read:quotations' },
   { code: 'renewals', label: 'Renewals', icon: 'pi pi-refresh', permission: 'read:renewals' },
   { code: 'receivables', label: 'Premiums due', icon: 'pi pi-wallet', permission: 'read:policies' },

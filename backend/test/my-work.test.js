@@ -194,7 +194,7 @@ describe('open items per role and scope', () => {
   });
 
   it('a user limited to their own book never sees another book, even with scope all', async () => {
-    const r = await ctx.api('post', '/roles').send({ code: 'mw-own-book', name: 'Own book (my work test)', permissions: ['read:quotations', 'read:policies', 'read:profile'] });
+    const r = await ctx.api('post', '/roles').send({ code: 'mw-own-book', name: 'Own book (my work test)', permissions: ['read:quotations', 'write:quotations', 'read:policies', 'read:profile'] });
     expect(r.status).toBe(201);
     await makeUser('mw.agent', ['mw-own-book']);
     await query("UPDATE quotes SET agent_user_id = $1, created_by = $1 WHERE id = 'qt_mwp0'", [ids['mw.agent']]);
