@@ -9,16 +9,45 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * An answer that arrives after a newer request was made is ignored. `debounceMs` waits for the inputs to settle
  * before a reload (dates typed in a date field); the first load starts at once.
  *
+ * Every view has exactly four states (`status`): "loading" (the first load, at most `timeoutMs`), "loaded" (with
+ * data), "empty" (answered, nothing to show: `isEmpty(data)`) and "error" (failed or timed out, nothing to keep on
+ * screen). A failed refresh keeps the data on screen ("loaded", `error` set). `loading` / `refreshing` always end when
+ * the request settles, so no spinner turns for ever. components/LoadState/ViewState renders the four states.
+ *
  * @param {() => Promise<any>} loader
- * @param {{ debounceMs?: number, enabled?: boolean, initialData?: any }} [options] enabled: false waits (nothing
- *   chosen yet); initialData: the data before the first answer (null by default)
- * @returns {{ data: any, loading: boolean, refreshing: boolean, error: string|null, reload: () => Promise<any>,
- *   setData: Function }} loading: the first load is running; refreshing: a later load is running; reload: load
- *   again now (after an action), resolves with the new data (undefined when it failed or was overtaken)
+ * @param {{ debounceMs?: number, enabled?: boolean, initialData?: any, timeoutMs?: number, isEmpty?: (data) => boolean }} [options]
+ *   enabled: false waits (nothing chosen yet); initialData: the data before the first answer (null by default);
+ *   timeoutMs: a request still running after this long is given up as an error (10 s; 0: never); isEmpty: whether an
+ *   answer has nothing to show (default: null, undefined or an empty array)
+ * @returns {{ data: any, status: "loading"|"loaded"|"empty"|"error", loading: boolean, refreshing: boolean,
+ *   error: string|null, timedOut: boolean, reload: () => Promise<any>, setData: Function }} loading: the first load is
+ *   running; refreshing: a later load is running; reload: load again now (after an action, Retry), resolves with the
+ *   new data (undefined when it failed or was overtaken)
  */
-export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialData = null } = {}) => {
+export const LOAD_TIMEOUT_MS = 10000;
+const defaultIsEmpty = (data) => data === null || data === undefined || (Array.isArray(data) && data.length === 0);
+
+/** Thrown when a request runs past its time limit. */
+export class LoadTimeoutError extends Error {
+  constructor() {
+    super("The request is taking too long.");
+    this.name = "LoadTimeoutError";
+    this.timedOut = true;
+  }
+}
+
+/** The promise, or a LoadTimeoutError once `ms` have passed (0: no limit). */
+export const withTimeout = (promise, ms) => {
+  if (!ms) return promise;
+  let timer;
+  const limit = new Promise((_, reject) => { timer = setTimeout(() => reject(new LoadTimeoutError()), ms); });
+  return Promise.race([promise, limit]).finally(() => clearTimeout(timer));
+};
+
+export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialData = null, timeoutMs = LOAD_TIMEOUT_MS, isEmpty = defaultIsEmpty } = {}) => {
   const [data, setData] = useState(initialData);
   const [error, setError] = useState(null);
+  const [timedOut, setTimedOut] = useState(false);
   const [pending, setPending] = useState(enabled);
   const [loaded, setLoaded] = useState(false);
   const seq = useRef(0);
@@ -36,13 +65,17 @@ export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialD
     const current = () => mine === seq.current && mounted.current;
     setPending(true);
     try {
-      const result = await loader();
+      const result = await withTimeout(Promise.resolve(loader()), timeoutMs);
       if (!current()) return undefined;
       setData(result);
       setError(null);
+      setTimedOut(false);
       return result;
     } catch (e) {
-      if (current()) setError(e?.message || String(e));
+      if (current()) {
+        setError(e?.message || String(e));
+        setTimedOut(!!e?.timedOut);
+      }
       return undefined;
     } finally {
       if (current()) {
@@ -51,7 +84,7 @@ export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialD
         setPending(false);
       }
     }
-  }, [loader]);
+  }, [loader, timeoutMs]);
 
   useEffect(() => {
     if (!enabled) {
@@ -71,7 +104,13 @@ export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialD
 
   const reload = useCallback(() => run(++seq.current), [run]);
 
-  return { data, loading: pending && !loaded, refreshing: pending && loaded, error, reload, setData };
+  const loading = pending && !loaded;
+  let status = "loaded";
+  // before the first answer (also while waiting to be enabled) the view is loading
+  if (!loaded) status = "loading";
+  else if (error && isEmpty(data)) status = "error";
+  else if (isEmpty(data)) status = "empty";
+  return { data, status, loading, refreshing: pending && loaded, error, timedOut, reload, setData };
 };
 
 export default useStableLoad;

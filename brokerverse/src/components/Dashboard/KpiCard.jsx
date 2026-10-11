@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { formatPercent } from "../../utility/numberFormat";
 import { numberLocale } from "../../utility/currencyConverter";
+import { KpiValueSkeleton } from "../Skeletons";
 
 /** "+12.5%", "-3%", "> +999%" (a period compared with an almost empty one). */
 export const deltaText = (change) => {
@@ -28,28 +29,40 @@ export const deltaTone = (change, good = "up") => {
 const ICONS = { up: "pi-arrow-up-right", down: "pi-arrow-down-right", flat: "pi-minus" };
 const STATUS_ICONS = { good: "pi-check-circle", warning: "pi-exclamation-circle", serious: "pi-exclamation-triangle", critical: "pi-times-circle" };
 
+/** The value of a figure that does not apply (not "0": a real zero is shown as 0, ₱0 or 0%). */
+export const NOT_APPLICABLE = "\u2013";
+
 /**
  * One KPI: label, value, change with its arrow against the named comparison period, an optional note (target,
  * secondary figure) and an optional state (icon + word). Neutral card: no coloured background, no icon chip. With `onClick`
  * the card opens the list behind the figure (drill-down); `active` marks the card whose filter is applied.
+ * `loading` (first load only) shows a skeleton of the figure in the card of final height; `refreshing` keeps the figure
+ * under a light veil. A value of null / undefined is a figure that does not apply: "–" with `naReason` as its tooltip.
  */
-const KpiCard = ({ label, value, change, good, comparison, note, status, onClick, active, actionLabel }) => {
+const KpiCard = ({ label, value, change, good, comparison, note, status, onClick, active, actionLabel, loading, refreshing, naReason }) => {
   const { t } = useTranslation();
-  const shown = value === null || value === undefined || value === "" ? "-" : typeof value === "number" ? value.toLocaleString(numberLocale()) : value;
+  const na = value === null || value === undefined || value === "" || value === "-" || value === NOT_APPLICABLE;
+  const naTitle = naReason || t("dashboards.notApplicable", "Does not apply to this figure");
+  const shown = na ? NOT_APPLICABLE : typeof value === "number" ? value.toLocaleString(numberLocale()) : value;
   const delta = deltaText(change);
   const { direction, tone } = deltaTone(change, good);
   const body = (
     <>
       <span className="bv-stat-label">{label}</span>
-      <span className="bv-stat-value">{shown}</span>
-      {delta ? (
+      {loading ? <span className="bv-stat-value" role="status" aria-label={t("common.loading", "Loading")}><KpiValueSkeleton /></span> : (
+        <span className="bv-stat-value" title={na ? naTitle : undefined}>
+          {shown}
+          {na ? <span className="p-sr-only">{naTitle}</span> : null}
+        </span>
+      )}
+      {!loading && delta ? (
         <span className={`bv-stat-delta bv-stat-delta--${tone}`}>
           <i className={`pi ${ICONS[direction]}`} aria-hidden="true" />
           <span className="bv-stat-delta__value">{delta}</span>
           {comparison ? <span className="bv-stat-delta__period">{comparison}</span> : null}
         </span>
       ) : null}
-      {status ? (
+      {!loading && status ? (
         <span className={`bv-stat-status bv-stat-status--${status.severity}`}>
           <i className={`pi ${STATUS_ICONS[status.severity] || STATUS_ICONS.warning}`} aria-hidden="true" />
           {status.label}
@@ -59,13 +72,14 @@ const KpiCard = ({ label, value, change, good, comparison, note, status, onClick
       {onClick && active === undefined ? <span className="bv-stat-open" aria-hidden="true"><i className="pi pi-arrow-right" /></span> : null}
     </>
   );
+  const state = loading ? "bv-stat-card--loading" : refreshing ? "bv-stat-card--refreshing" : "";
   return onClick ? (
-    <button type="button" className={`bv-stat-card clickable ${active ? "active" : ""}`} onClick={onClick} aria-pressed={active === undefined ? undefined : !!active}
+    <button type="button" className={`bv-stat-card clickable ${active ? "active" : ""} ${state}`} aria-busy={loading || refreshing || undefined} onClick={onClick} aria-pressed={active === undefined ? undefined : !!active}
       title={actionLabel || t("dashboards.openList", "Open the list")}>
       {body}
     </button>
   ) : (
-    <div className="bv-stat-card">{body}</div>
+    <div className={`bv-stat-card ${state}`} aria-busy={loading || refreshing || undefined}>{body}</div>
   );
 };
 
@@ -80,7 +94,15 @@ KpiCard.propTypes = {
   onClick: PropTypes.func,
   active: PropTypes.bool,
   actionLabel: PropTypes.string,
+  /** first load: a skeleton of the figure */
+  loading: PropTypes.bool,
+  /** a later load: the figure stays under a light veil */
+  refreshing: PropTypes.bool,
+  /** why the figure does not apply (tooltip of "–") */
+  naReason: PropTypes.string,
 };
-KpiCard.defaultProps = { value: null, change: null, good: "up", comparison: null, note: null, status: null, onClick: null, active: undefined, actionLabel: null };
+KpiCard.defaultProps = {
+  value: null, change: null, good: "up", comparison: null, note: null, status: null, onClick: null, active: undefined, actionLabel: null, loading: false, refreshing: false, naReason: null,
+};
 
 export default KpiCard;

@@ -196,6 +196,13 @@
   }
 }
 
+// empty state of the issued view, between the toolbar and the KPI row (OriginEmpty.jsx)
+div.bv-origin-empty {
+  margin: 16px 0 0;
+  justify-content: flex-start;
+  text-align: left;
+}
+
 .bv-viz-chart {
   position: relative;
   min-width: 0;
