@@ -70,10 +70,10 @@ describe('access catalogue and overview', () => {
 
   it('lists the TISPH roles by department in the brief\'s order, the base roles as platform roles, with users and included access', async () => {
     const o = await overview();
-    expect(o.departments.map((d) => d.name)).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management']);
+    expect(o.departments.map((d) => d.name)).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management', 'Audit']);
     const tis = o.roles.filter((r) => r.department);
     expect(tis.map((r) => r.code)).toEqual(['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head',
-      'tis-ccd-pdu', 'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-superid', 'tis-general-manager']);
+      'tis-ccd-pdu', 'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-superid', 'tis-general-manager', 'tis-auditor']);
     const role = (code) => o.roles.find((r) => r.code === code);
     expect(o.roles.filter((r) => r.platform).map((r) => r.code)).toEqual(['system-admin', 'sales', 'processing', 'operations', 'claims', 'accounting', 'accounting-manager']);
     expect(role('tis-it-admin').users).toEqual({ active: 2, inactive: 0 });

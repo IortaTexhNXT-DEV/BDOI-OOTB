@@ -59,7 +59,7 @@ afterAll(async () => { await pool.end(); });
 describe('the matrix', () => {
   it('lists the TISPH roles by department, flags the base platform roles and says which types each role can approve', async () => {
     const m = await matrix();
-    expect(m.departments.map((d) => d.name)).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management']);
+    expect(m.departments.map((d) => d.name)).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management', 'Audit']);
     const fin = m.roles.find((r) => r.code === 'tis-finance');
     expect(fin).toMatchObject({ department: 'Finance and Accounting', platform: false });
     expect(fin.approves).toEqual(expect.arrayContaining(['payment_voucher', 'journal_voucher', 'remittance', 'remittance_settlement']));

@@ -24,10 +24,10 @@ afterAll(async () => {
 });
 
 describe('TISPH manual role facts', () => {
-  it('covers the thirteen roles of the departments, not the base platform roles or SUPERID', () => {
+  it('covers the fourteen roles of the departments, not the base platform roles or SUPERID', () => {
     expect(facts.roles.map((r) => r.code)).toEqual(['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer',
-      'tis-ops-unit-head', 'tis-ccd-pdu', 'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-general-manager']);
-    expect(facts.departments).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management']);
+      'tis-ops-unit-head', 'tis-ccd-pdu', 'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-general-manager', 'tis-auditor']);
+    expect(facts.departments).toEqual(['Sales', 'Operations', 'Cash Control', 'Finance and Accounting', 'IT', 'Management', 'Audit']);
   });
 
   it('gives the access of a screen from the permissions of the role', () => {
