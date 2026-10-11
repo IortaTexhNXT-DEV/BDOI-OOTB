@@ -1,7 +1,8 @@
 # BrokerVerse for TISPH: documents
 
 Documents written for Toyota Insurance Services Philippines (TISPH). They describe the system built on this
-branch line (`TISPH-DEV`) and take precedence over the generic BrokerVerse product documents elsewhere under `docs/`.
+branch line (`TISPH-DEV`) and take precedence over the few product files still kept elsewhere under `docs/` (templates
+and sources used by the code, listed in `docs/package/README.md` and `docs/architecture/README.md`).
 Classification: Confidential, TISPH and iorta TechNXT.
 
 Start with the Document Register (`pack/TISPH_Document_Register.docx`): it lists every document TISPH requires,
@@ -44,13 +45,13 @@ where it is held, its owner, its approver and its status.
 | `TISPH_Data_Migration_and_Cutover.docx` | Data Migration and Cutover Plan |
 | `TISPH_Operations_and_Support.docx` | Operations, Support Model, Runbooks, DR/BCP and Service Levels |
 | `TISPH_Delivery_Governance.docx` | Delivery Governance, RACI, Risks, ADRs, Production Readiness, Go-Live and Hypercare |
-| `TISPH_Documentation_Cleanup.docx` | Documentation clean-up: generic documents retired from this repository and their replacements |
+| `TISPH_Documentation_Cleanup.docx` | Documentation clean-up: generic documents retired from this repository, their replacements and the status of each item |
 
 ## `testing/`: test strategy and test pack
 
 | File | Contents |
 |---|---|
-| `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels, environments, entry and exit criteria, roles, tools |
+| `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels (including the performance test method), environments, entry and exit criteria, roles, tools |
 | [`TISPH_Test_Pack.xlsx`](testing/TISPH_Test_Pack.xlsx) | Requirements, scenarios, positive and negative conditions and gaps, traced to the BRD and FRS identifiers |
 
 ## `proposals/`: design proposals
@@ -66,9 +67,12 @@ All documents use the iorta TechNXT document template and are issued as Word fil
 
 ## Related folders
 
-* `docs/onboarding/`: procedures used by the code (data masking, go-live data set-up, smoke test and reset, support).
-* `docs/developer-guide/`, `backend/docs/`, `deploy/AZURE.md`, `deploy/REFERENCE.md`: developer and runtime reference.
-* `docs/archive/`: generic product documents retired from this repository, with what replaced each one.
+* `docs/onboarding/`: getting started, go-live data set-up, smoke test and reset, data masking, support and
+  escalation, UAT scripts per TISPH role.
+* `deploy/README.md`: where each TISPH environment runs (DEV on Railway, `deploy/RAILWAY.md`; Azure,
+  `deploy/AZURE.md`) and the runtime reference (`deploy/REFERENCE.md`).
+* `docs/developer-guide/`, `backend/docs/`: developer and production support reference.
+* `docs/archive/`: generic product documents kept as records (test runs, reviews), with what replaced each one.
 
 Client source documents (the signed BRD and the discovery and gap-analysis material) are not held in this
 repository.

@@ -1,4 +1,4 @@
-"""Wording check for the architecture documents and the review and test reports.
+"""Wording check for the TISPH documents, the onboarding and deployment guides and this folder.
 
     python3 docs/architecture/tools/check_style.py            # default file set (below)
     python3 docs/architecture/tools/check_style.py a.md b.pdf # only these files
@@ -23,12 +23,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 
 DEFAULT = [
     'docs/architecture/README.md',
-    'docs/architecture/tools/src/*.md',
-    'docs/architecture/*.docx',
-    'docs/architecture/*.pdf',
-    'docs/e2e/E2E_REPORT.md',
-    'docs/e2e/PERSONA_WALK.md',
-    'docs/review/CODE_REVIEW.md',
+    'docs/TISPH/README.md',
+    'docs/TISPH/pack/*.docx',
+    'docs/TISPH/testing/*.docx',
+    'docs/onboarding/*.md',
+    'deploy/*.md',
 ]
 
 STOCK = ['seamless', 'robust', 'comprehensive', 'leverage', 'delve', 'empower', 'cutting-edge', 'streamline', 'unlock',

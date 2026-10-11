@@ -1,27 +1,27 @@
 # Support and escalation
 
-Version 1.1, 04 October 2026, iorta TechNXT. Changes: the Help panel, the usual suspects of the new areas, and the
-support procedures for integrations, the compliance deadline jobs, keys, brand packs and e-signatures (section 6).
+Version 1.2, 11 October 2026, iorta TechNXT. Changes: tailored for TISPH: the support steps of the modules removed
+from the TISPH build (compliance and AML, complaints, data-privacy breach deadlines) are taken out, and releases follow
+the TISPH route (section 5).
 
-How users report a problem with BrokerVerse, how it is graded, the response targets and what production support
-checks first. Contacts, hours and targets marked "to be agreed with the customer" are settled in the support agreement
-before go-live; fill them in here once agreed.
+How users at Toyota Insurance Services Philippines (TISPH) report a problem with BrokerVerse, how it is graded, the
+response targets and what production support checks first. Contacts, hours and targets marked "to be agreed with
+TISPH" are settled in the support agreement before go-live; fill them in here once agreed.
 
-For TISPH, the support model, incident, problem and change management and the runbooks are in
-`docs/TISPH/pack/TISPH_Operations_and_Support.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md)). This guide
-still describes support steps for compliance, AML, complaints and breach-deadline jobs removed from the TISPH build, and
-the generic release route; its rewrite for TISPH is operations planned item P29.
+The TISPH support model, incident, problem and change management, the scheduled jobs and the runbooks are in
+`docs/TISPH/pack/TISPH_Operations_and_Support.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md)); this guide
+is the user-facing part of it.
 
 ## 1. Who to contact
 
 | Level | Who | How |
 |---|---|---|
 | First line | Key user of the team (one trained person per team) | In person or team chat |
-| Second line | Customer's System Administrator | Internal ticket or e-mail (to be agreed with the customer) |
-| Third line | iorta TechNXT production support | Support mailbox or portal and telephone for severity 1 (to be agreed with the customer) |
+| Second line | TISPH IT AppSupport (role TIS IT AppSupport / Admin) | Internal ticket or e-mail (to be agreed with TISPH) |
+| Third line | iorta TechNXT production support | Support mailbox or portal and telephone for severity 1 (to be agreed with TISPH) |
 
-The key user answers "how do I" questions and checks the problem is not a missing role or setting. The System
-Administrator handles users, roles, passwords, two-step verification resets, settings and master data, and raises a
+The key user answers "how do I" questions and checks the problem is not a missing role or setting. TISPH IT
+AppSupport handles users, roles, passwords, two-step verification resets, settings and master data, and raises a
 ticket to iorta TechNXT for anything else.
 
 ## 2. Reporting an issue
@@ -41,17 +41,17 @@ Do not send passwords, two-step codes, the environment settings or full client I
 
 ## 3. Severity levels and response targets
 
-All targets are to be agreed with the customer. The figures below are a proposal to start the discussion.
+All targets are to be agreed with TISPH in the support agreement. The figures below are a proposal to start the discussion.
 
 | Severity | Meaning | Examples | First response | Workaround or fix |
 |---|---|---|---|---|
-| 1 Critical | The system is down or a core process is stopped for everyone, or data is wrong or exposed | Nobody can sign in; receipts cannot be issued; wrong amounts posted to the ledger | 1 business hour (to be agreed with the customer) | 1 business day (to be agreed with the customer) |
-| 2 High | A core process is stopped for one team or has no workaround | Month-end close run fails; bank statement import refused for a valid file | 4 business hours (to be agreed with the customer) | 3 business days (to be agreed with the customer) |
-| 3 Medium | A function fails but there is a workaround | A report column is wrong; an upload rejects one valid row | 1 business day (to be agreed with the customer) | Next planned release (to be agreed with the customer) |
-| 4 Low | Question, cosmetic issue or change request | Wording, layout, new report request | 2 business days (to be agreed with the customer) | Planned with the customer |
+| 1 Critical | The system is down or a core process is stopped for everyone, or data is wrong or exposed | Nobody can sign in; receipts cannot be issued; wrong amounts posted to the ledger | 1 business hour (to be agreed with TISPH) | 1 business day (to be agreed with TISPH) |
+| 2 High | A core process is stopped for one team or has no workaround | Month-end close run fails; bank statement import refused for a valid file | 4 business hours (to be agreed with TISPH) | 3 business days (to be agreed with TISPH) |
+| 3 Medium | A function fails but there is a workaround | A report column is wrong; an upload rejects one valid row | 1 business day (to be agreed with TISPH) | Next planned release (to be agreed with TISPH) |
+| 4 Low | Question, cosmetic issue or change request | Wording, layout, new report request | 2 business days (to be agreed with TISPH) | Planned with TISPH |
 
-Escalation: if a severity 1 or 2 issue has no response within the target, the System Administrator calls the
-iorta TechNXT support lead, then the account manager (names and numbers to be agreed with the customer).
+Escalation: if a severity 1 or 2 issue has no response within the target, TISPH IT AppSupport calls the
+iorta TechNXT support lead, then the account manager (names and numbers to be agreed with TISPH).
 
 ## 4. What production support checks first
 
@@ -77,22 +77,23 @@ The developer and production support guide is `docs/developer-guide/README.md`; 
 
 ## 5. Changes and releases
 
-Fixes and changes are delivered as a new release of the front end and the back end following
-`deploy/README.md` (sections 2 to 4 and the rollback in section 8). Database migrations only add; a
-database snapshot is taken before each release. The customer tests a release in a test environment before it goes to
-production, using the scripts in `UAT_SCRIPTS.md`.
+Fixes and changes are merged into the branch `TISPH-DEV`. Every push deploys DEV automatically (today on Railway,
+`deploy/RAILWAY.md`). SIT, UAT and production receive the same build through the Azure pipeline (`azure-deploy.yml`,
+`deploy/AZURE.md`) after approval by their reviewers; UAT is set up only after TISPH confirms. Database migrations
+only add; on Azure a failed smoke test restores the previous images. The environments, approvals, rollback and hotfix
+route are described in `docs/TISPH/pack/TISPH_Environments_and_Release.docx`. TISPH tests a release in UAT before it
+goes to production, using the scripts in `UAT_SCRIPTS.md` and the TISPH test pack.
 
 ## 6. Support procedures by area
 
-The full procedures are in the Production Support Approach and Standards (06_Support), chapter "Operational
-procedures for the new capabilities", and the support runbook of each scheduled job is in the Schedules and Batch
-Jobs document (05_Delivery). In short:
+The full procedures, the scheduled jobs and their runbooks are in `docs/TISPH/pack/TISPH_Operations_and_Support.docx`
+(sections 9 and 10). In short:
 
-| Area | First line (key user, System Administrator) | Third line (iorta TechNXT) |
+| Area | First line (key user, TISPH IT AppSupport) | Third line (iorta TechNXT) |
 |---|---|---|
 | SMS, CTPL authentication, insurer requests, bank files not going out | Master > System Configuration > Integrations: is the connector Enabled and Live, what does Last error say? Correct the client data and **Resend**; **Cancel message** what must not go | Provider down, credentials rejected, messages stuck; credentials are set by DevOps in the secret store, never on the screen |
 | E-invoices to the BIR EIS failed or rejected | Accounts > Tax > E-Invoicing (EIS): rejected means cancel and reissue the invoice; failed is retried | Connector settings, submissions stuck in sending, manual upload fallback |
-| Compliance reminders missing (AML alerts, KYC refresh, licences, complaints, breach deadlines) | Master > Schedules: is the job on and did its last run succeed? Tell the compliance officer or the DPO at once when a deadline is near | Restore the job the same day; the breach deadline job runs hourly and is treated as urgent |
+| A scheduled job did not run or failed (for example renewal notices, the e-mail outbox, period-end or SAP GL export jobs) | Master > Schedules: is the job on and did its last run succeed? Tell the business owner when a deadline depends on it | Restore the job the same day; job list and runbook per job in the TISPH operations document, section 9 |
 | Personal identifiers unreadable for everyone (TIN, ID, bank numbers) | Report as severity 1 | Wrong or missing `PII_ENCRYPTION_KEY` after a deployment or restore; key custody and rotation follow the documented procedure |
 | Branding wrong (default colours, logo or name instead of the client's) | With `BRAND_PACK` set: restart the API; the start-up log names what differed and the pack is applied again. Without it: import the pack exported before the change (`POST /api/branding/brand-pack`) | Brand pack checks; a client brand pack only in that client's environments, under its contract with iorta TechNXT |
 | A signature must stop printing | Master > Generals > Insurance Management > Signatories (or the user), E-signature, **Revoke** with the reason | Audit of the documents issued with the version when misuse is suspected |

@@ -742,7 +742,7 @@ Entered on screen (also listed on the Instructions sheet): roles and permissions
 access reviews; approval of authority limits; tax codes; account determination and posting rules; bank statement,
 bank transaction type and insurer statement formats; close checklist; product templates, rating and the motor tariff;
 package bundles; payment gateway credentials; the brand pack (name, logo, colours: `BRAND_PACK`); company logo files; schedules;
-fiscal years and periods; remittance masters, reinsurance, incentive programs; referrer accounts; petty cash funds.
+fiscal years and periods; remittance masters, incentive programs; referrer accounts; petty cash funds.
 
 Not migrated: premium due to insurers and commission due to referrers (opening balances, then payment vouchers);
 direct-bill commission receivable (opening balance, cleared by journal voucher); co-insurance participants (added on the
