@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../assets/icons/SvgTable";
 import { useNavigate } from "react-router-dom";
-import SvgIconeye from "../../../assets/icons/SvgIconeye";
+import RowActions from "../../../components/RowActions";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
@@ -160,7 +160,7 @@ const DataTabelJV = ({
         <Column
 
           body={(columnData) => (
-            <SvgIconeye onClick={() => handleView(columnData)} />
+            <RowActions onView={() => handleView(columnData)} viewLabel={tr("accounts.viewVoucher", { number: columnData.transactionNumber })} />
           )}
           style={{ textAlign: "center" }}
           headerStyle={headaction}
