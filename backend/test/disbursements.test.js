@@ -103,6 +103,8 @@ describe('disbursements / payment vouchers', () => {
     const none = await ctx.as('maker')('post', '/disbursements').send(base);
     expect(none.status).toBe(400);
     expect(JSON.stringify(none.body.errors)).toMatch(/refund reason/);
+    // Client (the API spelling of Customer) is a refund to the insured client too
+    expect((await ctx.as('maker')('post', '/disbursements').send({ ...base, payeeType: 'Client' })).status).toBe(400);
     // REF-CANCEL asks for its note
     expect((await ctx.as('maker')('post', '/disbursements').send({ ...base, refundReasonCode: 'REF-CANCEL' })).status).toBe(400);
     const csv = 'Voucher Date,Payee Type,Customer Code,Amount,Transaction Code,Refund Reason,Refund Note\n'

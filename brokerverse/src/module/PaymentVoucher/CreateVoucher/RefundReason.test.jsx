@@ -31,5 +31,6 @@ describe("refund reason on Create Voucher (GAP-CASH-17)", () => {
     expect(refundReasonError({ PayeeType: CUSTOMER, RefundReason: { reasonCode: "REF-CANCEL", noteRequired: true, note: "Mid-term cancellation" } })).toBeNull();
     expect(refundReasonError({ PayeeType: { code: "Insurer" } })).toBeNull();
     expect(refundReasonError({ PayeeType: "Agent/Referrer" })).toBeNull();
+    expect(refundReasonError({ PayeeType: "Client" })).toBe("paymentVoucher.refundReasonRequired");
   });
 });

@@ -24,6 +24,8 @@ import { emailTemplate, renderTemplate } from '../documents/common.js';
 const AGENT = 'Agent/Referrer';
 /** Payee types of a payment voucher. */
 export const PAYEE_TYPES = ['Customer', 'Client', 'Insurer', AGENT, 'Supplier'];
+/** Payee types of a refund to the insured client: Client is the API and upload spelling of Customer (the screen offers Customer). */
+export const REFUND_PAYEES = ['Customer', 'Client'];
 
 /**
  * Columns of the payment voucher bulk upload (Accounts > Payment Voucher > Bulk upload); header names are read
@@ -112,7 +114,7 @@ async function resolveInsurer(db, ref) {
 /** Create a voucher from the Create Voucher screen payload (or bulk upload row). */
 export async function createDisbursement(db, b, user, { source = 'manual', status = 'draft' } = {}) {
   const payeeType = b.payeeType || 'Customer';
-  const refund = payeeType === 'Customer' ? await refundReasonOf(db, b, { required: true }) : null;
+  const refund = REFUND_PAYEES.includes(payeeType) ? await refundReasonOf(db, b, { required: true }) : null;
   const client = await findClient(db, b.customerCode);
   const insurer = await resolveInsurer(db, b.insurerName || b.insuranceCompanyId);
   const policy = await findPolicy(db, b.policyNumber || b.policyId);
@@ -144,7 +146,7 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
  */
 export async function notifyRefund(db, disbursementId) {
   const d = (await db.query('SELECT * FROM disbursements WHERE id = $1', [disbursementId])).rows[0];
-  if (!d || d.payee_type !== 'Customer' || d.refund_notified_at || !d.client_id) return null;
+  if (!d || !REFUND_PAYEES.includes(d.payee_type) || d.refund_notified_at || !d.client_id) return null;
   if ((await getSetting('disbursements.refund_notify_client', true)) === false) return null;
   const c = (await db.query('SELECT email, display_name FROM clients WHERE id = $1', [d.client_id])).rows[0];
   if (!c?.email) return null;
@@ -215,7 +217,7 @@ export async function updateDisbursement(db, id, b, user) {
   const sets = []; const p = [d.id];
   for (const [k, col] of Object.entries(EDITABLE)) if (b[k] !== undefined) { p.push(col === 'voucher_date' ? isoDate(b[k]) : b[k]); sets.push(`${col} = $${p.length}`); }
   if (b.amount !== undefined) { p.push(round2(num(b.amount))); sets.push(`amount = $${p.length}`); }
-  if (d.payee_type === 'Customer') {
+  if (REFUND_PAYEES.includes(d.payee_type)) {
     // a customer refund keeps a reason: a new one replaces it; one is required while the voucher has none
     const refund = await refundReasonOf(db, b, { required: !d.refund_reason_code && b.status !== 'cancelled' });
     if (refund) { p.push(refund.code, refund.text); sets.push(`refund_reason_code = $${p.length - 1}`, `refund_reason = $${p.length}`); }
@@ -338,7 +340,7 @@ async function approveCheque(db, c, amount, user) {
     // A cheque drawn on the whole voucher (no single payable named) pays the voucher's payables once the approved cheques
     // cover the voucher, so they no longer show as open payables to the insurer (aged payables, remittances due)
     if (!inv) await settleVoucherPayables(db, d.id);
-    if (payeeType === 'Customer') await notifyRefund(db, d.id);
+    if (REFUND_PAYEES.includes(payeeType)) await notifyRefund(db, d.id);
   }
 }
 
