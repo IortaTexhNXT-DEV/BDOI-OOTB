@@ -15,6 +15,7 @@ Back-office screens look like an enterprise insurance system (Guidewire, Sapiens
 ## Buttons
 - Do: one primary (filled) button per header and per dialog footer; others outlined.
 - Do: dialog footers through `components/DialogFooter`: Close / Cancel as a text button on the left, destructive actions (withdraw, cancel, delete) red outlined and set apart, three or more secondary actions in the "More actions" menu.
+- Every `primereact/dialog` resolves to `components/Dialog` (craco alias), which puts a footer made only of buttons in this order automatically (`DialogFooter/arrange.jsx`); a footer holding other components must use `DialogFooter` itself.
 - Don't: a disabled primary as an instruction ("Select … to batch"); use a normal outlined button with a tooltip.
 - Don't: rounded pill buttons with labels (rounded is for icon-only buttons).
 

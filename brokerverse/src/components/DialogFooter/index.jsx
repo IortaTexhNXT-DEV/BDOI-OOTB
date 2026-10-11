@@ -12,15 +12,16 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import RowActions from "../RowActions";
+import MoreActions from "./MoreActions";
+import { MORE_AT } from "./constants";
 import StatusChip from "../StatusChip";
 import "./index.scss";
 
 const shown = (list) => (list || []).filter((a) => a && !a.hidden);
 const tip = (a) => (a.tooltip ? { tooltip: a.tooltip, tooltipOptions: { position: "top", showOnDisabled: true } } : {});
 
-/** Number of secondary actions from which they collapse into the "More actions" menu. */
-export const MORE_AT = 3;
+export { MORE_AT };
+export { arrangeFooter } from "./arrange";
 
 const DialogFooter = ({ onClose, closeLabel, primary, secondary, destructive, children }) => {
   const { t } = useTranslation();
@@ -41,9 +42,7 @@ const DialogFooter = ({ onClose, closeLabel, primary, secondary, destructive, ch
           </span>
         ) : null}
         {others.length >= MORE_AT ? (
-          <RowActions label={t("common.moreActions", "More actions")}
-            actions={others.map((a, i) => ({ code: `a${i}`, label: a.label, allowed: !a.disabled, blockedReason: a.tooltip }))}
-            onAction={(a) => others[Number(a.code.slice(1))].onClick()} />
+          <MoreActions label={t("common.moreActions", "More actions")} actions={others} />
         ) : others.map((a) => (
           <Button key={a.label} type="button" label={a.label} icon={a.icon} outlined onClick={a.onClick} loading={a.loading} disabled={a.disabled} {...tip(a)} />
         ))}
