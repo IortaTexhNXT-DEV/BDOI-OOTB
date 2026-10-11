@@ -208,7 +208,7 @@ export async function batch2307(db, id) {
   const b = { id: row.id, batchNumber: row.batch_number, year: row.year, quarter: row.quarter, payeeType: row.payee_type, certificates: row.certificates,
     totalIncome: Number(row.total_income), totalTax: Number(row.total_tax), createdBy: row.created_by, createdAt: row.created_at };
   const certs = (await db.query('SELECT * FROM bir_2307_certificates WHERE batch_id = $1 ORDER BY cert_number', [b.id])).rows;
-  const detail = certs.flatMap((c) => (c.lines || []).map((l) => ({ certificateNumber: c.cert_number, status: c.status, payeeName: c.payee_name, payeeTin: c.payee_tin || '',
+  const detail = certs.flatMap((c) => (c.lines || []).map((l) => ({ certificateNumber: c.cert_number, status: c.status, payeeName: c.payee_name, payeeTin: revealPii(c.payee_tin) || '',
     atc: l.atc, nature: l.nature || '', month1: Number(l.month1) || 0, month2: Number(l.month2) || 0, month3: Number(l.month3) || 0, income: Number(l.total) || 0, tax: Number(l.tax) || 0 })));
   return { ...b, detail };
 }
@@ -231,7 +231,7 @@ export async function issue2307(db, params, user) {
 export async function listCertificates(db, q = {}) {
   const rows = (await db.query(`SELECT * FROM bir_2307_certificates WHERE ($1::int IS NULL OR year = $1) AND ($2::int IS NULL OR quarter = $2) AND ($3::text IS NULL OR direction = $3)
     ORDER BY created_at DESC LIMIT 500`, [q.year ? Number(q.year) : null, q.quarter ? Number(q.quarter) : null, q.direction || null])).rows;
-  return rows.map((c) => ({ id: c.id, certificateNumber: c.cert_number, direction: c.direction, payeeKey: c.payee_key, payeeName: c.payee_name, payeeTin: c.payee_tin,
+  return rows.map((c) => ({ id: c.id, certificateNumber: c.cert_number, direction: c.direction, payeeKey: c.payee_key, payeeName: c.payee_name, payeeTin: revealPii(c.payee_tin) || '',
     payorName: c.payor_name, year: c.year, quarter: c.quarter, periodFrom: iso(c.period_from), periodTo: iso(c.period_to), lines: c.lines,
     totalIncome: Number(c.total_income), totalTax: Number(c.total_tax), status: c.status, createdAt: c.created_at, cancelReason: c.cancel_reason }));
 }

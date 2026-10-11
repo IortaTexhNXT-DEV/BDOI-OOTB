@@ -82,7 +82,7 @@ describe('BIR 2307 and the returns for supplier EWT (accounts payable)', () => {
     expect(r.body.data.batchNumber).toMatch(new RegExp(`^CWB-${year}Q${quarter}-\\d{3}$`));
     const batch = (await maker('get', `/period-end/bir/2307/batches/${r.body.data.batchId}`)).body.data;
     expect(batch).toMatchObject({ certificates: 2, totalTax: r.body.data.issued.reduce((a, x) => a + x.totalTax, 0) });
-    expect(batch.detail.find((d) => d.payeeName === 'Makati Office Services Inc.')).toMatchObject({ atc: 'WC160', income: 50000, tax: 1000 });
+    expect(batch.detail.find((d) => d.payeeName === 'Makati Office Services Inc.')).toMatchObject({ atc: 'WC160', income: 50000, tax: 1000, payeeTin: '201-555-777-00000' });
     expect((await maker('get', `/period-end/bir/2307/batches?year=${year}&quarter=${quarter}`)).body.data.map((b) => b.id)).toContain(batch.id);
     expect((await maker('get', `/period-end/bir/2307/batches/${batch.id}?format=xlsx`)).status).toBe(200);
     expect((await maker('get', '/period-end/bir/2307/batches/CWB-NONE')).status).toBe(404);
