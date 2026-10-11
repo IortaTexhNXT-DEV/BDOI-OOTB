@@ -1,10 +1,12 @@
 /**
  * Low-level PDF 1.4 writer: pages with drawing operations, the Helvetica / Helvetica-Bold base fonts in
  * WinAnsiEncoding, and image XObjects (PNG as /FlateDecode with an /SMask for transparency, JPEG as /DCTDecode).
- * Content streams stay uncompressed (small, and readable in tests); image data is compressed.
+ * Content streams stay uncompressed (small, and readable in tests); image data is compressed. With a user password
+ * (constructor option `password`) the file is encrypted with AES-128 and opens only with that password (./security.js).
  */
 import zlib from 'node:zlib';
 import { toWinAnsi } from './fonts.js';
+import { pdfSecurity } from './security.js';
 
 export const PAGE_SIZES = { A4: [595.28, 841.89], A3: [841.89, 1190.55], LETTER: [612, 792], LEGAL: [612, 1008] };
 
@@ -60,7 +62,11 @@ export class Page {
 }
 
 export class PdfWriter {
-  constructor({ title = '', author = '', subject = '' } = {}) { this.pages = []; this.images = []; this.info = { title, author, subject }; }
+  constructor({ title = '', author = '', subject = '', password = null, ownerPassword = null } = {}) {
+    this.pages = []; this.images = []; this.info = { title, author, subject };
+    this.password = password ? String(password) : null;
+    this.ownerPassword = ownerPassword;
+  }
 
   addPage(width, height) { const p = new Page(width, height); this.pages.push(p); return p; }
 
@@ -81,7 +87,8 @@ export class PdfWriter {
     const pagesId = add(null);
     const f1 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
     const f2 = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
-    const stream = (dict, data) => Buffer.concat([Buffer.from(`<< ${dict} /Length ${data.length} >>\nstream\n`, 'latin1'), data, Buffer.from('\nendstream', 'latin1')]);
+    // streams are written when their object number is known (an encrypted stream is keyed by it)
+    const stream = (dict, data) => ({ dict, data });
     for (const h of this.images) {
       const img = h.src;
       if (img.type === 'jpeg') {
@@ -102,21 +109,33 @@ export class PdfWriter {
     const d = new Date();
     const pad = (v) => String(v).padStart(2, '0');
     const created = `D:${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
-    const info = add(`<< /Title (${pdfString(this.info.title)}) /Author (${pdfString(this.info.author)}) /Subject (${pdfString(this.info.subject)}) /Producer (BrokerVerse) /CreationDate (${created}) >>`);
+    const security = this.password ? pdfSecurity({ userPassword: this.password, ownerPassword: this.ownerPassword }) : null;
+    const infoId = objs.length + 1;
+    // strings of the info dictionary are the only strings outside streams: encrypted (hex) when the file is protected
+    const str = (v) => (security ? `<${security.string(infoId, Buffer.from(toWinAnsi(v), 'latin1')).toString('hex')}>` : `(${pdfString(v)})`);
+    const info = add(`<< /Title ${str(this.info.title)} /Author ${str(this.info.author)} /Subject ${str(this.info.subject)} /Producer ${str('BrokerVerse')} /CreationDate ${str(created)} >>`);
+    const encrypt = security ? add(security.encryptDict) : null;
     objs[catalog - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
     objs[pagesId - 1] = `<< /Type /Pages /Kids [${kids.map((k) => `${k} 0 R`).join(' ')}] /Count ${kids.length} >>`;
 
-    const parts = [Buffer.from('%PDF-1.4\n%\xe2\xe3\xcf\xd3\n', 'latin1')];
+    // the AES crypt filter is PDF 1.6
+    const parts = [Buffer.from(`%PDF-${security ? '1.6' : '1.4'}\n%\xe2\xe3\xcf\xd3\n`, 'latin1')];
     let offset = parts[0].length;
     const offsets = [];
+    const body = (o, num) => {
+      if (typeof o === 'string') return Buffer.from(o, 'latin1');
+      const data = security ? security.stream(num, o.data) : o.data;
+      return Buffer.concat([Buffer.from(`<< ${o.dict} /Length ${data.length} >>\nstream\n`, 'latin1'), data, Buffer.from('\nendstream', 'latin1')]);
+    };
     objs.forEach((o, i) => {
-      const buf = Buffer.concat([Buffer.from(`${i + 1} 0 obj\n`, 'latin1'), Buffer.isBuffer(o) ? o : Buffer.from(o, 'latin1'), Buffer.from('\nendobj\n', 'latin1')]);
+      const buf = Buffer.concat([Buffer.from(`${i + 1} 0 obj\n`, 'latin1'), body(o, i + 1), Buffer.from('\nendobj\n', 'latin1')]);
       offsets.push(offset);
       parts.push(buf);
       offset += buf.length;
     });
     const xref = `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
-    parts.push(Buffer.from(`${xref}trailer\n<< /Size ${objs.length + 1} /Root ${catalog} 0 R /Info ${info} 0 R >>\nstartxref\n${offset}\n%%EOF\n`, 'latin1'));
+    const secured = security ? ` /Encrypt ${encrypt} 0 R /ID [<${security.id.toString('hex')}> <${security.id.toString('hex')}>]` : '';
+    parts.push(Buffer.from(`${xref}trailer\n<< /Size ${objs.length + 1} /Root ${catalog} 0 R /Info ${info} 0 R${secured} >>\nstartxref\n${offset}\n%%EOF\n`, 'latin1'));
     return Buffer.concat(parts);
   }
 }
