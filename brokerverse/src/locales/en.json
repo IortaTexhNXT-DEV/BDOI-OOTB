@@ -12877,7 +12877,13 @@
       "secretary-certificate": "Secretary's certificate",
       "beneficial-owner-declaration": "Beneficial owner declaration",
       "source-of-funds": "Source of funds",
-      "other": "Other"
+      "other": "Other",
+      "tfs-kyc-confirmation": "TFS KYC confirmation",
+      "or-cr": "Vehicle OR/CR",
+      "signed-proposal": "Signed proposal form",
+      "vehicle-photos": "Vehicle photos (four sides)",
+      "birth-certificate": "Birth certificate",
+      "acr-srrv": "ACR I-Card / SRRV"
     },
     "kycStatus": {
       "pending": "Incomplete",
@@ -12911,7 +12917,13 @@
     "cancel": "Cancel",
     "save": "Save",
     "uploadFailed": "Could not upload the document",
-    "fileFailed": "Could not open the file"
+    "fileFailed": "Could not open the file",
+    "kycMode": "KYC source",
+    "checklist": "Onboarding checklist",
+    "onFile": "on file",
+    "toCollect": "to collect",
+    "noChecklist": "No document required",
+    "printKycForm": "Print KYC form"
   },
   "jvTools": {
     "upload": "Upload",

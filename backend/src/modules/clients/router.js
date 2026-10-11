@@ -8,6 +8,7 @@ import { sendEntity, actor } from '../documents/common.js';
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as kyc from './kyc.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
 
 const { router, define } = moduleRouter('Clients', '/clients');
 const customers = moduleRouter('Clients', '/customers');
@@ -36,6 +37,11 @@ define({
     const pagination = { page: pg.page, pageSize: pg.perPage, totalCount: total, totalPages: Math.ceil(total / pg.perPage) };
     res.json({ success: true, data: { clients: rows.map((r) => svc.toClient(r)), pagination }, total, page: pg.page, pageSize: pg.perPage });
   },
+});
+define({
+  method: 'GET', path: '/duplicates', summary: 'Duplicate-account control: the clients a new record would duplicate by e-mail, mobile number, or name with the same date of birth (emailId, contactNumber, firstName, lastName, companyName, DOB)', screen: `${SCREEN} > New client`,
+  middleware: canRead, query: { emailId: 'juan@example.com', contactNumber: '09171234567' }, response: { success: true, data: [{ id: 'cl_1', clientCode: 'CL-2026-00001', name: 'Juan Dela Cruz', matchedOn: ['email'] }] },
+  handler: async (req, res) => ok(res, await svc.duplicateClients({ email: req.query.emailId || req.query.email, phone: req.query.contactNumber || req.query.phone, first_name: req.query.firstName, last_name: req.query.lastName, company_name: req.query.companyName, birth_date: req.query.DOB })),
 });
 define({
   method: 'GET', path: '/:id', summary: 'Get one client with its policies (by id or client code)', screen: `${SCREEN} > Client view / Payment options`, middleware: [...canRead, ownRecord('client')],
@@ -146,7 +152,16 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id/profile', summary: 'KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents',
+  method: 'GET', path: '/:id/kyc-form.pdf', summary: 'The KYC form of the client for a wet signature: identity, address, identification, the onboarding checklist, the documents on file and the signature lines', screen: `${SCREEN} > Onboard client > Print KYC form`,
+  middleware: [...canRead, ownRecord('client')], response: '<pdf>',
+  handler: async (req, res) => {
+    const doc = await kyc.kycFormDoc(req.params.id);
+    await audit(req, { entity: 'client', entityId: req.params.id, action: 'print', after: { document: 'kyc-form' } });
+    sendPdf(res, buildPdf(doc), `kyc-form-${doc.number}.pdf`);
+  },
+});
+define({
+  method: 'GET', path: '/:id/profile', summary: 'KYC profile of a client: identification still missing, KYC source and onboarding checklist, signatories, beneficial owners with their warnings, documents',
   screen: `${SCREEN} > Onboard client`, middleware: [...canRead, ownRecord('client')],
   response: { success: true, data: { client: { kycStatus: 'complete' }, missing: [], signatories: [], beneficialOwners: [], ownerWarnings: [], beneficialOwnerThreshold: 25, documents: [] } },
   handler: async (req, res) => ok(res, await kyc.profile(req.params.id)),

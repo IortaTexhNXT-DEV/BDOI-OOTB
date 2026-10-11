@@ -1,5 +1,6 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { notFound, badRequest } from '../../lib/errors.js';
+import { HttpError, notFound, badRequest } from '../../lib/errors.js';
+import { getSetting } from '../../lib/settings.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -130,11 +131,47 @@ async function insertClient(db, cols, extra, userId) {
   return r.rows[0].id;
 }
 
+/**
+ * Duplicate-account control (TIS-BRD-KYC-05): the clients a new record would duplicate, by e-mail, by mobile number
+ * (its last ten digits) or by name with the same date of birth. Each match: { id, clientCode, name, matchedOn }.
+ */
+export async function duplicateClients(cols, { excludeId = null } = {}) {
+  const email = String(cols.email || '').trim().toLowerCase() || null;
+  const mobile = String(cols.phone || '').replace(/\D/g, '').slice(-10) || null;
+  const name = (String(cols.company_name || '').trim() || [cols.first_name, cols.last_name].map((x) => String(x || '').trim()).filter(Boolean).join(' ')).toLowerCase() || null;
+  const dob = isoDate(cols.birth_date) || null;
+  if (!email && !mobile && !(name && dob)) return [];
+  const rows = await many(`SELECT c.id, c.client_code, c.display_name, c.company_name, c.email, c.phone, c.birth_date FROM clients c
+    WHERE c.status <> 'deleted' AND c.anonymised_at IS NULL AND ($5::text IS NULL OR c.id <> $5)
+      AND (($1::text IS NOT NULL AND lower(c.email) = $1)
+        OR ($2::text IS NOT NULL AND right(regexp_replace(COALESCE(c.phone, ''), '\\D', '', 'g'), 10) = $2)
+        OR ($3::text IS NOT NULL AND $4::date IS NOT NULL AND (lower(c.display_name) = $3 OR lower(c.company_name) = $3) AND c.birth_date = $4))
+    ORDER BY c.created_at DESC LIMIT 10`, [email, mobile, name, dob, excludeId]);
+  return rows.map((r) => ({
+    id: r.id, clientCode: r.client_code, name: r.display_name,
+    matchedOn: [email && String(r.email || '').toLowerCase() === email && 'email', mobile && String(r.phone || '').replace(/\D/g, '').slice(-10) === mobile && 'mobile',
+      name && dob && [r.display_name, r.company_name].some((x) => String(x || '').toLowerCase() === name) && 'name and birth date'].filter(Boolean),
+  }));
+}
+
+/** Refuse (409) a client that duplicates an existing one, unless clients.duplicate_control allows it or the caller confirmed the duplicate. */
+export async function assertNoDuplicate(cols, { allowDuplicate = false } = {}) {
+  const control = String(await getSetting('clients.duplicate_control', 'block'));
+  if (control === 'off' || allowDuplicate) return [];
+  const matches = await duplicateClients(cols);
+  if (matches.length && control === 'block') {
+    throw new HttpError(409, `A client with the same ${[...new Set(matches.flatMap((m) => m.matchedOn))].join(' or ')} already exists: ${matches.map((m) => `${m.name} (${m.clientCode})`).join(', ')}`,
+      matches.map((m) => ({ path: 'duplicate', message: `${m.name} (${m.clientCode}): same ${m.matchedOn.join(', ')}`, clientId: m.id, clientCode: m.clientCode })));
+  }
+  return matches;
+}
+
 export async function createClient(body, userId) {
   const { cols, extra } = columnsFrom(body);
   cols.onboarded_via = cols.onboarded_via || 'client-record';
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
+  await assertNoDuplicate(cols, { allowDuplicate: body.allowDuplicate === true });
   await fillRegion(cols);
   const id = await withTransaction((c) => insertClient(c, cols, extra, userId));
   return getClient(id);

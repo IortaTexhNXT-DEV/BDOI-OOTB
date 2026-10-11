@@ -5,8 +5,8 @@ import { Tag } from "primereact/tag";
 import { formatDate } from "../../../utility/dateFormat";
 
 /** Values the server accepts (backend/src/modules/clients); their labels are in en.json "onboarding". */
-export const DOC_TYPES = ["government-id", "proof-of-address", "tin", "sec-registration", "dti-registration", "cda-registration", "articles-by-laws", "gis",
-  "board-resolution", "secretary-certificate", "beneficial-owner-declaration", "source-of-funds", "other"];
+export const DOC_TYPES = ["government-id", "tfs-kyc-confirmation", "or-cr", "signed-proposal", "vehicle-photos", "birth-certificate", "acr-srrv", "proof-of-address", "tin",
+  "sec-registration", "dti-registration", "cda-registration", "articles-by-laws", "gis", "board-resolution", "secretary-certificate", "beneficial-owner-declaration", "source-of-funds", "other"];
 export const AUTHORITY_DOCUMENTS = ["board-resolution", "secretary-certificate", "partnership-resolution", "special-power-of-attorney", "other"];
 export const CONTROL_TYPES = ["ownership", "control", "senior-management"];
 

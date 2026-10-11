@@ -23,7 +23,7 @@ import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { clientFromLead, createClientInTx } from '../clients/service.js';
 import { issuePolicy, getPolicyRow } from '../policies/service.js';
-import { assertKyc, kycPrefill, kycValue } from '../policies/kyc.js';
+import { KYC_MODES, assertKyc, kycModeFor, kycPrefill, kycValue } from '../policies/kyc.js';
 import { activeRecords } from '../ops-masters/records.js';
 import { findDocument, reserveKey, writeObject, safeKey } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
@@ -383,6 +383,22 @@ export async function verifyPayment(id, body, user) {
   return { before: p.paymentVerification, after: await placementById(p.id) };
 }
 
+/**
+ * The customer's KYC for the insurer (TIS-BRD-KYC-02, placement.attach_kyc_documents): the government ID of a walk-in or
+ * direct customer, or the TFS KYC confirmation of a TFS-sourced one, from the client's documents or the files of the
+ * quotation; nothing when the customer has neither on file.
+ */
+async function kycAttachments(p) {
+  if ((await getSetting('placement.attach_kyc_documents', true)) === false) return [];
+  const { mode } = await kycModeFor({ clientId: p.clientId, leadId: p.leadId });
+  const docType = mode === KYC_MODES.tfs ? 'tfs-kyc-confirmation' : 'government-id';
+  const doc = p.clientId ? (await query('SELECT storage_key, file_name FROM client_kyc_documents WHERE client_id = $1 AND doc_type = $2 ORDER BY uploaded_at DESC LIMIT 1', [p.clientId, docType])).rows[0] : null;
+  if (doc?.storage_key) return [fileAttachment(doc.storage_key, doc.file_name || `${docType}.pdf`)];
+  const quote = p.quoteId ? (await query('SELECT doc FROM quotes WHERE id = $1', [p.quoteId])).rows[0] : null;
+  const key = kycValue([quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc], mode === KYC_MODES.tfs ? 'tfsConfirmation' : 'idImage');
+  return key && /^[a-z0-9_/-]+\.[a-z0-9]+$/i.test(key) && (await findDocument(key)) ? [fileAttachment(key, key.split('/').pop())] : [];
+}
+
 export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   const p = await placementById(id);
   if (!['draft', ...WITH_INSURER].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
@@ -391,6 +407,7 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   const t = await emailTemplate('placement_order');
   const company = await companyName();
   const lto = p.doc?.ltoDocumentKey ? [fileAttachment(p.doc.ltoDocumentKey, p.doc.ltoDocumentName || 'lto-document.pdf')] : [];
+  const kycDocs = await kycAttachments(p);
   const sent = [];
   const failed = [];
   for (const x of toSend) {
@@ -400,7 +417,7 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
       role: x.isLead ? 'lead insurer' : 'co-insurer', shareSumInsured: amountText(x.sumInsured), sharePremium: amountText(x.premium), sharePremiumTotal: amountText(x.premiumTotal) };
     const slip = documentAttachment('placement-slip', { placementId: p.id, insurerId: x.insuranceCompanyId }, `placement-slip-${p.placementNumber}-${x.insurerCode || x.insuranceCompanyId}.pdf`);
     const emailId = await queueEmail({ to: x.insurerEmail, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'placement_order', entity: 'placement', entityId: p.id,
-      attachments: [slip, ...lto] });
+      attachments: [slip, ...lto, ...kycDocs] });
     sent.push({ insurer: x.insuranceCompanyName, email: x.insurerEmail, emailId });
   }
   if (!sent.length && failed.length) throw badRequest(`No insurer could be e-mailed: ${failed.map((f) => `${f.insurer} (${f.reason})`).join('; ')}`);
@@ -665,7 +682,7 @@ export async function bookPlacement(id, body, user) {
   const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
   const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
   await assertPaymentVerified(p);
-  await assertKyc({ lob: p.lob, sources: [quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc, p.epolicy?.vehicle, extra.customerInfo, extra] });
+  await assertKyc({ lob: p.lob, sources: [quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc, p.epolicy?.vehicle, extra.customerInfo, extra], clientId: p.client_id, leadId: p.lead_id });
   const r = await withTransaction((db) => bookInTx(db, p.id, body, user));
   const policy = await getPolicyRow(r.policyId);
   const schedule = await emailSchedule(policy.id, p);

@@ -385,6 +385,7 @@ export async function convertToPolicy(id, body, user) {
   await assertKyc({
     lob: existing.lob || lobOf(existing.product_type),
     sources: [renewedFrom?.details, renewedFrom?.doc, qdoc.insuranceVehicleDetails?.[0], qdoc, extra.customerInfo, extra],
+    clientId: existing.client_id, leadId: existing.lead_id,
   });
   const result = await withTransaction(async (db) => {
     const q = (await db.query('SELECT * FROM quotes WHERE id = $1 FOR UPDATE', [existing.id])).rows[0];

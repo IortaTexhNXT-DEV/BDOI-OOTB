@@ -7,6 +7,8 @@ import { getSetting } from '../../lib/settings.js';
 import { num } from '../../lib/money.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { storeFile } from '../uploads/storage.js';
+import { KYC_MODES, kycChecklist, kycModeFor } from '../policies/kyc.js';
+import { header, kv } from '../documents/templates.js';
 
 const isoDay = (v) => {
   if (!v) return null;
@@ -148,6 +150,47 @@ export function ownerWarnings(c, list, threshold) {
   return warnings;
 }
 
+/**
+ * The KYC source of a client and its onboarding checklist (policies/kyc.js): the KYC mode of the client's lead source,
+ * and the documents of the Onboarding Checklist master for the client's expected lines (or all lines) with whether
+ * the client record holds them.
+ */
+export async function kycSource(c) {
+  const { mode, source } = await kycModeFor({ clientId: c.id });
+  const lines = Array.isArray(c.expected_lines) && c.expected_lines.length ? c.expected_lines : [null];
+  const seen = new Map();
+  for (const lob of lines) for (const row of await kycChecklist({ lob, mode, clientId: c.id })) if (!seen.has(row.code)) seen.set(row.code, row);
+  return { mode, source, tfsConfirmation: mode === KYC_MODES.tfs, checklist: [...seen.values()] };
+}
+
+/**
+ * The KYC form of a client for a wet signature (TIS-BRD-KYC-04): identity, address, identification, the onboarding
+ * checklist and the signature lines, as a document spec for lib/pdf.
+ */
+export async function kycFormDoc(id) {
+  const c = await clientRow(id);
+  const source = await kycSource(c);
+  const h = await header('Know Your Customer Form', c.client_code);
+  const identity = c.client_type === 'corporate'
+    ? kv([['Registered name', c.company_name], ['Trade name', c.trade_name], ['Registration', [c.registration_authority, c.registration_number].filter(Boolean).join(' ')], ['TIN', c.tin], ['Nature of business', c.business_nature]])
+    : kv([['Name', [c.first_name, c.middle_name, c.last_name, c.suffix].filter(Boolean).join(' ')], ['Date of birth', isoDay(c.birth_date)], ['Place of birth', c.place_of_birth], ['Nationality', c.nationality],
+      ['Civil status', c.civil_status], ['Occupation', c.occupation], ['Employer', c.employer_name], ['Source of funds', c.source_of_funds], ['TIN', c.tin]]);
+  const docs = await documents(c.id);
+  return {
+    ...h,
+    meta: kv([['Client', c.display_name], ['Client code', c.client_code], ['Customer type', c.customer_type], ['KYC source', source.source ? `${source.source} (${source.mode})` : source.mode], ['KYC status', c.kyc_status]]),
+    sections: [
+      { heading: 'Identity', rows: identity },
+      { heading: 'Address and contact', rows: kv([['Address', [c.house_no, c.road, c.barangay, c.city, c.state, c.postal_code].filter(Boolean).join(', ')], ['Region', c.region], ['Country', c.country], ['E-mail', c.email], ['Mobile', c.phone]]) },
+      { heading: 'Identification', rows: kv([['ID type', c.id_type], ['ID number', c.id_number], ['ID expiry', isoDay(c.id_expiry)], ['Politically exposed person', c.is_pep ? 'Yes' : 'No']]) },
+      { heading: 'Onboarding checklist', table: { columns: ['Document', 'Required', 'On file'], rows: source.checklist.map((x) => [x.name, x.required ? 'Yes' : 'No', x.satisfied ? 'Yes' : 'No']) } },
+      ...(docs.length ? [{ heading: 'Documents on file', table: { columns: ['Document', 'File', 'Expiry'], rows: docs.map((d) => [d.docType, d.fileName, d.expiryDate || '']) } }] : []),
+      { heading: 'Declaration', text: 'I confirm that the information above is true and correct and that the documents presented are genuine. I consent to the processing of my personal data for the insurance I am applying for, under the Data Privacy Act of 2012.' },
+      { heading: 'Signatures', signatures: [{ label: 'Customer' }, { label: 'Verified by' }] },
+    ],
+  };
+}
+
 /** KYC profile of a client: identification gaps, signatories, beneficial owners and documents. */
 export async function profile(id) {
   const c = await clientRow(id);
@@ -161,6 +204,7 @@ export async function profile(id) {
       kycStatus: fresh.kyc_status, isPep: fresh.is_pep, onboardedVia: fresh.onboarded_via, onboardedAt: fresh.onboarded_at,
     },
     missing: await missingKyc({ query }, fresh),
+    kyc: await kycSource(fresh),
     signatories: await signatories(c.id),
     beneficialOwners: ownerList,
     ownerWarnings: ownerWarnings(fresh, ownerList, threshold),

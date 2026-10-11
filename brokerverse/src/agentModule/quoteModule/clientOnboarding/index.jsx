@@ -18,6 +18,7 @@ import PhAddressFields from "../../component/PhAddressFields";
 import onboardingService, { errorMessage, fieldErrors } from "./onboardingService";
 import { AUTHORITY_DOCUMENTS, CONTROL_TYPES, KycStatusTag, PageHeader } from "./common";
 import KycDocuments from "./KycDocuments";
+import { printPdf } from "../../../components/Print";
 import DateField from "../../../components/DateField";
 import "../../../module/Administration/index.scss";
 import "../../../module/AccessControl/index.scss";
@@ -231,6 +232,7 @@ const ClientOnboarding = () => {
         actions={<>
           <Button icon="pi pi-arrow-left" text label={t("onboarding.backToClients")} onClick={() => navigate("/agent/clientlisting")} />
           {id ? <Button icon="pi pi-eye" outlined label={t("onboarding.viewClient")} onClick={() => navigate(`/agent/clientview/${id}`)} /> : null}
+          {id ? <Button icon="pi pi-print" outlined label={t("onboarding.printKycForm")} onClick={() => printPdf(`/clients/${encodeURIComponent(id)}/kyc-form.pdf`, { fileName: `kyc-form-${id}.pdf` }).catch((e) => toast.current?.show({ severity: "error", summary: errorMessage(e, t("onboarding.loadFailed")) }))} /> : null}
         </>} />
 
       {c ? (
@@ -240,6 +242,12 @@ const ClientOnboarding = () => {
         </div>
       ) : null}
       {profile?.missing?.length ? <Message severity="warn" className="w-full mb-2" text={`${t("onboarding.missing")}: ${profile.missing.join(", ")}`} /> : null}
+      {profile?.kyc ? (
+        <div className="onboarding__summary mb-2">
+          <div><label>{t("onboarding.kycMode")}</label>{profile.kyc.mode}{profile.kyc.source ? ` (${profile.kyc.source})` : ""}</div>
+          <div><label>{t("onboarding.checklist")}</label>{(profile.kyc.checklist || []).map((x) => `${x.name}: ${x.satisfied ? t("onboarding.onFile") : t("onboarding.toCollect")}`).join(" · ") || t("onboarding.noChecklist")}</div>
+        </div>
+      ) : null}
       {profile?.ownerWarnings?.map((w) => <Message key={w} severity="warn" className="w-full mb-2" text={w} />)}
 
       <form onSubmit={formik.handleSubmit} noValidate>

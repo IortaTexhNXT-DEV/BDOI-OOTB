@@ -114,6 +114,15 @@ WHERE code = 'branch' AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(fields)
 UPDATE branches SET attrs = attrs || '{"IssuingOffice": true, "Region": "NCR", "NumberingCode": "1"}'::jsonb, updated_at = now()
  WHERE code = 'HO' AND NOT (attrs ? 'IssuingOffice');
 
+-- ---------------------------------------------------------------- KYC: accepted IDs (FR-SIS-012) and the vehicle age limit (KYC-03)
+-- The accepted government IDs of the TFSPH list (the Voter's ID is not accepted) where the shipped list is unchanged;
+-- a vehicle older than ten years is referred (BRD KYC-03) where the delivered Motor rule still says fifteen.
+UPDATE app_settings SET value = '["PhilSys ID", "UMID", "Passport", "Driver''s License", "PRC ID", "SSS ID", "GSIS ID", "TIN ID", "Postal ID", "Senior Citizen ID", "PhilHealth ID"]'::jsonb, updated_at = now()
+ WHERE key = 'policy.kyc_id_types' AND value = '["PhilSys ID", "UMID", "Passport", "Driver''s License", "PRC ID", "SSS ID", "GSIS ID", "TIN ID", "Postal ID", "Voter''s ID", "Senior Citizen ID"]'::jsonb;
+UPDATE product_components SET data = data || '{"condition": "Vehicle Age <= 10 years", "value": 10}'::jsonb, updated_at = now()
+ WHERE kind = 'underwriting-rules' AND code = 'VEH_AGE_LIMIT' AND data->>'condition' = 'Vehicle Age <= 15 years'
+   AND template_id IN (SELECT id FROM product_templates WHERE template_code = 'MOTOR-COMP-2026');
+
 -- ---------------------------------------------------------------- M03 Departments
 INSERT INTO master_records(type_code, code, name, data, status, created_by)
 SELECT 'department', v.code, v.name, jsonb_build_object('DepartmentCode', v.code, 'DepartmentName', v.name, 'BranchCode', 'HO'), 'active', 'seed'
