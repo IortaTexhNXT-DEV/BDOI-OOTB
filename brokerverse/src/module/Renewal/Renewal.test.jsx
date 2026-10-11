@@ -114,6 +114,20 @@ describe("Negotiations", () => {
     expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Submit for approval" })).toBeNull();
   });
+
+  it("confirms the approval of renewal terms with the policy and premiums before deciding", async () => {
+    service.getNegotiations.mockResolvedValue([row("pending-approval", "Pending Approval")]);
+    service.decide.mockResolvedValue({});
+    wrap(<NegotiationWorkspace />);
+    fireEvent.click(await screen.findByRole("button", { name: "POL-pending-approval" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Approve" }));
+    const dialog = await screen.findByRole("dialog", { name: "Approve renewal terms" });
+    expect(service.decide).not.toHaveBeenCalled();
+    expect(within(dialog).getByText("Liza Mendoza")).toBeInTheDocument();
+    fireEvent.change(within(dialog).getByRole("textbox"), { target: { value: "Within authority" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Approve terms" }));
+    await waitFor(() => expect(service.decide).toHaveBeenCalledWith("rnw_pending-approval", "approve", "Within authority"));
+  });
 });
 
 describe("claim sections by line of business", () => {
