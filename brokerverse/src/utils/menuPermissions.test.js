@@ -124,8 +124,8 @@ describe("Sales & Marketing menu", () => {
       "Promotions", "Scheme Master", "Scheme Issuance"];
     for (const role of ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-general-manager"]) expect(items([role])).toEqual(journey);
     for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"]) expect(items([role])).toEqual(journey);
-    // IT AppSupport has no read:lead-assignment (RBAC v4) and no sales activities or promotions
-    expect(items(["tis-it-admin"])).toEqual(journey.filter((i) => !["Lead Assignment", "Sales Activities", "Promotions"].includes(i)));
+    // IT AppSupport has no read:lead-assignment (RBAC v4) and no sales activities; it keeps the promotions (TISPH decision of 11 Oct 2026)
+    expect(items(["tis-it-admin"])).toEqual(journey.filter((i) => !["Lead Assignment", "Sales Activities"].includes(i)));
     for (const role of ["tis-sales-officer", "tis-ops-officer", "tis-general-manager"]) {
       expect(isPathAllowed("/sales/quick-quote", menuList, [role])).toBe(false);
       expect(isPathAllowed("/sales/campaigns", menuList, [role])).toBe(false);

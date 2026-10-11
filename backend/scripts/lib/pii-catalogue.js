@@ -129,6 +129,7 @@ export const CATALOGUE = {
   'placements.epolicy_document_name': 'fileName',
   'placements.check_result': 'json',
   'placements.check_reason': 'freeText',
+  'placements.send_approval_note': 'freeText',
   'insurer_offers.remarks': 'freeText',
   'insurer_offers.attachment_name': 'fileName',
   'endorsements.changes': 'json',

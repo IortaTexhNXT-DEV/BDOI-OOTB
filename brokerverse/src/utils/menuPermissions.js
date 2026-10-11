@@ -260,9 +260,10 @@ Object.assign(roleMenuPermissions, {
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,
-    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, promotions, fleet
-    // schedules and open covers (read:campaigns, read:sales-activities, read:promotions, read:fleet, read:marine)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities", "Promotions")],
+    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
+    // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine); maintains and approves the Scheme
+    // Master and the promotions (TISPH decision of 11 Oct 2026, GAP-SALES-17)
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance", ...INCENTIVE_READER],
     commission: ["Commission Dashboard", "Sharing Schemes"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],

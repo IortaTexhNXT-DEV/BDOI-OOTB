@@ -15,6 +15,8 @@ const customers = moduleRouter('Clients', '/customers');
 const SCREEN = 'Operations > Clients';
 const canRead = [requireAuth, requirePermission('read:clients')];
 const canWrite = [requireAuth, requirePermission('write:clients')];
+// the KYC of an existing client: write:clients, or write:client-kyc (TISPH Operations maintains the KYC, GAP-POLICY-09)
+const canKyc = [requireAuth, requirePermission('write:clients', 'write:client-kyc')];
 // the customer codes of the bulk print of Receipts and Disbursement: Cash Control receipts without the client register
 const canListCodes = [requireAuth, requirePermission('read:clients', 'read:receipts', 'read:disbursements')];
 const docUpload = memoryUpload({ files: 1 }).single('file');
@@ -142,7 +144,7 @@ define({
 });
 define({
   method: 'PUT', path: '/:id/kyc', summary: 'Update the identification of a client (onboarding screen); its KYC status follows',
-  screen: `${SCREEN} > Onboard client`, middleware: [...canWrite, ownRecord('client'), validate(z.object(kycFields).partial().extend({ clientType: z.enum(['individual', 'corporate']).optional() }))],
+  screen: `${SCREEN} > Onboard client`, middleware: [...canKyc, ownRecord('client'), validate(z.object(kycFields).partial().extend({ clientType: z.enum(['individual', 'corporate']).optional() }))],
   request: { occupation: 'Business owner', expectedAnnualPremium: 250000 }, response: { success: true, data: { client: example } },
   handler: async (req, res) => {
     const r = await svc.updateKyc(req.params.id, req.body, actor(req));
@@ -175,7 +177,7 @@ for (const [kind, path, body, save, entity, status] of [
   const label = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   define({
     method: 'POST', path: `/:id/${path}`, summary: `Add a ${kind} of a juridical client`, screen: `${SCREEN} > Onboard client (juridical)`,
-    middleware: [...canWrite, ownRecord('client'), validate(body.extend({ status: status.optional() }))],
+    middleware: [...canKyc, ownRecord('client'), validate(body.extend({ status: status.optional() }))],
     request: kind === 'signatory' ? { fullName: 'Maria Reyes', position: 'Treasurer', authorityDocument: 'secretary-certificate', authorityDate: '2026-09-01' }
       : { fullName: 'Jose Tan', ownershipPercent: 40, controlType: 'ownership', nationality: 'Filipino' }, response: { success: true },
     handler: async (req, res) => {
@@ -187,7 +189,7 @@ for (const [kind, path, body, save, entity, status] of [
   });
   define({
     method: 'PUT', path: `/:id/${path}/:rowId`, summary: `Change or ${kind === 'signatory' ? 'revoke' : 'remove'} a ${kind}`, screen: `${SCREEN} > Onboard client (juridical)`,
-    middleware: [...canWrite, ownRecord('client'), validate(body.extend({ status: status.optional() }).partial())],
+    middleware: [...canKyc, ownRecord('client'), validate(body.extend({ status: status.optional() }).partial())],
     request: { status: kind === 'signatory' ? 'revoked' : 'removed' }, response: { success: true },
     handler: async (req, res) => {
       const r = await save(req.params.id, req.params.rowId, req.body, actor(req));
@@ -200,7 +202,7 @@ for (const [kind, path, body, save, entity, status] of [
 
 define({
   method: 'POST', path: '/:id/documents', summary: 'Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner, relatedId, description, expiryDate)',
-  screen: `${SCREEN} > Onboard client`, middleware: [...canWrite, ownRecord('client'), docUpload],
+  screen: `${SCREEN} > Onboard client`, middleware: [...canKyc, ownRecord('client'), docUpload],
   request: { file: '<binary>', docType: 'board-resolution', relatedType: 'signatory', relatedId: 'sig_1' }, response: { success: true, data: { id: 1, docType: 'board-resolution', fileName: 'resolution.pdf' } },
   handler: async (req, res) => {
     const d = await kyc.addDocument(req.params.id, req.file, req.body || {}, req.user);

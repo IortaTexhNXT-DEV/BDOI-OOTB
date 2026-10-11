@@ -115,6 +115,7 @@ const PERMISSION_LIST = {
   'write:sales-activities': ['sales-activities', 'edit', 'Log, change and cancel calls, meetings, e-mails and visits'],
   'read:clients': ['clients', 'view', 'See clients'],
   'write:clients': ['clients', 'edit', 'Create and edit clients'],
+  'write:client-kyc': ['clients', 'edit', 'Maintain the KYC of a client: identification, signatories, beneficial owners and KYC documents'],
   'read:policies': ['policies', 'view', 'See policies, cover notes, payments and CTPL authentication'],
   'write:policies': ['policies', 'edit', 'Record and issue policies, cover notes and CTPL certificates'],
   'approve:policies': ['policies', 'approve', 'Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user'],

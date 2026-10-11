@@ -9,6 +9,7 @@ import { issuePolicy } from '../src/modules/policies/service.js';
 
 let ctx;
 let maker;
+let capMaker;
 let approver;
 let associate;
 let officer;
@@ -39,7 +40,10 @@ const motor = (extra = {}) => ({
 beforeAll(async () => {
   ctx = await setup();
   now = await today();
-  maker = await persona('pr.maker', ['tis-ops-officer']);
+  // TISPH decision of 11 Oct 2026 (GAP-SALES-17): IT AppSupport, the Sales Unit Head and the General Manager keep the
+  // promotions, each making and approving (never their own); Operations sets up the discount caps
+  maker = await persona('pr.maker', ['tis-it-admin']);
+  capMaker = await persona('pr.capmaker', ['tis-ops-officer']);
   approver = await persona('pr.approver', ['tis-sales-unit-head']);
   associate = await persona('pr.associate', ['tis-sales-associate']);
   officer = await persona('pr.officer', ['tis-sales-officer']);
@@ -74,6 +78,9 @@ describe('promotion set-up (FR-PRM-001 to 003)', () => {
     expect(r.body.data).toMatchObject({ code: 'PRM-TEST-FORT', version: 1, status: 'draft', lineCount: 1 });
     expect((await maker.api('post', '/promotions').send(promo())).status).toBe(409);
     expect((await associate.api('post', '/promotions').send(promo({ code: 'PRM-OTHER' }))).status).toBe(403);
+    // Operations reads the promotions and no longer sets them up
+    expect((await capMaker.api('post', '/promotions').send(promo({ code: 'PRM-OTHER' }))).status).toBe(403);
+    expect((await capMaker.api('get', `/promotions/${promoId}`)).status).toBe(200);
   });
 
   it('checks every line against the caps: the dealer cap blocks the submission', async () => {
@@ -230,20 +237,20 @@ describe('discount caps (FR-PRM-010)', () => {
   it('a cap is proposed, never approved by its maker, and live once approved', async () => {
     ctplId = (await q("SELECT id FROM products WHERE code = 'CTPL'"))[0].id;
     const body = { productId: ctplId, channelType: 'affinity', minPct: 0, maxPct: 18, lowestOd: 1.5, effectiveFrom: now };
-    expect((await maker.api('post', '/discount-caps').send({ ...body, minPct: 30 })).body.errors[0].message).toBe('Min discount % cannot be higher than max discount %');
-    expect((await maker.api('post', '/discount-caps').send({ ...body, effectiveFrom: addDays(now, -1) })).body.errors[0].message).toBe('effectiveFrom cannot be before today');
-    const r = await maker.api('post', '/discount-caps').send(body);
+    expect((await capMaker.api('post', '/discount-caps').send({ ...body, minPct: 30 })).body.errors[0].message).toBe('Min discount % cannot be higher than max discount %');
+    expect((await capMaker.api('post', '/discount-caps').send({ ...body, effectiveFrom: addDays(now, -1) })).body.errors[0].message).toBe('effectiveFrom cannot be before today');
+    const r = await capMaker.api('post', '/discount-caps').send(body);
     expect(r.status).toBe(201);
     capId = r.body.data.id;
-    expect((await maker.api('post', `/discount-caps/${capId}/approve`).send({})).status).toBe(403);
+    expect((await capMaker.api('post', `/discount-caps/${capId}/approve`).send({})).status).toBe(403);
     expect((await approver.api('post', `/discount-caps/${capId}/return`).send({})).status).toBe(400);
     expect((await approver.api('post', `/discount-caps/${capId}/approve`).send({})).body.data.status).toBe('approved');
-    const again = await maker.api('post', '/discount-caps').send(body);
+    const again = await capMaker.api('post', '/discount-caps').send(body);
     expect(again.status).toBe(409);
   });
 
   it('a replacement ends the cap it replaces the day before it starts', async () => {
-    const r = await maker.api('post', '/discount-caps').send({ productId: ctplId, channelType: 'affinity', minPct: 0, maxPct: 15, lowestOd: 1.5, effectiveFrom: addDays(now, 10), replacesId: capId });
+    const r = await capMaker.api('post', '/discount-caps').send({ productId: ctplId, channelType: 'affinity', minPct: 0, maxPct: 15, lowestOd: 1.5, effectiveFrom: addDays(now, 10), replacesId: capId });
     expect(r.status).toBe(201);
     await approver.api('post', `/discount-caps/${r.body.data.id}/approve`).send({});
     const old = (await approver.api('get', `/discount-caps?channelType=affinity&productId=${ctplId}`).send()).body.data.find((c) => c.id === capId);

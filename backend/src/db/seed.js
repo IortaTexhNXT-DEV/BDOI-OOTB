@@ -140,11 +140,12 @@ const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'cla
 const TIS_CCD = [...TIS_COMMON, 'receipts'];
 const TIS_ACCOUNTING_READS = ['disbursements:read', 'journal-vouchers:read', 'payables:read', 'fixed-assets:read'];
 const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'policies:read', 'endorsements:read', 'renewals:read', 'claims:read'];
-// Promotions (migration 0485), proposed until TISPH names the users (DECISIONS D-QP-15): Operations Officers and the
-// Operations Unit Head set up promotions and discount caps; the Sales Unit Head and the General Manager approve them;
-// Sales Officers, the Sales Unit Head and the General Manager may lower a promotion rate to its minimum.
-const TIS_PROMOTION_MAKER = ['promotions', 'discount-caps'];
-const TIS_PROMOTION_APPROVER = ['promotions:approve', 'discount-caps:approve', 'promotion-rates:write'];
+// Promotions (migration 0485; TISPH decision of 11 Oct 2026, migration 0687, GAP-SALES-17): the Sales Unit Head, the
+// General Manager and IT AppSupport maintain the promotions, each making and approving (never their own); Operations
+// Officers and the Operations Unit Head set up the discount caps, which the Sales Unit Head and the General Manager
+// approve; Sales Officers, the Sales Unit Head and the General Manager may lower a promotion rate to its minimum.
+const TIS_PROMOTION_MAKER = ['discount-caps'];
+const TIS_PROMOTION_APPROVER = ['promotions', 'promotions:approve', 'discount-caps:approve', 'promotion-rates:write'];
 Object.assign(ROLE_PERMS, {
   'tis-sales-associate': [...TIS_SALES, 'lead-assignment:read', 'campaigns:read'],
   'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'promotion-rates:write'],
@@ -168,7 +169,7 @@ Object.assign(ROLE_PERMS, {
     'remittance:approve', 'claim-cash:reverse'],
   'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
-    'integrations', 'schedules', 'audit:read', 'features:read', 'data-load'],
+    'integrations', 'schedules', 'audit:read', 'features:read', 'data-load', 'promotions', 'promotions:approve'],
   'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_APPROVER, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read', 'remittance:approve', 'features:read'],
@@ -218,20 +219,24 @@ for (const role of ['tis-sales-unit-head', 'tis-ops-unit-head', 'tis-general-man
 // Dealer schemes (migrations 0600 to 0602, FRS SCHM-01 to 03 default grants): the Processing Team keeps the Scheme Master
 // and the scheme applications, the Accounting Manager approves schemes, checklist waivers and lock-in decisions; Sales
 // and the Processing Team review the lock-in accounts, Operations and Compliance set the TFS loan status; everyone reads.
-// TISPH personas (proposal until TISPH names the users): Operations makes, the Sales Unit Head, the Operations Unit
-// Head (waivers) and the General Manager approve.
+// TISPH personas: Operations makes the scheme applications, the Operations Unit Head (waivers) and the General Manager
+// approve them; the Scheme Master is kept by the Sales Unit Head, the General Manager and IT AppSupport, each making
+// and approving (never their own), Operations reads it (TISPH decision of 11 Oct 2026, migration 0687, GAP-SALES-17).
 const SCHEME_PERMS = {
   processing: ['schemes', 'scheme-issuance', 'lock-in'], sales: ['schemes:read', 'scheme-issuance:read', 'lock-in'],
   operations: ['schemes:read', 'scheme-issuance:read', 'lock-in:read', 'loan-status:write'], accounting: ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
   'accounting-manager': ['schemes:approve', 'scheme-issuance:approve', 'lock-in:approve'],
   'tis-sales-associate': ['schemes:read', 'scheme-issuance:read', 'lock-in'], 'tis-sales-officer': ['schemes:read', 'scheme-issuance:read', 'lock-in'],
-  'tis-sales-unit-head': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'lock-in', 'lock-in:approve'],
-  'tis-ops-associate': ['schemes:read', 'scheme-issuance', 'lock-in:read', 'loan-status:write'], 'tis-ops-officer': ['schemes', 'scheme-issuance', 'lock-in', 'loan-status:write'],
-  'tis-ops-unit-head': ['schemes', 'scheme-issuance', 'scheme-issuance:approve', 'lock-in', 'loan-status:write'],
-  'tis-finance': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'], 'tis-it-admin': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'],
-  'tis-general-manager': ['schemes:read', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
+  'tis-sales-unit-head': ['schemes', 'schemes:approve', 'scheme-issuance:read', 'lock-in', 'lock-in:approve'],
+  'tis-ops-associate': ['schemes:read', 'scheme-issuance', 'lock-in:read', 'loan-status:write'], 'tis-ops-officer': ['schemes:read', 'scheme-issuance', 'lock-in', 'loan-status:write'],
+  'tis-ops-unit-head': ['schemes:read', 'scheme-issuance', 'scheme-issuance:approve', 'lock-in', 'loan-status:write'],
+  'tis-finance': ['schemes:read', 'scheme-issuance:read', 'lock-in:read'], 'tis-it-admin': ['schemes', 'schemes:approve', 'scheme-issuance:read', 'lock-in:read'],
+  'tis-general-manager': ['schemes', 'schemes:approve', 'scheme-issuance:read', 'scheme-issuance:approve', 'lock-in:read', 'lock-in:approve'],
 };
 for (const [role, items] of Object.entries(SCHEME_PERMS)) if (ROLE_PERMS[role]) ROLE_PERMS[role].push(...items);
+// Operations maintains the client KYC (TISPH decision of 11 Oct 2026, migration 0687, GAP-POLICY-09): identification,
+// signatories, beneficial owners and KYC documents of a client, without the other client edits of write:clients
+for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('client-kyc:write');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /**

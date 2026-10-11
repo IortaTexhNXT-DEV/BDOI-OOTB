@@ -3,7 +3,9 @@
 The Scheme 1 and Scheme 2 bundling schemes agreed with TFSPH, the Toyota dealers and the insurers, and the scheme rating
 used by Scheme Issuance and the renewals of scheme policies (TIS-BRD-SCHM-02, FRS SCHM-02 FR-SCM-001 to 031). Route:
 `/schemes` (Operations > Sales & Marketing > Scheme Master). Access: `read:schemes`, `write:schemes`, `approve:schemes`.
-Migration 0600; reason contexts `dealer_scheme_return` and `dealer_scheme_status` (seed 97_dealer_schemes.sql).
+Migration 0600; reason contexts `dealer_scheme_return` and `dealer_scheme_status` (seed 97_dealer_schemes.sql). TISPH decision of
+11 Oct 2026 (GAP-SALES-17, migration 0687): the TIS Sales Unit Head, the General Manager and IT AppSupport make and
+approve schemes (never their own); every other persona reads them.
 
 ## Files
 
