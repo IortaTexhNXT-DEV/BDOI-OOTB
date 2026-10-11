@@ -146,6 +146,7 @@ const EncodeDialog = ({ visible, onHide, onSaved, banks }) => {
             <div className="col-12">
               {errors.rows ? <FieldError error={errors.rows} /> : null}
               {!rows.length ? <p className="pe-muted">{t("opsAcc.pdc.nothingToEncode")}</p> : (
+                <div className="pdc-rows-scroll">
                 <table className="pdc-rows">
                   <thead>
                     <tr>
@@ -189,6 +190,7 @@ const EncodeDialog = ({ visible, onHide, onSaved, banks }) => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
             {rows.length > 1 ? <div className="col-12 md:col-4"><Button label={t("opsAcc.pdc.copyDown")} icon="pi pi-angle-double-down" text onClick={copyDown} /></div> : null}

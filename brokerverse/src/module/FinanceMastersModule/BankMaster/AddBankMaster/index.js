@@ -21,6 +21,7 @@ import { phoneCountryCode } from "../../../../utility/phoneFormat";
 const initialValues = {
   bankCode: "",
   bankName: "",
+  shortName: "",
   bankBranch: "",
   ifscCode: "",
   AddressLine1: "",
@@ -204,6 +205,15 @@ function AddBankMaster() {
             </div>
           </div>
 
+          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
+            <InputField
+              classNames="field__container"
+              label="Short Name"
+              placeholder={"Enter"}
+              value={formik.values.shortName}
+              onChange={formik.handleChange("shortName")}
+            />
+          </div>
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField

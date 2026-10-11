@@ -1,4 +1,36 @@
-// Accounts > Post-Dated Cheques: the rows of Encode PDCs, the ageing line above the log and the tab badges.
+// Accounts > Post-Dated Cheques: the log, the rows of Encode PDCs, the ageing strip above the log and the filters.
+
+// the log: one compact row per cheque; references, bank, custody and dates never wrap (the full text is on hover)
+.pdc-table {
+  .p-datatable-thead > tr > th {
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    line-height: 18px;
+  }
+
+  .pdc-link.p-button.p-button-link {
+    justify-content: flex-start;
+    white-space: nowrap;
+    line-height: 18px;
+  }
+
+  .pdc-client {
+    display: inline-block;
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
+}
+
+.pdc-nowrap {
+  white-space: nowrap;
+}
+
 .pdc-rows {
   width: 100%;
   border-collapse: collapse;
@@ -17,37 +49,33 @@
     padding: 0.35rem;
     vertical-align: top;
     border-bottom: 1px solid var(--surface-border);
+    white-space: nowrap;
   }
 
   td:nth-child(1), td:nth-child(2), td:nth-child(3) {
     padding-top: 0.85rem;
-    white-space: nowrap;
   }
 
   .bv-num {
     text-align: right;
   }
 
-  td:nth-child(4) { min-width: 11rem; }
+  td:nth-child(4) { min-width: 12rem; }
+  td:nth-child(5), td:nth-child(6) { min-width: 8rem; }
+  td:nth-child(7) { min-width: 6.5rem; }
   td:nth-child(8) { min-width: 8rem; }
   td:nth-child(9) { min-width: 10rem; }
 }
 
-.pdc-ageing {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.5rem;
-  margin: 0 0 0.75rem;
-  font-size: 0.9rem;
+// the rows of a set scroll sideways inside the dialog on a narrow window instead of folding their cells
+.pdc-rows-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
 
-  span {
-    white-space: nowrap;
-  }
-
-  b {
-    font-variant-numeric: tabular-nums;
-    margin-left: 0.35rem;
-  }
+// the ageing strip sits between the filters and the log, on the surface of the card
+.pdc-ageing.bv-key-facts {
+  margin-bottom: 10px;
 }
 
 .pdc-filters {
@@ -58,12 +86,21 @@
   margin-bottom: 0.75rem;
 
   .p-dropdown,
-  .p-calendar {
+  .pdc-filters__date {
     width: 13rem;
   }
 
   .pdc-filters__search {
     width: 18rem;
+  }
+
+  // on a phone every filter takes the width of the card
+  @media (max-width: 640px) {
+    .p-dropdown,
+    .pdc-filters__date,
+    .pdc-filters__search {
+      width: 100%;
+    }
   }
 }
 
