@@ -47,6 +47,8 @@ const periodEndService = {
   statusPreview: (period, status) => request(`/period-end/periods/${period}/status-preview${qs({ status })}`),
   periodHistory: (period) => request(`/period-end/periods/${period}/history`),
   periodChecks: (period) => request(`/period-end/periods/${period}/checks`),
+  financeControls: () => request("/period-end/finance-controls"),
+  saveFinanceControls: (settings) => put("/period-end/finance-controls", { settings }),
 
   // month-end close
   closeRuns: (params) => request(`/period-end/close-runs${qs(params)}`),

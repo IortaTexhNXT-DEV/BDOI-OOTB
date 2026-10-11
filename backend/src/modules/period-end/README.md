@@ -85,6 +85,14 @@ Reason Codes master (context `year_end_reverse`) and approved by another user wi
 a run that has not closed the year is cancelled with a reason of the context `year_end_cancel`;
 it is possible until the first period of the next year is closed. Every action is kept in `year_end_run_history`.
 
+Finance controls (`lib/financeControls.js`, GAP-FIN-05): the maker-checker and posting controls of Finance
+(`finance.maker_checker_enabled`, `journal.require_approval`, `payables.maker_checker`,
+`accounting.period_close_requires_approval`, `accounting.reopen_closed_periods`, `accounting.year_end_accepts_soft_closed`,
+`accounting.parked_events`, `accounting.auto_post_system_entries`, `receipts.reversal_requires_approval`) change only
+with `approve:period-end` (Finance; the System Administrator passes), on every path that writes settings. IT
+AppSupport (write:settings) keeps the rest of the configuration. Finance changes them on Period Management > Finance
+controls: `GET / PUT /period-end/finance-controls` (other keys refused, the change audited).
+
 ## Key settings
 
 `accounting.operations_cutoff_day` (26: premium bookings from that day go to the next period),

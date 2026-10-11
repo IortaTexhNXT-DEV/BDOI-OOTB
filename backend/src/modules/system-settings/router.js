@@ -92,7 +92,7 @@ define({
     const changes = b.settings && typeof b.settings === 'object' ? b.settings
       : Array.isArray(b.items) ? Object.fromEntries(b.items.map((i) => [i.key, i.value])) : null;
     if (!changes) throw badRequest('Send { settings: { key: value } } or { items: [{ key, value }] }');
-    const { before, after } = await svc.updateConfiguration(changes, req.user.id);
+    const { before, after } = await svc.updateConfiguration(changes, req.user.id, req.user);
     await audit(req, { entity: 'settings', action: 'update', before, after });
     ok(res, await svc.configurationCatalogue(), 'Configuration saved');
   },

@@ -5,7 +5,7 @@
  * (finance manager) to approve closes, reopen periods, post into soft-closed periods and reverse a year-end close.
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { formatMoney } from '../../lib/money.js';
@@ -14,6 +14,7 @@ import { ok, created } from '../../lib/respond.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { APPROVE } from './posting.js';
+import { FINANCE_CONTROL_KEYS, FINANCE_CONTROL_PERMISSION } from '../../lib/financeControls.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as fiscal from './fiscal.js';
 import * as close from './close.js';
@@ -197,6 +198,36 @@ define({
   handler: async (req, res) => {
     const p = await fiscal.getPeriod(pool, req.params.period);
     ok(res, await runChecks(pool, p, await checklistItems(pool)));
+  },
+});
+
+// ---------- finance controls (GAP-FIN-05) ----------
+const controlRows = async (user) => {
+  const rows = (await pool.query('SELECT key, value, type, label, updated_at, updated_by FROM app_settings WHERE key = ANY($1)', [FINANCE_CONTROL_KEYS])).rows;
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  const canChange = hasPermission(user, FINANCE_CONTROL_PERMISSION);
+  return FINANCE_CONTROL_KEYS.filter((k) => byKey.has(k)).map((k) => {
+    const r = byKey.get(k);
+    return { key: k, label: r.label, type: r.type, value: r.value, updatedAt: r.updated_at, updatedBy: r.updated_by, canChange };
+  });
+};
+define({
+  method: 'GET', path: '/finance-controls', summary: 'The finance control settings (maker-checker and posting controls of Finance) with their values; only a holder of approve:period-end changes them',
+  screen: `${S} > Period Management > Finance Controls`, middleware: read,
+  response: { success: true, data: [{ key: 'finance.maker_checker_enabled', label: 'Finance maker-checker', type: 'boolean', value: true, canChange: true }] },
+  handler: async (req, res) => ok(res, await controlRows(req.user)),
+});
+define({
+  method: 'PUT', path: '/finance-controls', summary: 'Change finance control settings ({ settings: { key: value } }); keys other than the finance controls are refused; the change is audited',
+  screen: `${S} > Period Management > Finance Controls`, middleware: [...approve, validate(z.object({ settings: z.record(z.any()) }))],
+  request: { settings: { 'accounting.reopen_closed_periods': false } }, response: { success: true, data: [{ key: 'accounting.reopen_closed_periods', value: false }] },
+  handler: async (req, res) => {
+    const other = Object.keys(req.body.settings).filter((k) => !FINANCE_CONTROL_KEYS.includes(k));
+    if (other.length) throw badRequest('Validation failed', other.map((k) => ({ path: k, message: `${k} is not a finance control; change it on Master > Configuration` })));
+    const { updateConfiguration } = await import('../system-settings/service.js');
+    const { before, after } = await updateConfiguration(req.body.settings, req.user.id, req.user);
+    await audit(req, { entity: 'settings', action: 'update', before, after });
+    ok(res, await controlRows(req.user), 'Finance controls saved');
   },
 });
 

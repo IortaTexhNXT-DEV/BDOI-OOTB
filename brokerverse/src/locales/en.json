@@ -15389,7 +15389,15 @@
       "replaceRule": "Loading again for the same go-live date replaces this load."
     },
     "closing": "Closing calendar",
-    "closingText": "Operations cut-off {{cutoff}} · Finance close {{close}} · Adjustments until {{window}}"
+    "closingText": "Operations cut-off {{cutoff}} · Finance close {{close}} · Adjustments until {{window}}",
+    "financeControls": {
+      "button": "Finance controls",
+      "title": "Finance controls",
+      "save": "Save controls",
+      "saved": "Finance controls saved",
+      "help": "The maker-checker and posting controls of Finance. Only Finance (approve:period-end) changes them; each change is kept in the audit trail.",
+      "readOnly": "The maker-checker and posting controls of Finance. Only Finance (approve:period-end) changes them."
+    }
   },
   "pageHeader": {
     "help": "About this page",

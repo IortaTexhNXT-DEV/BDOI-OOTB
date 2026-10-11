@@ -1,4 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
+import { assertFinanceControlsAllowed } from '../../lib/financeControls.js';
 import { ADMIN_ROLE, requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
 import { getSettings, setSetting } from '../../lib/settings.js';
 import { validate, z } from '../../lib/validate.js';
@@ -44,6 +45,7 @@ define({
     const invalid = await localizationErrors(changes);
     if (invalid.length) throw badRequest('Validation failed', invalid);
     await assertNotControlled(changes);
+    assertFinanceControlsAllowed(changes, req.user);
     assertParkedEvents(changes);
     await assertSettingsAllowed(changes.filter(([, v, was]) => JSON.stringify(v) !== JSON.stringify(was)).map(([k]) => k));
     for (const [k, v] of changes) {
