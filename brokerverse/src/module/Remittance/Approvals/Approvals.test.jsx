@@ -150,7 +150,8 @@ describe("Approvals", () => {
     fireEvent.click(within(dialog()).getByRole("button", { name: "Approve" }));
     expect(remittanceService.approveApproval).toHaveBeenCalledWith(51, { version: 1 });
     expect(await screen.findByText("Approved by J. Cruz at 10:32.")).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument());
+    // the confirm dialog closes with its exit transition and the panel reloads before it turns read-only
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument(), { timeout: 3000 });
     expect(screen.queryByRole("button", { name: "Reject" })).not.toBeInTheDocument();
   });
 
