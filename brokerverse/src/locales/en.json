@@ -2618,7 +2618,14 @@
         "xlsx": "Export Excel",
         "csv": "Export CSV"
       },
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "rateVat": "{{rate}} · VAT {{vat}}",
+      "ewtOf": "EWT {{ewt}}",
+      "dueOn": "due {{date}}",
+      "commissionVat": "commission {{commission}} · VAT {{vat}}",
+      "collectedOf": "collected {{amount}}",
+      "policyCount_one": "{{count}} policy",
+      "policyCount_other": "{{count}} policies"
     },
     "held": {
       "title": "Held Policies",

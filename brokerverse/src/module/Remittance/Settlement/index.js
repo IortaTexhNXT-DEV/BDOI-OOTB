@@ -466,15 +466,16 @@ const SettlementProcessing = () => {
                   </div>
 
                   <DataTable value={policies} className="policy-table" loading={loading} emptyMessage={t("common.noData")}>
-                    <Column field="policyNo" header={t("remittance.policyNo")} style={{ width: '12%' }} />
-                    <Column field="insuredName" header={t("remittance.insuredName")} style={{ width: '18%' }} />
-                    <Column field="product" header={t("remittance.product")} style={{ width: '10%' }} />
-                    <Column body={(data) => amountBodyTemplate(data, 'premium')} header={t("remittance.premium")} style={{ width: '12%', textAlign: 'right' }} />
-                    <Column body={percentageBodyTemplate} header={t("remittance.commissionRate")} style={{ width: '8%', textAlign: 'center' }} />
-                    <Column body={(data) => amountBodyTemplate(data, 'commission')} header={t("remittance.commission")} style={{ width: '12%', textAlign: 'right' }} />
-                    <Column body={(data) => amountBodyTemplate(data, 'tax')} header={t("remittance.tax")} style={{ width: '10%', textAlign: 'right' }} />
-                    <Column body={(data) => amountBodyTemplate(data, 'netAmount')} header={t("remittance.netAmount")} style={{ width: '13%', textAlign: 'right' }} />
-                    <Column body={actionBodyTemplate} style={{ width: '5%' }} />
+                    <Column field="policyNo" header={t("remittance.policyNo")} body={(r) => (
+                      <span className="bv-cell-stack"><span className="rm-ref">{r.policyNo}</span><small>{[r.insuredName, r.product].filter(Boolean).join(" · ")}</small></span>
+                    )} />
+                    <Column body={(data) => amountBodyTemplate(data, 'premium')} header={t("remittance.premium")} className="bv-num" headerClassName="bv-num" />
+                    <Column header={t("remittance.commission")} className="bv-num" headerClassName="bv-num" body={(data) => (
+                      <span className="bv-cell-stack bv-cell-stack--end"><span>{amountBodyTemplate(data, 'commission')}</span><small>{percentageBodyTemplate(data)}</small></span>
+                    )} />
+                    <Column body={(data) => amountBodyTemplate(data, 'tax')} header={t("remittance.tax")} className="bv-num" headerClassName="bv-num" />
+                    <Column body={(data) => <strong>{amountBodyTemplate(data, 'netAmount')}</strong>} header={t("remittance.netAmount")} className="bv-num" headerClassName="bv-num" />
+                    <Column body={actionBodyTemplate} className="bv-actions" headerClassName="bv-actions" />
                   </DataTable>
                 </div>
             ) : null}
@@ -719,11 +720,11 @@ const SettlementProcessing = () => {
               className="policy-selection-table"
             >
               <Column selectionMode="multiple" style={{ width: '3em' }} />
-              <Column field="policyNo" header="Policy No" />
-              <Column field="insuredName" header="Insured" />
-              <Column field="product" header="Product" />
-              <Column body={(data) => amountBodyTemplate(data, 'premium')} header="Premium" />
-              <Column body={(data) => amountBodyTemplate(data, 'commission')} header="Commission" />
+              <Column field="policyNo" header={t("remittance.policyNo")} body={(r) => (
+                <span className="bv-cell-stack"><span className="rm-ref">{r.policyNo}</span><small>{[r.insuredName, r.product].filter(Boolean).join(" · ")}</small></span>
+              )} />
+              <Column body={(data) => amountBodyTemplate(data, 'premium')} header={t("remittance.premium")} className="bv-num" headerClassName="bv-num" />
+              <Column body={(data) => amountBodyTemplate(data, 'commission')} header={t("remittance.commission")} className="bv-num" headerClassName="bv-num" />
             </DataTable>
           </Dialog>
 

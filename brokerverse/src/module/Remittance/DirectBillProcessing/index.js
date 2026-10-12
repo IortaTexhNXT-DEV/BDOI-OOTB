@@ -432,18 +432,23 @@ const DirectBillProcessing = () => {
             <DataTable value={items} selection={selected} onSelectionChange={(e) => setSelected(e.value)} dataKey="id" className="policy-grid" loading={loadingItems}
               emptyMessage={t("remittance.billing.emptyPolicies")} scrollable stripedRows size="small">
               <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-              <Column field="policyNo" header={t("remittance.billing.columns.policyNo")} />
-              <Column field="reference" header={t("remittance.billing.columns.reference")} body={(r) => (r.reference && r.reference !== r.policyNo ? r.reference : "-")} />
-              <Column field="insuredName" header={t("remittance.billing.columns.insured")} />
-              <Column field="product" header={t("remittance.billing.columns.product")} />
-              <Column field="lineOfBusiness" header={t("remittance.billing.columns.line")} />
-              <Column field="bookedOn" body={dateBody("bookedOn")} header={t("remittance.billing.columns.issued")} />
-              <Column field="grossPremium" header={t("remittance.billing.columns.grossPremium")} body={money("grossPremium")} className="text-right" />
-              <Column field="commissionRate" header={t("remittance.billing.columns.rate")} body={(r) => (r.commissionRate == null ? "-" : `${Number(r.commissionRate).toFixed(2)}%`)} className="text-right" />
-              <Column field="commission" header={t("remittance.billing.columns.commission")} body={money("commission")} className="text-right" />
-              <Column field="vat" header={t("remittance.billing.columns.vat")} body={money("vat")} className="text-right" />
-              <Column field="totalDue" header={t("remittance.billing.columns.totalDue")} body={(r) => <strong>{formatCurrency(r.totalDue)}</strong>} className="text-right" />
-              <Column field="expectedEwt" header={t("remittance.billing.columns.ewt")} body={money("expectedEwt")} className="text-right" />
+              {/* fits at 1366px: each figure with its parts under it */}
+              <Column field="policyNo" header={t("remittance.billing.columns.policyNo")} body={(r) => (
+                <span className="bv-cell-stack"><span className="rm-ref">{r.policyNo}</span><small>{[r.reference && r.reference !== r.policyNo ? r.reference : null, r.insuredName].filter(Boolean).join(" · ")}</small></span>
+              )} />
+              <Column field="product" header={t("remittance.billing.columns.product")} body={(r) => (
+                <span className="bv-cell-stack"><span>{r.product}</span><small>{r.lineOfBusiness}</small></span>
+              )} />
+              <Column field="bookedOn" body={dateBody("bookedOn")} header={t("remittance.billing.columns.issued")} bodyClassName="bv-nowrap" />
+              <Column field="grossPremium" header={t("remittance.billing.columns.grossPremium")} body={money("grossPremium")} className="bv-num" headerClassName="bv-num" />
+              <Column field="commission" header={t("remittance.billing.columns.commission")} className="bv-num" headerClassName="bv-num" body={(r) => (
+                <span className="bv-cell-stack bv-cell-stack--end"><span>{formatCurrency(r.commission)}</span>
+                  <small>{t("remittance.billing.rateVat", "{{rate}} · VAT {{vat}}", { rate: r.commissionRate == null ? "-" : `${Number(r.commissionRate).toFixed(2)}%`, vat: formatCurrency(r.vat) })}</small></span>
+              )} />
+              <Column field="totalDue" header={t("remittance.billing.columns.totalDue")} className="bv-num" headerClassName="bv-num" body={(r) => (
+                <span className="bv-cell-stack bv-cell-stack--end"><strong>{formatCurrency(r.totalDue)}</strong>
+                  <small>{t("remittance.billing.ewtOf", "EWT {{ewt}}", { ewt: formatCurrency(r.expectedEwt) })}</small></span>
+              )} />
               <Column field="clientPaymentStatus" header={t("remittance.billing.columns.clientPaid")} body={clientPaymentBody} style={{ minWidth: "11rem" }} />
               <Column field="bookingJournal" header={t("remittance.billing.columns.bookedIn")} />
             </DataTable>
@@ -519,17 +524,22 @@ const DirectBillProcessing = () => {
                   <div className="text-sm text-500">{[t(`directBillBasis.document.${r.basis || "direct"}`), r.productLine].filter(Boolean).join(" · ")}</div>
                 </div>
               )} />
-              <Column field="dnDate" body={dateBody("dnDate")} header={t("remittance.billing.columns.date")} />
-              <Column field="insurerName" header={t("remittance.billing.columns.insurer")} />
-              <Column field="policyCount" header={t("remittance.billing.columns.policies")} />
-              <Column field="commission" header={t("remittance.billing.columns.commission")} body={money("commission")} className="text-right" />
-              <Column field="vat" header={t("remittance.billing.columns.vat")} body={money("vat")} className="text-right" />
-              <Column field="amount" header={t("remittance.billing.columns.totalDue")} body={money("amount")} className="text-right" />
-              <Column field="collectedAmount" header={t("remittance.billing.columns.collected")} body={money("collectedAmount")} className="text-right" />
-              <Column field="balance" header={t("remittance.billing.columns.balance")} body={(r) => <strong>{formatCurrency(r.balance)}</strong>} className="text-right" />
-              <Column field="dueDate" body={dateBody("dueDate")} header={t("remittance.billing.columns.due")} />
+              <Column field="dnDate" header={t("remittance.billing.columns.date")} bodyClassName="bv-nowrap" body={(r) => (
+                <span className="bv-cell-stack"><span>{dateBody("dnDate")(r)}</span><small>{t("remittance.billing.dueOn", "due {{date}}", { date: dateBody("dueDate")(r) })}</small></span>
+              )} />
+              <Column field="insurerName" header={t("remittance.billing.columns.insurer")} body={(r) => (
+                <span className="bv-cell-stack"><span>{r.insurerName}</span><small>{t("remittance.billing.policyCount", "{{count}} policies", { count: r.policyCount })}</small></span>
+              )} />
+              <Column field="amount" header={t("remittance.billing.columns.totalDue")} className="bv-num" headerClassName="bv-num" body={(r) => (
+                <span className="bv-cell-stack bv-cell-stack--end"><span>{formatCurrency(r.amount)}</span>
+                  <small>{t("remittance.billing.commissionVat", "commission {{commission}} · VAT {{vat}}", { commission: formatCurrency(r.commission), vat: formatCurrency(r.vat) })}</small></span>
+              )} />
+              <Column field="balance" header={t("remittance.billing.columns.balance")} className="bv-num" headerClassName="bv-num" body={(r) => (
+                <span className="bv-cell-stack bv-cell-stack--end"><strong>{formatCurrency(r.balance)}</strong>
+                  <small>{t("remittance.billing.collectedOf", "collected {{amount}}", { amount: formatCurrency(r.collectedAmount) })}</small></span>
+              )} />
               <Column field="status" header={t("remittance.billing.columns.status")} body={noteStatus} style={{ minWidth: "10rem" }} />
-              <Column header={<span className="p-sr-only">{t("remittance.billing.actionsHeader")}</span>} align="center" style={{ width: "3.5rem" }}
+              <Column header={<span className="p-sr-only">{t("remittance.billing.actionsHeader")}</span>} className="bv-actions" headerClassName="bv-actions"
                 body={(r) => <RowActions label={t("remittance.billing.actionsFor", { reference: r.dnNumber })} actions={noteActions(r)} labelOf={noteActionLabel} onAction={onNoteAction(r)} />} />
             </DataTable>
           </div>
