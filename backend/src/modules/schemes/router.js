@@ -19,7 +19,7 @@ import { previewPremiums } from './rating.js';
 import { policySchemePanel } from './panel.js';
 
 const { router, define } = moduleRouter('Scheme Master', '/schemes');
-const SCREEN = 'Operations > Sales & Marketing > Scheme Master';
+const SCREEN = 'Sales & Placement > Scheme Master';
 const canRead = [requireAuth, requirePermission('read:schemes', 'write:schemes', 'approve:schemes')];
 const canWrite = [requireAuth, requirePermission('write:schemes')];
 const canApprove = [requireAuth, requirePermission('approve:schemes')];
@@ -98,7 +98,7 @@ define({
 });
 define({
   method: 'GET', path: '/policies/:policyId', summary: 'Scheme panel of a policy: scheme, version, vehicle line, policy year of the term, sums insured, rates, commission, dealer and TISPH shares, and the issuance data (application, loan, KYC source, ARA, waived documents)',
-  screen: 'Operations > Policy > Policy detail > Scheme', middleware: [requireAuth, requirePermission('read:policies')],
+  screen: 'Policy Servicing > Policy > Policy detail > Scheme', middleware: [requireAuth, requirePermission('read:policies')],
   response: { success: true, data: { schemeNo: 'S1-STD-2027', version: 1, lineNo: 1, policyYear: 1, termYears: 5, label: 'S1-STD-2027 v1, line 1, Year 1 of 5', commission: 6781.25, dealerShare: 5764.06, tisphShare: 1017.19 } },
   handler: async (req, res) => res.json({ success: true, data: await policySchemePanel(req.params.policyId) }),
 });

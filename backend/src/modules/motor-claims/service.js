@@ -1,5 +1,5 @@
 /**
- * Motor claim repairs (Operations > Motor Claim Repairs).
+ * Motor claim repairs (Policy Servicing > Motor Claim Repairs).
  *
  * The repair shop (master repair-shop, accredited shops) sends an estimate; the claims officer records it and then the
  * decision of the insurer's adjuster (approved amount, adjuster, date, the insurer's reference). Work found during the

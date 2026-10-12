@@ -63,150 +63,153 @@ export const menuList = [
     ],
   },
   {
-    name: "Operations",
-    icon: "pi pi-briefcase",
+    // Sales & Placement, the start of the value chain (BRD 5.1-5.3): leads, quotation, placement with the insurer and
+    // the scheme applications, then the sales-side set-up (dealer programmes, promotions, Scheme Master). Quick Quote and
+    // Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js).
+    name: "Sales & Placement",
+    icon: "pi pi-megaphone",
     submenu: [
       {
-        // Sales & Marketing: prospects, quick quotes for package products, requests for quotation (broker slips) and
-        // quotations for non-package risks, and the placement slips that bind them with the insurers
-        id: 29,
-        name: "Sales & Marketing",
-        submenu: [
-          {
-            id: 30,
-            // the prospect (lead) list and the motor quote and policy conversion screens opened from it
-            name: "Prospects",
-            path: "/agent/leadlisting",
-            includes: [
-              "/agent/createlead/employee-benefit",
-              "/agent/createlead/fire-allied-perils",
-              "/agent/leadlisting",
-              "/agent/createlead",
-              "/createquote/policydetails/createquote/",
-              "/createquote/coveragedetails/coveragecreate/",
-              "/createquote/accessories/accessoriescreate/",
-              "/agent/createquote/ordersummary",
-              "/agent/quotedetailview",
-              "/agent/convertpolicy/customerinfo/view/",
-              "/agent/convertpolicy/customerinfo/fire/new/",
-              "/agent/convertpolicy/uploadvehiclephotos",
-              "/agent/coveragedetailedview",
-              "/agent/policyapproval",
-              "/agent/uploadpolicy",
-              "/agent/createquote/policydetails/createquote/",
-              "/agent/createquote/coveragedetails/coveragecreate/",
-              "/agent/leadedit",
-              "/agent/createquote/accessories/accessoriescreate/",
-              "/agent/quotelisting",
-              "/agent/convertpolicy/customerinfo/edit/",
-              "/agent/editquote/policydetails/quotedetails/",
-              "/agent/quotedetailedit",
-            ],
-            permissions: ["read:leads"],
-          },
-          // TISPH journey: leads (prospects, their assignment and the account executives' activities; the SALES stream's
-          // lead entries such as call lists go after Lead Assignment) -> quotation (requests for quotation and the
-          // client comparison of the PA market, PJRN-05) -> placement with the insurer -> dealer and bank programmes ->
-          // promotions (PROD-15).
-          // Quick Quote and Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js).
-          {
-            id: 36,
-            name: "Lead Assignment",
-            path: "/sales/lead-assignment",
-            includes: ["/sales/lead-assignment"],
-            permissions: ["read:leads"],
-          },
-          {
-            id: 50,
-            name: "Sales Activities",
-            path: "/sales/activities",
-            includes: ["/sales/activities"],
-            permissions: ["read:sales-activities"],
-          },
-          {
-            id: 33,
-            name: "Quotations",
-            path: "/agent/Quotation",
-            includes: [
-              "/agent/Quotation",
-              "/agent/employee-benefit/create-quote",
-              "/agent/employee-benefit/create-quote-employeebulkupload",
-              "/agent/employee-benefit/create-quote-Coverage-details",
-              "/agent/employee-benefit/create-quote-order-summary",
-              "/agent/employee-benefit/create-quote-quote-details",
-            ],
-            permissions: ["read:quotations"],
-          },
-          {
-            // the broker slip is the request for quotation sent to several insurers
-            id: 32,
-            name: "Request for Quotation",
-            path: "/placement/broker-slips",
-            includes: ["/placement/broker-slips"],
-            permissions: ["read:quotations"],
-          },
-          {
-            id: 38,
-            name: "Comparison Reports",
-            path: "/sales/comparison-reports",
-            includes: ["/sales/comparison-reports"],
-            permissions: ["read:quotations"],
-          },
-          {
-            // firm orders to the insurers through to the e-policy, its check against the slip and the booking
-            id: 34,
-            name: "Placement Slips",
-            path: "/placement/placement-slips",
-            includes: ["/placement/placement-slips", "/placement/record-epolicy"],
-            permissions: ["read:quotations"],
-          },
-          {
-            id: 37,
-            name: "Dealer Programmes",
-            path: "/sales/dealer-programmes",
-            includes: ["/sales/dealer-programmes"],
-            permissions: ["read:motor-programmes"],
-          },
-          {
-            // promotional rates on brand-new vehicles (PROD-15), after the dealer and bank programmes they may combine with
-            id: 52,
-            name: "Promotions",
-            path: "/sales/promotions",
-            includes: ["/sales/promotions"],
-            permissions: ["read:promotions"],
-          },
-          {
-            // Scheme 1 and Scheme 2 bundling schemes agreed with TFSPH, the dealers and the insurers (TIS-BRD-SCHM-02)
-            id: 53,
-            name: "Scheme Master",
-            path: "/sales/scheme-master",
-            includes: ["/sales/scheme-master"],
-            permissions: ["read:schemes"],
-          },
-          {
-            // scheme applications on TFS loan documents, the loan bookings upload, checklist, placement and policy (TIS-BRD-SCHM-01, CR-05)
-            id: 54,
-            name: "Scheme Issuance",
-            path: "/sales/scheme-issuance",
-            includes: ["/sales/scheme-issuance"],
-            permissions: ["read:scheme-issuance"],
-          },
-          {
-            id: 31,
-            name: "Quick Quote",
-            path: "/sales/quick-quote",
-            includes: ["/sales/quick-quote"],
-            permissions: ["write:quotations"],
-          },
-          {
-            id: 39,
-            name: "Campaigns",
-            path: "/sales/campaigns",
-            includes: ["/sales/campaigns"],
-            permissions: ["read:campaigns"],
-          },
+        id: 30,
+        // the prospect (lead) list and the motor quote and policy conversion screens opened from it
+        name: "Prospects",
+        path: "/agent/leadlisting",
+        includes: [
+          "/agent/createlead/employee-benefit",
+          "/agent/createlead/fire-allied-perils",
+          "/agent/leadlisting",
+          "/agent/createlead",
+          "/createquote/policydetails/createquote/",
+          "/createquote/coveragedetails/coveragecreate/",
+          "/createquote/accessories/accessoriescreate/",
+          "/agent/createquote/ordersummary",
+          "/agent/quotedetailview",
+          // conversion of a quotation into a policy, its upload and approval (kept here: the route guard of the roles
+          // that convert quotations follows Prospects)
+          "/agent/convertpolicy/customerinfo/view/",
+          "/agent/convertpolicy/customerinfo/fire/new/",
+          "/agent/convertpolicy/uploadvehiclephotos",
+          "/agent/policyapproval",
+          "/agent/uploadpolicy",
+          "/agent/convertpolicy/customerinfo/edit/",
+          "/agent/coveragedetailedview",
+          "/agent/createquote/policydetails/createquote/",
+          "/agent/createquote/coveragedetails/coveragecreate/",
+          "/agent/leadedit",
+          "/agent/createquote/accessories/accessoriescreate/",
+          "/agent/quotelisting",
+          "/agent/editquote/policydetails/quotedetails/",
+          "/agent/quotedetailedit",
         ],
+        permissions: ["read:leads"],
       },
+      {
+        id: 36,
+        name: "Lead Assignment",
+        path: "/sales/lead-assignment",
+        includes: ["/sales/lead-assignment"],
+        permissions: ["read:leads"],
+      },
+      {
+        id: 50,
+        name: "Sales Activities",
+        path: "/sales/activities",
+        includes: ["/sales/activities"],
+        permissions: ["read:sales-activities"],
+      },
+      {
+        id: 33,
+        name: "Quotations",
+        path: "/agent/Quotation",
+        includes: [
+          "/agent/Quotation",
+          "/agent/employee-benefit/create-quote",
+          "/agent/employee-benefit/create-quote-employeebulkupload",
+          "/agent/employee-benefit/create-quote-Coverage-details",
+          "/agent/employee-benefit/create-quote-order-summary",
+          "/agent/employee-benefit/create-quote-quote-details",
+        ],
+        permissions: ["read:quotations"],
+      },
+      {
+        // the broker slip is the request for quotation sent to several insurers
+        id: 32,
+        name: "Request for Quotation",
+        path: "/placement/broker-slips",
+        includes: ["/placement/broker-slips"],
+        permissions: ["read:quotations"],
+      },
+      {
+        id: 38,
+        name: "Comparison Reports",
+        path: "/sales/comparison-reports",
+        includes: ["/sales/comparison-reports"],
+        permissions: ["read:quotations"],
+      },
+      {
+        // firm orders to the insurers through to the e-policy, its check against the slip and the booking
+        id: 34,
+        name: "Placement Slips",
+        path: "/placement/placement-slips",
+        includes: [
+          "/placement/placement-slips",
+          "/placement/record-epolicy",
+        ],
+        permissions: ["read:quotations"],
+      },
+      {
+        // scheme applications on TFS loan documents, the loan bookings upload, checklist, placement and policy (TIS-BRD-SCHM-01, CR-05)
+        id: 54,
+        name: "Scheme Issuance",
+        path: "/sales/scheme-issuance",
+        includes: ["/sales/scheme-issuance"],
+        permissions: ["read:scheme-issuance"],
+      },
+      {
+        id: 37,
+        name: "Dealer Programmes",
+        path: "/sales/dealer-programmes",
+        includes: ["/sales/dealer-programmes"],
+        permissions: ["read:motor-programmes"],
+      },
+      {
+        // promotional rates on brand-new vehicles (PROD-15), after the dealer and bank programmes they may combine with
+        id: 52,
+        name: "Promotions",
+        path: "/sales/promotions",
+        includes: ["/sales/promotions"],
+        permissions: ["read:promotions"],
+      },
+      {
+        // Scheme 1 and Scheme 2 bundling schemes agreed with TFSPH, the dealers and the insurers (TIS-BRD-SCHM-02)
+        id: 53,
+        name: "Scheme Master",
+        path: "/sales/scheme-master",
+        includes: ["/sales/scheme-master"],
+        permissions: ["read:schemes"],
+      },
+      {
+        id: 31,
+        name: "Quick Quote",
+        path: "/sales/quick-quote",
+        includes: ["/sales/quick-quote"],
+        permissions: ["write:quotations"],
+      },
+      {
+        id: 39,
+        name: "Campaigns",
+        path: "/sales/campaigns",
+        includes: ["/sales/campaigns"],
+        permissions: ["read:campaigns"],
+      },
+    ],
+  },
+  {
+    // Policy Servicing (BRD 5.4-5.8): the client and the policy, then what happens to a policy in force: endorsement,
+    // cancellation, renewal and claims
+    name: "Policy Servicing",
+    icon: "pi pi-briefcase",
+    submenu: [
       {
         name: "Clients",
         path: "/agent/clientlisting",
@@ -219,36 +222,14 @@ export const menuList = [
           "/agent/policydetailedview",
           "/agent/policydetailedview/accountview",
           "/agent/policydetailedviewonly",
-          "/agent/claimrequest/claimdetails",
-          "/agent/claimrequest/sendmail",
-          "/agent/claimrequest/requestapproval/",
-          "/agent/claimrequest/adjustersubmission",
-          "/agent/claimrequest/settlementapproval",
-          "/agent/claimrequest/settlementdetails/",
-          "/agent/claimdetailedview/",
           "/agent/renewalquote/coveragedetails/coveragedetail/",
           "/agent/createquote/accessories/accessorirsdetails/",
           "/agent/createquote/ordersummaryquote",
-          "/agent/endorsement/paymentconfirmation",
-          "/agent/policy/paymentoptions",
-          "/agent/endorsement/paymenterror/",
-          "/agent/uploadendorsement",
-          "/agent/endorsementdetailedview/123",
-          "/agent/endorsement/paymentconfirmation",
-          "/agent/endorsement/personaldetails",
-          "/agent/uploadendorsement",
-          "/agent/endorsementdetailedview/123",
-          "/agent/endorsement/paymentconfirmation",
           "/agent/policy/paymentapproval",
           "/agent/renewal/waiting/",
           "/agent/renewalquote/accessories/accessorirsdetails/",
           "/agent/renewalquote/ordersummary",
-          "/agent/endorsementdetailedview/",
-          "/agent/endorsement/rejected/",
           "/agent/createquote/coveragedetails/coveragedetail/",
-          "/agent/claimrejected",
-          "/agent/claimdocumentupload",
-          "/agent/endorsementdetailedviewonly/",
           "/agent/employee-benefit/client-policy-details",
         ],
         permissions: ["read:clients"],
@@ -258,12 +239,15 @@ export const menuList = [
         path: "/agent/policy",
         includes: [
           "/agent/policy",
+          // payment captured on a policy (verified by Finance under Receipts)
+          "/agent/policy/paymentoptions",
           "/agent/employee-benefit/policy-waiting-for-policy",
           "/agent/employee-benefit/policy-upload-policy",
         ],
         permissions: ["read:policies"],
       },
-      // one policy for many vehicles, and marine cargo open covers with their certificates and declarations
+      // cover notes on issuance; one policy for many vehicles; parcel / courier open covers
+      { id: 40, name: "Cover Notes", path: "/operations/cover-notes", includes: ["/operations/cover-notes"], permissions: ["read:policies"] },
       {
         name: "Fleet Schedules",
         path: "/operations/fleet-schedules",
@@ -283,20 +267,38 @@ export const menuList = [
         includes: ["/operations/credit-life"],
         permissions: ["read:credit-life"],
       },
-
       {
-        name: "Claims",
-        path: "/agent/claim",
-        includes: ["/agent/claim"],
-        permissions: ["read:claims"],
+        // endorsements of every policy as a work list (TIS-BRD-ENDT-02): to submit, to approve, to send and to complete
+        id: 44,
+        name: "Endorsements",
+        path: "/operations/endorsements",
+        includes: [
+          "/operations/endorsements",
+          "/agent/endorsement/",
+          "/agent/uploadendorsement",
+          "/agent/endorsementdetailedview/",
+          "/agent/endorsementdetailedviewonly/",
+        ],
+        permissions: ["read:endorsements"],
       },
+      { id: 41, name: "Policy Cancellation", path: "/operations/policy-cancellation", includes: ["/operations/policy-cancellation"], permissions: ["read:endorsements"] },
       {
         id: 9,
         name: "Renewals",
         submenu: [
           {
+            id: 1,
+            name: "Renewal Queue",
+            path: "/renewal/queue",
+            includes: ["/renewal/queue", "/renewal/generate-quote"],
+          },
+          {
+            // merged into the Renewal Queue (one work queue, RENEW-01): kept for the grants, the route guard and the
+            // menu search, not drawn in the tree
             id: 18,
             name: "Renewal Policy",
+            searchOnly: true,
+            home: "Renewal Queue",
             path: "/agent/expired-policies",
             includes: ["/agent/expired-policies"],
           },
@@ -307,38 +309,20 @@ export const menuList = [
             includes: ["/agent/renewal-batch"],
           },
           {
-            // Talkbot call lists of Motor renewals (TIS-BRD-LEAD-09)
-            id: 20,
-            name: "Talkbot Calls",
-            path: "/renewal/talkbot",
-            includes: ["/renewal/talkbot"],
-            permissions: ["read:talkbot-calls"],
-          },
-          {
-            id: 1,
-            name: "Renewal Queue",
-            path: "/renewal/queue",
-            includes: ["/renewal/queue", "/renewal/generate-quote"],
-          },
-          {
-            id: 2,
-            name: "Retention Analytics",
-            path: "/renewal/analytics",
-            includes: ["/renewal/analytics"],
-          },
-          {
-            id: 3,
-            name: "At-Risk Policies",
-            path: "/renewal/at-risk",
-            includes: ["/renewal/at-risk"],
-          },
-          {
             // 60-day review of lock-in and Scheme 2 accounts, TFS loan status uploads, Lock-in / Scheme 2 expiry report (TIS-BRD-SCHM-03, RPT-SLS-05)
             id: 7,
             name: "Lock-in Review",
             path: "/renewal/lock-in-review",
             includes: ["/renewal/lock-in-review", "/renewal/lock-in-accounts"],
             permissions: ["read:lock-in"],
+          },
+          {
+            // Talkbot call lists of Motor renewals (TIS-BRD-LEAD-09)
+            id: 20,
+            name: "Talkbot Calls",
+            path: "/renewal/talkbot",
+            includes: ["/renewal/talkbot"],
+            permissions: ["read:talkbot-calls"],
           },
           {
             id: 4,
@@ -353,6 +337,18 @@ export const menuList = [
             includes: ["/renewal/lapse-management"],
           },
           {
+            id: 2,
+            name: "Retention Analytics",
+            path: "/renewal/analytics",
+            includes: ["/renewal/analytics"],
+          },
+          {
+            id: 3,
+            name: "At-Risk Policies",
+            path: "/renewal/at-risk",
+            includes: ["/renewal/at-risk"],
+          },
+          {
             id: 6,
             name: "Performance",
             path: "/renewal/performance",
@@ -361,11 +357,25 @@ export const menuList = [
         ],
       },
       {
-        name: "Payments",
-        path: "/agent/payments",
-        includes: ["/agent/payments"],
-        permissions: ["read:payments"],
+        name: "Claims",
+        path: "/agent/claim",
+        // the claim steps opened from a policy or a client light up Claims
+        includes: [
+          "/agent/claim",
+          "/agent/claimrequest/claimdetails",
+          "/agent/claimrequest/sendmail",
+          "/agent/claimrequest/requestapproval/",
+          "/agent/claimrequest/adjustersubmission",
+          "/agent/claimrequest/settlementapproval",
+          "/agent/claimrequest/settlementdetails/",
+          "/agent/claimdetailedview/",
+          "/agent/claimrejected",
+          "/agent/claimdocumentupload",
+        ],
+        permissions: ["read:claims"],
       },
+      { id: 42, name: "Claim Documents", path: "/operations/claim-documents", includes: ["/operations/claim-documents"], permissions: ["read:claims"] },
+      { id: 43, name: "Motor Claim Repairs", path: "/operations/motor-claim-repairs", includes: ["/operations/motor-claim-repairs"], permissions: ["read:claims"] },
       {
         // CTPL certificates of cover: COC series, authentication with the IC-accredited provider, unauthenticated report
         name: "CTPL Authentication",
@@ -373,11 +383,6 @@ export const menuList = [
         includes: ["/operations/ctpl-authentication"],
         permissions: ["read:policies"],
       },
-      // cover notes, cancellation with computed return premium, claim document checklist and motor claim repairs
-      { id: 40, name: "Cover Notes", path: "/operations/cover-notes", includes: ["/operations/cover-notes"], permissions: ["read:policies"] },
-      { id: 41, name: "Policy Cancellation", path: "/operations/policy-cancellation", includes: ["/operations/policy-cancellation"], permissions: ["read:endorsements"] },
-      { id: 42, name: "Claim Documents", path: "/operations/claim-documents", includes: ["/operations/claim-documents"], permissions: ["read:claims"] },
-      { id: 43, name: "Motor Claim Repairs", path: "/operations/motor-claim-repairs", includes: ["/operations/motor-claim-repairs"], permissions: ["read:claims"] },
     ],
   },
   {
@@ -400,7 +405,24 @@ export const menuList = [
         ],
         permissions: ["read:receipts"],
       },
-  {
+      {
+        // policy payments to verify: merged into Receipts (one cash screen; the Receipts header links here). Kept for the
+        // grants, the route guard and the menu search, not drawn in the tree
+        name: "Payments",
+        path: "/agent/payments",
+        includes: ["/agent/payments"],
+        searchOnly: true,
+        home: "Receipts",
+        permissions: ["read:payments"],
+      },
+      {
+        id: 40,
+        name: "Post-Dated Cheques",
+        path: "/accounts/post-dated-cheques",
+        includes: ["/accounts/post-dated-cheques"],
+        permissions: ["read:pdc"],
+      },
+      {
         // money received that no bill takes yet: excess On Account, floating and advance payments
         id: 44,
         name: "Unapplied Collections",
@@ -408,14 +430,14 @@ export const menuList = [
         includes: ["/accounts/unapplied-collections"],
         permissions: ["read:receipts"],
       },
-  {
+      {
         id: 12,
         name: "Collections",
         path: "/agent/collections",
         includes: ["/agent/collections", "/agent/collections/aging-report"],
         permissions: ["read:collections"],
       },
-  {
+      {
         id: 24,
         name: "Credit Control",
         submenu: [
@@ -425,72 +447,34 @@ export const menuList = [
           { id: 4, name: "Remittance Ageing", path: "/accounts/credit-control/remittance-ageing", includes: ["/accounts/credit-control/remittance-ageing"] },
         ],
       },
-  // post-dated cheques, claims paid through the broker, accounts payable and fixed assets
-  {
-        id: 40,
-        name: "Post-Dated Cheques",
-        path: "/accounts/post-dated-cheques",
-        includes: ["/accounts/post-dated-cheques"],
-        permissions: ["read:pdc"],
-      },
-  {
-        id: 41,
-        name: "Claims Settlements",
-        path: "/accounts/claims-settlements",
-        includes: ["/accounts/claims-settlements"],
-        permissions: ["read:receipts"],
-      },
-  {
-        id: 42,
-        name: "Payables",
+      {
+        id: 22,
+        name: "Bank Reconciliation",
         submenu: [
-          { id: 1, name: "Supplier Invoices", path: "/accounts/payables/invoices", includes: ["/accounts/payables/invoices"] },
-          { id: 2, name: "Supplier Payments", path: "/accounts/payables/payments", includes: ["/accounts/payables/payments"] },
-          { id: 3, name: "AP Ageing", path: "/accounts/payables/ageing", includes: ["/accounts/payables/ageing"] },
-          { id: 4, name: "Suppliers", path: "/accounts/payables/suppliers", includes: ["/accounts/payables/suppliers"] },
-          // BIR Form 2307 of the expanded withholding tax withheld from suppliers
-          { id: 5, name: "Supplier 2307", path: "/accounts/payables/2307", includes: ["/accounts/payables/2307"] },
+          { id: 1, name: "Reconciliation Workspace", path: "/accounts/bank-reconciliation", includes: ["/accounts/bank-reconciliation"] },
+          { id: 2, name: "Reconciliations", path: "/accounts/bank-reconciliation/reconciliations", includes: ["/accounts/bank-reconciliation/reconciliations"] },
+          { id: 3, name: "Reconciliation Statement Report", path: "/accounts/bank-reconciliation/reports/bank-reconciliation-statement", includes: ["/accounts/bank-reconciliation/reports/bank-reconciliation-statement"] },
+          { id: 4, name: "Outstanding Cheques", path: "/accounts/bank-reconciliation/reports/bank-outstanding-cheques", includes: ["/accounts/bank-reconciliation/reports/bank-outstanding-cheques"] },
+          { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
+          { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
+          { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
         ],
       },
-  {
-        id: 43,
-        name: "Fixed Assets",
-        submenu: [
-          { id: 1, name: "Asset Register", path: "/accounts/fixed-assets/register", includes: ["/accounts/fixed-assets/register"] },
-          { id: 2, name: "Depreciation Run", path: "/accounts/fixed-assets/depreciation", includes: ["/accounts/fixed-assets/depreciation"] },
-          // sale or write-off of an asset and the disposal register
-          { id: 3, name: "Disposals", path: "/accounts/fixed-assets/disposals", includes: ["/accounts/fixed-assets/disposals"] },
-        ],
-      },
-  {
-        id: 2,
-        name: "Disbursement",
-        path: "/accounts/paymentvoucher",
-        includes: [
-          "/accounts/paymentvoucher",
-          "/accounts/paymentvoucher/createvoucher",
-          "/accounts/paymentvoucher/bulk-disburse",
-          "/accounts/paymentvoucher/invoicelist/",
-          "/accounts/paymentvoucher/detailview/",
-          "/accounts/paymentvoucher/SpecificVoucher",
-          "/accounts/paymentvoucher/bankdetailselection",
-        ],
-        permissions: ["read:disbursements"],
-      },
-  {
-        // payment vouchers paid by a bank's bulk credit / InstaPay / PESONet upload file
-        id: 30,
-        name: "Bank Payment Files",
-        path: "/accounts/bank-payment-files",
-        includes: ["/accounts/bank-payment-files"],
-        permissions: ["read:disbursements"],
-      },
-  {
-        // Accounts > Remittance (R1): seven entries, and Settlement until the payment path of R2 replaces it. Who sees
-        // which entry is set per role in utils/menuPermissions.js; the server's permissions decide what each may do.
+      {
+        // Accounts > Remittance in the order of the run (BRD 5.10): insurer billing (15th / 26th), the remittances and their
+        // approval, the payment to the insurer, the reconciliation of the insurer's statement with its exceptions and held
+        // policies, the settlement; Setup last. Insurer statements (formerly Accounts > Insurer Reconciliation) open under
+        // Reconciliation. Who sees which entry is set per role in utils/menuPermissions.js.
         id: 7,
         name: "Remittance",
         submenu: [
+          {
+            id: 6,
+            name: "Insurer billing",
+            path: "/finance/remittance/billing",
+            includes: ["/finance/remittance/billing"],
+            permissions: ["read:remittance"],
+          },
           {
             id: 1,
             name: "Remittances",
@@ -516,7 +500,7 @@ export const menuList = [
             id: 4,
             name: "Reconciliation",
             path: "/finance/remittance/reconciliation/insurer-statements",
-            includes: ["/finance/remittance/reconciliation"],
+            includes: ["/finance/remittance/reconciliation", "/accounts/insurer-reconciliation"],
             permissions: ["read:remittance"],
           },
           {
@@ -534,10 +518,10 @@ export const menuList = [
             permissions: ["read:remittance"],
           },
           {
-            id: 6,
-            name: "Insurer billing",
-            path: "/finance/remittance/billing",
-            includes: ["/finance/remittance/billing"],
+            id: 8,
+            name: "Settlement",
+            path: "/finance/remittance/settlement/process",
+            includes: ["/finance/remittance/settlement"],
             permissions: ["read:remittance"],
           },
           {
@@ -547,16 +531,121 @@ export const menuList = [
             includes: ["/finance/remittance/setup"],
             permissions: ["read:remittance"],
           },
+        ],
+      },
+      {
+        // commission (formerly the top-level Commission menu), computed in the remittance run (COMM-04/06), with the
+        // incentive after it
+        id: 45,
+        name: "Commission",
+        submenu: [
           {
-            id: 8,
-            name: "Settlement",
-            path: "/finance/remittance/settlement/process",
-            includes: ["/finance/remittance/settlement"],
-            permissions: ["read:remittance"],
+            id: 1,
+            name: "Commission Dashboard",
+            path: "/commission/dashboard",
+            includes: ["/commission/dashboard"],
+          },
+          {
+            id: 2,
+            name: "Agents/Referrer Accounts",
+            path: "/commission/referrer-accounts",
+            includes: [
+              "/commission/referrer-accounts",
+              "/commission/referrer-accounts/",
+            ],
+          },
+          // who is paid what of the commission: split lines with limits, assigned to referrers and channels (read:sharing-schemes)
+          {
+            id: 4,
+            name: "Sharing Schemes",
+            path: "/commission/sharing-schemes",
+            includes: ["/commission/sharing-schemes"],
+            permissions: ["read:sharing-schemes"],
+          },
+          // overriding, profit and contingent commission from insurers
+          { id: 5, name: "Insurer Override Agreements", path: "/commission/insurer-overrides/agreements", includes: ["/commission/insurer-overrides/agreements"] },
+          { id: 6, name: "Insurer Override Computations", path: "/commission/insurer-overrides/computations", includes: ["/commission/insurer-overrides/computations"] },
+        ],
+      },
+      {
+        id: 8,
+        name: "Incentive",
+        submenu: [
+          {
+            id: 1,
+            name: "My Programs",
+            path: "/incentive/my-programs",
+            includes: ["/incentive/my-programs"],
+          },
+          {
+            id: 2,
+            name: "Calculations",
+            path: "/incentive/calculations",
+            includes: ["/incentive/calculations"],
+          },
+          {
+            id: 3,
+            name: "Approvals",
+            path: "/incentive/approvals",
+            includes: ["/incentive/approvals"],
+          },
+          {
+            id: 4,
+            name: "Statement",
+            path: "/incentive/statement",
+            includes: ["/incentive/statement"],
+          },
+          {
+            id: 5,
+            name: "Reports",
+            path: "/incentive/reports",
+            includes: ["/incentive/reports"],
           },
         ],
       },
-  {
+      {
+        id: 2,
+        name: "Disbursement",
+        path: "/accounts/paymentvoucher",
+        includes: [
+          "/accounts/paymentvoucher",
+          "/accounts/paymentvoucher/createvoucher",
+          "/accounts/paymentvoucher/bulk-disburse",
+          "/accounts/paymentvoucher/invoicelist/",
+          "/accounts/paymentvoucher/detailview/",
+          "/accounts/paymentvoucher/SpecificVoucher",
+          "/accounts/paymentvoucher/bankdetailselection",
+        ],
+        permissions: ["read:disbursements"],
+      },
+      {
+        // payment vouchers paid by a bank's bulk credit / InstaPay / PESONet upload file
+        id: 30,
+        name: "Bank Payment Files",
+        path: "/accounts/bank-payment-files",
+        includes: ["/accounts/bank-payment-files"],
+        permissions: ["read:disbursements"],
+      },
+      {
+        id: 41,
+        name: "Claims Settlements",
+        path: "/accounts/claims-settlements",
+        includes: ["/accounts/claims-settlements"],
+        permissions: ["read:receipts"],
+      },
+      {
+        id: 42,
+        name: "Payables",
+        submenu: [
+          { id: 1, name: "Supplier Invoices", path: "/accounts/payables/invoices", includes: ["/accounts/payables/invoices"] },
+          { id: 2, name: "Supplier Payments", path: "/accounts/payables/payments", includes: ["/accounts/payables/payments"] },
+          { id: 3, name: "AP Ageing", path: "/accounts/payables/ageing", includes: ["/accounts/payables/ageing"] },
+          { id: 4, name: "Suppliers", path: "/accounts/payables/suppliers", includes: ["/accounts/payables/suppliers"] },
+          // BIR Form 2307 of the expanded withholding tax withheld from suppliers
+          { id: 5, name: "Supplier 2307", path: "/accounts/payables/2307", includes: ["/accounts/payables/2307"] },
+        ],
+      },
+      {
         id: 4,
         name: "Journal Voucher",
         path: "/accounts/journalvoucher",
@@ -567,7 +656,57 @@ export const menuList = [
         ],
         permissions: ["read:journalvoucher"],
       },
-  {
+      {
+        id: 5,
+        name: "Correction JV",
+        // merged into Journal Voucher (Correct and Reverse on its header): not drawn in the tree
+        searchOnly: true,
+        home: "Journal Voucher",
+        path: "/accounts/correctionsjv/correctionsjvdetails",
+        includes: ["/accounts/correctionsjv/correctionsjvdetails"],
+        permissions: ["read:correctionjv"],
+      },
+      {
+        id: 6,
+        name: "Reversal JV",
+        searchOnly: true,
+        home: "Journal Voucher",
+        path: "/accounts/reversaljv/reversaljvdetails",
+        includes: ["/accounts/reversaljv/reversaljvdetails"],
+        permissions: ["read:reversaljv"],
+      },
+      {
+        id: 15,
+        name: "Open Entry Matching",
+        path: "/accounts/open-entry-matching",
+        includes: ["/accounts/open-entry-matching"],
+        permissions: ["read:accounting"],
+      },
+      {
+        id: 16,
+        name: "Open Entry Unmatching",
+        // merged into Open Entry Matching (Unmatch on its header): not drawn in the tree
+        searchOnly: true,
+        home: "Open Entry Matching",
+        path: "/accounts/open-entry-unmatching",
+        includes: ["/accounts/open-entry-unmatching"],
+        permissions: ["read:accounting"],
+      },
+      {
+        id: 13,
+        name: "Accounting Query",
+        path: "/agent/accounting/query",
+        includes: ["/agent/accounting/query"],
+        permissions: ["read:accounting"],
+      },
+      {
+        id: 14,
+        name: "All Clients Accounting",
+        path: "/agent/accounting/all-clients-details",
+        includes: ["/agent/accounting/all-clients-details"],
+        permissions: ["read:accounting"],
+      },
+      {
         // daily SAP GL header and line files (TIS-BRD-INTG-04)
         id: 46,
         name: "SAP GL Export",
@@ -575,49 +714,48 @@ export const menuList = [
         includes: ["/accounts/sap-gl-export"],
         permissions: ["read:journalvoucher"],
       },
-  {
-        id: 5,
-        name: "Correction JV",
-        path: "/accounts/correctionsjv/correctionsjvdetails",
-        includes: ["/accounts/correctionsjv/correctionsjvdetails"],
-        permissions: ["read:correctionjv"],
+      {
+        id: 20,
+        name: "Period End",
+        submenu: [
+          { id: 1, name: "Period Management", path: "/accounts/period-end/periods", includes: ["/accounts/period-end/periods"] },
+          { id: 2, name: "Month-End Close", path: "/accounts/period-end/close", includes: ["/accounts/period-end/close"] },
+          { id: 3, name: "Year-End Close", path: "/accounts/period-end/year-end", includes: ["/accounts/period-end/year-end"] },
+          { id: 4, name: "Recurring Journals", path: "/accounts/period-end/recurring", includes: ["/accounts/period-end/recurring"] },
+          { id: 5, name: "Financial Statements", path: "/accounts/period-end/statements", includes: ["/accounts/period-end/statements"] },
+        ],
       },
-  {
-        id: 6,
-        name: "Reversal JV",
-        path: "/accounts/reversaljv/reversaljvdetails",
-        includes: ["/accounts/reversaljv/reversaljvdetails"],
-        permissions: ["read:reversaljv"],
+      {
+        id: 21,
+        name: "Tax",
+        submenu: [
+          { id: 1, name: "BIR Form 2307", path: "/accounts/tax/2307", includes: ["/accounts/tax/2307"] },
+          { id: 2, name: "VAT Summary", path: "/accounts/tax/reports/bir-vat-summary", includes: ["/accounts/tax/reports/bir-vat-summary"] },
+          { id: 3, name: "SAWT", path: "/accounts/tax/reports/bir-sawt", includes: ["/accounts/tax/reports/bir-sawt"] },
+          { id: 4, name: "QAP", path: "/accounts/tax/reports/bir-qap", includes: ["/accounts/tax/reports/bir-qap"] },
+          { id: 5, name: "SLSP Sales", path: "/accounts/tax/reports/bir-slsp-sales", includes: ["/accounts/tax/reports/bir-slsp-sales"] },
+          { id: 6, name: "SLSP Purchases", path: "/accounts/tax/reports/bir-slsp-purchases", includes: ["/accounts/tax/reports/bir-slsp-purchases"] },
+          // BIR forms, invoicing and tax: returns with filing records, DAT files, EOPT invoices, EIS, CAS pack
+          { id: 7, name: "Withholding Returns", path: "/accounts/tax/withholding-returns", includes: ["/accounts/tax/withholding-returns"] },
+          { id: 8, name: "Annual Alphalist 1604-E", path: "/accounts/tax/alphalist-1604e", includes: ["/accounts/tax/alphalist-1604e"] },
+          { id: 9, name: "Percentage Tax 2551Q", path: "/accounts/tax/percentage-tax", includes: ["/accounts/tax/percentage-tax"] },
+          { id: 10, name: "BIR DAT Files", path: "/accounts/tax/dat-files", includes: ["/accounts/tax/dat-files"] },
+          { id: 11, name: "Sales Invoices", path: "/accounts/tax/sales-invoices", includes: ["/accounts/tax/sales-invoices"] },
+          { id: 12, name: "E-Invoicing (EIS)", path: "/accounts/tax/eis", includes: ["/accounts/tax/eis"] },
+          { id: 13, name: "CAS Books and Documents", path: "/accounts/tax/cas", includes: ["/accounts/tax/cas"] },
+        ],
       },
-  {
-        id: 15,
-        name: "Open Entry Matching",
-        path: "/accounts/open-entry-matching",
-        includes: ["/accounts/open-entry-matching"],
-        permissions: ["read:accounting"],
+      {
+        id: 43,
+        name: "Fixed Assets",
+        submenu: [
+          { id: 1, name: "Asset Register", path: "/accounts/fixed-assets/register", includes: ["/accounts/fixed-assets/register"] },
+          { id: 2, name: "Depreciation Run", path: "/accounts/fixed-assets/depreciation", includes: ["/accounts/fixed-assets/depreciation"] },
+          // sale or write-off of an asset and the disposal register
+          { id: 3, name: "Disposals", path: "/accounts/fixed-assets/disposals", includes: ["/accounts/fixed-assets/disposals"] },
+        ],
       },
-  {
-        id: 16,
-        name: "Open Entry Unmatching",
-        path: "/accounts/open-entry-unmatching",
-        includes: ["/accounts/open-entry-unmatching"],
-        permissions: ["read:accounting"],
-      },
-  {
-        id: 13,
-        name: "Accounting Query",
-        path: "/agent/accounting/query",
-        includes: ["/agent/accounting/query"],
-        permissions: ["read:accounting"],
-      },
-  {
-        id: 14,
-        name: "All Clients Accounting",
-        path: "/agent/accounting/all-clients-details",
-        includes: ["/agent/accounting/all-clients-details"],
-        permissions: ["read:accounting"],
-      },
-  {
+      {
         id: 3,
         name: "Petty Cash",
         permissions: ["read:pettycash"],
@@ -678,136 +816,6 @@ export const menuList = [
               "/accounts/pettycash/replenishtdetailview",
             ],
           },
-        ],
-      },
-  {
-        id: 22,
-        name: "Bank Reconciliation",
-        submenu: [
-          { id: 1, name: "Reconciliation Workspace", path: "/accounts/bank-reconciliation", includes: ["/accounts/bank-reconciliation"] },
-          { id: 2, name: "Reconciliations", path: "/accounts/bank-reconciliation/reconciliations", includes: ["/accounts/bank-reconciliation/reconciliations"] },
-          { id: 3, name: "Reconciliation Statement Report", path: "/accounts/bank-reconciliation/reports/bank-reconciliation-statement", includes: ["/accounts/bank-reconciliation/reports/bank-reconciliation-statement"] },
-          { id: 4, name: "Outstanding Cheques", path: "/accounts/bank-reconciliation/reports/bank-outstanding-cheques", includes: ["/accounts/bank-reconciliation/reports/bank-outstanding-cheques"] },
-          { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
-          { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
-          { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
-        ],
-      },
-  {
-        id: 23,
-        name: "Insurer Reconciliation",
-        submenu: [
-          {
-            id: 1,
-            name: "Insurer Statements",
-            path: "/accounts/insurer-reconciliation/statements",
-            includes: ["/accounts/insurer-reconciliation/statements"],
-          },
-        ],
-      },
-  {
-        id: 21,
-        name: "Tax",
-        submenu: [
-          { id: 1, name: "BIR Form 2307", path: "/accounts/tax/2307", includes: ["/accounts/tax/2307"] },
-          { id: 2, name: "VAT Summary", path: "/accounts/tax/reports/bir-vat-summary", includes: ["/accounts/tax/reports/bir-vat-summary"] },
-          { id: 3, name: "SAWT", path: "/accounts/tax/reports/bir-sawt", includes: ["/accounts/tax/reports/bir-sawt"] },
-          { id: 4, name: "QAP", path: "/accounts/tax/reports/bir-qap", includes: ["/accounts/tax/reports/bir-qap"] },
-          { id: 5, name: "SLSP Sales", path: "/accounts/tax/reports/bir-slsp-sales", includes: ["/accounts/tax/reports/bir-slsp-sales"] },
-          { id: 6, name: "SLSP Purchases", path: "/accounts/tax/reports/bir-slsp-purchases", includes: ["/accounts/tax/reports/bir-slsp-purchases"] },
-          // BIR forms, invoicing and tax: returns with filing records, DAT files, EOPT invoices, EIS, CAS pack
-          { id: 7, name: "Withholding Returns", path: "/accounts/tax/withholding-returns", includes: ["/accounts/tax/withholding-returns"] },
-          { id: 8, name: "Annual Alphalist 1604-E", path: "/accounts/tax/alphalist-1604e", includes: ["/accounts/tax/alphalist-1604e"] },
-          { id: 9, name: "Percentage Tax 2551Q", path: "/accounts/tax/percentage-tax", includes: ["/accounts/tax/percentage-tax"] },
-          { id: 10, name: "BIR DAT Files", path: "/accounts/tax/dat-files", includes: ["/accounts/tax/dat-files"] },
-          { id: 11, name: "Sales Invoices", path: "/accounts/tax/sales-invoices", includes: ["/accounts/tax/sales-invoices"] },
-          { id: 12, name: "E-Invoicing (EIS)", path: "/accounts/tax/eis", includes: ["/accounts/tax/eis"] },
-          { id: 13, name: "CAS Books and Documents", path: "/accounts/tax/cas", includes: ["/accounts/tax/cas"] },
-        ],
-      },
-  {
-        id: 20,
-        name: "Period End",
-        submenu: [
-          { id: 1, name: "Period Management", path: "/accounts/period-end/periods", includes: ["/accounts/period-end/periods"] },
-          { id: 2, name: "Month-End Close", path: "/accounts/period-end/close", includes: ["/accounts/period-end/close"] },
-          { id: 3, name: "Year-End Close", path: "/accounts/period-end/year-end", includes: ["/accounts/period-end/year-end"] },
-          { id: 4, name: "Recurring Journals", path: "/accounts/period-end/recurring", includes: ["/accounts/period-end/recurring"] },
-          { id: 5, name: "Financial Statements", path: "/accounts/period-end/statements", includes: ["/accounts/period-end/statements"] },
-        ],
-      },
-  {
-        id: 8,
-        name: "Incentive",
-        submenu: [
-          {
-            id: 1,
-            name: "My Programs",
-            path: "/incentive/my-programs",
-            includes: ["/incentive/my-programs"],
-          },
-          {
-            id: 2,
-            name: "Calculations",
-            path: "/incentive/calculations",
-            includes: ["/incentive/calculations"],
-          },
-          {
-            id: 3,
-            name: "Approvals",
-            path: "/incentive/approvals",
-            includes: ["/incentive/approvals"],
-          },
-          {
-            id: 4,
-            name: "Statement",
-            path: "/incentive/statement",
-            includes: ["/incentive/statement"],
-          },
-          {
-            id: 5,
-            name: "Reports",
-            path: "/incentive/reports",
-            includes: ["/incentive/reports"],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    name: "Commission",
-    icon: "pi pi-percentage",
-    submenu: [
-      {
-        id: 1,
-        name: "Commission Dashboard",
-        path: "/commission/dashboard",
-        includes: ["/commission/dashboard"],
-      },
-      {
-        id: 2,
-        name: "Agents/Referrer Accounts",
-        path: "/commission/referrer-accounts",
-        includes: [
-          "/commission/referrer-accounts",
-          "/commission/referrer-accounts/",
-        ],
-      },
-      // who is paid what of the commission: split lines with limits, assigned to referrers and channels (read:sharing-schemes)
-      {
-        id: 4,
-        name: "Sharing Schemes",
-        path: "/commission/sharing-schemes",
-        includes: ["/commission/sharing-schemes"],
-        permissions: ["read:sharing-schemes"],
-      },
-      // overriding, profit and contingent commission from insurers
-      {
-        id: 3,
-        name: "Insurer Overrides",
-        submenu: [
-          { id: 1, name: "Agreements", path: "/commission/insurer-overrides/agreements", includes: ["/commission/insurer-overrides/agreements"] },
-          { id: 2, name: "Computations", path: "/commission/insurer-overrides/computations", includes: ["/commission/insurer-overrides/computations"] },
         ],
       },
     ],
@@ -984,6 +992,72 @@ export const menuList = [
         path: "/reports/builder",
         includes: ["/reports/builder"],
         permissions: ["read:reports"],
+      },
+    ],
+  },
+  {
+    name: "Product Configurator",
+    icon: "pi pi-sliders-h",
+    submenu: [
+      {
+        id: 1,
+        name: "Dashboard",
+        path: "/product-configurator/dashboard",
+        includes: ["/product-configurator/dashboard"],
+        permissions: ["read:product-configurator-dashboard"],
+      },
+      {
+        id: 2,
+        name: "Product Templates",
+        path: "/product-configurator/templates",
+        includes: [
+          "/product-configurator/templates",
+          "/product-configurator/template/",
+          "/product-configurator/create",
+        ],
+        permissions: ["read:product-templates"],
+      },
+      {
+        id: 3,
+        name: "Coverage Builder",
+        path: "/product-configurator/coverages",
+        includes: ["/product-configurator/coverages"],
+        permissions: ["read:product-coverages"],
+      },
+      {
+        id: 4,
+        name: "Rating Engine",
+        path: "/product-configurator/rating",
+        includes: ["/product-configurator/rating"],
+        permissions: ["read:product-rating"],
+      },
+      {
+        id: 5,
+        name: "Acceptance Rules",
+        path: "/product-configurator/underwriting",
+        includes: ["/product-configurator/underwriting"],
+        permissions: ["read:product-underwriting"],
+      },
+      {
+        id: 6,
+        name: "Document Manager",
+        path: "/product-configurator/documents",
+        includes: ["/product-configurator/documents"],
+        permissions: ["read:product-documents"],
+      },
+      {
+        id: 8,
+        name: "Market Mapping",
+        path: "/product-configurator/market-mapping",
+        includes: ["/product-configurator/market-mapping"],
+        permissions: ["read:product-market-mapping"],
+      },
+      {
+        id: 9,
+        name: "Product Analytics",
+        path: "/product-configurator/analytics",
+        includes: ["/product-configurator/analytics"],
+        permissions: ["read:product-analytics"],
       },
     ],
   },
@@ -1644,72 +1718,6 @@ export const menuList = [
             platform: true,
           },
         ],
-      },
-    ],
-  },
-  {
-    name: "Product Configurator",
-    icon: "pi pi-sliders-h",
-    submenu: [
-      {
-        id: 1,
-        name: "Dashboard",
-        path: "/product-configurator/dashboard",
-        includes: ["/product-configurator/dashboard"],
-        permissions: ["read:product-configurator-dashboard"],
-      },
-      {
-        id: 2,
-        name: "Product Templates",
-        path: "/product-configurator/templates",
-        includes: [
-          "/product-configurator/templates",
-          "/product-configurator/template/",
-          "/product-configurator/create",
-        ],
-        permissions: ["read:product-templates"],
-      },
-      {
-        id: 3,
-        name: "Coverage Builder",
-        path: "/product-configurator/coverages",
-        includes: ["/product-configurator/coverages"],
-        permissions: ["read:product-coverages"],
-      },
-      {
-        id: 4,
-        name: "Rating Engine",
-        path: "/product-configurator/rating",
-        includes: ["/product-configurator/rating"],
-        permissions: ["read:product-rating"],
-      },
-      {
-        id: 5,
-        name: "Acceptance Rules",
-        path: "/product-configurator/underwriting",
-        includes: ["/product-configurator/underwriting"],
-        permissions: ["read:product-underwriting"],
-      },
-      {
-        id: 6,
-        name: "Document Manager",
-        path: "/product-configurator/documents",
-        includes: ["/product-configurator/documents"],
-        permissions: ["read:product-documents"],
-      },
-      {
-        id: 8,
-        name: "Market Mapping",
-        path: "/product-configurator/market-mapping",
-        includes: ["/product-configurator/market-mapping"],
-        permissions: ["read:product-market-mapping"],
-      },
-      {
-        id: 9,
-        name: "Product Analytics",
-        path: "/product-configurator/analytics",
-        includes: ["/product-configurator/analytics"],
-        permissions: ["read:product-analytics"],
       },
     ],
   },

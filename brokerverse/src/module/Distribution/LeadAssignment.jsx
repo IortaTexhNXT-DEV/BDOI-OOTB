@@ -322,7 +322,7 @@ const LeadAssignment = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.la.title", "Lead Assignment")} />
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("distribution.la.title", "Lead Assignment")} />
       <div className="pe-card">
         <TabView activeIndex={tab} onTabChange={(e) => { setTab(e.index); setSelected([]); }}>
           <TabPanel header={t("distribution.la.team", "Team View")}>

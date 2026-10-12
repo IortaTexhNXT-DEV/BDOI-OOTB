@@ -111,7 +111,7 @@ const SchemeApplication = () => {
   const y1 = a.pricing?.year1;
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.sales", "Sales & Marketing")} section={t("schemeIssuance.title", "Scheme Issuance")} title={a.applicationNumber}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} section={t("schemeIssuance.title", "Scheme Issuance")} title={a.applicationNumber}
         onBack={() => navigate("/sales/scheme-issuance")}>
         {write && ["draft", ...OPEN].includes(a.status) ? <Button label={t("schemeIssuance.edit", "Edit")} icon="pi pi-pencil" outlined onClick={() => setEditing(true)} /> : null}
         {write && a.status === "ready" ? <Button label={t("schemeIssuance.send", "Send to insurer")} icon="pi pi-send"

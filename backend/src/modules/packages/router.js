@@ -18,7 +18,7 @@ import * as issue from './issue.js';
 const { router, define } = moduleRouter('Packaged Products', '/packages');
 const MASTER_BUNDLES = 'Master > Packaged Products > Bundle Products';
 const MASTER_RATES = 'Master > Packaged Products > Insurer Rate Tables';
-const BUNDLES = 'Operations > Sales & Marketing > Package Bundles';
+const BUNDLES = 'Sales & Placement > Package Bundles';
 const readMasters = [requireAuth, requirePermission('read:quotations', 'read:products', 'read:masters', 'read:policies')];
 const writeMasters = [requireAuth, requirePermission('write:products')];
 const canQuote = [requireAuth, requirePermission('read:quotations')];

@@ -36,7 +36,7 @@ import ReceiptBatches from "./ReceiptBatches";
 import { printPdf } from "../../../components/Print";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
-import { hasPermission } from "../../../utils/canOpen";
+import { canOpen, hasPermission } from "../../../utils/canOpen";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
 const CONVERTED = "Converted";
@@ -506,6 +506,13 @@ const PolicyReceipts = () => {
   const [batchesOpen, setBatchesOpen] = useState(false);
   const headerActions = (
     <>
+      {canOpen("/agent/payments") && (
+        <div className="filter_bulk_button_container">
+          <Button type="button" className="bulk_button_container" outlined onClick={() => navigate("/agent/payments")}>
+            <span className="addtext">{t("accounts.receipts.paymentsToVerify")}</span>
+          </Button>
+        </div>
+      )}
       <div className="filter_bulk_button_container">
         <Button type="button" className="bulk_button_container" outlined onClick={handleModal}>
           <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>

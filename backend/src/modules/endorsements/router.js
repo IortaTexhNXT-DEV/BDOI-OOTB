@@ -15,7 +15,7 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { endorsementDoc } from '../documents/templates.js';
 
 const { router, define } = moduleRouter('Endorsements', '/endorsements');
-const SCREEN = 'Operations > Policy > Endorsement';
+const SCREEN = 'Policy Servicing > Policy > Endorsement';
 const canRead = [requireAuth, requirePermission('read:endorsements')];
 const canWrite = [requireAuth, requirePermission('write:endorsements')];
 const out = svc.toEndorsement;
@@ -60,7 +60,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/get-All-Endorsements', summary: 'List endorsements (clientId, policyId, status, search; pageNo / perPage)', screen: 'Operations > Clients > Client view > Endorsements',
+  method: 'GET', path: '/get-All-Endorsements', summary: 'List endorsements (clientId, policyId, status, search; pageNo / perPage)', screen: 'Policy Servicing > Endorsements; Policy Servicing > Clients > Client view > Endorsements',
   middleware: canRead, query: { pageNo: 1, perPage: 50, clientId: 'cl_1' },
   response: { success: true, data: { items: [example], pagination: { page: 1, perPage: 50, total: 1, totalPages: 1 } } },
   handler: async (req, res) => {

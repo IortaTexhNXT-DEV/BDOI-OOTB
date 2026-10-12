@@ -94,7 +94,7 @@ const auditRead = [requireAuth, requirePermission('read:audit')];
 const auditEvent = {
   id: '812', at: '2026-10-02T01:49:37.774Z', day: '2026-10-02', date: '02/10/2026', time: '09:49', atText: '02/10/2026 09:49', entity: 'policy',
   entityLabel: 'Policy', entityId: 'pol_0123456789abcdef', reference: 'MC-2026-000123', action: 'update', title: 'Policy updated', note: null,
-  user: { username: 'r.underwriter', displayName: 'Ramon Reyes', roles: ['Underwriter'] }, source: { channel: 'screen', label: 'Screen', name: 'Operations > Policies > Edit' },
+  user: { username: 'r.underwriter', displayName: 'Ramon Reyes', roles: ['Underwriter'] }, source: { channel: 'screen', label: 'Screen', name: 'Policy Servicing > Policies > Edit' },
   changes: [{ key: 'grossPremium', label: 'Gross premium', from: 'PHP 12,500.00', to: 'PHP 13,750.00' }],
 };
 define({

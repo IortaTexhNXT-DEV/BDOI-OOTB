@@ -239,7 +239,7 @@ const Campaigns = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.cp.title", "Campaigns")}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("distribution.cp.title", "Campaigns")}
         subtitle={t("distribution.cp.subtitle", "E-mail offers to clients and prospects who agreed to receive them; everyone else is left out and every e-mail carries an opt-out link.")}>
         {write && tab === 0 ? <Button label={t("distribution.cp.new", "New campaign")} icon="pi pi-plus" onClick={() => openCampaign({ name: "", segmentId: null, templateId: null, notes: "" })} /> : null}
         {write && tab === 1 ? <Button label={t("distribution.cp.newSegment", "New segment")} icon="pi pi-plus" onClick={() => { openSegment(EMPTY_SEGMENT); setSegmentPreview(null); }} /> : null}

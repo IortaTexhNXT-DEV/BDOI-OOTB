@@ -2,9 +2,9 @@
 -- The contexts are added to the Used For list of the master and their reasons to the master; a decision of these kinds
 -- is taken with a reason code of its context and a remark, checked by requiredReason() in
 -- src/modules/ops-masters/records.js:
---   renewal_reassign      reassign a renewal to another user (Operations > Renewals > Renewal Queue)
+--   renewal_reassign      reassign a renewal to another user (Policy Servicing > Renewals > Renewal Queue)
 --   non_renewal           mark a renewal not for renewal
---   claim_cancel          cancel a claim registered in error (Operations > Claims)
+--   claim_cancel          cancel a claim registered in error (Policy Servicing > Claims)
 --   claim_cash_reversal   reverse funds received from an insurer or a payment to the claimant recorded in error
 --                         (Accounts > Claims Settlements)
 -- Idempotent: a context is added once and a reason only when its code is missing, so administrator changes are kept.

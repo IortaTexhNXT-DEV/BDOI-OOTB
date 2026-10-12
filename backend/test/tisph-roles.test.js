@@ -22,6 +22,9 @@ const REMITTANCE_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0400_
 const RECEIPTING_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0531_tisph_receipting_grants.sql', import.meta.url), 'utf8');
 // 0675 takes write:marine from the TIS Sales personas that 0348 gave it (they keep write:parcel-certificates): it follows 0348 whenever 0348 runs
 const PARCEL_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0675_parcel_open_covers.sql', import.meta.url), 'utf8');
+// the TISPH decision that takes journal vouchers, disbursements and the incentive approval off the front office: run again
+// after the earlier grants, it takes them off again
+const FINANCE_ONLY_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0691_tisph_finance_only_jv_disbursement.sql', import.meta.url), 'utf8');
 
 let ctx;
 const as = {};
@@ -205,7 +208,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
       '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql',
       '0597_tenant_phase2_enabling.sql', '0600_scheme_master.sql', '0601_scheme_issuance.sql', '0602_lock_in_review.sql', '0610_telesales_incentive.sql',
       '0615_motor_rating_controls.sql', '0660_product_template_approval.sql', '0675_parcel_open_covers.sql', '0680_credit_life_batches.sql',
-      '0687_tisph_decisions_grants.sql')`);
+      '0687_tisph_decisions_grants.sql', '0691_tisph_finance_only_jv_disbursement.sql')`);
     // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
     await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });
@@ -216,6 +219,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await pool.query(REMITTANCE_MIGRATION);
     await pool.query(RECEIPTING_MIGRATION);
     await pool.query(PARCEL_MIGRATION);
+    await pool.query(FINANCE_ONLY_MIGRATION);
     expect(await grants()).toEqual(migrated);
   });
 });

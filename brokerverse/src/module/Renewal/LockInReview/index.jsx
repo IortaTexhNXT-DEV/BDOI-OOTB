@@ -178,7 +178,7 @@ const LockInReview = () => {
   const canApprove = approve && review?.status === "pending-approval" && !isInitiator({ id: review.decidedById });
   return (
     <div className="pe-page">
-      <PageHeader home={t("lockInReview.home", "Operations")} section={t("lockInReview.section", "Renewals")} title={t("lockInReview.title", "Lock-in Review")}
+      <PageHeader home={t("lockInReview.home", "Policy servicing")} section={t("lockInReview.section", "Renewals")} title={t("lockInReview.title", "Lock-in Review")}
         trail={[t("lockInReview.title", "Lock-in Review")]}>
         <Button label={t("lockInReview.report", "Lock-in / Scheme 2 expiry report")} icon="pi pi-file-excel" outlined onClick={report} />
       </PageHeader>

@@ -255,7 +255,7 @@ define({
 });
 define({
   method: 'GET', path: '/telesales/policies/:policyId', summary: 'The telesales link of a policy: caller, call-out endorsement, NB / renewal, payment, commission settlement, eligible date, batch',
-  screen: 'Operations > Policy > Related Records', middleware: [requireAuth, requirePermission('read:policies', 'read:incentive')],
+  screen: 'Policy Servicing > Policy > Related Records', middleware: [requireAuth, requirePermission('read:policies', 'read:incentive')],
   response: { success: true, data: { telesales: true, policyNumber: 'POL-2026-004655', caller: 'Geralyn Ramos', kind: 'NB', endorsedOn: '2026-09-22', label: 'Telesales: Geralyn Ramos, call-out endorsed 22/09/2026' } },
   handler: async (req, res) => ok(res, await tsi.policyLink(req.params.policyId)),
 });

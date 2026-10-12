@@ -1,5 +1,5 @@
 /**
- * Brand-new vehicle programmes of a captive agency (Operations > Sales & Marketing > Dealer Programmes).
+ * Brand-new vehicle programmes of a captive agency (Sales & Placement > Dealer Programmes).
  *
  * A programme holds the terms agreed with a dealer and, optionally, a financing bank: insurer, own damage and acts of
  * nature rates, excess liability limits, CTPL term, the free or subsidised first year and who pays, and whether an

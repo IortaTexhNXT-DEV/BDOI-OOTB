@@ -17,7 +17,7 @@ import systemSettingsService from "../../../services/systemSettingsService";
 import PolicyPaymentCapture from "../../../components/PolicyPaymentCapture";
 
 /**
- * Policy payment (Operations > Quotation / Policy > Payment).
+ * Policy payment (Policy Servicing > Quotation / Policy > Payment).
  *
  * Replaces the former mock payment that auto-completed and issued an official receipt without any money captured.
  * The user chooses how the client pays:

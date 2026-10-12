@@ -13,7 +13,7 @@ import { policyBreakdown, recomputeBasis } from './breakdown.js';
 const { router, define } = moduleRouter('Commission', '/commission');
 const read = [requireAuth, requirePermission('read:commission', 'read:quotations')];
 const write = [requireAuth, requirePermission('write:commission')];
-const SCREEN = 'Commission > Agents/Referrer Accounts';
+const SCREEN = 'Accounts > Commission > Agents/Referrer Accounts';
 
 /** Lines marked eligible go to the approvers (write:commission); approved lines are reported to whoever made them eligible. */
 async function notifyPayout(req, action, makers) {
@@ -26,7 +26,7 @@ const lineExample = { id: 'cm_1', policyNo: 'POL-2026-00001', productInsurer: 'M
 const accountExample = { referrer: { id: 'ref-dcruz', name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', whtApplicable: true }, summary: { cycleLabel: 'Sep 2026', dueThisCycle: 1140, upcoming: 0, paidToDate: 0 }, currentCycle: { label: 'Sep 2026', totalNet: 1140, lines: [lineExample] }, futureCycles: { totalNet: 0, lines: [] }, past: { totalNet: 0, lines: [] }, actions: { approveCount: 1, generatePayoutCount: 0, markEligibleCount: 0 } };
 
 define({
-  method: 'GET', path: '/dashboard', summary: 'Commission KPIs, comsub by referrer / product, brokerage by insurer, payable funnel, trend', screen: 'Commission > Commission Dashboard', middleware: read,
+  method: 'GET', path: '/dashboard', summary: 'Commission KPIs, comsub by referrer / product, brokerage by insurer, payable funnel, trend', screen: 'Accounts > Commission > Commission Dashboard', middleware: read,
   response: { success: true, data: { kpis: { brokerageIncome: 448530, comsubGross: 221706, netMargin: 226824, marginPct: 50.6, outstandingPayable: 150146, whtWithheldPaid: 1228 }, linesByStatus: [{ status: 'Accrued', count: 9 }] } },
   handler: async (req, res) => ok(res, await svc.dashboard(pool, await scopeOf(req)), 'Commission dashboard retrieved'),
 });
@@ -244,13 +244,13 @@ define({
 const breakdownRead = [requireAuth, requirePermission('read:commission-rules', 'read:remittance', 'write:remittance', 'read:commission', 'read:policies')];
 define({
   method: 'GET', path: '/policies/:policyId/breakdown', summary: 'Commission breakdown of a policy: per peril the sum insured, premium, issuing, insurer net and TIS remitting rates, insurer remitting, commission and variance share; gross commission, shares, retained; the remittance and billing statement carrying it; whether Recompute is allowed',
-  screen: 'Operations > Policy > Commission breakdown', middleware: breakdownRead,
+  screen: 'Policy Servicing > Policy > Commission breakdown', middleware: breakdownRead,
   response: { success: true, data: { policyNumber: 'POL-2026-00412', basis: { rateBasis: 'issuing-remitting', grossCommission: 16131.25, varianceShare: 4800, retained: 11331.25, perils: [] }, recompute: { allowed: true, reason: null } } },
   handler: async (req, res) => ok(res, await policyBreakdown(req.params.policyId)),
 });
 define({
   method: 'POST', path: '/policies/:policyId/recompute', summary: 'Recompute the commission of a policy from the rules register on its inception date (write:remittance); refused once the policy is on an approved remittance',
-  screen: 'Operations > Policy > Commission breakdown', middleware: [requireAuth, requirePermission('write:remittance')],
+  screen: 'Policy Servicing > Policy > Commission breakdown', middleware: [requireAuth, requirePermission('write:remittance')],
   response: { success: true, data: { message: 'Commission recomputed: 0.00 to 7,891.25.' } },
   handler: async (req, res) => {
     const r = await recomputeBasis(req.params.policyId, req.user);
@@ -263,7 +263,7 @@ define({
 const schemeRead = [requireAuth, requirePermission('read:sharing-schemes', 'write:sharing-schemes', 'approve:sharing-schemes')];
 const schemeWrite = [requireAuth, requirePermission('write:sharing-schemes')];
 const schemeApprove = [requireAuth, requirePermission('approve:sharing-schemes')];
-const SCHEMES = 'Commission > Sharing Schemes';
+const SCHEMES = 'Accounts > Commission > Sharing Schemes';
 const schemeExample = { id: 1, code: 'EXT-AGENT-STD', name: 'External agents, TFS team members and referrals', partyTypes: ['Agent', 'TFS team member', 'Referral', 'External'], productIds: [2], policyType: 'any',
   effectiveFrom: '2026-11-01', effectiveTo: null, status: 'active', statusLabel: 'Active', version: 1, lines: [{ lineNo: 1, paidTo: 'referrer', basis: 'variance', perils: ['OD', 'AON'], defaultValue: 0.3, min: 0, max: 0.3 }] };
 const lineSchema = z.object({ paidTo: z.enum(schemes.PAID_TO), basis: z.enum(schemes.SHARE_BASES), perils: z.array(z.string()).optional(), defaultValue: z.coerce.number().min(0), min: z.coerce.number().min(0).optional(),

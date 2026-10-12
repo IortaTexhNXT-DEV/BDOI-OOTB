@@ -169,7 +169,7 @@ async function reviewTask(item, policyNumber, expiry, ownerId, due, renewalId = 
     const key = renewalId && ownerId ? `lock-in:${renewalId}` : `lock-in-review:${item}:${due}:${u}`;
     n += (await query(`INSERT INTO work_tasks(title, notes, due_date, priority, assigned_to, source, source_key, entity, entity_id, created_by)
       SELECT $1, $2, $3::date, 'high', $4, 'renewal', $5, 'lock-in-review', $6, 'system' WHERE EXISTS (SELECT 1 FROM users WHERE id = $4 AND status = 'active')
-      ON CONFLICT (source_key) DO NOTHING`, [`Lock-in review due: ${policyNumber}, expires ${dmy(expiry)}`, 'Operations > Renewals > Lock-in Review', due,
+      ON CONFLICT (source_key) DO NOTHING`, [`Lock-in review due: ${policyNumber}, expires ${dmy(expiry)}`, 'Policy Servicing > Renewals > Lock-in Review', due,
       u, key, item])).rowCount;
   }
   return n;

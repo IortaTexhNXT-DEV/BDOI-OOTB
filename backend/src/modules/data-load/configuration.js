@@ -659,7 +659,7 @@ const payeeAccountsSheet = () => ({
 });
 
 const cocSeriesSheet = () => ({
-  key: 'coc-series', name: 'COC Series', menu: 'Operations > CTPL Authentication (COC series)',
+  key: 'coc-series', name: 'COC Series', menu: 'Policy Servicing > CTPL Authentication (COC series)',
   columns: [
     { key: 'insurer', header: 'Insurer', required: true, list: 'Insurers', format: 'Insurer code (or name)' },
     { key: 'branchCode', header: 'Branch Code', format: 'Branch the series is for; empty = every branch' },
@@ -761,7 +761,7 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Sales activity types and outcomes (starter lists are installed)', 'Master > Organization > Sales Activity Types / Sales Activity Outcomes'],
   ['Fiscal years and accounting periods (close the periods before the cutover date)', 'Accounts > Period End > Period Management'],
   ['Remittance masters, incentive programs', 'Master > Finance > Remittance Master; Incentive'],
-  ['Referrers / agents and their commission accounts', 'Commission > Agents/Referrer Accounts'],
+  ['Referrers / agents and their commission accounts', 'Accounts > Commission > Agents/Referrer Accounts'],
   ['Petty cash funds', 'Accounts > Petty Cash > Initiate'],
   ['Users\' passwords: never in the workbook. A new user gets a temporary password shown once after the load (change at first sign-in); a forgotten one is reset on the screen', 'Master > Generals > User Management > User > Reset password'],
   ['Cutover date and go-live lock (switched on by two users once the migration is signed off)', 'Master > System Configuration > Data Migration & Go-Live > Go-Live'],

@@ -1,4 +1,4 @@
--- Reasons of the Talkbot call lists (Operations > Renewals > Talkbot Calls, migration 0460) on the Reason Codes master
+-- Reasons of the Talkbot call lists (Policy Servicing > Renewals > Talkbot Calls, migration 0460) on the Reason Codes master
 -- of seed 77_lead_sources_reason_codes.sql: an account taken off a call list before it is sent (talkbot_line_remove,
 -- FRS LEAD-09 list of values "Line removal reason") and a call list cancelled (talkbot_list_cancel). The contexts are
 -- added to the Used For list of the master once, and a reason only when its code is missing, so administrator changes

@@ -1,5 +1,5 @@
 /**
- * Fleet schedules (Operations > Fleet Schedules): one motor policy covering many vehicles of a client.
+ * Fleet schedules (Policy Servicing > Fleet Schedules): one motor policy covering many vehicles of a client.
  *
  * A draft schedule collects vehicles (one by one or from the Fleet Vehicles upload). Each vehicle is priced on its own
  * with the quotation premium routine (quotations/premium.js#premiumBreakdown): own damage and acts of nature on its sum

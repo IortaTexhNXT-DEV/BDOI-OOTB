@@ -48,6 +48,7 @@ export const screenRequires = {
   "/operations/ctpl-authentication": [["read:masters", "read:profile", "write:masters"], ["read:policies"]],
   "/operations/cover-notes": [["read:policies"]],
   "/operations/policy-cancellation": [["read:endorsements"]],
+  "/operations/endorsements": [["read:endorsements"]],
   "/operations/claim-documents": [["read:claims"]],
   "/operations/motor-claim-repairs": [["read:claims"]],
   // Accounts

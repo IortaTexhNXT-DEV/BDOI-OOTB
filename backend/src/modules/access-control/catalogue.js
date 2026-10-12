@@ -54,7 +54,7 @@ const MODULE_LIST = [
   ['payables', 'accounts', 'Payables', ['Payables', 'Suppliers']],
   ['fixed-assets', 'accounts', 'Fixed assets', ['Fixed Assets']],
   ['journal-vouchers', 'accounts', 'Journal vouchers', ['Journal Voucher', 'Correction JV', 'Reversal JV', 'SAP GL Export']],
-  ['remittance', 'accounts', 'Remittance and insurer reconciliation', ['Remittance', 'Insurer Reconciliation']],
+  ['remittance', 'accounts', 'Remittance and insurer reconciliation', ['Remittance']],
   ['bank-reconciliation', 'accounts', 'Bank reconciliation', ['Bank Reconciliation']],
   ['period-end', 'accounts', 'Period end and tax', ['Period End', 'Tax']],
   ['incentive', 'accounts', 'Incentives', ['Incentive']],

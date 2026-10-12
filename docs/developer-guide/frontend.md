@@ -20,7 +20,7 @@ forms and i18next for text. It talks only to the BrokerVerse API (`backend/`, se
 | `components/` | Shared UI pieces (error boundary, dialogs host, notification drawer, file upload, status badge, stats cards) |
 | `hooks/` | `useFormatCurrency`, `useNotifications` |
 | `redux/` | Store and the list of reducers |
-| `locales/` | `en.json` (complete) and `th.json` |
+| `locales/` | `en.json`, the one language of the interface |
 | `theme/bdoi/` | PrimeReact theme and application styles (generated theme: `scripts/build-bdoi-theme.js`) |
 
 ### Why two source trees
@@ -180,15 +180,13 @@ dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
 ## 7. Translations
 
-Text is in `src/locales/en.json` and `th.json`, loaded by `src/i18n.js`, and read with
-`const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The
-language pickers offer the languages configured in Master > Configuration that have a bundled translation
-(`utility/languages.js`).
+Text is in `src/locales/en.json`, loaded by `src/i18n.js`, and read with
+`const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The interface is in
+English only (TISPH decision): there is no other bundle and no language picker.
 
-- Add every new key to `en.json`; add the Thai text to `th.json` when known (English is shown
-  otherwise).
+- Add every new key to `en.json`.
 - `t("key", "Default")` shows the default when the key is missing, but the key still belongs in
-  `en.json` so that it can be translated.
+  `en.json`.
 - `npm run check:i18n` (`scripts/check-translations.js`) lists keys used in code and missing from
   `en.json`.
 
@@ -221,7 +219,7 @@ Buttons that open another screen should check `canOpen(path)`.
 **Add a menu entry for an existing screen.** Add it to `list.js` and to the roles that need it. An
 entry without a role grant is visible only to the administrator.
 
-**Add a translation.** Add the key to `en.json` (and `th.json`), use `t("area.key")`, run
+**Add a translation.** Add the key to `en.json`, use `t("area.key")`, run
 `npm run check:i18n`.
 
 **Add a report.** Standard reports are defined in the backend report catalogue and appear under

@@ -24,7 +24,7 @@ import mastersRouter from './masters.js';
 import emailRouter from './email.js';
 
 const { router, define } = moduleRouter('Quotations', '/quotations');
-const SCREEN = 'Operations > Sales & Marketing > Quotations';
+const SCREEN = 'Sales & Placement > Quotations';
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 

@@ -5,14 +5,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
-| Operations | Payments | View |
 | Accounts | Receipts | View |
-| Accounts | Collections | View |
+| Accounts | Policy Payments to Verify | View |
 | Accounts | Post-Dated Cheques | Create and edit |
-| Accounts > Remittance | Remittances | View |
-| Accounts > Remittance | Reconciliation | View |
-| Accounts > Remittance | Exceptions | View |
-| Accounts > Remittance | Held policies | View |
+| Accounts | Collections | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -20,6 +16,10 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
+| Accounts > Remittance | Remittances | View |
+| Accounts > Remittance | Reconciliation | View |
+| Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held Policies | View |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -35,7 +35,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Post-dated cheques | Create and edit | Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques |  |
 | Accounts | Post-dated cheques | Approve | Approve or return the cancellation of a post-dated cheque requested by another user |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held policies |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held Policies |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -54,8 +54,8 @@ Who approves the work of this role:
 | Post-dated cheques | Approve or return the cancellation of a post-dated cheque requested by another user | CCD-PDC / CCD-ADA |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
-| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
-| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

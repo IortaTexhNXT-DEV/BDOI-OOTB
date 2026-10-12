@@ -17,7 +17,7 @@ import * as svc from './service.js';
 import * as docs from './certificates.js';
 
 const { router, define } = moduleRouter('Credit Life', '/credit-life');
-const SCREEN = 'Operations > Credit Life';
+const SCREEN = 'Policy Servicing > Credit Life';
 const canRead = [requireAuth, requirePermission('read:credit-life', 'write:credit-life')];
 const canWrite = [requireAuth, requirePermission('write:credit-life')];
 const text = (n) => z.string().max(n).optional().nullable();

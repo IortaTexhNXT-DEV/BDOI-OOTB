@@ -708,7 +708,7 @@ export async function syncTelesalesPolicies({ asOf = null } = {}) {
   return { linked, checked: open.length, eligible };
 }
 
-/** The telesales link of a policy (Operations > Policy, Related Records): "Telesales: <caller>, call-out endorsed <date>". */
+/** The telesales link of a policy (Policy Servicing > Policy, Related Records): "Telesales: <caller>, call-out endorsed <date>". */
 export async function policyLink(policyId) {
   const r = await one(`SELECT tp.*, u.display_name AS caller, p.policy_number, pr.program_code FROM telesales_policies tp JOIN policies p ON p.id = tp.policy_id
     JOIN users u ON u.id = tp.caller_user_id JOIN incentive_programs pr ON pr.id = tp.program_id WHERE tp.policy_id = $1 OR p.policy_number = $1`, [String(policyId)]);

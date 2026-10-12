@@ -13,7 +13,7 @@ import { openPromotions } from './quote.js';
 
 const { router, define } = moduleRouter('Promotions', '/promotions');
 const cap = moduleRouter('Discount caps', '/discount-caps');
-const SCREEN = 'Operations > Sales & Marketing > Promotions';
+const SCREEN = 'Sales & Placement > Promotions';
 const CAP_SCREEN = 'Master > Finance > Discount Caps';
 const canRead = [requireAuth, requirePermission('read:promotions', 'write:promotions', 'approve:promotions')];
 const canWrite = [requireAuth, requirePermission('write:promotions')];

@@ -97,7 +97,7 @@ const CoverList = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.oc.title", "Marine Open Covers")}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} title={t("distribution.oc.title", "Marine Open Covers")}
         subtitle={t("distribution.oc.subtitle", "Open policies: Parcel / Courier covers with a certificate per customer, and Marine Cargo covers with a rate and limit per conveyance; daily and monthly declarations billed on the open policy.")}>
         {write ? <Button label={t("distribution.oc.new", "New open cover")} icon="pi pi-plus" onClick={() => newForm("parcel")} /> : null}
       </PageHeader>
@@ -334,7 +334,7 @@ const CoverDetail = ({ id }) => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.oc.title", "Marine Open Covers")} title={`${cover.coverNumber} · ${cover.clientName}`}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} section={t("distribution.oc.title", "Marine Open Covers")} title={`${cover.coverNumber} · ${cover.clientName}`}
         subtitle={`${t(`distribution.oc.types.${cover.coverType}`, cover.coverType)} · ${cover.insurerName} · ${date(cover.periodFrom)} to ${date(cover.periodTo)}${cover.policyNumber ? ` · ${t("distribution.fl.policy", "Policy")} ${cover.policyNumber}` : ""}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         {write && cover.status === "draft" ? <Button label={t("distribution.oc.activate", "Activate")} icon="pi pi-check" disabled={busy} onClick={activate} /> : null}

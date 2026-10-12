@@ -120,7 +120,7 @@ const DealerProgrammes = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.mp.title", "Dealer Programmes")}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("distribution.mp.title", "Dealer Programmes")}
         help={t("distribution.mp.subtitle", "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.")}>
         {write ? <Button label={t("distribution.mp.add", "Add programme")} icon="pi pi-plus" onClick={() => setForm({ ...EMPTY })} /> : null}
       </PageHeader>

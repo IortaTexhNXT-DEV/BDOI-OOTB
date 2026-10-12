@@ -3,7 +3,7 @@ import { menuList } from "../components/SideBar/list";
 
 const menu = [
   { name: "Dashboard", submenu: [{ name: "Executive Dashboard", path: "/", includes: ["/"] }] },
-  { name: "Operations", submenu: [{ name: "Policy", path: "/agent/policy", includes: ["/agent/policy"] }] },
+  { name: "Policy Servicing", submenu: [{ name: "Policy", path: "/agent/policy", includes: ["/agent/policy"] }] },
   { name: "Accounts", submenu: [{ name: "Journal Voucher", path: "/accounts/journalvoucher", includes: ["/accounts/journalvoucher/addjournalvoucture"] }] },
 ];
 
@@ -30,7 +30,7 @@ describe("route guard", () => {
 describe("persona walk: menu grants match the API", () => {
   const walkMenu = [
     {
-      name: "Operations",
+      name: "Policy Servicing",
       submenu: [
         {
           name: "Renewals",
@@ -109,19 +109,18 @@ describe("bank reconciliation menu", () => {
   });
 });
 
-describe("Sales & Marketing menu", () => {
+describe("Sales & Placement menu", () => {
   const items = (roles) =>
-    (filterMenuForRoles(menuList, roles).find((m) => m.name === "Operations")?.submenu || [])
-      .find((i) => i.name === "Sales & Marketing")?.submenu.map((i) => i.name) || [];
+    (filterMenuForRoles(menuList, roles).find((m) => m.name === "Sales & Placement")?.submenu || []).map((i) => i.name);
 
-  it("follows the TISPH journey: leads, quotation, placement, dealer and bank programmes, promotions, dealer schemes", () => {
+  it("follows the TISPH journey: leads, quotation, placement, scheme issuance, then dealer programmes, promotions and the Scheme Master", () => {
     expect(items(["system-admin"])).toEqual(["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports",
-      "Placement Slips", "Dealer Programmes", "Promotions", "Scheme Master", "Scheme Issuance", "Quick Quote", "Campaigns"]);
+      "Placement Slips", "Scheme Issuance", "Dealer Programmes", "Promotions", "Scheme Master", "Quick Quote", "Campaigns"]);
     for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(13);
   });
   it("gives no TISPH persona the entries without a TISPH requirement (Quick Quote, Campaigns)", () => {
-    const journey = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
-      "Promotions", "Scheme Master", "Scheme Issuance"];
+    const journey = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Scheme Issuance",
+      "Dealer Programmes", "Promotions", "Scheme Master"];
     for (const role of ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-general-manager"]) expect(items([role])).toEqual(journey);
     for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"]) expect(items([role])).toEqual(journey);
     // IT AppSupport has no read:lead-assignment (RBAC v4) and no sales activities; it keeps the promotions (TISPH decision of 11 Oct 2026)
@@ -132,8 +131,8 @@ describe("Sales & Marketing menu", () => {
     }
   });
   it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
-    expect(items(["processing"])).toEqual(["Prospects", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Dealer Programmes",
-      "Promotions", "Scheme Master", "Scheme Issuance"]);
+    expect(items(["processing"])).toEqual(["Prospects", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips", "Scheme Issuance",
+      "Dealer Programmes", "Promotions", "Scheme Master"]);
     expect(isPathAllowed("/sales/quick-quote", menuList, ["processing"])).toBe(false);
     expect(items(["claims"])).toEqual([]);
   });
@@ -165,9 +164,9 @@ describe("menu structure", () => {
       for (const screen of section.submenu) expect(screen.submenu).toBeUndefined();
     }
   });
-  it("My Work is the first top-level entry of every delivered role, not inside Operations", () => {
+  it("My Work is the first top-level entry of every delivered role, not inside Policy Servicing", () => {
     expect(menuList[0].name).toBe("My Work");
-    expect(menuList.find((m) => m.name === "Operations").submenu.map((i) => i.name)).not.toContain("My Work");
+    expect(menuList.find((m) => m.name === "Policy Servicing").submenu.map((i) => i.name)).not.toContain("My Work");
     expect(menuList.map((m) => m.name)).not.toContain("Home");
     // the Accounting Manager inherits Accounting: the server returns both roles
     for (const roles of [["sales"], ["processing"], ["operations"], ["claims"], ["accounting"], ["accounting", "accounting-manager"], ["system-admin"]]) {
@@ -201,8 +200,8 @@ describe("Accounts > Remittance (R1)", () => {
     return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
   };
 
-  it("has the eight entries and Settlement, in that order, and no screen of earlier releases", () => {
-    expect(remittanceOf(["accounting"])).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Setup", "Settlement"]);
+  it("lists the entries in the order of the run (insurer billing first, Setup last), and no screen of earlier releases", () => {
+    expect(remittanceOf(["accounting"])).toEqual(["Insurer billing", "Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Settlement", "Setup"]);
     expect(JSON.stringify(menuList)).not.toMatch(/"\/finance\/remittance\/(automated|tracking|scheduling|electronictransfer|approval"|agencybill|analytics)/);
   });
 
