@@ -1,6 +1,5 @@
 import { formatPhone, normalisePhone, PH_PHONE, toFormValues, toPayload, validateProfile } from "./profileForm";
 import { initialsOf, roleLineOf } from "../../utility/userIdentity";
-import { languageOptions, showLanguagePicker } from "../../utility/languages";
 import { badgeText, newestFirst } from "../../agentModule/component/navBar";
 
 describe("My Profile form", () => {
@@ -64,9 +63,4 @@ describe("top bar", () => {
     expect(newestFirst(list).map((n) => n.id)).toEqual([2, 3, 1]);
   });
 
-  it("shows a language picker only when two or more languages are available", () => {
-    expect(showLanguagePicker(languageOptions([{ code: "en" }, { code: "fil" }]))).toBe(false);
-    expect(showLanguagePicker([{ value: "en" }, { value: "fil" }])).toBe(true);
-    expect(showLanguagePicker([])).toBe(false);
-  });
 });

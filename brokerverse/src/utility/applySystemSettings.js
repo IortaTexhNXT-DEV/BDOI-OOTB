@@ -23,16 +23,9 @@ export function applyAppTitle(name, options = {}) {
   document.title = appTitle(name, options);
 }
 
-/**
- * Apply default language only when user has no saved preference.
- */
-export function applyDefaultLanguage(defaultLanguage) {
-  const saved = localStorage.getItem("i18nextLng");
-  if (saved) return;
-  const lng = defaultLanguage || DEFAULT_SYSTEM_SETTINGS.defaultLanguage;
-  if (lng && i18n.language !== lng) {
-    i18n.changeLanguage(lng);
-  }
+/** The interface is in English only (src/i18n.js): a configured default language is not applied. */
+export function applyDefaultLanguage() {
+  if (!i18n.language || !i18n.language.startsWith("en")) i18n.changeLanguage("en");
 }
 
 /**
