@@ -41,8 +41,8 @@ export async function sendRemittance(id, body, user) {
   const vars = { remittanceNo: r.remittance_number, insurerName: r.insurer_name || '', amount: Number(r.net_due).toLocaleString('en-US', { minimumFractionDigits: 2 }),
     currency: r.currency || 'PHP', remittanceDate: isoDate(r.remittance_date) || '', companyName: await companyName() };
   const attach = (await getSetting('remittance.email_schedule_attachment', true)) !== false;
-  const emailId = await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.schedule_email_subject', 'Remittance {{remittanceNo}}'), vars, { html: false }),
-    html: renderTemplate(await getSetting('remittance.schedule_email_body', '<p>Remittance {{remittanceNo}}</p>'), vars), template: 'remittance-schedule', entity: 'remittance',
+  const emailId = await queueEmail({ to, subject: renderTemplate(await getSetting('remittance.schedule_email_subject', '{{companyName}}: premium remittance {{remittanceNo}}'), vars, { html: false }),
+    html: renderTemplate(await getSetting('remittance.schedule_email_body', '<p>Dear {{insurerName}},</p><p>Please find attached the schedule of our premium remittance <b>{{remittanceNo}}</b> of {{currency}} {{amount}}.</p><p>Thank you,<br/>{{companyName}}</p>'), vars), template: 'remittance-schedule', entity: 'remittance',
     entityId: r.id, attachments: attach ? [documentAttachment('remittance-schedule', { remittanceId: r.id }, `${r.remittance_number}_Schedule.xlsx`, XLSX)] : [] });
   await query('UPDATE remittances SET sent_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [r.id, user.id]);
   return { id: r.id, after: { emailedTo: to, emailId, scheduleAttached: attach }, message: `${r.remittance_number} e-mailed to ${to}${attach ? ' with its schedule' : ''}` };
