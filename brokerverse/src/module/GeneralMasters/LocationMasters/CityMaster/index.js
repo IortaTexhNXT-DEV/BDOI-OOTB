@@ -87,34 +87,6 @@ const City = () => {
       <div className="no__data__found">{t("generalMasters.noDataEntered")}</div>
     </div>
   );
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <React.Fragment>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("generalMasters.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </React.Fragment>
-      );
-    },
-  };
 
   const headerStyle = {
     // width: '10rem',
@@ -194,10 +166,7 @@ const City = () => {
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             scrollable={true}
-            scrollHeight="40vh"
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
             <Column

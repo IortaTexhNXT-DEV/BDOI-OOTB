@@ -69,7 +69,7 @@ export const noteActions = (row) => {
  */
 const DirectBillProcessing = () => {
   const { t } = useTranslation();
-  // amounts read "PHP 1,234.56" as on every remittance screen
+  // amounts read "₱1,234.56" as on every screen
   const formatCurrency = codeMoney;
   const toast = useRef(null);
   const [params, setParams] = useSearchParams();

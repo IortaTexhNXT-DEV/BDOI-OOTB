@@ -98,9 +98,9 @@ describe("Import policy list", () => {
     await waitFor(() => expect(onOpen).toHaveBeenCalledWith("imp_4"));
     for (const chip of ["Rows 52", "Ready 46", "Errors 6", "Warnings 4", "Fully paid check: not yet available"]) expect(await screen.findByText(chip)).toBeInTheDocument();
     expect(await screen.findByText("File 25,871.34, system 25,817.34, difference -54.00")).toBeInTheDocument();
-    expect(screen.getByText("-PHP 54.00")).toBeInTheDocument();
+    expect(screen.getByText("-₱54.00")).toBeInTheDocument();
     expect(screen.getByText("Remittances to Create")).toBeInTheDocument();
-    expect(screen.getByText("PHP 1,204,553.10")).toBeInTheDocument();
+    expect(screen.getByText("₱1,204,553.10")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Download error report" }));
     await waitFor(() => expect(remittanceService.download).toHaveBeenCalledWith("/remittance/imports/imp_4/errors.xlsx", "IMP-2026-0004_Errors.xlsx"));
   });
@@ -114,7 +114,7 @@ describe("Import policy list", () => {
     open("imp_4", { onChanged });
     fireEvent.click(await screen.findByRole("button", { name: "Create 3 draft remittances" }));
     const confirm = await screen.findByRole("dialog", { name: "Create Draft Remittances" });
-    expect(within(confirm).getByText(/Create 3 draft remittances for PHP 1,204,553.10 from 46 policies\?/)).toBeInTheDocument();
+    expect(within(confirm).getByText(/Create 3 draft remittances for ₱1,204,553.10 from 46 policies\?/)).toBeInTheDocument();
     expect(remittanceService.commitImport).not.toHaveBeenCalled();
     fireEvent.click(within(confirm).getByRole("button", { name: "Create 3 drafts" }));
     await waitFor(() => expect(remittanceService.commitImport).toHaveBeenCalledWith("imp_4", 1));

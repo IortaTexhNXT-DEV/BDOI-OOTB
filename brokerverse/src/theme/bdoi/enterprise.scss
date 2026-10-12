@@ -1683,3 +1683,54 @@ small.p-error {
 .p-button.p-button-rounded:not(.p-button-icon-only) {
   border-radius: var(--bv-radius-button);
 }
+
+// UI standard, table cells: every cell in the 14px theme font, whatever a module sets; a record number (a link button
+// or link in a cell: rm-ref, pdc-link, the renewal policy number) is the same 14px, semibold, in the link colour and on
+// one line; a status chip never wraps or is clipped; no centred text in a cell (checkbox columns aside).
+.p-datatable .p-datatable-tbody > tr > td {
+  font-size: 14px !important;
+
+  :is(strong, b, a, span, div, p, label, .p-button-link, .p-button-label):not(.p-tag, .p-tag *, .pi, small, .small, .muted, .bv-muted, .pe-muted, .participant-role) {
+    font-size: 14px !important;
+  }
+
+  :is(.p-button.p-button-link, a.rm-ref, .rm-link, .pdc-link) {
+    padding: 0 !important;
+    font-weight: 600;
+    color: var(--bv-link, #0072d8) !important;
+    white-space: nowrap;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  :is(.text-center, .justify-content-center):not(.p-checkbox, .p-radiobutton, .p-button-icon-only) {
+    text-align: left !important;
+    justify-content: flex-start !important;
+  }
+
+  .p-tag {
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: none;
+  }
+
+  &:has(> .p-tag, > .bv-status-chip) {
+    white-space: nowrap;
+    min-width: 7rem;
+  }
+}
+
+// a reference with its client or detail line under it: both left-aligned (a link button would otherwise stretch and
+// centre its label), the second line muted and smaller
+.p-datatable .p-datatable-tbody > tr > td .bv-cell-stack {
+  align-items: flex-start;
+
+  > small {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+}
+
+.p-datatable .p-datatable-tbody > tr > td.p-selection-column {
+  text-align: center !important;
+}

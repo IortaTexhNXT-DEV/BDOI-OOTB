@@ -115,7 +115,7 @@ const ImportStatementDialog = ({ visible, onHide, account, formats, onImported }
           {preview.errors?.length > 0 && (
             <div className="br-notice br-notice-bad">{preview.errors.slice(0, 8).map((e) => <div key={e.row}>{t("bankReconciliation.row")} {e.row}: {e.message}</div>)}</div>
           )}
-          <DataTable value={preview.lines} dataKey="lineNo" size="small" scrollable scrollHeight="340px" stripedRows>
+          <DataTable value={preview.lines} dataKey="lineNo" size="small" scrollable stripedRows>
             <Column field="lineNo" header="#" style={{ width: "3rem" }} />
             <Column header={t("bankReconciliation.date")} body={(l) => date(l.date)} style={{ width: "7rem" }} />
             <Column field="description" header={t("bankReconciliation.description")} />

@@ -80,6 +80,11 @@
       "file": "module/Sales/SchemeApplication.jsx",
       "rule": "raw-file-input",
       "why": "Hidden input opened from the checklist row's Upload button."
+    },
+    {
+      "file": "utility/currencyConverter.js",
+      "rule": "code-amount",
+      "why": "Defines codeAmount for exported and bank files, and falls back to it when the currency has no symbol."
     }
   ],
   "copyKeys": [

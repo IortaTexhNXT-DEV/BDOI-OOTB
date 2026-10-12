@@ -26,14 +26,14 @@ import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import DateField from "../DateField";
 import StatusChip from "../StatusChip";
-import { codeAmount } from "../../utility/currencyConverter";
+import { displayAmount } from "../../utility/currencyConverter";
 import { canOpen } from "../../utils/canOpen";
 import service from "../../services/integrationsService";
 import { formatDate, instantParts } from "../../utility/dateFormat";
 import "./bankBatchDialog.scss";
 
 const CHANNELS = ["bulk_credit", "instapay", "pesonet"];
-const amount = (v) => codeAmount(v, "PHP");
+const amount = (v) => displayAmount(v, "PHP");
 
 /** "BPI ···8801": the bank and the last four digits of the payee's account. */
 const maskedAccount = (bankCode, number) => {
@@ -185,7 +185,7 @@ const BankBatchDialog = ({ visible, onHide, onCreated, preselectedIds, payeeType
 
       <h3 className="bv-bank-batch__title">{preset ? t("bankBatchDialog.included") : t("bankBatchDialog.vouchers")}</h3>
       {missing > 0 ? <p className="bv-bank-batch__missing" role="status">{t("bankBatchDialog.notEligible", { count: missing })}</p> : null}
-      <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" emptyMessage={t("bankBatchDialog.noVouchers")} scrollable scrollHeight="20rem">
+      <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" emptyMessage={t("bankBatchDialog.noVouchers")} scrollable>
         <Column style={{ width: "3rem" }} body={(v) => (v.ready ? (
           <Checkbox checked={selected.some((s) => s.disbursementId === v.disbursementId)} onChange={(e) => tick(v, e.checked)}
             aria-label={t("bankBatchDialog.include", { voucher: v.voucherNumber })} />

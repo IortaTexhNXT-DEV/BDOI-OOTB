@@ -2,7 +2,6 @@ import React from "react";
 import "../ViewDataTabel/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useTranslation } from "react-i18next";
 import { EMPTY_VALUE, formatValue } from "../../../../components/KeyValueGrid";
@@ -44,34 +43,6 @@ const ViewDataTabel = ({
     </div>
   );
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div style={{ width: "44%" }} className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              Row count :{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
-
   return (
     <div className="journal__table__container">
       <DataTable
@@ -85,8 +56,6 @@ const ViewDataTabel = ({
         first={first || 0}
         totalRecords={pagination?.total || 0}
         rowsPerPageOptions={[20, 50, 100]}
-        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-        paginatorTemplate={template2}
         emptyMessage={isEmpty ? emptyTableIcon : null}
         onPage={onPageChange}
         loading={loading}

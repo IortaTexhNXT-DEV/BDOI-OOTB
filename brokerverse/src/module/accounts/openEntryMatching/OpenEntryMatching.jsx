@@ -202,7 +202,6 @@ const OpenEntryMatching = () => {
             onSelectionChange={(e) => setSelectedDebits(e.value)}
             dataKey="id"
             scrollable
-            scrollHeight="300px"
             className="entry__table__open__entry__matching"
           >
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
@@ -289,7 +288,6 @@ const OpenEntryMatching = () => {
             onSelectionChange={(e) => setSelectedCredits(e.value)}
             dataKey="id"
             scrollable
-            scrollHeight="300px"
             className="entry__table__open__entry__matching"
           >
             <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />

@@ -74,7 +74,7 @@ const UploadPreview = ({ preview, loadRows, columns, filters, onErrorReport, has
         ) : null}
       </div>
       {error ? <p className="import-dialog__error" role="alert">{error}</p> : null}
-      <DataTable value={data.rows} dataKey={columns.find((c) => c.key)?.field || "row"} size="small" stripedRows scrollable scrollHeight="18rem" loading={loading}
+      <DataTable value={data.rows} dataKey={columns.find((c) => c.key)?.field || "row"} size="small" stripedRows scrollable loading={loading}
         lazy paginator={data.total > PER_PAGE} rows={PER_PAGE} totalRecords={data.total} first={(page - 1) * PER_PAGE}
         onPage={(e) => setPage(e.page + 1)} emptyMessage={t("importDialog.noRows")} className="import-dialog__rows">
         {columns.map((c) => (

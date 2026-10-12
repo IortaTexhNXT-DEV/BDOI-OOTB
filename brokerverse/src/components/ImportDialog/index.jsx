@@ -41,7 +41,7 @@ const ErrorTable = ({ errors }) => {
   if (!rows.length) return null;
   const withColumn = rows.some((r) => r.column);
   return (
-    <DataTable value={rows} dataKey="key" size="small" stripedRows scrollable scrollHeight="16rem" className="import-dialog__errors">
+    <DataTable value={rows} dataKey="key" size="small" stripedRows scrollable className="import-dialog__errors">
       <Column header={t("importDialog.row")} body={(r) => r.row ?? "—"} style={{ width: "5rem" }} />
       {withColumn && <Column header={t("importDialog.column")} body={(r) => r.column || "—"} style={{ width: "10rem" }} />}
       <Column field="message" header={t("importDialog.message")} />

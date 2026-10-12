@@ -142,7 +142,7 @@ const LockInReview = () => {
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="p-input-icon-left">
           <i className="pi pi-search" />
-          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("lockInReview.search", "Policy, insured or loan account")} aria-label={t("lockInReview.search", "Policy, insured or loan account")} />
+          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("lockInReview.search", "Policy, insured or loan")} aria-label={t("lockInReview.search", "Policy, insured or loan")} />
         </span>
         <div className="w-12rem"><DateField id="lkr-asof" value={asOf} onChange={(e) => setAsOf(e.target.value || "")} aria-label={t("lockInReview.asOf", "As of")} /></div>
         <Dropdown value={source} aria-label={t("lockInReview.source", "Lock-in")} onChange={(e) => setSource(e.value || "")}
@@ -165,7 +165,7 @@ const LockInReview = () => {
           <span className="bv-cell-stack"><StatusChip code={LOAN_SEVERITY[r.loanStatus] || "draft"} label={r.loanStatusLabel || "-"} /><small>{r.loanAccount}</small>
             {r.staleWarning ? <small className="bv-text-alert">{r.staleWarning}</small> : null}</span>
         )} />
-        <Column header={t("lockInReview.notices", "Notices")} body={(r) => r.treatment?.label} />
+        <Column header={t("lockInReview.notices", "Notices")} body={(r) => <span className="bv-nowrap" title={r.treatment?.label}>{r.treatment?.label}</span>} />
         <Column header={t("lockInReview.reviewStatus", "Review")} body={(r) => (r.reviewStatusLabel ? <StatusChip code={r.reviewStatus} label={r.reviewStatusLabel} /> : null)} />
         <Column field="owner" header={t("lockInReview.owner", "Owner")} />
         <Column header={t("common.actions", "Actions")} body={(r) => (r.reviewId ? <RowActions onView={() => openReview(r.reviewId)} /> : null)} />

@@ -22,7 +22,6 @@ import DropDowns from "../../../../components/DropDowns";
 import usePettyCashOptions from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
 import { getPatchDisbursementData, postDisbursementData, postEditDisbursmentMiddleware, postPatchDisbursementData } from "../store/pettyCashDisbursementMiddleware";
-import { Dropdown } from "primereact/dropdown";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 
 const initialValue = {
@@ -257,37 +256,6 @@ if(formAction === "Edit" ){
 
   }, [getPatchDisbursment]);
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="paginator__container">
-          <React.Fragment>
-            <span
-              className="mx-1"
-              style={{ color: "var(--text-color)", userSelect: "none" }}
-            >
-              Row count :{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdownunique_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
-
   return (
     <div className="add__disbursement__table">
       <CustomToast
@@ -341,12 +309,9 @@ if(formAction === "Edit" ){
             onSelectionChange={(e) => setSelectedRows(e.value)}
             selectionMode="checkbox"
             scrollable={true}
-            scrollHeight="40vh"
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
           >
             <Column
               headerStyle={headaction}

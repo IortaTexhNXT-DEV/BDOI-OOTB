@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import EligibilityNote from "../EligibilityNote";
 import { currentUser } from "../../utility/userIdentity";
-import { codeAmount } from "../../utility/currencyConverter";
+import { displayAmount } from "../../utility/currencyConverter";
 import { hasPermission } from "../../utils/canOpen";
 import "./approvalActions.scss";
 
@@ -85,8 +85,8 @@ const ServerDecision = ({ decision, onApprove, onReject, approveLabel, rejectLab
     );
   }
   const limit = decision.myLimit === null || decision.myLimit === undefined
-    ? t("decisionBar.noLimit") : t("decisionBar.yourLimit", { amount: codeAmount(decision.myLimit, currency) });
-  const item = decision.amount === null || decision.amount === undefined ? null : t("decisionBar.thisItem", { amount: codeAmount(decision.amount, currency) });
+    ? t("decisionBar.noLimit") : t("decisionBar.yourLimit", { amount: displayAmount(decision.myLimit, currency) });
+  const item = decision.amount === null || decision.amount === undefined ? null : t("decisionBar.thisItem", { amount: displayAmount(decision.amount, currency) });
   return (
     <div className={classes} role="group" aria-label={t("decisionBar.label")}>
       <span className="bv-decision-bar__authority">

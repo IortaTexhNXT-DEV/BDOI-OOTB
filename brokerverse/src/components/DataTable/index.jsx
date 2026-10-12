@@ -77,7 +77,9 @@ export const needsPaginator = ({ paginator, lazy, value, totalRecords, rows, fil
 
 export const DataTable = forwardRef(function DataTable(props, ref) {
   const { skeletonRows, ...given } = props;
-  const rest = given.paginator && !needsPaginator(given) && !given.first ? { ...given, paginator: false } : given;
+  const paged = given.paginator && !needsPaginator(given) && !given.first ? { ...given, paginator: false } : given;
+  // no nested scroll boxes (UI standard): a table grows with the page; only a virtual-scroll table keeps its height
+  const rest = paged.scrollHeight && !paged.virtualScrollerOptions ? { ...paged, scrollHeight: undefined } : paged;
   const empty = isEmpty(rest.value);
   // "settled": the table has had its data once (rows arrived, or a load finished, or the grace time is over)
   const [settled, setSettled] = useState(!empty);

@@ -12,7 +12,6 @@ import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { useDispatch, useSelector } from "react-redux";
 import { getDisbursementDetailsMiddleware } from "../store/paymentVocherMiddleware";
 import CustomToast from "../../../components/Toast";
@@ -205,35 +204,6 @@ function Detailview() {
     ) : (
       <span className="allocation-role-text">{role}</span>
     );
-
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <React.Fragment>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("paymentVoucher.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </React.Fragment>
-      );
-    },
-  };
 
   const headerStyle = {
     fontSize: 16,
@@ -714,10 +684,7 @@ function Detailview() {
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
           scrollable={true}
-          scrollHeight="40vh"
           rowClassName={(rowData) => {
             const baseClass = getStatusClassName(rowData.status);
             if (!actionable(rowData)) {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -56,43 +55,6 @@ const UserGroupAccess = () => {
     { label: "Trans00123", value: "Trans00123" },
     { label: "Trans00124", value: "Trans00124" },
   ];
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="paginator__container">
-          <React.Fragment>
-            <span
-              className="mx-1"
-              style={{
-                color: "var(--text-color)",
-                userSelect: "none",
-                width: "127%",
-                textAlign: "center",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              Row count :{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
 
   const dispatch = useDispatch();
   const initialValues = {
@@ -164,12 +126,9 @@ const UserGroupAccess = () => {
             color: "var(--text-color)",
           }}
           scrollable={true}
-          scrollHeight="40vh"
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
         >
           <Column

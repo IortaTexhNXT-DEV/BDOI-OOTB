@@ -95,7 +95,7 @@ describe("Remittances worklist", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select every draft on this page" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit for approval (3)" }));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Submit 3 remittances totalling PHP 600,000.00 for approval? Another user with remittance authority approves them.")).toBeInTheDocument();
+    expect(within(dialog).getByText("Submit 3 remittances totalling ₱600,000.00 for approval? Another user with remittance authority approves them.")).toBeInTheDocument();
     expect(remittanceService.submitRemittances).not.toHaveBeenCalled();
     fireEvent.click(within(dialog).getByRole("button", { name: "Submit 3 remittances" }));
     await waitFor(() => expect(remittanceService.submitRemittances).toHaveBeenCalledWith([{ id: "rm_1", version: 2 }, { id: "rm_2", version: 2 }, { id: "rm_3", version: 2 }]));
@@ -174,8 +174,8 @@ describe("Remittances worklist", () => {
   it("takes the KPI figures and the total from the server; a card filters the list over the same filters", async () => {
     remittanceService.listRegister.mockResolvedValue(page([row(1)]));
     show();
-    expect(await screen.findByText("PHP 1,234,567.89")).toBeInTheDocument();
-    expect(screen.getByText("PHP 600,000.00")).toBeInTheDocument();
+    expect(await screen.findByText("₱1,234,567.89")).toBeInTheDocument();
+    expect(screen.getByText("₱600,000.00")).toBeInTheDocument();
     expect(screen.getByText("oldest 4 days")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Awaiting approval/ }));
     await waitFor(() => expect(lastParams()).toMatchObject({ segment: "all", kpi: "awaiting-approval", week: undefined }));

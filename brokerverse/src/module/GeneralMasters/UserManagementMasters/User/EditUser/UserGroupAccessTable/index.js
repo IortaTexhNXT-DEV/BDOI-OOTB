@@ -188,11 +188,8 @@ const UserGroupAccess = () => {
           paginatorLeft
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
           scrollable={true}
-          scrollHeight="40vh"
         >
           <Column
             field="RoleCode"

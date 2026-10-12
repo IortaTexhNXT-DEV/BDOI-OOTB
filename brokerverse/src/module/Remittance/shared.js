@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiRequest, masterService } from "../../services/remittanceService";
 import { calendarDateFormat, formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
-import { codeAmount } from "../../utility/currencyConverter";
+import { displayAmount } from "../../utility/currencyConverter";
 
 /** Accounts > Remittance routes (R1). */
 export const REMITTANCE_ROUTES = {
@@ -45,8 +45,8 @@ export const R1_SEVERITY = {
 /** StatusChip props of a row: { code, label, severity } from its status code and label. */
 export const statusChip = (code, label) => ({ code: code || null, label: label || null, severity: R1_SEVERITY[String(code || "").toLowerCase()] || undefined });
 
-/** "PHP 409,141.43" (two decimals, thousands separators, a minus sign for negatives); "" when empty. */
-export const money = (value) => codeAmount(value, "PHP");
+/** "₱409,141.43" (the display format of every screen, -₱5,000.00 for negatives); "" when empty. */
+export const money = (value) => displayAmount(value, "PHP");
 
 /** "Oct 2026" for an accounting period "2026-10"; the value itself when it is not one. */
 export const periodText = (period) => {

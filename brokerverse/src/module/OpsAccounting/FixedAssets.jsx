@@ -149,7 +149,7 @@ export const AssetRegister = () => {
               ]} />
             </DetailSection>
             <DetailSection title={t("opsAcc.confirmations.asset.schedule")} flush>
-              <DataTable value={view.schedule} dataKey="period" size="small" stripedRows scrollable scrollHeight="320px">
+              <DataTable value={view.schedule} dataKey="period" size="small" stripedRows scrollable>
                 <Column field="period" header={t("opsAcc.period")} />
                 <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
                 <Column header={t("opsAcc.fa.accumulated")} body={(r) => money(r.accumulated)} {...numericColumn} />

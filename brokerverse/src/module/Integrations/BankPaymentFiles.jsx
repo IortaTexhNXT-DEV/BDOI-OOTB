@@ -20,14 +20,14 @@ import EligibilityNote from "../../components/EligibilityNote";
 import BankBatchDialog from "../../components/BankBatchDialog";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { ActivityLog, fromLifecycle } from "../../components/ActivityLog";
-import { codeAmount } from "../../utility/currencyConverter";
+import { displayAmount } from "../../utility/currencyConverter";
 import { hasPermission } from "../../utils/canOpen";
 import { IntTag, PageHeader, SEVERITY, date, dateTime, showError, showSuccess } from "./common";
 
 const STATUSES = ["draft", "for-approval", "approved", "file-generated", "sent", "completed", "cancelled"];
 
-/** "PHP 89,026.00", as the remittance and payment screens write amounts. */
-const money = (value) => codeAmount(value, "PHP");
+/** "₱89,026.00", the display format of every screen. */
+const money = (value) => displayAmount(value, "PHP");
 
 /** "BPI ···8801": the payee's bank and the last four digits of the account; the full number stays in Insurer payments. */
 const maskedAccount = (bankCode, accountNumber) => {

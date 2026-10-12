@@ -6,7 +6,6 @@ import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
-import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../../../components/InputField";
 import { useDispatch, useSelector } from "react-redux";
@@ -51,34 +50,6 @@ const DepartMentList = ({ action, branchCode }) => {
       <div className="no__data__found">No data entered</div>
     </div>
   );
-
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          {/* <React.Fragment> */}
-          <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-            Row count :{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-          {/* </React.Fragment> */}
-        </div>
-      );
-    },
-  };
 
   const handleView = (columnData) => {
     dispatch(getDepatmentView(columnData));
@@ -192,10 +163,7 @@ const DepartMentList = ({ action, branchCode }) => {
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
           scrollable={true}
-          scrollHeight="40vh"
           emptyMessage={isEmpty ? emptyTableIcon : null}
         >
           <Column

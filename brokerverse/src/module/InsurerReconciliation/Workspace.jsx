@@ -303,7 +303,7 @@ const Workspace = () => {
               <InputText value={match.search} onChange={(e) => setMatch({ ...match, search: e.target.value })} placeholder={t("insurerRec.searchCandidates")} className="w-full" />
               <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label={t("common.search")} />
             </div>
-            <DataTable value={match.candidates} dataKey="id" size="small" stripedRows scrollable scrollHeight="360px" emptyMessage={t("insurerRec.none")}>
+            <DataTable value={match.candidates} dataKey="id" size="small" stripedRows scrollable emptyMessage={t("insurerRec.none")}>
               <Column header={t("insurerRec.brokerRecord")} body={(r) => t(`insurerRec.record.${r.type}`)} />
               <Column field="policyNumber" header={t("insurerRec.policyNo")} />
               <Column field="insured" header={t("insurerRec.insured")} />

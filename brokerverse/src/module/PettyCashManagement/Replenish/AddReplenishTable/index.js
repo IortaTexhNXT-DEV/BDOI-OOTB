@@ -14,7 +14,6 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import InputField from "../../../../components/InputField";
-import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import { useDispatch, useSelector } from "react-redux";
 import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddleware";
@@ -96,36 +95,6 @@ const AddReplenishTable = () => {
     color: "#000",
     border: "none",
   };
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="paginator__container">
-          <React.Fragment>
-            <span
-              className="mx-1"
-              style={{ color: "var(--text-color)", userSelect: "none" }}
-            >
-              Row count :{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
 
   return (
     <div className="add__replenish__table">
@@ -162,12 +131,9 @@ const AddReplenishTable = () => {
             value={AddReplenishTable}
             tableStyle={{ minWidth: "50rem" }}
             scrollable={true}
-            scrollHeight="40vh"
             paginator
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             selectionMode="checkbox"
             emptyMessage={isEmpty ? emptyTableIcon : null}
             selection={selectedRows}

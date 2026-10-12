@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
@@ -64,33 +63,6 @@ const TransactionCodeSetupTable = ({ action }) => {
       <div className="no__data__found">{t("generalMasters.noDataEntered")}</div>
     </div>
   );
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              {t("generalMasters.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
 
   const handleSubmit = () => {
     dispatch(postViewMainBranchUser(formik.values))
@@ -175,12 +147,9 @@ const TransactionCodeSetupTable = ({ action }) => {
             color: "var(--text-color)",
           }}
           scrollable={true}
-          scrollHeight="40vh"
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
         >
           <Column

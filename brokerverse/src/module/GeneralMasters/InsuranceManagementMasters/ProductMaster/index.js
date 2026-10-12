@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
+import PageHeader from "../../../../components/PageHeader";
 import "./index.scss";
-import { BreadCrumb } from "primereact/breadcrumb";
-import SvgDot from "../../../../assets/icons/SvgDot";
 import TableData from "./TableData/index";
 import { useNavigate } from "react-router-dom";
 import PageActions from "../../../../components/PageActions";
@@ -31,12 +30,7 @@ const Index = () => {
         <div className="col-12 p-0 " 
 style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <div>
-          <div className="main__account__title">{t("generalMasters.productMaster")}</div>
-          <BreadCrumb
-            home={home}
-            className="breadCrums__view__reversal"
-            model={items}
-            separatorIcon={<SvgDot color={"#000"} />}
+          <PageHeader title={t("generalMasters.productMaster")} home={home.label} trail={items.map((i) => (i.url ? { label: i.label, to: i.url } : i.label))} />}
           />
           </div>
           <div>

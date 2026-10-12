@@ -231,7 +231,7 @@ const UnappliedCollections = () => {
                 <Button label={t("unapplied.find")} icon="pi pi-search" outlined onClick={searchBills} />
               </div>
             ) : null}
-            <DataTable value={allocating.lines} dataKey="receivableId" size="small" scrollable scrollHeight="22rem" emptyMessage={t("unapplied.noBills")}>
+            <DataTable value={allocating.lines} dataKey="receivableId" size="small" scrollable emptyMessage={t("unapplied.noBills")}>
               <Column field="billNumber" header={t("unapplied.bill")} />
               <Column field="policyNumber" header={t("unapplied.policy")} />
               <Column field="customerName" header={t("unapplied.client")} />

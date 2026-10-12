@@ -88,7 +88,24 @@ export const formatNumber = (value, options = {}) => {
   return n.toLocaleString(numberLocale(), options);
 };
 
-/** "PHP 409,141.43": the currency code, then the amount with two decimals and thousands separators. */
+/**
+ * The one display format of an amount on screen (UI standard): the currency symbol and two decimals, the sign first:
+ * "₱8,457.50", "-₱5,000.00". Empty for no value.
+ */
+export const displayAmount = (value, currency = "PHP") => {
+  const n = Number(`${value ?? ""}`.replace(/,/g, ""));
+  if (value === null || value === undefined || value === "" || Number.isNaN(n)) return "";
+  try {
+    return new Intl.NumberFormat(numberLocale(), { style: "currency", currency, currencyDisplay: "narrowSymbol", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+  } catch {
+    return codeAmount(n, currency);
+  }
+};
+
+/**
+ * "PHP 409,141.43": the currency code, then the amount. Only for exported and bank files that need the code; screens
+ * use displayAmount.
+ */
 export const codeAmount = (value, currency = "PHP") => {
   const text = formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (!text) return "";

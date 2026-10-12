@@ -94,10 +94,10 @@ describe("Remittance record", () => {
     remittanceService.getRemittance.mockResolvedValue(checker());
     remittanceService.approveApproval.mockRejectedValue(failWith(409, "Approved by J. Cruz at 10:32."));
     show();
-    expect(await screen.findByText("Awaiting your decision · Your limit PHP 1,000,000.00 · This item PHP 40,137.18")).toBeInTheDocument();
+    expect(await screen.findByText("Awaiting your decision · Your limit ₱1,000,000.00 · This item ₱40,137.18")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-    expect(await screen.findByText("Approve REM-2026-00021 for PHP 409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
+    expect(await screen.findByText("Approve REM-2026-00021 for ₱409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Approve" }));
     expect(remittanceService.approveApproval).toHaveBeenCalledWith(21, { version: 1 });
     expect(await screen.findByText("Approved by J. Cruz at 10:32. Reload to see the current version.")).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe("Remittance record", () => {
     expect(screen.getByRole("button", { name: "Submit for approval" })).toBeInTheDocument();
     fireEvent.click(screen.getByText("Activity"));
     expect(await screen.findByText("Approval summary")).toBeInTheDocument();
-    expect(screen.getByText("PHP 1,000,000.00")).toBeInTheDocument();
+    expect(screen.getByText("₱1,000,000.00")).toBeInTheDocument();
     expect(screen.getByText("Role limit: TIS Finance & General Accounting")).toBeInTheDocument();
     expect(screen.getAllByText("Rates to be corrected: OD rate of POL-1").length).toBeGreaterThan(0);
     expect(screen.getByText("Remittance returned to the maker")).toBeInTheDocument();

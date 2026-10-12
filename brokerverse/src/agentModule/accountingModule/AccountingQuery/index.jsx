@@ -457,8 +457,6 @@ const AccountingQuery = () => {
             totalRecords={pagination.total}
             onPage={(e) => handleSearch(e.page + 1, e.rows)}
             rowsPerPageOptions={[20, 50, 100]}
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             emptyMessage={t("accounting.noEntriesFound")}
             className="results-table"
             loading={loading}

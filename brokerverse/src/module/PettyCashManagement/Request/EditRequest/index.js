@@ -393,7 +393,6 @@ const EditRequestForm = ({ action }) => {
                             value={AddRequestTable}
                             tableStyle={{ minWidth: "50rem" }}
                             scrollable={true}
-                            scrollHeight="40vh"
                         >
                             <Column
                                 field="Narration"
