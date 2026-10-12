@@ -106,7 +106,7 @@ const FIGURES = {
     return [
       { key: 'activeUsers', label: 'Active users', value: num(users.active), format: 'count' },
       { key: 'failedJobs24h', label: 'Failed jobs (24 h)', value: num(jobs.n), format: 'count' },
-      { key: 'awaitingSignIn', label: 'Awaiting first sign-in', value: num(users.waiting), format: 'count' },
+      { key: 'awaitingSignIn', label: 'Not signed in yet', value: num(users.waiting), format: 'count' },
     ];
   },
 };

@@ -12741,7 +12741,7 @@
         "vouchersForApproval": "Vouchers awaiting approval",
         "activeUsers": "Active users",
         "failedJobs24h": "Failed jobs (24 h)",
-        "awaitingSignIn": "Awaiting first sign-in"
+        "awaitingSignIn": "Not signed in yet"
       }
     },
     "due": {
