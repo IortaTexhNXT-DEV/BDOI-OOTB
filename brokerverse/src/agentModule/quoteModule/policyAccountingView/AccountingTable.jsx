@@ -94,7 +94,6 @@ const AccountingTable = ({ type }) => {
                 className="corrections__table__main"
                 dataKey="id"
                 scrollable={true}
-                scrollHeight="80vh"
                 tableStyle={{ minWidth: "50rem" }}
             >
                 <Column

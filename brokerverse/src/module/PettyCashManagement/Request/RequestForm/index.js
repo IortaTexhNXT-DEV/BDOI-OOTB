@@ -258,7 +258,6 @@ const RequestForm = ({ action }) => {
               <DataTable
                 tableStyle={{ minWidth: "50rem" }}
                 scrollable={true}
-                scrollHeight="40vh"
               >
                 <Column
                   field="Narration"

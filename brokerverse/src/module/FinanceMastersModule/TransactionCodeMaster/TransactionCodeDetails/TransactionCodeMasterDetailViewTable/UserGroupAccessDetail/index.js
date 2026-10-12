@@ -50,7 +50,6 @@ const UserGroupAccessDetail = () => {
             color: "var(--text-color)",
           }}
           scrollable={true}
-          scrollHeight="40vh"
           emptyMessage={isEmpty ? emptyTableIcon : null}
         >
           <Column

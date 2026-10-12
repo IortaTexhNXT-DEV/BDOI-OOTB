@@ -413,7 +413,6 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
                 value={TableList}
                 tableStyle={{ minWidth: "50rem" }}
                 scrollable={true}
-                scrollHeight="26vh"
                 emptyMessage={isEmpty ? emptyTableIcon : null}
               >
                 <Column

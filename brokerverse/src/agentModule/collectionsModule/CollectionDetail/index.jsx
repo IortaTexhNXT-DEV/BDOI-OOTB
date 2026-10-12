@@ -383,7 +383,6 @@ const CollectionDetail = () => {
           emptyMessage={t("collectionDetail.noPaymentsRecorded")}
           className="payment-table"
           scrollable
-          scrollHeight="400px"
         >
           <Column
             field="paymentDate"

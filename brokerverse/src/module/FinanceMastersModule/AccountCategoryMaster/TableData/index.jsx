@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -40,33 +39,6 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
       <div className="no__data__found">{t("financeMasters.noDataEntered")}</div>
     </div>
   );
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              {t("financeMasters.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
   const renderActionButton = (rowData) => <RowActions onView={() => handleViewAction(rowData)} onEdit={() => handleEditAction(rowData)} />;
 
   useEffect(() => {
@@ -99,12 +71,9 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
         paginator
         rows={20}
         rowsPerPageOptions={[20, 50, 100]}
-        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-        paginatorTemplate={template2}
         className="reversal__table__main"
         emptyMessage={emptyTableIcon}
         scrollable={true}
-        scrollHeight="40vh"
       >
         <Column
           field="categoryCode"

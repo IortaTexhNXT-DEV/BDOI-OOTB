@@ -2654,7 +2654,10 @@
         "bounced": "Bounced cheques",
         "releasedOn": "Fully paid on",
         "releaseReceipt": "Clearing receipt"
-      }
+      },
+      "balanceOf": "of {{total}}, paid {{paid}}",
+      "paidOf": "paid {{paid}}",
+      "heldSinceShort": "held since {{date}}"
     }
   },
   "incentive": {
@@ -3656,7 +3659,7 @@
     "addBranch": "Add branch",
     "editBranch": "Edit branch",
     "branchDetails": "Branch details",
-    "insuranceCompany": "Insurance company",
+    "insuranceCompany": "Insurance Company",
     "addInsuranceCompany": "Add Insurance company",
     "editInsuranceCompany": "Edit Insurance company",
     "insuranceCompanyDetails": "Insurance Company details",
@@ -3664,7 +3667,7 @@
     "addLineOfBusiness": "Add line of business",
     "editLineOfBusiness": "Edit line of business",
     "lineOfBusinessDetails": "Line of business details",
-    "productMaster": "Product master",
+    "productMaster": "Product Master",
     "addProductMaster": "Add product master",
     "editProductMaster": "Edit product master",
     "productMasterDetails": "Product Master details",
@@ -3874,7 +3877,7 @@
     "replaceLogo": "Replace logo",
     "uploadLogo": "Upload logo",
     "removeLogo": "Remove",
-    "policyTypeMaster": "Policy type",
+    "policyTypeMaster": "Policy Type",
     "department": "Department",
     "systemSetup": "System set-up",
     "includePlatformRoles": "Include the base platform roles",
@@ -3892,7 +3895,8 @@
     "numberingCode": "Numbering code",
     "issuingOffice": "Issuing office",
     "quoteValidityDays": "Quotation validity (days)",
-    "quoteValidityDaysRange": "Enter 1 to 366 days, or leave empty for the standard validity"
+    "quoteValidityDaysRange": "Enter 1 to 366 days, or leave empty for the standard validity",
+    "searchCodeOrName": "Search code or name"
   },
   "agent": {
     "createQuote": "Create quotation",

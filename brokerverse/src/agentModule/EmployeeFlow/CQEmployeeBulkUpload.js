@@ -5,7 +5,6 @@ import SvgUploadArrowIcon from "./uploadIcon";
 import './index.scss'
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import SvgDownArrow from "../../assets/agentIcon/SvgDownArrow";
 import { Dropdown } from "primereact/dropdown";
 import React, { useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
@@ -26,37 +25,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
     const [employeeList, setEmployeeList] = useState([]);
     const fileInputRef = useRef(null);
     const [selectedFileName, setSelectedFileName] = useState("");
-    const template2 = {
-        layout:
-            "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-        RowsPerPageDropdown: (options) => {
-            const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-            return (
-                <div className="table__selector">
-                    <React.Fragment>
-                        <span
-                            className="table__selector__text"
-                            style={{ color: "var(--text-color)", userSelect: "none" }}
-                        >
-                            {t("employeeBenefit.rowsPerPage")}{" "}
-                        </span>
-                        <Dropdown
-                            value={options.value}
-                            className="pagedropdown_container"
-                            options={dropdownOptions}
-                            onChange={options.onChange}
-                            dropdownIcon={<SvgDownArrow />}
-                        />
-                    </React.Fragment>
-                </div>
-            );
-        },
-    };
 
     const formik = useFormik({
         initialValues: {
@@ -255,8 +223,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                         paginator
                         rows={20}
                         rowsPerPageOptions={[20, 50, 100]}
-                        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                        paginatorTemplate={template2}
                         className="corrections__table__main"
                         dataKey="EmployeeID"
                         emptyMessage={

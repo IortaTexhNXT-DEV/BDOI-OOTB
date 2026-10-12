@@ -137,7 +137,6 @@ const PCuploadPolicy = ({ state }) => {
 
         <div className="card" style={{ marginBottom: 24, marginTop: 24 }}>
           <DataTable value={TableList} tableStyle={{ minWidth: '50rem' }} scrollable={true}
-            scrollHeight="26vh"
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
             <Column header={t("employeeBenefit.participantName")} field="ParticipantName" style={{ paddingLeft: 20 }}></Column>

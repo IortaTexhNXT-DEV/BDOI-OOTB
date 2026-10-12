@@ -55,18 +55,35 @@ const HeldPolicies = () => {
           <InputText value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("remittance.held.search")} aria-label={t("remittance.held.search")} className="w-18rem" />
         </div>
         <DataTable value={data?.rows || []} dataKey="policyId" loading={loading} size="small" stripedRows paginator rows={20} emptyMessage={t(`remittance.held.empty.${view}`)}>
-          <Column field="policyNumber" header={t("remittance.held.columns.policy")} />
-          <Column field="clientName" header={t("remittance.held.columns.client")} />
-          <Column field="insurerName" header={t("remittance.held.columns.insurer")} />
-          <Column field="productLine" header={t("remittance.held.columns.productLine")} />
-          <Column header={t("remittance.held.columns.plan")} body={(r) => r.plan || "—"} />
-          <Column header={t("remittance.held.columns.premium")} body={(r) => money(r.premium)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("remittance.held.columns.paidToDate")} body={(r) => money(r.paidToDate)} className="bv-num" headerClassName="bv-num" />
-          {view === "held" ? <Column header={t("remittance.held.columns.balance")} body={(r) => money(r.balance)} className="bv-num" headerClassName="bv-num" /> : null}
-          {view === "held" ? <Column header={t("remittance.held.columns.nextDue")} body={(r) => formatDate(r.nextDue)} /> : null}
-          {view === "held" ? <Column header={t("remittance.held.columns.heldSince")} body={(r) => formatDate(r.heldSince)} /> : null}
+          {/* fits at 1366px: policy with its client, insurer with line and plan, one amount column with its parts under it */}
+          <Column field="policyNumber" header={t("remittance.held.columns.policy")} body={(r) => (
+            <span className="bv-cell-stack"><span className="rm-ref">{r.policyNumber}</span><small>{r.clientName}</small></span>
+          )} />
+          <Column field="insurerName" header={t("remittance.held.columns.insurer")} body={(r) => (
+            <span className="bv-cell-stack"><span>{r.insurerName}</span><small>{[r.productLine, r.plan].filter(Boolean).join(" · ")}</small></span>
+          )} />
           {view === "held" ? (
-            <Column header={t("remittance.held.columns.bounced")} body={(r) => (r.bouncedCheques ? <StatusChip code="bounced" label={t("remittance.held.bouncedCount", { count: r.bouncedCheques })} /> : "")} />
+            <Column header={t("remittance.held.columns.balance")} className="bv-num" headerClassName="bv-num" body={(r) => (
+              <span className="bv-cell-stack" style={{ alignItems: "flex-end" }}>
+                <strong>{money(r.balance)}</strong>
+                <small>{t("remittance.held.balanceOf", { total: money(r.premium), paid: money(r.paidToDate), defaultValue: "of {{total}}, paid {{paid}}" })}</small>
+              </span>
+            )} />
+          ) : (
+            <Column header={t("remittance.held.columns.premium")} className="bv-num" headerClassName="bv-num" body={(r) => (
+              <span className="bv-cell-stack" style={{ alignItems: "flex-end" }}>
+                <strong>{money(r.premium)}</strong>
+                <small>{t("remittance.held.paidOf", { paid: money(r.paidToDate), defaultValue: "paid {{paid}}" })}</small>
+              </span>
+            )} />
+          )}
+          {view === "held" ? (
+            <Column header={t("remittance.held.columns.nextDue")} bodyClassName="bv-nowrap" body={(r) => (
+              <span className="bv-cell-stack"><span>{formatDate(r.nextDue)}</span><small>{t("remittance.held.heldSinceShort", { date: formatDate(r.heldSince), defaultValue: "held since {{date}}" })}</small></span>
+            )} />
+          ) : null}
+          {view === "held" ? (
+            <Column header={t("remittance.held.columns.bounced")} bodyClassName="bv-nowrap" body={(r) => (r.bouncedCheques ? <StatusChip code="bounced" label={t("remittance.held.bouncedCount", { count: r.bouncedCheques })} /> : "—")} />
           ) : null}
           {view === "released" ? <Column header={t("remittance.held.columns.releasedOn")} body={(r) => formatDate(r.releasedOn)} /> : null}
           {view === "released" ? <Column field="releaseReceipt" header={t("remittance.held.columns.releaseReceipt")} /> : null}

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { useSelector, useDispatch } from "react-redux";
@@ -42,33 +41,6 @@ const TableData = ({ navigate }) => {
       <div className="no__data__found">No data entered</div>
     </div>
   );
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              {t("generalMasters.rowCount")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
   const renderActionButton = (rowData) => <RowActions onView={() => handleView(rowData.id)} onEdit={() => handleEdit(rowData.id)} />;
 
   const handleView = (id) => {
@@ -101,15 +73,12 @@ const TableData = ({ navigate }) => {
           <span className="p-input-icon-left w-full">
             <i className="pi pi-search" />
             <InputText
-              placeholder="Search By Insurance Company  Code"
+              placeholder={t("generalMasters.searchCodeOrName", "Search code or name")}
               className="searchinput__field"
               value={formik.values.search}
               onChange={formik.handleChange("search")}
             />
           </span>
-        </div>
-        <div className="p-0 col-12">
-          <div className="table__title">Cover List</div>
         </div>
       </div>
       <DataTable
@@ -119,22 +88,19 @@ const TableData = ({ navigate }) => {
         paginator
         rows={20}
         rowsPerPageOptions={[20, 50, 100]}
-        currentPageReportTemplate="{first} - {last} of {totalRecords}"
-        paginatorTemplate={template2}
         className="reversal__table__main"
         emptyMessage={emptyTableIcon}
         scrollable={true}
-        scrollHeight="40vh"
       >
         <Column
           field="coverCode"
-          header="Cover Code"
+          header="Cover code"
           className="fieldvalue_container"
           sortable
         ></Column>
         <Column
           field="coverName"
-          header="Cover Name"
+          header="Cover name"
           className="fieldvalue_container"
           body={(rowData) => rowData.coverName}
         ></Column>
@@ -146,12 +112,12 @@ const TableData = ({ navigate }) => {
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
-          header="Modified On"
+          header="Modified on"
           className="fieldvalue_container"
         ></Column>
         <Column
           field="status"
-          header="status"
+          header="Status"
           className="fieldvalue_container"
           body={(columnData) => <MasterStatusToggle type="cover" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>

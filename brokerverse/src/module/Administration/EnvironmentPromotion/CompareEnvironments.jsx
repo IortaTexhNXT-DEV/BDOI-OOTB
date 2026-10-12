@@ -109,7 +109,7 @@ const CompareEnvironments = () => {
               ]} />
             </DetailSection>
             <DetailSection title={k("sections.sheets")}>
-              <DataTable value={open.sheets || []} dataKey="sheet" size="small" stripedRows scrollable scrollHeight="14rem">
+              <DataTable value={open.sheets || []} dataKey="sheet" size="small" stripedRows scrollable>
                 <Column header={k("columns.sheet")} field="name" />
                 <Column header={k("columns.inFile")} field="inFile" />
                 <Column header={k("columns.here")} field="here" />
@@ -120,7 +120,7 @@ const CompareEnvironments = () => {
               </DataTable>
             </DetailSection>
             <DetailSection title={k("sections.differences")}>
-              <DataTable value={rows} dataKey="key" size="small" stripedRows scrollable scrollHeight="18rem" emptyMessage={k("noDifferences")}>
+              <DataTable value={rows} dataKey="key" size="small" stripedRows scrollable emptyMessage={k("noDifferences")}>
                 <Column header={k("columns.sheet")} field="sheetName" />
                 <Column header={k("columns.key")} field="key" />
                 <Column header={k("columns.status")} body={(r) => statusChip(r.status)} />

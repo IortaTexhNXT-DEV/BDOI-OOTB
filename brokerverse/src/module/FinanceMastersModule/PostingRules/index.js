@@ -234,7 +234,7 @@ const PostingRules = () => {
               <Dropdown value={moduleFilter} options={modules} onChange={(e) => setModuleFilter(e.value)} placeholder={t("postingRules.allModules")} showClear />
             </div>
             <DataTable value={shown} loading={loading} selectionMode="single" selection={selected} onSelectionChange={(e) => choose(e.value)} dataKey="eventCode"
-              size="small" stripedRows scrollable scrollHeight="560px" emptyMessage={t("postingRules.noEvents")}>
+              size="small" stripedRows scrollable emptyMessage={t("postingRules.noEvents")}>
               <Column header={t("postingRules.event")} body={(e) => (<div title={e.eventCode}><div className="font-semibold">{e.label}</div><span className="text-500 text-sm">{e.module}</span></div>)} />
               <Column header={t("postingRules.version")} style={{ width: "5.5rem" }} body={(e) => (
                 <span className="flex flex-column gap-1">

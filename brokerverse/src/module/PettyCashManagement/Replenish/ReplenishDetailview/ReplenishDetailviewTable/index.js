@@ -30,7 +30,6 @@ const ReplenishtDetailViewTable = ({ AddReplenishTable }) => {
           tableStyle={{ minWidth: "50rem" }}
           emptyMessage={isEmpty ? emptyTableIcon : null}
           scrollable={true}
-          scrollHeight="40vh"
         >
           <Column
             field="Transactioncode"

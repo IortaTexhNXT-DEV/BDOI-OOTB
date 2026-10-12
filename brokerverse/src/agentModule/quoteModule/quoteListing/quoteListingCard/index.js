@@ -109,38 +109,6 @@ const QuoteListingCard = () => {
     }
   }, [search]);
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <div className="table__selector">
-          <React.Fragment>
-            <span
-              className="table__selector__text"
-              style={{ color: "var(--text-color)", userSelect: "none" }}
-            >
-              {t("quoteListing.rowsPerPage")}{" "}
-            </span>
-            <Dropdown
-              value={options.value}
-              className="pagedropdown_container"
-              options={dropdownOptions}
-              onChange={options.onChange}
-              dropdownIcon={<SvgDownArrow />}
-            />
-          </React.Fragment>
-        </div>
-      );
-    },
-  };
-
   const rendercheckedHeader = (value) => value;
 
   const renderUncheckedHeader = (value) => value;
@@ -551,13 +519,10 @@ const QuoteListingCard = () => {
               setRowsPerPage(e.rows);
             }}
             rowsPerPageOptions={[20, 50, 100]}
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
             className="corrections__table__main"
             dataKey="quotationId"
             tableStyle={{ minWidth: "50rem" }}
             scrollable={true}
-            scrollHeight="60vh"
           >
             <Column
               body={renderCompany}

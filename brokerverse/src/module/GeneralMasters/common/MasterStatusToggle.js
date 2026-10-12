@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "primereact/button";
 import "../../../components/ToggleButton/index.scss";
+import StatusChip from "../../../components/StatusChip";
 import mastersService from "../../../services/mastersService";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { humanize } from "../../../components/ActivityLog";
@@ -61,7 +63,7 @@ export const identityFacts = (type, record, t) => {
  * Persists through PATCH /masters/<type>/<id>/status, or through `onToggle` when given. Switching a record off asks
  * first (it is no longer offered on new transactions; a role or user loses access), naming the record.
  */
-const MasterStatusToggle = ({ type, record, onToggle, onChanged, onError }) => {
+const MasterStatusToggle = ({ type, record, onToggle, onChanged, onError, asSwitch = false }) => {
   const { t } = useTranslation();
   const [checked, setChecked] = useState(isActiveRecord(record));
   const [saving, setSaving] = useState(false);
@@ -103,6 +105,17 @@ const MasterStatusToggle = ({ type, record, onToggle, onChanged, onError }) => {
     }
   };
 
+  // in a list (UI standard): the status as a chip and an icon button that switches it; the switch itself is for forms
+  if (!asSwitch) {
+    const action = checked ? t("common.deactivate", "Deactivate") : t("common.activate", "Activate");
+    return (
+      <span className="flex align-items-center gap-1 bv-nowrap">
+        <StatusChip code={checked ? "active" : "inactive"} label={checked ? t("masterStatus.active") : t("masterStatus.inactive")} />
+        <Button type="button" icon={checked ? "pi pi-ban" : "pi pi-check-circle"} text rounded size="small" aria-label={action} tooltip={action}
+          tooltipOptions={{ position: "top" }} onClick={handleToggle} disabled={saving || !record?.id} />
+      </span>
+    );
+  }
   const inputId = `toggle-${type}-${record?.id}`;
   return (
     <div className="toggle__container">

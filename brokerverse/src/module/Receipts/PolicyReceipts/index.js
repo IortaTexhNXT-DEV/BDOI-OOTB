@@ -136,35 +136,6 @@ const PolicyReceipts = () => {
     }));
   };
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 20, value: 20 },
-        { label: 50, value: 50 },
-        { label: 100, value: 100 },
-      ];
-
-      return (
-        <>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("accounts.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </>
-      );
-    },
-  };
-
   const home = { label: t("sidebar.Accounts") };
 
   const navigate = useNavigate();
@@ -701,8 +672,6 @@ const PolicyReceipts = () => {
               first={first}
               onPage={onPageChange}
               rowsPerPageOptions={[20, 50, 100]}
-              currentPageReportTemplate="{first} - {last} of {totalRecords}"
-              paginatorTemplate={template2}
               className="datatable_container"
               loading={loading}
             >

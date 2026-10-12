@@ -185,7 +185,7 @@ const BankBatchDialog = ({ visible, onHide, onCreated, preselectedIds, payeeType
 
       <h3 className="bv-bank-batch__title">{preset ? t("bankBatchDialog.included") : t("bankBatchDialog.vouchers")}</h3>
       {missing > 0 ? <p className="bv-bank-batch__missing" role="status">{t("bankBatchDialog.notEligible", { count: missing })}</p> : null}
-      <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" emptyMessage={t("bankBatchDialog.noVouchers")} scrollable scrollHeight="20rem">
+      <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" emptyMessage={t("bankBatchDialog.noVouchers")} scrollable>
         <Column style={{ width: "3rem" }} body={(v) => (v.ready ? (
           <Checkbox checked={selected.some((s) => s.disbursementId === v.disbursementId)} onChange={(e) => tick(v, e.checked)}
             aria-label={t("bankBatchDialog.include", { voucher: v.voucherNumber })} />

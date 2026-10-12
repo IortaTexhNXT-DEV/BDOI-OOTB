@@ -66,7 +66,7 @@ const UploadJournalVouchers = ({ visible, onHide, onUploaded }) => {
       </div>
       {message && <Message severity={result ? (errors.length ? "warn" : "success") : "error"} className="w-full mb-2" text={message} />}
       {errors.length > 0 && (
-        <DataTable value={errors} size="small" stripedRows scrollable scrollHeight="18rem">
+        <DataTable value={errors} size="small" stripedRows scrollable>
           <Column field="path" header={t("jvTools.row")} style={{ width: "14rem" }} />
           <Column field="message" header={t("jvTools.problem")} />
         </DataTable>

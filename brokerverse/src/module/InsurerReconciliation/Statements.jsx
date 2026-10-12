@@ -158,7 +158,7 @@ const Statements = () => {
                 {preview.errors.length > 0 && (
                   <div className="p-message p-message-error p-2 mb-2">{preview.errors.slice(0, 8).map((e) => <div key={e.row}>{t("insurerRec.row")} {e.row}: {e.message}</div>)}</div>
                 )}
-                <DataTable value={preview.lines} size="small" scrollable scrollHeight="260px" dataKey="lineNo">
+                <DataTable value={preview.lines} size="small" scrollable dataKey="lineNo">
                   <Column field="policyNo" header={t("insurerRec.policyNo")} />
                   <Column field="insured" header={t("insurerRec.insured")} />
                   <Column header={t("insurerRec.date")} body={(l) => date(l.date)} />
