@@ -217,6 +217,9 @@ const SidebarSection = ({ title, icon, actions, children, className }) => (
 
 // a field with no value (blank, N/A or a zero amount) is left out of a detail grid rather than shown as a long list
 // of N/A; an item marked `always` (a total) is kept
+/** A date of the period of insurance with its cover time ("15/11/2026 12:00 noon"); the date alone when either is missing. */
+const withCoverTime = (date, time) => (date && time && date !== "-" && date !== "N/A" ? `${date} ${time}` : date);
+
 const isBlankValue = (v, empty) =>
   v === null || v === undefined || v === "" || v === "N/A" || v === empty || /^[^\d-]*0(\.0+)?$/.test(String(v).replace(/,/g, "").trim());
 const recordedItems = (items, empty) => (items || []).filter((item) => item.always || !isBlankValue(item.value, empty));
@@ -1078,7 +1081,7 @@ const PolicyDetailView = () => {
     {
       key: "policy-expiry",
       icon: "pi pi-calendar",
-      text: formatDate(policyDetails.PolicyExpiry),
+      text: withCoverTime(formatDate(policyDetails.PolicyExpiry), rawPolicyData?.coverEndLabel),
     },
     {
       key: "payment-status",
@@ -1250,7 +1253,14 @@ const PolicyDetailView = () => {
     {
       key: "inceptionDate",
       label: t("policyDetail.inceptionDate"),
-      value: formatDate(rawPolicyData?.inception),
+      // PROD-05: cover starts at the cover start time (12:00 noon) on the inception date
+      value: withCoverTime(formatDate(rawPolicyData?.inception), rawPolicyData?.coverStartLabel),
+    },
+    {
+      key: "expiryDate",
+      label: t("policyDetail.expiryDate"),
+      // and ends at the cover end time (11:59 PM) on the expiry date
+      value: withCoverTime(formatDate(rawPolicyData?.expiry), rawPolicyData?.coverEndLabel),
     },
   ];
 

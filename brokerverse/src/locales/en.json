@@ -284,7 +284,8 @@
     "Promotions": "Promotions",
     "Discount Caps": "Discount Caps",
     "Data Migration & Go-Live": "Data Migration & Go-Live",
-    "Broker Commission": "Broker Commission"
+    "Broker Commission": "Broker Commission",
+    "Sales Targets": "Sales Targets"
   },
   "sidebarFull": {
     "Request for Quotation": "Requests for Quotation (Broker Slips)",
@@ -19680,5 +19681,70 @@
     },
     "newBatchTitle": "New Batch",
     "addMemberTitle": "Add Member"
+  },
+  "salesTargets": {
+    "title": "Sales Targets",
+    "help": "Commission target of each agent or sales unit per month. A target counts in the reports once a second user approves it.",
+    "add": "Add target",
+    "addTitle": "Add Sales Target",
+    "editTitle": "Edit Sales Target",
+    "save": "Save draft",
+    "saved": "Sales target saved as a draft",
+    "submit": "Send {{count}} for approval",
+    "submitted": "Sales targets sent for approval",
+    "approve": "Approve {{count}}",
+    "approved": "Sales targets approved",
+    "return": "Return",
+    "returned": "Sales targets returned to draft",
+    "returnTitle": "Return Sales Targets",
+    "returnNote": "Reason for returning",
+    "withdraw": "Withdraw",
+    "withdrawn": "Sales target withdrawn",
+    "search": "Agent or sales unit",
+    "statusLabel": "Status",
+    "inForceAndOpen": "In force and open",
+    "empty": "No sales targets yet. Add a target or upload the template.",
+    "month": "Month",
+    "targetFor": "Target for",
+    "agent": "Agent",
+    "salesUnit": "Sales unit",
+    "name": "Agent or sales unit",
+    "amount": "Target commission",
+    "remarks": "Remarks",
+    "actions": "Actions",
+    "chooseAgent": "Choose the agent",
+    "chooseUnit": "Choose the sales unit",
+    "chooseMonth": "Choose the month",
+    "uploadTitle": "Upload Sales Targets",
+    "uploadHelp": "Each row is added as a draft target; send the drafts for approval afterwards.",
+    "status": {
+      "draft": "Draft",
+      "pending-approval": "Pending approval",
+      "approved": "Approved",
+      "superseded": "Superseded",
+      "withdrawn": "Withdrawn"
+    }
+  },
+  "clientPrivacy": {
+    "title": "Privacy",
+    "help": "Privacy notice, marketing consent and e-mail opt-out. Policy, billing, renewal and claim e-mails are sent whatever the choice.",
+    "edit": "Edit privacy",
+    "editTitle": "Edit Privacy",
+    "save": "Save",
+    "notice": "Privacy notice",
+    "noticeAcknowledged": "Privacy notice acknowledged",
+    "acknowledgedOn": "Acknowledged {{date}}, version {{version}}",
+    "notAcknowledged": "Not acknowledged",
+    "marketingConsent": "Marketing consent",
+    "marketingEmail": "Marketing e-mail",
+    "optOut": "Opted out of marketing e-mail",
+    "optedOutOn": "Opted out {{date}}",
+    "receives": "Receives marketing e-mail when consent is given",
+    "transactionalNote": "Policy, billing, renewal and claim e-mails are still sent.",
+    "consent": {
+      "given": "Given",
+      "refused": "Refused",
+      "notRecorded": "Not recorded"
+    }
   }
 }

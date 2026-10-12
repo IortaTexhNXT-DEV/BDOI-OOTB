@@ -5,6 +5,7 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { one } from '../../db/pool.js';
+import { coverTimes } from '../../lib/policyTerm.js';
 import { printContext } from '../../lib/pdf/index.js';
 import { amountInWords, formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { round2 } from '../../lib/money.js';
@@ -279,7 +280,10 @@ export async function standardPolicyScheduleDoc(p) {
   const pr = p.id ? await one('SELECT created_by, status FROM policies WHERE id::text = $1', [String(p.id)]).catch(() => null) : null;
   const sig = await signatures(h, 'policy-schedule', { status: pr?.status || p.status, date: p.issuedDate || p.inception, issuedBy: pr?.created_by },
     { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
-  return { ...h, watermark: sig.watermark, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', f.date(p.inception)], ['Period to', f.date(p.expiry)],
+  // PROD-05: the period of insurance runs from the cover start time on the inception date to the cover end time on the expiry date
+  const times = await coverTimes();
+  const at = (d, label) => (f.date(d) ? `${f.date(d)} ${label}` : '');
+  return { ...h, watermark: sig.watermark, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', at(p.inception, times.startLabel)], ['Period to', at(p.expiry, times.endLabel)],
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
     ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency],

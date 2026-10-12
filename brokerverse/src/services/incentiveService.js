@@ -73,6 +73,16 @@ export const incentiveService = {
   agents: () => get("/agents"),
   branches: () => get("/branches"),
 
+  // sales targets (Master > Finance > Sales Targets, TIS-BRD-RPT-02): drafted, submitted, approved by a second user
+  listSalesTargets: (params) => get("/sales-targets", params),
+  salesTargetOptions: () => get("/sales-targets/options"),
+  createSalesTarget: (payload) => post("/sales-targets", payload),
+  updateSalesTarget: (targetId, payload) => put(`/sales-targets/${id(targetId)}`, payload),
+  submitSalesTargets: (ids) => post("/sales-targets/submit", { ids }),
+  decideSalesTargets: (ids, decision, note) => post("/sales-targets/decide", { ids, decision, note: note || undefined }),
+  withdrawSalesTarget: (targetId) => post(`/sales-targets/${id(targetId)}/withdraw`),
+  salesTargetUploadTarget: (label) => ({ label, templatePath: "/incentive/sales-targets/upload/template", uploadPath: "/incentive/sales-targets/upload" }),
+
   // reports
   reportTemplates: () => get("/reports/templates"),
   listReports: () => get("/reports"),

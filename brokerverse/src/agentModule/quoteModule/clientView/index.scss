@@ -11,6 +11,28 @@
   }
 }
 
+// Privacy section (NFR-17.1): the edit dialog, one field per row
+.client-privacy__form {
+  display: grid;
+  gap: 0.5rem;
+
+  .p-dropdown {
+    width: 100%;
+  }
+}
+
+.client-privacy__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.client-privacy__note {
+  margin: 0.25rem 0 0;
+  color: var(--text-color-secondary);
+  font-size: 0.875rem;
+}
+
 .client360-endorse {
   display: flex;
   flex-direction: column;

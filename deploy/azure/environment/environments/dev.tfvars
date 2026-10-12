@@ -31,6 +31,9 @@ uploads_replication = "LRS"
 uploads_quota_gb    = 50
 uploads_backup      = false
 
+# NFR-11: monthly database export to immutable archive storage, kept 10 years
+db_archive_export = false
+
 smtp_enabled  = false
 entra_sign_in = { enabled = false, tenant_id = "", client_id = "" }
 sftp_enabled  = false

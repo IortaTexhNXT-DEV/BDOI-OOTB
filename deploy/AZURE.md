@@ -145,6 +145,7 @@ Set in `environments/<env>.tfvars`. Defaults are in `deploy/azure/modules/enviro
 | `api` / `web` | 1 replica | 1-2 | 1-2 | 2-6 / 2-4 | CPU, memory and replicas |
 | `uploads_replication` | LRS | LRS | ZRS | GZRS | redundancy of the documents share |
 | `uploads_backup` | no | no | yes | yes | Azure Backup of the share every 4 hours |
+| `db_archive_export` | no | no | no | yes | monthly database export to immutable archive storage, kept `db_archive_retention_years` (10) (section 12, NFR-11) |
 | `smtp_enabled` | no | yes | yes | yes | pass `SMTP_URL` to the API (section 7) |
 | `entra_sign_in` | off | off | on | on | sign-in with Microsoft (section 14) |
 | `sftp_enabled`, `sftp_users`, `sftp_allowed_ips` | off | on | on | on | SFTP for SAP and bank files (section 11) |
@@ -313,6 +314,7 @@ Explorer or `az storage blob upload --auth-mode login`.
 | Secrets | Key Vault soft delete 90 days, purge protection in production | none lost |
 | Images | registry zone-redundant and replicated to East Asia | none lost |
 | Infrastructure | Terraform in this repository, state versioned in RA-GZRS | rebuilt from code |
+| Database, long term (NFR-11) | monthly full export (`pg_dump`) to an immutable archive-tier container, kept 10 years, geo-redundant | the 1st of each month |
 
 **Restore the database to a point in time** (data damage, e.g. a wrong bulk update at 14:05 Manila time):
 
@@ -328,6 +330,26 @@ for a full switch, point `database-url` at the restored server and restart the A
 **Restore documents:** Azure portal > the recovery services vault > Backup items > Azure Storage (Azure Files) >
 uploads > Restore share or Restore files (single files or folders, to the original or another location). Files
 deleted within 30 days can also be undeleted from the share's soft delete.
+
+**Long-term backups, 10 years (NFR-11).** The point-in-time backups reach back 35 days at most. With
+`db_archive_export = true` (production) Terraform adds `deploy/azure/modules/environment/backup-archive.tf`: the job
+`caj-tisph-bv-prod-dbarchive` runs `pg_dump` on the 1st of each month (`db_archive_schedule`, 02:00 Manila) and writes
+`brokerverse-<UTC time>.dump` to the container `db-archive` of the archive storage account (`st...ar...`, GRS, reached
+through a private endpoint). The container has a time-based immutability policy of `db_archive_retention_years` (at
+least 10; WORM: nobody can change or delete an export before then); the lifecycle rule moves each export to the
+Archive tier after a day and deletes it after the retention period. Not provisioned yet (Azure is not set up).
+
+- After the first production run, check the export (`az storage blob list --auth-mode login --account-name <archive
+  account> -c db-archive -o table`) and, once TISPH accepts the set-up, set `db_archive_lock_immutability = true` and
+  apply. Locking cannot be undone: the retention can then only be extended.
+- Check monthly that the job succeeded: Azure portal > the job > Execution history (or `az containerapp job execution
+  list -n caj-tisph-bv-prod-dbarchive -g rg-tisph-bv-prod -o table`). Run it by hand with `az containerapp job start`.
+- Restore an export: rehydrate the blob to the Hot tier (`az storage blob set-tier --tier Hot --rehydrate-priority
+  Standard`, up to 15 hours; High is faster and dearer), download it, create an empty database on a restored or new
+  server and run `pg_restore --no-owner --dbname=<url> brokerverse-<time>.dump` from a container in the
+  environment. The data stays readable only with the `data-encryption-key` and `pii-encryption-key` of the time:
+  keep the offline copies of the keys (below) for as long as the exports.
+- Rehearse a restore of the oldest and the latest export once a year with the DR drill.
 
 **Regional disaster (production):**
 

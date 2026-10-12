@@ -33,6 +33,7 @@ import { LOAN_BOOKING_COLUMNS } from '../scheme-issuance/upload.js';
 import { LOAN_STATUS_COLUMNS } from '../lock-in/upload.js';
 import { PARCEL_COLUMNS, SHIPMENT_COLUMNS } from '../marine/parcel.js';
 import { CREDIT_LIFE_COLUMNS } from '../credit-life/service.js';
+import { SALES_TARGET_COLUMNS } from '../incentive/salesTargets.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file and 10 MB.';
@@ -318,6 +319,18 @@ export function staticUploads() {
       ],
       notes: ['Documents are not in the file: they are uploaded on each application (Scheme Issuance > application > Document checklist).',
         'ARA Signed On and ARA Payment Mode are required for a Scheme 1 loan; a Scheme 2 loan pays through the monthly amortisation.'],
+    },
+    {
+      id: 'sales-targets', file: 'Sales_Targets_Upload_Template.xlsx', title: 'Sales targets (commission target of an agent or a sales unit per month)',
+      menu: 'Master > Finance > Sales Targets > Upload', route: 'POST /api/incentive/sales-targets/upload (multipart field "file")',
+      columns: SALES_TARGET_COLUMNS, fileTypes: XLSX_OR_CSV, maxRows: 'Up to 2,000 rows per file (Configuration setting incentive.sales_target_max_rows).',
+      onError: `${ROW_BY_ROW} Each saved row is a Draft target: send the drafts for approval on the screen; a second user approves them.`,
+      samples: [
+        { scope: 'Agent', agent: 'ref-dcruz', salesUnit: '', period: '2026-11', targetAmount: '150000.00', remarks: 'Q4 push' },
+        { scope: 'Sales unit', agent: '', salesUnit: 'MNL', period: '2026-11', targetAmount: '1200000.00', remarks: '' },
+      ],
+      notes: ['A target counts in the reports only once approved (Agent Policy Conversion: Target and Variance; Sales Target Variance).',
+        'A row for an agent or sales unit and month that already has an approved target replaces it when the new target is approved.'],
     },
     {
       id: 'tfs-loan-status', file: 'TFS_Loan_Status_Upload_Template.xlsx', title: 'TFS account status (loan status of the financed accounts)',

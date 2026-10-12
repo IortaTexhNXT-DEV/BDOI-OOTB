@@ -12,7 +12,9 @@
  *        reconciliationSchedule; the bank matching
  *        reports insufficientPayments and overpayments; commissionSharing (OPS-07: the share of each agent or dealer
  *        on the fully paid commission and what TISPH keeps)
- * CR-13  agentConversion (SR-03: the policies converted per agent per month with the tier level, premium and commission)
+ * CR-13  agentConversion (SR-03: the policies converted per agent per month with the tier level, premium and commission;
+ *        RPT-02: the agent's commission target and the variance), salesTargetVariance (RPT-02: commission of each sales
+ *        unit against its target)
  */
 import { FS_MAP } from '../accounting/fsVersions.js';
 import { FY_START, POSTED } from './periodEndQueries.js';
@@ -147,11 +149,28 @@ const commissionSharing = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.
   LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
   WHERE cm.cycle_date BETWEEN $1 AND $2`;
 // Agent policy conversion (RPT-SLS-03): the policies of each agent per month with the tier level, premium and
-// commission; the telesales incentive joins once COMM-08 is built (0 meanwhile)
+// commission; the telesales incentive joins once COMM-08 is built (0 meanwhile). RPT-02: the approved commission target
+// of the agent for the month (Sales Targets, migration 0689) as rows of their own, so Target and Variance (total
+// commission less total target) come out of the same grouping.
+const TARGET_MONTHS = "st.status = 'approved' AND st.period BETWEEN to_char($1::date, 'YYYY-MM') AND to_char($2::date, 'YYYY-MM')";
 const agentConversion = `SELECT r.id AS _agent_id, r.id AS _agent_username, r.name AS agent, r.referrer_type AS "payeeType", COALESCE(r.level, '-') AS "tierLevel",
-    to_char(cm.cycle_date, 'YYYY-MM') AS month, cm.policy_id AS _policy_id, cm.net_premium AS premium, cm.amount AS commission, 0::numeric AS incentives
+    to_char(cm.cycle_date, 'YYYY-MM') AS month, cm.policy_id AS _policy_id, cm.net_premium AS premium, cm.amount AS commission, 0::numeric AS incentives, 0::numeric AS target
   FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id
-  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2`;
+  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2
+  UNION ALL
+  SELECT r.id, r.id, r.name, r.referrer_type, COALESCE(r.level, '-'), st.period, NULL, 0, 0, 0, st.target_amount
+  FROM sales_targets st JOIN commission_referrers r ON r.id = st.referrer_id
+  WHERE st.scope = 'agent' AND ${TARGET_MONTHS}`;
+// Sales target variance (RPT-02): the commission of each sales unit (the branch of the user linked to the payee) per
+// month against the unit's approved target; payees without a branch are under "No sales unit"
+const salesTargetVariance = `SELECT COALESCE(b.code, '-') AS _branch_code, COALESCE(b.name, 'No sales unit') AS branch, to_char(cm.cycle_date, 'YYYY-MM') AS month,
+    cm.policy_id AS _policy_id, cm.referrer_id AS _agent_id, cm.amount AS commission, 0::numeric AS target
+  FROM commissions cm JOIN commission_referrers r ON r.id = cm.referrer_id LEFT JOIN users u ON u.id = r.user_id LEFT JOIN branches b ON b.code = u.branch_code
+  WHERE cm.status <> 'Reversed' AND cm.cycle_date BETWEEN $1 AND $2
+  UNION ALL
+  SELECT b.code, b.name, st.period, NULL, NULL, 0, st.target_amount
+  FROM sales_targets st JOIN branches b ON b.id = st.branch_id
+  WHERE st.scope = 'unit' AND ${TARGET_MONTHS}`;
 const premiumPaymentStatus = `SELECT p.policy_number AS "policyNumber", p.inception_date AS "inceptionDate", ${CLIENT_DIMS}, ${INSURER_DIMS}, pr.name AS product,
     pr.id::text AS _product_id, pr.code AS _product_code, p.premium_total AS premium, COALESCE(pos.paid, 0) AS paid, COALESCE(pos.outstanding, p.premium_total) AS outstanding,
     CASE WHEN p.status IN ('cancelled', 'Cancelled') THEN 'Cancelled' WHEN pos.policy_id IS NULL OR COALESCE(pos.paid, 0) <= 0 THEN 'Pending'
@@ -367,9 +386,19 @@ export const TISPH_QUERIES = {
     criteria: { Payee: { groupBy: 'agent' }, 'Payee Type': { groupBy: 'payeeType' }, 'Principal Insurer': { groupBy: 'insurer' }, Overall: {} }, orderBy: 'f.agent, f."policyNumber"',
   },
   agentConversion: {
-    sql: agentConversion, filters: ['agent'], aggregate: { accounts: 'count(DISTINCT t._policy_id)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', incentives: 'sum(t.incentives)' },
+    sql: agentConversion, filters: ['agent'],
+    aggregate: { accounts: 'count(DISTINCT t._policy_id)', premium: 'sum(t.premium)', commission: 'sum(t.commission)', incentives: 'sum(t.incentives)', target: 'sum(t.target)',
+      variance: 'sum(t.commission) - sum(t.target)' },
     criteria: { Agent: { dims: ['agent', 'payeeType', 'tierLevel', 'month'], groupBy: 'agent' }, Month: { dims: ['month', 'agent', 'payeeType', 'tierLevel'], groupBy: 'month' } },
     orderBy: 'f.agent, f.month',
+  },
+  salesTargetVariance: {
+    sql: salesTargetVariance, filters: ['branch'],
+    aggregate: { agents: 'count(DISTINCT t._agent_id)', accounts: 'count(DISTINCT t._policy_id)', commission: 'sum(t.commission)', target: 'sum(t.target)',
+      variance: 'sum(t.commission) - sum(t.target)', achievement: 'round(100.0 * sum(t.commission) / NULLIF(sum(t.target), 0), 2)' },
+    criteria: { 'Sales Unit': { dims: ['branch', 'month'], groupBy: 'branch' }, Month: { dims: ['month', 'branch'], groupBy: 'month' } },
+    summary: { achievement: 'round(100.0 * sum(f.commission) / NULLIF(sum(f.target), 0), 2)' },
+    orderBy: 'f.branch, f.month',
   },
   premiumPaymentStatus: {
     sql: premiumPaymentStatus, filters: ['insurer', 'client', 'product'],
