@@ -27,6 +27,9 @@ import TransmittalDetail from "./TransmittalDetail";
 import { TABS, chequeActions, clearable, forwardable } from "./model";
 import "./pdc.scss";
 
+const MAIN_TABS = TABS.slice(0, 6);
+const MORE_TABS = TABS.slice(6);
+
 const LIST_TABS = TABS.filter((tab) => !["follow-up", "transmittals"].includes(tab));
 
 /**
@@ -250,9 +253,15 @@ const PostDatedCheques = () => {
       ]} />
       <div className="pe-card bv-loading-host">
         <LoadingBar active={refreshing} />
-        <TabView activeIndex={TABS.indexOf(tab)} onTabChange={(e) => setTab(TABS[e.index])} scrollable>
-          {TABS.map((key) => <TabPanel key={key} header={tabLabel(key)} />)}
-        </TabView>
+        {/* six tabs fit at 1366px without a scroll arrow; the rest are under More */}
+        <div className="pdc-tabs">
+          <TabView activeIndex={MAIN_TABS.indexOf(tab)} onTabChange={(e) => setTab(MAIN_TABS[e.index])}>
+            {MAIN_TABS.map((key) => <TabPanel key={key} header={tabLabel(key)} />)}
+          </TabView>
+          <Dropdown className={MORE_TABS.includes(tab) ? "pdc-tabs__more pdc-tabs__more--active" : "pdc-tabs__more"} value={MORE_TABS.includes(tab) ? tab : null}
+            options={MORE_TABS.map((key) => ({ label: tabLabel(key), value: key }))} placeholder={t("common.more", "More")} aria-label={t("common.more", "More")}
+            onChange={(e) => e.value && setTab(e.value)} />
+        </div>
         <div className="pdc-filters">
           <Dropdown value={filters.insurerId} options={insurers} optionLabel="label" optionValue="value" showClear filter placeholder={t("opsAcc.pdc.insurancePartner")}
             onChange={(e) => setFilters({ ...filters, insurerId: e.value })} aria-label={t("opsAcc.pdc.insurancePartner")} />

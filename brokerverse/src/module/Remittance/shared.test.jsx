@@ -23,7 +23,7 @@ describe("Remittance shared helpers", () => {
     expect(statusChip("settled", "Settled (voucher raised)").severity).toBe("success");
     expect(statusChip("failed", "Failed").severity).toBe("danger");
     expect(statusChip("unknown", "Odd").severity).toBeUndefined();
-    expect(money(409141.43)).toBe("PHP 409,141.43");
+    expect(money(409141.43)).toBe("₱409,141.43");
     expect(money(null)).toBe("");
     expect(REMITTANCE_ROUTES.setup()).toBe("/finance/remittance/setup/schedules");
   });

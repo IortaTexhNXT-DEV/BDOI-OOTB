@@ -46,6 +46,10 @@ export const sourceProblems = (file, source) => {
   if (/<h1[\s>]/.test(source)) problems.push({ file, rule: "own-h1" });
   if (/type=["']date["']/.test(source)) problems.push({ file, rule: "native-date" });
   if (/<select[\s>]/.test(source)) problems.push({ file, rule: "native-select" });
+  // amounts on screen read "₱8,457.50" (displayAmount); the "PHP 8,457.50" form is for exported and bank files
+  if (/\bcodeAmount\(/.test(source)) problems.push({ file, rule: "code-amount" });
+  // a button never carries an instruction as its label ("Select payments to batch"): plain label and a tooltip
+  if (/label=\{[^}]*t\(\s*["'][\w.]*\.select\w*To\w*["']/.test(source)) problems.push({ file, rule: "instruction-label" });
   return problems;
 };
 

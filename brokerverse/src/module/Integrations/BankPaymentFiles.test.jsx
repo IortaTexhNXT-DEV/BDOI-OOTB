@@ -50,7 +50,7 @@ describe("Bank Payment Files decision block", () => {
     expect(screen.queryByText(/3081-9988-01/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Cancel batch" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "New batch" })).not.toBeInTheDocument();
-    expect(screen.getAllByText("PHP 89,026.00").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("₱89,026.00").length).toBeGreaterThan(0);
   });
 
   it("a user who may decide gets Approve and Reject", async () => {

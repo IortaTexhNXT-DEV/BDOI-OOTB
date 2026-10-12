@@ -26,14 +26,14 @@ import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import DateField from "../DateField";
 import StatusChip from "../StatusChip";
-import { codeAmount } from "../../utility/currencyConverter";
+import { displayAmount } from "../../utility/currencyConverter";
 import { canOpen } from "../../utils/canOpen";
 import service from "../../services/integrationsService";
 import { formatDate, instantParts } from "../../utility/dateFormat";
 import "./bankBatchDialog.scss";
 
 const CHANNELS = ["bulk_credit", "instapay", "pesonet"];
-const amount = (v) => codeAmount(v, "PHP");
+const amount = (v) => displayAmount(v, "PHP");
 
 /** "BPI ···8801": the bank and the last four digits of the payee's account. */
 const maskedAccount = (bankCode, number) => {

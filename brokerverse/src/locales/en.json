@@ -76,7 +76,8 @@
     "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list.",
     "moreActions": "More actions",
     "loadTimeout": "This is taking too long to load.",
-    "loadFailed": "This could not be loaded."
+    "loadFailed": "This could not be loaded.",
+    "more": "More"
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -5744,7 +5745,8 @@
       "Quoted": "Quoted",
       "Failed": "Failed",
       "Skipped": "Skipped"
-    }
+    },
+    "selectToSend": "Select policies whose notice is not sent yet"
   },
   "shareOption": {
     "email": "Email",
@@ -13768,7 +13770,7 @@
       "bounced": "Bounced",
       "depositDue": "Deposit due",
       "depositDueHelp": "Cheques on hand dated within {{days}} day(s): {{total}}.",
-      "searchHint": "PDC, set, cheque, client, policy or bill",
+      "searchHint": "Cheque, client or policy",
       "number": "PDC no.",
       "bill": "Bill / policy",
       "bank": "Drawee bank",
@@ -19235,7 +19237,7 @@
     "approve": "Approve",
     "return": "Return",
     "returnNote": "Reason for returning",
-    "search": "Policy, insured or loan account",
+    "search": "Policy, insured or loan",
     "asOf": "As of",
     "source": "Lock-in",
     "allSources": "All lock-ins",

@@ -108,3 +108,42 @@
   padding: 0;
   font-weight: 600;
 }
+
+// the tab row: six tabs and a More list for the others, on one line at 1366px
+.pdc-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  border-bottom: 1px solid var(--color-border);
+
+  .p-tabview {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .p-tabview-nav {
+    border-bottom: 0;
+  }
+
+  .p-tabview-nav li .p-tabview-nav-link {
+    white-space: nowrap;
+  }
+
+  .pdc-tabs__more {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+    min-width: 11rem;
+  }
+
+  .pdc-tabs__more--active {
+    border-color: var(--bv-link, #0072d8);
+  }
+}
+
+// the actions column never covers the status of the row
+.pdc-table .p-datatable-tbody > tr > td:last-child,
+.pdc-table .p-datatable-thead > tr > th:last-child {
+  position: static !important;
+  width: 1%;
+  white-space: nowrap;
+}

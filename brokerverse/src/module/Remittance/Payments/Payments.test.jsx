@@ -103,7 +103,9 @@ describe("Insurer payments", () => {
     expect(screen.getAllByText("MBT ···4821").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("No account").length).toBeGreaterThan(0);
     expect(screen.queryByRole("checkbox", { name: "Select PV-2026-00103" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Select payments to batch" })).toBeDisabled();
+    // never a disabled primary as an instruction: the plain label, outlined, with the reason on hover
+    expect(screen.getByRole("button", { name: "Create Metrobank batch" })).toHaveClass("p-button-outlined");
+    expect(screen.queryByRole("button", { name: "Select payments to batch" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /transfer/i })).not.toBeInTheDocument();
   });
 

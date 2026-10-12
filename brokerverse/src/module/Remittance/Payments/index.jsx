@@ -107,7 +107,8 @@ const Payments = () => {
     if (action.code === "bank-payment-files") navigate(BANK_PAYMENT_FILES);
   };
 
-  const primaryLabel = selection.length ? t("remittance.payments.createBatch", { count: selection.length }) : t("remittance.payments.selectToBatch");
+  // never a disabled primary as an instruction: "Create batch" outlined with the reason until payments are ticked
+  const primaryLabel = selection.length ? t("remittance.payments.createBatch", { count: selection.length }) : t("remittance.payments.createBatchPlain");
   const headerActions = readOnly ? (
     <PageActions className="rm-header-actions">
       <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />
@@ -116,6 +117,8 @@ const Payments = () => {
   ) : (
     <PageActions className="rm-header-actions">
       <Button type="button" label={canBatch ? primaryLabel : t("remittance.payments.createBatchPlain")} disabled={!canBatch || !selection.length || legacy}
+        outlined={!selection.length} tooltip={canBatch && !selection.length ? t("remittance.payments.selectToBatch") : undefined}
+        tooltipOptions={{ position: "left", showOnDisabled: true }}
         onClick={() => setBatching(true)} aria-describedby={batchState && !canBatch ? "rm-batching-reason" : undefined} />
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
     </PageActions>
