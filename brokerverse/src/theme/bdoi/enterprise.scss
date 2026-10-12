@@ -1734,3 +1734,8 @@ small.p-error {
 .p-datatable .p-datatable-tbody > tr > td.p-selection-column {
   text-align: center !important;
 }
+
+// a figure with its parts under it, in a number column: both lines on the right
+.p-datatable .p-datatable-tbody > tr > td .bv-cell-stack.bv-cell-stack--end {
+  align-items: flex-end;
+}

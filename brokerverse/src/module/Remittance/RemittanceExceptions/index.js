@@ -203,7 +203,7 @@ const RemittanceExceptions = () => {
             <Column header={t("remittance.exceptions.fields.age")} align="right" body={(x) => <span className="rm-num">{t("remittance.exceptions.days", { count: x.age || 0 })}</span>} />
             <Column header={t("remittance.exceptions.fields.assignedTo")} body={(x) => x.assignedTo || "-"} />
             <Column header={t("remittance.exceptions.fields.status")} body={(x) => <StatusChip label={statusLabel(x.status)} severity={STATUS_TONE[x.status]} />} />
-            <Column header={<span className="p-sr-only">{t("remittance.exceptions.fields.actions")}</span>} align="center" style={{ width: "3.5rem" }}
+            <Column header={<span className="p-sr-only">{t("remittance.exceptions.fields.actions")}</span>} className="bv-actions" headerClassName="bv-actions"
               body={(x) => <RowActions label={t("remittance.exceptions.actionsFor", { reference: x.exceptionId })} actions={exceptionActions(x, canWrite)} labelOf={actionLabel} onAction={onAction(x)} />} />
           </DataTable>
         </div>

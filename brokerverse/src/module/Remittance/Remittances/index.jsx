@@ -335,7 +335,7 @@ const Remittances = () => {
             {show("bankRef") ? <Column header={t("remittance.list.columns.bankRef")} body={(r) => r.bankReference || "-"} /> : null}
             {show("submittedBy") ? <Column header={t("remittance.list.columns.submittedBy")} body={(r) => r.submittedBy?.name || "-"} /> : null}
             {show("createdOn") ? <Column header={t("remittance.list.columns.createdOn")} body={(r) => dayOf(r.createdAt)} /> : null}
-            <Column header={<span className="p-sr-only">{t("remittance.list.columns.actions")}</span>} align="center" style={{ width: "3.5rem" }}
+            <Column header={<span className="p-sr-only">{t("remittance.list.columns.actions")}</span>} className="bv-actions" headerClassName="bv-actions"
               body={(r) => <RowActions label={t("remittance.list.actionsFor", { reference: r.remittanceNo })} actions={rowActions(r)} labelOf={actionLabel} onAction={onRowAction(r)} />} />
           </DataTable>
         </div>
