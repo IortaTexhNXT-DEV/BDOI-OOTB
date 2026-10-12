@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { assertMinimumTerm } from '../../lib/policyTerm.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config.js';
 import { hasPermission } from '../../lib/auth.js';
@@ -99,6 +100,10 @@ const premiumCols = (b) => ({
   commission_rate: b.commissionRate, commission_amount: b.commissionAmount, currency: b.currency,
 });
 
+/** PROD-05: a quotation that states its period of insurance carries at least the minimum term (policies.min_term_months). */
+const assertQuoteTerm = (doc, lob) => assertMinimumTerm({ inception: doc.inception || doc.inceptionDate || doc.policyStartDate,
+  expiry: doc.expiry || doc.expiryDate || doc.policyEndDate, lob });
+
 export async function createQuote(body, userId, db = null) {
   const raw = stripReserved(body);
   delete raw.brokerSlipId;
@@ -136,6 +141,7 @@ export async function createQuote(body, userId, db = null) {
     const discount = promo ? promo.authority : await discountControl(c, { doc, b, productId, productType: body.productType, leadId, userId });
     const referral = withRateReferral(withDiscountReferral(withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names), discount, null), rating?.minRate, null);
     if (referral) doc.underwritingReferral = referral;
+    await assertQuoteTerm(doc, b.lob);
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     // valid through valid_until: the product's quotation validity (Product Master), else limits.quote_validity_days
     const issuedOn = await today();
@@ -229,6 +235,7 @@ export async function updateQuote(id, body, userId) {
     const discount = promo ? promo.authority : await discountControl(c, { doc, b, productId: before.product_id, productType, leadId: leadRef, userId });
     const referral = withRateReferral(withDiscountReferral(withReduction(referralFor(b.underwriting, prior), cl?.reduction, prior, cl?.names), discount, prior), rating?.minRate, prior);
     if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;
+    await assertQuoteTerm(doc, b.lob);
     const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date(), ...(newVersion ? nextVersionCols(before) : {}) };
     if (body.leadRefId && body.leadRefId !== before.lead_id) data.lead_id = body.leadRefId;

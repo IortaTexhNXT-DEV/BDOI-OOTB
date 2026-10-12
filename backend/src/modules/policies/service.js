@@ -13,6 +13,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
 import { isoDate, postingDate, today } from '../../lib/dates.js';
+import { assertMinimumTerm, coverTimes } from '../../lib/policyTerm.js';
 import { ORIGIN_FIELDS, legacySystemName, originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
@@ -97,7 +98,10 @@ export async function policyWithParticipants(row, db = null) {
       endorsement_type_ids AS "endorsementTypeIds", status, effective_date::text AS "effectiveDate", premium_delta::float AS "premiumDelta", is_cancel AS "isCancelPolicy",
       document_key AS "documentKey", created_at AS "createdAt"
     FROM endorsements WHERE policy_id = $1 ORDER BY created_at DESC`, [row.id])).rows;
-  return { ...p, participants, endorsements, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null };
+  // PROD-05: cover starts at policies.cover_start_time on the inception date and ends at policies.cover_end_time on the expiry date
+  const times = await coverTimes();
+  return { ...p, participants, endorsements, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null,
+    coverStartTime: times.start, coverEndTime: times.end, coverStartLabel: times.startLabel, coverEndLabel: times.endLabel };
 }
 
 export async function getPolicyRow(id, db = null) {
@@ -201,6 +205,9 @@ export async function updatePolicy(id, body, userId) {
     const input = withoutOriginFields(body, before);
     const cols = await columnsFrom(db, input);
     if (cols.policy_number) await assertUniqueNumber(db, cols.policy_number, before.id);
+    if (cols.inception_date || cols.expiry_date) {
+      await assertMinimumTerm({ inception: cols.inception_date || isoDate(before.inception_date), expiry: cols.expiry_date || isoDate(before.expiry_date), lob: before.lob });
+    }
     if (cols.payment_status === 'Completed' && before.payment_status !== 'Completed') cols.paid_at = new Date();
     const data = { ...cols, doc: JSON.stringify({ ...(before.doc || {}), ...docOf(input) }), updated_by: userId, updated_at: new Date() };
     const keys = Object.keys(data);
@@ -336,6 +343,8 @@ export async function issuePolicy(db, src, body, userId) {
   const inception = cols.inception_date || await today();
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
+  // PROD-05: the minimum period of insurance (a migrated or uploaded legacy policy is recorded as it was issued)
+  if (!src.migration && src.doc?.source !== 'bulk-upload') await assertMinimumTerm({ inception, expiry, lob: src.lob });
   const issuedOn = cols.issued_date || await today();
   // the number carries the issuing office and the product, sub-line and business type segments of the series pattern
   const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' },

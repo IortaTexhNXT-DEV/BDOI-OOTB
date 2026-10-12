@@ -270,6 +270,7 @@ import MyPrograms from "../module/Incentive/MyPrograms";
 import IncentiveCalculations from "../module/Incentive/Calculations";
 import IncentiveApprovals from "../module/Incentive/Approvals";
 import IncentiveReports from "../module/Incentive/Reports";
+import SalesTargets from "../module/Incentive/SalesTargets";
 import IncentiveStatement from "../module/Incentive/Statement";
 
 // Renewal Module
@@ -1114,6 +1115,7 @@ const Maincomponent = () => {
             path="master/incentive/programs/:mode"
             element={<IncentiveProgramMaster />}
           />
+          <Route path="master/incentive/sales-targets" element={<SalesTargets />} />
 
           {/* Incentive User Routes */}
           <Route path="incentive/my-programs" element={<MyPrograms />} />

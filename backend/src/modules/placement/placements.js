@@ -17,6 +17,7 @@ import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { companyName } from '../../lib/letterhead.js';
 import { queueEmail, documentAttachment, fileAttachment } from '../../lib/mailer.js';
 import { today, isoDate } from '../../lib/dates.js';
+import { assertMinimumTerm } from '../../lib/policyTerm.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { notify } from '../notifications/service.js';
 import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
@@ -137,10 +138,12 @@ const premiumCols = (b) => ({ sum_insured: b.totalSumInsured, premium_base: b.ne
   commission_amount: b.commissionAmount, currency: b.currency });
 const colsTotals = (c) => ({ sumInsured: c.sum_insured, premium: c.premium_base, taxes: taxesOf(c), premiumTotal: c.premium_total, commissionAmount: c.commission_amount });
 
-async function period(body, fallbackInception = null) {
+async function period(body, fallbackInception = null, lob = null) {
   const inception = isoDate(body.inceptionDate || body.inception) || fallbackInception || await today();
   const expiry = isoDate(body.expiryDate || body.expiry) || addMonths(inception, Number(await getSetting('policies.default_term_months', 12)));
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
+  // PROD-05: the minimum period of insurance (policies.min_term_months)
+  await assertMinimumTerm({ inception, expiry, lob });
   return { inception, expiry };
 }
 
@@ -188,7 +191,7 @@ async function fromQuote(db, body, user) {
   if (!parts.length) throw badRequest('The quotation names no insurer: add the participating insurer(s)');
   const { renewalTerm } = await import('../quotations/service.js');
   const renewal = await renewalTerm(db, q);
-  const { inception, expiry } = await period(body, renewal.inception || isoDate(q.doc?.inception || q.doc?.inceptionDate || q.doc?.policyStartDate));
+  const { inception, expiry } = await period(body, renewal.inception || isoDate(q.doc?.inception || q.doc?.inceptionDate || q.doc?.policyStartDate), q.lob);
   const doc = { ...(q.doc || {}), valueAddedTax: Number(q.vat), documentaryStampTax: Number(q.dst), localGovernmentTax: Number(q.lgt), fireServiceTax: Number(q.fst),
     discount: Number(q.discount), accountPremiumOthers: Number(q.others) };
   return {
@@ -215,7 +218,7 @@ async function fromBrokerSlip(db, body) {
   const risk = riskFromSlip(slip, lead);
   const b = await premiumBreakdown({ ...risk, includeCTPL: false }, { insurerId: lead.insuranceCompanyId });
   assertNotDeclined(b.underwriting, 'The placement');
-  const { inception, expiry } = await period(body, slip.inception_date);
+  const { inception, expiry } = await period(body, slip.inception_date, slip.lob);
   await db.query('UPDATE insurer_offers SET selected = (id = ANY($2)), updated_at = now() WHERE broker_slip_id = $1', [slip.id, chosen.map((o) => o.id)]);
   await db.query("UPDATE broker_slips SET status = 'closed', updated_at = now() WHERE id = $1", [slip.id]);
   return {
@@ -264,7 +267,7 @@ async function direct(db, body, user, { source = 'direct', checkJourney = true }
   const parts = await normaliseParticipants(body.participants || (body.insuranceCompanyId || body.insuranceCompanyName ? [{ insuranceCompanyId: body.insuranceCompanyId, insuranceCompanyName: body.insuranceCompanyName, sharePercent: 100 }] : []), { db });
   const b = await directBreakdown(body, lob, leadOf(parts).insuranceCompanyId);
   assertNotDeclined(b.underwriting, 'The placement');
-  const { inception, expiry } = await period(body);
+  const { inception, expiry } = await period(body, null, lob);
   const doc = { ...(body.doc || {}), riskDetails: body.riskDetails || {}, premiumBreakdown: b, valueAddedTax: b.valueAddedTax, documentaryStampTax: b.documentaryStampTax,
     localGovernmentTax: b.localGovernmentTax, fireServiceTax: b.fireServiceTax, discount: b.discount, productType: body.productType };
   return {
@@ -322,7 +325,7 @@ export async function updatePlacement(id, body, user) {
   await withTransaction(async (db) => {
     const cols = {};
     if (body.inceptionDate || body.expiryDate) {
-      const { inception, expiry } = await period({ inceptionDate: body.inceptionDate || before.inception_date, expiryDate: body.expiryDate || (body.inceptionDate ? null : before.expiry_date) });
+      const { inception, expiry } = await period({ inceptionDate: body.inceptionDate || before.inception_date, expiryDate: body.expiryDate || (body.inceptionDate ? null : before.expiry_date) }, null, before.lob);
       Object.assign(cols, { inception_date: inception, expiry_date: expiry });
     }
     if (body.billingMode !== undefined) cols.billing_mode = body.billingMode || null;

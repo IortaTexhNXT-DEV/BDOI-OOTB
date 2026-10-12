@@ -106,6 +106,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Dealer vehicle sales (brand-new vehicle programme) | Operations > Sales & Marketing > Dealer Programmes > Dealer Sales Upload | `POST /api/motor-programmes/:id/sales/upload` | `Dealer_Sales_Upload_Template.xlsx` |
 | Scheme vehicle lines (make and model range of a scheme) | Operations > Sales & Marketing > Scheme Master > Upload vehicle lines | `POST /api/schemes/lines/upload` | `Scheme_Vehicle_Lines_Upload_Template.xlsx` |
 | TFSPH loan bookings (Scheme 1 and 2 applications) | Operations > Sales & Marketing > Scheme Issuance > Upload loan bookings | `POST /api/scheme-issuance/bookings/upload` | `Scheme_Loan_Bookings_Upload_Template.xlsx` |
+| Sales targets (commission target of an agent or a sales unit per month) | Master > Finance > Sales Targets > Upload | `POST /api/incentive/sales-targets/upload` | `Sales_Targets_Upload_Template.xlsx` |
 | TFS account status (loan status of the financed accounts) | Operations > Renewals > Lock-in Review > Upload loan status | `POST /api/lock-in/uploads` | `TFS_Loan_Status_Upload_Template.xlsx` |
 | TFS daily parcel list (Parcel / Courier certificates) | Operations > Marine Open Covers > Open Cover > Certificates > Upload Parcels | `POST /api/marine/open-covers/:id/parcels/upload` | `Parcel_List_Upload_Template.xlsx` |
 | Credit Life members (monthly batch of the financing bank) | Operations > Credit Life > Batch > Upload Members | `POST /api/credit-life/batches/:id/upload` | `Credit_Life_Members_Upload_Template.xlsx` |

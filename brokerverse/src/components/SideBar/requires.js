@@ -218,6 +218,7 @@ export const screenRequires = {
   "/master/finance/bank-file-layouts": [["read:disbursements"], ["read:masters", "read:profile", "write:masters"]],
   "/master/finance/remittance": [["read:masters", "read:remittance", "write:remittance"]],
   "/master/incentive/programs/view": [["read:incentive", "read:profile", "write:incentive"], ["read:masters", "write:masters"]],
+  "/master/incentive/sales-targets": [["approve:incentive", "read:incentive", "write:incentive"]],
   "/master/configuration/email-layout": [["read:settings", "write:settings"]],
   "/master/configuration/documents-layout": [["read:settings", "write:settings"]],
   "/master/configuration/document-signatures": [["read:masters", "read:profile", "write:masters"], ["read:settings", "write:settings"]],

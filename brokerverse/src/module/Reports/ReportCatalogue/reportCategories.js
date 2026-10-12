@@ -27,7 +27,7 @@ const BY_CATEGORY = {
     "remittance-summary", "aged-payables-insurers", "tisph-net-remittance-fully-paid", "tisph-net-remittance-partially-paid",
     "tisph-soa-per-partner", "tisph-reconciliation-schedule", "disbursement-register",
   ],
-  commission: ["commission-statement", "direct-bill-commission", "incentive-results", "tisph-commission-sharing"],
+  commission: ["commission-statement", "direct-bill-commission", "incentive-results", "tisph-commission-sharing", "tisph-sales-target-variance"],
   collections: [
     "collections-ageing", "collections-summary", "premium-receivable-soa", "receipts-register", "non-payment", "tisph-insufficient-payments",
     "tisph-overpayments", "tisph-payment-summary", "tisph-pdc-acknowledgements", "tisph-pdc-cancelled", "tisph-pdc-encoded",

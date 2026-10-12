@@ -35,6 +35,12 @@ module "environment" {
   uploads_quota_gb    = var.uploads_quota_gb
   uploads_backup      = var.uploads_backup
 
+  db_archive_export            = var.db_archive_export
+  db_archive_retention_years   = var.db_archive_retention_years
+  db_archive_lock_immutability = var.db_archive_lock_immutability
+  db_archive_schedule          = var.db_archive_schedule
+  db_archive_image             = var.db_archive_image
+
   smtp_enabled     = var.smtp_enabled
   entra_sign_in    = var.entra_sign_in
   sftp_enabled     = var.sftp_enabled

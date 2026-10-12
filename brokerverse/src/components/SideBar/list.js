@@ -1495,6 +1495,13 @@ export const menuList = [
               "/master/incentive/programs/view",
             ],
           },
+          {
+            // commission targets of the agents and sales units by month, approved by a second user (TIS-BRD-RPT-02)
+            id: 12,
+            name: "Sales Targets",
+            path: "/master/incentive/sales-targets",
+            includes: ["/master/incentive/sales-targets"],
+          },
         ],
       },
       {

@@ -31,6 +31,9 @@ uploads_replication = "ZRS"
 uploads_quota_gb    = 100
 uploads_backup      = true
 
+# NFR-11: monthly database export to immutable archive storage, kept 10 years
+db_archive_export = false
+
 smtp_enabled  = true
 entra_sign_in = { enabled = true, tenant_id = "00000000-0000-0000-0000-000000000000", client_id = "00000000-0000-0000-0000-000000000000" } # TISPH
 sftp_enabled  = true

@@ -154,6 +154,8 @@ export const MASTER_CONFIG_TABLES = [
   'products', 'policy_types', 'coverages', 'product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections',
   'commission_rates', 'sharing_schemes', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'incentive_programs', 'incentive_program_versions', 'incentive_callers', 'payment_gateways',
+  // commission targets of the agents and sales units by month (RPT-02)
+  'sales_targets',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
   'gl_accounts', 'fs_versions', 'fs_version_lines', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',

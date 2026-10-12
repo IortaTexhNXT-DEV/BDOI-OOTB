@@ -2,11 +2,14 @@ import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { forbidden } from '../../lib/errors.js';
+import { parseUploadedRows, uploadFile } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 import { created, ok } from '../../lib/respond.js';
 import { many } from '../../db/pool.js';
 import { canRead, canWrite } from '../masters/helpers.js';
 import * as svc from './service.js';
 import * as tsi from './telesales.js';
+import * as targets from './salesTargets.js';
 
 /** Incentive (Accounts > Incentive, 4 screens + reports) and Master > Incentive Programs. */
 const { router, define } = moduleRouter('Incentive', '/incentive');
@@ -297,6 +300,82 @@ define({
     res.setHeader('Content-Disposition', `attachment; filename="${out.fileName}"`);
     res.send(out.content);
   },
+});
+
+// ---------- sales targets (Master > Finance > Sales Targets; TIS-BRD-RPT-02, migration 0689) ----------
+const ST = 'Master > Finance > Sales Targets';
+const targetRead = canRead('incentive', 'approve:incentive');
+const target = { id: 7, scope: 'agent', agentId: 'ref-dcruz', agentName: 'Juan Dela Cruz', salesUnitId: null, salesUnitCode: null, salesUnitName: null, name: 'Juan Dela Cruz',
+  period: '2026-11', targetAmount: 150000, remarks: 'Q4 push', status: 'pending-approval', statusLabel: 'Pending approval', submittedBy: 'Sales Unit Head' };
+define({
+  method: 'GET', path: '/sales-targets', summary: 'Sales targets of agents and sales units by month (status, scope, period or periodFrom / periodTo, search; superseded and withdrawn only with all=true or that status)',
+  screen: ST, middleware: targetRead, query: { status: 'pending-approval', periodFrom: '2026-10', periodTo: '2026-12' }, response: { success: true, data: [target] },
+  handler: async (req, res) => ok(res, await targets.listTargets(req.query)),
+});
+define({
+  method: 'GET', path: '/sales-targets/options', summary: 'Agents (active payees of the Commission Payees master) and sales units (active branches) a target can be set for',
+  screen: ST, middleware: targetRead,
+  response: { success: true, data: { agents: [{ id: 'ref-dcruz', name: 'Juan Dela Cruz', payeeType: 'Agent' }], salesUnits: [{ id: 1, code: 'HO', name: 'Head Office' }] } },
+  handler: async (_req, res) => ok(res, {
+    agents: await many("SELECT id, name, referrer_type AS \"payeeType\" FROM commission_referrers WHERE status = 'Active' ORDER BY name"),
+    salesUnits: await many("SELECT id, code, name FROM branches WHERE status = 'active' ORDER BY name"),
+  }),
+});
+define({
+  method: 'GET', path: '/sales-targets/upload/template', summary: 'Sales Targets upload template (XLSX: Data, Columns, Instructions)', screen: `${ST} > Upload`, middleware: targetRead,
+  response: 'binary file', handler: async (_req, res) => sendTemplate(res, 'sales-targets'),
+});
+define({
+  method: 'POST', path: '/sales-targets/upload', summary: 'Upload sales targets (.xlsx or .csv, multipart "file"; write:incentive): each row is added as a draft on its own, failed rows are listed with their row number',
+  screen: `${ST} > Upload`, middleware: [...write, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, message: 'Processed 2 rows: 1 drafts added, 1 failed', data: { loaded: 1, failed: 1, errors: [{ row: 3, message: 'Row 3: Enter the month as YYYY-MM' }] } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file);
+    const out = await targets.uploadTargets(rows, req.user);
+    await audit(req, { entity: 'sales_target', entityId: 'upload', action: 'upload', after: { loaded: out.loaded, failed: out.failed, errors: out.errors.slice(0, 50) } });
+    res.json({ success: true, message: out.message, data: { loaded: out.loaded, failed: out.failed, errors: out.errors } });
+  },
+});
+define({
+  method: 'POST', path: '/sales-targets', summary: 'Add a draft sales target of an agent (agentId: payee) or a sales unit (salesUnitId: branch) for a month (write:incentive)', screen: ST, middleware: write,
+  request: { scope: 'agent', agentId: 'ref-dcruz', period: '2026-11', targetAmount: 150000, remarks: 'Q4 push' }, response: { success: true, data: { ...target, status: 'draft', statusLabel: 'Draft' } },
+  handler: async (req, res) => {
+    const t = await targets.createTarget(req.body || {}, req.user);
+    await audit(req, { entity: 'sales_target', entityId: t.id, action: 'create', after: t });
+    created(res, t, 'Sales target added');
+  },
+});
+define({
+  method: 'POST', path: '/sales-targets/submit', summary: 'Send draft sales targets for approval (ids)', screen: ST, middleware: write,
+  request: { ids: [7] }, response: { success: true, data: [target] },
+  handler: async (req, res) => {
+    const out = await targets.submitTargets(req.body?.ids ?? req.body?.id, req.user);
+    for (const t of out) await audit(req, { entity: 'sales_target', entityId: t.id, action: 'submit', after: t });
+    ok(res, out, out.length === 1 ? 'Sales target sent for approval' : `${out.length} sales targets sent for approval`);
+  },
+});
+define({
+  method: 'POST', path: '/sales-targets/decide', summary: 'Approve or return pending sales targets (approve:incentive; maker-checker: never a target you created, changed or submitted; a return needs a note)',
+  screen: `${ST} > Approve`, middleware: approve, request: { ids: [7], decision: 'approve', note: null }, response: { success: true, data: [{ ...target, status: 'approved', statusLabel: 'Approved' }] },
+  handler: async (req, res) => {
+    const out = await targets.decideTargets(req.body?.ids ?? req.body?.id, { decision: req.body?.decision, note: req.body?.note }, req.user);
+    for (const t of out) await audit(req, { entity: 'sales_target', entityId: t.id, action: req.body.decision, after: t });
+    ok(res, out, req.body.decision === 'approve' ? 'Sales targets approved' : 'Sales targets returned');
+  },
+});
+define({
+  method: 'GET', path: '/sales-targets/:id', summary: 'One sales target', screen: ST, middleware: targetRead, response: { success: true, data: target },
+  handler: async (req, res) => ok(res, await targets.getTarget(req.params.id)),
+});
+define({
+  method: 'PUT', path: '/sales-targets/:id', summary: 'Change a draft sales target (amount, month, remarks, agent or sales unit)', screen: ST, middleware: write,
+  request: { targetAmount: 175000 }, response: { success: true, data: { ...target, status: 'draft', targetAmount: 175000 } },
+  handler: async (req, res) => ok(res, await run(req, 'sales_target', 'update', () => targets.updateTarget(req.params.id, req.body || {}, req.user)), 'Sales target saved'),
+});
+define({
+  method: 'POST', path: '/sales-targets/:id/withdraw', summary: 'Withdraw a draft or pending sales target', screen: ST, middleware: write,
+  response: { success: true, data: { ...target, status: 'withdrawn', statusLabel: 'Withdrawn' } },
+  handler: async (req, res) => ok(res, await run(req, 'sales_target', 'withdraw', () => targets.withdrawTarget(req.params.id, req.user)), 'Sales target withdrawn'),
 });
 
 export default router;

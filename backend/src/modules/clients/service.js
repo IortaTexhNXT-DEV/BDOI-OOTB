@@ -1,4 +1,4 @@
-import { many, one, query, withTransaction } from '../../db/pool.js';
+import { many, one, withTransaction } from '../../db/pool.js';
 import { HttpError, notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -9,6 +9,8 @@ import { fillRegion } from '../../lib/address.js';
 import { ORIGIN_FIELDS, originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 import { refreshKycStatus, saveOwner, saveSignatory } from './kyc.js';
 
+/** Privacy fields of a client body (NFR-17.1, migration 0690). */
+const PRIVACY_FIELDS = ['privacyNoticeAcknowledged', 'privacyNoticeVersion', 'marketingConsent', 'emailOptOut'];
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
   taxNumber: 'tin', emailId: 'email', contactNumber: 'phone', gender: 'gender', houseNo: 'house_no', barangay: 'barangay',
@@ -23,7 +25,9 @@ const FIELD_MAP = {
 };
 const KNOWN = new Set([...Object.keys(FIELD_MAP), ...ORIGIN_FIELDS, 'DOB', 'email', 'phone', 'clientId', 'id', 'generatedClientId', 'policies', 'createdAt', 'updatedAt', 'leadId',
   // derived or set by the onboarding route, never stored from a request body
-  'kycStatus', 'riskRating', 'riskScore', 'kycNextReviewOn', 'onboardedAt', 'signatories', 'beneficialOwners']);
+  'kycStatus', 'riskRating', 'riskScore', 'kycNextReviewOn', 'onboardedAt', 'signatories', 'beneficialOwners',
+  // privacy notice and opt-out (NFR-17.1): set through privacyColumns, never kept in extra
+  ...PRIVACY_FIELDS, 'privacyNoticeAcknowledgedAt', 'marketingConsentAt', 'emailOptOutAt']);
 
 export function toClient(r, policies = null) {
   if (!r) return null;
@@ -46,6 +50,9 @@ export function toClient(r, policies = null) {
     incorporationCountry: r.incorporation_country ?? null, isPep: !!r.is_pep, pepDetails: r.pep_details ?? null, expectedLines: r.expected_lines || [],
     expectedPaymentMode: r.expected_payment_mode ?? null, expectedAnnualPremium: r.expected_annual_premium === null || r.expected_annual_premium === undefined ? null : Number(r.expected_annual_premium),
     kycStatus: r.kyc_status ?? null, onboardedVia: r.onboarded_via ?? null, onboardedAt: r.onboarded_at ?? null,
+    // privacy notice and opt-out (NFR-17.1): transactional e-mail is sent whatever the opt-out
+    privacyNoticeAcknowledged: Boolean(r.privacy_notice_ack_at), privacyNoticeAcknowledgedAt: r.privacy_notice_ack_at ?? null, privacyNoticeVersion: r.privacy_notice_version ?? null,
+    marketingConsent: r.marketing_consent ?? null, marketingConsentAt: r.marketing_consent_at ?? null, emailOptOut: Boolean(r.email_opt_out), emailOptOutAt: r.email_opt_out_at ?? null,
     origin: originOf(r),
   };
 }
@@ -124,6 +131,42 @@ function columnsFrom(body) {
   const extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)));
   return { cols, extra };
 }
+const asFlag = (v) => (v === null || v === undefined || v === '' ? null : v === true || ['true', '1', 'yes', 'y'].includes(String(v).toLowerCase()));
+
+/**
+ * Columns of the privacy fields of a body (NFR-17.1): the acknowledgement of the privacy notice is stamped now with the
+ * version given or the one in force (privacy.notice_version); marketing consent and the e-mail opt-out are stamped when
+ * they change. `before` is the stored client (null for a new one).
+ */
+export async function privacyColumns(body, before = null) {
+  const cols = {};
+  const now = new Date();
+  const ack = asFlag(body.privacyNoticeAcknowledged);
+  if (ack === true && (!before?.privacy_notice_ack_at || (body.privacyNoticeVersion && body.privacyNoticeVersion !== before.privacy_notice_version))) {
+    cols.privacy_notice_ack_at = now;
+    cols.privacy_notice_version = String(body.privacyNoticeVersion || await getSetting('privacy.notice_version', '1.0')).slice(0, 40);
+  } else if (ack === false) Object.assign(cols, { privacy_notice_ack_at: null, privacy_notice_version: null });
+  if (body.marketingConsent !== undefined) {
+    const v = asFlag(body.marketingConsent);
+    if (v !== (before?.marketing_consent ?? null)) Object.assign(cols, { marketing_consent: v, marketing_consent_at: v === null ? null : now });
+  }
+  if (body.emailOptOut !== undefined) {
+    const v = asFlag(body.emailOptOut) === true;
+    if (v !== Boolean(before?.email_opt_out)) Object.assign(cols, { email_opt_out: v, email_opt_out_at: v ? now : null });
+  }
+  return cols;
+}
+
+/** Keep the consent register (privacy_consents, read by the campaigns) in step with a marketing consent changed on the client record. */
+async function recordConsent(db, clientId, cols, userId) {
+  if (!('marketing_consent' in cols) || cols.marketing_consent === null) return;
+  const version = cols.privacy_notice_version || await getSetting('privacy.notice_version', '1.0');
+  const r = (await db.query(`INSERT INTO privacy_consents(party_type, party_id, purpose, granted, channel, notice_version, evidence, recorded_by)
+    VALUES ('client', $1, 'marketing', $2, 'Form', $3, 'Client record', $4) RETURNING id`, [clientId, cols.marketing_consent, String(version), userId])).rows[0];
+  await db.query(`UPDATE privacy_consents SET withdrawn_at = now(), withdrawn_by = $3, withdrawal_reason = 'Superseded by a later record'
+    WHERE party_type = 'client' AND party_id = $1 AND purpose = 'marketing' AND granted AND withdrawn_at IS NULL AND id <> $2`, [clientId, r.id, userId]);
+}
+
 const nameOf = (c) => [c.first_name, c.last_name].filter(Boolean).join(' ').trim() || c.company_name || c.preferred_name || 'Unnamed client';
 
 async function insertClient(db, cols, extra, userId) {
@@ -177,7 +220,12 @@ export async function createClient(body, userId) {
   await assertBirthDate(cols.birth_date);
   await assertNoDuplicate(cols, { allowDuplicate: body.allowDuplicate === true });
   await fillRegion(cols);
-  const id = await withTransaction((c) => insertClient(c, cols, extra, userId));
+  Object.assign(cols, await privacyColumns(body));
+  const id = await withTransaction(async (c) => {
+    const newId = await insertClient(c, cols, extra, userId);
+    await recordConsent(c, newId, cols, userId);
+    return newId;
+  });
   return getClient(id);
 }
 
@@ -195,10 +243,14 @@ export async function updateClient(id, body, userId) {
   const { cols, extra } = columnsFrom(withoutOriginFields(body, before));
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
+  Object.assign(cols, await privacyColumns(body, before));
   const next = { ...before, ...cols };
   const data = { ...cols, display_name: nameOf(next), extra: JSON.stringify({ ...(before.extra || {}), ...extra }), updated_by: userId, updated_at: new Date() };
   const keys = Object.keys(data);
-  await query(`UPDATE clients SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
+  await withTransaction(async (db) => {
+    await db.query(`UPDATE clients SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
+    await recordConsent(db, before.id, cols, userId);
+  });
   return { before, after: await getClient(before.id) };
 }
 

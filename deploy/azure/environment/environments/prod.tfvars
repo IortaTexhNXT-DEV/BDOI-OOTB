@@ -33,6 +33,9 @@ uploads_replication = "GZRS"
 uploads_quota_gb    = 500
 uploads_backup      = true
 
+# NFR-11: monthly database export to immutable archive storage, kept 10 years (lock the policy once TISPH accepts it)
+db_archive_export = true
+
 smtp_enabled     = true
 entra_sign_in    = { enabled = true, tenant_id = "00000000-0000-0000-0000-000000000000", client_id = "00000000-0000-0000-0000-000000000000" } # TISPH
 sftp_enabled     = true

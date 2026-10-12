@@ -1,5 +1,23 @@
 // Accounts > Incentive screens (My Programs, Calculations, Approvals, Statement, Reports). Theme CSS variables only.
 
+// Master > Finance > Sales Targets: the add / edit and return dialogs, one field per row (label above)
+.inc-target-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.375rem;
+
+  label {
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+
+  .p-dropdown,
+  .p-inputnumber,
+  textarea {
+    width: 100%;
+  }
+}
+
 // the page container of the other Accounts screens (Period End, Tax): same padding, so titles and cards line up
 .inc-page {
   padding: 1rem;

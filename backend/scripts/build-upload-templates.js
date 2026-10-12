@@ -71,6 +71,7 @@ export const FILE_ROUTES = [
   { module: 'scheme-issuance', method: 'POST', path: '/bookings/upload', templates: ['scheme-loan-bookings'] },
   { module: 'scheme-issuance', method: 'POST', path: '/:id/items/:itemId/upload', noTemplate: 'The copy of one document of the scheme application checklist (single file)' },
   { module: 'lock-in', method: 'POST', path: '/uploads', templates: ['tfs-loan-status'] },
+  { module: 'incentive', method: 'POST', path: '/sales-targets/upload', templates: ['sales-targets'] },
   { module: 'marine', method: 'POST', path: '/open-covers/:id/parcels/upload', templates: ['parcel-list'] },
   { module: 'credit-life', method: 'POST', path: '/batches/:id/upload', templates: ['credit-life-members'] },
   { module: 'marine', method: 'POST', path: '/open-covers/:id/shipments/upload', templates: ['cargo-shipments'] },

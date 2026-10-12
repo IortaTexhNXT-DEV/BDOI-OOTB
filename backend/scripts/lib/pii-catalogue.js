@@ -465,6 +465,9 @@ export const CATALOGUE = {
   'campaigns.notes': 'freeText',
   // remarks given with the approval of an incentive batch (migration 0387)
   'incentive_calculations.approval_remarks': 'freeText',
+  // remarks and the return note of a sales target of an agent (migration 0689, RPT-02): free text that may name people
+  'sales_targets.remarks': 'freeText',
+  'sales_targets.decision_note': 'freeText',
   // remarks given with the approval or rejection of a data load (migration 0440)
   'data_load_batches.decision_remarks': 'freeText',
   // remarks given with the rejection of a go-live lock or unlock request (migration 0442)
@@ -545,6 +548,13 @@ export const ALLOW_LIST = {
   'client_beneficial_owners.nationality': 'nationality only',
   'leads.country': 'country only',
   'clients.anonymised_by': 'username of the staff member who anonymised the record',
+  // privacy notice and opt-out of the client record (NFR-17.1, migration 0690): kept so that a masked copy honours them
+  'clients.privacy_notice_ack_at': 'date and time the privacy notice was acknowledged; not identifying once names, contacts and identifiers are masked',
+  'clients.privacy_notice_version': 'version number of the privacy notice (a document of the broker), not personal',
+  'clients.marketing_consent': 'consent flag; kept so that a masked copy keeps the client\'s choice (no marketing to a refusal)',
+  'clients.marketing_consent_at': 'date and time the consent was recorded; not identifying once names, contacts and identifiers are masked',
+  'clients.email_opt_out': 'opt-out flag, not an address; kept so that a masked copy never sends marketing e-mail to a client who opted out',
+  'clients.email_opt_out_at': 'date and time of the opt-out, not an address; not identifying once names, contacts and identifiers are masked',
   'leads.anonymised_by': 'username of the staff member who anonymised the record',
   'signatories.designation': 'job title printed under the signature',
   'commission_referrers.bank_name': 'name of the bank (an institution), not of the person; the account number is masked',

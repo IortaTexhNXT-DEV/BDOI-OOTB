@@ -61897,8 +61897,14 @@
                         "defaultOrigin": {
                           "type": "string"
                         },
+                        "configuredOrigin": {
+                          "type": "string"
+                        },
                         "cutoverDate": {
                           "type": "string"
+                        },
+                        "issuedPolicies": {
+                          "type": "integer"
                         }
                       }
                     }
@@ -61907,8 +61913,10 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "defaultOrigin": "issued",
-                    "cutoverDate": "2026-11-01"
+                    "defaultOrigin": "all",
+                    "configuredOrigin": "auto",
+                    "cutoverDate": "2026-11-01",
+                    "issuedPolicies": 0
                   }
                 }
               }
@@ -72873,7 +72881,7 @@
                     "settings": {
                       "legacySystemName": "Legacy",
                       "loadApprovalRequired": true,
-                      "dashboardDefaultOrigin": "issued",
+                      "dashboardDefaultOrigin": "auto",
                       "unlockWindowDays": 7,
                       "unlockMaxHours": 4
                     },
@@ -99201,6 +99209,1115 @@
         "x-permissions": [
           "read:incentive",
           "write:incentive"
+        ]
+      }
+    },
+    "/incentive/sales-targets": {
+      "get": {
+        "operationId": "getIncentiveSalesTargets",
+        "summary": "Sales targets of agents and sales units by month (status, scope, period or periodFrom / periodTo, search; superseded and withdrawn only with all=true or that status)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: read:incentive, write:incentive, approve:incentive",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending-approval"
+          },
+          {
+            "name": "periodFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10"
+          },
+          {
+            "name": "periodTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-12"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "agentId": {
+                            "type": "string"
+                          },
+                          "agentName": {
+                            "type": "string"
+                          },
+                          "salesUnitId": {},
+                          "salesUnitCode": {},
+                          "salesUnitName": {},
+                          "name": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "targetAmount": {
+                            "type": "integer"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "submittedBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "scope": "agent",
+                      "agentId": "ref-dcruz",
+                      "agentName": "Juan Dela Cruz",
+                      "salesUnitId": null,
+                      "salesUnitCode": null,
+                      "salesUnitName": null,
+                      "name": "Juan Dela Cruz",
+                      "period": "2026-11",
+                      "targetAmount": 150000,
+                      "remarks": "Q4 push",
+                      "status": "pending-approval",
+                      "statusLabel": "Pending approval",
+                      "submittedBy": "Sales Unit Head"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive",
+          "approve:incentive"
+        ]
+      },
+      "post": {
+        "operationId": "postIncentiveSalesTargets",
+        "summary": "Add a draft sales target of an agent (agentId: payee) or a sales unit (salesUnitId: branch) for a month (write:incentive)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: write:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "agentId": {
+                          "type": "string"
+                        },
+                        "agentName": {
+                          "type": "string"
+                        },
+                        "salesUnitId": {},
+                        "salesUnitCode": {},
+                        "salesUnitName": {},
+                        "name": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "targetAmount": {
+                          "type": "integer"
+                        },
+                        "remarks": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "scope": "agent",
+                    "agentId": "ref-dcruz",
+                    "agentName": "Juan Dela Cruz",
+                    "salesUnitId": null,
+                    "salesUnitCode": null,
+                    "salesUnitName": null,
+                    "name": "Juan Dela Cruz",
+                    "period": "2026-11",
+                    "targetAmount": 150000,
+                    "remarks": "Q4 push",
+                    "status": "draft",
+                    "statusLabel": "Draft",
+                    "submittedBy": "Sales Unit Head"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "scope": {
+                    "type": "string"
+                  },
+                  "agentId": {
+                    "type": "string"
+                  },
+                  "period": {
+                    "type": "string"
+                  },
+                  "targetAmount": {
+                    "type": "integer"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "scope": "agent",
+                "agentId": "ref-dcruz",
+                "period": "2026-11",
+                "targetAmount": 150000,
+                "remarks": "Q4 push"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/sales-targets/{id}": {
+      "get": {
+        "operationId": "getIncentiveSalesTargetsId",
+        "summary": "One sales target",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: read:incentive, write:incentive, approve:incentive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "agentId": {
+                          "type": "string"
+                        },
+                        "agentName": {
+                          "type": "string"
+                        },
+                        "salesUnitId": {},
+                        "salesUnitCode": {},
+                        "salesUnitName": {},
+                        "name": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "targetAmount": {
+                          "type": "integer"
+                        },
+                        "remarks": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "scope": "agent",
+                    "agentId": "ref-dcruz",
+                    "agentName": "Juan Dela Cruz",
+                    "salesUnitId": null,
+                    "salesUnitCode": null,
+                    "salesUnitName": null,
+                    "name": "Juan Dela Cruz",
+                    "period": "2026-11",
+                    "targetAmount": 150000,
+                    "remarks": "Q4 push",
+                    "status": "pending-approval",
+                    "statusLabel": "Pending approval",
+                    "submittedBy": "Sales Unit Head"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive",
+          "approve:incentive"
+        ]
+      },
+      "put": {
+        "operationId": "putIncentiveSalesTargetsId",
+        "summary": "Change a draft sales target (amount, month, remarks, agent or sales unit)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: write:incentive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "agentId": {
+                          "type": "string"
+                        },
+                        "agentName": {
+                          "type": "string"
+                        },
+                        "salesUnitId": {},
+                        "salesUnitCode": {},
+                        "salesUnitName": {},
+                        "name": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "targetAmount": {
+                          "type": "integer"
+                        },
+                        "remarks": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "scope": "agent",
+                    "agentId": "ref-dcruz",
+                    "agentName": "Juan Dela Cruz",
+                    "salesUnitId": null,
+                    "salesUnitCode": null,
+                    "salesUnitName": null,
+                    "name": "Juan Dela Cruz",
+                    "period": "2026-11",
+                    "targetAmount": 175000,
+                    "remarks": "Q4 push",
+                    "status": "draft",
+                    "statusLabel": "Pending approval",
+                    "submittedBy": "Sales Unit Head"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetAmount": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "targetAmount": 175000
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/sales-targets/{id}/withdraw": {
+      "post": {
+        "operationId": "postIncentiveSalesTargetsIdWithdraw",
+        "summary": "Withdraw a draft or pending sales target",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: write:incentive",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "agentId": {
+                          "type": "string"
+                        },
+                        "agentName": {
+                          "type": "string"
+                        },
+                        "salesUnitId": {},
+                        "salesUnitCode": {},
+                        "salesUnitName": {},
+                        "name": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "string"
+                        },
+                        "targetAmount": {
+                          "type": "integer"
+                        },
+                        "remarks": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "submittedBy": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 7,
+                    "scope": "agent",
+                    "agentId": "ref-dcruz",
+                    "agentName": "Juan Dela Cruz",
+                    "salesUnitId": null,
+                    "salesUnitCode": null,
+                    "salesUnitName": null,
+                    "name": "Juan Dela Cruz",
+                    "period": "2026-11",
+                    "targetAmount": 150000,
+                    "remarks": "Q4 push",
+                    "status": "withdrawn",
+                    "statusLabel": "Withdrawn",
+                    "submittedBy": "Sales Unit Head"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "write:incentive"
+        ]
+      }
+    },
+    "/incentive/sales-targets/decide": {
+      "post": {
+        "operationId": "postIncentiveSalesTargetsDecide",
+        "summary": "Approve or return pending sales targets (approve:incentive; maker-checker: never a target you created, changed or submitted; a return needs a note)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets > Approve\n\nAccess: approve:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "agentId": {
+                            "type": "string"
+                          },
+                          "agentName": {
+                            "type": "string"
+                          },
+                          "salesUnitId": {},
+                          "salesUnitCode": {},
+                          "salesUnitName": {},
+                          "name": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "targetAmount": {
+                            "type": "integer"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "submittedBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "scope": "agent",
+                      "agentId": "ref-dcruz",
+                      "agentName": "Juan Dela Cruz",
+                      "salesUnitId": null,
+                      "salesUnitCode": null,
+                      "salesUnitName": null,
+                      "name": "Juan Dela Cruz",
+                      "period": "2026-11",
+                      "targetAmount": 150000,
+                      "remarks": "Q4 push",
+                      "status": "approved",
+                      "statusLabel": "Approved",
+                      "submittedBy": "Sales Unit Head"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets > Approve",
+        "x-permissions": [
+          "approve:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "decision": {
+                    "type": "string"
+                  },
+                  "note": {}
+                }
+              },
+              "example": {
+                "ids": [
+                  7
+                ],
+                "decision": "approve",
+                "note": null
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/sales-targets/options": {
+      "get": {
+        "operationId": "getIncentiveSalesTargetsOptions",
+        "summary": "Agents (active payees of the Commission Payees master) and sales units (active branches) a target can be set for",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: read:incentive, write:incentive, approve:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "agents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "payeeType": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "salesUnits": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "agents": [
+                      {
+                        "id": "ref-dcruz",
+                        "name": "Juan Dela Cruz",
+                        "payeeType": "Agent"
+                      }
+                    ],
+                    "salesUnits": [
+                      {
+                        "id": 1,
+                        "code": "HO",
+                        "name": "Head Office"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive",
+          "approve:incentive"
+        ]
+      }
+    },
+    "/incentive/sales-targets/submit": {
+      "post": {
+        "operationId": "postIncentiveSalesTargetsSubmit",
+        "summary": "Send draft sales targets for approval (ids)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets\n\nAccess: write:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "agentId": {
+                            "type": "string"
+                          },
+                          "agentName": {
+                            "type": "string"
+                          },
+                          "salesUnitId": {},
+                          "salesUnitCode": {},
+                          "salesUnitName": {},
+                          "name": {
+                            "type": "string"
+                          },
+                          "period": {
+                            "type": "string"
+                          },
+                          "targetAmount": {
+                            "type": "integer"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "submittedBy": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "scope": "agent",
+                      "agentId": "ref-dcruz",
+                      "agentName": "Juan Dela Cruz",
+                      "salesUnitId": null,
+                      "salesUnitCode": null,
+                      "salesUnitName": null,
+                      "name": "Juan Dela Cruz",
+                      "period": "2026-11",
+                      "targetAmount": 150000,
+                      "remarks": "Q4 push",
+                      "status": "pending-approval",
+                      "statusLabel": "Pending approval",
+                      "submittedBy": "Sales Unit Head"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "ids": [
+                  7
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/incentive/sales-targets/upload": {
+      "post": {
+        "operationId": "postIncentiveSalesTargetsUpload",
+        "summary": "Upload sales targets (.xlsx or .csv, multipart \"file\"; write:incentive): each row is added as a draft on its own, failed rows are listed with their row number",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets > Upload\n\nAccess: write:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "loaded": {
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "type": "integer"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Processed 2 rows: 1 drafts added, 1 failed",
+                  "data": {
+                    "loaded": 1,
+                    "failed": 1,
+                    "errors": [
+                      {
+                        "row": 3,
+                        "message": "Row 3: Enter the month as YYYY-MM"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets > Upload",
+        "x-permissions": [
+          "write:incentive"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/incentive/sales-targets/upload/template": {
+      "get": {
+        "operationId": "getIncentiveSalesTargetsUploadTemplate",
+        "summary": "Sales Targets upload template (XLSX: Data, Columns, Instructions)",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Sales Targets > Upload\n\nAccess: read:incentive, write:incentive, approve:incentive",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "binary file",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Sales Targets > Upload",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive",
+          "approve:incentive"
         ]
       }
     },
