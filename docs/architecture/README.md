@@ -4,8 +4,7 @@ The generic BrokerVerse architecture set has been retired from this repository. 
 in the TISPH document pack (index: [`docs/TISPH/README.md`](../TISPH/README.md)), in particular
 `docs/TISPH/pack/TISPH_Solution_Architecture.docx`, `TISPH_Data_Architecture.docx`, `TISPH_Operations_and_Support.docx`
 and `TISPH_NFR_Compliance.docx`. The performance test method is in `docs/TISPH/testing/TISPH_Test_Strategy.docx`
-(section 3). The last generic document, Capacity and Performance, is archived under
-[`docs/archive/2026-10-11/`](../archive/2026-10-11/README.md) as the record of the indicative load test.
+(section 3).
 
 What stays here, and why:
 
