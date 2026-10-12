@@ -14,6 +14,7 @@ import LoadState from "../../../components/LoadState";
 import NextStep from "../../../components/NextStep";
 import { hasPermission } from "../../../utils/canOpen";
 import FollowUpModal from "../FollowUpModal";
+import { LogActivityButton } from "../../../components/LogActivity";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import KeyValueGrid from "../../../components/KeyValueGrid";
@@ -241,8 +242,8 @@ const CollectionDetail = () => {
         <Button label={t("collectionDetail.back")} icon="pi pi-arrow-left" outlined onClick={() => navigate("/agent/collections")} />
         <Button label={t("collectionDetail.sendEmail")} icon="pi pi-envelope" outlined onClick={() => handleFollowUpAction("Email")} />
         <Button label={t("emailDocument.emailInvoice")} icon="pi pi-file-pdf" outlined disabled={!collection.receivableId} onClick={() => setShowInvoiceEmail(true)} />
-        <Button label={t("collectionDetail.addNote")} icon="pi pi-file-edit" outlined onClick={() => handleFollowUpAction("Note")} />
-        <Button label={t("collectionDetail.setCommitmentDate")} icon="pi pi-calendar" onClick={() => handleFollowUpAction("Commitment")} />
+        {/* a call, a note or a payment commitment: the shared Log Activity dialog (components/LogActivity) */}
+        <LogActivityButton primary onClick={() => handleFollowUpAction("Call")} />
       </PageHeader>
 
       {collection.outstandingAmount > 0 && (

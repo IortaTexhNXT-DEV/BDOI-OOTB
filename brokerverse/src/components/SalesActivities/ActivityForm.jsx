@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { LogActivityDialog } from "../LogActivity";
 
 const isoDay = (d) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : null);
 const addDays = (n) => {
@@ -19,7 +18,8 @@ const addDays = (n) => {
 
 /**
  * Log (or change) a sales activity: type, subject, when, duration, contact, location, outcome, notes and the next
- * step with its date. The next step becomes a follow-up task in the account executive's My Work.
+ * step with its date. The next step becomes a follow-up task in the account executive's My Work. The shared Log Activity
+ * dialog (components/LogActivity) with the activity types of the Sales Activity Types master.
  */
 const ActivityForm = ({ visible, options, activity, onSave, onHide }) => {
   const { t } = useTranslation();
@@ -59,14 +59,8 @@ const ActivityForm = ({ visible, options, activity, onSave, onHide }) => {
   };
 
   return (
-    <Dialog className="pe-dialog" header={activity ? t("salesActivities.editActivity") : t("salesActivities.logActivity")} visible={visible} style={{ width: "min(760px, 96vw)" }} onHide={onHide}
-      footer={<div><Button label={t("salesActivities.cancel")} text onClick={onHide} /><Button label={t("salesActivities.save")} icon="pi pi-save" disabled={!valid} loading={saving} onClick={save} /></div>}>
-      <div className="grid">
-        <div className="col-12 md:col-6">
-          <label htmlFor="sa-type" className="block mb-1">{t("salesActivities.type")} *</label>
-          <Dropdown inputId="sa-type" value={form.activityType} options={types.map((x) => ({ label: x.name, value: x.code }))} onChange={(e) => chooseType(e.value)} className="w-full"
-            placeholder={t("salesActivities.chooseType")} />
-        </div>
+    <LogActivityDialog visible={visible} onHide={onHide} title={activity ? t("salesActivities.editActivity") : null} types={types.map((x) => ({ label: x.name, value: x.code }))}
+      type={form.activityType} onTypeChange={chooseType} typePlaceholder={t("salesActivities.chooseType")} onSave={save} saving={saving} saveDisabled={!valid}>
         <div className="col-12 md:col-6">
           <label htmlFor="sa-when" className="block mb-1">{t("salesActivities.when")} *</label>
           <Calendar inputId="sa-when" value={form.activityAt} onChange={(e) => set("activityAt", e.value)} showTime hourFormat="24" showIcon maxDate={new Date()} className="w-full" />
@@ -105,8 +99,7 @@ const ActivityForm = ({ visible, options, activity, onSave, onHide }) => {
           <Calendar inputId="sa-next-date" value={form.nextStepDate} onChange={(e) => set("nextStepDate", e.value)} showIcon minDate={addDays(0)} className="w-full" />
         </div>
         {form.nextStep.trim() && form.nextStepDate && <div className="col-12"><small>{t("salesActivities.followUpNote")}</small></div>}
-      </div>
-    </Dialog>
+    </LogActivityDialog>
   );
 };
 

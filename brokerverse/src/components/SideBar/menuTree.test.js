@@ -1,4 +1,4 @@
-import { findActiveTrail, initialsOf, matchLength, searchMenu, visibleTrail } from "./menuTree";
+import { findActiveTrail, initialsOf, matchLength, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { menuList } from "./list";
 
 const label = (name) => name;
@@ -63,5 +63,23 @@ describe("abbreviations and groups found only by search", () => {
     expect(trail).toEqual(["Reports", "Operational Reports", "Dealer Production"]);
     expect(visibleTrail(tree, trail)).toEqual(["Reports", "All Reports"]);
     expect(visibleTrail(tree, ["Accounts", "Journal Voucher"])).toEqual(["Accounts", "Journal Voucher"]);
+  });
+});
+
+describe("tabs and highlights", () => {
+  const tree = [
+    { name: "Sales", submenu: [{ name: "Prospects", path: "/agent/leadlisting", includes: ["/agent/uploadpolicy"] }] },
+    { name: "Servicing", submenu: [
+      { name: "Policy", path: "/agent/policy", highlights: ["/agent/uploadpolicy"] },
+      { name: "Claims", path: "/agent/claim" },
+      { name: "Claim Documents", tab: "Claims", path: "/agent/claim/documents" },
+    ] },
+  ];
+  it("leaves the entries shown as tabs out of the drawn menu", () => {
+    expect(withoutTabs(tree)[1].submenu.map((x) => x.name)).toEqual(["Policy", "Claims"]);
+    expect(findActiveTrail(withoutTabs(tree), "/agent/claim/documents")).toEqual(["Servicing", "Claims"]);
+  });
+  it("lights up the entry that highlights an address over the one that grants it", () => {
+    expect(findActiveTrail(tree, "/agent/uploadpolicy/12")).toEqual(["Servicing", "Policy"]);
   });
 });

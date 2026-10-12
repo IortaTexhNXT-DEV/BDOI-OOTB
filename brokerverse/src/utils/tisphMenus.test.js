@@ -39,7 +39,7 @@ describe("TISPH roles (RBAC v4): menus", () => {
         .filter((p) => !isPathAllowed(p, menuList, [role])).map((p) => `${role} ${p}`));
     expect(refused).toEqual([]);
     expect(isPathAllowed("/agent/claim", menuList, ["tis-ops-associate"])).toBe(true);
-    expect(isPathAllowed("/operations/claim-documents", menuList, ["tis-sales-officer"])).toBe(false);
+    expect(isPathAllowed("/agent/claim/documents", menuList, ["tis-sales-officer"])).toBe(false);
   });
 
   it("Sales associates and officers open their own incentive programs and statement, not the calculations", () => {

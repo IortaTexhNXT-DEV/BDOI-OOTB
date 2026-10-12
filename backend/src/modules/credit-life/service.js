@@ -32,7 +32,11 @@ export const CREDIT_LIFE_COLUMNS = [
   { key: 'loanAccount', header: 'LOAN_ACCOUNT', aliases: ['loan account', 'tfs loan account'], required: true, format: 'TFS loan number, 10 digits (credit_life.loan_account_pattern); one active certificate per loan account', example: '8005123456' },
   { key: 'loanAmount', header: 'LOAN_AMOUNT', aliases: ['loan amount', 'amount financed'], format: 'Amount', example: '1250000' },
   { key: 'loanTermMonths', header: 'LOAN_TERM_MONTHS', aliases: ['loan term', 'term'], required: true, format: 'Whole number of months; the cover follows the loan tenor (credit_life.rules termYears)', example: '60' },
-  { key: 'releaseDate', header: 'RELEASE_DATE', aliases: ['release date', 'booking date'], required: true, format: 'Date DD/MM/YYYY or YYYY-MM-DD, not in the future', example: '05/10/2026' },
+  { key: 'releaseDate', header: 'RELEASE_DATE', aliases: ['release date', 'unit release date'], required: true, format: 'Date DD/MM/YYYY or YYYY-MM-DD, not in the future', example: '05/10/2026' },
+  { key: 'bookingDate', header: 'BOOKING_DATE', aliases: ['booking date'], format: 'Date DD/MM/YYYY or YYYY-MM-DD the loan was booked, not in the future', example: '03/10/2026' },
+  { key: 'maturityDate', header: 'MATURITY_DATE', aliases: ['maturity date'], format: 'Date DD/MM/YYYY or YYYY-MM-DD the loan matures, after the release date', example: '05/10/2031' },
+  { key: 'outstandingBalance', header: 'OUTSTANDING_BALANCE', aliases: ['outstanding', 'outstanding balance'], format: 'Amount of the loan still outstanding', example: '1250000' },
+  { key: 'gender', header: 'GENDER', aliases: ['sex'], format: 'M or F (Male / Female)', example: 'M' },
   { key: 'accountCount', header: 'ACCOUNT_COUNT', aliases: ['accounts', 'number of accounts'], format: "Number of the borrower's accounts with the bank (counted from the file when blank)", example: '1' },
   { key: 'sumInsured', header: 'SUM_INSURED', aliases: ['sum insured'], format: 'Amount; blank = credit_life.batch_sum_insured', example: '1000000' },
   { key: 'email', header: 'EMAIL', aliases: ['e-mail'], format: 'E-mail address; the certificate of cover is e-mailed to it', example: 'juan.delacruz@example.ph' },
@@ -55,6 +59,7 @@ const dateOf = (v) => {
   if (/^\d{5}$/.test(s)) return new Date(Date.UTC(1899, 11, 30) + Number(s) * 86400000).toISOString().slice(0, 10);
   return isoDate(s);
 };
+const genderOf = (v) => ({ M: 'M', MALE: 'M', F: 'F', FEMALE: 'F' })[String(v ?? '').trim().toUpperCase()] || null;
 const nameOf = (m) => [m.first_name, m.last_name].filter(Boolean).join(' ');
 const keyOf = (v) => (String(v.customerNo || '').trim() ? `NO:${String(v.customerNo).trim().toUpperCase()}`
   : `NB:${String(v.lastName || '').trim().toUpperCase()}|${String(v.firstName || '').trim().toUpperCase()}|${v.birthDate || ''}`);
@@ -71,7 +76,9 @@ export const memberOut = (m) => ({
   id: m.id, batchId: m.batch_id, batchNumber: m.batch_number ?? null, masterPolicyId: m.master_policy_id, masterNumber: m.master_number ?? null, rowNo: m.row_no,
   certificateNumber: m.certificate_number, customerNo: m.customer_no, firstName: m.first_name, lastName: m.last_name, borrowerName: nameOf(m), birthDate: m.birth_date ? String(m.birth_date).slice(0, 10) : null,
   email: m.email, mobile: m.mobile, address: m.address, city: m.city, province: m.province, loanAccount: m.loan_account, loanAmount: m.loan_amount == null ? null : Number(m.loan_amount),
-  loanTermMonths: m.loan_term_months, releaseDate: m.release_date ? String(m.release_date).slice(0, 10) : null, accountCount: m.account_count, sumInsured: Number(m.sum_insured), premium: Number(m.premium),
+  loanTermMonths: m.loan_term_months, releaseDate: m.release_date ? String(m.release_date).slice(0, 10) : null, bookingDate: m.booking_date ? String(m.booking_date).slice(0, 10) : null,
+  maturityDate: m.maturity_date ? String(m.maturity_date).slice(0, 10) : null, outstandingBalance: m.outstanding_balance == null ? null : Number(m.outstanding_balance), gender: m.gender ?? null,
+  accountCount: m.account_count, sumInsured: Number(m.sum_insured), premium: Number(m.premium),
   coverFrom: m.cover_from ? String(m.cover_from).slice(0, 10) : null, coverTo: m.cover_to ? String(m.cover_to).slice(0, 10) : null, status: m.status, errors: m.errors || [],
   emailed: Boolean(m.email_id), emailedAt: m.emailed_at, issuedAt: m.issued_at, cancelReason: m.cancel_reason,
 });
@@ -188,11 +195,23 @@ export async function checkMember(db, batch, v, siblings = []) {
   if (si > num(rules.defaultSumInsured)) errors.push(`The sum insured is at most ${num(rules.defaultSumInsured).toFixed(2)}`);
   const loanAmount = v.loanAmount === undefined || v.loanAmount === null || v.loanAmount === '' ? null : round2(num(v.loanAmount));
   if (loanAmount !== null && !(loanAmount > 0)) errors.push('The loan amount must be greater than zero');
+  // the TFS file's fields of the CLI Generated Report (RPT-OPS-01): booking and maturity dates, outstanding balance, gender
+  const booking = dateOf(v.bookingDate);
+  const maturity = dateOf(v.maturityDate);
+  if (v.bookingDate && !booking) errors.push('The booking date is not a date (DD/MM/YYYY)');
+  if (booking && booking > now) errors.push('The booking date cannot be after today');
+  if (v.maturityDate && !maturity) errors.push('The maturity date is not a date (DD/MM/YYYY)');
+  if (maturity && release && maturity <= release) errors.push('The maturity date must be after the release date');
+  const outstanding = v.outstandingBalance === undefined || v.outstandingBalance === null || v.outstandingBalance === '' ? null : round2(num(v.outstandingBalance));
+  if (outstanding !== null && (!Number.isFinite(outstanding) || outstanding < 0)) errors.push('The outstanding balance cannot be negative');
+  const gender = genderOf(v.gender);
+  if (String(v.gender ?? '').trim() && !gender) errors.push('Enter the gender as M or F');
   return {
     errors,
     values: { customerNo: String(v.customerNo || '').trim() || null, firstName: String(v.firstName || '').trim() || null, lastName: String(v.lastName || '').trim() || null, birthDate: birth,
       email: email || null, mobile: mobile63 || (mobile || null), address: String(v.address || '').trim() || null, city: String(v.city || '').trim() || null, province: String(v.province || '').trim() || null,
       loanAccount: account || '(blank)', loanAmount, loanTermMonths: Number.isInteger(months) ? months : null, releaseDate: release, accountCount: accounts, sumInsured: si,
+      bookingDate: booking, maturityDate: maturity, outstandingBalance: outstanding, gender,
       premium: await premiumOf(si, rules), coverFrom, coverTo: coverFrom && Number.isInteger(months) && months > 0 ? addDays(addMonths(coverFrom, months), -1) : null },
   };
 }
@@ -205,10 +224,11 @@ const addMonths = (iso, n) => {
 
 async function insertMember(db, batch, v, errors, user, rowNo = null) {
   return (await db.query(`INSERT INTO credit_life_members(batch_id, row_no, customer_no, first_name, last_name, birth_date, email, mobile, address, city, province, loan_account, loan_amount,
-      loan_term_months, release_date, account_count, sum_insured, premium, cover_from, cover_to, status, errors, created_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23) RETURNING id`,
+      loan_term_months, release_date, account_count, sum_insured, premium, cover_from, cover_to, status, errors, created_by, booking_date, maturity_date, outstanding_balance, gender)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27) RETURNING id`,
   [batch.id, rowNo, v.customerNo, v.firstName, v.lastName, v.birthDate, v.email, v.mobile, v.address, v.city, v.province, v.loanAccount, v.loanAmount, v.loanTermMonths, v.releaseDate,
-    v.accountCount, v.sumInsured, v.premium, v.coverFrom, v.coverTo, errors.length ? 'error' : 'valid', JSON.stringify(errors), user.id])).rows[0];
+    v.accountCount, v.sumInsured, v.premium, v.coverFrom, v.coverTo, errors.length ? 'error' : 'valid', JSON.stringify(errors), user.id, v.bookingDate, v.maturityDate,
+    v.outstandingBalance, v.gender])).rows[0];
 }
 
 const assertDraft = (b) => { if (b.status !== 'draft') throw conflict(`Batch ${b.batch_number} is ${b.status}: its members can no longer change`); };

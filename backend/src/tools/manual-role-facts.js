@@ -54,6 +54,9 @@ const slug = (s) => String(s).toLowerCase().replace(/&/g, ' and ').replace(/[^a-
 const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}` : names[0] || '');
 const listAnd = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0] || '');
 
+/** The groups above a menu entry, then the screen it is a tab of (`tab` of the entry, e.g. Claims > Claim Documents). */
+const sectionOf = (l, menu) => [...l.ancestors.map((a) => menu.label(a.name)), ...(l.item.tab ? [menu.label(l.item.tab)] : [])];
+
 /** The menu of the front end: the tree, the role grants and the side bar labels. */
 export async function loadMenu(web = WEB) {
   const load = (file) => import(pathToFileURL(path.join(web, file)).href);
@@ -158,7 +161,7 @@ export async function roleFacts(db, menu) {
     const menus = menu.flattenLeaves(own).filter((l) => l.item.path).map((l) => {
       const modules = modulesOf.get(leafKey(l)) || [];
       const level = accessLevel(l, modules, held, cat);
-      return { section: l.ancestors.map((a) => menu.label(a.name)).join(' > '), screen: menu.label(l.item.name), path: l.item.path, access: LEVEL_NAMES[level],
+      return { section: sectionOf(l, menu).join(' > '), screen: menu.label(l.item.name), path: l.item.path, access: LEVEL_NAMES[level],
         modules: modules.map((code) => moduleOf.get(code)?.name || code) };
     });
 
@@ -216,7 +219,7 @@ export async function roleFacts(db, menu) {
   for (const l of leaves) {
     const open = facts.map((f) => ({ role: f.name, entry: f.menus.find((m) => m.path === l.item.path) })).filter((x) => x.entry);
     if (!open.length) continue;
-    screens[l.item.path] = { menu: [...l.ancestors.map((a) => menu.label(a.name)), menu.label(l.item.name)].join(' > '),
+    screens[l.item.path] = { menu: [...sectionOf(l, menu), menu.label(l.item.name)].join(' > '),
       roles: open.map((x) => ({ role: x.role, access: x.entry.access })) };
   }
   const permissionHolders = Object.fromEntries(cat.permissions.filter((p) => p.checked).map((p) => [p.code, holders(p.code)]));

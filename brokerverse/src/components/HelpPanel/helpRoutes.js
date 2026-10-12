@@ -68,8 +68,8 @@ export const HELP_ROUTES = [
   // operations and accounting: cover notes, cancellation, claims documents and repairs, cheques, claims cash, payables, assets
   ["/operations/cover-notes", "cover-notes-binders"],
   ["/operations/policy-cancellation", "cancel-a-policy-computed-return-premium"],
-  ["/operations/claim-documents", "claims-awaiting-documents"],
-  ["/operations/motor-claim-repairs", "motor-claim-repairs-and-letters-of-authority"],
+  ["/agent/claim/documents", "claims-awaiting-documents"],
+  ["/agent/claim/motor-repairs", "motor-claim-repairs-and-letters-of-authority"],
   ["/accounts/post-dated-cheques", "post-dated-cheques"],
   ["/accounts/claims-settlements", "claims-settlements-paid-through-the-broker", "screens-accounts"],
   ["/accounts/payables", "accounts-payable"],

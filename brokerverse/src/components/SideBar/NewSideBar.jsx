@@ -7,7 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { menuList } from "./list";
 import "./NewSideBar.scss";
 import { filterMenuForRoles, getUserRoles } from "../../utils/menuPermissions";
-import { findActiveTrail, keyOf, searchMenu, visibleTrail } from "./menuTree";
+import { findActiveTrail, keyOf, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { isTyping } from "../HelpPanel/helpEvents";
 import {
   COMMISSION_VIEW_MODE_EVENT,
@@ -99,9 +99,10 @@ const NewSideBar = ({ onNavigate }) => {
   // Deny-by-default role filter shared with the route guard (utils/menuPermissions.js); Agents/Referrer Accounts is
   // hidden when the Commission view is Management.
   const menu = useMemo(() => {
-    const base = userRoles.length
+    // the entries shown as tabs of another screen are not drawn (components/SideBar/menuTree.js withoutTabs)
+    const base = withoutTabs(userRoles.length
       ? filterMenuForRoles(withoutFeatures(menuList, features), userRoles)
-      : menuList.filter((m) => m.name === "Dashboard");
+      : menuList.filter((m) => m.name === "Dashboard"));
     if (commissionViewMode !== "management") return base;
     return base.map((m) =>
       m.name === "Commission" && m.submenu

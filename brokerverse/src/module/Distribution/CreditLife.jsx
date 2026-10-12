@@ -26,7 +26,7 @@ import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, isoDay, 
 const BASE = "/operations/credit-life";
 const thisMonth = () => new Date().toISOString().slice(0, 7);
 const EMPTY_MEMBER = { customerNo: "", lastName: "", firstName: "", birthDate: null, loanAccount: "", loanAmount: null, loanTermMonths: 60, releaseDate: new Date(), accountCount: null, sumInsured: null,
-  email: "", mobile: "", address: "", city: "", province: "" };
+  email: "", mobile: "", address: "", city: "", province: "", gender: null, bookingDate: null, maturityDate: null, outstandingBalance: null };
 
 /** Operations > Credit Life (PJRN-01, PJRN-02): the monthly batches of the financing bank and the master policies of its customers. */
 const CreditLife = () => {
@@ -218,7 +218,8 @@ const BatchDetail = ({ id }) => {
   const saveMember = async () => {
     setErrors({});
     try {
-      const r = await service.addCreditLifeMember(batch.id, { ...member, birthDate: isoDay(member.birthDate), releaseDate: isoDay(member.releaseDate) });
+      const r = await service.addCreditLifeMember(batch.id, { ...member, birthDate: isoDay(member.birthDate), releaseDate: isoDay(member.releaseDate),
+        bookingDate: isoDay(member.bookingDate), maturityDate: isoDay(member.maturityDate) });
       showSuccess(toast, r.message);
       setMember(null);
       load();
@@ -358,6 +359,19 @@ const BatchDetail = ({ id }) => {
             </Field>
             <Field label={t("creditLife.releaseDate", "Release date")} htmlFor="clm-release" required>
               <Calendar inputId="clm-release" value={member.releaseDate} dateFormat="yy-mm-dd" showIcon maxDate={new Date()} onChange={(e) => setMember({ ...member, releaseDate: e.value })} />
+            </Field>
+            <Field label={t("creditLife.gender")} htmlFor="clm-gender">
+              <Dropdown inputId="clm-gender" value={member.gender} showClear onChange={(e) => setMember({ ...member, gender: e.value })}
+                options={[{ label: t("creditLife.genderMale"), value: "M" }, { label: t("creditLife.genderFemale"), value: "F" }]} />
+            </Field>
+            <Field label={t("creditLife.bookingDate")} htmlFor="clm-booking">
+              <Calendar inputId="clm-booking" value={member.bookingDate} dateFormat="yy-mm-dd" showIcon maxDate={new Date()} onChange={(e) => setMember({ ...member, bookingDate: e.value })} />
+            </Field>
+            <Field label={t("creditLife.maturityDate")} htmlFor="clm-maturity">
+              <Calendar inputId="clm-maturity" value={member.maturityDate} dateFormat="yy-mm-dd" showIcon onChange={(e) => setMember({ ...member, maturityDate: e.value })} />
+            </Field>
+            <Field label={t("creditLife.outstandingBalance")} htmlFor="clm-outstanding">
+              <InputNumber inputId="clm-outstanding" value={member.outstandingBalance} min={0} minFractionDigits={2} onValueChange={(e) => setMember({ ...member, outstandingBalance: e.value })} />
             </Field>
             <Field label={t("creditLife.term", "Loan term (months)")} htmlFor="clm-term" required>
               <InputNumber inputId="clm-term" value={member.loanTermMonths} min={1} useGrouping={false} onValueChange={(e) => setMember({ ...member, loanTermMonths: e.value })} />

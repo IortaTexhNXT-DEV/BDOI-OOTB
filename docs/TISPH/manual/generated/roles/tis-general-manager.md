@@ -34,8 +34,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing > Renewals | Negotiations | Approve |
 | Policy Servicing > Renewals | Lapse Management | Create and edit |
 | Policy Servicing | Claims | Approve |
-| Policy Servicing | Claims Awaiting Documents | Create and edit |
-| Policy Servicing | Motor Claim Repairs | Create and edit |
+| Policy Servicing > Claims | Awaiting Documents | Create and edit |
+| Policy Servicing > Claims | Motor Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Policy Payments to Verify | Create and edit |
 | Accounts | Post-Dated Cheques | View |
@@ -177,7 +177,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Lock-in review and TFS loan status | Approve | Approve or return Release, Not for renewal and lock-in changes (never one you requested) |  |
-| Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | View | See claims | Claims, Awaiting Documents and Motor Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
