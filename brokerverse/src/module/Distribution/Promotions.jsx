@@ -186,7 +186,7 @@ const Promotions = () => {
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("promotions.title")}>
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("promotions.title")}>
         {write ? <Button label={t("promotions.add")} icon="pi pi-plus" onClick={() => edit(null)} /> : null}
       </PageHeader>
       <div className="pe-card">

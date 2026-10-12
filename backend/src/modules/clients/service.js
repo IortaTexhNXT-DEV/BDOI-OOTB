@@ -64,7 +64,7 @@ export async function getClient(id) {
 const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved', 'partially-settled'];
 
 /**
- * Figures of the client view (Operations > Clients > client): policies in force and their premium, open claims, open
+ * Figures of the client view (Policy Servicing > Clients > client): policies in force and their premium, open claims, open
  * renewals (not yet renewed or lapsed), the unpaid balance of the client's bills, and the number of records under each tab
  * (quotations of the client or of the prospect it was converted from).
  */
@@ -240,7 +240,7 @@ export function customerCodes(scope = null) {
 }
 
 /**
- * Onboard a client before its first policy (Operations > Clients > Onboard client): the client record with its
+ * Onboard a client before its first policy (Policy Servicing > Clients > Onboard client): the client record with its
  * identification and, for a juridical client, its authorised signatories and beneficial owners, in one transaction;
  * the KYC status is then set from what is still missing.
  */

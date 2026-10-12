@@ -18,7 +18,7 @@ import * as issue from './issue.js';
 import { listBatches, uploadBookings } from './upload.js';
 
 const { router, define } = moduleRouter('Scheme Issuance', '/scheme-issuance');
-const SCREEN = 'Operations > Sales & Marketing > Scheme Issuance';
+const SCREEN = 'Sales & Placement > Scheme Issuance';
 const APP = `${SCREEN} > Application`;
 const canRead = [requireAuth, requirePermission('read:scheme-issuance', 'write:scheme-issuance', 'approve:scheme-issuance')];
 const canWrite = [requireAuth, requirePermission('write:scheme-issuance')];

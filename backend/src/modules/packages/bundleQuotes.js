@@ -1,5 +1,5 @@
 /**
- * Package quotations (Operations > Sales & Marketing > Package Bundles): a bundle priced for a client or lead.
+ * Package quotations (Sales & Placement > Package Bundles): a bundle priced for a client or lead.
  *
  * Pricing (priceBundle): every included section is priced with its insurer (the section's default carrier unless
  * another allowed one is chosen): the insurer's rate table in force for the product when there is one, else the

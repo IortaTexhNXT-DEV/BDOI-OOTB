@@ -1,5 +1,5 @@
 /**
- * Talkbot call lists (Operations > Renewals > Talkbot Calls, FRS LEAD-09): the accounts Talkbot calls before their Motor
+ * Talkbot call lists (Policy Servicing > Renewals > Talkbot Calls, FRS LEAD-09): the accounts Talkbot calls before their Motor
  * policy expires, the Contact Import file, the call results, one Talkbot outcome per account, and the renewal batch of
  * the confirmed accounts.
  *

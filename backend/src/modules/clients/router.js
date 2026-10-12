@@ -12,7 +12,7 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 
 const { router, define } = moduleRouter('Clients', '/clients');
 const customers = moduleRouter('Clients', '/customers');
-const SCREEN = 'Operations > Clients';
+const SCREEN = 'Policy Servicing > Clients';
 const canRead = [requireAuth, requirePermission('read:clients')];
 const canWrite = [requireAuth, requirePermission('write:clients')];
 // the KYC of an existing client: write:clients, or write:client-kyc (TISPH Operations maintains the KYC, GAP-POLICY-09)
@@ -77,7 +77,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/from-lead/:leadId', summary: 'Convert a lead into a client (returns the existing client when already converted)', screen: 'Operations > Quotation > Convert to policy',
+  method: 'POST', path: '/from-lead/:leadId', summary: 'Convert a lead into a client (returns the existing client when already converted)', screen: 'Policy Servicing > Quotation > Convert to policy',
   middleware: [...canWrite, ownRecord('lead', 'leadId')], request: { contactNumber: '09171234567' }, response: { ...example, success: true },
   handler: async (req, res) => {
     const client = svc.toClient(await svc.convertLead(req.params.leadId, req.body || {}, actor(req)));

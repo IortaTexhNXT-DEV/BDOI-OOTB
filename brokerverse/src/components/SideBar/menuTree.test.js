@@ -14,9 +14,9 @@ describe("active menu entry", () => {
     expect(findActiveTrail(menuList, "/my-work")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/operations/my-work")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/executive/dashboard")).toEqual(["Dashboard", "Executive Dashboard"]);
-    expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Operations", "Clients"]);
-    expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Operations", "Policy"]);
-    expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Operations", "Renewals", "Renewal Queue"]);
+    expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Policy Servicing", "Clients"]);
+    expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Policy Servicing", "Policy"]);
+    expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Policy Servicing", "Renewals", "Renewal Queue"]);
     expect(findActiveTrail(menuList, "/master/finance/taxation")).toEqual(["Master", "Finance", "Taxation"]);
     expect(findActiveTrail(menuList, "/agent/home")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/account/profile")).toEqual([]);

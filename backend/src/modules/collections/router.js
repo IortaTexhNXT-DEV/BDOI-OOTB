@@ -67,7 +67,7 @@ define({
   handler: async (req, res) => {
     const id = await withTransaction((db) => svc.setCommitment(db, req.params.id, req.body.commitmentDate, req.body.reason, req.user));
     await audit(req, { entity: 'collection', entityId: id, action: 'commitment', after: req.body });
-    // the promised date becomes a follow-up task of the collector (Operations > My Work)
+    // the promised date becomes a follow-up task of the collector (Policy Servicing > My Work)
     await syncAutoTasksQuietly(req.log);
     ok(res, await svc.getCollection(pool, id), 'Commitment date saved');
   },

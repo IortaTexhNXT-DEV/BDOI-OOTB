@@ -21,7 +21,7 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Claim Documents', '/claim-documents');
 const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
-const S = 'Operations > Claims > claim > Documents';
+const S = 'Policy Servicing > Claims > claim > Documents';
 const multerSingle = memoryUpload({ files: 1 }).single('file');
 const singleFile = (req, res, next) => multerSingle(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const example = { claimNumber: 'CLM-2026-00001', policyNumber: 'POL-2026-00001', claimType: 'Own Damage', summary: { total: 8, required: 7, received: 5, missingRequired: 2, complete: false },
@@ -29,7 +29,7 @@ const example = { claimNumber: 'CLM-2026-00001', policyNumber: 'POL-2026-00001',
 
 define({
   method: 'GET', path: '/awaiting', summary: 'Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)',
-  screen: 'Operations > Claims Awaiting Documents', middleware: [...read, validate(z.object({ stage: z.enum(['missing', 'ready', 'all']).optional(), search: z.string().max(100).optional() }), 'query')], query: { stage: 'missing' },
+  screen: 'Policy Servicing > Claims Awaiting Documents', middleware: [...read, validate(z.object({ stage: z.enum(['missing', 'ready', 'all']).optional(), search: z.string().max(100).optional() }), 'query')], query: { stage: 'missing' },
   response: { success: true, data: { summary: { missing: 3, ready: 1, documentsMissing: 11, notReminded: 1 },
     rows: [{ claimId: 'clm_1', claimNumber: 'CLM-2026-00001', policyNumber: 'POL-2026-00001', claimant: 'Maria Santos', lob: 'MOTOR', lossCause: 'Theft', status: 'registered',
       reportedDate: '2026-10-01', daysOpen: 8, required: 18, received: 15, missing: 3, lastReminderAt: null, complete: false }] } },

@@ -88,7 +88,7 @@ const FleetList = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.fl.title", "Fleet Schedules")}>
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} title={t("distribution.fl.title", "Fleet Schedules")}>
         {write ? <Button label={t("distribution.fl.new", "New fleet schedule")} icon="pi pi-plus" onClick={open} /> : null}
       </PageHeader>
       <div className="pe-card">
@@ -229,7 +229,7 @@ const FleetDetail = ({ id }) => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.fl.title", "Fleet Schedules")} title={`${fleet.fleetNumber} · ${fleet.clientName}`}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} section={t("distribution.fl.title", "Fleet Schedules")} title={`${fleet.fleetNumber} · ${fleet.clientName}`}
         subtitle={`${fleet.insurerName || t("distribution.fl.noInsurer", "Insurer not chosen")} · ${date(fleet.inceptionDate)} to ${date(fleet.expiryDate)}${fleet.policyNumber ? ` · ${t("distribution.fl.policy", "Policy")} ${fleet.policyNumber}` : ""}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         <Button label={t("distribution.fl.printSchedule", "Print schedule")} icon="pi pi-print" outlined

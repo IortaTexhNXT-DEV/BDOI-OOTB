@@ -1,5 +1,5 @@
 /**
- * Lead assignment (Operations > Sales & Marketing > Lead Assignment): rules that give each new prospect an account
+ * Lead assignment (Sales & Placement > Lead Assignment): rules that give each new prospect an account
  * executive, the reassignment queue, single and bulk reassignment, and the team view by reporting line.
  *
  * A rule matches on the prospect's branch, line of business, product, source, category, distribution channel and

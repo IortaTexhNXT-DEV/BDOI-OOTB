@@ -19,7 +19,7 @@ let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
   // functions of a later release (modules/features), enabled as the platform administrators do
-  await enableFeatures(ctx.app, ['recurring-journals', 'bir-reports']);
+  await enableFeatures(ctx.app, ['recurring-journals']);
   await withCalendarFiscalYear();
   admin = ctx.api;
   maker = ctx.as('maker');

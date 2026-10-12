@@ -1,6 +1,7 @@
 # Endorsements
 
-Mid-term changes and cancellations of a policy (Operations > Policy > Endorsement), routes under `/endorsements`.
+Mid-term changes and cancellations of a policy, raised from the policy (Policy Servicing > Policy) and worked from the
+work list Policy Servicing > Endorsements; routes under `/endorsements`.
 Access: `read:endorsements`, `write:endorsements`; approving, and booking money going back, need `approve:policies`.
 
 ## Files

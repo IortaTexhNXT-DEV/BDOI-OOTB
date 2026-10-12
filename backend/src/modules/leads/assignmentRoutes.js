@@ -12,7 +12,7 @@ import * as asg from './assignment.js';
 import * as callout from './callout.js';
 
 const { router, define } = moduleRouter('Lead assignment', '/lead-assignment');
-const SCREEN = 'Operations > Sales & Marketing > Lead Assignment';
+const SCREEN = 'Sales & Placement > Lead Assignment';
 const canRead = [requireAuth, requirePermission('read:lead-assignment', 'write:lead-assignment')];
 const canWrite = [requireAuth, requirePermission('write:lead-assignment')];
 // the team view is open to every prospect user: a manager sees the people reporting to them

@@ -5,22 +5,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Menu | Screen | Access |
 |---|---|---|
 | My Work | My Work | View |
-| Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
+| Accounts | Policy Payments to Verify | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts | Unapplied Collections | Create and edit |
 | Accounts | Collections | Create and edit |
 | Accounts > Credit Control | Instalment Plans | Create and edit |
 | Accounts > Credit Control | Premium Warranty Monitor | Create and edit |
 | Accounts > Credit Control | Remittance Ageing | View |
-| Accounts | Post-Dated Cheques | View |
-| Accounts | Disbursement | View |
-| Accounts > Remittance | Remittances | Create and edit |
-| Accounts > Remittance | Approvals | Approve |
-| Accounts > Remittance | Insurer payments | Create and edit |
-| Accounts > Remittance | Reconciliation | Create and edit |
-| Accounts > Remittance | Exceptions | Create and edit |
-| Accounts > Remittance | Held policies | Create and edit |
-| Accounts > Remittance | Insurer billing | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliations | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -28,6 +20,14 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Bank Reconciliation | Deposits in Transit | View |
 | Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
 | Accounts > Bank Reconciliation | Bank Book | View |
+| Accounts > Remittance | Insurer Billing | Create and edit |
+| Accounts > Remittance | Remittances | Create and edit |
+| Accounts > Remittance | Approvals | Approve |
+| Accounts > Remittance | Insurer Payments | Create and edit |
+| Accounts > Remittance | Reconciliation | Create and edit |
+| Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Held Policies | Create and edit |
+| Accounts | Disbursement | View |
 | Reports | All Reports | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
@@ -46,8 +46,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies and Insurer billing |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Insurer Payments and Disbursement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Insurer Billing, Remittances, Approvals, Insurer Payments, Reconciliation, Exceptions and Held Policies |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve insurer statement reconciliations and post their adjustments (not the preparer) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
@@ -75,8 +75,8 @@ Who approves the work of this role:
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
-| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
-| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Sales & Placement > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

@@ -170,7 +170,7 @@ class EndorsementService {
     }
   }
 
-  async getEndorsements({ clientId, policyId, page = 1, perPage = 50 } = {}) {
+  async getEndorsements({ clientId, policyId, status, search, page = 1, perPage = 50 } = {}) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -181,6 +181,8 @@ class EndorsementService {
 
       if (clientId) params.append('clientId', clientId);
       if (policyId) params.append('policyId', policyId);
+      if (status) params.append('status', status);
+      if (search) params.append('search', search);
 
       const response = await fetch(
         `${this.baseURL}/endorsements/get-All-Endorsements?${params.toString()}`,

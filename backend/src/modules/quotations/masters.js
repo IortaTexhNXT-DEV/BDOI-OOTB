@@ -11,7 +11,7 @@ import { premiumBreakdown } from './premium.js';
 import { activeSignatories } from '../documents/signatory.js';
 
 const { router, define } = moduleRouter('Quotation masters', '');
-const SCREEN = 'Operations > Quotation > Create Quote (policy / coverage details)';
+const SCREEN = 'Policy Servicing > Quotation > Create Quote (policy / coverage details)';
 const canRead = [requireAuth, requirePermission('read:quotations', 'read:masters')];
 const ref = (v) => (v === undefined || v === null || v === '' ? null : String(v));
 
@@ -77,7 +77,7 @@ define({
   handler: async (_req, res) => ok(res, await activeSignatories()),
 });
 define({
-  method: 'GET', path: '/master/banks/get-all-banks', summary: 'Banks / mortgagees', screen: 'Operations > Quotation > Convert to policy (mortgagee)', middleware: canRead,
+  method: 'GET', path: '/master/banks/get-all-banks', summary: 'Banks / mortgagees', screen: 'Policy Servicing > Quotation > Convert to policy (mortgagee)', middleware: canRead,
   response: { success: true, data: [{ id: 1, code: 'BDO', name: 'Banco de Oro' }] },
   handler: async (_req, res) => ok(res, await many("SELECT id, code, name, swift_code AS \"swiftCode\", name AS label, name AS value FROM banks WHERE status = 'active' ORDER BY name")),
 });

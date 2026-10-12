@@ -1,4 +1,4 @@
--- TISPH campaign e-mail templates (Operations > Sales & Marketing > Campaigns > Templates): the products TISPH offers,
+-- TISPH campaign e-mail templates (Sales & Placement > Campaigns > Templates): the products TISPH offers,
 -- Motor (renewal, new Toyota owners), Personal Accident and Credit Life. Runs on a new database and on every start of
 -- one in use. Idempotent: a template is added only when its code is missing, so administrator changes are kept.
 -- Placeholders: {{firstName}}, {{fullName}}, {{companyName}}, {{optOutLink}}.

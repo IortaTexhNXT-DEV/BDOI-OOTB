@@ -39,7 +39,7 @@ const insurerRef = z.union([z.number(), z.string().min(1), z.object({}).passthro
 
 // ---------------------------------------------------------------- Broker slips
 const bs = moduleRouter('Broker Slips', '/broker-slips');
-const BS = 'Operations > Sales & Marketing > Request for Quotation (Broker Slip)';
+const BS = 'Sales & Placement > Request for Quotation (Broker Slip)';
 const slipExample = { brokerSlipId: 'bs_1', slipNumber: 'BS-2026-00001', status: 'submitted', insuredName: 'Cebu Cold Storage Corp.', productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000,
   submissionDate: '2026-09-20', responseDueDate: '2026-09-27', offers: [{ offerId: 'ofr_1', offerNumber: 'OFR-2026-00001', insuranceCompanyName: 'Malayan Insurance Co., Inc.', status: 'offered', premium: 212500, rate: 0.25, taxes: 31556.25, premiumTotal: 244056.25, offeredShare: 60, validityDate: '2026-10-20' }] };
 const slipBody = z.object({
@@ -182,7 +182,7 @@ bs.define({
 
 // ---------------------------------------------------------------- Placement slips
 const { router, define } = moduleRouter('Placement Slips', '/placements');
-const PS = 'Operations > Sales & Marketing > Placement Slips';
+const PS = 'Sales & Placement > Placement Slips';
 const participantExample = { participantId: 11, insuranceCompanyId: 2, insuranceCompanyName: 'Malayan Insurance Co., Inc.', isLead: true, sharePercent: 60, sumInsured: 51000000, premium: 127500, taxes: 18933.75, premiumTotal: 146433.75, commissionAmount: 19125, insurerReference: null, status: 'pending' };
 const placementExample = { placementId: 'plc_1', placementNumber: 'PS-2026-00001', source: 'quote', status: 'draft', placementStatus: 'PlacementRaised', quotationNumber: 'QT-2026-00007', insuredName: 'Cebu Cold Storage Corp.',
   productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000, netPremium: 212500, grossPremium: 244056.25, inceptionDate: '2026-10-01', expiryDate: '2027-10-01', participants: [participantExample] };
@@ -224,7 +224,7 @@ define({
 });
 define({
   method: 'GET', path: '/product-lines', summary: 'Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products',
-  screen: 'Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips',
+  screen: 'Sales & Placement > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips',
   middleware: [requireAuth, requirePermission('read:quotations', 'read:leads')], query: { businessType: 'package' },
   response: { success: true, data: { lines: [{ code: 'ACCIDENT', name: 'Personal Accident', products: [{ id: 9, code: 'PA', name: 'Personal Accident', line: 'ACCIDENT', lob: 'ACCIDENT', businessType: 'package', customerSegment: 'retail' }] }] } },
   handler: async (req, res) => {

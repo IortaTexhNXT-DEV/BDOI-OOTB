@@ -25,7 +25,7 @@ import * as corrections from './corrections.js';
 import { policyVersions } from '../endorsements/workflow.js';
 
 const { router, define } = moduleRouter('Policies', '/policies');
-const SCREEN = 'Operations > Policy';
+const SCREEN = 'Policy Servicing > Policy';
 const canRead = [requireAuth, requirePermission('read:policies')];
 const canWrite = [requireAuth, requirePermission('write:policies')];
 const out = svc.toPolicy;
@@ -169,7 +169,7 @@ define({
   handler: async (req, res) => sendEntity(res, await svc.policyWithParticipants(await svc.getPolicyRow(req.params.id))),
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus', screen: 'Operations > Quotation > Upload policy',
+  method: 'PUT', path: '/:id', summary: 'Update policy details (upload policy: insurer policy number, dates, vehicle ids, photos, document); only finance may change paymentStatus', screen: 'Policy Servicing > Quotation > Upload policy',
   middleware: [...canWrite, ownRecord('policy'), validate(z.object({ policyNumber: z.string().max(60).optional().nullable(), paymentStatus: z.string().optional() }).passthrough())],
   request: { policyNumber: 'MAL-MC-2026-0099', inception: '2026-10-01', expiry: '2027-10-01', plateNumber: 'ABC 1234', policyDocument: 'document/abc.pdf' },
   response: { ...example, success: true },

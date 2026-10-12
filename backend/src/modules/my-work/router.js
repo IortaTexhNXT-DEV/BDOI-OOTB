@@ -20,7 +20,7 @@ import { figures } from './figures.js';
 import { assignableUsers, manages } from './team.js';
 
 const { router, define } = moduleRouter('My Work', '/my-work');
-const S = 'Operations > My Work';
+const S = 'Policy Servicing > My Work';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
 const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM (24 hours)');
 const listQuery = (req) => ({ ...req.query, recordScope: undefined });

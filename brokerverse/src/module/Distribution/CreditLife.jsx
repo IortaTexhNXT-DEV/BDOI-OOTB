@@ -88,7 +88,7 @@ const BatchList = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} title={t("creditLife.title", "Credit Life")}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} title={t("creditLife.title", "Credit Life")}
         subtitle={t("creditLife.subtitle", "Monthly Credit Life batches of the financing bank: members checked against the Credit Life rules, one master policy per customer, certificates of cover e-mailed as password-protected PDFs.")}>
         {write ? <Button label={t("creditLife.newBatch", "New batch")} icon="pi pi-plus" onClick={() => { setErrors({}); setForm({ client: null, insuranceCompanyId: null, productId: defaultProduct(), period: thisMonth(), notes: "" }); }} /> : null}
       </PageHeader>
@@ -267,7 +267,7 @@ const BatchDetail = ({ id }) => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("creditLife.title", "Credit Life")} title={`${batch.batchNumber} · ${batch.bankName}`}
+      <PageHeader home={t("distribution.home.operations", "Policy servicing")} section={t("creditLife.title", "Credit Life")} title={`${batch.batchNumber} · ${batch.bankName}`}
         subtitle={`${batch.insurerName} · ${batch.productName || ""} · ${batch.period}`}>
         <Button label={t("distribution.common.back", "Back")} icon="pi pi-arrow-left" text onClick={() => navigate(BASE)} />
         {write && draft ? <Button label={t("creditLife.issue", "Issue certificates")} icon="pi pi-check" disabled={busy || !batch.valid} onClick={issue} /> : null}

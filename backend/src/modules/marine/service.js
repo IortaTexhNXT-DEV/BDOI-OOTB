@@ -1,5 +1,5 @@
 /**
- * Open covers (Operations > Marine Open Covers): Parcel / Courier and Marine Cargo inland for TISPH (TIS-BRD-PJRN-09, FRS
+ * Open covers (Policy Servicing > Marine Open Covers): Parcel / Courier and Marine Cargo inland for TISPH (TIS-BRD-PJRN-09, FRS
  * PJRN-09, features open-covers and marine-cargo-inland, Phase 1); cargo on another conveyance than the inland ones
  * (marine.inland_conveyances) is the Phase 2 feature marine-cargo, enabled by SUPERID (terms.js#checkTerms).
  *

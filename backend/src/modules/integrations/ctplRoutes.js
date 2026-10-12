@@ -15,7 +15,7 @@ import { formatDateTime } from '../../lib/pdf/format.js';
  * report. Read: read:policies; change: write:policies.
  */
 const { router, define } = moduleRouter('CTPL Authentication', '/ctpl');
-const SCREEN = 'Operations > CTPL Authentication';
+const SCREEN = 'Policy Servicing > CTPL Authentication';
 const read = [requireAuth, requirePermission('read:policies')];
 const write = [requireAuth, requirePermission('write:policies')];
 const authExample = { id: 'cta_0123456789abcdef', policyNumber: 'PC-MLY-2026-000101', insurerName: 'Malayan Insurance Co., Inc.', cocNumber: 'MIC00012345', plateNumber: 'NCA 4521',

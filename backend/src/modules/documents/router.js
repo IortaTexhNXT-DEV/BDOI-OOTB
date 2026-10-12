@@ -31,13 +31,13 @@ const quotePdf = async (req, res) => {
 
 for (const [path, handler, label] of [
   ['/document-templates/quote-template/:id', quotePdf, 'Motor quotation PDF'], ['/document-templates/quote-template-fire/:id', quotePdf, 'Fire / IAR quotation PDF'],
-]) define({ method: 'GET', path, summary: label, screen: 'Operations > Quotation > Quote detail > Share > Download', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf', handler });
+]) define({ method: 'GET', path, summary: label, screen: 'Policy Servicing > Quotation > Quote detail > Share > Download', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf', handler });
 for (const [path, label] of [['/document-templates/policy-schedule/:id', 'Motor policy schedule PDF'], ['/document-templates/policy-schedule-fire/:id', 'Fire / IAR policy schedule PDF']]) {
-  define({ method: 'GET', path, summary: label, screen: 'Operations > Policy > Policy detail > Policy schedule', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf', handler: policyPdf });
+  define({ method: 'GET', path, summary: label, screen: 'Policy Servicing > Policy > Policy detail > Policy schedule', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf', handler: policyPdf });
 }
 define({
   method: 'GET', path: '/document-templates/product-document/:documentId/policy/:id', summary: 'A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout',
-  screen: 'Operations > Policy > Policy detail > Documents', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf',
+  screen: 'Policy Servicing > Policy > Policy detail > Documents', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf',
   handler: async (req, res) => {
     const row = await getPolicyRow(req.params.id);
     const p = await printablePolicy(toPolicy(row), row);
@@ -48,7 +48,7 @@ define({
 });
 define({
   method: 'GET', path: '/document-templates/product-document/:documentId/quote/:id', summary: 'A product document template (e.g. member enrollment form) printed for a quotation',
-  screen: 'Operations > Quotation > Quote detail', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf',
+  screen: 'Policy Servicing > Quotation > Quote detail', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf',
   handler: async (req, res) => {
     const q = await quoteById(req.params.id);
     const spec = await productDocumentSpec('quote', q, { documentId: req.params.documentId });
@@ -72,7 +72,7 @@ define({
 });
 define({
   method: 'GET', path: '/document-templates/acknowledgement-receipt/:paymentId', summary: 'Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)',
-  screen: 'Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt',
+  screen: 'Policy Servicing > Policy > Payment > Payments recorded > Print acknowledgement receipt',
   middleware: [requireAuth, requirePermission('read:policies', 'read:receipts')],
   response: 'application/pdf',
   handler: async (req, res) => {

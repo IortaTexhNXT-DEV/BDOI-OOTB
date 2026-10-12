@@ -1,4 +1,4 @@
--- Reasons of a prospect reassignment or of a prospect sent to the reassignment queue (Operations > Sales & Marketing >
+-- Reasons of a prospect reassignment or of a prospect sent to the reassignment queue (Sales & Placement >
 -- Lead Assignment) on the Reason Codes master of seed 77_lead_sources_reason_codes.sql: the context "reassignment" is
 -- added to the Used For list of the master, and its reasons to the master. Idempotent: the context is added once and a
 -- reason only when its code is missing, so administrator changes are kept.

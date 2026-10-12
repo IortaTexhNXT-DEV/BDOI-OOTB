@@ -225,6 +225,7 @@ import CreditLimits from "../module/CreditControl/CreditLimits";
 import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
 // operations and accounting: cover notes, cancellation, post-dated cheques, claims, payables, fixed assets
 import CoverNotes from "../module/OpsAccounting/CoverNotes";
+import EndorsementWorklist from "../module/Endorsements/EndorsementWorklist";
 import PolicyCancellation from "../module/OpsAccounting/PolicyCancellation";
 import PostDatedCheques from "../module/OpsAccounting/PostDatedCheques";
 import ClaimsSettlements from "../module/OpsAccounting/ClaimsSettlements";
@@ -1621,6 +1622,7 @@ const Maincomponent = () => {
           <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
           <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
           <Route path="/operations/cover-notes" element={<CoverNotes />} />
+          <Route path="/operations/endorsements" element={<EndorsementWorklist />} />
           <Route path="/operations/policy-cancellation" element={<PolicyCancellation />} />
           <Route path="/operations/claim-documents" element={<ClaimDocuments />} />
           <Route path="/operations/motor-claim-repairs" element={<MotorClaimRepairs />} />

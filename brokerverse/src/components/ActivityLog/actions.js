@@ -63,7 +63,7 @@ const ACTION_KEYS = {
   request: "request", relock: "relock", "refused-locked": "refused", "download-file": "export", "evidence-pack": "export",
   "legacy-update": "update", "cutover-date": "update", criterion: "update", explain: "explain", accept: "accept", sign: "signOff",
   start: "start", done: "complete", block: "block", skip: "skip", waive: "waive", "open-voting": "openVoting", vote: "vote", go: "approve", "no-go": "reject",
-  // lead assignment history (Operations > Sales & Marketing > Lead Assignment)
+  // lead assignment history (Sales & Placement > Lead Assignment)
   auto: "assignAuto", queued: "assignQueued", manual: "assignManual", bulk: "assignBulk", taken: "assignTaken",
 };
 

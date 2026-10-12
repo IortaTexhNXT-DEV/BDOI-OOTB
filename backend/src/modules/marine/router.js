@@ -23,7 +23,7 @@ import { certificatePdf, certificatesPdf } from './documents.js';
 import { closeDailyDeclarations } from './daily.js';
 
 const { router, define } = moduleRouter('Marine open covers', '/marine');
-const SCREEN = 'Operations > Marine Open Covers';
+const SCREEN = 'Policy Servicing > Marine Open Covers';
 const canRead = [requireAuth, requirePermission('read:marine', 'write:marine', 'write:parcel-certificates', 'approve:marine')];
 const canWrite = [requireAuth, requirePermission('write:marine')];
 const canParcel = [requireAuth, requirePermission('write:parcel-certificates')];

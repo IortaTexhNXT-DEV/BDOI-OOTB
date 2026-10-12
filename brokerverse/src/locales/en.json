@@ -183,7 +183,7 @@
     "Leads/Prospects": "Prospects",
     "Clients": "Clients",
     "Quotation": "Quotation",
-    "Policy": "Policy",
+    "Policy": "Policies",
     "Claims": "Claims",
     "Renewals": "Renewals",
     "Renewal Policy": "Renewal Policy",
@@ -195,7 +195,7 @@
     "Lapse Management": "Lapse Management",
     "Performance": "Performance",
     "Open Items": "Open Items",
-    "Payments": "Payments",
+    "Payments": "Policy Payments to Verify",
     "Accounts": "Accounts",
     "Receipts": "Receipts",
     "Collections": "Collections",
@@ -284,7 +284,16 @@
     "Promotions": "Promotions",
     "Discount Caps": "Discount Caps",
     "Data Migration & Go-Live": "Data Migration & Go-Live",
-    "Broker Commission": "Broker Commission"
+    "Broker Commission": "Broker Commission",
+    "Sales & Placement": "Sales & Placement",
+    "Policy Servicing": "Policy Servicing",
+    "Marine Open Covers": "Parcel / Courier Open Covers",
+    "Endorsements": "Endorsements",
+    "Insurer Override Agreements": "Insurer Override Agreements",
+    "Insurer Override Computations": "Insurer Override Computations",
+    "Insurer billing": "Insurer Billing",
+    "Insurer payments": "Insurer Payments",
+    "Held policies": "Held Policies"
   },
   "sidebarFull": {
     "Request for Quotation": "Requests for Quotation (Broker Slips)",
@@ -433,6 +442,7 @@
     "correctionsJVDetails": "Correction JV details",
     "receipts": {
       "title": "Receipts",
+      "paymentsToVerify": "Policy payments to verify",
       "bulkPrint": "Bulk Print",
       "bulkUpload": "Bulk upload",
       "receipt": "Receipt",
@@ -13421,6 +13431,8 @@
     "noOnboardPermission": "Onboarding a new client needs the right to create clients; open an existing client to maintain its KYC"
   },
   "jvTools": {
+    "correct": "Correction JV",
+    "reverse": "Reversal JV",
     "upload": "Upload",
     "uploadTitle": "Upload Journal Vouchers",
     "uploadIntro": "Download the template, enter one row per journal line (rows with the same Voucher Ref make one voucher) and upload it. The whole file is checked first: nothing is saved while a row is wrong. Every voucher waits for the approval of another user.",
@@ -13499,7 +13511,7 @@
   },
   "opsAcc": {
     "accounts": "Accounts",
-    "operations": "Operations",
+    "operations": "Policy servicing",
     "master": "Master",
     "activate": "Activate",
     "deactivate": "Deactivate",
@@ -14374,8 +14386,8 @@
       "summary": "Summary"
     },
     "home": {
-      "operations": "Operations",
-      "sales": "Sales & marketing",
+      "operations": "Policy servicing",
+      "sales": "Sales & placement",
       "master": "Master",
       "insurance": "Insurance management",
       "reinsurance": "Reinsurance",
@@ -16988,6 +17000,7 @@
     }
   },
   "openEntryActions": {
+    "unmatchScreen": "Unmatch entries",
     "pull": "Pull",
     "match": "Match",
     "side": "Side",
@@ -19261,7 +19274,7 @@
     "notices": "Notices",
     "reviewStatus": "Review",
     "owner": "Owner",
-    "home": "Operations",
+    "home": "Policy servicing",
     "section": "Renewals",
     "title": "Lock-in Review",
     "report": "Lock-in / Scheme 2 Expiry Report",
@@ -19680,5 +19693,33 @@
     },
     "newBatchTitle": "New Batch",
     "addMemberTitle": "Add Member"
+  },
+  "endorsementWorklist": {
+    "title": "Endorsements",
+    "home": "Policy servicing",
+    "list": "Endorsements by status",
+    "help": "Endorsements of every policy you can see. Raise a new endorsement from the policy.",
+    "search": "Search endorsement, policy or client",
+    "status": "Status",
+    "filter": {
+      "PendingApproval": "Awaiting approval",
+      "Approved": "Approved, to send",
+      "PendingCustomer": "Sent, to complete",
+      "Draft": "Draft",
+      "Completed": "Completed",
+      "Rejected": "Rejected",
+      "all": "All statuses"
+    },
+    "emptyTitle": "No endorsements in this status",
+    "emptyText": "Choose another status or raise an endorsement from a policy.",
+    "col": {
+      "endorsement": "Endorsement",
+      "client": "Client",
+      "effective": "Effective",
+      "premiumChange": "Premium change",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "open": "Open endorsement"
   }
 }

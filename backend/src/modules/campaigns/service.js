@@ -1,5 +1,5 @@
 /**
- * Marketing campaigns to consenting clients and prospects (Operations > Sales & Marketing > Campaigns).
+ * Marketing campaigns to consenting clients and prospects (Sales & Placement > Campaigns).
  *
  * A campaign sends an e-mail template to a segment. Only a party whose latest marketing consent in the consent
  * register (privacy_consents, purpose 'marketing') is granted and not withdrawn, with an e-mail address and not

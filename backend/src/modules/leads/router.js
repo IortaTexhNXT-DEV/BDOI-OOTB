@@ -15,7 +15,7 @@ import * as tfs from './tfsImport.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
-const SCREEN = 'Operations > Sales & Marketing > Prospects';
+const SCREEN = 'Sales & Placement > Prospects';
 const canRead = [requireAuth, requirePermission('read:leads')];
 const canWrite = [requireAuth, requirePermission('write:leads')];
 const canDelete = [requireAuth, requirePermission('delete:leads')];

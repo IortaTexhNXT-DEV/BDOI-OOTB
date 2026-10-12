@@ -283,7 +283,7 @@ export async function standardPolicyScheduleDoc(p) {
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
     ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency],
-    // CTPL certificate of cover and its authentication code (Operations > CTPL Authentication)
+    // CTPL certificate of cover and its authentication code (Policy Servicing > CTPL Authentication)
     ['COC no.', p.cocNumber], ['CTPL authentication code', p.ctplAuthenticationCode], ['Insurer policy no.', p.insurerPolicyNumber]]),
   sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency), await coverTerms(x),
     { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }, sig.section] };
@@ -491,7 +491,7 @@ async function remittanceAdviceLetter(rem, a) {
 }
 
 /**
- * Endorsement (Operations > Endorsement > Print): the policy, the type and effective date, the premium change, every
+ * Endorsement (Policy Servicing > Endorsement > Print): the policy, the type and effective date, the premium change, every
  * change group recorded on the endorsement (personal details, vehicle, coverage, extension ...) and the authorised
  * signature once issued. `e` is endorsements/service.js#toEndorsement, `row` its endorsements row.
  */

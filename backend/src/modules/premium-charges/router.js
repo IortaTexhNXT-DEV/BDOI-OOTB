@@ -140,7 +140,7 @@ define({
 
 define({
   method: 'POST', path: '/calculate', summary: 'Taxes and charges of a premium: product (line, tax regime), location (LGU) and date; the breakdown shown on screens and prints',
-  screen: 'Operations > Sales & Marketing > Quick Quote / Package Bundles', middleware: [...canRead, validate(calcBody)],
+  screen: 'Sales & Placement > Quick Quote / Package Bundles', middleware: [...canRead, validate(calcBody)],
   request: { premium: 10000, productId: 11, lguCode: 'MKT' }, response: { success: true, data: calcExample },
   handler: async (req, res) => {
     const b = req.body;

@@ -38,6 +38,7 @@ export const HELP_ROUTES = [
   ["/agent/policy", "policies"],
   ["/agent/policydetailedview", "policies"],
   ["/agent/policy/paymentoptions", "verify-payments-and-post-official-receipts"],
+  ["/operations/endorsements", "raise-an-endorsement-request"],
   ["/agent/endorsement", "raise-an-endorsement-request"],
   ["/agent/uploadendorsement", "raise-an-endorsement-request"],
   ["/agent/endorsementdetailedview", "raise-an-endorsement-request"],

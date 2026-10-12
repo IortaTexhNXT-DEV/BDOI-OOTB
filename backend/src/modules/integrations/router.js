@@ -233,7 +233,7 @@ messaging.define({
 });
 messaging.define({
   method: 'POST', path: '/send', summary: 'Send a message to a client from a template (or a free text) about a policy or claim: consent check, mobile number from the client record unless given',
-  screen: 'Operations > Clients / Policy / Claims > Send SMS', middleware: [...sendPerm, validate(z.object({
+  screen: 'Policy Servicing > Clients / Policy / Claims > Send SMS', middleware: [...sendPerm, validate(z.object({
     clientId: z.string().trim().min(1), templateCode: z.string().trim().max(40).optional(), text: z.string().trim().max(1000).optional(), to: z.string().trim().max(20).optional(),
     policyId: z.string().trim().max(60).optional(), claimId: z.string().trim().max(60).optional(), channel: z.enum(msg.CHANNELS).optional(),
   }).strict().refine((b) => b.templateCode || b.text, 'Choose a template or type the text'))],

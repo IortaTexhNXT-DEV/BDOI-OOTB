@@ -212,7 +212,7 @@ for (const role of ['tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].pu
 for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('sharing-schemes:read');
 ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 // Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
-// TISPH decision (migration 0689): only the Sales Unit Head and the General Manager approve incentive batches; journal
+// TISPH decision (migration 0691): only the Sales Unit Head and the General Manager approve incentive batches; journal
 // vouchers and disbursements are Finance work, not read by the Operations and Sales personas
 ROLE_PERMS['tis-general-manager'].push('incentive:approve');
 // Product register maker-checker (migration 0660, PROD-03, RBAC v4 "A" on the Product Configurator): IT AppSupport drafts

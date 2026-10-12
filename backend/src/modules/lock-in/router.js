@@ -20,8 +20,8 @@ import * as changes from './changes.js';
 import { failedRows, listBatches, uploadLoanStatus } from './upload.js';
 
 const { router, define } = moduleRouter('Lock-in', '/lock-in');
-const SCREEN = 'Operations > Renewals > Lock-in Review';
-const PANEL = 'Operations > Policy > Policy detail > Lock-in & loan';
+const SCREEN = 'Policy Servicing > Renewals > Lock-in Review';
+const PANEL = 'Policy Servicing > Policy > Policy detail > Lock-in & loan';
 const canRead = [requireAuth, requirePermission('read:lock-in', 'write:lock-in', 'approve:lock-in', 'write:loan-status')];
 const canWrite = [requireAuth, requirePermission('write:lock-in')];
 const canApprove = [requireAuth, requirePermission('approve:lock-in')];

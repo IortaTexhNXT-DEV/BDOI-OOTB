@@ -9,7 +9,7 @@ import { companyName } from '../../lib/letterhead.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Campaigns', '/campaigns');
-const SCREEN = 'Operations > Sales & Marketing > Campaigns';
+const SCREEN = 'Sales & Placement > Campaigns';
 const canRead = [requireAuth, requirePermission('read:campaigns', 'write:campaigns')];
 const canWrite = [requireAuth, requirePermission('write:campaigns')];
 // Marketing consent (Data Privacy Act; TIS-BRD-NFR-17.1): recorded by whoever keeps the client relationship, the account

@@ -120,7 +120,7 @@ const clientValues = (c) => ({ clientCode: c.client_code, clientType: c.client_t
   city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) });
 
 const clientsSheet = () => ({
-  key: 'clients', name: 'Clients', menu: 'Operations > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode), keyMap: 'client',
+  key: 'clients', name: 'Clients', menu: 'Policy Servicing > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode), keyMap: 'client',
   sample: { clientCode: 'C-000123', clientType: 'individual', firstName: 'Maria', lastName: 'Santos', email: 'maria.santos@example.ph', phone: '09171234567', tin: '123-456-789-000',
     birthDate: '1988-04-12', address: 'Unit 4B, 12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', region: 'National Capital Region (NCR)', country: 'Philippines', postalCode: '1600' },
   async exportRows() {
@@ -301,7 +301,7 @@ async function policyInput(ctx, sheet, v) {
 
 /** Change a policy created by a migration load (Changed row): nothing may hang on it yet. */
 async function updateMigratedPolicy(ctx, sheet, existing, input, v) {
-  if (!existing.load_batch_id) fail('policyNumber', `Policy ${existing.policy_number} was migrated outside a load: correct it on the policy screen (Operations > Policy)`);
+  if (!existing.load_batch_id) fail('policyNumber', `Policy ${existing.policy_number} was migrated outside a load: correct it on the policy screen (Policy Servicing > Policy)`);
   const deps = await dependentsOf(POLICY_DEPENDENTS, existing.id);
   if (deps.length) changedAfterLoad('policyNumber', 'Policy', existing.policy_number, existing.load_batch_id, deps);
   const kinds = ctx.presentKinds;
@@ -367,7 +367,7 @@ const policyTotals = (rows) => ({ grossPremium: pesoSum(rows.map((r) => r.grossP
 /** A policy sheet: kind entry of products.js, or null for the single Policies sheet of the earlier layout. */
 function policySheet(def) {
   const sheet = {
-    key: def ? def.key : 'policies', name: def ? def.name : 'Policies', menu: 'Operations > Policy',
+    key: def ? def.key : 'policies', name: def ? def.name : 'Policies', menu: 'Policy Servicing > Policy',
     columns: def ? policyColumns(def.kind) : LEGACY_POLICY_COLUMNS, keyColumns: ['policyNumber'], keyOf: (v) => keyText(v.policyNumber),
     policyKind: def ? def.kind : null, productLines: def ? def.lines : [], legacyLayout: !def, keyGroup: 'policies',
     sample: def ? POLICY_SAMPLES[def.kind] : POLICY_SAMPLES.motor,
@@ -527,7 +527,7 @@ const CLAIM_EXPORT = `SELECT c.*, p.policy_number, u.username AS handler_usernam
 const claimValues = (c) => ({ claimNumber: c.claim_number, policyNumber: c.policy_number, lossDate: cell(c.loss_date), reportedDate: cell(c.reported_date), status: c.status,
   lossType: cell(c.loss_type), description: cell(c.description), estimateAmount: String(Number(c.estimate_amount)), insurerClaimNumber: cell(c.insurer_claim_number), handler: cell(c.handler_username) });
 const claimsSheet = () => ({
-  key: 'claims', name: 'Open Claims', menu: 'Operations > Claims',
+  key: 'claims', name: 'Open Claims', menu: 'Policy Servicing > Claims',
   columns: [
     { key: 'claimNumber', header: 'Claim Number', required: true, format: 'Claim number in the old system; kept' },
     { key: 'policyNumber', header: 'Policy Number', required: true, format: 'Policy of the policy sheets or already in BrokerVerse' },
@@ -774,7 +774,7 @@ export const MIGRATION_ON_SCREEN = [
   ['Expired, cancelled and lapsed policies; settled and closed claims; paid bills; journals before the cutover', 'Not migrated: they stay in the old system (read only)'],
   ['Cheques deposited in the legacy system but not cleared at cutover', 'Stay on the legacy bank reconciliation; a bounce after go-live is a late legacy item'],
   ['Credit balances and unapplied collections', 'Part of the GL opening balances, with the legacy listing per client in the Control Totals sheet'],
-  ['Leads and quotations in progress', 'Operations > Sales & Marketing > Prospects / Quotations > Bulk Upload'],
+  ['Leads and quotations in progress', 'Sales & Placement > Prospects / Quotations > Bulk Upload'],
   ['Unreconciled bank items', 'Stay on the old bank reconciliation; BrokerVerse reconciles from the reconcile-from date of each bank account'],
   ['Documents and images of the old system', 'Named by the document file naming convention below and attached on the record screen when needed'],
 ];

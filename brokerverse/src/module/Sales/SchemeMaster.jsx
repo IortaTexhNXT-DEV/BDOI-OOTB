@@ -232,7 +232,7 @@ const SchemeMaster = () => {
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeMaster.title", "Scheme Master")}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("schemeMaster.title", "Scheme Master")}
         trail={[t("schemeMaster.title", "Scheme Master")]}>
         <Button label={t("schemeMaster.export", "Export to Excel")} icon="pi pi-file-excel" outlined onClick={exportList} disabled={!rows.length} />
         {write ? <Button label={t("schemeMaster.add", "New scheme")} icon="pi pi-plus" disabled={!choices.perils.length} onClick={() => edit(null)} /> : null}

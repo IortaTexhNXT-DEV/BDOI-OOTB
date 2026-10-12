@@ -25,7 +25,7 @@ let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
   // functions of a later release (modules/features), enabled as the platform administrators do
-  await enableFeatures(ctx.app, ['bir-returns', 'bir-2551q', 'bir-eis', 'bir-reports']);
+  await enableFeatures(ctx.app, ['bir-returns', 'bir-2551q', 'bir-eis']);
   maker = ctx.as('maker');
 });
 afterAll(async () => { await pool.end(); });

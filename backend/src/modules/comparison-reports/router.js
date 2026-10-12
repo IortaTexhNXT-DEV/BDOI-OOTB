@@ -9,7 +9,7 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Comparison reports', '/comparison-reports');
-const SCREEN = 'Operations > Sales & Marketing > Comparison Reports';
+const SCREEN = 'Sales & Placement > Comparison Reports';
 const canRead = [requireAuth, requirePermission('read:quotations', 'write:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 

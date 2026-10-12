@@ -11,7 +11,7 @@ import { printContext } from '../../lib/pdf/index.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Fleet schedules', '/fleet');
-const SCREEN = 'Operations > Fleet Schedules';
+const SCREEN = 'Policy Servicing > Fleet Schedules';
 const canRead = [requireAuth, requirePermission('read:fleet', 'write:fleet')];
 const canWrite = [requireAuth, requirePermission('write:fleet')];
 

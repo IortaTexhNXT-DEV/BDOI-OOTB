@@ -143,7 +143,7 @@ const DistributionChannels = () => {
               <Dropdown value={form.parentId} options={parents.map((p) => ({ value: p.id, label: p.path || p.name }))} showClear disabled={!PARENTS[form.channelType].length}
                 onChange={(e) => set({ parentId: e.value || null })} />
             </Field>
-            <Field label={t("distribution.ch.referrer", "Referrer")} help={t("distribution.ch.referrerHelp", "Commission > Agents/Referrer Accounts: the channel's business earns this referrer's comsub")}>
+            <Field label={t("distribution.ch.referrer", "Referrer")} help={t("distribution.ch.referrerHelp", "Accounts > Commission > Agents/Referrer Accounts: the channel's business earns this referrer's comsub")}>
               <Dropdown value={form.referrerId} options={referrers} filter showClear onChange={(e) => set({ referrerId: e.value || null })} />
             </Field>
             <Field label={t("distribution.ch.comsub", "Comsub %")} help={t("distribution.ch.comsubHelp", "Empty: the rate of the referrer's level")}>

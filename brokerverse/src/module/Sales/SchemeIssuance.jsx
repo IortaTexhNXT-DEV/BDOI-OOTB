@@ -228,7 +228,7 @@ const SchemeIssuance = () => {
 
   return (
     <div className="pe-page">
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("schemeIssuance.title", "Scheme Issuance")}
+      <PageHeader home={t("distribution.home.sales", "Sales & placement")} title={t("schemeIssuance.title", "Scheme Issuance")}
         trail={[t("schemeIssuance.title", "Scheme Issuance")]}>
         {write ? <Button label={t("schemeIssuance.add", "New application")} icon="pi pi-plus" onClick={() => setCreating(true)} /> : null}
       </PageHeader>
