@@ -155,10 +155,17 @@ export const FEATURES = Object.freeze([
   // ---------------------------------------------------------------- sales and placement
   feature({
     key: 'prospects', name: 'Prospects and lead assignment', module: 'Sales & Marketing', tier: P1,
-    description: 'Prospect capture and import, duplicate check, quick quote, assignment rules and reassignment, lead sources',
+    description: 'Prospect capture and import, duplicate check, assignment rules and reassignment, lead sources',
     requirements: ['TIS-BRD-LEAD-01', 'TIS-BRD-LEAD-02', 'TIS-BRD-LEAD-03', 'TIS-BRD-LEAD-04', 'TIS-BRD-LEAD-05', 'TIS-BRD-LEAD-06', 'TIS-BRD-LEAD-07', 'TIS-BRD-LEAD-08', 'TIS-BRD-LEAD-09'],
-    menus: ['Sales & Placement > Prospects', 'Sales & Placement > Quick Quote', 'Sales & Placement > Lead Assignment',
-      'Master > Insurance Management > Lead Sources'],
+    menus: ['Sales & Placement > Prospects', 'Sales & Placement > Lead Assignment', 'Master > Insurance Management > Lead Sources'],
+  }),
+  feature({
+    key: 'quick-quote', name: 'Quick Quote', module: 'Sales & Marketing', tier: FUT,
+    description: 'Picker of the package products quoted on the spot from their tariff, opening the quotation wizard of the product or a request for quotation',
+    decision: { question: 'No BRD or FRS requirement and no TISPH role uses Quick Quote: the BRD raises a quotation per product from Quotations (QUOT-01). Is a quick quote picker wanted?',
+      options: ['Not wanted', 'Wanted in a later release'] },
+    dependsOn: ['quotations'],
+    menus: ['Sales & Placement > Quick Quote'], routes: ['/sales/quick-quote'], permissions: ['write:quotations'],
   }),
   feature({
     key: 'sales-activities', name: 'Sales activities', module: 'Sales & Marketing', tier: P1,

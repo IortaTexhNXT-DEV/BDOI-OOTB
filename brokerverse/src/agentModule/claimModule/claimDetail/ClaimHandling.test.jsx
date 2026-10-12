@@ -56,7 +56,7 @@ describe("Claim communications", () => {
   it("needs a message before logging", async () => {
     claimHandlingService.communications.mockResolvedValue([]);
     wrap(<ClaimCommunications claimId="clm_1" canEdit notify={jest.fn()} />);
-    fireEvent.click(await screen.findByRole("button", { name: "Log Communication" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Log activity" }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
     expect(await within(dialog).findByText("Enter the message.")).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe("Claim communications", () => {
     claimHandlingService.communications.mockResolvedValue([]);
     wrap(<ClaimCommunications claimId="clm_1" notify={jest.fn()} />);
     await screen.findByText("No communications logged.");
-    expect(screen.queryByRole("button", { name: "Log Communication" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Log activity" })).toBeNull();
   });
 });
 

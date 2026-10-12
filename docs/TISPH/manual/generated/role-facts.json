@@ -3311,18 +3311,18 @@
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Claims Awaiting Documents",
-     "path": "/operations/claim-documents",
+     "section": "Policy Servicing > Claims",
+     "screen": "Awaiting Documents",
+     "path": "/agent/claim/documents",
      "access": "Create and edit",
      "modules": [
       "Claims"
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Motor Claim Repairs",
-     "path": "/operations/motor-claim-repairs",
+     "section": "Policy Servicing > Claims",
+     "screen": "Motor Repairs",
+     "path": "/agent/claim/motor-repairs",
      "access": "Create and edit",
      "modules": [
       "Claims"
@@ -4318,18 +4318,18 @@
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Claims Awaiting Documents",
-     "path": "/operations/claim-documents",
+     "section": "Policy Servicing > Claims",
+     "screen": "Awaiting Documents",
+     "path": "/agent/claim/documents",
      "access": "Create and edit",
      "modules": [
       "Claims"
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Motor Claim Repairs",
-     "path": "/operations/motor-claim-repairs",
+     "section": "Policy Servicing > Claims",
+     "screen": "Motor Repairs",
+     "path": "/agent/claim/motor-repairs",
      "access": "Create and edit",
      "modules": [
       "Claims"
@@ -5406,18 +5406,18 @@
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Claims Awaiting Documents",
-     "path": "/operations/claim-documents",
+     "section": "Policy Servicing > Claims",
+     "screen": "Awaiting Documents",
+     "path": "/agent/claim/documents",
      "access": "Create and edit",
      "modules": [
       "Claims"
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Motor Claim Repairs",
-     "path": "/operations/motor-claim-repairs",
+     "section": "Policy Servicing > Claims",
+     "screen": "Motor Repairs",
+     "path": "/agent/claim/motor-repairs",
      "access": "Create and edit",
      "modules": [
       "Claims"
@@ -11238,18 +11238,18 @@
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Claims Awaiting Documents",
-     "path": "/operations/claim-documents",
+     "section": "Policy Servicing > Claims",
+     "screen": "Awaiting Documents",
+     "path": "/agent/claim/documents",
      "access": "Create and edit",
      "modules": [
       "Claims"
      ]
     },
     {
-     "section": "Policy Servicing",
-     "screen": "Motor Claim Repairs",
-     "path": "/operations/motor-claim-repairs",
+     "section": "Policy Servicing > Claims",
+     "screen": "Motor Repairs",
+     "path": "/agent/claim/motor-repairs",
      "access": "Create and edit",
      "modules": [
       "Claims"
@@ -14286,8 +14286,8 @@
     }
    ]
   },
-  "/operations/claim-documents": {
-   "menu": "Policy Servicing > Claims Awaiting Documents",
+  "/agent/claim/documents": {
+   "menu": "Policy Servicing > Claims > Awaiting Documents",
    "roles": [
     {
      "role": "TIS Operations Associate",
@@ -14307,8 +14307,8 @@
     }
    ]
   },
-  "/operations/motor-claim-repairs": {
-   "menu": "Policy Servicing > Motor Claim Repairs",
+  "/agent/claim/motor-repairs": {
+   "menu": "Policy Servicing > Claims > Motor Repairs",
    "roles": [
     {
      "role": "TIS Operations Associate",

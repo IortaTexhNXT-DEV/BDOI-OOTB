@@ -541,6 +541,7 @@ export const ALLOW_LIST = {
   'users.country': 'country only',
   'clients.gender': 'kept for rating and statistics tests; not identifying once names, contacts and identifiers are masked',
   'leads.gender': 'kept for rating and statistics tests; not identifying once names, contacts and identifiers are masked',
+  'credit_life_members.gender': 'kept for the CLI Generated Report tests; not identifying once names, contacts and identifiers are masked',
   'clients.country': 'country only',
   'clients.nationality': 'nationality only; not identifying once names, contacts and identifiers are masked',
   'clients.civil_status': 'civil status category; not identifying once names, contacts and identifiers are masked',

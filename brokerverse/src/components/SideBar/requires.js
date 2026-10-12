@@ -49,8 +49,8 @@ export const screenRequires = {
   "/operations/cover-notes": [["read:policies"]],
   "/operations/policy-cancellation": [["read:endorsements"]],
   "/operations/endorsements": [["read:endorsements"]],
-  "/operations/claim-documents": [["read:claims"]],
-  "/operations/motor-claim-repairs": [["read:claims"]],
+  "/agent/claim/documents": [["read:claims"]],
+  "/agent/claim/motor-repairs": [["read:claims"]],
   // Accounts
   "/accounts/receipts": [["read:receipts"]],
   "/accounts/unapplied-collections": [["read:receipts"]],

@@ -58358,11 +58358,23 @@
                               "birthDate": {
                                 "type": "string"
                               },
+                              "gender": {
+                                "type": "string"
+                              },
                               "loanTermMonths": {
                                 "type": "integer"
                               },
                               "releaseDate": {
                                 "type": "string"
+                              },
+                              "bookingDate": {
+                                "type": "string"
+                              },
+                              "maturityDate": {
+                                "type": "string"
+                              },
+                              "outstandingBalance": {
+                                "type": "integer"
                               },
                               "sumInsured": {
                                 "type": "integer"
@@ -58413,8 +58425,12 @@
                         "loanAccount": "8005123456",
                         "borrowerName": "Juan Dela Cruz",
                         "birthDate": "1980-03-14",
+                        "gender": "M",
                         "loanTermMonths": 60,
                         "releaseDate": "2026-10-05",
+                        "bookingDate": "2026-10-03",
+                        "maturityDate": "2031-10-05",
+                        "outstandingBalance": 1250000,
                         "sumInsured": 1000000,
                         "premium": 2000,
                         "coverFrom": "2026-10-05",
@@ -58607,11 +58623,23 @@
                         "birthDate": {
                           "type": "string"
                         },
+                        "gender": {
+                          "type": "string"
+                        },
                         "loanTermMonths": {
                           "type": "integer"
                         },
                         "releaseDate": {
                           "type": "string"
+                        },
+                        "bookingDate": {
+                          "type": "string"
+                        },
+                        "maturityDate": {
+                          "type": "string"
+                        },
+                        "outstandingBalance": {
+                          "type": "integer"
                         },
                         "sumInsured": {
                           "type": "integer"
@@ -58644,8 +58672,12 @@
                     "loanAccount": "8005123456",
                     "borrowerName": "Juan Dela Cruz",
                     "birthDate": "1980-03-14",
+                    "gender": "M",
                     "loanTermMonths": 60,
                     "releaseDate": "2026-10-05",
+                    "bookingDate": "2026-10-03",
+                    "maturityDate": "2031-10-05",
+                    "outstandingBalance": 1250000,
                     "sumInsured": 1000000,
                     "premium": 2000,
                     "coverFrom": "2026-10-05",
@@ -59286,11 +59318,23 @@
                               "birthDate": {
                                 "type": "string"
                               },
+                              "gender": {
+                                "type": "string"
+                              },
                               "loanTermMonths": {
                                 "type": "integer"
                               },
                               "releaseDate": {
                                 "type": "string"
+                              },
+                              "bookingDate": {
+                                "type": "string"
+                              },
+                              "maturityDate": {
+                                "type": "string"
+                              },
+                              "outstandingBalance": {
+                                "type": "integer"
                               },
                               "sumInsured": {
                                 "type": "integer"
@@ -59331,8 +59375,12 @@
                         "loanAccount": "8005123456",
                         "borrowerName": "Juan Dela Cruz",
                         "birthDate": "1980-03-14",
+                        "gender": "M",
                         "loanTermMonths": 60,
                         "releaseDate": "2026-10-05",
+                        "bookingDate": "2026-10-03",
+                        "maturityDate": "2031-10-05",
+                        "outstandingBalance": 1250000,
                         "sumInsured": 1000000,
                         "premium": 2000,
                         "coverFrom": "2026-10-05",
@@ -59457,11 +59505,23 @@
                         "birthDate": {
                           "type": "string"
                         },
+                        "gender": {
+                          "type": "string"
+                        },
                         "loanTermMonths": {
                           "type": "integer"
                         },
                         "releaseDate": {
                           "type": "string"
+                        },
+                        "bookingDate": {
+                          "type": "string"
+                        },
+                        "maturityDate": {
+                          "type": "string"
+                        },
+                        "outstandingBalance": {
+                          "type": "integer"
                         },
                         "sumInsured": {
                           "type": "integer"
@@ -59494,8 +59554,12 @@
                     "loanAccount": "8005123456",
                     "borrowerName": "Juan Dela Cruz",
                     "birthDate": "1980-03-14",
+                    "gender": "M",
                     "loanTermMonths": 60,
                     "releaseDate": "2026-10-05",
+                    "bookingDate": "2026-10-03",
+                    "maturityDate": "2031-10-05",
+                    "outstandingBalance": 1250000,
                     "sumInsured": 1000000,
                     "premium": 2000,
                     "coverFrom": "2026-10-05",
@@ -59570,11 +59634,23 @@
                         "birthDate": {
                           "type": "string"
                         },
+                        "gender": {
+                          "type": "string"
+                        },
                         "loanTermMonths": {
                           "type": "integer"
                         },
                         "releaseDate": {
                           "type": "string"
+                        },
+                        "bookingDate": {
+                          "type": "string"
+                        },
+                        "maturityDate": {
+                          "type": "string"
+                        },
+                        "outstandingBalance": {
+                          "type": "integer"
                         },
                         "sumInsured": {
                           "type": "integer"
@@ -59607,8 +59683,12 @@
                     "loanAccount": "8005123456",
                     "borrowerName": "Juan Dela Cruz",
                     "birthDate": "1980-03-14",
+                    "gender": "M",
                     "loanTermMonths": 60,
                     "releaseDate": "2026-10-05",
+                    "bookingDate": "2026-10-03",
+                    "maturityDate": "2031-10-05",
+                    "outstandingBalance": 1250000,
                     "sumInsured": 1000000,
                     "premium": 2000,
                     "coverFrom": "2026-10-05",

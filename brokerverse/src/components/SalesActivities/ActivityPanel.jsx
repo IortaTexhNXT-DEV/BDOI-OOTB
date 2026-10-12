@@ -9,6 +9,7 @@ import salesActivityService from "../../services/salesActivityService";
 import { hasPermission } from "../../utils/canOpen";
 import { formatDate, formatInstant } from "../../utility/dateFormat";
 import { openConfirm } from "../ConfirmDialog";
+import { LogActivityButton } from "../LogActivity";
 import ActivityForm from "./ActivityForm";
 import "./activities.scss";
 
@@ -103,7 +104,7 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
             </div>
           )}
         </div>
-        {canWrite && <Button icon="pi pi-plus" label={t("salesActivities.logActivity")} size="small" onClick={() => setForm({ activity: null })} />}
+        {canWrite && <LogActivityButton primary size="small" onClick={() => setForm({ activity: null })} />}
       </div>
       {loading && !data && <div aria-busy="true">{[0, 1].map((i) => <Skeleton key={i} height="3.5rem" className="mb-2" />)}</div>}
       {error && <div className="bv-activities-empty">{error}</div>}

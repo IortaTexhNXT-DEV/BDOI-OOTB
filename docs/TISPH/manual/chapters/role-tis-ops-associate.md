@@ -147,7 +147,7 @@ The system refuses the claim when the premium is unpaid or the date of loss is o
 
 ### Collect the claim documents {#tis-operations-associate-claim-documents}
 
-1. Choose {{menu:/operations/claim-documents}}. **Claims missing documents** and **Ready to submit** count the open
+1. Choose {{menu:/agent/claim/documents}}. **Claims missing documents** and **Ready to submit** count the open
    claims whose file has not gone to the insurer.
 2. Select the folder icon of a claim. The checklist lists the documents of the line of business and cause of loss.
 3. For each document received, select **Upload a copy** or **Mark received**. A document the claim does not need is
@@ -167,7 +167,7 @@ Once the claim is **Processing**, you record the adjuster's name and report on t
 
 ### Follow a motor repair {#tis-operations-associate-motor-repair}
 
-1. Choose {{menu:/operations/motor-claim-repairs}}. The list shows each motor claim with the stage of its repair:
+1. Choose {{menu:/agent/claim/motor-repairs}}. The list shows each motor claim with the stage of its repair:
    **No Estimate Yet**, **Awaiting approval**, **Approved**, **In repair**, **Released**.
 2. Select the claim. Its repair file opens with the estimates and the letters of authority.
 3. Select **Record estimate**: the accredited repair shop, the **Shop estimate no.**, the date and the amounts.

@@ -13,7 +13,7 @@ import { today, addDays } from '../src/lib/dates.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { generateDocument } from '../src/modules/documents/emailDocuments.js';
-import { certificatePassword } from '../src/modules/credit-life/certificates.js';
+import { batchSoaPdf, certificatePassword } from '../src/modules/credit-life/certificates.js';
 
 let ctx;
 const as = {};
@@ -180,5 +180,44 @@ describe('issue, certificates and the insurer (PJRN-02, CL-03, CL-04)', () => {
     expect(all.body.data.rows.map((x) => x.loanAccount)).toEqual(['8005000003']);
     const audit = await q("SELECT action FROM audit_log WHERE entity IN ('credit_life_batch', 'credit_life_member') ORDER BY id");
     expect(audit.map((a) => a.action)).toEqual(expect.arrayContaining(['create', 'upload', 'issue', 'send', 'cancel']));
+  });
+});
+
+describe('TFS file fields and the billing of the statement of account (PJRN-01, PJRN-03, RPT-OPS-01)', () => {
+  const setSetting = async (key, value) => {
+    await q('UPDATE app_settings SET value = $2::jsonb WHERE key = $1', [key, JSON.stringify(value)]);
+    clearSettingsCache();
+  };
+
+  it('keeps the booking and maturity dates, the outstanding balance and the gender; the CLI Generated Report lists them with the age', async () => {
+    const b3 = (await as['cl.ops']('post', '/credit-life/batches').send({ financingClientId: TFS, insuranceCompanyId: insurer, period: T.slice(0, 7) })).body.data;
+    const base = { lastName: 'Santos', firstName: 'Maria', birthDate: '1990-06-01', loanAccount: '8005000091', loanTermMonths: 36, releaseDate: addDays(T, -3), loanAmount: 900000 };
+    const bad = await as['cl.ops']('post', `/credit-life/batches/${b3.id}/members`).send({ ...base, gender: 'X' });
+    expect(bad.status).toBe(400);
+    expect(bad.body.message).toBe('Enter the gender as M or F');
+    const early = await as['cl.ops']('post', `/credit-life/batches/${b3.id}/members`).send({ ...base, maturityDate: addDays(T, -10) });
+    expect(early.body.message).toBe('The maturity date must be after the release date');
+    const m = await as['cl.ops']('post', `/credit-life/batches/${b3.id}/members`).send({ ...base, gender: 'Female', bookingDate: addDays(T, -4), maturityDate: addDays(T, 1000),
+      outstandingBalance: 880000 });
+    expect(m.status, JSON.stringify(m.body)).toBe(201);
+    expect(m.body.data).toMatchObject({ gender: 'F', bookingDate: addDays(T, -4), maturityDate: addDays(T, 1000), outstandingBalance: 880000 });
+    expect((await as['cl.ops']('post', `/credit-life/batches/${b3.id}/issue`)).status).toBe(200);
+    const rep = await as['cl.ops']('post', '/reports/cli-generated/run').send({ ReportCriteria: 'In force', FromDate: addDays(T, -1), ToDate: T });
+    const row = rep.body.data.rows.find((x) => x.loanAccount === '8005000091');
+    expect(row).toMatchObject({ gender: 'Female', outstandingBalance: 880000 });
+    expect(row.age).toBeGreaterThanOrEqual(35);
+    expect(String(row.maturityDate).slice(0, 10)).toBe(addDays(T, 1000));
+
+    // the statement of account bills the premium by default, a fixed amount per account, or no amount (setting)
+    expect((await batchSoaPdf(b3.id))).toMatchObject({ basis: 'premium', total: 2000, accounts: 1 });
+    await setSetting('credit_life.soa_amount_per_account', 2500);
+    await setSetting('credit_life.soa_billing_basis', 'per_account');
+    expect((await batchSoaPdf(b3.id))).toMatchObject({ basis: 'per_account', total: 2500 });
+    await setSetting('credit_life.soa_billing_basis', 'none');
+    const none = await batchSoaPdf(b3.id);
+    expect(none).toMatchObject({ basis: 'none', total: 0 });
+    expect(none.pdf.subarray(0, 4).toString()).toBe('%PDF');
+    await setSetting('credit_life.soa_billing_basis', 'premium');
+    await setSetting('credit_life.soa_amount_per_account', 2000);
   });
 });

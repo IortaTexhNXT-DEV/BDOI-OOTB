@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import DateField from "../../../components/DateField";
 import FieldError from "../../../components/FieldError";
+import { LogActivityButton, LogActivityDialog, activityTypeLabel } from "../../../components/LogActivity";
 import { RowActions, StatusChip } from "../../../components/RecordPage";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import claimHandlingService from "../../../services/claimHandlingService";
@@ -19,8 +20,9 @@ const EMPTY_ENTRY = { party: "insurer", direction: "out", method: "Phone", subje
 
 /**
  * Communication log of a claim (TIS-BRD-CLAIM-06, FGA CM-10): exchanges with the insurer, the client, the adjuster or the
- * repair shop, newest first, with their follow-up date (overdue in red until marked done). Log communication records
- * one; Follow up insurer e-mails the insurer and logs it (write:claims).
+ * repair shop, newest first, with their follow-up date (overdue in red until marked done). Log activity records one
+ * (the shared Log Activity dialog: the method is its activity type); Follow up insurer e-mails the insurer and logs it
+ * (write:claims).
  */
 const ClaimCommunications = ({ claimId, parties, methods, canEdit, notify }) => {
   const { t } = useTranslation();
@@ -74,14 +76,14 @@ const ClaimCommunications = ({ claimId, parties, methods, canEdit, notify }) => 
     <>
       {canEdit ? (
         <div className="flex gap-2 mb-2 flex-wrap">
-          <Button type="button" icon="pi pi-plus" outlined size="small" label={t("claimComms.log")} onClick={() => { setErrors({}); setEntry({ ...EMPTY_ENTRY }); }} />
+          <LogActivityButton size="small" onClick={() => { setErrors({}); setEntry({ ...EMPTY_ENTRY }); }} />
           <Button type="button" icon="pi pi-send" outlined size="small" label={t("claimComms.followUpInsurer")} onClick={() => { setErrors({}); setFollowUp({ message: "", followUpDate: "" }); }} />
         </div>
       ) : null}
       <DataTable value={data || []} dataKey="id" loading={loading} size="small" emptyMessage={t("claimComms.empty")}>
         <Column header={t("claimComms.when")} body={(r) => formatDate(r.at, { withTime: true })} />
         <Column header={t("claimComms.party")} body={(r) => `${r.partyLabel} · ${r.direction === "in" ? t("claimComms.in") : t("claimComms.out")}`} />
-        <Column field="method" header={t("claimComms.method")} />
+        <Column header={t("claimComms.method")} body={(r) => activityTypeLabel(t, r.method)} />
         <Column header={t("claimComms.message")} body={(r) => <span className="bv-cell-stack">{r.subject ? <strong>{r.subject}</strong> : null}<span>{r.message}</span></span>} />
         <Column header={t("claimComms.followUp")} body={followBody} />
         <Column field="by" header={t("claimComms.by")} />
@@ -91,28 +93,18 @@ const ClaimCommunications = ({ claimId, parties, methods, canEdit, notify }) => 
         ) : null}
       </DataTable>
 
-      <Dialog header={t("claimComms.log")} visible={!!entry} onHide={() => setEntry(null)} style={{ width: "40rem" }} breakpoints={{ "768px": "95vw" }}
-        footer={(
-          <>
-            <Button type="button" label={t("claimJourney.cancel")} text onClick={() => setEntry(null)} disabled={busy} />
-            <Button type="button" label={t("claimComms.save")} icon="pi pi-check" onClick={saveEntry} loading={busy} />
-          </>
-        )}>
+      <LogActivityDialog visible={!!entry} onHide={() => setEntry(null)} width="40rem" types={methods.map((m) => ({ label: activityTypeLabel(t, m), value: m }))}
+        type={entry?.method} onTypeChange={(value) => setEntry({ ...entry, method: value })} onSave={saveEntry} saving={busy}>
         {entry ? (
-          <div className="grid">
-            <div className="col-12 md:col-4">
+          <>
+            <div className="col-12 md:col-3">
               <label htmlFor="cm-party">{t("claimComms.party")}</label>
               <Dropdown inputId="cm-party" value={entry.party} options={parties} onChange={(e) => setEntry({ ...entry, party: e.value })} className="w-full" />
             </div>
-            <div className="col-12 md:col-4">
+            <div className="col-12 md:col-3">
               <label htmlFor="cm-direction">{t("claimComms.direction")}</label>
               <Dropdown inputId="cm-direction" value={entry.direction} onChange={(e) => setEntry({ ...entry, direction: e.value })} className="w-full"
                 options={[{ label: t("claimComms.out"), value: "out" }, { label: t("claimComms.in"), value: "in" }]} />
-            </div>
-            <div className="col-12 md:col-4">
-              <label htmlFor="cm-method">{t("claimComms.method")}</label>
-              <Dropdown inputId="cm-method" value={entry.method} options={methods.map((m) => ({ label: t(`claimComms.methods.${m}`, m), value: m }))}
-                onChange={(e) => setEntry({ ...entry, method: e.value })} className="w-full" />
             </div>
             <div className="col-12">
               <label htmlFor="cm-subject">{t("claimComms.subject")}</label>
@@ -129,9 +121,9 @@ const ClaimCommunications = ({ claimId, parties, methods, canEdit, notify }) => 
               <DateField id="cm-follow" value={entry.followUpDate} min={today} onChange={(e) => setEntry({ ...entry, followUpDate: e.target.value })} invalid={!!errors.followUpDate} />
               <FieldError error={errors.followUpDate} />
             </div>
-          </div>
+          </>
         ) : null}
-      </Dialog>
+      </LogActivityDialog>
 
       <Dialog header={t("claimComms.followUpInsurer")} visible={!!followUp} onHide={() => setFollowUp(null)} style={{ width: "36rem" }} breakpoints={{ "768px": "95vw" }}
         footer={(

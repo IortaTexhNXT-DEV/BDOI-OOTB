@@ -65,7 +65,8 @@ export const menuList = [
   {
     // Sales & Placement, the start of the value chain (BRD 5.1-5.3): leads, quotation, placement with the insurer and
     // the scheme applications, then the sales-side set-up (dealer programmes, promotions, Scheme Master). Quick Quote and
-    // Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js).
+    // Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js); both are future-release
+    // features (backend modules/features/catalogue.js), off in a delivered environment.
     name: "Sales & Placement",
     icon: "pi pi-megaphone",
     submenu: [
@@ -85,7 +86,7 @@ export const menuList = [
           "/agent/createquote/ordersummary",
           "/agent/quotedetailview",
           // conversion of a quotation into a policy, its upload and approval (kept here: the route guard of the roles
-          // that convert quotations follows Prospects)
+          // that convert quotations follows Prospects; Policy lights up for them through its `highlights`)
           "/agent/convertpolicy/customerinfo/view/",
           "/agent/convertpolicy/customerinfo/fire/new/",
           "/agent/convertpolicy/uploadvehiclephotos",
@@ -244,6 +245,9 @@ export const menuList = [
           "/agent/employee-benefit/policy-waiting-for-policy",
           "/agent/employee-benefit/policy-upload-policy",
         ],
+        // issuance screens opened from a quotation light up Policy, while their access stays with Prospects (moving them
+        // to the includes would open them to the Claims role, which reads policies but not prospects)
+        highlights: ["/agent/convertpolicy/", "/agent/policyapproval", "/agent/uploadpolicy"],
         permissions: ["read:policies"],
       },
       // cover notes on issuance; one policy for many vehicles; parcel / courier open covers
@@ -374,8 +378,11 @@ export const menuList = [
         ],
         permissions: ["read:claims"],
       },
-      { id: 42, name: "Claim Documents", path: "/operations/claim-documents", includes: ["/operations/claim-documents"], permissions: ["read:claims"] },
-      { id: 43, name: "Motor Claim Repairs", path: "/operations/motor-claim-repairs", includes: ["/operations/motor-claim-repairs"], permissions: ["read:claims"] },
+      // Claim Documents and Motor Claim Repairs are tabs of the Claims screen (`tab`: the screen it is a tab of; not drawn in the side menu,
+      // granted by name like any entry, so the tab shows only to the roles given it); the former addresses
+      // /operations/claim-documents and /operations/motor-claim-repairs redirect to them (routes/MainRoute.js)
+      { id: 42, name: "Claim Documents", tab: "Claims", path: "/agent/claim/documents", includes: ["/agent/claim/documents"], permissions: ["read:claims"] },
+      { id: 43, name: "Motor Claim Repairs", tab: "Claims", path: "/agent/claim/motor-repairs", includes: ["/agent/claim/motor-repairs"], permissions: ["read:claims"] },
       {
         // CTPL certificates of cover: COC series, authentication with the IC-accredited provider, unauthenticated report
         name: "CTPL Authentication",

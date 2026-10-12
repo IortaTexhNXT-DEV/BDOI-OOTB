@@ -19,9 +19,9 @@ const AMOUNTS = ["parts", "labour", "paint", "other", "vat"];
 /**
  * Operations > Motor Claim Repairs: estimates of accredited repair shops, the insurer adjuster's decision recorded by
  * the claims officer, supplementary estimates, the letter of authority with the insured's participation and the
- * release of the repaired vehicle.
+ * release of the repaired vehicle. A tab of Claims (`embedded`: the Claims page draws the header).
  */
-const MotorClaimRepairs = () => {
+const MotorClaimRepairs = ({ embedded = false }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [stage, setStage] = useState("all");
@@ -71,7 +71,7 @@ const MotorClaimRepairs = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("opsAcc.motor.title")} group={t("opsAcc.operations")} subtitle={t("opsAcc.motor.intro")} />
+      {!embedded && <PageHeader title={t("opsAcc.motor.title")} group={t("opsAcc.operations")} subtitle={t("opsAcc.motor.intro")} />}
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
           <Dropdown value={stage} options={STAGES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }))} onChange={(e) => setStage(e.value)} className="w-14rem" />

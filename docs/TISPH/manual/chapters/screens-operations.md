@@ -712,7 +712,7 @@ Nothing is saved by this screen. The cancellation itself is made as an endorseme
 
 ## Claims awaiting documents {#claims-awaiting-documents}
 
-{{screen:/operations/claim-documents}}
+{{screen:/agent/claim/documents}}
 
 This screen lists the open claims that still miss documents. The cards count the **Claims missing documents**, those **Ready to submit**, the **Documents outstanding** and the claims **Not reminded yet**. Each row shows the claim, policy, line and cause of loss, **Reported**, **Documents** (received of required), **Missing**, **Last reminder** and **Actions**.
 
@@ -724,7 +724,7 @@ Select a claim to open its **Documents** step: upload or waive each document, or
 
 Operations > Motor Claim Repairs lists the motor claims with the stage of their repair: no estimate yet, awaiting approval, approved, in repair, released. Select a claim to open its repair file.
 
-{{screen:/operations/motor-claim-repairs}}
+{{screen:/agent/claim/motor-repairs}}
 
 {{screen:/master/insurance/repair-shops}}
 

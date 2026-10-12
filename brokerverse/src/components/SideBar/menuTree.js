@@ -11,7 +11,9 @@ const strip = (pathname) => String(pathname || "").replace(/\d+/g, "");
 
 /**
  * How well an entry matches an address: the length of its longest matching include (0 when none matches). The home
- * route "/" matches only itself, so the Executive Dashboard does not claim every address.
+ * route "/" matches only itself, so the Executive Dashboard does not claim every address. `highlights` of an entry are
+ * addresses it lights up without granting them (the route guard reads `path` and `includes` only): they win over the
+ * same address in the includes of another entry (one more than its length).
  */
 export const matchLength = (item, pathname) => {
   const raw = String(pathname || "");
@@ -25,8 +27,21 @@ export const matchLength = (item, pathname) => {
     }
     if ((path.startsWith(inc) || raw.startsWith(inc)) && inc.length > best) best = inc.length;
   }
+  for (const inc of item?.highlights || []) {
+    if ((path.startsWith(inc) || raw.startsWith(inc)) && inc.length + 1 > best) best = inc.length + 1;
+  }
   return best;
 };
+
+/**
+ * The menu as the side bar draws it: without the entries with `tab` (screens shown as a tab of the screen it names,
+ * such as Claims > Claim Documents). They stay in the tree the grants and the route guard read.
+ */
+export const withoutTabs = (items) =>
+  (items || [])
+    .filter((item) => !item.tab)
+    .map((item) => (item.submenu ? { ...item, submenu: withoutTabs(item.submenu) } : item))
+    .filter((item) => !item.submenu || item.submenu.length);
 
 /** Every screen of the menu with the names of the groups (and sections) above it. */
 export const flattenLeaves = (items, ancestors = []) =>

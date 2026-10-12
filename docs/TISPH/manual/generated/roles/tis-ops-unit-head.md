@@ -34,8 +34,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Policy Servicing > Renewals | Negotiations | Approve |
 | Policy Servicing > Renewals | Lapse Management | Create and edit |
 | Policy Servicing | Claims | Approve |
-| Policy Servicing | Claims Awaiting Documents | Create and edit |
-| Policy Servicing | Motor Claim Repairs | Create and edit |
+| Policy Servicing > Claims | Awaiting Documents | Create and edit |
+| Policy Servicing > Claims | Motor Repairs | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Policy Payments to Verify | Create and edit |
 | Accounts | Post-Dated Cheques | View |
@@ -109,7 +109,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Lock-in review and TFS loan status | View | See Lock-in Review, the Lock-in & loan panel of a policy and the Lock-in / Scheme 2 expiry report | Lock-in Review |
 | Operations | Lock-in review and TFS loan status | Create and edit | Record lock-in review decisions and request lock-in changes |  |
 | Operations | Lock-in review and TFS loan status | Special | Upload the TFS account status file and set the loan status of a policy by hand |  |
-| Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
+| Operations | Claims | View | See claims | Claims, Awaiting Documents and Motor Repairs |
 | Operations | Claims | Create and edit | Move a claim to review and submit its settlement, partial or final, for approval |  |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |

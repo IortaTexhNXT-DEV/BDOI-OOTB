@@ -11,24 +11,30 @@ import "./index.scss";
 import { notifyError } from "../../../utility/dialogs";
 import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { LogActivityDialog, activityTypeLabel } from "../../../components/LogActivity";
 
 const EMPTY = { notes: "", callOutcome: "", commitmentDate: null, to: "", subject: "" };
 const OUTCOMES = ["Answered", "NoAnswer", "WrongNumber", "CallbackRequested"];
+// the activity types of a collection logged through the shared Log Activity dialog (the e-mail reminder is sent, not logged)
+const LOGGED = ["Call", "Note", "Commitment"];
 
 /**
  * A follow-up on a collection: an e-mail reminder (to, subject and text, prefilled from the bill), a call with its
- * outcome, a note or a payment commitment. Every opening starts from a clean form, so text typed for one kind of
- * follow-up never ends up in another.
+ * outcome, a note or a payment commitment. A call, a note and a commitment are logged through the shared Log Activity
+ * dialog (components/LogActivity), the type chosen in it. Every opening starts from a clean form, so text typed for one
+ * kind of follow-up never ends up in another.
  */
 const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectionId, actionType, onSaved, handleSendEmail }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [formData, setFormData] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [kind, setKind] = useState(actionType);
   const k = (key, opts) => t(`collectionDetail.followUp.${key}`, opts);
 
   useEffect(() => {
     if (!visible) return;
+    setKind(LOGGED.includes(actionType) ? actionType : actionType || "Call");
     if (actionType !== "Email" || !collection) {
       setFormData(EMPTY);
       return;
@@ -50,13 +56,13 @@ const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectio
   const handleSave = async () => {
     setSaving(true);
     try {
-      if (actionType === "Commitment") {
+      if (kind === "Commitment") {
         await collectionService.setCommitmentDate(collectionId, formData.commitmentDate, formData.notes);
       } else {
         await collectionService.addFollowUpAction(collectionId, {
-          actionType,
+          actionType: kind,
           notes: formData.notes,
-          callOutcome: actionType === "Call" ? formData.callOutcome : null,
+          callOutcome: kind === "Call" ? formData.callOutcome : null,
           commitmentDate: null,
         });
       }
@@ -82,7 +88,7 @@ const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectio
   );
 
   const renderContent = () => {
-    switch (actionType) {
+    switch (actionType === "Email" ? "Email" : kind) {
       case "Email":
         return (
           <div className="follow-up-form">
@@ -122,21 +128,26 @@ const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectio
     }
   };
 
+  if (actionType !== "Email") {
+    return (
+      <LogActivityDialog visible={visible} onHide={close} width="500px" types={LOGGED.map((v) => ({ label: activityTypeLabel(t, v), value: v }))} type={kind}
+        onTypeChange={(v) => { setKind(v); setFormData(EMPTY); }} onSave={handleSave} saving={saving}
+        saveDisabled={(kind === "Commitment" && !formData.commitmentDate) || (kind === "Call" && !formData.callOutcome) || (kind === "Note" && !formData.notes.trim())}>
+        <div className="col-12 follow-up-modal">{renderContent()}</div>
+      </LogActivityDialog>
+    );
+  }
+
   const footer = (
     <div>
       <Button label={t("common.cancel")} outlined onClick={close} />
-      {actionType === "Email" ? (
-        <Button label={t("emailDocument.sendEmail")} icon="pi pi-send" disabled={!formData.to || !formData.notes}
-          onClick={() => handleSendEmail({ notes: formData.notes, to: formData.to, subject: formData.subject })} loading={loadingFollowUp} />
-      ) : (
-        <Button label={k(`actions.${actionType}`, { defaultValue: t("common.save") })} icon="pi pi-check" onClick={handleSave} loading={saving}
-          disabled={(actionType === "Commitment" && !formData.commitmentDate) || (actionType === "Call" && !formData.callOutcome) || (actionType === "Note" && !formData.notes.trim())} />
-      )}
+      <Button label={t("emailDocument.sendEmail")} icon="pi pi-send" disabled={!formData.to || !formData.notes}
+        onClick={() => handleSendEmail({ notes: formData.notes, to: formData.to, subject: formData.subject })} loading={loadingFollowUp} />
     </div>
   );
 
   return (
-    <Dialog header={actionType ? k(`titles.${actionType}`, { defaultValue: actionType }) : ""} visible={visible} style={{ width: actionType === "Email" ? "640px" : "500px" }}
+    <Dialog header={k("titles.Email")} visible={visible} style={{ width: "640px" }}
       breakpoints={{ "700px": "95vw" }} footer={footer} onHide={close} className="follow-up-modal bv-centered">
       {renderContent()}
     </Dialog>

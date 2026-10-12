@@ -25,10 +25,12 @@ const num = z.union([z.null(), z.literal(''), z.coerce.number()]).optional();
 const memberBody = z.object({
   customerNo: text(40), lastName: text(120), firstName: text(120), birthDate: text(10), loanAccount: text(30), loanAmount: num, loanTermMonths: num, releaseDate: text(10),
   accountCount: num, sumInsured: num, email: text(200), mobile: text(20), address: text(300), city: text(120), province: text(120),
+  bookingDate: text(10), maturityDate: text(10), outstandingBalance: num, gender: text(10),
 });
 const batch = { id: 'clb_1', batchNumber: 'CLB-2026-00010', bankName: 'Toyota Financial Services Philippines Corporation', insurerName: 'Pioneer Life', productName: 'Credit Life - Compulsory',
   period: '2026-10', status: 'draft', members: 8000, valid: 7980, errors: 20, issued: 0, totalSumInsured: 7980000000, totalPremium: 15960000 };
-const member = { id: 'clmb_1', rowNo: 2, loanAccount: '8005123456', borrowerName: 'Juan Dela Cruz', birthDate: '1980-03-14', loanTermMonths: 60, releaseDate: '2026-10-05', sumInsured: 1000000,
+const member = { id: 'clmb_1', rowNo: 2, loanAccount: '8005123456', borrowerName: 'Juan Dela Cruz', birthDate: '1980-03-14', gender: 'M', loanTermMonths: 60, releaseDate: '2026-10-05',
+  bookingDate: '2026-10-03', maturityDate: '2031-10-05', outstandingBalance: 1250000, sumInsured: 1000000,
   premium: 2000, coverFrom: '2026-10-05', coverTo: '2031-10-04', status: 'valid', errors: [] };
 
 define({

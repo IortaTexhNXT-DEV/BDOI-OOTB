@@ -34,10 +34,19 @@ batch reuses.
 - **Insurer.** Send to insurer e-mails the list of the issued accounts (Excel) to the insurer's contact e-mail or the
   address given; the batch becomes Sent.
 
+- **TFS file fields.** Besides the release date (start of cover), a member keeps the booking date, the maturity date,
+  the outstanding balance and the gender of the bank's file (optional; checked when given). The CLI Generated Report
+  (RPT-OPS-01) lists them with the age at the start of cover, as does the list forwarded to the insurer.
+- **Statement of account.** What it bills the bank is `credit_life.soa_billing_basis`: `premium` (the premium of the
+  issued accounts, default), `per_account` (`credit_life.soa_amount_per_account`, 2,000, for each account) or `none`
+  (the accounts without an amount due). TISPH has still to confirm the fixed year-1 charge per account (PJRN-03); the
+  choice is a setting so that the confirmation needs no release. Migration 0693.
+
 ## Settings
 
 `credit_life.batch_product` (CL-COMP), `credit_life.batch_sum_insured` (1,000,000), `credit_life.batch_premium_basis`
 (fixed), `credit_life.batch_premium_per_account` (2,000), `credit_life.cover_start` (release_date),
 `credit_life.max_upload_rows` (10,000), `credit_life.email_certificate` (true), `credit_life.certificate_password`
 (birth_ddmmyyyy), `credit_life.certificate_email_subject` / `_body`, `credit_life.certificate_wording`,
-`credit_life.insurer_email_subject` / `_body`; and `credit_life.rules` of the quotations.
+`credit_life.insurer_email_subject` / `_body`, `credit_life.soa_email_subject` / `_body`, `credit_life.soa_billing_basis`
+(premium), `credit_life.soa_amount_per_account` (2,000); and `credit_life.rules` of the quotations.

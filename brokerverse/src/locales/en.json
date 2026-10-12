@@ -273,7 +273,8 @@
     "Integrations": "Integrations",
     "Message Templates": "Message Templates",
     "Insurer Integration": "Insurer Integration",
-    "Claim Documents": "Claims Awaiting Documents",
+    "Claim Documents": "Awaiting Documents",
+    "Motor Claim Repairs": "Motor Repairs",
     "Features & Releases": "Features & Releases",
     "Platform": "Platform",
     "Environment Promotion": "Environment Promotion",
@@ -4687,6 +4688,11 @@
       "settled": "Settled",
       "closed": "Closed",
       "rejected": "Rejected"
+    },
+    "tabs": {
+      "claims": "Claims",
+      "documents": "Awaiting Documents",
+      "motorRepairs": "Motor Repairs"
     }
   },
   "auditTrail": {
@@ -5057,7 +5063,7 @@
     "moveDone": "Policy {{status}}"
   },
   "uploadPolicy": {
-    "title": "Prospects",
+    "title": "Upload Policy",
     "leadIdLabel": "Prospect ID:",
     "quoteIdLabel": "Quotation ID:",
     "loading": "Loading...",
@@ -7227,8 +7233,6 @@
     "over90Days": "Over 90 days",
     "collectionActions": "Collection actions",
     "sendEmail": "Send reminder",
-    "addNote": "Add note",
-    "setCommitmentDate": "Set commitment date",
     "followUpHistory": "Follow-up history",
     "noFollowUpActions": "No follow-up actions recorded",
     "date": "Date",
@@ -7261,10 +7265,7 @@
     "outstandingNote": "* Outstanding amount shown above is the total across all insurers.",
     "followUp": {
       "titles": {
-        "Email": "Send payment reminder",
-        "Call": "Log a call",
-        "Note": "Add note",
-        "Commitment": "Set commitment date"
+        "Email": "Send payment reminder"
       },
       "to": "To",
       "subject": "Subject",
@@ -7282,12 +7283,7 @@
         "CallbackRequested": "Callback requested"
       },
       "emailSubject": "Premium due: policy {{policy}}",
-      "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you.",
-      "actions": {
-        "Call": "Log call",
-        "Note": "Add note",
-        "Commitment": "Set date"
-      }
+      "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you."
     },
     "collections": "Collections",
     "back": "Back",
@@ -17453,7 +17449,6 @@
   },
   "claimComms": {
     "title": "Communications",
-    "log": "Log Communication",
     "followUpInsurer": "Follow Up Insurer",
     "sendFollowUp": "Send follow-up",
     "empty": "No communications logged.",
@@ -19693,7 +19688,13 @@
       "cancelled": "Cancelled"
     },
     "newBatchTitle": "New Batch",
-    "addMemberTitle": "Add Member"
+    "addMemberTitle": "Add Member",
+    "gender": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "bookingDate": "Booking date",
+    "maturityDate": "Maturity date",
+    "outstandingBalance": "Outstanding balance"
   },
   "salesTargets": {
     "title": "Sales Targets",
@@ -19787,5 +19788,23 @@
       "actions": "Actions"
     },
     "open": "Open endorsement"
+  },
+  "logActivity": {
+    "button": "Log activity",
+    "title": "Log Activity",
+    "type": "Activity type",
+    "chooseType": "Choose the activity type",
+    "save": "Save",
+    "cancel": "Cancel",
+    "types": {
+      "call": "Call",
+      "phone": "Call",
+      "email": "E-mail",
+      "note": "Note",
+      "meeting": "Meeting",
+      "letter": "Letter",
+      "sms": "SMS",
+      "commitment": "Payment commitment"
+    }
   }
 }
