@@ -7,7 +7,7 @@ seed `82_tisph_roles.sql`) instead of the generic broker roles; scenarios of the
 Short scripts a key user of Toyota Insurance Services Philippines (TISPH) runs in the first week to confirm BrokerVerse
 works for their role with the company's own data. They complement, and do not replace, the TISPH UAT test cases: the
 test strategy (`docs/TISPH/testing/TISPH_Test_Strategy.docx`), the test pack with its scenarios and conditions per
-persona (`docs/TISPH/testing/TISPH_Test_Pack.xlsx`) and the test cases of each FRS (`docs/TISPH/frs/`). For each
+persona (`docs/TISPH/testing/TISPH_Test_Pack.xlsx`, regenerated after the build) and the test cases of each FRS (`docs/TISPH/frs/`). For each
 scenario write Pass or Fail, the date, your name and, for a failure, the record number and the request ID from the
 error message (see `SUPPORT_AND_ESCALATION.md`).
 

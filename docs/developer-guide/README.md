@@ -29,11 +29,10 @@ defects in production.
 | `deploy/AZURE.md` | TISPH on Microsoft Azure (Terraform, `azure-deploy.yml`, DEV, SIT, UAT and PROD), used once the Azure subscription is provisioned. |
 | `deploy/RELEASE_PIPELINE.md` | The product's other pipeline (`ci.yml` deploy jobs, `deploy.yml`, `rollback.yml`: EC2 and the product's own environments); its migrations policy (expand, then contract) applies to TISPH too. It does not deploy TISPH. |
 | `docs/onboarding/` | Getting started, go-live data set-up and workbench, smoke test and transaction reset, client data masking, support and escalation, UAT scripts for the TISPH roles. |
-| `docs/e2e/` | UAT scenario run, go-live rehearsal, document and report sweep, role walk, and the end-to-end test tooling. The earlier generic code reviews, end-to-end reports and defect register are in `docs/archive/2026-10-10/`. |
+| `docs/e2e/` | The end-to-end test tooling; the run reports are written here when the runs are repeated after the build. |
 | `docs/TISPH/` | TISPH documents: functional specifications, the document pack (architecture, security, data, environments, migration, operations, governance) and the test pack. Start with `docs/TISPH/README.md`. |
 | `docs/package/` | Product documents still used by the code or not yet replaced: user manual source, upload templates, brand packs, data dictionary workbook, templates. See `docs/package/README.md`. |
 | `docs/architecture/` | Table catalogue and indicative load test. |
-| `docs/archive/` | Generic product documents kept as records (earlier test runs, reviews, plans), by date of retirement. Not maintained. |
 | `backend/docs/api/` | Generated API list: OpenAPI, Postman collection, the API touchpoint workbook (screen to API). |
 | `docker-compose.yml` | Database, API and web server for a single-server installation. |
 

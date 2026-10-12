@@ -8,7 +8,7 @@ This guide is for everyone at Toyota Insurance Services Philippines (TISPH) who 
 explains how to sign in the first time, what you see after signing in, which roles exist and how to ask for help. The
 TISPH user manual describes every screen and, in one chapter per role, the exact menus, access, approvals and
 segregation of duties of each role. It opens from the Help panel (F1) and is also available as Word and PDF
-(`TISPH_User_Manual.docx`, `.pdf`, downloaded from the Help panel; source `docs/TISPH/manual/`). The other TISPH
+(`TISPH_User_Manual.docx`, `.pdf`, downloaded from the Help panel once regenerated after the build; source `docs/TISPH/manual/`). The other TISPH
 documents are indexed in [`docs/TISPH/README.md`](../TISPH/README.md).
 
 ## 1. Signing in the first time

@@ -7,8 +7,8 @@
  "status": "Draft",
  "brandPack": "toyota-insurance-services",
  "files": {
-  "pdf": "TISPH_User_Manual.pdf",
-  "word": "TISPH_User_Manual.docx"
+  "pdf": null,
+  "word": null
  },
  "sourceHash": "dd978fbf5275537a105e54536be2e0f2055615a3a27102173519acb1871773bd",
  "roles": {

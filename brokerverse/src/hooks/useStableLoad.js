@@ -11,7 +11,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *
  * Every view has exactly four states (`status`): "loading" (the first load, at most `timeoutMs`), "loaded" (with
  * data), "empty" (answered, nothing to show: `isEmpty(data)`) and "error" (failed or timed out, nothing to keep on
- * screen). A failed refresh keeps the data on screen ("loaded", `error` set). `loading` / `refreshing` always end when
+ * screen). A lost connection or a gateway error (502/503/504, a server restarting) is tried again twice after a
+ * short pause, and a time-out once, before it counts as failed. A failed refresh keeps the data on screen ("loaded", `error` set). `loading` / `refreshing` always end when
  * the request settles, so no spinner turns for ever. components/LoadState/ViewState renders the four states.
  *
  * @param {() => Promise<any>} loader
@@ -44,6 +45,20 @@ export const withTimeout = (promise, ms) => {
   return Promise.race([promise, limit]).finally(() => clearTimeout(timer));
 };
 
+/** How often a transient failure is tried again, and the pause before each try (a server restarting during a deploy). */
+export const LOAD_RETRY_DELAYS_MS = [1500, 4000];
+
+/** A failure worth trying again: a time-out, no answer from the server, or a gateway answer while it restarts. */
+export const isTransientError = (e) => {
+  if (!e) return false;
+  if (e.timedOut || e.name === "TypeError") return true;
+  const status = e.status || e.response?.status;
+  if (status) return status === 502 || status === 503 || status === 504;
+  return /\((502|503|504)\)/.test(e.message || "");
+};
+
+const pause = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
 export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialData = null, timeoutMs = LOAD_TIMEOUT_MS, isEmpty = defaultIsEmpty } = {}) => {
   const [data, setData] = useState(initialData);
   const [error, setError] = useState(null);
@@ -65,7 +80,18 @@ export const useStableLoad = (loader, { debounceMs = 0, enabled = true, initialD
     const current = () => mine === seq.current && mounted.current;
     setPending(true);
     try {
-      const result = await withTimeout(Promise.resolve(loader()), timeoutMs);
+      let result;
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          result = await withTimeout(Promise.resolve(loader()), timeoutMs);
+          break;
+        } catch (e) {
+          // a server restarting answers again within seconds: try again quietly before showing an error
+          if (attempt >= (e?.timedOut ? 1 : LOAD_RETRY_DELAYS_MS.length) || !isTransientError(e) || !current()) throw e;
+          await pause(LOAD_RETRY_DELAYS_MS[attempt]);
+          if (!current()) return undefined;
+        }
+      }
       if (!current()) return undefined;
       setData(result);
       setError(null);

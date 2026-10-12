@@ -151,9 +151,24 @@ describe("useStableLoad", () => {
         await act(async () => { jest.advanceTimersByTime(9999); });
         expect(result.current.load.status).toBe("loading");
         await act(async () => { jest.advanceTimersByTime(1); });
+        // tried once more after a short pause (a server restarting) before the error shows
+        expect(result.current.load.status).toBe("loading");
+        await act(async () => { jest.advanceTimersByTime(1500); });
+        expect(requests).toHaveLength(2);
+        await act(async () => { jest.advanceTimersByTime(10000); });
         expect(result.current.load).toMatchObject({ status: "error", timedOut: true, loading: false, refreshing: false });
         await act(async () => requests[0].resolve({ late: true }));
         expect(result.current.load.data).toBeNull();
+      });
+
+      it("tries a gateway error again after a pause and shows the answer of the second try", async () => {
+        const requests = [];
+        const { result } = renderHook(() => useStatement(requests));
+        await act(async () => requests[0].reject(new Error("Request failed (502)")));
+        expect(result.current.load.status).toBe("loading");
+        await act(async () => { jest.advanceTimersByTime(1500); });
+        await act(async () => requests[1].resolve({ period: "2026-10" }));
+        expect(result.current.load).toMatchObject({ status: "loaded", data: { period: "2026-10" }, error: null });
       });
 
       it("keeps the data on screen when a refresh times out", async () => {
@@ -161,6 +176,8 @@ describe("useStableLoad", () => {
         const { result } = renderHook(() => useStatement(requests, { timeoutMs: 500 }));
         await act(async () => requests[0].resolve({ period: "2026-09" }));
         act(() => { result.current.load.reload(); });
+        await act(async () => { jest.advanceTimersByTime(500); });
+        await act(async () => { jest.advanceTimersByTime(1500); });
         await act(async () => { jest.advanceTimersByTime(500); });
         expect(result.current.load).toMatchObject({ status: "loaded", data: { period: "2026-09" }, timedOut: true, refreshing: false });
       });

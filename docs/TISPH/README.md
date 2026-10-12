@@ -13,7 +13,6 @@ where it is held, its owner, its approver and its status.
 | [`frs/`](frs/) | Functional Requirement Specifications, one per BRD build item (the TISPH SRS): personas, functional requirements with acceptance criteria, traceability to test cases |
 | [`pack/`](pack/) | Non-functional, technical, operational and governance documents (list below) |
 | [`testing/`](testing/) | Test strategy and test pack |
-| [`proposals/`](proposals/) | Design proposals and answers awaiting TISPH decisions |
 | [`manual/`](manual/) | Source of the TISPH user manual: chapters, generated role facts and screenshots; the Word and PDF are published in `brokerverse/public/help` (see its README) |
 | [`tools/`](tools/) | `md2docx.py` and the document template the Word documents are built with |
 
@@ -52,18 +51,7 @@ where it is held, its owner, its approver and its status.
 | File | Contents |
 |---|---|
 | `TISPH_Test_Strategy.docx` | Test strategy: scope, test levels (including the performance test method), environments, entry and exit criteria, roles, tools |
-| [`TISPH_Test_Pack.xlsx`](testing/TISPH_Test_Pack.xlsx) | Requirements, scenarios, positive and negative conditions and gaps, traced to the BRD and FRS identifiers |
 
-## `proposals/`: design proposals
-
-| File | Contents |
-|---|---|
-| `TISPH_Remittance_Redesign_Specification.docx` | Remittance redesign: menu, status model, controls, screens, flows and phased build plan |
-| `TISPH_Agents_Referrer_Commission_and_Reports.docx` | Agents and referrer commission process, Reports screen and overriding commission panel |
-| `TISPH_Platform_Features_Proposal.docx` | Environment promotion, copy of transactions, master uploads, TISPH manual, risk details and personal data |
-| `TISPH_Feature_Catalogue_and_Release_Tiers.docx` | Every function of the platform with its release tier (Phase 1, platform, Phase 2, future release), requirement IDs, dependencies and the decisions open for TISPH |
-
-All documents use the iorta TechNXT document template and are issued as Word files.
 
 ## Related folders
 
@@ -72,7 +60,6 @@ All documents use the iorta TechNXT document template and are issued as Word fil
 * `deploy/README.md`: where each TISPH environment runs (DEV on Railway, `deploy/RAILWAY.md`; Azure,
   `deploy/AZURE.md`) and the runtime reference (`deploy/REFERENCE.md`).
 * `docs/developer-guide/`, `backend/docs/`: developer and production support reference.
-* `docs/archive/`: generic product documents kept as records (test runs, reviews), with what replaced each one.
 
 Client source documents (the signed BRD and the discovery and gap-analysis material) are not held in this
 repository.
