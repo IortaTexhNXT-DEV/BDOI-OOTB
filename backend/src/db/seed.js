@@ -149,10 +149,10 @@ const TIS_PROMOTION_APPROVER = ['promotions', 'promotions:approve', 'discount-ca
 Object.assign(ROLE_PERMS, {
   'tis-sales-associate': [...TIS_SALES, 'lead-assignment:read', 'campaigns:read'],
   'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'promotion-rates:write'],
-  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_APPROVER, 'lead-assignment', 'campaigns', 'incentive', 'incentive:approve', 'disbursements:read', 'payables:read', 'payables:approve'],
+  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_APPROVER, 'lead-assignment', 'campaigns', 'incentive', 'incentive:approve', 'payables:read', 'payables:approve'],
   'tis-ops-associate': [...TIS_OPS],
-  'tis-ops-officer': [...TIS_OPS, ...TIS_PROMOTION_MAKER, 'journal-vouchers:read', 'fixed-assets:read'],
-  'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_MAKER, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
+  'tis-ops-officer': [...TIS_OPS, ...TIS_PROMOTION_MAKER, 'fixed-assets:read'],
+  'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, ...TIS_PROMOTION_MAKER, 'claims:approve', 'payables:read', 'fixed-assets:read', 'payables:approve'],
   // PDC Management (RBAC v4): CCD-PDU CRU, CCD-PDC CRUD and the checker of cancellations, every other persona reads
   // Receipting (RBAC v4): CCD-BP issues the receipts, CCD-PDC and CCD-Recon read them, CCD-PDU has no access
   'tis-ccd-pdu': [...TIS_COMMON, 'pdc'],
@@ -212,7 +212,9 @@ for (const role of ['tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].pu
 for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('sharing-schemes:read');
 ROLE_PERMS['tis-ops-unit-head'].push('commission:approve');
 // Telesales incentive batches are approved by the General Manager or the Operations Unit Head as well (migration 0572)
-for (const role of ['tis-general-manager', 'tis-ops-unit-head']) ROLE_PERMS[role].push('incentive:approve');
+// TISPH decision (migration 0689): only the Sales Unit Head and the General Manager approve incentive batches; journal
+// vouchers and disbursements are Finance work, not read by the Operations and Sales personas
+ROLE_PERMS['tis-general-manager'].push('incentive:approve');
 // Product register maker-checker (migration 0660, PROD-03, RBAC v4 "A" on the Product Configurator): IT AppSupport drafts
 // and submits product templates, the Unit Heads and the General Manager approve them
 for (const role of ['tis-sales-unit-head', 'tis-ops-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('products:approve');

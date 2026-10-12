@@ -492,10 +492,11 @@ export const FEATURES = Object.freeze([
     menus: ['Accounts > Tax > BIR Form 2307', 'Accounts > Tax > Sales Invoices', 'Accounts > Tax > CAS Books and Documents'],
   }),
   feature({
-    key: 'bir-reports', name: 'BIR relief and summary reports', module: 'Accounts', tier: FUT,
+    key: 'bir-reports', name: 'BIR relief and summary reports', module: 'Accounts', tier: P1,
     description: 'VAT summary, SAWT, QAP and the summary lists of sales and purchases',
     decision: { question: 'TIS-BRD-TAX-02 asks for a BIR report on criteria TISPH has not yet given (MOM s.16). Which BIR reports are wanted?',
-      options: ['VAT summary', 'SAWT', 'QAP', 'SLSP sales and purchases', 'None for now'] },
+      options: ['VAT summary', 'SAWT', 'QAP', 'SLSP sales and purchases', 'None for now'],
+      decided: { answer: 'Phase 1, handled by Finance', by: 'TISPH', on: '2026-10-12', note: 'The tax and VAT reports belong to Finance; the BIR selection criteria remain open' } },
     dependsOn: ['tax'],
     menus: ['Accounts > Tax > VAT Summary', 'Accounts > Tax > SAWT', 'Accounts > Tax > QAP', 'Accounts > Tax > SLSP Sales', 'Accounts > Tax > SLSP Purchases'],
     api: ['/reports/bir-vat-summary', '/reports/bir-sawt', '/reports/bir-qap', '/reports/bir-slsp-sales', '/reports/bir-slsp-purchases'],

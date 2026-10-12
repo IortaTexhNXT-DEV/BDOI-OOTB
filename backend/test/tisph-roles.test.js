@@ -205,7 +205,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
       '0570_commission_rules_register.sql', '0571_commission_controls.sql', '0572_tisph_commission_approvers.sql', '0593_payment_verification_nonpayment_cadence.sql', '0595_environment_promotion.sql',
       '0597_tenant_phase2_enabling.sql', '0600_scheme_master.sql', '0601_scheme_issuance.sql', '0602_lock_in_review.sql', '0610_telesales_incentive.sql',
       '0615_motor_rating_controls.sql', '0660_product_template_approval.sql', '0675_parcel_open_covers.sql', '0680_credit_life_batches.sql',
-      '0687_tisph_decisions_grants.sql')`);
+      '0687_tisph_decisions_grants.sql', '0689_tisph_finance_only_jv_disbursement.sql')`);
     // and the Data Migration & Go-Live grants and the auditor role (0440), the finance and audit grants of 0445
     await q("DELETE FROM schema_migrations WHERE name IN ('0440_migration_origin.sql', '0445_migration_controls.sql')");
     await migrate({ log: () => {} });
