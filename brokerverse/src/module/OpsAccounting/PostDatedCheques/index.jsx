@@ -204,7 +204,7 @@ const PostDatedCheques = () => {
           <span className="pdc-nowrap">{r.receiptNumber ? `${r.receiptNumber}${r.receiptCancelled ? ` (${t("opsAcc.status.cancelled")})` : ""}` : ""}</span>
         )} />
       ) : null}
-      <Column header={<span className="p-sr-only">{t("opsAcc.pdc.actions")}</span>} className="bv-actions" headerClassName="bv-actions" body={(r) => (
+      <Column header={<span className="p-sr-only">{t("common.actions")}</span>} className="bv-actions" headerClassName="bv-actions" body={(r) => (
         <RowActions label={t("opsAcc.pdc.actionsFor", { number: r.pdcNumber })} actions={chequeActions(r).map((a) => ({ ...a, label: t(`opsAcc.pdc.menu.${a.code}`) }))}
           onAction={(a) => run(a.code, r)} />
       )} />

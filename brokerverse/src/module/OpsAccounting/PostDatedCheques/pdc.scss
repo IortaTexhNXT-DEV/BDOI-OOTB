@@ -140,10 +140,9 @@
   }
 }
 
-// the actions column never covers the status of the row
-.pdc-table .p-datatable-tbody > tr > td:last-child,
-.pdc-table .p-datatable-thead > tr > th:last-child {
-  position: static !important;
+// the actions column takes only the width of its button; it stays pinned at the right edge as on every list
+.pdc-table .p-datatable-tbody > tr > td.bv-actions,
+.pdc-table .p-datatable-thead > tr > th.bv-actions {
   width: 1%;
   white-space: nowrap;
 }
