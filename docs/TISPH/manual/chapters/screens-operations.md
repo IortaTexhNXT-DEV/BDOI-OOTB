@@ -623,15 +623,21 @@ Under **More actions**, {{roles:assign:renewals}} can:
 
 A renewal opened from [My Work](#my-work) or a notification opens on the selected renewal.
 
-## Lock-in Accounts {#lock-in-accounts}
-
-{{screen:/renewal/lock-in-accounts}}
-
-Lock-in Accounts lists the lock-in (promotion, Scheme 1 ARA) and Scheme 2 accounts expiring within the review window (60 days as delivered) or the days chosen. The cards count the **Accounts**, those whose **Review due** date is reached, **Notices suppressed** and **Notices held**. Each row shows the policy and insured, the lock-in and its year, **Expiry**, **Review date**, **TFS loan status** with the loan account, the notice treatment and the owner. Filter by lock-in, loan status and notice treatment, or search by policy, client or loan account.
-
-**Download Excel** downloads the list. **Open renewal** opens the renewal of the account. **Set loan status** records the TFS loan status (**Current**, **Past due**, **Fraud**, **Terminated**, **Legal dispute**, **Closed**); a status that holds the notices needs a note, and the notices already queued for the policy are skipped. A review task is created in [My Work](#my-work) for the owner when the review date is reached.
-
 **At-Risk Policies** is the risk register: open renewals with a **Medium** or higher retention risk. The cards count the **Policies at risk**, **High**, **Medium**, the **Premium at risk** and those **Without a next action**. Each row shows the risk score and its **Main drivers** (for example claims in the current term, first renewal with the broker, premium up on the renewal quote, expiry close), and the **Next action** with its due date. Open the policy to plan the next action.
+
+## Lock-in Review {#lock-in-review}
+
+{{screen:/renewal/lock-in-review}}
+
+Lock-in Review lists the lock-in (promotion, Scheme 1 ARA) and Scheme 2 accounts reviewed before expiry: the daily job raises a review, with a task in [My Work](#my-work) for the owner, when the review date is reached (60 days before expiry as delivered). The tabs **Review Due**, **Notices Held** (accounts whose renewal notices are held by the TFS loan status), **Pending Approval** and **In Lock-in** show the number of accounts. Each row shows the policy and insured, the lock-in, **Expiry**, **Review date**, **TFS loan** status with the loan account, the notice treatment, the review status and the owner. Filter by lock-in and as-of date, or search by policy, insured or loan account. **Lock-in / Scheme 2 expiry report** downloads the accounts of the tab as Excel.
+
+Open a review to see the account, its lock-in year and end, the TFS loan status history and the decision. The owner chooses the decision with a reason and a remark of at least 10 characters, then **Save decision**:
+
+- **Renew under lock-in**: the renewal keeps the lock-in terms.
+- **Hold**: the review comes back on the **Re-review date**.
+- **Release to standard renewal** or **Not for renewal**: the decision waits on **Pending Approval** until another user with the approval right chooses **Approve** or **Return** (with the reason for returning). The user who saved the decision cannot approve it.
+
+The tab **Loan Status Uploads** lists the TFS account status files loaded, with the rows updated, not changed and failed and the notices held. **Upload loan status** loads a file (validated first, then loaded); **Download template** gives the file layout and the failed rows of a batch can be downloaded. A status that holds the notices (past due, fraud, terminated, legal dispute) stops the notices already queued for the policy.
 
 ## Negotiations {#negotiations}
 
