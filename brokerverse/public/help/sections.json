@@ -7,10 +7,10 @@
  "status": "Draft",
  "brandPack": "toyota-insurance-services",
  "files": {
-  "pdf": null,
-  "word": null
+  "pdf": "TISPH_User_Manual.pdf",
+  "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "dd978fbf5275537a105e54536be2e0f2055615a3a27102173519acb1871773bd",
+ "sourceHash": "e9a5b766bf6344cb6c032c0b3722b7cf83fbc299e84df508b9864b511dc3ae3e",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -2156,9 +2156,9 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "lock-in-accounts",
+   "id": "lock-in-review",
    "number": "18.18",
-   "title": "Lock-in Accounts",
+   "title": "Lock-in Review",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
