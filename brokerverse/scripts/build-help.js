@@ -76,18 +76,22 @@ async function featureEdition() {
   return { ...edition, screens };
 }
 
-/** The screens of every role's menu, and the Help section each one opens. */
+/**
+ * The screens every role opens, and the Help section each one opens. The menus of the role facts are those the side
+ * bar draws (without the tabs and the entries of the menu search); every screen a role opens needs a section.
+ */
 async function menuChecks(facts) {
-  const [{ menuList }, { filterMenuForRoles }, { flattenLeaves }, { helpSectionFor }] = await Promise.all([
+  const [{ menuList }, { filterMenuForRoles }, { drawnMenu, flattenLeaves }, { helpSectionFor }] = await Promise.all([
     load("components/SideBar/list.js"), load("utils/menuPermissions.js"), load("components/SideBar/menuTree.js"), load("components/HelpPanel/helpRoutes.js"),
   ]);
   const problems = [];
   const paths = new Set();
+  const screens = (tree) => flattenLeaves(tree).map((l) => l.item.path).filter(Boolean);
   for (const role of facts.roles) {
-    const live = flattenLeaves(filterMenuForRoles(menuList, [role.code])).map((l) => l.item.path).filter(Boolean);
+    const own = filterMenuForRoles(menuList, [role.code]);
     const written = role.menus.map((m) => m.path);
-    if (live.join("\n") !== written.join("\n")) problems.push(`the role facts of ${role.name} no longer match the menus: run npm run manual:role-facts in backend/`);
-    live.forEach((p) => paths.add(p));
+    if (screens(drawnMenu(own)).join("\n") !== written.join("\n")) problems.push(`the role facts of ${role.name} no longer match the menus: run npm run manual:role-facts in backend/`);
+    screens(own).forEach((p) => paths.add(p));
   }
   return { problems, sectionOf: (p, known) => helpSectionFor(p, known).id, paths: [...paths] };
 }

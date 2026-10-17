@@ -43,6 +43,19 @@ export const withoutTabs = (items) =>
     .map((item) => (item.submenu ? { ...item, submenu: withoutTabs(item.submenu) } : item))
     .filter((item) => !item.submenu || item.submenu.length);
 
+/**
+ * True for an entry the side bar draws: not a tab of another screen (`tab`) and not an entry kept for the grants, the
+ * route guard and the menu search only (`searchOnly`, opened from its `home` entry).
+ */
+export const isDrawn = (item) => !item.tab && !item.searchOnly;
+
+/** The menu exactly as the side bar draws it: the drawn entries only, without the groups left empty. */
+export const drawnMenu = (items) =>
+  (items || [])
+    .filter(isDrawn)
+    .map((item) => (item.submenu ? { ...item, submenu: drawnMenu(item.submenu) } : item))
+    .filter((item) => !item.submenu || item.submenu.length);
+
 /** Every screen of the menu with the names of the groups (and sections) above it. */
 export const flattenLeaves = (items, ancestors = []) =>
   (items || []).flatMap((item) =>

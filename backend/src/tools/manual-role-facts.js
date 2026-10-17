@@ -3,15 +3,19 @@
  *
  * Reads the delivered configuration of the database in DATABASE_URL (run it on a database freshly migrated and
  * seeded) and the menu of the front end, and writes to docs/TISPH/manual/generated/:
- *   role-facts.json        per TISPH role: department, summary, menu entries with their routes and access level,
- *                          permissions in business words, approvals it gives and receives, approval limits and the
- *                          segregation-of-duties rules that concern it; per screen the roles that open it
+ *   role-facts.json        per TISPH role: department, summary, the entries of its side menu with their routes and
+ *                          access level, permissions in business words, approvals it gives and receives, approval
+ *                          limits and the segregation-of-duties rules that concern it; per screen the roles that open
+ *                          it, the screens opened from another one (a tab, an entry of the menu search) included
  *   roles/<role>.md        the same facts as Markdown, included by the role chapters ({{include:generated/roles/...}})
  *
  * The TISPH roles are those of the departments of access.role_groups, without the roles of the base platform
  * (access.platform_roles) and without the roles that include the administrator (SUPERID). Business words come from
  * the access catalogue (Role Permissions), the menu labels from the side bar (en.json sidebar.*), the access level of
- * a screen from the modules of the catalogue that list it and from the permissions the menu entry requires.
+ * a screen from the modules of the catalogue that list it and from the permissions the menu entry requires. The menu
+ * of a role is the one the side bar draws for it: the features of the environment (features/entitlements.js), the
+ * role grants and the permissions every screen needs to load (utils/menuPermissions.js filterMenuForRoles,
+ * components/SideBar/requires.js), without the tabs and the entries of the menu search (SideBar/menuTree.js drawnMenu).
  * test/manual-role-facts.test.js fails when the committed files differ from what this writes.
  */
 import fs from 'node:fs';
@@ -54,21 +58,41 @@ const slug = (s) => String(s).toLowerCase().replace(/&/g, ' and ').replace(/[^a-
 const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}` : names[0] || '');
 const listAnd = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0] || '');
 
-/** The groups above a menu entry, then the screen it is a tab of (`tab` of the entry, e.g. Claims > Claim Documents). */
-const sectionOf = (l, menu) => [...l.ancestors.map((a) => menu.label(a.name)), ...(l.item.tab ? [menu.label(l.item.tab)] : [])];
+/**
+ * Where a screen is in the side menu: the groups above it, then the screen it is a tab of (`tab`, e.g. Claims > Claim
+ * Documents); for an entry of the menu search only, the drawn entry it is opened from (`home`, e.g. Reports > All
+ * Reports for a report, Accounts > Receipts for Payments).
+ */
+const sectionOf = (l, menu) => {
+  const names = [...l.ancestors.map((a) => a.name), l.item.name];
+  const drawn = menu.visibleTrail(menu.menuList, names);
+  if (drawn.length !== names.length || drawn.some((n, i) => n !== names[i])) return drawn.map(menu.label);
+  return [...l.ancestors.map((a) => menu.label(a.name)), ...(l.item.tab ? [menu.label(l.item.tab)] : [])];
+};
 
-/** The menu of the front end: the tree, the role grants and the side bar labels. */
+/** The menu of the front end: the tree, the role grants, what the side bar draws and the side bar labels. */
 export async function loadMenu(web = WEB) {
   const load = (file) => import(pathToFileURL(path.join(web, file)).href);
-  const [{ menuList }, { filterMenuForRoles }, { flattenLeaves }, { setFeatureState }] = await Promise.all([
+  const [{ menuList }, { filterMenuForRoles }, { drawnMenu, flattenLeaves, visibleTrail }, { setFeatureState }] = await Promise.all([
     load('components/SideBar/list.js'), load('utils/menuPermissions.js'), load('components/SideBar/menuTree.js'), load('features/entitlements.js'),
   ]);
   const labels = JSON.parse(fs.readFileSync(path.join(web, 'locales', 'en.json'), 'utf8')).sidebar || {};
-  return { menuList, filterMenuForRoles, flattenLeaves, setFeatureState, label: (name) => labels[name] || name };
+  return { menuList, filterMenuForRoles, drawnMenu, flattenLeaves, visibleTrail, setFeatureState, label: (name) => labels[name] || name };
+}
+
+/**
+ * The screens a role opens and the side menu it is shown (`permissions`: the effective permissions of the role): the
+ * menu tree of the enabled features reduced by the role grants and the permissions each screen needs, as the side bar
+ * and the route guard reduce it. `drawn` keeps the entries the side bar draws.
+ */
+export function roleMenu(menu, role, permissions) {
+  const own = menu.filterMenuForRoles(menu.menuList, [role], permissions);
+  const leaves = (tree) => menu.flattenLeaves(tree).filter((l) => l.item.path);
+  return { opens: leaves(own), drawn: leaves(menu.drawnMenu(own)) };
 }
 
 /** Permissions of every role with those of the active roles it includes. */
-async function effectivePermissions(db) {
+export async function effectivePermissions(db) {
   const { rows } = await db.query(`SELECT r.code, r.status, r.inherits, COALESCE(array_agg(p.code) FILTER (WHERE p.code IS NOT NULL), '{}') AS perms
     FROM roles r LEFT JOIN role_permissions rp ON rp.role_id = r.id LEFT JOIN permissions p ON p.id = rp.permission_id GROUP BY r.id`);
   const byCode = new Map(rows.map((r) => [r.code, r]));
@@ -95,8 +119,10 @@ async function effectivePermissions(db) {
  */
 function screenModules(leaf, cat) {
   const byPermission = (leaf.item.permissions || []).map((code) => cat.permissions.find((p) => p.code === code)?.module).filter(Boolean);
-  // a report or a dashboard named after a module ("Claims" of Operational Reports) belongs to the group above it
-  const own = leaf.ancestors.some((a) => VIEW_ONLY_SECTIONS.has(a.name)) ? [] : cat.modules.filter((m) => m.screens.includes(leaf.item.name)).map((m) => m.code);
+  // a report or a dashboard named after a module ("Claims" of Operational Reports) belongs to the group above it; an
+  // entry of the section's own module (All Reports of Reports) to that module
+  const section = leaf.ancestors.find((a) => VIEW_ONLY_SECTIONS.has(a.name))?.name;
+  const own = cat.modules.filter((m) => m.screens.includes(leaf.item.name) && (!section || m.name === section)).map((m) => m.code);
   if (own.length) return own;
   const names = leaf.ancestors.map((a) => a.name).reverse();
   for (const name of names) {
@@ -154,16 +180,22 @@ export async function roleFacts(db, menu) {
     return limitWords(t?.measure, c?.maxAmount, c?.unlimited, !!c?.set);
   };
 
+  // per role, the access of every screen it opens (also those opened from another screen) by entry
+  const opensOf = new Map();
   const facts = roles.map((role) => {
     const held = perms.get(role.code) || new Set();
-    // the menu the role is shown: its grants, without the entries its permissions cannot load
-    const own = menu.filterMenuForRoles(menu.menuList, [role.code], [...held]);
-    const menus = menu.flattenLeaves(own).filter((l) => l.item.path).map((l) => {
+    const { opens, drawn } = roleMenu(menu, role.code, [...held]);
+    const entry = (l) => {
       const modules = modulesOf.get(leafKey(l)) || [];
       const level = accessLevel(l, modules, held, cat);
       return { section: sectionOf(l, menu).join(' > '), screen: menu.label(l.item.name), path: l.item.path, access: LEVEL_NAMES[level],
         modules: modules.map((code) => moduleOf.get(code)?.name || code) };
-    });
+    };
+    const byPath = new Map();
+    for (const l of opens) if (!byPath.has(l.item.path)) byPath.set(l.item.path, entry(l));
+    opensOf.set(role.code, byPath);
+    // the menus of the role: the entries the side bar draws for it
+    const menus = drawn.map(entry);
 
     const permissions = cat.permissions.filter((p) => held.has(p.code) && p.checked)
       .sort((a, b) => moduleOf.get(a.module).order - moduleOf.get(b.module).order || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level)).map((p) => ({
@@ -217,7 +249,7 @@ export async function roleFacts(db, menu) {
 
   const screens = {};
   for (const l of leaves) {
-    const open = facts.map((f) => ({ role: f.name, entry: f.menus.find((m) => m.path === l.item.path) })).filter((x) => x.entry);
+    const open = facts.map((f) => ({ role: f.name, entry: opensOf.get(f.code).get(l.item.path) })).filter((x) => x.entry);
     if (!open.length) continue;
     screens[l.item.path] = { menu: [...sectionOf(l, menu), menu.label(l.item.name)].join(' > '),
       roles: open.map((x) => ({ role: x.role, access: x.entry.access })) };

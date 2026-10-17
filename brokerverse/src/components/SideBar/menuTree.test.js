@@ -1,4 +1,4 @@
-import { findActiveTrail, initialsOf, matchLength, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
+import { drawnMenu, findActiveTrail, flattenLeaves, initialsOf, matchLength, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { menuList } from "./list";
 
 const label = (name) => name;
@@ -78,6 +78,17 @@ describe("tabs and highlights", () => {
   it("leaves the entries shown as tabs out of the drawn menu", () => {
     expect(withoutTabs(tree)[1].submenu.map((x) => x.name)).toEqual(["Policy", "Claims"]);
     expect(findActiveTrail(withoutTabs(tree), "/agent/claim/documents")).toEqual(["Servicing", "Claims"]);
+  });
+  it("draws neither the tabs nor the entries kept for the menu search", () => {
+    const withSearchOnly = [...tree, { name: "Reports", submenu: [
+      { name: "All Reports", path: "/reports/catalogue" },
+      { name: "Operational Reports", searchOnly: true, home: "All Reports", submenu: [{ name: "Production", path: "/reports/production" }] },
+    ] }, { name: "Archive", submenu: [{ name: "Old", searchOnly: true, path: "/old" }] }];
+    expect(flattenLeaves(drawnMenu(withSearchOnly)).map((l) => l.item.name)).toEqual(["Prospects", "Policy", "Claims", "All Reports"]);
+    const drawn = flattenLeaves(drawnMenu(menuList)).map((l) => l.item.path);
+    expect(drawn).not.toContain("/agent/payments");
+    expect(drawn).not.toContain("/agent/claim/documents");
+    expect(drawn).toContain("/reports/catalogue");
   });
   it("lights up the entry that highlights an address over the one that grants it", () => {
     expect(findActiveTrail(tree, "/agent/uploadpolicy/12")).toEqual(["Servicing", "Policy"]);

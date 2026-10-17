@@ -7,7 +7,7 @@ import { InputText } from "primereact/inputtext";
 import { menuList } from "./list";
 import "./NewSideBar.scss";
 import { filterMenuForRoles, getUserRoles } from "../../utils/menuPermissions";
-import { findActiveTrail, keyOf, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
+import { findActiveTrail, isDrawn, keyOf, searchMenu, visibleTrail, withoutTabs } from "./menuTree";
 import { isTyping } from "../HelpPanel/helpEvents";
 import {
   COMMISSION_VIEW_MODE_EVENT,
@@ -208,7 +208,7 @@ const NewSideBar = ({ onNavigate }) => {
   };
 
   const renderChildren = (items, parentNames, level) =>
-    items.filter((child) => !child.searchOnly).map((child) => {
+    items.filter(isDrawn).map((child) => {
       const names = [...parentNames, child.name];
       if (child.section && child.submenu) {
         return (
