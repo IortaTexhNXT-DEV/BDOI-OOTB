@@ -108,7 +108,8 @@ describe('calculations', () => {
     const adj = await adjust({ reasonCode: 'IAD-OTHER', note: 'Spot bonus' });
     expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ adjustmentReasonCode: 'IAD-OTHER', adjustmentReason: 'Other: Spot bonus' });
     expect(adj.body.data.details.find((d) => d.id === nb.id)).toMatchObject({ finalAmount: 1250, status: 'Adjusted' });
-    expect(adj.body.data.totalAmount).toBe(1250);
+    // the batch total is the sum of its lines (the sample account executives book business in the month too)
+    expect(adj.body.data.totalAmount).toBe(adj.body.data.details.reduce((sum, d) => sum + Number(d.finalAmount), 0));
   });
   it('maker-checker approval, rejection and payment', async () => {
     expect((await ctx.api('post', `/incentive/calculations/${batchId}/approve`)).status).toBe(409);
